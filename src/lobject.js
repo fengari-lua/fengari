@@ -4,7 +4,7 @@
 class LClosure {
 
     constructor(L, n) {
-        this.p = [];
+        this.p = null;
         this.nupvalues = n;
     }
 
