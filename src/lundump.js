@@ -114,6 +114,24 @@ class BytecodeParser {
             f.code.push(this.readInstruction());
     }
 
+    readUpvalues(f) {
+        let n = this.readInt();
+
+        for (let i = 0; i < n; i++) {
+            f.upvalues[i] = {
+                name:    null,
+                instack: this.readByte(),
+                idx:     this.readByte()
+            };
+
+            console.log(`
+                f.upvalues[${i}].name    = ${f.upvalues[i].name}
+                f.upvalues[${i}].instack = ${f.upvalues[i].instack}
+                f.upvalues[${i}].idx     = ${f.upvalues[i].idx}
+            `);
+        }
+    }
+
     readConstants(f) {
         let n = this.readInt();
         
@@ -126,28 +144,28 @@ class BytecodeParser {
                     type: constant_types.LUA_TNIL,
                     value: null
                 });
-                console.log(`LUA_TNIL     : ${f.k[f.k.length - 1].value}`);
+                console.log(`LUA_TNIL     = ${f.k[f.k.length - 1].value}`);
                 break;
             case constant_types.LUA_TBOOLEAN:
                 f.k.push({
                     type: constant_types.LUA_TBOOLEAN,
                     value: this.readByte()
                 });
-                console.log(`LUA_TBOOLEAN : ${f.k[f.k.length - 1].value}`);
+                console.log(`LUA_TBOOLEAN = ${f.k[f.k.length - 1].value}`);
                 break;
             case constant_types.LUA_TNUMFLT:
                 f.k.push({
                     type: constant_types.LUA_TNUMFLT,
                     value: this.readNumber()
                 });
-                console.log(`LUA_TNUMFLT  : ${f.k[f.k.length - 1].value}`);
+                console.log(`LUA_TNUMFLT  = ${f.k[f.k.length - 1].value}`);
                 break;
             case constant_types.LUA_TNUMINT:
                 f.k.push({
                     type: constant_types.LUA_TNUMINT,
                     value: this.readInteger()
                 });
-                console.log(`LUA_TNUMINT  : ${f.k[f.k.length - 1].value}`);
+                console.log(`LUA_TNUMINT  = ${f.k[f.k.length - 1].value}`);
                 break;
             case constant_types.LUA_TSHRSTR:
             case constant_types.LUA_TLNGSTR:
@@ -155,7 +173,7 @@ class BytecodeParser {
                     type: constant_types.LUA_TLNGSTR,
                     value: this.readString()
                 });
-                console.log(`LUA_TLNGSTR  : ${f.k[f.k.length - 1].value}`);
+                console.log(`LUA_TLNGSTR  = ${f.k[f.k.length - 1].value}`);
                 break;
             default:
                 throw new Error(`unrecognized constant '${t}'`);
@@ -184,7 +202,7 @@ class BytecodeParser {
 
         this.readCode(f);
         this.readConstants(f);
-        // this.readUpvalues(f);
+        this.readUpvalues(f);
         // this.readProtos(f);
         // this.readDebug(f);
     }
