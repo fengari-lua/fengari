@@ -181,9 +181,18 @@ class BytecodeParser {
         }
     }
 
+    readProtos(f) {
+        let n = this.readInt();
+
+        for (let i = 0; i < n; i++) {
+            f.p[i] = new Proto(this.L);
+            this.readFunction(f.p[i], f.source);
+        }
+    }
+
     readFunction(f, psource) {
         f.source = this.readString();
-        if (f.source == null)  /* no source in dump? */
+        if (f.source === null || f.source === undefined || f.source.length === 0)  /* no source in dump? */
             f.source = psource;  /* reuse parent's source */
         f.linedefined = this.readInt();
         f.lastlinedefined = this.readInt();
@@ -203,7 +212,7 @@ class BytecodeParser {
         this.readCode(f);
         this.readConstants(f);
         this.readUpvalues(f);
-        // this.readProtos(f);
+        this.readProtos(f);
         // this.readDebug(f);
     }
 
