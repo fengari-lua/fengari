@@ -190,6 +190,36 @@ class BytecodeParser {
         }
     }
 
+    readDebug(f) {
+        let n = this.readInt();
+        for (let i = 0; i < n; i++)
+            f.lineinfo[i] = this.readInt();
+
+        n = this.readInt();
+        for (let i = 0; i < n; i++) {
+            f.locvars[i] = {
+                varname: this.readString(),
+                startpc: this.readInt(),
+                endpc:   this.readInt()
+            }
+
+            console.log(`
+                f.locvars[${i}].varname = ${f.locvars[i].varname}
+                f.locvars[${i}].startpc = ${f.locvars[i].startpc}
+                f.locvars[${i}].endpc   = ${f.locvars[i].endpc}
+            `);
+        }
+
+        n = this.readInt();
+        for (let i = 0; i < n; i++) {
+            f.upvalues[i].name = this.readString();
+
+            console.log(`
+                f.upvalues[${i}].name = ${f.upvalues[i].name}
+            `);
+        }
+    }
+
     readFunction(f, psource) {
         f.source = this.readString();
         if (f.source === null || f.source === undefined || f.source.length === 0)  /* no source in dump? */
@@ -213,7 +243,7 @@ class BytecodeParser {
         this.readConstants(f);
         this.readUpvalues(f);
         this.readProtos(f);
-        // this.readDebug(f);
+        this.readDebug(f);
     }
 
     checkHeader() {
@@ -260,7 +290,7 @@ class BytecodeParser {
 
         this.readFunction(cl.p);
 
-        // assert(cl.nupvalues === cl.p.upvalues.length);
+        assert(cl.nupvalues === cl.p.upvalues.length);
 
         return cl;
     }
