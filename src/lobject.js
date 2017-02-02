@@ -3,7 +3,7 @@
 
 class LClosure {
 
-    constructor(L, n) {
+    constructor(n) {
         this.p = null;
         this.nupvalues = n;
     }
