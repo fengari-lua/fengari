@@ -1,13 +1,14 @@
 /*jshint esversion: 6 */
 "use strict";
 
-const DataView  = require('buffer-dataview');
-const fs        = require('fs');
-const assert    = require('assert');
+const DataView      = require('buffer-dataview');
+const fs            = require('fs');
+const assert        = require('assert');
 
-const lua_State = require('./lstate.js').lua_State;
-const LClosure  = require('./lobject.js').LClosure;
-const Proto     = require('./lfunc.js').Proto;
+const lua_State     = require('./lstate.js').lua_State;
+const LClosure      = require('./lobject.js').LClosure;
+const Proto         = require('./lfunc.js').Proto;
+const constant_types = require('./lua.js').constant_types;
 
 const LUAI_MAXSHORTLEN = 40;
 
@@ -113,6 +114,55 @@ class BytecodeParser {
             f.code.push(this.readInstruction());
     }
 
+    readConstants(f) {
+        let n = this.readInt();
+        
+        for (let i = 0; i < n; i++) {
+            let t = this.readByte();
+
+            switch (t) {
+            case constant_types.LUA_TNIL:
+                f.k.push({
+                    type: constant_types.LUA_TNIL,
+                    value: null
+                });
+                console.log(`LUA_TNIL     : ${f.k[f.k.length - 1].value}`);
+                break;
+            case constant_types.LUA_TBOOLEAN:
+                f.k.push({
+                    type: constant_types.LUA_TBOOLEAN,
+                    value: this.readByte()
+                });
+                console.log(`LUA_TBOOLEAN : ${f.k[f.k.length - 1].value}`);
+                break;
+            case constant_types.LUA_TNUMFLT:
+                f.k.push({
+                    type: constant_types.LUA_TNUMFLT,
+                    value: this.readNumber()
+                });
+                console.log(`LUA_TNUMFLT  : ${f.k[f.k.length - 1].value}`);
+                break;
+            case constant_types.LUA_TNUMINT:
+                f.k.push({
+                    type: constant_types.LUA_TNUMINT,
+                    value: this.readInteger()
+                });
+                console.log(`LUA_TNUMINT  : ${f.k[f.k.length - 1].value}`);
+                break;
+            case constant_types.LUA_TSHRSTR:
+            case constant_types.LUA_TLNGSTR:
+                f.k.push({
+                    type: constant_types.LUA_TLNGSTR,
+                    value: this.readString()
+                });
+                console.log(`LUA_TLNGSTR  : ${f.k[f.k.length - 1].value}`);
+                break;
+            default:
+                throw new Error(`unrecognized constant '${t}'`);
+            }
+        }
+    }
+
     readFunction(f, psource) {
         f.source = this.readString();
         if (f.source == null)  /* no source in dump? */
@@ -133,7 +183,7 @@ class BytecodeParser {
         `);
 
         this.readCode(f);
-        // this.readConstants(f);
+        this.readConstants(f);
         // this.readUpvalues(f);
         // this.readProtos(f);
         // this.readDebug(f);
