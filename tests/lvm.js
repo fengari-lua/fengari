@@ -113,7 +113,7 @@ test('Binary op', function (t) {
 });
 
 
-test('Unary op', function (t) {
+test('Unary op, LOADBOOL', function (t) {
     let luaCode = `
         local a = 5
         local b = false

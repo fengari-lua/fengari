@@ -66,19 +66,21 @@ class LuaVM {
             let i = ci.savedpc[ci.pcOff++];
             let ra = this.RA(base, i);
 
-            var op1, op2, numberop1, numberop2, op, numberop;
             switch (OC.OpCodes[i.opcode]) {
-                case "OP_MOVE":
+                case "OP_MOVE": {
                     L.stack[ra] = L.stack[this.RB(base, i)];
                     break;
-                case "OP_LOADK":
+                }
+                case "OP_LOADK": {
                     L.stack[ra] = k[i.Bx];
                     break;
-                case "OP_LOADKX":
+                }
+                case "OP_LOADKX": {
                     assert(OC.OpCodes[ci.savedpc[ci.pcOff].opcode] === "OP_EXTRAARG");
                     L.stack[ra] = k[ci.savedpc[ci.pcOff++].Ax];
                     break;
-                case "OP_LOADBOOL":
+                }
+                case "OP_LOADBOOL": {
                     L.stack[ra] = {
                         type: CT.LUA_TBOOLEAN,
                         value: i.B !== 0
@@ -88,34 +90,44 @@ class LuaVM {
                         ci.pcOff++; /* skip next instruction (if C) */
 
                     break;
-                case "OP_LOADNIL":
+                }
+                case "OP_LOADNIL": {
                     for (let j = 0; j <= i.B; j++)
                         L.stack[ra + j] = {
                             type: CT.LUA_TNIL,
                             value: null
                         }
                     break;
-                case "OP_GETUPVAL":
+                }
+                case "OP_GETUPVAL": {
                     break;
-                case "OP_GETTABUP":
+                }
+                case "OP_GETTABUP": {
                     break;
-                case "OP_GETTABLE":
+                }
+                case "OP_GETTABLE": {
                     break;
-                case "OP_SETTABUP":
+                }
+                case "OP_SETTABUP": {
                     break;
-                case "OP_SETUPVAL":
+                }
+                case "OP_SETUPVAL": {
                     break;
-                case "OP_SETTABLE":
+                }
+                case "OP_SETTABLE": {
                     break;
-                case "OP_NEWTABLE":
+                }
+                case "OP_NEWTABLE": {
                     break;
-                case "OP_SELF":
+                }
+                case "OP_SELF": {
                     break;
-                case "OP_ADD":
-                    op1 = k[i.B];
-                    op2 = k[i.C];
-                    numberop1 = LuaVM.tonumber(op1);
-                    numberop2 = LuaVM.tonumber(op2);
+                }
+                case "OP_ADD": {
+                    let op1 = k[i.B];
+                    let op2 = k[i.C];
+                    let numberop1 = LuaVM.tonumber(op1);
+                    let numberop2 = LuaVM.tonumber(op2);
 
                     if (op1.type === CT.LUA_TNUMINT && op2.type === CT.LUA_TNUMINT) {
                         L.stack[ra] = {
@@ -132,11 +144,12 @@ class LuaVM {
                         throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
                     }
                     break;
-                case "OP_SUB":
-                    op1 = k[i.B];
-                    op2 = k[i.C];
-                    numberop1 = LuaVM.tonumber(op1);
-                    numberop2 = LuaVM.tonumber(op2);
+                }
+                case "OP_SUB": {
+                    let op1 = k[i.B];
+                    let op2 = k[i.C];
+                    let numberop1 = LuaVM.tonumber(op1);
+                    let numberop2 = LuaVM.tonumber(op2);
 
                     if (op1.type === CT.LUA_TNUMINT && op2.type === CT.LUA_TNUMINT) {
                         L.stack[ra] = {
@@ -153,11 +166,12 @@ class LuaVM {
                         throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
                     }
                     break;
-                case "OP_MUL":
-                    op1 = k[i.B];
-                    op2 = k[i.C];
-                    numberop1 = LuaVM.tonumber(op1);
-                    numberop2 = LuaVM.tonumber(op2);
+                }
+                case "OP_MUL": {
+                    let op1 = k[i.B];
+                    let op2 = k[i.C];
+                    let numberop1 = LuaVM.tonumber(op1);
+                    let numberop2 = LuaVM.tonumber(op2);
 
                     if (op1.type === CT.LUA_TNUMINT && op2.type === CT.LUA_TNUMINT) {
                         L.stack[ra] = {
@@ -174,11 +188,12 @@ class LuaVM {
                         throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
                     }
                     break;
-                case "OP_MOD":
-                    op1 = k[i.B];
-                    op2 = k[i.C];
-                    numberop1 = LuaVM.tonumber(op1);
-                    numberop2 = LuaVM.tonumber(op2);
+                }
+                case "OP_MOD": {
+                    let op1 = k[i.B];
+                    let op2 = k[i.C];
+                    let numberop1 = LuaVM.tonumber(op1);
+                    let numberop2 = LuaVM.tonumber(op2);
 
                     if (op1.type === CT.LUA_TNUMINT && op2.type === CT.LUA_TNUMINT) {
                         L.stack[ra] = {
@@ -195,11 +210,12 @@ class LuaVM {
                         throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
                     }
                     break;
-                case "OP_POW":
-                    op1 = k[i.B];
-                    op2 = k[i.C];
-                    numberop1 = LuaVM.tonumber(op1);
-                    numberop2 = LuaVM.tonumber(op2);
+                }
+                case "OP_POW": {
+                    let op1 = k[i.B];
+                    let op2 = k[i.C];
+                    let numberop1 = LuaVM.tonumber(op1);
+                    let numberop2 = LuaVM.tonumber(op2);
 
                     if (numberop1 !== false && numberop2 !== false) {
                         L.stack[ra] = {
@@ -211,11 +227,12 @@ class LuaVM {
                         throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
                     }
                     break;
-                case "OP_DIV":
-                    op1 = k[i.B];
-                    op2 = k[i.C];
-                    numberop1 = LuaVM.tonumber(op1);
-                    numberop2 = LuaVM.tonumber(op2);
+                }
+                case "OP_DIV": {
+                    let op1 = k[i.B];
+                    let op2 = k[i.C];
+                    let numberop1 = LuaVM.tonumber(op1);
+                    let numberop2 = LuaVM.tonumber(op2);
 
                     if (numberop1 !== false && numberop2 !== false) {
                         L.stack[ra] = {
@@ -227,11 +244,12 @@ class LuaVM {
                         throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
                     }
                     break;
-                case "OP_IDIV":
-                    op1 = k[i.B];
-                    op2 = k[i.C];
-                    numberop1 = LuaVM.tonumber(op1);
-                    numberop2 = LuaVM.tonumber(op2);
+                }
+                case "OP_IDIV": {
+                    let op1 = k[i.B];
+                    let op2 = k[i.C];
+                    let numberop1 = LuaVM.tonumber(op1);
+                    let numberop2 = LuaVM.tonumber(op2);
 
                     if (op1.type === CT.LUA_TNUMINT && op2.type === CT.LUA_TNUMINT) {
                         L.stack[ra] = {
@@ -248,11 +266,12 @@ class LuaVM {
                         throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
                     }
                     break;
-                case "OP_BAND":
-                    op1 = k[i.B];
-                    op2 = k[i.C];
-                    numberop1 = LuaVM.tonumber(op1);
-                    numberop2 = LuaVM.tonumber(op2);
+                }
+                case "OP_BAND": {
+                    let op1 = k[i.B];
+                    let op2 = k[i.C];
+                    let numberop1 = LuaVM.tonumber(op1);
+                    let numberop2 = LuaVM.tonumber(op2);
 
                     if (op1.type === CT.LUA_TNUMINT && op2.type === CT.LUA_TNUMINT) {
                         L.stack[ra] = {
@@ -264,11 +283,12 @@ class LuaVM {
                         throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
                     }
                     break;
-                case "OP_BOR":
-                    op1 = k[i.B];
-                    op2 = k[i.C];
-                    numberop1 = LuaVM.tonumber(op1);
-                    numberop2 = LuaVM.tonumber(op2);
+                }
+                case "OP_BOR": {
+                    let op1 = k[i.B];
+                    let op2 = k[i.C];
+                    let numberop1 = LuaVM.tonumber(op1);
+                    let numberop2 = LuaVM.tonumber(op2);
 
                     if (op1.type === CT.LUA_TNUMINT && op2.type === CT.LUA_TNUMINT) {
                         L.stack[ra] = {
@@ -280,11 +300,12 @@ class LuaVM {
                         throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
                     }
                     break;
-                case "OP_BXOR":
-                    op1 = k[i.B];
-                    op2 = k[i.C];
-                    numberop1 = LuaVM.tonumber(op1);
-                    numberop2 = LuaVM.tonumber(op2);
+                }
+                case "OP_BXOR": {
+                    let op1 = k[i.B];
+                    let op2 = k[i.C];
+                    let numberop1 = LuaVM.tonumber(op1);
+                    let numberop2 = LuaVM.tonumber(op2);
 
                     if (op1.type === CT.LUA_TNUMINT && op2.type === CT.LUA_TNUMINT) {
                         L.stack[ra] = {
@@ -296,11 +317,12 @@ class LuaVM {
                         throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
                     }
                     break;
-                case "OP_SHL":
-                    op1 = k[i.B];
-                    op2 = k[i.C];
-                    numberop1 = LuaVM.tonumber(op1);
-                    numberop2 = LuaVM.tonumber(op2);
+                }
+                case "OP_SHL": {
+                    let op1 = k[i.B];
+                    let op2 = k[i.C];
+                    let numberop1 = LuaVM.tonumber(op1);
+                    let numberop2 = LuaVM.tonumber(op2);
 
                     if (op1.type === CT.LUA_TNUMINT && op2.type === CT.LUA_TNUMINT) {
                         L.stack[ra] = {
@@ -312,11 +334,12 @@ class LuaVM {
                         throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
                     }
                     break;
-                case "OP_SHR":
-                    op1 = k[i.B];
-                    op2 = k[i.C];
-                    numberop1 = LuaVM.tonumber(op1);
-                    numberop2 = LuaVM.tonumber(op2);
+                }
+                case "OP_SHR": {
+                    let op1 = k[i.B];
+                    let op2 = k[i.C];
+                    let numberop1 = LuaVM.tonumber(op1);
+                    let numberop2 = LuaVM.tonumber(op2);
 
                     if (op1.type === CT.LUA_TNUMINT && op2.type === CT.LUA_TNUMINT) {
                         L.stack[ra] = {
@@ -328,9 +351,10 @@ class LuaVM {
                         throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
                     }
                     break;
-                case "OP_UNM":
-                    op = L.stack[this.RB(base, i)];
-                    numberop = LuaVM.tonumber(op);
+                }
+                case "OP_UNM": {
+                    let op = L.stack[this.RB(base, i)];
+                    let numberop = LuaVM.tonumber(op);
 
                     if (op.type === CT.LUA_TNUMINT) {
                         L.stack[ra] = {
@@ -347,9 +371,10 @@ class LuaVM {
                         throw new Error(`Can't perform unary operation on ${k[i.B].value} and ${k[i.C].value}`);
                     }
                     break;
-                case "OP_BNOT":
-                    op = L.stack[this.RB(base, i)];
-                    numberop = LuaVM.tonumber(op);
+                }
+                case "OP_BNOT": {
+                    let op = L.stack[this.RB(base, i)];
+                    let numberop = LuaVM.tonumber(op);
 
                     if (op.type === CT.LUA_TNUMINT) {
                         L.stack[ra] = {
@@ -361,34 +386,46 @@ class LuaVM {
                         throw new Error(`Can't perform unary operation on ${k[i.B].value} and ${k[i.C].value}`);
                     }
                     break;
-                case "OP_NOT":
-                    op = L.stack[this.RB(base, i)];
+                }
+                case "OP_NOT": {
+                    let op = L.stack[this.RB(base, i)];
                     L.stack[ra] = {
                         type: CT.LUA_TBOOLEAN,
                         value: !!((op.type === CT.LUA_TBOOLEAN && !op.value) || op.type === CT.LUA_TNIL)
                     }
                     break;
-                case "OP_LEN":
+                }
+                case "OP_LEN": {
                     break;
-                case "OP_CONCAT":
+                }
+                case "OP_CONCAT": {
                     break;
-                case "OP_JMP":
+                }
+                case "OP_JMP": {
                     break;
-                case "OP_EQ":
+                }
+                case "OP_EQ": {
                     break;
-                case "OP_LT":
+                }
+                case "OP_LT": {
                     break;
-                case "OP_LE":
+                }
+                case "OP_LE": {
                     break;
-                case "OP_TEST":
+                }
+                case "OP_TEST": {
                     break;
-                case "OP_TESTSET":
+                }
+                case "OP_TESTSET": {
                     break;
-                case "OP_CALL":
+                }
+                case "OP_CALL": {
                     break;
-                case "OP_TAILCALL":
+                }
+                case "OP_TAILCALL": {
                     break;
-                case "OP_RETURN":
+                }
+                case "OP_RETURN": {
                     if (i.B >= 2) {
                         for (let j = 0; j <= i.B-2; j++) {
                             L.stack[L.ciOff + j] = L.stack[ra + j];
@@ -404,22 +441,31 @@ class LuaVM {
 
                     continue newframe;
                     break;
-                case "OP_FORLOOP":
+                }
+                case "OP_FORLOOP": {
                     break;
-                case "OP_FORPREP":
+                }
+                case "OP_FORPREP": {
                     break;
-                case "OP_TFORCALL":
+                }
+                case "OP_TFORCALL": {
                     break;
-                case "OP_TFORLOOP":
+                }
+                case "OP_TFORLOOP": {
                     break;
-                case "OP_SETLIST":
+                }
+                case "OP_SETLIST": {
                     break;
-                case "OP_CLOSURE":
+                }
+                case "OP_CLOSURE": {
                     break;
-                case "OP_VARARG":
+                }
+                case "OP_VARARG": {
                     break;
-                case "OP_EXTRAARG":
+                }
+                case "OP_EXTRAARG": {
                     break;
+                }
             }
         }
     }
