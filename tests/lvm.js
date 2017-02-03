@@ -10,6 +10,7 @@ const DataView       = require('buffer-dataview');
 const BytecodeParser = require("../src/lundump.js");
 const lua_State      = require("../src/lstate.js").lua_State;
 const LuaVM          = require("../src/lvm.js").LuaVM;
+const Table          = require("../src/lobject.js").Table;
 
 const toByteCode = function (luaCode) {
     var luaFile = tmp.fileSync(),
@@ -132,6 +133,28 @@ test('Unary op, LOADBOOL', function (t) {
     t.deepEqual(
         vm.L.stack.slice(0, 3).map(function (e) { return e.value; }),
         [-5, true, -6],
+        "Program output is correct"
+    );
+});
+
+
+test('NEWTABLE', function (t) {
+    let luaCode = `
+        local a = {}
+        return a
+    `, vm;
+    
+    t.plan(2);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    t.doesNotThrow(function () {
+        vm = getVM(luaCode);
+        vm.execute();
+    }, "Program executed without errors");
+
+    t.ok(
+        vm.L.stack[0] instanceof Table,
         "Program output is correct"
     );
 });

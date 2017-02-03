@@ -5,6 +5,7 @@ const BytecodeParser = require("./lundump.js");
 const OC             = require('./lopcodes.js');
 const CT             = require('./lua.js').constant_types;
 const TValue         = require('./lobject.js').TValue;
+const Table          = require('./lobject.js').Table;
 
 class LuaVM {
 
@@ -104,6 +105,7 @@ class LuaVM {
                     break;
                 }
                 case "OP_NEWTABLE": {
+                    L.stack[ra] = new Table();
                     break;
                 }
                 case "OP_SELF": {
