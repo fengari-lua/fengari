@@ -14,7 +14,7 @@ class LuaVM {
        return base + a;
     }
 
-    RB(base, opcode, base, b) {
+    RB(base, opcode, b) {
        return base + b;
     }
 
@@ -35,18 +35,21 @@ class LuaVM {
         let ci = L.ci[this.L.ciOff];
 
         newframe:
-        let cl = ci.func;
-        let k = cl.p.k;
-        let base = ci.base;
-
         for (;;) {
-            let i = ci.savedpc[ci.pcOff++];
-            let ra = this.RA(base, i.a);
+            var cl = L.stack[ci.func];
+            let k = cl.p.k;
+            let base = ci.base;
 
+            let i = ci.savedpc[ci.pcOff++];
+            let ra = this.RA(base, i.A);
+
+            console.log(OC.OpCodes[i.opcode]);
             switch (OC.OpCodes[i.opcode]) {
                 case "OP_MOVE":
+                    L.stack[ra] = RB(base, i.opcode, i.B);
                     break;
                 case "OP_LOADK":
+                    L.stack[ra] = k[i.Bx];
                     break;
                 case "OP_LOADKX":
                     break;
@@ -121,6 +124,18 @@ class LuaVM {
                 case "OP_TAILCALL":
                     break;
                 case "OP_RETURN":
+                    if (i.B >= 2) {
+                        for (let j = 0; j <= i.B-2; j++) {
+                            L.stack[L.ciOff + j] = L.stack[ra + j];
+                        }
+                    }
+                    L.ci = ci.previous;
+
+                    if (L.ci === null) return;
+
+                    if (i.B !== 0) L.top = ci.top;
+
+                    continue newframe;
                     break;
                 case "OP_FORLOOP":
                     break;
