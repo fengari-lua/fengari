@@ -42,11 +42,10 @@ class LuaVM {
 
             let i = ci.savedpc[ci.pcOff++];
             let ra = this.RA(base, i.A);
-
-            console.log(OC.OpCodes[i.opcode]);
+            
             switch (OC.OpCodes[i.opcode]) {
                 case "OP_MOVE":
-                    L.stack[ra] = RB(base, i.opcode, i.B);
+                    L.stack[ra] = L.stack[this.RB(base, i.opcode, i.B)];
                     break;
                 case "OP_LOADK":
                     L.stack[ra] = k[i.Bx];
@@ -131,6 +130,8 @@ class LuaVM {
                     }
                     L.ci = ci.previous;
 
+                    // TODO what to return when end of program ?
+                    console.log(L.stack);
                     if (L.ci === null) return;
 
                     if (i.B !== 0) L.top = ci.top;

@@ -1,1 +1,0 @@
-local a = "hello world"

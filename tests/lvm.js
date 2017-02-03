@@ -64,3 +64,27 @@ test('LOADK, RETURN', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('MOV', function (t) {
+    let luaCode = `
+        local a = "hello world"
+        local b = a
+        return b
+    `, vm;
+    
+    t.plan(1);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    // t.doesNotThrow(function () {
+        vm = getVM(luaCode);
+        vm.execute();
+    // }, "Program executed without errors");
+
+    t.strictEqual(
+        vm.L.stack[0].value,
+        "hello world",
+        "Program output is correct"
+    );
+});
