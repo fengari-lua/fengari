@@ -86,6 +86,16 @@ const MAXARG_A   = ((1 << SIZE_A) - 1);
 const MAXARG_B   = ((1 << SIZE_B) - 1);
 const MAXARG_C   = ((1 << SIZE_C) - 1);
 
+const BITRK      = (1 << (SIZE_B - 1));
+
+const ISK = function (x) {
+    return x & BITRK;
+};
+
+const INDEXK = function (r) {
+    return r & ~BITRK;
+}
+
 module.exports = {
     OpCodes:    OpCodes,
     SIZE_C:     SIZE_C,
@@ -105,5 +115,8 @@ module.exports = {
     MAXARG_Ax:  MAXARG_Ax,
     MAXARG_A:   MAXARG_A,
     MAXARG_B:   MAXARG_B,
-    MAXARG_C:   MAXARG_C
+    MAXARG_C:   MAXARG_C,
+    BITRK:      BITRK,
+    ISK:        ISK,
+    INDEXK:     INDEXK
 };

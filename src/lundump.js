@@ -78,6 +78,7 @@ class BytecodeParser {
         return number;
     }
 
+    // TODO: 8-bit clean strings
     readString(n) {
         let size = typeof n !== 'undefined' ? n : this.readByte() - 1;
 
