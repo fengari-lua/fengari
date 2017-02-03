@@ -73,18 +73,65 @@ test('MOV', function (t) {
         return b
     `, vm;
     
-    t.plan(1);
+    t.plan(2);
 
     t.comment("Running following code: \n" + luaCode);
 
-    // t.doesNotThrow(function () {
+    t.doesNotThrow(function () {
         vm = getVM(luaCode);
         vm.execute();
-    // }, "Program executed without errors");
+    }, "Program executed without errors");
 
     t.strictEqual(
         vm.L.stack[0].value,
         "hello world",
+        "Program output is correct"
+    );
+});
+
+test('Binary op', function (t) {
+    let luaCode = `
+        local a = 5
+        local b = 10
+        return a + b, a - b, a * b, a / b, a % b, a^b, a // b, a & b, a | b, a ~ b, a << b, a >> b
+    `, vm;
+    
+    t.plan(2);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    t.doesNotThrow(function () {
+        vm = getVM(luaCode);
+        vm.execute();
+    }, "Program executed without errors");
+
+    t.deepEqual(
+        vm.L.stack.slice(0, 12).map(function (e) { return e.value; }),
+        [15, -5, 50, 0.5, 5, 9765625.0, 0, 0, 15, 15, 5120, 0],
+        "Program output is correct"
+    );
+});
+
+
+test('Unary op', function (t) {
+    let luaCode = `
+        local a = 5
+        local b = false
+        return -a, not b, ~a
+    `, vm;
+    
+    t.plan(2);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    t.doesNotThrow(function () {
+        vm = getVM(luaCode);
+        vm.execute();
+    }, "Program executed without errors");
+
+    t.deepEqual(
+        vm.L.stack.slice(0, 3).map(function (e) { return e.value; }),
+        [-5, true, -6],
         "Program output is correct"
     );
 });
