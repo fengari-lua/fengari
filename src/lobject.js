@@ -1,6 +1,8 @@
 /*jshint esversion: 6 */
 "use strict";
 
+const CT = require('./lua.js').constant_types;
+
 class LClosure {
 
     constructor(n) {
@@ -10,6 +12,17 @@ class LClosure {
 
 }
 
+
+class TValue {
+
+    constructor(type, value) {
+        this.type = type;
+        this.value = value;
+    }
+
+}
+
 module.exports = {
-    LClosure: LClosure
+    LClosure: LClosure,
+    TValue: TValue
 };

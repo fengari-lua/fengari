@@ -6,6 +6,7 @@ const fs             = require('fs');
 const assert         = require('assert');
 
 const LClosure       = require('./lobject.js').LClosure;
+const TValue         = require('./lobject.js').TValue;
 const Proto          = require('./lfunc.js').Proto;
 const constant_types = require('./lua.js').constant_types;
 const OpCodes        = require('./lopcodes.js');
@@ -163,39 +164,24 @@ class BytecodeParser {
 
             switch (t) {
             case constant_types.LUA_TNIL:
-                f.k.push({
-                    type: constant_types.LUA_TNIL,
-                    value: null
-                });
+                f.k.push(new TValue(constant_types.LUA_TNIL, null));
                 console.log(`   LUA_TNIL     = ${f.k[f.k.length - 1].value}`);
                 break;
             case constant_types.LUA_TBOOLEAN:
-                f.k.push({
-                    type: constant_types.LUA_TBOOLEAN,
-                    value: this.readByte()
-                });
+                f.k.push(new TValue(constant_types.LUA_TBOOLEAN, this.readByte()));
                 console.log(`   LUA_TBOOLEAN = ${f.k[f.k.length - 1].value}`);
                 break;
             case constant_types.LUA_TNUMFLT:
-                f.k.push({
-                    type: constant_types.LUA_TNUMFLT,
-                    value: this.readNumber()
-                });
+                f.k.push(new TValue(constant_types.LUA_TNUMFLT, this.readNumber()));
                 console.log(`   LUA_TNUMFLT  = ${f.k[f.k.length - 1].value}`);
                 break;
             case constant_types.LUA_TNUMINT:
-                f.k.push({
-                    type: constant_types.LUA_TNUMINT,
-                    value: this.readInteger()
-                });
+                f.k.push(new TValue(constant_types.LUA_TNUMINT, this.readInteger()));
                 console.log(`   LUA_TNUMINT  = ${f.k[f.k.length - 1].value}`);
                 break;
             case constant_types.LUA_TSHRSTR:
             case constant_types.LUA_TLNGSTR:
-                f.k.push({
-                    type: constant_types.LUA_TLNGSTR,
-                    value: this.readString()
-                });
+                f.k.push(new TValue(constant_types.LUA_TLNGSTR, this.readString()));
                 console.log(`   LUA_TLNGSTR  = ${f.k[f.k.length - 1].value}`);
                 break;
             default:
