@@ -3,15 +3,6 @@
 
 const CT = require('./lua.js').constant_types;
 
-class LClosure {
-
-    constructor(n) {
-        this.p = null;
-        this.nupvalues = n;
-    }
-
-}
-
 
 class TValue {
 
@@ -23,6 +14,20 @@ class TValue {
 
 }
 
+
+class LClosure extends TValue {
+
+    constructor(n) {
+        super(CT.LUA_TLCL, null);
+
+        this.p = null;
+        this.nupvalues = n;
+        this.upvals = [];
+
+        this.value = this;
+    }
+
+}
 
 class TString extends TValue {
 

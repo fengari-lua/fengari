@@ -158,3 +158,25 @@ test('NEWTABLE', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('CALL', function (t) {
+    let luaCode = `
+        local f = function (a, b)
+            return a + b
+        end
+
+        local c = f(1, 2)
+
+        return c
+    `, vm;
+    
+    t.plan(0);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    // t.doesNotThrow(function () {
+        vm = getVM(luaCode);
+        vm.execute();
+    // }, "Program executed without errors");
+});

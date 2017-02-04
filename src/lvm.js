@@ -1,11 +1,16 @@
-/*jshint esversion: 6 */
+    /*jshint esversion: 6 */
 "use strict";
 
 const BytecodeParser = require("./lundump.js");
 const OC             = require('./lopcodes.js');
 const CT             = require('./lua.js').constant_types;
-const TValue         = require('./lobject.js').TValue;
-const Table          = require('./lobject.js').Table;
+const lobject        = require('./lobject.js');
+const TValue         = lobject.TValue;
+const Table          = lobject.Table;
+const LClosure       = lobject.LClosure;
+const lfunc          = require('./lfunc.js');
+const UpVal          = lfunc.UpVal;
+const CallInfo       = require('./lstate.js').CallInfo;
 
 class LuaVM {
 
@@ -52,11 +57,11 @@ class LuaVM {
 
         newframe:
         for (;;) {
-            var cl = L.stack[ci.func];
+            var cl = ci.func;
             let k = cl.p.k;
             let base = ci.base;
 
-            let i = ci.savedpc[ci.pcOff++];
+            let i = ci.u.l.savedpc[ci.pcOff++];
             let ra = this.RA(base, i);
 
             switch (OC.OpCodes[i.opcode]) {
@@ -69,8 +74,8 @@ class LuaVM {
                     break;
                 }
                 case "OP_LOADKX": {
-                    assert(OC.OpCodes[ci.savedpc[ci.pcOff].opcode] === "OP_EXTRAARG");
-                    L.stack[ra] = k[ci.savedpc[ci.pcOff++].Ax];
+                    assert(OC.OpCodes[ci.u.l.savedpc[ci.pcOff].opcode] === "OP_EXTRAARG");
+                    L.stack[ra] = k[ci.u.l.savedpc[ci.pcOff++].Ax];
                     break;
                 }
                 case "OP_LOADBOOL": {
@@ -92,13 +97,13 @@ class LuaVM {
                 case "OP_GETTABUP": {
                     break;
                 }
-                case "OP_GETTABLE": {
-                    break;
-                }
                 case "OP_SETTABUP": {
                     break;
                 }
                 case "OP_SETUPVAL": {
+                    break;
+                }
+                case "OP_GETTABLE": {
                     break;
                 }
                 case "OP_SETTABLE": {
@@ -345,6 +350,16 @@ class LuaVM {
                     break;
                 }
                 case "OP_CALL": {
+                    let b = i.B;
+                    let nresults = i.C - 1;
+
+                    if (b !== 0)
+                        L.top = ra+b;
+
+                    this.precall(ra, L.stack[ra], nresults);
+                    ci = L.ci;
+                    continue newframe;
+
                     break;
                 }
                 case "OP_TAILCALL": {
@@ -383,6 +398,20 @@ class LuaVM {
                     break;
                 }
                 case "OP_CLOSURE": {
+                    let p = cl.p.p[i.Bx];
+                    let nup = p.upvalues.length;
+                    let uv = p.upvalues;
+                    let ncl = new LClosure(nup);
+                    ncl.p = p;
+
+                    L.stack[ra] = ncl;
+
+                    for (let i = 0; i < nup; i++) { // TODO test
+                        if (uv[i].instack)
+                            ncl.upvals[i] = this.findupval(base + uv[i].idx);
+                        else
+                            ncl.upvals[i] = cl.upvals[uv[i].idx];
+                    }
                     break;
                 }
                 case "OP_VARARG": {
@@ -393,6 +422,85 @@ class LuaVM {
                 }
             }
         }
+    }
+
+    precall(off, func, nresults) {
+        let L = this.L;
+        let ci;
+
+        switch(func.type) {
+            case CT.LUA_TCCL: // JS function ?
+                throw new Error("LUA_TCCL not implemeted yet")
+                break;
+            case CT.LUA_TLCF: // still JS function ?
+                throw new Error("LUA_TLCF not implemeted yet")
+                break;
+            case CT.LUA_TLCL: {
+                let p = func.p;
+                let n = L.top - off - 1;
+                let fsize = p.maxstacksize;
+                let base;
+
+                if (p.is_vararg) {
+                    // base = adjust_varargs(L, p, n);
+                } else {
+                    for (; n < p.numparams; n++)
+                        L.stack[L.top++] = new TValue(CT.LUA_TNIL, null);
+                    base = off + 1;
+                }
+
+                // next_ci
+                if (L.ci.next) {
+                    L.ci = L.ci.next;
+                } else {
+                    ci = new CallInfo();
+                    L.ci.next = ci;
+                    ci.previous = L.ci;
+                    ci.next = null;
+
+                    L.ci = ci;
+                }
+                ci.nresults = nresults;
+                ci.func = func;
+                ci.u.l.base = base;
+                ci.top = base + fsize;
+                L.top = ci.top;
+                ci.u.l.savedpc = p.code;
+                break;
+            }
+            default:
+                // __call
+        }
+    }
+
+    postcall(ci, firstResult, nres) {
+        
+    }
+
+    findupval(level) { // TODO test
+        let pp = L.openupval;
+        
+        while(pp !== null && pp.v >= level) {
+            let p = pp;
+
+            if (p.v === level)
+                return p;
+
+            pp = p.u.open.next;
+        }
+
+        let uv = new UpVal();
+        uv.refcount = 0;
+        uv.u.open.next = pp;
+        uv.u.open.touched = true;
+
+        pp = uv;
+
+        uv.v = level;
+
+        // Thread with upvalue list business ? lfunc.c:75
+
+        return uv;
     }
 
 }

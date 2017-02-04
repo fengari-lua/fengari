@@ -21,7 +21,22 @@ class Proto {
 
 }
 
+class UpVal {
+
+    constructor() {
+        this.v = null;
+        this.u = {
+            open: {
+                next: null,
+                touched: false
+            },
+            value: null
+        };
+    }
+
+}
 
 module.exports = {
-    Proto: Proto
+    Proto: Proto,
+    UpVal: UpVal
 };
