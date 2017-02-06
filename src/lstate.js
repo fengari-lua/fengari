@@ -4,8 +4,9 @@
 
 class CallInfo {
 
-    constructor(func, top, base, previous, next) {
+    constructor(funcOff, func, top, base, previous, next) {
         this.func = func;
+        this.funcOff = funcOff;
         this.top = top;
         this.previous = previous;
         this.next = next;
@@ -16,6 +17,7 @@ class CallInfo {
                 savedpc: []
             }
         };
+        this.nresults = 0;
     }
 
 }
@@ -24,7 +26,7 @@ class lua_State {
 
     constructor(cl) {
         this.top = 1;
-        this.ci = new CallInfo(cl, 1, 1, null, null);
+        this.ci = new CallInfo(0, cl, 1, 1, null, null);
         this.ci.u.l.savedpc = cl.p.code;
         this.ciOff = 0;
         this.stack = [

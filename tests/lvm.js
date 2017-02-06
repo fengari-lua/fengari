@@ -61,7 +61,7 @@ test('LOADK, RETURN', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        vm.L.stack[vm.L.top].value,
+        vm.L.stack[vm.L.stack.length - 1].value,
         "hello world",
         "Program output is correct"
     );
@@ -85,7 +85,7 @@ test('MOV', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        vm.L.stack[vm.L.top].value,
+        vm.L.stack[vm.L.stack.length - 1].value,
         "hello world",
         "Program output is correct"
     );
@@ -108,7 +108,7 @@ test('Binary op', function (t) {
     }, "Program executed without errors");
 
     t.deepEqual(
-        vm.L.stack.slice(vm.L.top, vm.L.top + 12).map(function (e) { return e.value; }),
+        vm.L.stack.slice(vm.L.stack.length - 12).map(function (e) { return e.value; }),
         [15, -5, 50, 0.5, 5, 9765625.0, 0, 0, 15, 15, 5120, 0],
         "Program output is correct"
     );
@@ -132,7 +132,7 @@ test('Unary op, LOADBOOL', function (t) {
     }, "Program executed without errors");
 
     t.deepEqual(
-        vm.L.stack.slice(vm.L.top - 3, vm.L.top).map(function (e) { return e.value; }),
+        vm.L.stack.slice(vm.L.stack.length - 3).map(function (e) { return e.value; }),
         [-5, true, -6],
         "Program output is correct"
     );
@@ -155,7 +155,7 @@ test('NEWTABLE', function (t) {
     }, "Program executed without errors");
 
     t.ok(
-        vm.L.stack[vm.L.top] instanceof Table,
+        vm.L.stack[vm.L.stack.length - 1] instanceof Table,
         "Program output is correct"
     );
 });
@@ -182,7 +182,7 @@ test('CALL', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        vm.L.stack[vm.L.top].value,
+        vm.L.stack[vm.L.stack.length - 1].value,
         3,
         "Program output is correct"
     );

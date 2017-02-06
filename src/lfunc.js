@@ -17,7 +17,6 @@ class Proto {
         this.linedefined = 0;     // debug information
         this.lastlinedefined = 0; // debug information
         this.source = null;       // used for debug information
-        this.nresults = 0;        // expected number of results from this function
     }
 
 }

@@ -450,7 +450,7 @@ class LuaVM {
                 if (L.ci.next) {
                     L.ci = L.ci.next;
                 } else {
-                    ci = new CallInfo();
+                    ci = new CallInfo(off);
                     L.ci.next = ci;
                     ci.previous = L.ci;
                     ci.next = null;
@@ -473,7 +473,7 @@ class LuaVM {
 
     postcall(ci, firstResult, nres) {
         let wanted = ci.nresults;
-        let res = ci.func;
+        let res = ci.funcOff;
         this.L.ci = ci.previous;
         this.L.ciOff--;
         return this.moveresults(firstResult, res, nres, wanted);
