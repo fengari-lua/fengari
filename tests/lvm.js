@@ -187,3 +187,35 @@ test('CALL', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('Multiple return', function (t) {
+    let luaCode = `
+        local f = function (a, b)
+            return a + b, a - b, a * b
+        end
+
+        local c
+        local d
+        local e
+
+        c, d, e = f(1,2)
+
+        return c, d, e
+    `, vm;
+    
+    t.plan(2);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    t.doesNotThrow(function () {
+        vm = getVM(luaCode);
+        vm.execute();
+    }, "Program executed without errors");
+
+    t.deepEqual(
+        vm.L.stack.slice(vm.L.stack.length - 3).map(function (e) { return e.value; }),
+        [3, -1, 2],
+        "Program output is correct"
+    );
+});
