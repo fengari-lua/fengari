@@ -449,6 +449,25 @@ class LuaVM {
                     break;
                 }
                 case "OP_VARARG": {
+                    let b = i.B - 1;
+                    let n = base - ci.funcOff - cl.p.numparams - 1;
+                    let j
+
+                    if (n < 0) /* less arguments than parameters? */
+                        n = 0; /* no vararg arguments */
+
+                    if (b < 0) {
+                        b = n;  /* get all var. arguments */
+                        base = ci.u.l.base;
+                        ra = this.RA(i); /* previous call may change the stack */
+                        L.top = ra + n;
+                    }
+
+                    for (j = 0; j < b && j < n; j++)
+                        L.stack[ra + j] = L.stack[base - n - j];
+
+                    for (; j < b; j++) /* complete required results with nil */
+                        L.stack[ra + j] = new TValue(CT.LUA_TNIL, null);
                     break;
                 }
                 case "OP_EXTRAARG": {
