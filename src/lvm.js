@@ -3,7 +3,9 @@
 
 const BytecodeParser = require("./lundump.js");
 const OC             = require('./lopcodes.js');
-const CT             = require('./lua.js').constant_types;
+const lua            = require('./lua.js');
+const CT             = lua.constant_types;
+const LUA_MULTRET    = lua.LUA_MULTRET;
 const lobject        = require('./lobject.js');
 const TValue         = lobject.TValue;
 const Table          = lobject.Table;
@@ -366,21 +368,14 @@ class LuaVM {
                     break;
                 }
                 case "OP_RETURN": {
-                    if (i.B >= 2) {
-                        // TODO moveresults, ldo.c:334
-                        for (let j = 0; j <= i.B-2; j++) {
-                            L.stack[L.ciOff + j] = L.stack[ra + j];
-                            L.top++;
-                        }
-                    }
-                    L.ciOff--;
-                    L.ci = ci.previous;
+                    let b = this.postcall(ci, ra, (i.B !== 0 ? i.B - 1 : L.top - ra));
+                    // TODO call status check
+                    ci = L.ci;
 
                     // TODO what to return when end of program ?
                     if (L.ci === null) return;
 
-                    if (i.B !== 0) L.top = ci.top;
-
+                    if (b) L.top = ci.top;
                     continue newframe;
                     break;
                 }
@@ -477,7 +472,44 @@ class LuaVM {
     }
 
     postcall(ci, firstResult, nres) {
-        
+        let wanted = ci.nresults;
+        let res = ci.func;
+        this.L.ci = ci.previous;
+        this.L.ciOff--;
+        return this.moveresults(firstResult, res, nres, wanted);
+    }
+
+    moveresults(firstResult, res, nres, wanted) {
+        let L = this.L;
+
+        switch (wanted) {
+            case 0:
+                break;
+            case 1: {
+                if (nres == 0)
+                    firstResult = new TValue(CT.LUA_TNIL, null);
+                L.stack[res] = L.stack[firstResult];
+                break;
+            }
+            case LUA_MULTRET: {
+                for (let i = 0; i < nres; i++)
+                    L.stack[res + i] = L.stack[firstResult + i];
+                L.top = res + nres;
+                return false;
+            }
+            default: {
+                let i;
+                if (wanted <= nres) {
+                    for (i = 0; i < wanted; i++)
+                        L.stack[res + i] = L.stack[firstResult + i];
+                    for (; i < wanted; i++)
+                        L.stack[res + i] = new TValue(CT.LUA_TNIL, null);
+                }
+                break;
+            }
+        }
+
+        return true;
     }
 
     findupval(level) { // TODO test
