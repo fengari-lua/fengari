@@ -219,3 +219,29 @@ test('Multiple return', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('TAILCALL', function (t) {
+    let luaCode = `
+        local f = function (a, b)
+            return a + b
+        end
+
+        return f(1,2)
+    `, vm;
+    
+    t.plan(2);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    t.doesNotThrow(function () {
+        vm = getVM(luaCode);
+        vm.execute();
+    }, "Program executed without errors");
+
+    t.strictEqual(
+        vm.L.stack[vm.L.top - 1].value,
+        3,
+        "Program output is correct"
+    );
+});

@@ -1,7 +1,9 @@
 /*jshint esversion: 6 */
 "use strict";
 
-const BytecodeParser = require("./lundump.js");
+const assert         = require('assert');
+
+const BytecodeParser = require('./lundump.js');
 const OC             = require('./lopcodes.js');
 const lua            = require('./lua.js');
 const CT             = lua.constant_types;
@@ -358,13 +360,48 @@ class LuaVM {
                     if (b !== 0)
                         L.top = ra+b;
 
-                    this.precall(ra, L.stack[ra], nresults);
-                    ci = L.ci;
-                    continue newframe;
+                    if (this.precall(ra, L.stack[ra], nresults)) {
+                        if (nresults >= 0)
+                            L.top = ci.top;
+                        base = ci.u.l.base;
+                    } else {
+                        ci = L.ci;
+                        continue newframe;
+                    }
 
                     break;
                 }
                 case "OP_TAILCALL": {
+                    if (i.B !== 0) L.top = ra + i.B;
+                    if (this.precall(ra, L.stack[ra], LUA_MULTRET)) {
+                        base = ci.u.l.base;
+                    } else {
+                        /* tail call: put called frame (n) in place of caller one (o) */
+                        let nci = L.ci;
+                        let oci = nci.previous;
+                        let nfunc = nci.func;
+                        let nfuncOff = nci.funcOff;
+                        let ofunc = oci.func;
+                        let ofuncOff = oci.funcOff;
+                        let lim = nci.u.l.base + nfunc.p.numparams;
+                        // TODO close upvalues ?
+                        for (let aux = 0; nfuncOff + aux < lim; aux++)
+                            L.stack[ofuncOff + aux] = L.stack[nfuncOff + aux];
+
+                        oci.u.l.base = ofuncOff + (nci.u.l.base - nfuncOff);
+                        L.top = ofuncOff + (L.top - nfuncOff);
+                        oci.top = L.top;
+                        oci.u.l.savedpc = nci.u.l.savedpc;
+                        oci.pcOff = nci.pcOff;
+                        //TODO callstatus
+                        L.ci = oci;
+                        ci = L.ci;
+                        L.ciOff--;
+
+                        assert(L.top === oci.u.l.base + L.stack[ofuncOff].p.maxstacksize);
+
+                        continue newframe;
+                    }
                     break;
                 }
                 case "OP_RETURN": {
