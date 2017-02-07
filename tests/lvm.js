@@ -108,7 +108,7 @@ test('Binary op', function (t) {
     }, "Program executed without errors");
 
     t.deepEqual(
-        vm.L.stack.slice(vm.L.stack.length - 12).map(function (e) { return e.value; }),
+        vm.L.stack.slice(vm.L.top - 12, vm.L.top).map(function (e) { return e.value; }),
         [15, -5, 50, 0.5, 5, 9765625.0, 0, 0, 15, 15, 5120, 0],
         "Program output is correct"
     );

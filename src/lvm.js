@@ -70,8 +70,6 @@ class LuaVM {
             let i = ci.u.l.savedpc[ci.pcOff++];
             let ra = this.RA(base, i);
 
-            console.log(`Before ${OC.OpCodes[i.opcode]} L.top is ${L.top}`);
-
             switch (OC.OpCodes[i.opcode]) {
                 case "OP_MOVE": {
                     L.stack[ra] = L.stack[this.RB(base, i)];
