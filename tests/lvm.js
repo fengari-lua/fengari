@@ -249,11 +249,11 @@ test('TAILCALL', function (t) {
 
 test('VARARG', function (t) {
     let luaCode = `
-        local f = function (a, b)
-            return a + b
+        local f = function (...)
+            return ...
         end
 
-        return f(1,2)
+        return f(1,2,3)
     `, vm;
     
     t.plan(2);
@@ -265,9 +265,9 @@ test('VARARG', function (t) {
         vm.execute();
     }, "Program executed without errors");
 
-    t.strictEqual(
-        vm.L.stack[vm.L.top - 1].value,
-        3,
+    t.deepEqual(
+        vm.L.stack.slice(vm.L.stack.length - 3).map(function (e) { return e.value; }),
+        [1, 2, 3],
         "Program output is correct"
     );
 });

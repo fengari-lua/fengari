@@ -16,6 +16,8 @@ const lfunc          = require('./lfunc.js');
 const UpVal          = lfunc.UpVal;
 const CallInfo       = require('./lstate.js').CallInfo;
 
+const nil = new TValue(CT.LUA_TNIL, null);
+
 class LuaVM {
 
     constructor(L) {
@@ -92,7 +94,7 @@ class LuaVM {
                 }
                 case "OP_LOADNIL": {
                     for (let j = 0; j <= i.B; j++)
-                        L.stack[ra + j] = new TValue(CT.LUA_TNIL, null);
+                        L.stack[ra + j] = nil;
                     break;
                 }
                 case "OP_GETUPVAL": {
@@ -451,7 +453,7 @@ class LuaVM {
                 case "OP_VARARG": {
                     let b = i.B - 1;
                     let n = base - ci.funcOff - cl.p.numparams - 1;
-                    let j
+                    let j;
 
                     if (n < 0) /* less arguments than parameters? */
                         n = 0; /* no vararg arguments */
@@ -459,15 +461,16 @@ class LuaVM {
                     if (b < 0) {
                         b = n;  /* get all var. arguments */
                         base = ci.u.l.base;
-                        ra = this.RA(i); /* previous call may change the stack */
+                        ra = this.RA(base, i); /* previous call may change the stack */
+
                         L.top = ra + n;
                     }
 
                     for (j = 0; j < b && j < n; j++)
-                        L.stack[ra + j] = L.stack[base - n - j];
+                        L.stack[ra + j] = L.stack[base - n + j];
 
                     for (; j < b; j++) /* complete required results with nil */
-                        L.stack[ra + j] = new TValue(CT.LUA_TNIL, null);
+                        L.stack[ra + j] = nil;
                     break;
                 }
                 case "OP_EXTRAARG": {
@@ -495,10 +498,10 @@ class LuaVM {
                 let base;
 
                 if (p.is_vararg) {
-                    // base = adjust_varargs(L, p, n);
+                    base = this.adjust_varargs(p, n);
                 } else {
                     for (; n < p.numparams; n++)
-                        L.stack[L.top++] = new TValue(CT.LUA_TNIL, null); // complete missing arguments
+                        L.stack[L.top++] = nil; // complete missing arguments
                     base = off + 1;
                 }
 
@@ -543,7 +546,7 @@ class LuaVM {
                 break;
             case 1: {
                 if (nres == 0)
-                    firstResult = new TValue(CT.LUA_TNIL, null);
+                    firstResult = nil;
                 L.stack[res] = L.stack[firstResult];
                 break;
             }
@@ -559,7 +562,7 @@ class LuaVM {
                     for (i = 0; i < wanted; i++)
                         L.stack[res + i] = L.stack[firstResult + i];
                     for (; i < wanted; i++)
-                        L.stack[res + i] = new TValue(CT.LUA_TNIL, null);
+                        L.stack[res + i] = nil;
                 }
                 break;
             }
@@ -592,6 +595,25 @@ class LuaVM {
         // Thread with upvalue list business ? lfunc.c:75
 
         return uv;
+    }
+
+    adjust_varargs (p, actual) {
+        let L = this.L;
+        let nfixargs = p.numparams;
+        /* move fixed parameters to final position */
+        let fixed = L.top - actual; /* first fixed argument */
+        let base = L.top; /* final position of first argument */
+
+        let i;
+        for (i = 0; i < nfixargs && i < actual; i++) {
+            L.stack[L.top++] = L.stack[fixed + i];
+            L.stack[fixed + i] = nil;
+        }
+
+        for (; i < nfixargs; i++)
+            L.stack[L.top++] = nil;
+
+        return base;
     }
 
 }
