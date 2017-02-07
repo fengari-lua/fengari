@@ -271,3 +271,34 @@ test('VARARG', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('GETUPVAL, SETUPVAL', function (t) {
+    let luaCode = `
+        local a = 1
+
+        local f = function ()
+            a = a + 1
+            return a
+        end
+
+        f()
+
+        return a
+    `, vm;
+    
+    t.plan(2);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    t.doesNotThrow(function () {
+        vm = getVM(luaCode);
+        vm.execute();
+    }, "Program executed without errors");
+
+    t.strictEqual(
+        vm.L.stack[vm.L.top - 1].value,
+        2,
+        "Program output is correct"
+    );
+});

@@ -70,6 +70,8 @@ class LuaVM {
             let i = ci.u.l.savedpc[ci.pcOff++];
             let ra = this.RA(base, i);
 
+            console.log(`Before ${OC.OpCodes[i.opcode]} L.top is ${L.top}`);
+
             switch (OC.OpCodes[i.opcode]) {
                 case "OP_MOVE": {
                     L.stack[ra] = L.stack[this.RB(base, i)];
@@ -98,15 +100,17 @@ class LuaVM {
                     break;
                 }
                 case "OP_GETUPVAL": {
+                    L.stack[ra] = L.stack[cl.upvals[i.B].v];
+                    break;
+                }
+                case "OP_SETUPVAL": {
+                    L.stack[cl.upvals[i.B].v] = L.stack[ra];
                     break;
                 }
                 case "OP_GETTABUP": {
                     break;
                 }
                 case "OP_SETTABUP": {
-                    break;
-                }
-                case "OP_SETUPVAL": {
                     break;
                 }
                 case "OP_GETTABLE": {
@@ -442,7 +446,7 @@ class LuaVM {
 
                     L.stack[ra] = ncl;
 
-                    for (let i = 0; i < nup; i++) { // TODO test
+                    for (let i = 0; i < nup; i++) {
                         if (uv[i].instack)
                             ncl.upvals[i] = this.findupval(base + uv[i].idx);
                         else
@@ -571,7 +575,8 @@ class LuaVM {
         return true;
     }
 
-    findupval(level) { // TODO test
+    findupval(level) {
+        let L = this.L;
         let pp = L.openupval;
         
         while(pp !== null && pp.v >= level) {

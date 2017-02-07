@@ -10,11 +10,11 @@
     - [ ] OP_LOADKX
     - [x] OP_LOADBOOL
     - [x] OP_LOADNIL
-    - [ ] OP_GETUPVAL
+    - [x] OP_GETUPVAL
+    - [x] OP_SETUPVAL
     - [ ] OP_GETTABUP
     - [ ] OP_GETTABLE
     - [ ] OP_SETTABUP
-    - [ ] OP_SETUPVAL
     - [ ] OP_SETTABLE
     - [ ] OP_NEWTABLE
     - [ ] OP_SELF
