@@ -333,7 +333,7 @@ class LuaVM {
                 }
                 case "OP_NOT": {
                     let op = L.stack[this.RB(base, i)];
-                    L.stack[ra] = new TValue(CT.LUA_TBOOLEAN, !!((op.type === CT.LUA_TBOOLEAN && !op.value) || op.type === CT.LUA_TNIL));
+                    L.stack[ra] = new TValue(CT.LUA_TBOOLEAN, LuaVM.l_isfalse(op));
                     break;
                 }
                 case "OP_LEN": {
@@ -371,9 +371,20 @@ class LuaVM {
                     break;
                 }
                 case "OP_TEST": {
+                    if (i.C ? LuaVM.l_isfalse(L.stack[ra]) : !LuaVM.l_isfalse(L.stack[ra]))
+                        ci.pcOff++;
+                    else
+                        this.donextjump(ci);
                     break;
                 }
                 case "OP_TESTSET": {
+                    let rb = L.stack[this.RB(base, i)];
+                    if (i.C ? LuaVM.l_isfalse(rb) : !LuaVM.l_isfalse(rb))
+                        ci.pcOff++;
+                    else {
+                        L.stack[ra] = rb;
+                        this.donextjump(ci);
+                    }
                     break;
                 }
                 case "OP_CALL": {
@@ -747,18 +758,22 @@ class LuaVM {
     }
 
     static LEintfloat(l, r) {
-        // TODO
+        // TODO: LEintfloat
         return l <= r ? 1 : 0;
     }
 
     static LTintfloat(l, r) {
-        // TODO
+        // TODO: LTintfloat
         return l < r ? 1 : 0;
     }
 
     static l_strcmp(ls, rs) {
         // TODO: lvm.c:248 static int l_strcmp (const TString *ls, const TString *rs)
         return ls.value === rs.value ? 0 : (ls.value < rs.value ? -1 : 1);
+    }
+
+    static l_isfalse(o) {
+        return o.ttisnil() || (o.ttisboolean() && o.value === false)
     }
 
 }

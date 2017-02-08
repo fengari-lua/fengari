@@ -343,3 +343,111 @@ test('EQ', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('TESTSET (and)', function (t) {
+    let luaCode = `
+        local a = true
+        local b = "hello"
+
+        return a and b
+    `, vm;
+    
+    t.plan(2);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    t.doesNotThrow(function () {
+        vm = getVM(luaCode);
+        vm.execute();
+    }, "Program executed without errors");
+
+    t.strictEqual(
+        vm.L.stack[vm.L.top - 1].value,
+        "hello",
+        "Program output is correct"
+    );
+});
+
+
+test('TESTSET (or)', function (t) {
+    let luaCode = `
+        local a = false
+        local b = "hello"
+
+        return a or b
+    `, vm;
+    
+    t.plan(2);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    t.doesNotThrow(function () {
+        vm = getVM(luaCode);
+        vm.execute();
+    }, "Program executed without errors");
+
+    t.strictEqual(
+        vm.L.stack[vm.L.top - 1].value,
+        "hello",
+        "Program output is correct"
+    );
+});
+
+
+test('TEST (true)', function (t) {
+    let luaCode = `
+        local a = true
+        local b = "hello"
+
+        if a then
+            return b
+        end
+
+        return "goodbye"
+    `, vm;
+    
+    t.plan(2);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    t.doesNotThrow(function () {
+        vm = getVM(luaCode);
+        vm.execute();
+    }, "Program executed without errors");
+
+    t.strictEqual(
+        vm.L.stack[vm.L.top - 1].value,
+        "hello",
+        "Program output is correct"
+    );
+});
+
+
+test('TEST (false)', function (t) {
+    let luaCode = `
+        local a = false
+        local b = "hello"
+
+        if a then
+            return b
+        end
+
+        return "goodbye"
+    `, vm;
+    
+    t.plan(2);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    t.doesNotThrow(function () {
+        vm = getVM(luaCode);
+        vm.execute();
+    }, "Program executed without errors");
+
+    t.strictEqual(
+        vm.L.stack[vm.L.top - 1].value,
+        "goodbye",
+        "Program output is correct"
+    );
+});

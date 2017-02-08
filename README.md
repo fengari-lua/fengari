@@ -39,8 +39,8 @@
     - [x] OP_EQ
     - [x] OP_LT
     - [x] OP_LE
-    - [ ] OP_TEST
-    - [ ] OP_TESTSET
+    - [x] OP_TEST
+    - [x] OP_TESTSET
     - [x] OP_CALL
     - [x] OP_TAILCALL
     - [x] OP_RETURN
