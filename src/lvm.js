@@ -45,19 +45,6 @@ class LuaVM {
         return OC.ISK(i.C) ? k[OC.INDEXK(i.C)] : this.L.stack[base + i.C];
     }
 
-    static tonumber(v) {
-        if (v.type === CT.LUA_TNUMFLT)
-            return new TValue(v.type, v.value);
-
-        if (v.type === CT.LUA_TNUMINT)
-            return new TValue(CT.LUA_TNUMFLT, v.value);
-
-        if (v.type === CT.LUA_TSHRSTR || v.type === CT.LUA_TLNGSTR)
-            return new TValue(CT.LUA_TNUMFLT, parseFloat(v.value)); // TODO: 0x or other exotic form
-
-        return false;
-    }
-
     execute() {
         let L = this.L;
 
@@ -133,7 +120,7 @@ class LuaVM {
                     let numberop1 = LuaVM.tonumber(op1);
                     let numberop2 = LuaVM.tonumber(op2);
 
-                    if (op1.type === CT.LUA_TNUMINT && op2.type === CT.LUA_TNUMINT) {
+                    if (op1.ttisinteger() && op2.ttisinteger()) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMINT, op1.value + op2.value);
                     } else if (numberop1 !== false && numberop2 !== false) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMFLT, op1.value + op2.value);
@@ -149,7 +136,7 @@ class LuaVM {
                     let numberop1 = LuaVM.tonumber(op1);
                     let numberop2 = LuaVM.tonumber(op2);
 
-                    if (op1.type === CT.LUA_TNUMINT && op2.type === CT.LUA_TNUMINT) {
+                    if (op1.ttisinteger() && op2.ttisinteger()) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMINT, op1.value - op2.value);
                     } else if (numberop1 !== false && numberop2 !== false) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMFLT, op1.value - op2.value);
@@ -165,7 +152,7 @@ class LuaVM {
                     let numberop1 = LuaVM.tonumber(op1);
                     let numberop2 = LuaVM.tonumber(op2);
 
-                    if (op1.type === CT.LUA_TNUMINT && op2.type === CT.LUA_TNUMINT) {
+                    if (op1.ttisinteger() && op2.ttisinteger()) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMINT, op1.value * op2.value);
                     } else if (numberop1 !== false && numberop2 !== false) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMFLT, k[i.B].value * op2.value);
@@ -181,7 +168,7 @@ class LuaVM {
                     let numberop1 = LuaVM.tonumber(op1);
                     let numberop2 = LuaVM.tonumber(op2);
 
-                    if (op1.type === CT.LUA_TNUMINT && op2.type === CT.LUA_TNUMINT) {
+                    if (op1.ttisinteger() && op2.ttisinteger()) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMINT, op1.value % op2.value);
                     } else if (numberop1 !== false && numberop2 !== false) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMFLT, k[i.B].value % op2.value);
@@ -225,7 +212,7 @@ class LuaVM {
                     let numberop1 = LuaVM.tonumber(op1);
                     let numberop2 = LuaVM.tonumber(op2);
 
-                    if (op1.type === CT.LUA_TNUMINT && op2.type === CT.LUA_TNUMINT) {
+                    if (op1.ttisinteger() && op2.ttisinteger()) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMINT, Math.floor(op1.value / op2.value));
                     } else if (numberop1 !== false && numberop2 !== false) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMFLT, Math.floor(op1.value / op2.value));
@@ -241,7 +228,7 @@ class LuaVM {
                     let numberop1 = LuaVM.tonumber(op1);
                     let numberop2 = LuaVM.tonumber(op2);
 
-                    if (op1.type === CT.LUA_TNUMINT && op2.type === CT.LUA_TNUMINT) {
+                    if (op1.ttisinteger() && op2.ttisinteger()) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMINT, op1.value & op2.value);
                     } else {
                         // Metamethod
@@ -255,7 +242,7 @@ class LuaVM {
                     let numberop1 = LuaVM.tonumber(op1);
                     let numberop2 = LuaVM.tonumber(op2);
 
-                    if (op1.type === CT.LUA_TNUMINT && op2.type === CT.LUA_TNUMINT) {
+                    if (op1.ttisinteger() && op2.ttisinteger()) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMINT, op1.value | op2.value);
                     } else {
                         // Metamethod
@@ -269,7 +256,7 @@ class LuaVM {
                     let numberop1 = LuaVM.tonumber(op1);
                     let numberop2 = LuaVM.tonumber(op2);
 
-                    if (op1.type === CT.LUA_TNUMINT && op2.type === CT.LUA_TNUMINT) {
+                    if (op1.ttisinteger() && op2.ttisinteger()) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMINT, op1.value ^ op2.value);
                     } else {
                         // Metamethod
@@ -283,7 +270,7 @@ class LuaVM {
                     let numberop1 = LuaVM.tonumber(op1);
                     let numberop2 = LuaVM.tonumber(op2);
 
-                    if (op1.type === CT.LUA_TNUMINT && op2.type === CT.LUA_TNUMINT) {
+                    if (op1.ttisinteger() && op2.ttisinteger()) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMINT, op1.value << op2.value);
                     } else {
                         // Metamethod
@@ -297,7 +284,7 @@ class LuaVM {
                     let numberop1 = LuaVM.tonumber(op1);
                     let numberop2 = LuaVM.tonumber(op2);
 
-                    if (op1.type === CT.LUA_TNUMINT && op2.type === CT.LUA_TNUMINT) {
+                    if (op1.ttisinteger() && op2.ttisinteger()) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMINT, op1.value >> op2.value);
                     } else {
                         // Metamethod
@@ -309,7 +296,7 @@ class LuaVM {
                     let op = L.stack[this.RB(base, i)];
                     let numberop = LuaVM.tonumber(op);
 
-                    if (op.type === CT.LUA_TNUMINT) {
+                    if (op.ttisinteger()) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMINT, -op.value);
                     } else if (numberop !== false) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMFLT, -op.value);
@@ -323,7 +310,7 @@ class LuaVM {
                     let op = L.stack[this.RB(base, i)];
                     let numberop = LuaVM.tonumber(op);
 
-                    if (op.type === CT.LUA_TNUMINT) {
+                    if (op.ttisinteger()) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMINT, ~op.value);
                     } else {
                         // Metamethod
@@ -723,6 +710,19 @@ class LuaVM {
             default:
                 return t1.value === t2.value ? 1 : 0;
         }
+    }
+
+    static tonumber(v) {
+        if (v.type === CT.LUA_TNUMFLT)
+            return new TValue(v.type, v.value);
+
+        if (v.type === CT.LUA_TNUMINT)
+            return new TValue(CT.LUA_TNUMFLT, v.value);
+
+        if (v.type === CT.LUA_TSHRSTR || v.type === CT.LUA_TLNGSTR)
+            return new TValue(CT.LUA_TNUMFLT, parseFloat(v.value)); // TODO: 0x or other exotic form
+
+        return false;
     }
 
     static LTnum(l, r) {
