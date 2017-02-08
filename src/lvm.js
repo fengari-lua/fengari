@@ -14,7 +14,8 @@ const Table          = lobject.Table;
 const LClosure       = lobject.LClosure;
 const lfunc          = require('./lfunc.js');
 const UpVal          = lfunc.UpVal;
-const CallInfo       = require('./lstate.js').CallInfo;
+const lstate         = require('./lstate.js');
+const CallInfo       = lstate.CallInfo;
 
 const nil = new TValue(CT.LUA_TNIL, null);
 
@@ -60,9 +61,11 @@ class LuaVM {
     execute() {
         let L = this.L;
 
+        let ci = L.ci;
+        ci.callstatus |= lstate.CIST_FRESH;
         newframe:
         for (;;) {
-            let ci = L.ci;
+            ci = L.ci;
             var cl = ci.func;
             let k = cl.p.k;
             let base = ci.u.l.base
@@ -340,6 +343,7 @@ class LuaVM {
                     break;
                 }
                 case "OP_JMP": {
+                    this.dojump(ci, i, 0);
                     break;
                 }
                 case "OP_EQ": {
@@ -349,6 +353,11 @@ class LuaVM {
                     break;
                 }
                 case "OP_LE": {
+                    if (LuaVM.luaV_lessequal(this.RKB(base, k, i), this.RKC(base, k, i)) !== i.A)
+                        ci.pcOff++;
+                    else
+                        this.donextjump(ci);
+                    base = ci.u.l.base;
                     break;
                 }
                 case "OP_TEST": {
@@ -397,7 +406,7 @@ class LuaVM {
                         oci.top = L.top;
                         oci.u.l.savedpc = nci.u.l.savedpc;
                         oci.pcOff = nci.pcOff;
-                        //TODO callstatus
+                        oci.callstatus |= lstate.CIST_TAIL;
                         L.ci = oci;
                         ci = L.ci;
                         L.ciOff--;
@@ -410,13 +419,13 @@ class LuaVM {
                 }
                 case "OP_RETURN": {
                     let b = this.postcall(ci, ra, (i.B !== 0 ? i.B - 1 : L.top - ra));
-                    // TODO call status check
+
+                    if (ci.callstatus & lstate.CIST_FRESH)
+                        return; /* external invocation: return */
+                    
                     ci = L.ci;
-
-                    // TODO what to return when end of program ?
-                    if (L.ci === null) return;
-
                     if (b) L.top = ci.top;
+
                     continue newframe;
                     break;
                 }
@@ -525,6 +534,7 @@ class LuaVM {
                 ci.top = base + fsize;
                 L.top = ci.top;
                 ci.u.l.savedpc = p.code;
+                ci.callstatus = lstate.CIST_LUA;
                 break;
             }
             default:
@@ -617,6 +627,65 @@ class LuaVM {
             L.stack[L.top++] = nil;
 
         return base;
+    }
+
+    dojump(ci, i, e) {
+        let a = i.A;
+        // TODO if (a != 0) luaF_close(L, ci.u.l.base + a - 1);
+        ci.pcOff += i.sBx + e;
+    }
+
+    donextjump(ci) {
+        this.dojump(ci, ci.u.l.savedpc[ci.pcOff], 1);
+    }
+
+    static luaV_lessequal(l, r) {
+        if (l.ttisnumber() && r.ttisnumber())
+            return LuaVM.LEnum(l, r);
+        else if (l.ttisstring() && r.ttisstring())
+            return LuaVM.l_strcmp(l, r) <= 0;
+        // TODO metatable
+        // else if  (l.metatable.__le || r.metatable.__le)
+        //     return l.metatable.__le ? l.metatable.__le(l, r) : r.metatable.__le(l, r);
+        // else {
+        //     L.ci.callstatus |= lstate.CIST_LEQ;
+        //     let res = l.metatable.__lt ? l.metatable.__lt(r, l) : r.metatable.__lt(r, l);
+        //     L.ci.callstatus ^= lstate.CIST_LEQ;
+        //     if (res < 0)
+        //         throw new Error("attempt to compare two string values");
+        //     return !res;
+        // }
+    }
+
+    static LEnum(l, r) {
+        if (l.ttisinteger()) {
+            if (r.ttisinteger())
+                return l.value <= r.value ? 1 : 0;
+            else
+                return LuaVM.LEintfloat(l.value, r.value);
+        } else {
+            if (r.ttisfloat())
+                return l.value <= r.value ? 1 : 0;
+            else if (isNan(l.value))
+                return false;
+            else
+                return !LuaVM.LTintfloat(r.value, l.value);
+        }
+    }
+
+    static LEintfloat(l, r) {
+        // TODO
+        return l <= r ? 1 : 0;
+    }
+
+    static LTintfloat(l, r) {
+        // TODO
+        return l < r ? 1 : 0;
+    }
+
+    static l_strcmp(ls, rs) {
+        // TODO lvm.c:248 static int l_strcmp (const TString *ls, const TString *rs)
+        return ls.value === rs.value ? 0 : (ls.value < rs.value ? -1 : 1);
     }
 
 }

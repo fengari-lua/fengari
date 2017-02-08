@@ -12,6 +12,96 @@ class TValue {
         this.metatable = null;
     }
 
+    /* type tag of a TValue (bits 0-3 for tags + variant bits 4-5) */
+    ttype() {
+        return this.type & 0x3F;
+    }
+
+    /* type tag of a TValue with no variants (bits 0-3) */
+    ttnov() {
+        return this.type & 0x0F;
+    }
+
+    checktag(t) {
+        return this.type === t;
+    }
+    
+    checktype(t) {
+        return this.ttnov() === t;
+    }
+    
+    ttisnumber() {
+        return this.checktype(CT.LUA_TNUMBER);
+    }
+    
+    ttisfloat() {
+        return this.checktag(CT.LUA_TNUMFLT);
+    }
+    
+    ttisinteger() {
+        return this.checktag(CT.LUA_TNUMINT);
+    }
+    
+    ttisnil() {
+        return this.checktag(CT.LUA_TNIL);
+    }
+    
+    ttisboolean() {
+        return this.checktag(CT.LUA_TBOOLEAN);
+    }
+    
+    ttislightuserdata() {
+        return this.checktag(CT.LUA_TLIGHTUSERDATA);
+    }
+    
+    ttisstring() {
+        return this.checktype(CT.LUA_TSTRING);
+    }
+    
+    ttisshrstring() {
+        return this.checktag(ctb(CT.LUA_TSHRSTR));
+    }
+    
+    ttislngstring() {
+        return this.checktag(ctb(CT.LUA_TLNGSTR));
+    }
+    
+    ttistable() {
+        return this.checktag(ctb(CT.LUA_TTABLE));
+    }
+    
+    ttisfunction() {
+        return this.checktype(CT.LUA_TFUNCTION);
+    }
+    
+    ttisclosure() {
+        return (this.type & 0x1F) === CT.LUA_TFUNCTION;
+    }
+    
+    ttisCclosure() {
+        return this.checktag(ctb(CT.LUA_TCCL));
+    }
+    
+    ttisLclosure() {
+        return this.checktag(ctb(CT.LUA_TLCL));
+    }
+    
+    ttislcf() {
+        return this.checktag(CT.LUA_TLCF);
+    }
+    
+    ttisfulluserdata() {
+        return this.checktag(ctb(CT.LUA_TUSERDATA));
+    }
+    
+    ttisthread() {
+        return this.checktag(ctb(CT.LUA_TTHREAD));
+    }
+    
+    ttisdeadkey() {
+        return this.checktag(CT.LUA_TDEADKEY);
+    }
+
 }
 
 

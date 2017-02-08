@@ -61,7 +61,7 @@ test('LOADK, RETURN', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        vm.L.stack[vm.L.stack.length - 1].value,
+        vm.L.stack[vm.L.top - 1].value,
         "hello world",
         "Program output is correct"
     );
@@ -85,7 +85,7 @@ test('MOV', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        vm.L.stack[vm.L.stack.length - 1].value,
+        vm.L.stack[vm.L.top - 1].value,
         "hello world",
         "Program output is correct"
     );
@@ -132,7 +132,7 @@ test('Unary op, LOADBOOL', function (t) {
     }, "Program executed without errors");
 
     t.deepEqual(
-        vm.L.stack.slice(vm.L.stack.length - 3).map(function (e) { return e.value; }),
+        vm.L.stack.slice(vm.L.top - 3, vm.L.top).map(function (e) { return e.value; }),
         [-5, true, -6],
         "Program output is correct"
     );
@@ -155,7 +155,7 @@ test('NEWTABLE', function (t) {
     }, "Program executed without errors");
 
     t.ok(
-        vm.L.stack[vm.L.stack.length - 1] instanceof Table,
+        vm.L.stack[vm.L.top - 1] instanceof Table,
         "Program output is correct"
     );
 });
@@ -182,7 +182,7 @@ test('CALL', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        vm.L.stack[vm.L.stack.length - 1].value,
+        vm.L.stack[vm.L.top - 1].value,
         3,
         "Program output is correct"
     );
@@ -214,7 +214,7 @@ test('Multiple return', function (t) {
     }, "Program executed without errors");
 
     t.deepEqual(
-        vm.L.stack.slice(vm.L.stack.length - 3).map(function (e) { return e.value; }),
+        vm.L.stack.slice(vm.L.top - 3, vm.L.top).map(function (e) { return e.value; }),
         [3, -1, 2],
         "Program output is correct"
     );
@@ -266,25 +266,18 @@ test('VARARG', function (t) {
     }, "Program executed without errors");
 
     t.deepEqual(
-        vm.L.stack.slice(vm.L.stack.length - 3).map(function (e) { return e.value; }),
+        vm.L.stack.slice(vm.L.top - 3, vm.L.top).map(function (e) { return e.value; }),
         [1, 2, 3],
         "Program output is correct"
     );
 });
 
 
-test('GETUPVAL, SETUPVAL', function (t) {
+test('LE, JMP', function (t) {
     let luaCode = `
-        local a = 1
+        local a, b = 1, 2
 
-        local f = function ()
-            a = a + 1
-            return a
-        end
-
-        f()
-
-        return a
+        return a >= b
     `, vm;
     
     t.plan(2);
@@ -298,7 +291,7 @@ test('GETUPVAL, SETUPVAL', function (t) {
 
     t.strictEqual(
         vm.L.stack[vm.L.top - 1].value,
-        2,
+        false,
         "Program output is correct"
     );
 });

@@ -7,7 +7,7 @@
 - [ ] VM
     - [x] OP_MOVE
     - [x] OP_LOADK
-    - [ ] OP_LOADKX
+    - [x] OP_LOADKX
     - [x] OP_LOADBOOL
     - [x] OP_LOADNIL
     - [x] OP_GETUPVAL
@@ -35,10 +35,10 @@
     - [x] OP_NOT
     - [ ] OP_LEN
     - [ ] OP_CONCAT
-    - [ ] OP_JMP
+    - [x] OP_JMP
     - [ ] OP_EQ
     - [ ] OP_LT
-    - [ ] OP_LE
+    - [x] OP_LE
     - [ ] OP_TEST
     - [ ] OP_TESTSET
     - [x] OP_CALL
