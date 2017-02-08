@@ -83,7 +83,7 @@ class BytecodeParser {
     readString(n) {
         let size = typeof n !== 'undefined' ? n : this.readByte() - 1;
 
-        if (size === 0xFF) // TODO test
+        if (size === 0xFF) // TODO: test
             this.offset += this.size_tSize;
 
         if (size === 0) {
@@ -131,7 +131,7 @@ class BytecodeParser {
                 C:      (ins >> o.POS_C)  & p.MASK1(o.SIZE_C,  0),
                 Bx:     (ins >> o.POS_Bx) & p.MASK1(o.SIZE_Bx, 0),
                 Ax:     (ins >> o.POS_Ax) & p.MASK1(o.SIZE_Ax, 0),
-                sBx:    (ins >> o.POS_Bx) & p.MASK1(o.SIZE_Bx, 0) - o.MAXARG_sBx
+                sBx:    ((ins >> o.POS_Bx) & p.MASK1(o.SIZE_Bx, 0)) - o.MAXARG_sBx
             };
 
             console.log(`   [${i}]    Op: ${o.OpCodes[f.code[i].opcode]}  A: ${f.code[i].A}  B: ${f.code[i].B}  C: ${f.code[i].C}  Ax: ${f.code[i].Ax}  Bx: ${f.code[i].Bx}  sBx: ${f.code[i].sBx}`);

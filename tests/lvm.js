@@ -275,7 +275,7 @@ test('VARARG', function (t) {
 
 test('LE, JMP', function (t) {
     let luaCode = `
-        local a, b = 1, 2
+        local a, b = 1, 1
 
         return a >= b
     `, vm;
@@ -291,7 +291,55 @@ test('LE, JMP', function (t) {
 
     t.strictEqual(
         vm.L.stack[vm.L.top - 1].value,
+        true,
+        "Program output is correct"
+    );
+});
+
+
+test('LT', function (t) {
+    let luaCode = `
+        local a, b = 1, 1
+
+        return a > b
+    `, vm;
+    
+    t.plan(2);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    t.doesNotThrow(function () {
+        vm = getVM(luaCode);
+        vm.execute();
+    }, "Program executed without errors");
+
+    t.strictEqual(
+        vm.L.stack[vm.L.top - 1].value,
         false,
+        "Program output is correct"
+    );
+});
+
+
+test('EQ', function (t) {
+    let luaCode = `
+        local a, b = 1, 1
+
+        return a == b
+    `, vm;
+    
+    t.plan(2);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    t.doesNotThrow(function () {
+        vm = getVM(luaCode);
+        vm.execute();
+    }, "Program executed without errors");
+
+    t.strictEqual(
+        vm.L.stack[vm.L.top - 1].value,
+        true,
         "Program output is correct"
     );
 });

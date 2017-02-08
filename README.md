@@ -36,8 +36,8 @@
     - [ ] OP_LEN
     - [ ] OP_CONCAT
     - [x] OP_JMP
-    - [ ] OP_EQ
-    - [ ] OP_LT
+    - [x] OP_EQ
+    - [x] OP_LT
     - [x] OP_LE
     - [ ] OP_TEST
     - [ ] OP_TESTSET

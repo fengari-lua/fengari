@@ -53,7 +53,7 @@ class LuaVM {
             return new TValue(CT.LUA_TNUMFLT, v.value);
 
         if (v.type === CT.LUA_TSHRSTR || v.type === CT.LUA_TLNGSTR)
-            return new TValue(CT.LUA_TNUMFLT, parseFloat(v.value)); // TODO 0x or other exotic form
+            return new TValue(CT.LUA_TNUMFLT, parseFloat(v.value)); // TODO: 0x or other exotic form
 
         return false;
     }
@@ -347,9 +347,19 @@ class LuaVM {
                     break;
                 }
                 case "OP_EQ": {
+                    if (LuaVM.luaV_equalobj(this.RKB(base, k, i), this.RKC(base, k, i)) !== i.A)
+                        ci.pcOff++;
+                    else
+                        this.donextjump(ci);
+                    base = ci.u.l.base;
                     break;
                 }
                 case "OP_LT": {
+                    if (LuaVM.luaV_lessthan(this.RKB(base, k, i), this.RKC(base, k, i)) !== i.A)
+                        ci.pcOff++;
+                    else
+                        this.donextjump(ci);
+                    base = ci.u.l.base;
                     break;
                 }
                 case "OP_LE": {
@@ -397,7 +407,7 @@ class LuaVM {
                         let ofunc = oci.func;
                         let ofuncOff = oci.funcOff;
                         let lim = nci.u.l.base + nfunc.p.numparams;
-                        // TODO close upvalues ?
+                        // TODO: close upvalues ?
                         for (let aux = 0; nfuncOff + aux < lim; aux++)
                             L.stack[ofuncOff + aux] = L.stack[nfuncOff + aux];
 
@@ -631,7 +641,7 @@ class LuaVM {
 
     dojump(ci, i, e) {
         let a = i.A;
-        // TODO if (a != 0) luaF_close(L, ci.u.l.base + a - 1);
+        // TODO: if (a != 0) luaF_close(L, ci.u.l.base + a - 1);
         ci.pcOff += i.sBx + e;
     }
 
@@ -644,17 +654,80 @@ class LuaVM {
             return LuaVM.LEnum(l, r);
         else if (l.ttisstring() && r.ttisstring())
             return LuaVM.l_strcmp(l, r) <= 0;
-        // TODO metatable
-        // else if  (l.metatable.__le || r.metatable.__le)
-        //     return l.metatable.__le ? l.metatable.__le(l, r) : r.metatable.__le(l, r);
-        // else {
+        // TODO: metatable
+        // else if  (l.metatable.__le || r.metatable.__le) {
+        //     let res = l.metatable.__le ? l.metatable.__le(l, r) : r.metatable.__le(l, r);
+        //     if (res >= 0)
+        //         return res;
+        // } else {
         //     L.ci.callstatus |= lstate.CIST_LEQ;
         //     let res = l.metatable.__lt ? l.metatable.__lt(r, l) : r.metatable.__lt(r, l);
         //     L.ci.callstatus ^= lstate.CIST_LEQ;
         //     if (res < 0)
-        //         throw new Error("attempt to compare two string values");
+        //         throw new Error("attempt to compare ...");
         //     return !res;
         // }
+    }
+
+    static luaV_lessthan(l, r) {
+        if (l.ttisnumber() && r.ttisnumber())
+            return LuaVM.LTnum(l, r);
+        else if (l.ttisstring() && r.ttisstring())
+            return LuaVM.l_strcmp(l, r) < 0;
+        // TODO: metatable
+        // else if  (l.metatable.__lt || r.metatable.__lt) {
+        //     let res = l.metatable.__lt ? l.metatable.__lt(l, r) : r.metatable.__lt(l, r);
+        //     if (res < 0)
+        //         throw new Error("attempt to compare ...")
+        //     return res;
+        // }
+    }
+
+    static luaV_equalobj(t1, t2) {
+        if (t1.ttype() !== t2.ttype()) { /* not the same variant? */
+            if (t1.ttnov() !== t2.ttnov() || t1.ttnov() !== CT.LUA_NUMBER)
+                return 0; /* only numbers can be equal with different variants */
+            else { /* two numbers with different variants */
+                /* compare them as integers */
+                return Math.floor(t1.value) === Math.floor(t2.value) // TODO: tointeger
+            }
+        }
+
+        /* values have same type and same variant */
+        switch(t1.ttype()) {
+            case CT.LUA_TNIL:
+                return 1;
+            case CT.LUA_TNUMINT:
+            case CT.LUA_TNUMFLT:
+            case CT.LUA_TBOOLEAN:
+            case CT.LUA_TLIGHTUSERDATA:
+            case CT.LUA_TLCF:
+            case CT.LUA_TSHRSTR:
+            case CT.LUA_TLNGSTR:
+                return t1.value === t2.value ? 1 : 0;
+            case CT.LUA_TUSERDATA:
+            case CT.LUA_TTABLE:
+                if (t1 === t2) return 1;
+                // TODO: __eq
+            default:
+                return t1.value === t2.value ? 1 : 0;
+        }
+    }
+
+    static LTnum(l, r) {
+        if (l.ttisinteger()) {
+            if (r.ttisinteger())
+                return l.value < r.value ? 1 : 0;
+            else
+                return LuaVM.LTintfloat(r.value, l.value);
+        } else {
+            if (r.ttisfloat())
+                return l.value < r.value ? 1 : 0;
+            else if (isNan(l.value))
+                return 0;
+            else
+                return !LuaVM.LEintfloat(r.value, l.value);
+        }
     }
 
     static LEnum(l, r) {
@@ -684,7 +757,7 @@ class LuaVM {
     }
 
     static l_strcmp(ls, rs) {
-        // TODO lvm.c:248 static int l_strcmp (const TString *ls, const TString *rs)
+        // TODO: lvm.c:248 static int l_strcmp (const TString *ls, const TString *rs)
         return ls.value === rs.value ? 0 : (ls.value < rs.value ? -1 : 1);
     }
 
