@@ -2,6 +2,7 @@
 "use strict";
 
 const LUA_MULTRET = require('./lua.js').LUA_MULTRET;
+const Table       = require('./lobject.js').Table;
 
 class CallInfo {
 
@@ -27,12 +28,13 @@ class CallInfo {
 class lua_State {
 
     constructor(cl) {
-        this.top = 1;
+        this.top = 2;
         this.ci = new CallInfo(0, cl, 1, 1, null, null);
         this.ci.u.l.savedpc = cl.p.code;
         this.ci.nresults = LUA_MULTRET;
         this.ciOff = 0;
         this.stack = [
+            new Table(), // _ENV
             cl
         ];
         this.openupval = [];

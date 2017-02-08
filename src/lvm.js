@@ -89,40 +89,58 @@ class LuaVM {
                     break;
                 }
                 case "OP_GETUPVAL": {
-                    L.stack[ra] = L.stack[cl.upvals[i.B].v];
+                    L.stack[ra] = cl.upvals[i.B].val(L);
                     break;
                 }
                 case "OP_SETUPVAL": {
-                    L.stack[cl.upvals[i.B].v] = L.stack[ra];
+                    cl.upvals[i.B].setval(L, ra);
                     break;
                 }
                 case "OP_GETTABUP": {
+                    let table = cl.upvals[i.B].val(L);
+                    let key = this.RKC(base, k, i);
+
+                    // if (!table.ttistable() || !table.metatable.__index(table, key)) {
+                    //     // __index
+                    // } else {
+                        L.stack[ra] = table.metatable.__index(table, key);
+                    // }
                     break;
                 }
                 case "OP_SETTABUP": {
+                    let table = cl.upvals[i.A].val(L);
+                    let key = this.RKB(base, k, i);
+                    let v = this.RKC(base, k, i);
+
+                    // if (!table.ttistable() || !table.metatable.__index(table, key)) {
+                    //     // __index
+                    // } else {
+                        table.metatable.__newindex(table, key, v);
+                    // }
+
                     break;
                 }
                 case "OP_GETTABLE": {
-                    let t = L.stack[this.RKB(base, i)];
-                    let k = L.stack[this.RKC(base, i)];
+                    let table = this.RKB(base, k, i);
+                    let key = this.RKC(base, k, i);
 
-                    if (!t.ttistable() || !t.value.__index(t, k)) {
-                        // __index
-                    } else {
-                        L.stack[ra] = t.value.__index(t, k);
-                    }
+                    // if (!table.ttistable() || !table.metatable.__index(table, key)) {
+                    //     // __index
+                    // } else {
+                        L.stack[ra] = table.metatable.__index(table, key);
+                    // }
                     break;
                 }
                 case "OP_SETTABLE": {
-                    let t = L.stack[ra];
-                    let k = L.stack[this.RKB(base, i)];
-                    let v = L.stack[this.RKC(base, i)];
+                    let table = L.stack[ra];
+                    let key = this.RKB(base, k, i);
+                    let v = this.RKC(base, k, i);
 
-                    if (!t.ttistable() || !t.value.__index(t, k)) {
-                        // __index
-                    } else {
-                        t.value.__newindex(t, k, v);
-                    }
+                    // if (!table.ttistable() || !table.metatable.__index(table, key)) {
+                    //     // __index
+                    // } else {
+                        table.metatable.__newindex(table, key, v);
+                    // }
 
                     break;
                 }

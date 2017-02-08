@@ -24,14 +24,23 @@ class Proto {
 class UpVal {
 
     constructor() {
-        this.v = null;
+        this.v = null; /* if null, upval is closed, value is in u.value */
         this.u = {
-            open: {
-                next: null,
-                touched: false
+            open: { /* (when open) */
+                next: null, /* linked list */
+                touched: false /* mark to avoid cycles with dead threads */
             },
-            value: null
+            value: null /* the value (when closed) */
         };
+    }
+
+    val(L) {
+        return this.v !== null ? L.stack[this.v] : this.u.value;
+    }
+
+    setval(L, ra) {
+        if (this.v !== null) this.v = ra;
+        else this.u.value = L.stack[ra];
     }
 
 }

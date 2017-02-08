@@ -491,6 +491,69 @@ test('FORPREP, FORLOOP (float)', function (t) {
         return total
     `, vm;
     
+    t.plan(2);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    t.doesNotThrow(function () {
+        vm = getVM(luaCode);
+        vm.execute();
+    }, "Program executed without errors");
+
+    t.strictEqual(
+        vm.L.stack[vm.L.top - 1].value,
+        60.5,
+        "Program output is correct"
+    );
+});
+
+
+test('SETTABLE, GETTABLE', function (t) {
+    let luaCode = `
+        local t = {}
+
+        t[1] = "hello"
+        t["two"] = "world"
+
+        return t
+    `, vm;
+    
+    t.plan(3);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    t.doesNotThrow(function () {
+        vm = getVM(luaCode);
+        vm.execute();
+    }, "Program executed without errors");
+
+    t.strictEqual(
+        vm.L.stack[vm.L.top - 1].value.array[1].value,
+        "hello",
+        "Program output is correct"
+    );
+
+    t.strictEqual(
+        vm.L.stack[vm.L.top - 1].value.hash.get("two").value,
+        "world",
+        "Program output is correct"
+    );
+});
+
+
+test('SETUPVAL, GETUPVAL', function (t) {
+    let luaCode = `
+        local up = "hello"
+
+        local f = function ()
+            upup = "yo"
+            up = "world"
+            return up;
+        end
+
+        return f()
+    `, vm;
+    
     t.plan(1);
 
     t.comment("Running following code: \n" + luaCode);
@@ -502,40 +565,40 @@ test('FORPREP, FORLOOP (float)', function (t) {
 
     t.strictEqual(
         vm.L.stack[vm.L.top - 1].value,
-        60.5,
+        "world",
         "Program output is correct"
     );
 });
 
 
-// test('SETTABLE, GETTABLE', function (t) {
-//     let luaCode = `
-//         local t = {}
+test('SETTABUP, GETTABUP', function (t) {
+    let luaCode = `
+        t = {}
 
-//         t[1] = "hello"
-//         t["two"] = "world"
+        t[1] = "hello"
+        t["two"] = "world"
 
-//         return t[1], t["two"]
-//     `, vm;
+        return t
+    `, vm;
     
-//     t.plan(2);
+    t.plan(3);
 
-//     t.comment("Running following code: \n" + luaCode);
+    t.comment("Running following code: \n" + luaCode);
 
-//     t.doesNotThrow(function () {
-//         vm = getVM(luaCode);
-//         vm.execute();
-//     }, "Program executed without errors");
+    t.doesNotThrow(function () {
+        vm = getVM(luaCode);
+        vm.execute();
+    }, "Program executed without errors");
 
-//     t.stritEqual(
-//         vm.L.stack[vm.L.top - 1].value.array[1],
-//         "hello",
-//         "Program output is correct"
-//     );
+    t.strictEqual(
+        vm.L.stack[vm.L.top - 1].value.array[1].value,
+        "hello",
+        "Program output is correct"
+    );
 
-//     t.stritEqual(
-//         vm.L.stack[vm.L.top - 1].value.hash.get("two"),
-//         "world",
-//         "Program output is correct"
-//     );
-// });
+    t.strictEqual(
+        vm.L.stack[vm.L.top - 1].value.hash.get("two").value,
+        "world",
+        "Program output is correct"
+    );
+});

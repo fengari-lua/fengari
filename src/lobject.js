@@ -1,8 +1,8 @@
 /*jshint esversion: 6 */
 "use strict";
 
-const CT = require('./lua.js').constant_types;
-
+const CT    = require('./lua.js').constant_types;
+const UpVal = require('./lfunc.js').UpVal;
 
 class TValue {
 
@@ -59,15 +59,15 @@ class TValue {
     }
     
     ttisshrstring() {
-        return this.checktag(ctb(CT.LUA_TSHRSTR));
+        return this.checktag(CT.LUA_TSHRSTR);
     }
     
     ttislngstring() {
-        return this.checktag(ctb(CT.LUA_TLNGSTR));
+        return this.checktag(CT.LUA_TLNGSTR);
     }
     
     ttistable() {
-        return this.checktag(ctb(CT.LUA_TTABLE));
+        return this.checktag(CT.LUA_TTABLE);
     }
     
     ttisfunction() {
@@ -79,11 +79,11 @@ class TValue {
     }
     
     ttisCclosure() {
-        return this.checktag(ctb(CT.LUA_TCCL));
+        return this.checktag(CT.LUA_TCCL);
     }
     
     ttisLclosure() {
-        return this.checktag(ctb(CT.LUA_TLCL));
+        return this.checktag(CT.LUA_TLCL);
     }
     
     ttislcf() {
@@ -91,11 +91,11 @@ class TValue {
     }
     
     ttisfulluserdata() {
-        return this.checktag(ctb(CT.LUA_TUSERDATA));
+        return this.checktag(CT.LUA_TUSERDATA);
     }
     
     ttisthread() {
-        return this.checktag(ctb(CT.LUA_TTHREAD));
+        return this.checktag(CT.LUA_TTHREAD);
     }
     
     ttisdeadkey() {
@@ -112,7 +112,16 @@ class LClosure extends TValue {
 
         this.p = null;
         this.nupvalues = n;
-        this.upvals = [];
+
+        let _ENV = new UpVal();
+        _ENV.refcount = 0;
+        _ENV.v = 0; // _ENV is on the stack at index 0
+        _ENV.u.open.next = null;
+        _ENV.u.open.touched = true;
+
+        this.upvals = [
+            _ENV
+        ];
 
         this.value = this;
     }
@@ -139,10 +148,10 @@ class Table extends TValue {
         this.usermetatable = null;
 
         this.metatable = {
-            __newindex: function (table, key) {
+            __newindex: function (table, key, value) {
                 if (key instanceof TValue) {
                     // Those lua values are used by value, tables and functions by reference
-                    if ([CT.TNUMBER, CT.TSTRING, CT.TSHRSTR, CT.TLNGSTR, CT.TNUMFLT, CT.TNUMINT].indexOf(key.type) > -1) {
+                    if ([CT.LUA_TNUMBER, CT.LUA_TSTRING, CT.LUA_TSHRSTR, CT.LUA_TLNGSTR, CT.LUA_TNUMFLT, CT.LUA_TNUMINT].indexOf(key.type) > -1) {
                         key = key.value;
                     }
                 }
@@ -154,10 +163,10 @@ class Table extends TValue {
                 }
             },
 
-            __index: function (table, key, value) {
+            __index: function (table, key) {
                 if (key instanceof TValue) {
                     // Those lua values are used by value, tables and functions by reference
-                    if ([CT.TNUMBER, CT.TSTRING, CT.TSHRSTR, CT.TLNGSTR, CT.TNUMFLT, CT.TNUMINT].indexOf(key.type) > -1) {
+                    if ([CT.LUA_TNUMBER, CT.LUA_TSTRING, CT.LUA_TSHRSTR, CT.LUA_TLNGSTR, CT.LUA_TNUMFLT, CT.LUA_TNUMINT].indexOf(key.type) > -1) {
                         key = key.value;
                     }
                 }
