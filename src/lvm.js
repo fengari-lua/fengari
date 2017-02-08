@@ -16,6 +16,7 @@ const lfunc          = require('./lfunc.js');
 const UpVal          = lfunc.UpVal;
 const lstate         = require('./lstate.js');
 const CallInfo       = lstate.CallInfo;
+const llimit         = require('./llimit.js');
 
 const nil = new TValue(CT.LUA_TNIL, null);
 
@@ -139,7 +140,7 @@ class LuaVM {
                     let numberop2 = LuaVM.tonumber(op2);
 
                     if (op1.ttisinteger() && op2.ttisinteger()) {
-                        L.stack[ra] = new TValue(CT.LUA_TNUMINT, op1.value + op2.value);
+                        L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value + op2.value)|0);
                     } else if (numberop1 !== false && numberop2 !== false) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMFLT, op1.value + op2.value);
                     } else {
@@ -155,7 +156,7 @@ class LuaVM {
                     let numberop2 = LuaVM.tonumber(op2);
 
                     if (op1.ttisinteger() && op2.ttisinteger()) {
-                        L.stack[ra] = new TValue(CT.LUA_TNUMINT, op1.value - op2.value);
+                        L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value - op2.value)|0);
                     } else if (numberop1 !== false && numberop2 !== false) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMFLT, op1.value - op2.value);
                     } else {
@@ -171,7 +172,7 @@ class LuaVM {
                     let numberop2 = LuaVM.tonumber(op2);
 
                     if (op1.ttisinteger() && op2.ttisinteger()) {
-                        L.stack[ra] = new TValue(CT.LUA_TNUMINT, op1.value * op2.value);
+                        L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value * op2.value)|0);
                     } else if (numberop1 !== false && numberop2 !== false) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMFLT, k[i.B].value * op2.value);
                     } else {
@@ -187,7 +188,7 @@ class LuaVM {
                     let numberop2 = LuaVM.tonumber(op2);
 
                     if (op1.ttisinteger() && op2.ttisinteger()) {
-                        L.stack[ra] = new TValue(CT.LUA_TNUMINT, op1.value % op2.value);
+                        L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value % op2.value)|0);
                     } else if (numberop1 !== false && numberop2 !== false) {
                         L.stack[ra] = new TValue(CT.LUA_TNUMFLT, k[i.B].value % op2.value);
                     } else {
@@ -231,9 +232,9 @@ class LuaVM {
                     let numberop2 = LuaVM.tonumber(op2);
 
                     if (op1.ttisinteger() && op2.ttisinteger()) {
-                        L.stack[ra] = new TValue(CT.LUA_TNUMINT, Math.floor(op1.value / op2.value));
+                        L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value / op2.value)|0);
                     } else if (numberop1 !== false && numberop2 !== false) {
-                        L.stack[ra] = new TValue(CT.LUA_TNUMFLT, Math.floor(op1.value / op2.value));
+                        L.stack[ra] = new TValue(CT.LUA_TNUMFLT, (op1.value / op2.value)|0);
                     } else {
                         // Metamethod
                         throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
@@ -247,7 +248,7 @@ class LuaVM {
                     let numberop2 = LuaVM.tonumber(op2);
 
                     if (op1.ttisinteger() && op2.ttisinteger()) {
-                        L.stack[ra] = new TValue(CT.LUA_TNUMINT, op1.value & op2.value);
+                        L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value & op2.value)|0);
                     } else {
                         // Metamethod
                         throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
@@ -261,7 +262,7 @@ class LuaVM {
                     let numberop2 = LuaVM.tonumber(op2);
 
                     if (op1.ttisinteger() && op2.ttisinteger()) {
-                        L.stack[ra] = new TValue(CT.LUA_TNUMINT, op1.value | op2.value);
+                        L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value | op2.value)|0);
                     } else {
                         // Metamethod
                         throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
@@ -275,7 +276,7 @@ class LuaVM {
                     let numberop2 = LuaVM.tonumber(op2);
 
                     if (op1.ttisinteger() && op2.ttisinteger()) {
-                        L.stack[ra] = new TValue(CT.LUA_TNUMINT, op1.value ^ op2.value);
+                        L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value ^ op2.value)|0);
                     } else {
                         // Metamethod
                         throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
@@ -289,7 +290,7 @@ class LuaVM {
                     let numberop2 = LuaVM.tonumber(op2);
 
                     if (op1.ttisinteger() && op2.ttisinteger()) {
-                        L.stack[ra] = new TValue(CT.LUA_TNUMINT, op1.value << op2.value);
+                        L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value << op2.value)|0);
                     } else {
                         // Metamethod
                         throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
@@ -303,7 +304,7 @@ class LuaVM {
                     let numberop2 = LuaVM.tonumber(op2);
 
                     if (op1.ttisinteger() && op2.ttisinteger()) {
-                        L.stack[ra] = new TValue(CT.LUA_TNUMINT, op1.value >> op2.value);
+                        L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value >> op2.value)|0);
                     } else {
                         // Metamethod
                         throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
@@ -456,15 +457,75 @@ class LuaVM {
                     break;
                 }
                 case "OP_FORLOOP": {
+                    if (L.stack[ra].ttisinteger()) { /* integer loop? */
+                        let step = L.stack[ra + 2].value;
+                        let idx = L.stack[ra].value + step;
+                        let limit = L.stack[ra + 1].value;
+
+                        if (0 < step ? idx <= limit : limit <= idx) {
+                            ci.pcOff += i.sBx;
+                            L.stack[ra].value = idx;
+                            L.stack[ra + 3] = new TValue(CT.LUA_TNUMINT, idx); // TODO: if tvalue already there, just update it
+                        }
+                    } else { /* floating loop */
+                        let step = L.stack[ra + 2].value;
+                        let idx = L.stack[ra].value + step;
+                        let limit = L.stack[ra + 1].value;
+
+                        // TODO: luai_numlt, luai_numle
+                        if (0 < step ? idx <= limit : limit <= idx) {
+                            ci.pcOff += i.sBx;
+                            L.stack[ra].value = idx;
+                            L.stack[ra + 3] = new TValue(CT.LUA_TNUMFLT, idx); // TODO: if tvalue already there, just update it
+                        }
+                    }
                     break;
                 }
                 case "OP_FORPREP": {
+                    let init = L.stack[ra];
+                    let plimit = L.stack[ra + 1];
+                    let pstep = L.stack[ra + 2];
+                    let forlimit = LuaVM.forlimit(plimit, pstep.value);
+
+                    if (init.ttisinteger() && pstep.ttisinteger() && forlimit.casted) { /* all values are integer */
+                        let initv = forlimit.stopnow ? 0 : init.value;
+                        plimit.value = forlimit.ilimit;
+                        init.value = initv - pstep.value;
+                    } else { /* try making all values floats */
+                        let ninit = LuaVM.tonumber(init);
+                        let nlimit = LuaVM.tonumber(plimit);
+                        let nstep = LuaVM.tonumber(pstep);
+
+                        if (nlimit === false)
+                            throw new Error("'for' limit must be a number");
+
+                        plimit.type = CT.LUA_TNUMFLT;
+                        plimit.value = nlimit.value;
+
+                        if (nstep === false)
+                            throw new Error("'for' step must be a number");
+
+                        pstep.type = CT.LUA_TNUMFLT;
+                        pstep.value = nstep.value;
+
+                        if (ninit === false)
+                            throw new Error("'for' initial value must be a number");
+
+                        init.type = CT.LUA_TNUMFLT;
+                        init.value = ninit.value - nstep.value;
+                    }
+
+                    ci.pcOff += i.sBx;
                     break;
                 }
                 case "OP_TFORCALL": {
                     break;
                 }
                 case "OP_TFORLOOP": {
+                    if (!L.stack[ra + 1].ttisnil()) { /* continue loop? */
+                        L.stack[ra] = L.stack[ra + 1]; /* save control variable */
+                        ci.cpOff += i.sBx; /* jump back */
+                    }
                     break;
                 }
                 case "OP_SETLIST": {
@@ -730,6 +791,58 @@ class LuaVM {
         }
     }
 
+    static forlimit(obj, step) {
+        let stopnow = false;
+        let ilimit = LuaVM.luaV_tointeger(obj, step < 0 ? 2 : 1);
+        if (ilimit === false) {
+            let n = LuaVM.tonumber(obj);
+            if (n === false)
+                return false;
+
+            if (0 < n) {
+                ilimit = llimit.LUA_MAXINTEGER;
+                if (step < 0) stopnow = true;
+            } else {
+                ilimit = llimit.LUA_MININTEGER;
+                if (step >= 0) stopnow = true;
+            }
+        }
+
+        return {
+            casted: true,
+            stopnow: stopnow,
+            ilimit: ilimit
+        }
+    }
+
+    /*
+    ** try to convert a value to an integer, rounding according to 'mode':
+    ** mode == 0: accepts only integral values
+    ** mode == 1: takes the floor of the number
+    ** mode == 2: takes the ceil of the number
+    */
+    static luaV_tointeger(obj, mode) {
+        if (obj.ttisfloat()) {
+            let n = obj.value;
+            let f = n|0;
+
+            if (n !== f) { /* not an integral value? */
+                if (mode === 0)
+                    return false;  /* fails if mode demands integral value */
+                else if (mode > 1)  /* needs ceil? */
+                    f += 1;  /* convert floor to ceil (remember: n != f) */
+            }
+
+            return f|0;
+        } else if (obj.ttisinteger()) {
+            return obj.value|0;
+        } else if (obj.ttisstring()) {
+            return LuaVM.luaV_tointeger(parseFloat(obj.value), mode); // TODO: luaO_str2num
+        }
+
+        return false;
+    }
+
     static tonumber(v) {
         if (v.type === CT.LUA_TNUMFLT)
             return new TValue(v.type, v.value);
@@ -738,7 +851,7 @@ class LuaVM {
             return new TValue(CT.LUA_TNUMFLT, v.value);
 
         if (v.type === CT.LUA_TSHRSTR || v.type === CT.LUA_TLNGSTR)
-            return new TValue(CT.LUA_TNUMFLT, parseFloat(v.value)); // TODO: 0x or other exotic form
+            return new TValue(CT.LUA_TNUMFLT, parseFloat(v.value)); // TODO: luaO_str2num
 
         return false;
     }

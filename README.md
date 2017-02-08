@@ -44,8 +44,8 @@
     - [x] OP_CALL
     - [x] OP_TAILCALL
     - [x] OP_RETURN
-    - [ ] OP_FORLOOP
-    - [ ] OP_FORPREP
+    - [x] OP_FORLOOP
+    - [x] OP_FORPREP
     - [ ] OP_TFORCALL
     - [ ] OP_TFORLOOP
     - [ ] OP_SETLIST

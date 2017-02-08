@@ -453,14 +453,15 @@ test('TEST (false)', function (t) {
 });
 
 
-test('SETTABLE, GETTABLE', function (t) {
+test('FORPREP, FORLOOP (int)', function (t) {
     let luaCode = `
-        local t = {}
+        local total = 0
 
-        t[1] = "hello"
-        t["two"] = "world"
+        for i = 0, 10 do
+            total = total + i
+        end
 
-        return t[1], t["two"]
+        return total
     `, vm;
     
     t.plan(2);
@@ -472,15 +473,69 @@ test('SETTABLE, GETTABLE', function (t) {
         vm.execute();
     }, "Program executed without errors");
 
-    t.stritEqual(
-        vm.L.stack[vm.L.top - 1].value.array[1],
-        "hello",
-        "Program output is correct"
-    );
-
-    t.stritEqual(
-        vm.L.stack[vm.L.top - 1].value.hash.get("two"),
-        "world",
+    t.strictEqual(
+        vm.L.stack[vm.L.top - 1].value,
+        55,
         "Program output is correct"
     );
 });
+
+test('FORPREP, FORLOOP (float)', function (t) {
+    let luaCode = `
+        local total = 0
+
+        for i = 0.5, 10.5 do
+            total = total + i
+        end
+
+        return total
+    `, vm;
+    
+    t.plan(1);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    // t.doesNotThrow(function () {
+        vm = getVM(luaCode);
+        vm.execute();
+    // }, "Program executed without errors");
+
+    t.strictEqual(
+        vm.L.stack[vm.L.top - 1].value,
+        60.5,
+        "Program output is correct"
+    );
+});
+
+
+// test('SETTABLE, GETTABLE', function (t) {
+//     let luaCode = `
+//         local t = {}
+
+//         t[1] = "hello"
+//         t["two"] = "world"
+
+//         return t[1], t["two"]
+//     `, vm;
+    
+//     t.plan(2);
+
+//     t.comment("Running following code: \n" + luaCode);
+
+//     t.doesNotThrow(function () {
+//         vm = getVM(luaCode);
+//         vm.execute();
+//     }, "Program executed without errors");
+
+//     t.stritEqual(
+//         vm.L.stack[vm.L.top - 1].value.array[1],
+//         "hello",
+//         "Program output is correct"
+//     );
+
+//     t.stritEqual(
+//         vm.L.stack[vm.L.top - 1].value.hash.get("two"),
+//         "world",
+//         "Program output is correct"
+//     );
+// });
