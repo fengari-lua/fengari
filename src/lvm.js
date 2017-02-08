@@ -102,9 +102,27 @@ class LuaVM {
                     break;
                 }
                 case "OP_GETTABLE": {
+                    let t = L.stack[this.RKB(base, i)];
+                    let k = L.stack[this.RKC(base, i)];
+
+                    if (!t.ttistable() || !t.value.__index(t, k)) {
+                        // __index
+                    } else {
+                        L.stack[ra] = t.value.__index(t, k);
+                    }
                     break;
                 }
                 case "OP_SETTABLE": {
+                    let t = L.stack[ra];
+                    let k = L.stack[this.RKB(base, i)];
+                    let v = L.stack[this.RKC(base, i)];
+
+                    if (!t.ttistable() || !t.value.__index(t, k)) {
+                        // __index
+                    } else {
+                        t.value.__newindex(t, k, v);
+                    }
+
                     break;
                 }
                 case "OP_NEWTABLE": {

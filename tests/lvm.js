@@ -451,3 +451,36 @@ test('TEST (false)', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('SETTABLE, GETTABLE', function (t) {
+    let luaCode = `
+        local t = {}
+
+        t[1] = "hello"
+        t["two"] = "world"
+
+        return t[1], t["two"]
+    `, vm;
+    
+    t.plan(2);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    t.doesNotThrow(function () {
+        vm = getVM(luaCode);
+        vm.execute();
+    }, "Program executed without errors");
+
+    t.stritEqual(
+        vm.L.stack[vm.L.top - 1].value.array[1],
+        "hello",
+        "Program output is correct"
+    );
+
+    t.stritEqual(
+        vm.L.stack[vm.L.top - 1].value.hash.get("two"),
+        "world",
+        "Program output is correct"
+    );
+});
