@@ -49,7 +49,47 @@ class UpVal {
 
 }
 
+const findupval = function(L, level) {
+    let pp = L.openupval;
+    
+    while(pp !== null && pp.v >= level) {
+        let p = pp;
+
+        if (p.v === level)
+            return p;
+
+        pp = p.u.open.next;
+    }
+
+    let uv = new UpVal();
+    uv.refcount = 0;
+    uv.u.open.next = pp;
+    uv.u.open.touched = true;
+
+    pp = uv;
+
+    uv.v = level;
+
+    // Thread with upvalue list business ? lfunc.c:75
+
+    return uv;
+}
+
+const luaF_close = function(L, level) {
+    while (L.openupval !== null && L.openupval.v >= level) {
+        let uv = L.openupval;
+        assert(uv.isopen());
+        L.openupval = uv.u.open.next; /* remove from 'open' list */
+        if (uv.refcount > 0) {
+            uv.value = L.stack[uv.v];
+            uv.v = null;
+        }
+    }
+}
+
 module.exports = {
     Proto: Proto,
-    UpVal: UpVal
+    UpVal: UpVal,
+    findupval: findupval,
+    luaF_close: luaF_close
 };
