@@ -52,6 +52,8 @@
     - [x] OP_CLOSURE
     - [x] OP_VARARG
     - [x] OP_EXTRAARG
+    - [ ] Tag Methods
+    - [ ] Debug (errors)
 - [ ] C API
 - [ ] stdlib
 - [ ] DOM API binding
