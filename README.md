@@ -12,11 +12,11 @@
     - [x] OP_LOADNIL
     - [x] OP_GETUPVAL
     - [x] OP_SETUPVAL
-    - [ ] OP_GETTABUP
-    - [ ] OP_GETTABLE
-    - [ ] OP_SETTABUP
-    - [ ] OP_SETTABLE
-    - [ ] OP_NEWTABLE
+    - [x] OP_GETTABUP
+    - [x] OP_GETTABLE
+    - [x] OP_SETTABUP
+    - [x] OP_SETTABLE
+    - [x] OP_NEWTABLE
     - [ ] OP_SELF
     - [x] OP_ADD
     - [x] OP_SUB

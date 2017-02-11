@@ -28,13 +28,12 @@ class CallInfo {
 class lua_State {
 
     constructor(cl) {
-        this.top = 2;
+        this.top = 1;
         this.ci = new CallInfo(0, cl, 1, 1, null, null);
         this.ci.u.l.savedpc = cl.p.code;
         this.ci.nresults = LUA_MULTRET;
         this.ciOff = 0;
         this.stack = [
-            new Table(), // _ENV
             cl
         ];
         this.openupval = [];

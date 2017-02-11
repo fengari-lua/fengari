@@ -115,9 +115,10 @@ class LClosure extends TValue {
 
         let _ENV = new UpVal();
         _ENV.refcount = 0;
-        _ENV.v = 0; // _ENV is on the stack at index 0
+        _ENV.v = null;
         _ENV.u.open.next = null;
         _ENV.u.open.touched = true;
+        _ENV.u.value = new Table();
 
         this.upvals = [
             _ENV

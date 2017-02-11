@@ -431,7 +431,7 @@ class LuaVM {
                 }
                 case "OP_TAILCALL": {
                     if (i.B !== 0) L.top = ra + i.B;
-                    if (this.precall(ra, L.stack[ra], LUA_MULTRET)) {
+                    if (this.precall(ra, L.stack[ra], LUA_MULTRET)) { // JS function
                         base = ci.u.l.base;
                     } else {
                         /* tail call: put called frame (n) in place of caller one (o) */
@@ -445,7 +445,7 @@ class LuaVM {
                         if (cl.p.p.length > 0) this.closeupvals(oci.u.l.base);
                         for (let aux = 0; nfuncOff + aux < lim; aux++)
                             L.stack[ofuncOff + aux] = L.stack[nfuncOff + aux];
-
+                        oci.func = nci.func;
                         oci.u.l.base = ofuncOff + (nci.u.l.base - nfuncOff);
                         L.top = ofuncOff + (L.top - nfuncOff);
                         oci.top = L.top;
@@ -718,6 +718,7 @@ class LuaVM {
     }
 
     closeupvals(level) {
+        let L = this.L;
         while (L.openupval !== null && L.openupval.v >= level) {
             let uv = L.openupval;
             assert(uv.isopen());

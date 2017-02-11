@@ -554,14 +554,14 @@ test('SETUPVAL, GETUPVAL', function (t) {
         return f()
     `, vm;
     
-    t.plan(1);
+    t.plan(2);
 
     t.comment("Running following code: \n" + luaCode);
 
-    // t.doesNotThrow(function () {
+    t.doesNotThrow(function () {
         vm = getVM(luaCode);
         vm.execute();
-    // }, "Program executed without errors");
+    }, "Program executed without errors");
 
     t.strictEqual(
         vm.L.stack[vm.L.top - 1].value,
