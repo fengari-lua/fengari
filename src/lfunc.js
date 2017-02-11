@@ -43,6 +43,10 @@ class UpVal {
         else this.u.value = L.stack[ra];
     }
 
+    isopen() {
+        return this.v !== null;
+    }
+
 }
 
 module.exports = {

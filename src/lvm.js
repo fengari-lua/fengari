@@ -442,7 +442,7 @@ class LuaVM {
                         let ofunc = oci.func;
                         let ofuncOff = oci.funcOff;
                         let lim = nci.u.l.base + nfunc.p.numparams;
-                        // TODO: close upvalues ?
+                        if (cl.p.p.length > 0) this.closeupvals(oci.u.l.base);
                         for (let aux = 0; nfuncOff + aux < lim; aux++)
                             L.stack[ofuncOff + aux] = L.stack[nfuncOff + aux];
 
@@ -463,6 +463,7 @@ class LuaVM {
                     break;
                 }
                 case "OP_RETURN": {
+                    if (cl.p.p.length > 0) this.closeupvals(base);
                     let b = this.postcall(ci, ra, (i.B !== 0 ? i.B - 1 : L.top - ra));
 
                     if (ci.callstatus & lstate.CIST_FRESH)
@@ -563,6 +564,7 @@ class LuaVM {
                             ncl.upvals[i] = this.findupval(base + uv[i].idx);
                         else
                             ncl.upvals[i] = cl.upvals[uv[i].idx];
+                        ncl.upvals[i].refcount++;
                     }
                     break;
                 }
@@ -715,6 +717,18 @@ class LuaVM {
         return uv;
     }
 
+    closeupvals(level) {
+        while (L.openupval !== null && L.openupval.v >= level) {
+            let uv = L.openupval;
+            assert(uv.isopen());
+            L.openupval = uv.u.open.next; /* remove from 'open' list */
+            if (uv.refcount > 0) {
+                uv.value = L.stack[uv.v];
+                uv.v = null;
+            }
+        }
+    }
+
     adjust_varargs (p, actual) {
         let L = this.L;
         let nfixargs = p.numparams;
@@ -736,7 +750,7 @@ class LuaVM {
 
     dojump(ci, i, e) {
         let a = i.A;
-        // TODO: if (a != 0) luaF_close(L, ci.u.l.base + a - 1);
+        if (a != 0) closeupvals(ci.u.l.base + a - 1);
         ci.pcOff += i.sBx + e;
     }
 
