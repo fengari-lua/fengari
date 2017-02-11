@@ -149,6 +149,17 @@ class LuaVM {
                     break;
                 }
                 case "OP_SELF": {
+                    let table = L.stack[this.RB(base, i)];
+                    let key = this.RKC(base, k, i);
+
+                    L.stack[ra + 1] = table;
+
+                    // if (!table.ttistable() || !table.metatable.__index(table, key)) {
+                    //     // __index
+                    // } else {
+                        L.stack[ra] = table.metatable.__index(table, key);
+                    // }
+
                     break;
                 }
                 case "OP_ADD": {

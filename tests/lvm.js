@@ -602,3 +602,32 @@ test('SETTABUP, GETTABUP', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('SELF', function (t) {
+    let luaCode = `
+        local t = {}
+
+        t.value = "hello"
+        t.get = function (self)
+            return self.value
+        end
+
+        return t:get()
+    `, vm;
+    
+    t.plan(1);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    // t.doesNotThrow(function () {
+        vm = getVM(luaCode);
+        vm.execute();
+    // }, "Program executed without errors");
+
+    t.strictEqual(
+        vm.L.stack[vm.L.top - 1].value,
+        "hello",
+        "Program output is correct"
+    );
+});

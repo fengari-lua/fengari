@@ -17,7 +17,7 @@
     - [x] OP_SETTABUP
     - [x] OP_SETTABLE
     - [x] OP_NEWTABLE
-    - [ ] OP_SELF
+    - [x] OP_SELF
     - [x] OP_ADD
     - [x] OP_SUB
     - [x] OP_MUL
