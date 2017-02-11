@@ -104,6 +104,7 @@ class TValue {
 
 }
 
+const nil   = new TValue(CT.LUA_TNIL, null);
 
 class LClosure extends TValue {
 
@@ -138,6 +139,17 @@ class TString extends TValue {
 }
 
 
+class Userdata extends TValue {
+
+    constructor(jsObject) {
+        super(CT.LUA_TUSERDATA, jsObject);
+
+        this.metatable = null;
+    }
+
+}
+
+
 class Table extends TValue {
 
     constructor(array, hash) {
@@ -146,43 +158,44 @@ class Table extends TValue {
             hash: new Map(hash)
         });
 
-        this.usermetatable = null;
+        this.metatable = null;
+    }
 
-        this.metatable = {
-            __newindex: function (table, key, value) {
-                if (key instanceof TValue) {
-                    // Those lua values are used by value, tables and functions by reference
-                    if ([CT.LUA_TNUMBER, CT.LUA_TSTRING, CT.LUA_TSHRSTR, CT.LUA_TLNGSTR, CT.LUA_TNUMFLT, CT.LUA_TNUMINT].indexOf(key.type) > -1) {
-                        key = key.value;
-                    }
-                }
-
-                if (typeof key === 'number') {
-                    table.value.array[key] = value;
-                } else {
-                    table.value.hash.set(key, value);
-                }
-            },
-
-            __index: function (table, key) {
-                if (key instanceof TValue) {
-                    // Those lua values are used by value, tables and functions by reference
-                    if ([CT.LUA_TNUMBER, CT.LUA_TSTRING, CT.LUA_TSHRSTR, CT.LUA_TLNGSTR, CT.LUA_TNUMFLT, CT.LUA_TNUMINT].indexOf(key.type) > -1) {
-                        key = key.value;
-                    }
-                }
-
-                if (typeof key === 'number') {
-                    return table.value.array[key];
-                } else {
-                    return table.value.hash.get(key);
-                }
-            },
-
-            __len: function (table) {
-                return t.value.array.length;
+    __newindex(table, key, value) {
+        if (key instanceof TValue) {
+            // Those lua values are used by value, tables and functions by reference
+            if ([CT.LUA_TNUMBER, CT.LUA_TSTRING, CT.LUA_TSHRSTR, CT.LUA_TLNGSTR, CT.LUA_TNUMFLT, CT.LUA_TNUMINT].indexOf(key.type) > -1) {
+                key = key.value;
             }
-        };
+        }
+
+        if (typeof key === 'number') {
+            table.value.array[key] = value;
+        } else {
+            table.value.hash.set(key, value);
+        }
+    }
+
+    __index(table, key) {
+        if (key instanceof TValue) {
+            // Those lua values are used by value, tables and functions by reference
+            if ([CT.LUA_TNUMBER, CT.LUA_TSTRING, CT.LUA_TSHRSTR, CT.LUA_TLNGSTR, CT.LUA_TNUMFLT, CT.LUA_TNUMINT].indexOf(key.type) > -1) {
+                key = key.value;
+            }
+        }
+
+        let v = nil;
+        if (typeof key === 'number') {
+            v = table.value.array[key];
+        } else {
+            v = table.value.hash.get(key);
+        }
+
+        return v ? v : nil;
+    }
+
+    __len(table) {
+        return t.value.array.length;
     }
 
 }

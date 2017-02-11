@@ -47,7 +47,7 @@ class UpVal {
         return this.v !== null;
     }
 
-}
+};
 
 const findupval = function(L, level) {
     let pp = L.openupval;
@@ -73,7 +73,7 @@ const findupval = function(L, level) {
     // Thread with upvalue list business ? lfunc.c:75
 
     return uv;
-}
+};
 
 const luaF_close = function(L, level) {
     while (L.openupval !== null && L.openupval.v >= level) {

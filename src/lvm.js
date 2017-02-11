@@ -18,41 +18,54 @@ const lstate         = require('./lstate.js');
 const CallInfo       = lstate.CallInfo;
 const llimit         = require('./llimit.js');
 const ldo            = require('./ldo.js');
+const ltm            = require('./ltm.js');
+const TMS            = ltm.TMS;
 
 const RA = function(L, base, i) {
    return base + i.A;
-}
+};
 
 const RB = function(L, base, i) {
    return base + i.B;
-}
+};
 
 const RC = function(L, base, i) {
    return base + i.C;
-}
+};
 
 const RKB = function(L, base, k, i) {
     return OC.ISK(i.B) ? k[OC.INDEXK(i.B)] : L.stack[base + i.B];
-}
+};
 
 const RKC = function(L, base, k, i) {
     return OC.ISK(i.C) ? k[OC.INDEXK(i.C)] : L.stack[base + i.C];
-}
+};
 
 const luaV_execute = function(L) {
     let ci = L.ci;
+    let specialCase = null; // To enable jump to specific opcode without reading current op/ra
+    let opcode, k, base, i, ra;
+    var cl;
+    
     ci.callstatus |= lstate.CIST_FRESH;
     newframe:
     for (;;) {
-        ci = L.ci;
-        var cl = ci.func;
-        let k = cl.p.k;
-        let base = ci.u.l.base
+        if (specialCase) {
+            opcode = specialCase;
+            specialCase = null;
+        } else {
+            ci = L.ci;
+            cl = ci.func;
+            k = cl.p.k;
+            base = ci.u.l.base
 
-        let i = ci.u.l.savedpc[ci.pcOff++];
-        let ra = RA(L, base, i);
+            i = ci.u.l.savedpc[ci.pcOff++];
+            ra = RA(L, base, i);
 
-        switch (OC.OpCodes[i.opcode]) {
+            opcode = OC.OpCodes[i.opcode];
+        }
+
+        switch (opcode) {
             case "OP_MOVE": {
                 L.stack[ra] = L.stack[RB(L, base, i)];
                 break;
@@ -91,10 +104,10 @@ const luaV_execute = function(L) {
                 let table = cl.upvals[i.B].val(L);
                 let key = RKC(L, base, k, i);
 
-                // if (!table.ttistable() || !table.metatable.__index(table, key)) {
+                // if (!table.ttistable() || !table.__index(table, key)) {
                 //     // __index
                 // } else {
-                    L.stack[ra] = table.metatable.__index(table, key);
+                    L.stack[ra] = table.__index(table, key);
                 // }
                 break;
             }
@@ -103,10 +116,10 @@ const luaV_execute = function(L) {
                 let key = RKB(L, base, k, i);
                 let v = RKC(L, base, k, i);
 
-                // if (!table.ttistable() || !table.metatable.__index(table, key)) {
+                // if (!table.ttistable() || !table.__index(table, key)) {
                 //     // __index
                 // } else {
-                    table.metatable.__newindex(table, key, v);
+                    table.__newindex(table, key, v);
                 // }
 
                 break;
@@ -115,10 +128,10 @@ const luaV_execute = function(L) {
                 let table = RKB(L, base, k, i);
                 let key = RKC(L, base, k, i);
 
-                // if (!table.ttistable() || !table.metatable.__index(table, key)) {
+                // if (!table.ttistable() || !table.__index(table, key)) {
                 //     // __index
                 // } else {
-                    L.stack[ra] = table.metatable.__index(table, key);
+                    L.stack[ra] = table.__index(table, key);
                 // }
                 break;
             }
@@ -127,10 +140,10 @@ const luaV_execute = function(L) {
                 let key = RKB(L, base, k, i);
                 let v = RKC(L, base, k, i);
 
-                // if (!table.ttistable() || !table.metatable.__index(table, key)) {
+                // if (!table.ttistable() || !table.__index(table, key)) {
                 //     // __index
                 // } else {
-                    table.metatable.__newindex(table, key, v);
+                    table.__newindex(table, key, v);
                 // }
 
                 break;
@@ -145,10 +158,10 @@ const luaV_execute = function(L) {
 
                 L.stack[ra + 1] = table;
 
-                // if (!table.ttistable() || !table.metatable.__index(table, key)) {
+                // if (!table.ttistable() || !table.__index(table, key)) {
                 //     // __index
                 // } else {
-                    L.stack[ra] = table.metatable.__index(table, key);
+                    L.stack[ra] = table.__index(table, key);
                 // }
 
                 break;
@@ -164,8 +177,8 @@ const luaV_execute = function(L) {
                 } else if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, op1.value + op2.value);
                 } else {
-                    // Metamethod
-                    throw new Error(`Can't perform binary operation on ${op1.value} and ${op2.value}`);
+                    ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_ADD);
+                    base = ci.u.l.base;
                 }
                 break;
             }
@@ -180,8 +193,8 @@ const luaV_execute = function(L) {
                 } else if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, op1.value - op2.value);
                 } else {
-                    // Metamethod
-                    throw new Error(`Can't perform binary operation on ${op1.value} and ${k[i.C].value}`);
+                    ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_SUB);
+                    base = ci.u.l.base;
                 }
                 break;
             }
@@ -196,8 +209,8 @@ const luaV_execute = function(L) {
                 } else if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, k[i.B].value * op2.value);
                 } else {
-                    // Metamethod
-                    throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
+                    ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_MUL);
+                    base = ci.u.l.base;
                 }
                 break;
             }
@@ -212,8 +225,8 @@ const luaV_execute = function(L) {
                 } else if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, k[i.B].value % op2.value);
                 } else {
-                    // Metamethod
-                    throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
+                    ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_MOD);
+                    base = ci.u.l.base;
                 }
                 break;
             }
@@ -226,8 +239,8 @@ const luaV_execute = function(L) {
                 if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, Math.pow(op1.value, op2.value));
                 } else {
-                    // Metamethod
-                    throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
+                    ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_POW);
+                    base = ci.u.l.base;
                 }
                 break;
             }
@@ -240,8 +253,8 @@ const luaV_execute = function(L) {
                 if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, k[i.B].value / op2.value);
                 } else {
-                    // Metamethod
-                    throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
+                    ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_DIV);
+                    base = ci.u.l.base;
                 }
                 break;
             }
@@ -256,8 +269,8 @@ const luaV_execute = function(L) {
                 } else if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, (op1.value / op2.value)|0);
                 } else {
-                    // Metamethod
-                    throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
+                    ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_IDIV);
+                    base = ci.u.l.base;
                 }
                 break;
             }
@@ -270,8 +283,8 @@ const luaV_execute = function(L) {
                 if (op1.ttisinteger() && op2.ttisinteger()) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value & op2.value)|0);
                 } else {
-                    // Metamethod
-                    throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
+                    ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_BAND);
+                    base = ci.u.l.base;
                 }
                 break;
             }
@@ -284,8 +297,8 @@ const luaV_execute = function(L) {
                 if (op1.ttisinteger() && op2.ttisinteger()) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value | op2.value)|0);
                 } else {
-                    // Metamethod
-                    throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
+                    ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_BOR);
+                    base = ci.u.l.base;
                 }
                 break;
             }
@@ -298,8 +311,8 @@ const luaV_execute = function(L) {
                 if (op1.ttisinteger() && op2.ttisinteger()) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value ^ op2.value)|0);
                 } else {
-                    // Metamethod
-                    throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
+                    ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_BXOR);
+                    base = ci.u.l.base;
                 }
                 break;
             }
@@ -312,8 +325,8 @@ const luaV_execute = function(L) {
                 if (op1.ttisinteger() && op2.ttisinteger()) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value << op2.value)|0);
                 } else {
-                    // Metamethod
-                    throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
+                    ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_SHL);
+                    base = ci.u.l.base;
                 }
                 break;
             }
@@ -326,8 +339,8 @@ const luaV_execute = function(L) {
                 if (op1.ttisinteger() && op2.ttisinteger()) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value >> op2.value)|0);
                 } else {
-                    // Metamethod
-                    throw new Error(`Can't perform binary operation on ${k[i.B].value} and ${k[i.C].value}`);
+                    ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_SHR);
+                    base = ci.u.l.base;
                 }
                 break;
             }
@@ -340,8 +353,8 @@ const luaV_execute = function(L) {
                 } else if (numberop !== false) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, -op.value);
                 } else {
-                    // Metamethod
-                    throw new Error(`Can't perform unary operation on ${op.value}`);
+                    ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_UNM);
+                    base = ci.u.l.base;
                 }
                 break;
             }
@@ -352,8 +365,8 @@ const luaV_execute = function(L) {
                 if (op.ttisinteger()) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMINT, ~op.value);
                 } else {
-                    // Metamethod
-                    throw new Error(`Can't perform unary operation on ${op.value}`);
+                    ltm.luaT_trybinTM(L, op, op, ra, TMS.TM_BNOT);
+                    base = ci.u.l.base;
                 }
                 break;
             }
@@ -420,7 +433,7 @@ const luaV_execute = function(L) {
                 if (b !== 0)
                     L.top = ra+b;
 
-                if (ldo.precall(L, ra, L.stack[ra], nresults)) {
+                if (ldo.luaD_precall(L, ra, nresults)) {
                     if (nresults >= 0)
                         L.top = ci.top;
                     base = ci.u.l.base;
@@ -433,7 +446,7 @@ const luaV_execute = function(L) {
             }
             case "OP_TAILCALL": {
                 if (i.B !== 0) L.top = ra + i.B;
-                if (ldo.precall(L, ra, L.stack[ra], LUA_MULTRET)) { // JS function
+                if (ldo.luaD_precall(L, ra, LUA_MULTRET)) { // JS function
                     base = ci.u.l.base;
                 } else {
                     /* tail call: put called frame (n) in place of caller one (o) */
@@ -466,7 +479,7 @@ const luaV_execute = function(L) {
             }
             case "OP_RETURN": {
                 if (cl.p.p.length > 0) lfunc.luaF_close(L, base);
-                let b = ldo.postcall(L, ci, ra, (i.B !== 0 ? i.B - 1 : L.top - ra));
+                let b = ldo.luaD_poscall(L, ci, ra, (i.B !== 0 ? i.B - 1 : L.top - ra));
 
                 if (ci.callstatus & lstate.CIST_FRESH)
                     return; /* external invocation: return */
@@ -540,12 +553,24 @@ const luaV_execute = function(L) {
                 break;
             }
             case "OP_TFORCALL": {
+                let cb = ra + 3 /* call base */
+                L.stack[cb + 2] = L.stack[ra + 2];
+                L.stack[cb + 1] = L.stack[ra + 1];
+                L.stack[cb]     = L.stack[ra];
+                L.top = cb + 3; /* func. + 2 args (state and index) */
+                luaD_call(L, cb, i.C);
+                base = ci.u.l.base;
+                L.top = ci.top;
+                i = ci.u.l.savedpc[ci.pcOff++];
+                ra = RA(L, base, i);
+                assert(OC.OpCodes[i.opcode] === "OP_TFORLOOP");
+                specialCase = "OP_TFORLOOP";
                 break;
             }
             case "OP_TFORLOOP": {
                 if (!L.stack[ra + 1].ttisnil()) { /* continue loop? */
                     L.stack[ra] = L.stack[ra + 1]; /* save control variable */
-                    ci.cpOff += i.sBx; /* jump back */
+                    ci.pcOff += i.sBx; /* jump back */
                 }
                 break;
             }
@@ -616,51 +641,52 @@ const luaV_execute = function(L) {
             }
         }
     }
-}
+};
 
 const dojump = function(L, ci, i, e) {
     let a = i.A;
     if (a != 0) lfunc.luaF_close(L, ci.u.l.base + a - 1);
     ci.pcOff += i.sBx + e;
-}
+};
 
 const donextjump = function(L, ci) {
     dojump(L, ci, ci.u.l.savedpc[ci.pcOff], 1);
-}
+};
 
-const luaV_lessequal = function(l, r) {
-    if (l.ttisnumber() && r.ttisnumber())
-        return LEnum(l, r);
-    else if (l.ttisstring() && r.ttisstring())
-        return l_strcmp(l, r) <= 0;
-    // TODO: metatable
-    // else if  (l.metatable.__le || r.metatable.__le) {
-    //     let res = l.metatable.__le ? l.metatable.__le(l, r) : r.metatable.__le(l, r);
-    //     if (res >= 0)
-    //         return res;
-    // } else {
-    //     L.ci.callstatus |= lstate.CIST_LEQ;
-    //     let res = l.metatable.__lt ? l.metatable.__lt(r, l) : r.metatable.__lt(r, l);
-    //     L.ci.callstatus ^= lstate.CIST_LEQ;
-    //     if (res < 0)
-    //         throw new Error("attempt to compare ...");
-    //     return !res;
-    // }
-}
 
 const luaV_lessthan = function(l, r) {
     if (l.ttisnumber() && r.ttisnumber())
         return LTnum(l, r);
     else if (l.ttisstring() && r.ttisstring())
         return l_strcmp(l, r) < 0;
-    // TODO: metatable
-    // else if  (l.metatable.__lt || r.metatable.__lt) {
-    //     let res = l.metatable.__lt ? l.metatable.__lt(l, r) : r.metatable.__lt(l, r);
-    //     if (res < 0)
-    //         throw new Error("attempt to compare ...")
-    //     return res;
-    // }
-}
+    else {
+        res = ltm.luatT_callorderTM(L, l, r, TMS.TM_LT);
+        if (res < 0)
+            throw new Error("TM order error"); // TODO: luaG_ordererror
+        return res;
+    }
+};
+
+const luaV_lessequal = function(l, r) {
+    let res;
+
+    if (l.ttisnumber() && r.ttisnumber())
+        return LEnum(l, r);
+    else if (l.ttisstring() && r.ttisstring())
+        return l_strcmp(l, r) <= 0;
+    else {
+        res = ltm.luatT_callorderTM(L, l, r, TMS.TM_LE);
+        if (res >= 0)
+            return res;
+    }
+
+    L.ci.callstatus |= CIST_LEQ; /* mark it is doing 'lt' for 'le' */
+    res = ltm.luatT_callorderTM(L, l, r, TMS.TM_LT);
+    L.ci.callstatus ^= CIST_LEQ; /* clear mark */
+    if (res < 0)
+        throw new Error("TM order error"); // TODO: luaG_ordererror
+    return res === 1;
+};
 
 const luaV_equalobj = function(t1, t2) {
     if (t1.ttype() !== t2.ttype()) { /* not the same variant? */
@@ -671,6 +697,8 @@ const luaV_equalobj = function(t1, t2) {
             return Math.floor(t1.value) === Math.floor(t2.value) // TODO: tointeger
         }
     }
+
+    let tm;
 
     /* values have same type and same variant */
     switch(t1.ttype()) {
@@ -687,11 +715,23 @@ const luaV_equalobj = function(t1, t2) {
         case CT.LUA_TUSERDATA:
         case CT.LUA_TTABLE:
             if (t1 === t2) return 1;
-            // TODO: __eq
+            else if (L === null) return 1;
+
+            // TODO: fasttm ?
+            tm = ltm.luaT_gettmbyobj(L, t1, TMS.TM_EQ);
+            if (tm.ttisnil())
+                tm = ltm.luaT_gettmbyobj(L, t2, TMS.TM_EQ);
+            break
         default:
             return t1.value === t2.value ? 1 : 0;
     }
-}
+
+    if (!tm || tm.ttisnil())
+        return 0;
+
+    ltm.luaT_callTM(L, tm, t1, t2, L.top, 1);
+    return !l_isfalse(L.stack[L.top]);
+};
 
 const forlimit = function(obj, step) {
     let stopnow = false;
@@ -715,7 +755,7 @@ const forlimit = function(obj, step) {
         stopnow: stopnow,
         ilimit: ilimit
     }
-}
+};
 
 /*
 ** try to convert a value to an integer, rounding according to 'mode':
@@ -743,7 +783,7 @@ const luaV_tointeger = function(obj, mode) {
     }
 
     return false;
-}
+};
 
 const tonumber = function(v) {
     if (v.type === CT.LUA_TNUMFLT)
@@ -756,7 +796,7 @@ const tonumber = function(v) {
         return new TValue(CT.LUA_TNUMFLT, parseFloat(v.value)); // TODO: luaO_str2num
 
     return false;
-}
+};
 
 const LTnum = function(l, r) {
     if (l.ttisinteger()) {
@@ -772,7 +812,7 @@ const LTnum = function(l, r) {
         else
             return !LEintfloat(r.value, l.value);
     }
-}
+};
 
 const LEnum = function(l, r) {
     if (l.ttisinteger()) {
@@ -788,46 +828,86 @@ const LEnum = function(l, r) {
         else
             return !LTintfloat(r.value, l.value);
     }
-}
+};
 
 const LEintfloat = function(l, r) {
     // TODO: LEintfloat
     return l <= r ? 1 : 0;
-}
+};
 
 const LTintfloat = function(l, r) {
     // TODO: LTintfloat
     return l < r ? 1 : 0;
-}
+};
 
 const l_strcmp = function(ls, rs) {
     // TODO: lvm.c:248 static int l_strcmp (const TString *ls, const TString *rs)
     return ls.value === rs.value ? 0 : (ls.value < rs.value ? -1 : 1);
-}
+};
 
 const l_isfalse = function(o) {
     return o.ttisnil() || (o.ttisboolean() && o.value === false)
-}
+};
+
+/*
+** Check appropriate error for stack overflow ("regular" overflow or
+** overflow while handling stack overflow). If 'nCalls' is larger than
+** LUAI_MAXCCALLS (which means it is handling a "regular" overflow) but
+** smaller than 9/8 of LUAI_MAXCCALLS, does not report an error (to
+** allow overflow handling to work)
+*/
+const stackerror = function(L) {
+    if (L.nCcalls === llimit.LUAI_MAXCCALLS)
+        throw new Error("JS stack overflow");
+    else if (L.nCcalls >= llimit.LUAI_MAXCCALLS + (llimit.LUAI_MAXCCALLS >> 3)) /* error while handing stack error */
+        throw new Error("stack overflow") // TODO: luaD_throw(L, LUA_ERRERR);
+};
+
+/*
+** Call a function (JS or Lua). The function to be called is at func.
+** The arguments are on the stack, right after the function.
+** When returns, all the results are on the stack, starting at the original
+** function position.
+*/
+const luaD_call = function(L, off, nResults) {
+    if (++L.nCcalls >= llimit.LUAI_MAXCCALLS)
+        stackerror(L);
+    if (!ldo.luaD_precall(L, off, nResults))
+        luaV_execute(L);
+    L.nCcalls--;
+};
+
+/*
+** Similar to 'luaD_call', but does not allow yields during the call
+*/
+const luaD_callnoyield = function(L, off, nResults) {
+  L.nny++;
+  luaD_call(L, off, nResults);
+  L.nny--;
+};
 
 module.exports = {
-    RA:             RA,
-    RB:             RB,
-    RC:             RC,
-    RKB:            RKB,
-    RKC:            RKC,
-    luaV_execute:   luaV_execute,
-    dojump:         dojump,
-    donextjump:     donextjump,
-    luaV_lessequal: luaV_lessequal,
-    luaV_lessthan:  luaV_lessthan,
-    luaV_equalobj:  luaV_equalobj,
-    forlimit:       forlimit,
-    luaV_tointeger: luaV_tointeger,
-    tonumber:       tonumber,
-    LTnum:          LTnum,
-    LEnum:          LEnum,
-    LEintfloat:     LEintfloat,
-    LTintfloat:     LTintfloat,
-    l_strcmp:       l_strcmp,
-    l_isfalse:      l_isfalse
+    RA:               RA,
+    RB:               RB,
+    RC:               RC,
+    RKB:              RKB,
+    RKC:              RKC,
+    luaV_execute:     luaV_execute,
+    dojump:           dojump,
+    donextjump:       donextjump,
+    luaV_lessequal:   luaV_lessequal,
+    luaV_lessthan:    luaV_lessthan,
+    luaV_equalobj:    luaV_equalobj,
+    forlimit:         forlimit,
+    luaV_tointeger:   luaV_tointeger,
+    tonumber:         tonumber,
+    LTnum:            LTnum,
+    LEnum:            LEnum,
+    LEintfloat:       LEintfloat,
+    LTintfloat:       LTintfloat,
+    l_strcmp:         l_strcmp,
+    l_isfalse:        l_isfalse,
+    stackerror:       stackerror,
+    luaD_call:        luaD_call,
+    luaD_callnoyield: luaD_callnoyield,
 };
