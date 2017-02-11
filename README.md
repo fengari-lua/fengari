@@ -48,12 +48,13 @@
     - [x] OP_FORPREP
     - [ ] OP_TFORCALL
     - [ ] OP_TFORLOOP
-    - [ ] OP_SETLIST
+    - [x] OP_SETLIST
     - [x] OP_CLOSURE
     - [x] OP_VARARG
     - [x] OP_EXTRAARG
 - [ ] C API
 - [ ] stdlib
+- [ ] DOM API binding
 - [ ] Parse Lua
 - [ ] Generate bytecode
 

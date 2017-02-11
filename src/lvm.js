@@ -559,6 +559,24 @@ class LuaVM {
                     break;
                 }
                 case "OP_SETLIST": {
+                    let n = i.B;
+                    let c = i.C;
+
+                    if (n === 0) n = L.top - ra - 1;
+
+                    if (c === 0) {
+                        assert(OC.OpCodes[ci.u.l.savedpc[ci.pcOff].opcode] === "OP_EXTRAARG");
+                        c = ci.u.l.savedpc[ci.pcOff++].Ax;
+                    }
+
+                    let table = L.stack[ra].value;
+                    let last = ((c - 1) * OC.LFIELDS_PER_FLUSH) + n;
+
+                    for (; n > 0; n--) {
+                        table.array[last--] = L.stack[ra + n];
+                    }
+
+                    L.top = ci.top; /* correct top (in case of previous open call) */
                     break;
                 }
                 case "OP_CLOSURE": {

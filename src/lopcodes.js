@@ -80,27 +80,31 @@ const INDEXK = function (r) {
     return r & ~BITRK;
 }
 
+/* number of list items to accumulate before a SETLIST instruction */
+const LFIELDS_PER_FLUSH = 50
+
 module.exports = {
-    OpCodes:    OpCodes,
-    SIZE_C:     SIZE_C,
-    SIZE_B:     SIZE_B,
-    SIZE_Bx:    SIZE_Bx,
-    SIZE_A:     SIZE_A,
-    SIZE_Ax:    SIZE_Ax,
-    SIZE_OP:    SIZE_OP,
-    POS_OP:     POS_OP,
-    POS_A:      POS_A,
-    POS_C:      POS_C,
-    POS_B:      POS_B,
-    POS_Bx:     POS_Bx,
-    POS_Ax:     POS_Ax,
-    MAXARG_Bx:  MAXARG_Bx,
-    MAXARG_sBx: MAXARG_sBx,
-    MAXARG_Ax:  MAXARG_Ax,
-    MAXARG_A:   MAXARG_A,
-    MAXARG_B:   MAXARG_B,
-    MAXARG_C:   MAXARG_C,
-    BITRK:      BITRK,
-    ISK:        ISK,
-    INDEXK:     INDEXK
+    OpCodes:           OpCodes,
+    SIZE_C:            SIZE_C,
+    SIZE_B:            SIZE_B,
+    SIZE_Bx:           SIZE_Bx,
+    SIZE_A:            SIZE_A,
+    SIZE_Ax:           SIZE_Ax,
+    SIZE_OP:           SIZE_OP,
+    POS_OP:            POS_OP,
+    POS_A:             POS_A,
+    POS_C:             POS_C,
+    POS_B:             POS_B,
+    POS_Bx:            POS_Bx,
+    POS_Ax:            POS_Ax,
+    MAXARG_Bx:         MAXARG_Bx,
+    MAXARG_sBx:        MAXARG_sBx,
+    MAXARG_Ax:         MAXARG_Ax,
+    MAXARG_A:          MAXARG_A,
+    MAXARG_B:          MAXARG_B,
+    MAXARG_C:          MAXARG_C,
+    BITRK:             BITRK,
+    ISK:               ISK,
+    INDEXK:            INDEXK,
+    LFIELDS_PER_FLUSH: LFIELDS_PER_FLUSH
 };
