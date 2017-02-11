@@ -17,8 +17,7 @@ const UpVal          = lfunc.UpVal;
 const lstate         = require('./lstate.js');
 const CallInfo       = lstate.CallInfo;
 const llimit         = require('./llimit.js');
-
-const nil = new TValue(CT.LUA_TNIL, null);
+const ldo            = require('./ldo.js');
 
 class LuaVM {
 
@@ -85,7 +84,7 @@ class LuaVM {
                 }
                 case "OP_LOADNIL": {
                     for (let j = 0; j <= i.B; j++)
-                        L.stack[ra + j] = nil;
+                        L.stack[ra + j] = ldo.nil;
                     break;
                 }
                 case "OP_GETUPVAL": {
@@ -429,7 +428,7 @@ class LuaVM {
                     if (b !== 0)
                         L.top = ra+b;
 
-                    if (this.precall(ra, L.stack[ra], nresults)) {
+                    if (ldo.precall(L, ra, L.stack[ra], nresults)) {
                         if (nresults >= 0)
                             L.top = ci.top;
                         base = ci.u.l.base;
@@ -442,7 +441,7 @@ class LuaVM {
                 }
                 case "OP_TAILCALL": {
                     if (i.B !== 0) L.top = ra + i.B;
-                    if (this.precall(ra, L.stack[ra], LUA_MULTRET)) { // JS function
+                    if (ldo.precall(L, ra, L.stack[ra], LUA_MULTRET)) { // JS function
                         base = ci.u.l.base;
                     } else {
                         /* tail call: put called frame (n) in place of caller one (o) */
@@ -475,7 +474,7 @@ class LuaVM {
                 }
                 case "OP_RETURN": {
                     if (cl.p.p.length > 0) this.closeupvals(base);
-                    let b = this.postcall(ci, ra, (i.B !== 0 ? i.B - 1 : L.top - ra));
+                    let b = ldo.postcall(L, ci, ra, (i.B !== 0 ? i.B - 1 : L.top - ra));
 
                     if (ci.callstatus & lstate.CIST_FRESH)
                         return; /* external invocation: return */
@@ -617,7 +616,7 @@ class LuaVM {
                         L.stack[ra + j] = L.stack[base - n + j];
 
                     for (; j < b; j++) /* complete required results with nil */
-                        L.stack[ra + j] = nil;
+                        L.stack[ra + j] = ldo.nil;
                     break;
                 }
                 case "OP_EXTRAARG": {
@@ -625,98 +624,6 @@ class LuaVM {
                 }
             }
         }
-    }
-
-    precall(off, func, nresults) {
-        let L = this.L;
-        let ci;
-
-        switch(func.type) {
-            case CT.LUA_TCCL: // JS function ?
-                throw new Error("LUA_TCCL not implemeted yet")
-                break;
-            case CT.LUA_TLCF: // still JS function ?
-                throw new Error("LUA_TLCF not implemeted yet")
-                break;
-            case CT.LUA_TLCL: {
-                let p = func.p;
-                let n = L.top - off - 1;
-                let fsize = p.maxstacksize;
-                let base;
-
-                if (p.is_vararg) {
-                    base = this.adjust_varargs(p, n);
-                } else {
-                    for (; n < p.numparams; n++)
-                        L.stack[L.top++] = nil; // complete missing arguments
-                    base = off + 1;
-                }
-
-                // next_ci
-                if (L.ci.next) {
-                    L.ci = L.ci.next;
-                } else {
-                    ci = new CallInfo(off);
-                    L.ci.next = ci;
-                    ci.previous = L.ci;
-                    ci.next = null;
-
-                    L.ci = ci;
-                    L.ciOff++;
-                }
-                ci.nresults = nresults;
-                ci.func = func;
-                ci.u.l.base = base;
-                ci.top = base + fsize;
-                L.top = ci.top;
-                ci.u.l.savedpc = p.code;
-                ci.callstatus = lstate.CIST_LUA;
-                break;
-            }
-            default:
-                // __call
-        }
-    }
-
-    postcall(ci, firstResult, nres) {
-        let wanted = ci.nresults;
-        let res = ci.funcOff;
-        this.L.ci = ci.previous;
-        this.L.ciOff--;
-        return this.moveresults(firstResult, res, nres, wanted);
-    }
-
-    moveresults(firstResult, res, nres, wanted) {
-        let L = this.L;
-
-        switch (wanted) {
-            case 0:
-                break;
-            case 1: {
-                if (nres == 0)
-                    firstResult = nil;
-                L.stack[res] = L.stack[firstResult];
-                break;
-            }
-            case LUA_MULTRET: {
-                for (let i = 0; i < nres; i++)
-                    L.stack[res + i] = L.stack[firstResult + i];
-                L.top = res + nres;
-                return false;
-            }
-            default: {
-                let i;
-                if (wanted <= nres) {
-                    for (i = 0; i < wanted; i++)
-                        L.stack[res + i] = L.stack[firstResult + i];
-                    for (; i < wanted; i++)
-                        L.stack[res + i] = nil;
-                }
-                break;
-            }
-        }
-
-        return true;
     }
 
     findupval(level) {
@@ -757,25 +664,6 @@ class LuaVM {
                 uv.v = null;
             }
         }
-    }
-
-    adjust_varargs (p, actual) {
-        let L = this.L;
-        let nfixargs = p.numparams;
-        /* move fixed parameters to final position */
-        let fixed = L.top - actual; /* first fixed argument */
-        let base = L.top; /* final position of first argument */
-
-        let i;
-        for (i = 0; i < nfixargs && i < actual; i++) {
-            L.stack[L.top++] = L.stack[fixed + i];
-            L.stack[fixed + i] = nil;
-        }
-
-        for (; i < nfixargs; i++)
-            L.stack[L.top++] = nil;
-
-        return base;
     }
 
     dojump(ci, i, e) {
