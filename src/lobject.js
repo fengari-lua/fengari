@@ -106,6 +106,86 @@ class TValue {
 
 const nil   = new TValue(CT.LUA_TNIL, null);
 
+class Table extends TValue {
+
+    constructor(array, hash) {
+        super(CT.LUA_TTABLE, {
+            array: array !== undefined ? array : [],
+            hash: new Map(hash)
+        });
+
+        this.metatable = null;
+    }
+
+    static keyValue(key) {
+        // Those lua values are used by value, others by reference
+        if (key instanceof TValue
+            && [CT.LUA_TNUMBER,
+                CT.LUA_TSTRING,
+                CT.LUA_TSHRSTR,
+                CT.LUA_TLNGSTR,
+                CT.LUA_TNUMFLT,
+                CT.LUA_TNUMINT].indexOf(key.type) > -1) {
+            key = key.value;
+        }
+
+        return key;
+    }
+
+    __newindex(table, key, value) {
+        key = Table.keyValue(key);
+
+        if (typeof key === 'number' && key > 0) {
+            table.value.array[key - 1] = value; // Lua array starts at 1
+        } else {
+            table.value.hash.set(key, value);
+        }
+    }
+
+    __index(table, key) {
+        key = Table.keyValue(key);
+
+        let v = nil;
+        if (typeof key === 'number' && key > 0) {
+            v = table.value.array[key - 1]; // Lua array starts at 1
+        } else {
+            v = table.value.hash.get(key);
+        }
+
+        return v ? v : nil;
+    }
+
+    __len(table) {
+        return this.luaH_getn();
+    }
+
+    /*
+    ** Try to find a boundary in table 't'. A 'boundary' is an integer index
+    ** such that t[i] is non-nil and t[i+1] is nil (and 0 if t[1] is nil).
+    */
+    luaH_getn() {
+        let array = this.value.array;
+        let hash = this.value.hash;
+
+        let j = array.length;
+        if (j > 0 && array[j - 1].ttisnil()) {
+            /* there is a boundary in the array part: (binary) search for it */
+            let i = 0;
+            while (j - i > 1) {
+                let m = (i+j)/2;
+                if (array[m - 1].ttisnil()) j = m;
+                else i = m;
+            }
+            return i;
+        }
+        /* else must find a boundary in hash part */
+        else if (hash.size === 0)
+            return j;
+        else return j; // TODO: unbound_search(t, j) => but why ?
+    }
+
+}
+
 class LClosure extends TValue {
 
     constructor(n) {
@@ -150,59 +230,10 @@ class Userdata extends TValue {
 }
 
 
-class Table extends TValue {
-
-    constructor(array, hash) {
-        super(CT.LUA_TTABLE, {
-            array: array !== undefined ? array : [],
-            hash: new Map(hash)
-        });
-
-        this.metatable = null;
-    }
-
-    __newindex(table, key, value) {
-        if (key instanceof TValue) {
-            // Those lua values are used by value, tables and functions by reference
-            if ([CT.LUA_TNUMBER, CT.LUA_TSTRING, CT.LUA_TSHRSTR, CT.LUA_TLNGSTR, CT.LUA_TNUMFLT, CT.LUA_TNUMINT].indexOf(key.type) > -1) {
-                key = key.value;
-            }
-        }
-
-        if (typeof key === 'number') {
-            table.value.array[key] = value;
-        } else {
-            table.value.hash.set(key, value);
-        }
-    }
-
-    __index(table, key) {
-        if (key instanceof TValue) {
-            // Those lua values are used by value, tables and functions by reference
-            if ([CT.LUA_TNUMBER, CT.LUA_TSTRING, CT.LUA_TSHRSTR, CT.LUA_TLNGSTR, CT.LUA_TNUMFLT, CT.LUA_TNUMINT].indexOf(key.type) > -1) {
-                key = key.value;
-            }
-        }
-
-        let v = nil;
-        if (typeof key === 'number') {
-            v = table.value.array[key];
-        } else {
-            v = table.value.hash.get(key);
-        }
-
-        return v ? v : nil;
-    }
-
-    __len(table) {
-        return t.value.array.length;
-    }
-
-}
-
-
 module.exports = {
     LClosure: LClosure,
     TValue: TValue,
-    Table: Table
+    Table: Table,
+    TString: TString,
+    Userdata: Userdata
 };

@@ -376,6 +376,8 @@ const luaV_execute = function(L) {
                 break;
             }
             case "OP_LEN": {
+                luaV_objlen(L, ra, L.stack[RB(L, base, i)]);
+                base = ci.u.l.base;
                 break;
             }
             case "OP_CONCAT": {
@@ -585,11 +587,11 @@ const luaV_execute = function(L) {
                     c = ci.u.l.savedpc[ci.pcOff++].Ax;
                 }
 
-                let table = L.stack[ra].value;
+                let table = L.stack[ra];
                 let last = ((c - 1) * OC.LFIELDS_PER_FLUSH) + n;
 
                 for (; n > 0; n--) {
-                    table.array[last--] = L.stack[ra + n];
+                    table.__newindex(table, last--, L.stack[ra + n]);
                 }
 
                 L.top = ci.top; /* correct top (in case of previous open call) */
@@ -850,6 +852,41 @@ const l_isfalse = function(o) {
 };
 
 /*
+** Main operation 'ra' = #rb'.
+*/
+const luaV_objlen = function(L, ra, rb) {
+    let tm;
+    switch(rb.ttype()) {
+        case CT.LUA_TTABLE: {
+            tm = rb.value.metatable;
+            if (tm) break;
+            L.stack[ra] = rb.luaH_getn();
+            return;
+        }
+        case CT.LUA_TSHRSTR:
+        case CT.LUA_TLNGSTR:
+            L.stack[ra] = rb.value.length; // TODO: 8-byte clean string
+            return;
+        default: {
+            tm = ltm.luaT_gettmbyobj(L, rb, TMS.TM_LEN);
+            if (tm.ttisnil())
+                throw new Error("attempt to get length"); // TODO: luaG_typeerror
+            break;
+        }
+    }
+
+    ltm.luaT_callTM(L, tm, rb, rb, ra, 1);
+};
+
+/*
+** Main operation for concatenation: concat 'total' values in the stack,
+** from 'L->top - total' up to 'L->top - 1'.
+*/
+const luaV_concat = function(L, total) {
+    assert(total >= 2);
+}
+
+/*
 ** Check appropriate error for stack overflow ("regular" overflow or
 ** overflow while handling stack overflow). If 'nCalls' is larger than
 ** LUAI_MAXCCALLS (which means it is handling a "regular" overflow) but
@@ -907,6 +944,7 @@ module.exports = {
     LTintfloat:       LTintfloat,
     l_strcmp:         l_strcmp,
     l_isfalse:        l_isfalse,
+    luaV_objlen:      luaV_objlen,
     stackerror:       stackerror,
     luaD_call:        luaD_call,
     luaD_callnoyield: luaD_callnoyield,

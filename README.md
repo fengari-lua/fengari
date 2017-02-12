@@ -34,7 +34,7 @@
         - [x] `OP_UNM`
         - [x] `OP_BNOT`
         - [x] `OP_NOT`
-        - [ ] `OP_LEN`
+        - [x] `OP_LEN`
         - [ ] `OP_CONCAT`
         - [x] `OP_JMP`
         - [x] `OP_EQ`

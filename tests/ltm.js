@@ -6,7 +6,7 @@ const beautify       = require('js-beautify').js_beautify;
 
 const lua_State      = require("../src/lstate.js").lua_State;
 const VM             = require("../src/lvm.js");
-const Table          = require("../src/lobject.js").Table;
+const Table          = require("../src/lobject.js").Table;;
 
 const getState       = require("./tests.js");
 
