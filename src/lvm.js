@@ -11,6 +11,7 @@ const LUA_MULTRET    = lua.LUA_MULTRET;
 const lobject        = require('./lobject.js');
 const TValue         = lobject.TValue;
 const Table          = lobject.Table;
+const TString        = lobject.TString;
 const LClosure       = lobject.LClosure;
 const lfunc          = require('./lfunc.js');
 const UpVal          = lfunc.UpVal;
@@ -381,6 +382,16 @@ const luaV_execute = function(L) {
                 break;
             }
             case "OP_CONCAT": {
+                let b = i.B;
+                let c = i.C;
+                let rb;
+                L.top = base + c + 1; /* mark the end of concat operands */
+                luaV_concat(L, c - b + 1);
+                base = ci.u.l.base;
+                ra = RA(L, base, i); /* 'luaV_concat' may invoke TMs and move the stack */
+                rb = base + b;
+                L.stack[ra] = L.stack[rb];
+                L.top = ci.top; /* restore top */
                 break;
             }
             case "OP_JMP": {
@@ -873,12 +884,56 @@ const luaV_objlen = function(L, ra, rb) {
     ltm.luaT_callTM(L, tm, rb, rb, ra, 1);
 };
 
+const tostring = function(L, i) {
+    let o = L.stack[i];
+    let str = `${o.value}`;
+
+    if (o.ttisstring() || (o.ttisnumber() && !isNaN(parseFloat(`${str}`)))) {
+        L.stack[i] = new TString(str);
+        return true;
+    }
+
+    return false;
+};
+
 /*
 ** Main operation for concatenation: concat 'total' values in the stack,
 ** from 'L->top - total' up to 'L->top - 1'.
 */
 const luaV_concat = function(L, total) {
     assert(total >= 2);
+    do {
+        let top = L.top;
+        let n = 2; /* number of elements handled in this pass (at least 2) */
+        let v = L.stack[top-2];
+        let v2 = L.stack[top-1];
+
+        if (!(v.ttisstring() || v.ttisnumber()) || !tostring(L, top - 2)) // TODO: tostring
+            ltm.luaT_trybinTM(L, v, v2, top-2, TMS.TM_CONCAT);
+        else if (v2.ttisstring() && v2.value.length === 0)
+            tostring(L, top - 2)
+        else if (v.ttisstring() && v.value.length === 0)
+            L.stack[top - 2] = L.stack[top - 1];
+        else {
+            /* at least two non-empty string values; get as many as possible */
+            let tl = v.value.length;
+            /* collect total length and number of strings */
+            for (n = 1; n < total && tostring(L, top - n - 1); n++) {
+                let l = L.stack[top - n - 1].value.length;
+                // TODO: string length overflow ?
+                tl += l;
+            }
+
+            let ts = new TString("");
+            for (let i = n; i > 0; i--) {
+                ts.value = `${ts.value}${L.stack[top - i].value}`;
+            }
+
+            L.stack[top - n] = ts;
+        }
+        total -= n - 1; /* got 'n' strings to create 1 new */
+        L.top -= n - 1; /* popped 'n' strings and pushed one */
+    } while (total > 1); /* repeat until only 1 result left */
 };
 
 /*

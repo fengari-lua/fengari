@@ -774,3 +774,25 @@ test('LEN', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('CONCAT', function (t) {
+    let luaCode = `
+        return "hello " .. 2 .. " you"
+    `, L;
+    
+    t.plan(2);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    t.doesNotThrow(function () {
+        L = getState(luaCode);
+        VM.luaV_execute(L);
+    }, "Program executed without errors");
+
+    t.strictEqual(
+        L.stack[L.top - 1].value,
+        "hello 2 you",
+        "Program output is correct"
+    );
+});

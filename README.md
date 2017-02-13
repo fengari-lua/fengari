@@ -4,9 +4,7 @@
 ## So far
 
 - [x] Parse bytecode
-- [ ] Opcodes
-    - [x] ...
-    - [ ] `OP_CONCAT`
+- [x] Opcodes
 - [ ] Basic types representation:
     - [x] nil
     - [x] boolean
