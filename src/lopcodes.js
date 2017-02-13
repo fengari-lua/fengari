@@ -83,28 +83,26 @@ const INDEXK = function (r) {
 /* number of list items to accumulate before a SETLIST instruction */
 const LFIELDS_PER_FLUSH = 50;
 
-module.exports = {
-    OpCodes:           OpCodes,
-    SIZE_C:            SIZE_C,
-    SIZE_B:            SIZE_B,
-    SIZE_Bx:           SIZE_Bx,
-    SIZE_A:            SIZE_A,
-    SIZE_Ax:           SIZE_Ax,
-    SIZE_OP:           SIZE_OP,
-    POS_OP:            POS_OP,
-    POS_A:             POS_A,
-    POS_C:             POS_C,
-    POS_B:             POS_B,
-    POS_Bx:            POS_Bx,
-    POS_Ax:            POS_Ax,
-    MAXARG_Bx:         MAXARG_Bx,
-    MAXARG_sBx:        MAXARG_sBx,
-    MAXARG_Ax:         MAXARG_Ax,
-    MAXARG_A:          MAXARG_A,
-    MAXARG_B:          MAXARG_B,
-    MAXARG_C:          MAXARG_C,
-    BITRK:             BITRK,
-    ISK:               ISK,
-    INDEXK:            INDEXK,
-    LFIELDS_PER_FLUSH: LFIELDS_PER_FLUSH
-};
+module.exports.OpCodes           = OpCodes;
+module.exports.SIZE_C            = SIZE_C;
+module.exports.SIZE_B            = SIZE_B;
+module.exports.SIZE_Bx           = SIZE_Bx;
+module.exports.SIZE_A            = SIZE_A;
+module.exports.SIZE_Ax           = SIZE_Ax;
+module.exports.SIZE_OP           = SIZE_OP;
+module.exports.POS_OP            = POS_OP;
+module.exports.POS_A             = POS_A;
+module.exports.POS_C             = POS_C;
+module.exports.POS_B             = POS_B;
+module.exports.POS_Bx            = POS_Bx;
+module.exports.POS_Ax            = POS_Ax;
+module.exports.MAXARG_Bx         = MAXARG_Bx;
+module.exports.MAXARG_sBx        = MAXARG_sBx;
+module.exports.MAXARG_Ax         = MAXARG_Ax;
+module.exports.MAXARG_A          = MAXARG_A;
+module.exports.MAXARG_B          = MAXARG_B;
+module.exports.MAXARG_C          = MAXARG_C;
+module.exports.BITRK             = BITRK;
+module.exports.ISK               = ISK;
+module.exports.INDEXK            = INDEXK;
+module.exports.LFIELDS_PER_FLUSH = LFIELDS_PER_FLUSH;

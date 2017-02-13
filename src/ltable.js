@@ -1,8 +1,12 @@
 /*jshint esversion: 6 */
 "use strict";
 
+const assert  = require('assert');
+
 const lobject = require('./lobject.js');
+const nil     = require('./ldo.js').nil;
 const Table   = lobject.Table;
+
 
 /*
 ** Try to find a boundary in table 't'. A 'boundary' is an integer index
@@ -26,5 +30,5 @@ Table.prototype.luaH_getn = function() {
     /* else must find a boundary in hash part */
     else if (hash.size === 0)
         return j;
-    else return j; // TODO: unbound_search(t, j) => but why ?
+    else return hash.get(j);
 };

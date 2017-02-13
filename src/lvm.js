@@ -571,7 +571,7 @@ const luaV_execute = function(L) {
                 L.stack[cb + 1] = L.stack[ra + 1];
                 L.stack[cb]     = L.stack[ra];
                 L.top = cb + 3; /* func. + 2 args (state and index) */
-                luaD_call(L, cb, i.C);
+                ldo.luaD_call(L, cb, i.C);
                 base = ci.u.l.base;
                 L.top = ci.top;
                 i = ci.u.l.savedpc[ci.pcOff++];
@@ -728,7 +728,7 @@ const luaV_equalobj = function(L, t1, t2) {
         case CT.LUA_TUSERDATA:
         case CT.LUA_TTABLE:
             if (t1 === t2) return 1;
-            else if (L === null) return 1;
+            else if (L === null) return 0;
 
             // TODO: fasttm ?
             tm = ltm.luaT_gettmbyobj(L, t1, TMS.TM_EQ);
@@ -743,7 +743,7 @@ const luaV_equalobj = function(L, t1, t2) {
         return 0;
 
     ltm.luaT_callTM(L, tm, t1, t2, L.top, 1);
-    return !L.stack[L.top].l_isfalse();
+    return L.stack[L.top].l_isfalse() ? 0 : 1;
 };
 
 const forlimit = function(obj, step) {
@@ -937,65 +937,23 @@ const luaV_concat = function(L, total) {
     } while (total > 1); /* repeat until only 1 result left */
 };
 
-/*
-** Check appropriate error for stack overflow ("regular" overflow or
-** overflow while handling stack overflow). If 'nCalls' is larger than
-** LUAI_MAXCCALLS (which means it is handling a "regular" overflow) but
-** smaller than 9/8 of LUAI_MAXCCALLS, does not report an error (to
-** allow overflow handling to work)
-*/
-const stackerror = function(L) {
-    if (L.nCcalls === llimit.LUAI_MAXCCALLS)
-        throw new Error("JS stack overflow");
-    else if (L.nCcalls >= llimit.LUAI_MAXCCALLS + (llimit.LUAI_MAXCCALLS >> 3)) /* error while handing stack error */
-        throw new Error("stack overflow"); // TODO: luaD_throw(L, LUA_ERRERR);
-};
-
-/*
-** Call a function (JS or Lua). The function to be called is at func.
-** The arguments are on the stack, right after the function.
-** When returns, all the results are on the stack, starting at the original
-** function position.
-*/
-const luaD_call = function(L, off, nResults) {
-    if (++L.nCcalls >= llimit.LUAI_MAXCCALLS)
-        stackerror(L);
-    if (!ldo.luaD_precall(L, off, nResults))
-        luaV_execute(L);
-    L.nCcalls--;
-};
-
-/*
-** Similar to 'luaD_call', but does not allow yields during the call
-*/
-const luaD_callnoyield = function(L, off, nResults) {
-  L.nny++;
-  luaD_call(L, off, nResults);
-  L.nny--;
-};
-
-module.exports = {
-    RA:               RA,
-    RB:               RB,
-    RC:               RC,
-    RKB:              RKB,
-    RKC:              RKC,
-    luaV_execute:     luaV_execute,
-    dojump:           dojump,
-    donextjump:       donextjump,
-    luaV_lessequal:   luaV_lessequal,
-    luaV_lessthan:    luaV_lessthan,
-    luaV_equalobj:    luaV_equalobj,
-    forlimit:         forlimit,
-    luaV_tointeger:   luaV_tointeger,
-    tonumber:         tonumber,
-    LTnum:            LTnum,
-    LEnum:            LEnum,
-    LEintfloat:       LEintfloat,
-    LTintfloat:       LTintfloat,
-    l_strcmp:         l_strcmp,
-    luaV_objlen:      luaV_objlen,
-    stackerror:       stackerror,
-    luaD_call:        luaD_call,
-    luaD_callnoyield: luaD_callnoyield,
-};
+module.exports.RA             = RA;
+module.exports.RB             = RB;
+module.exports.RC             = RC;
+module.exports.RKB            = RKB;
+module.exports.RKC            = RKC;
+module.exports.luaV_execute   = luaV_execute;
+module.exports.dojump         = dojump;
+module.exports.donextjump     = donextjump;
+module.exports.luaV_lessequal = luaV_lessequal;
+module.exports.luaV_lessthan  = luaV_lessthan;
+module.exports.luaV_equalobj  = luaV_equalobj;
+module.exports.forlimit       = forlimit;
+module.exports.luaV_tointeger = luaV_tointeger;
+module.exports.tonumber       = tonumber;
+module.exports.LTnum          = LTnum;
+module.exports.LEnum          = LEnum;
+module.exports.LEintfloat     = LEintfloat;
+module.exports.LTintfloat     = LTintfloat;
+module.exports.l_strcmp       = l_strcmp;
+module.exports.luaV_objlen    = luaV_objlen;

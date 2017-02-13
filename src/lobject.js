@@ -209,10 +209,8 @@ class Userdata extends TValue {
 }
 
 
-module.exports = {
-    LClosure: LClosure,
-    TValue: TValue,
-    Table: Table,
-    TString: TString,
-    Userdata: Userdata
-};
+module.exports.LClosure = LClosure;
+module.exports.TValue   = TValue;
+module.exports.Table    = Table;
+module.exports.TString  = TString;
+module.exports.Userdata = Userdata;

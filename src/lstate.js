@@ -41,16 +41,14 @@ class lua_State {
 
 }
 
-module.exports = {
-    lua_State:       lua_State,
-    CallInfo:        CallInfo,
-    CIST_OAH:        (1<<0),  /* original value of 'allowhook' */
-    CIST_LUA:        (1<<1),  /* call is running a Lua function */
-    CIST_HOOKED:     (1<<2),  /* call is running a debug hook */
-    CIST_FRESH:      (1<<3),  /* call is running on a fresh invocation of luaV_execute */
-    CIST_YPCALL:     (1<<4),  /* call is a yieldable protected call */
-    CIST_TAIL:       (1<<5),  /* call was tail called */
-    CIST_HOOKYIELD:  (1<<6),  /* last hook called yielded */
-    CIST_LEQ:        (1<<7),  /* using __lt for __le */
-    CIST_FIN:        (1<<8)   /* call is running a finalizer */
-};
+module.exports.lua_State      = lua_State;
+module.exports.CallInfo       = CallInfo;
+module.exports.CIST_OAH       = (1<<0);  /* original value of 'allowhook' */
+module.exports.CIST_LUA       = (1<<1);  /* call is running a Lua function */
+module.exports.CIST_HOOKED    = (1<<2);  /* call is running a debug hook */
+module.exports.CIST_FRESH     = (1<<3);  /* call is running on a fresh invocation of luaV_execute */
+module.exports.CIST_YPCALL    = (1<<4);  /* call is a yieldable protected call */
+module.exports.CIST_TAIL      = (1<<5);  /* call was tail called */
+module.exports.CIST_HOOKYIELD = (1<<6);  /* last hook called yielded */
+module.exports.CIST_LEQ       = (1<<7);  /* using __lt for __le */
+module.exports.CIST_FIN       = (1<<8);   /* call is running a finalizer */

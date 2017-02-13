@@ -35,8 +35,6 @@ constant_types.LUA_TLCL = constant_types.LUA_TFUNCTION | (0 << 4);  /* Lua closu
 constant_types.LUA_TLCF = constant_types.LUA_TFUNCTION | (1 << 4);  /* light C function */
 constant_types.LUA_TCCL = constant_types.LUA_TFUNCTION | (2 << 4);  /* C closure */
 
-module.exports = {
-    constant_types: constant_types,
-    thread_status: thread_status,
-    LUA_MULTRET: -1
-};
+module.exports.constant_types = constant_types;
+module.exports.thread_status  = thread_status;
+module.exports.LUA_MULTRET    = -1;

@@ -11,6 +11,7 @@ const CallInfo       = lstate.CallInfo;
 const llimit         = require('./llimit.js');
 const ltm            = require('./ltm.js');
 const TMS            = ltm.TMS;
+const lvm            = require('./lvm.js');
 
 const nil            = new TValue(CT.LUA_TNIL, null);
 
@@ -141,11 +142,49 @@ const tryfuncTM = function(L, off, func) {
     L.stack[off] = tm; /* tag method is the new function to be called */       
 };
 
-module.exports = {
-    nil:              nil,
-    luaD_precall:     luaD_precall,
-    luaD_poscall:     luaD_poscall,
-    moveresults:      moveresults,
-    adjust_varargs:   adjust_varargs,
-    tryfuncTM:        tryfuncTM
+/*
+** Check appropriate error for stack overflow ("regular" overflow or
+** overflow while handling stack overflow). If 'nCalls' is larger than
+** LUAI_MAXCCALLS (which means it is handling a "regular" overflow) but
+** smaller than 9/8 of LUAI_MAXCCALLS, does not report an error (to
+** allow overflow handling to work)
+*/
+const stackerror = function(L) {
+    if (L.nCcalls === llimit.LUAI_MAXCCALLS)
+        throw new Error("JS stack overflow");
+    else if (L.nCcalls >= llimit.LUAI_MAXCCALLS + (llimit.LUAI_MAXCCALLS >> 3)) /* error while handing stack error */
+        throw new Error("stack overflow"); // TODO: luaD_throw(L, LUA_ERRERR);
 };
+
+/*
+** Call a function (JS or Lua). The function to be called is at func.
+** The arguments are on the stack, right after the function.
+** When returns, all the results are on the stack, starting at the original
+** function position.
+*/
+const luaD_call = function(L, off, nResults) {
+    if (++L.nCcalls >= llimit.LUAI_MAXCCALLS)
+        stackerror(L);
+    if (!luaD_precall(L, off, nResults))
+        lvm.luaV_execute(L);
+    L.nCcalls--;
+};
+
+/*
+** Similar to 'luaD_call', but does not allow yields during the call
+*/
+const luaD_callnoyield = function(L, off, nResults) {
+  L.nny++;
+  luaD_call(L, off, nResults);
+  L.nny--;
+};
+
+module.exports.nil              = nil;
+module.exports.luaD_precall     = luaD_precall;
+module.exports.luaD_poscall     = luaD_poscall;
+module.exports.moveresults      = moveresults;
+module.exports.adjust_varargs   = adjust_varargs;
+module.exports.tryfuncTM        = tryfuncTM;
+module.exports.stackerror       = stackerror;
+module.exports.luaD_call        = luaD_call;
+module.exports.luaD_callnoyield = luaD_callnoyield;

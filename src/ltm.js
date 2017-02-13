@@ -96,11 +96,9 @@ const luaT_gettmbyobj = function(L, o, event) {
     return mt ? mt.__index(mt, event) : ldo.nil;
 };
 
-module.exports = {
-    TMS:              TMS,
-    luaT_callTM:      luaT_callTM,
-    luaT_callbinTM:   luaT_callbinTM,
-    luaT_trybinTM:    luaT_trybinTM,
-    luaT_callorderTM: luaT_callorderTM,
-    luaT_gettmbyobj:  luaT_gettmbyobj
-};
+module.exports.TMS              = TMS;
+module.exports.luaT_callTM      = luaT_callTM;
+module.exports.luaT_callbinTM   = luaT_callbinTM;
+module.exports.luaT_trybinTM    = luaT_trybinTM;
+module.exports.luaT_callorderTM = luaT_callorderTM;
+module.exports.luaT_gettmbyobj  = luaT_gettmbyobj;
