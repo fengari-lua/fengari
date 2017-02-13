@@ -1,5 +1,6 @@
 /*jshint esversion: 6 */
 "use strict";
+const assert = require('assert');
 
 class Proto {
 
@@ -47,7 +48,7 @@ class UpVal {
         return this.v !== null;
     }
 
-};
+}
 
 const findupval = function(L, level) {
     let pp = L.openupval;
@@ -85,7 +86,7 @@ const luaF_close = function(L, level) {
             uv.v = null;
         }
     }
-}
+};
 
 module.exports = {
     Proto: Proto,

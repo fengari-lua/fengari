@@ -50,7 +50,7 @@ const luaT_callTM = function(L, f, p1, p2, p3, hasres) {
     if (!hasres)  /* no result? 'p3' is third argument */
         L.stack[L.top++] = p3;  /* 3rd argument */
 
-    if (ci.callstatus & lstate.CIST_LUA)
+    if (L.ci.callstatus & lstate.CIST_LUA)
         ldo.luaD_call(L, func, hasres);
     else
         ldo.luaD_callnoyield(L, func, hasres);
@@ -67,20 +67,20 @@ const luaT_callbinTM = function(L, p1, p2, res, event) {
     if (tm.ttisnil()) return false;
     luaT_callTM(L, tm, p1, p2, res, 1);
     return true;
-}
+};
 
 const luaT_trybinTM = function(L, p1, p2, res, event) {
     if (!luaT_gettmbyobj(L, p1, p2, res, event)) {
         throw new Error("TM error"); // TODO: luaG_error
     }
-}
+};
 
 const luaT_callorderTM = function(L, p1, p2, event) {
     if (!luaT_callbinTM(L, p2, p2, L.top, event))
         return -1;
     else
         return !l_isfalse(L.stack[L.top]) ? 1 : 0;
-}
+};
 
 const luaT_gettmbyobj = function(L, o, event) {
     let mt;
@@ -88,12 +88,13 @@ const luaT_gettmbyobj = function(L, o, event) {
         case CT.LUA_TTABLE:
         case CT.LUA_TTUSERDATA:
             mt = o.value.metatable;
+            break;
         default:
             // TODO: mt = G(L)->mt[ttnov(o)];
     }
 
     return mt ? mt.__index(mt, event) : ldo.nil;
-}
+};
 
 module.exports = {
     TMS:              TMS,
@@ -102,4 +103,4 @@ module.exports = {
     luaT_trybinTM:    luaT_trybinTM,
     luaT_callorderTM: luaT_callorderTM,
     luaT_gettmbyobj:  luaT_gettmbyobj
-}
+};

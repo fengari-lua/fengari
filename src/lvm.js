@@ -57,7 +57,7 @@ const luaV_execute = function(L) {
             ci = L.ci;
             cl = ci.func;
             k = cl.p.k;
-            base = ci.u.l.base
+            base = ci.u.l.base;
 
             i = ci.u.l.savedpc[ci.pcOff++];
             ra = RA(L, base, i);
@@ -353,7 +353,7 @@ const luaV_execute = function(L) {
                 } else if (numberop !== false) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, -op.value);
                 } else {
-                    ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_UNM);
+                    ltm.luaT_trybinTM(L, op, op, ra, TMS.TM_UNM);
                     base = ci.u.l.base;
                 }
                 break;
@@ -388,7 +388,7 @@ const luaV_execute = function(L) {
                 break;
             }
             case "OP_EQ": {
-                if (luaV_equalobj(RKB(L, base, k, i), RKC(L, base, k, i)) !== i.A)
+                if (luaV_equalobj(L, RKB(L, base, k, i), RKC(L, base, k, i)) !== i.A)
                     ci.pcOff++;
                 else
                     donextjump(L, ci);
@@ -396,7 +396,7 @@ const luaV_execute = function(L) {
                 break;
             }
             case "OP_LT": {
-                if (luaV_lessthan(RKB(L, base, k, i), RKC(L, base, k, i)) !== i.A)
+                if (luaV_lessthan(L, RKB(L, base, k, i), RKC(L, base, k, i)) !== i.A)
                     ci.pcOff++;
                 else
                     donextjump(L, ci);
@@ -404,7 +404,7 @@ const luaV_execute = function(L) {
                 break;
             }
             case "OP_LE": {
-                if (luaV_lessequal(RKB(L, base, k, i), RKC(L, base, k, i)) !== i.A)
+                if (luaV_lessequal(L, RKB(L, base, k, i), RKC(L, base, k, i)) !== i.A)
                     ci.pcOff++;
                 else
                     donextjump(L, ci);
@@ -490,7 +490,6 @@ const luaV_execute = function(L) {
                 if (b) L.top = ci.top;
 
                 continue newframe;
-                break;
             }
             case "OP_FORLOOP": {
                 if (L.stack[ra].ttisinteger()) { /* integer loop? */
@@ -555,7 +554,7 @@ const luaV_execute = function(L) {
                 break;
             }
             case "OP_TFORCALL": {
-                let cb = ra + 3 /* call base */
+                let cb = ra + 3; /* call base */
                 L.stack[cb + 2] = L.stack[ra + 2];
                 L.stack[cb + 1] = L.stack[ra + 1];
                 L.stack[cb]     = L.stack[ra];
@@ -647,7 +646,7 @@ const luaV_execute = function(L) {
 
 const dojump = function(L, ci, i, e) {
     let a = i.A;
-    if (a != 0) lfunc.luaF_close(L, ci.u.l.base + a - 1);
+    if (a !== 0) lfunc.luaF_close(L, ci.u.l.base + a - 1);
     ci.pcOff += i.sBx + e;
 };
 
@@ -656,20 +655,20 @@ const donextjump = function(L, ci) {
 };
 
 
-const luaV_lessthan = function(l, r) {
+const luaV_lessthan = function(L, l, r) {
     if (l.ttisnumber() && r.ttisnumber())
         return LTnum(l, r);
     else if (l.ttisstring() && r.ttisstring())
         return l_strcmp(l, r) < 0;
     else {
-        res = ltm.luatT_callorderTM(L, l, r, TMS.TM_LT);
+        let res = ltm.luatT_callorderTM(L, l, r, TMS.TM_LT);
         if (res < 0)
             throw new Error("TM order error"); // TODO: luaG_ordererror
         return res;
     }
 };
 
-const luaV_lessequal = function(l, r) {
+const luaV_lessequal = function(L, l, r) {
     let res;
 
     if (l.ttisnumber() && r.ttisnumber())
@@ -682,21 +681,21 @@ const luaV_lessequal = function(l, r) {
             return res;
     }
 
-    L.ci.callstatus |= CIST_LEQ; /* mark it is doing 'lt' for 'le' */
+    L.ci.callstatus |= lstate.CIST_LEQ; /* mark it is doing 'lt' for 'le' */
     res = ltm.luatT_callorderTM(L, l, r, TMS.TM_LT);
-    L.ci.callstatus ^= CIST_LEQ; /* clear mark */
+    L.ci.callstatus ^= lstate.CIST_LEQ; /* clear mark */
     if (res < 0)
         throw new Error("TM order error"); // TODO: luaG_ordererror
     return res === 1;
 };
 
-const luaV_equalobj = function(t1, t2) {
+const luaV_equalobj = function(L, t1, t2) {
     if (t1.ttype() !== t2.ttype()) { /* not the same variant? */
         if (t1.ttnov() !== t2.ttnov() || t1.ttnov() !== CT.LUA_NUMBER)
             return 0; /* only numbers can be equal with different variants */
         else { /* two numbers with different variants */
             /* compare them as integers */
-            return Math.floor(t1.value) === Math.floor(t2.value) // TODO: tointeger
+            return Math.floor(t1.value) === Math.floor(t2.value); // TODO: tointeger
         }
     }
 
@@ -723,7 +722,7 @@ const luaV_equalobj = function(t1, t2) {
             tm = ltm.luaT_gettmbyobj(L, t1, TMS.TM_EQ);
             if (tm.ttisnil())
                 tm = ltm.luaT_gettmbyobj(L, t2, TMS.TM_EQ);
-            break
+            break;
         default:
             return t1.value === t2.value ? 1 : 0;
     }
@@ -756,7 +755,7 @@ const forlimit = function(obj, step) {
         casted: true,
         stopnow: stopnow,
         ilimit: ilimit
-    }
+    };
 };
 
 /*
@@ -848,7 +847,7 @@ const l_strcmp = function(ls, rs) {
 };
 
 const l_isfalse = function(o) {
-    return o.ttisnil() || (o.ttisboolean() && o.value === false)
+    return o.ttisnil() || (o.ttisboolean() && o.value === false);
 };
 
 /*
@@ -884,7 +883,7 @@ const luaV_objlen = function(L, ra, rb) {
 */
 const luaV_concat = function(L, total) {
     assert(total >= 2);
-}
+};
 
 /*
 ** Check appropriate error for stack overflow ("regular" overflow or
@@ -897,7 +896,7 @@ const stackerror = function(L) {
     if (L.nCcalls === llimit.LUAI_MAXCCALLS)
         throw new Error("JS stack overflow");
     else if (L.nCcalls >= llimit.LUAI_MAXCCALLS + (llimit.LUAI_MAXCCALLS >> 3)) /* error while handing stack error */
-        throw new Error("stack overflow") // TODO: luaD_throw(L, LUA_ERRERR);
+        throw new Error("stack overflow"); // TODO: luaD_throw(L, LUA_ERRERR);
 };
 
 /*

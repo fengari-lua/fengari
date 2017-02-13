@@ -21,10 +21,8 @@ const luaD_precall = function(L, off, nresults) {
     switch(func.type) {
         case CT.LUA_TCCL: // JS function ?
             throw new Error("LUA_TCCL not implemeted yet");
-            break;
         case CT.LUA_TLCF: // still JS function ?
             throw new Error("LUA_TLCF not implemeted yet");
-            break;
         case CT.LUA_TLCL: {
             let p = func.p;
             let n = L.top - off - 1;
@@ -63,7 +61,6 @@ const luaD_precall = function(L, off, nresults) {
             ci.callstatus = lstate.CIST_LUA;
 
             return false;
-            break;
         }
         default:
             tryfuncTM(L, off, func);
@@ -84,7 +81,7 @@ const moveresults = function(L, firstResult, res, nres, wanted) {
         case 0:
             break;
         case 1: {
-            if (nres == 0)
+            if (nres === 0)
                 firstResult = nil;
             L.stack[res] = L.stack[firstResult];
             break;
@@ -136,13 +133,13 @@ const adjust_varargs = function(L, p, actual) {
 const tryfuncTM = function(L, off, func) {
     let tm = ltm.luaT_gettmbyobj(L, func, TMS.TM_CALL);
     if (!tm.ttisfunction(tm))
-        throw new Error("__call metatable member is not a function") // TODO: luaG_typeerror
+        throw new Error("__call metatable member is not a function"); // TODO: luaG_typeerror
     /* Open a hole inside the stack at 'func' */
-    for (p = L.top; p > off; p--)
+    for (let p = L.top; p > off; p--)
         L.stack[p] = L.stack[p-1];
     L.top++; /* slot ensured by caller */
     L.stack[off] = tm; /* tag method is the new function to be called */       
-}
+};
 
 module.exports = {
     nil:              nil,

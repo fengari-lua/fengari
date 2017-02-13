@@ -105,11 +105,11 @@ class BytecodeParser {
 
     /* creates a mask with 'n' 0 bits at position 'p' */
     static MASK0(n, p) {
-        return (~MASK1(n,p));
+        return (~BytecodeParser.MASK1(n,p));
     }
 
     readInstruction() {
-        let ins = new DataView(new Buffer(this.instructionSize))
+        let ins = new DataView(new Buffer(this.instructionSize));
         for (let i = 0; i < this.instructionSize; i++)
             ins.setUint8(i, this.readByte());
 
@@ -210,7 +210,7 @@ class BytecodeParser {
                 varname: this.readString(),
                 startpc: this.readInt(),
                 endpc:   this.readInt()
-            }
+            };
 
             console.log(`
                 f.locvars[${i}].varname = ${f.locvars[i].varname}

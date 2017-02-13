@@ -78,10 +78,10 @@ const ISK = function (x) {
 
 const INDEXK = function (r) {
     return r & ~BITRK;
-}
+};
 
 /* number of list items to accumulate before a SETLIST instruction */
-const LFIELDS_PER_FLUSH = 50
+const LFIELDS_PER_FLUSH = 50;
 
 module.exports = {
     OpCodes:           OpCodes,
