@@ -20,6 +20,7 @@ const CallInfo       = lstate.CallInfo;
 const llimit         = require('./llimit.js');
 const ldo            = require('./ldo.js');
 const ltm            = require('./ltm.js');
+const ltable         = require('./ltable.js');
 const TMS            = ltm.TMS;
 
 const RA = function(L, base, i) {
