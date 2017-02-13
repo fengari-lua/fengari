@@ -102,6 +102,10 @@ class TValue {
         return this.checktag(CT.LUA_TDEADKEY);
     }
 
+    l_isfalse() {
+        return this.ttisnil() || (this.ttisboolean() && this.value === false);
+    }
+
 }
 
 const nil   = new TValue(CT.LUA_TNIL, null);

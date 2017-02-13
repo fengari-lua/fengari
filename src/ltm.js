@@ -79,7 +79,7 @@ const luaT_callorderTM = function(L, p1, p2, event) {
     if (!luaT_callbinTM(L, p2, p2, L.top, event))
         return -1;
     else
-        return !l_isfalse(L.stack[L.top]) ? 1 : 0;
+        return !L.stack[L.top].l_isfalse() ? 1 : 0;
 };
 
 const luaT_gettmbyobj = function(L, o, event) {

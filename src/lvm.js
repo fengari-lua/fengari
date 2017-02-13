@@ -372,7 +372,7 @@ const luaV_execute = function(L) {
             }
             case "OP_NOT": {
                 let op = L.stack[RB(L, base, i)];
-                L.stack[ra] = new TValue(CT.LUA_TBOOLEAN, l_isfalse(op));
+                L.stack[ra] = new TValue(CT.LUA_TBOOLEAN, op.l_isfalse());
                 break;
             }
             case "OP_LEN": {
@@ -412,7 +412,7 @@ const luaV_execute = function(L) {
                 break;
             }
             case "OP_TEST": {
-                if (i.C ? l_isfalse(L.stack[ra]) : !l_isfalse(L.stack[ra]))
+                if (i.C ? L.stack[ra].l_isfalse() : !L.stack[ra].l_isfalse())
                     ci.pcOff++;
                 else
                     donextjump(L, ci);
@@ -420,7 +420,7 @@ const luaV_execute = function(L) {
             }
             case "OP_TESTSET": {
                 let rb = L.stack[RB(L, base, i)];
-                if (i.C ? l_isfalse(rb) : !l_isfalse(rb))
+                if (i.C ? rb.l_isfalse() : !rb.l_isfalse())
                     ci.pcOff++;
                 else {
                     L.stack[ra] = rb;
@@ -731,7 +731,7 @@ const luaV_equalobj = function(L, t1, t2) {
         return 0;
 
     ltm.luaT_callTM(L, tm, t1, t2, L.top, 1);
-    return !l_isfalse(L.stack[L.top]);
+    return !L.stack[L.top].l_isfalse();
 };
 
 const forlimit = function(obj, step) {
@@ -846,10 +846,6 @@ const l_strcmp = function(ls, rs) {
     return ls.value === rs.value ? 0 : (ls.value < rs.value ? -1 : 1);
 };
 
-const l_isfalse = function(o) {
-    return o.ttisnil() || (o.ttisboolean() && o.value === false);
-};
-
 /*
 ** Main operation 'ra' = #rb'.
 */
@@ -942,7 +938,6 @@ module.exports = {
     LEintfloat:       LEintfloat,
     LTintfloat:       LTintfloat,
     l_strcmp:         l_strcmp,
-    l_isfalse:        l_isfalse,
     luaV_objlen:      luaV_objlen,
     stackerror:       stackerror,
     luaD_call:        luaD_call,

@@ -747,7 +747,7 @@ test('LEN', function (t) {
         return #t, #t2, #s
     `, L;
     
-    t.plan(3);
+    t.plan(4);
 
     t.comment("Running following code: \n" + luaCode);
 
