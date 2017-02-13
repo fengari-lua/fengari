@@ -4,81 +4,46 @@
 ## So far
 
 - [x] Parse bytecode
-- [ ] VM
-    - [ ] Opcodes
-        - [x] `OP_MOVE`
-        - [x] `OP_LOADK`
-        - [x] `OP_LOADKX`
-        - [x] `OP_LOADBOOL`
-        - [x] `OP_LOADNIL`
-        - [x] `OP_GETUPVAL`
-        - [x] `OP_SETUPVAL`
-        - [x] `OP_GETTABUP`
-        - [x] `OP_GETTABLE`
-        - [x] `OP_SETTABUP`
-        - [x] `OP_SETTABLE`
-        - [x] `OP_NEWTABLE`
-        - [x] `OP_SELF`
-        - [x] `OP_ADD`
-        - [x] `OP_SUB`
-        - [x] `OP_MUL`
-        - [x] `OP_MOD`
-        - [x] `OP_POW`
-        - [x] `OP_DIV`
-        - [x] `OP_IDIV`
-        - [x] `OP_BAND`
-        - [x] `OP_BOR`
-        - [x] `OP_BXOR`
-        - [x] `OP_SHL`
-        - [x] `OP_SHR`
-        - [x] `OP_UNM`
-        - [x] `OP_BNOT`
-        - [x] `OP_NOT`
-        - [x] `OP_LEN`
-        - [ ] `OP_CONCAT`
-        - [x] `OP_JMP`
-        - [x] `OP_EQ`
-        - [x] `OP_LT`
-        - [x] `OP_LE`
-        - [x] `OP_TEST`
-        - [x] `OP_TESTSET`
-        - [x] `OP_CALL`
-        - [x] `OP_TAILCALL`
-        - [x] `OP_RETURN`
-        - [x] `OP_FORLOOP`
-        - [x] `OP_FORPREP`
-        - [x] `OP_TFORCALL`
-        - [x] `OP_TFORLOOP`
-        - [x] `OP_SETLIST`
-        - [x] `OP_CLOSURE`
-        - [x] `OP_VARARG`
-        - [x] `OP_EXTRAARG`
-    - [ ] Tag Methods
-        - [ ] `__index`
-        - [ ] `__newindex`
-        - [x] `__gc` (unavailable)
-        - [ ] `__mode`
-        - [ ] `__len`
-        - [ ] `__eq`
-        - [ ] `__add`
-        - [ ] `__sub`
-        - [ ] `__mul`
-        - [ ] `__mod`
-        - [ ] `__pow`
-        - [ ] `__div`
-        - [ ] `__idiv`
-        - [ ] `__band`
-        - [ ] `__bor`
-        - [ ] `__bxor`
-        - [ ] `__shl`
-        - [ ] `__shr`
-        - [ ] `__unm`
-        - [ ] `__bnot`
-        - [ ] `__lt`
-        - [ ] `__le`
-        - [ ] `__concat`
-        - [ ] `__call`
-    - [ ] Debug (errors)
+- [ ] Opcodes
+    - [x] ...
+    - [ ] `OP_CONCAT`
+- [ ] Basic types representation:
+    - [x] nil
+    - [x] boolean
+    - [ ] number (32-bit ?)
+        - [ ] integer
+        - [ ] float
+    - [ ] string (8-bit clean)
+    - [ ] table
+    - [ ] function
+    - [ ] userdata
+    - [ ] thread
+- [ ] Tag Methods
+    - [ ] `__index`
+    - [ ] `__newindex`
+    - [x] `__gc` (unavailable)
+    - [ ] `__mode`
+    - [ ] `__len`
+    - [ ] `__eq`
+    - [ ] `__add`
+    - [ ] `__sub`
+    - [ ] `__mul`
+    - [ ] `__mod`
+    - [ ] `__pow`
+    - [ ] `__div`
+    - [ ] `__idiv`
+    - [ ] `__band`
+    - [ ] `__bor`
+    - [ ] `__bxor`
+    - [ ] `__shl`
+    - [ ] `__shr`
+    - [ ] `__unm`
+    - [ ] `__bnot`
+    - [ ] `__lt`
+    - [ ] `__le`
+    - [ ] `__concat`
+    - [ ] `__call`
+- [ ] Debug (errors)
 - [ ] C API
 - [ ] stdlib
 - [ ] DOM API binding
