@@ -169,8 +169,6 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, op1.value + op2.value);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_ADD);
-                    debugger;
-                    console.log(`TM_ADD: ${L.stack[ra].value} (${ra})`);
                     base = ci.u.l.base;
                 }
                 break;
@@ -187,8 +185,6 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, op1.value - op2.value);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_SUB);
-                    debugger;
-                    console.log(`TM_SUB: ${L.stack[ra].value} (${ra})`);
                     base = ci.u.l.base;
                 }
                 break;
@@ -205,8 +201,6 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, k[i.B].value * op2.value);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_MUL);
-                    debugger;
-                    console.log(`TM_MUL: ${L.stack[ra].value} (${ra})`);
                     base = ci.u.l.base;
                 }
                 break;
@@ -223,8 +217,6 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, k[i.B].value % op2.value);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_MOD);
-                    debugger;
-                    console.log(`TM_MOD: ${L.stack[ra].value} (${ra})`);
                     base = ci.u.l.base;
                 }
                 break;
@@ -239,8 +231,6 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, Math.pow(op1.value, op2.value));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_POW);
-                    debugger;
-                    console.log(`TM_POW: ${L.stack[ra].value} (${ra})`);
                     base = ci.u.l.base;
                 }
                 break;
@@ -255,8 +245,6 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, k[i.B].value / op2.value);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_DIV);
-                    debugger;
-                    console.log(`TM_DIV: ${L.stack[ra].value} (${ra})`);
                     base = ci.u.l.base;
                 }
                 break;
@@ -273,8 +261,6 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, (op1.value / op2.value)|0);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_IDIV);
-                    debugger;
-                    console.log(`TM_IDIV: ${L.stack[ra].value} (${ra})`);
                     base = ci.u.l.base;
                 }
                 break;
@@ -289,8 +275,6 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value & op2.value)|0);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_BAND);
-                    debugger;
-                    console.log(`TM_BAND: ${L.stack[ra].value} (${ra})`);
                     base = ci.u.l.base;
                 }
                 break;
@@ -305,8 +289,6 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value | op2.value)|0);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_BOR);
-                    debugger;
-                    console.log(`TM_BOR: ${L.stack[ra].value} (${ra})`);
                     base = ci.u.l.base;
                 }
                 break;
@@ -321,8 +303,6 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value ^ op2.value)|0);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_BXOR);
-                    debugger;
-                    console.log(`TM_BXOR: ${L.stack[ra].value} (${ra})`);
                     base = ci.u.l.base;
                 }
                 break;
@@ -337,8 +317,6 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value << op2.value)|0);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_SHL);
-                    debugger;
-                    console.log(`TM_SHL: ${L.stack[ra].value} (${ra})`);
                     base = ci.u.l.base;
                 }
                 break;
@@ -353,8 +331,6 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value >> op2.value)|0);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_SHR);
-                    debugger;
-                    console.log(`TM_SHR: ${L.stack[ra].value} (${ra})`);
                     base = ci.u.l.base;
                 }
                 break;

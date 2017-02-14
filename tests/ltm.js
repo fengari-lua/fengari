@@ -5,6 +5,7 @@ const test     = require('tape');
 const beautify = require('js-beautify').js_beautify;
 
 const VM       = require("../src/lvm.js");
+const ldo      = require("../src/ldo.js");
 const OC       = require('../src/lopcodes.js');
 
 const getState = require("./tests.js").getState;
@@ -22,7 +23,7 @@ test('__index, __newindex: with actual table', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        VM.luaV_execute(L);
+        ldo.luaD_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
@@ -54,7 +55,7 @@ test('__index: with non table', function (t) {
     }, "Bytecode parsed without errors");
 
     t.throws(function () {
-        VM.luaV_execute(L);
+        ldo.luaD_call(L, 0, -1);
     }, "Program executed with expected error");
 });
 
@@ -74,7 +75,7 @@ test('__newindex: with non table', function (t) {
     }, "Bytecode parsed without errors");
 
     t.throws(function () {
-        VM.luaV_execute(L);
+        ldo.luaD_call(L, 0, -1);
     }, "Program executed with expected error");
 });
 
@@ -129,7 +130,7 @@ test('__index function in metatable', function (t) {
     L.stack[0].p.code[4].breakpoint = true;
 
     t.doesNotThrow(function () {
-        VM.luaV_execute(L);
+        ldo.luaD_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     t.strictEqual(
@@ -220,7 +221,7 @@ test('__newindex function in metatable', function (t) {
     L.stack[0].p.code[4].breakpoint = true;
 
     t.doesNotThrow(function () {
-        VM.luaV_execute(L);
+        ldo.luaD_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     t.strictEqual(
@@ -305,7 +306,7 @@ test('__index table in metatable', function (t) {
     L.stack[0].p.code[5].breakpoint = true;
 
     t.doesNotThrow(function () {
-        VM.luaV_execute(L);
+        ldo.luaD_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     t.strictEqual(
@@ -394,7 +395,7 @@ test('__newindex table in metatable', function (t) {
     L.stack[0].p.code[5].breakpoint = true;
 
     t.doesNotThrow(function () {
-        VM.luaV_execute(L);
+        ldo.luaD_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     t.strictEqual(
@@ -499,7 +500,7 @@ test('__index table with own metatable', function (t) {
     L.stack[0].p.code[8].breakpoint = true;
 
     t.doesNotThrow(function () {
-        VM.luaV_execute(L);
+        ldo.luaD_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     L.ci.pcOff--;
@@ -604,7 +605,7 @@ test('__newindex table with own metatable', function (t) {
     L.stack[0].p.code[8].breakpoint = true;
 
     t.doesNotThrow(function () {
-        VM.luaV_execute(L);
+        ldo.luaD_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     L.ci.pcOff--;
@@ -781,7 +782,7 @@ test('binary __xxx functions in metatable', function (t) {
     L.stack[0].p.code[26].breakpoint = true;
 
     t.doesNotThrow(function () {
-        VM.luaV_execute(L);
+        ldo.luaD_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     L.ci.pcOff--;
@@ -796,7 +797,20 @@ test('binary __xxx functions in metatable', function (t) {
 
     t.deepEqual(
         L.stack.slice(L.top - 12, L.top).map(function (e) { return e.value }),
-        ["{} + 1", "{} - 1", "{} * 1", "{} % 1", "{} ^ 1", "{} / 1", "{} // 1", "{} & 1", "{} | 1", "{} ~ 1", "{} << 1", "{} >> 1", ],
+        [
+            "{} + 1",
+            "{} - 1",
+            "{} * 1",
+            "{} % 1",
+            "{} ^ 1",
+            "{} / 1",
+            "{} // 1",
+            "{} & 1",
+            "{} | 1",
+            "{} ~ 1",
+            "{} << 1",
+            "{} >> 1"
+        ],
         "Program output is correct"
     );
 });

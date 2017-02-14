@@ -23,18 +23,18 @@
     - [x] `__mode` (unavailable)
     - [ ] `__len`
     - [ ] `__eq`
-    - [ ] `__add`
-    - [ ] `__sub`
-    - [ ] `__mul`
-    - [ ] `__mod`
-    - [ ] `__pow`
-    - [ ] `__div`
-    - [ ] `__idiv`
-    - [ ] `__band`
-    - [ ] `__bor`
-    - [ ] `__bxor`
-    - [ ] `__shl`
-    - [ ] `__shr`
+    - [x] `__add`
+    - [x] `__sub`
+    - [x] `__mul`
+    - [x] `__mod`
+    - [x] `__pow`
+    - [x] `__div`
+    - [x] `__idiv`
+    - [x] `__band`
+    - [x] `__bor`
+    - [x] `__bxor`
+    - [x] `__shl`
+    - [x] `__shr`
     - [ ] `__unm`
     - [ ] `__bnot`
     - [ ] `__lt`
