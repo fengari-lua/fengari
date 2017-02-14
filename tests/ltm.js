@@ -649,3 +649,154 @@ test('__newindex table with own metatable', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('binary __xxx functions in metatable', function (t) {
+    let luaCode = `
+        local mt = {
+            __add = function (a, b)
+                return "{} + " .. b
+            end,
+
+            __sub = function (a, b)
+                return "{} - " .. b
+            end,
+
+            __mul = function (a, b)
+                return "{} * " .. b
+            end,
+
+            __mod = function (a, b)
+                return "{} % " .. b
+            end,
+
+            __pow = function (a, b)
+                return "{} ^ " .. b
+            end,
+
+            __div = function (a, b)
+                return "{} / " .. b
+            end,
+
+            __idiv = function (a, b)
+                return "{} // " .. b
+            end,
+
+            __band = function (a, b)
+                return "{} & " .. b
+            end,
+
+            __bor = function (a, b)
+                return "{} | " .. b
+            end,
+
+            __bxor = function (a, b)
+                return "{} ~ " .. b
+            end,
+
+            __shl = function (a, b)
+                return "{} << " .. b
+            end,
+
+            __shr = function (a, b)
+                return "{} >> " .. b
+            end
+
+        }
+
+        local t = {}
+
+        -- setmetatable(t, mt)
+
+        return
+            t + 1,
+            t - 1,
+            t * 1,
+            t % 1,
+            t ^ 1,
+            t / 1,
+            t // 1,
+            t & 1,
+            t | 1,
+            t ~ 1,
+            t << 1,
+            t >> 1
+    `, L;
+    
+    t.plan(4);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    t.doesNotThrow(function () {
+        L = getState(luaCode);
+    }, "Bytecode parsed without errors");
+
+
+    
+    //main <hello.lua:0,0> (40 instructions at 0x7fd29ac03210)
+    //0+ params, 14 slots, 1 upvalue, 2 locals, 13 constants, 12 functions
+    //    1   [1] NEWTABLE    0 0 12
+    //    2   [4] CLOSURE     1 0 ; 0x7fd29ac03440
+    //    3   [4] SETTABLE    0 -1 1  ; "__add" -
+    //    4   [8] CLOSURE     1 1 ; 0x7fd29ac03500
+    //    5   [8] SETTABLE    0 -2 1  ; "__sub" -
+    //    6   [12]    CLOSURE     1 2 ; 0x7fd29ac038c0
+    //    7   [12]    SETTABLE    0 -3 1  ; "__mul" -
+    //    8   [16]    CLOSURE     1 3 ; 0x7fd29ac039e0
+    //    9   [16]    SETTABLE    0 -4 1  ; "__mod" -
+    //    10  [20]    CLOSURE     1 4 ; 0x7fd29ac03c00
+    //    11  [20]    SETTABLE    0 -5 1  ; "__pow" -
+    //    12  [24]    CLOSURE     1 5 ; 0x7fd29ac036a0
+    //    13  [24]    SETTABLE    0 -6 1  ; "__div" -
+    //    14  [28]    CLOSURE     1 6 ; 0x7fd29ac037c0
+    //    15  [28]    SETTABLE    0 -7 1  ; "__idiv" -
+    //    16  [32]    CLOSURE     1 7 ; 0x7fd29ac03ce0
+    //    17  [32]    SETTABLE    0 -8 1  ; "__band" -
+    //    18  [36]    CLOSURE     1 8 ; 0x7fd29ac03b00
+    //    19  [36]    SETTABLE    0 -9 1  ; "__bor" -
+    //    20  [40]    CLOSURE     1 9 ; 0x7fd29ac04060
+    //    21  [40]    SETTABLE    0 -10 1 ; "__bxor" -
+    //    22  [44]    CLOSURE     1 10    ; 0x7fd29ac04180
+    //    23  [44]    SETTABLE    0 -11 1 ; "__shl" -
+    //    24  [48]    CLOSURE     1 11    ; 0x7fd29ac042a0
+    //    25  [48]    SETTABLE    0 -12 1 ; "__shr" -
+    //    26  [52]    NEWTABLE    1 0 0
+    //    27  [57]    ADD         2 1 -13 ; - 1             <=== We stop here
+    //    28  [58]    SUB         3 1 -13 ; - 1
+    //    29  [59]    MUL         4 1 -13 ; - 1
+    //    30  [60]    MOD         5 1 -13
+    //    31  [61]    POW         6 1 -13 ; - 1
+    //    32  [62]    DIV         7 1 -13 ; - 1
+    //    33  [63]    IDIV        8 1 -13 ; - 1
+    //    34  [64]    BAND        9 1 -13 ; - 1
+    //    35  [65]    BOR         10 1 -13    ; - 1
+    //    36  [66]    BXOR        11 1 -13    ; - 1
+    //    37  [67]    SHL         12 1 -13    ; - 1
+    //    38  [68]    SHR         13 1 -13    ; - 1
+    //    39  [68]    RETURN      2 13
+    //    40  [68]    RETURN      0 1
+    //
+    //    ...
+
+    L.stack[0].p.code[26].breakpoint = true;
+
+    t.doesNotThrow(function () {
+        VM.luaV_execute(L);
+    }, "First part of the program executed without errors");
+
+    L.ci.pcOff--;
+    L.stack[0].p.code[26].breakpoint = false;
+
+    t.comment("We manually set t's metatable to mt");
+    L.stack[2].metatable = L.stack[1];
+
+    t.doesNotThrow(function () {
+        VM.luaV_execute(L);
+    }, "Second part of the program executed without errors");
+
+    t.deepEqual(
+        L.stack.slice(L.top - 12, L.top).map(function (e) { return e.value }),
+        ["{} + 1", "{} - 1", "{} * 1", "{} % 1", "{} ^ 1", "{} / 1", "{} // 1", "{} & 1", "{} | 1", "{} ~ 1", "{} << 1", "{} >> 1", ],
+        "Program output is correct"
+    );
+});

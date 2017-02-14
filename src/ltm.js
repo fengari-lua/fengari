@@ -73,7 +73,7 @@ const luaT_callbinTM = function(L, p1, p2, res, event) {
 };
 
 const luaT_trybinTM = function(L, p1, p2, res, event) {
-    if (!luaT_gettmbyobj(L, p1, p2, res, event)) {
+    if (!luaT_callbinTM(L, p1, p2, res, event)) {
         throw new Error("TM error"); // TODO: luaG_error
     }
 };
