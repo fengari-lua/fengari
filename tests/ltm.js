@@ -4,23 +4,18 @@
 const test           = require('tape');
 const beautify       = require('js-beautify').js_beautify;
 
-const lua_State      = require("../src/lstate.js").lua_State;
 const VM             = require("../src/lvm.js");
-const Table          = require("../src/lobject.js").Table;;
 
-const getState       = require("./tests.js");
+const getState       = require("./tests.js").getState;
 
 
-test('__add', function (t) {
+test('__index', function (t) {
     let luaCode = `
-        local t = {}
-        setmetatable(t, {__add = function ()
-            return "hello"
-        end})
-        return t + 1
+        local t = {yo=1}
+        return t.yo, t.lo
     `, L;
     
-    t.plan(2);
+    t.plan(3);
 
     t.comment("Running following code: \n" + luaCode);
 
@@ -31,7 +26,13 @@ test('__add', function (t) {
 
     t.strictEqual(
         L.stack[L.top - 1].value,
-        "hello",
+        null,
+        "Program output is correct"
+    );
+
+    t.strictEqual(
+        L.stack[L.top - 2].value,
+        1,
         "Program output is correct"
     );
 });

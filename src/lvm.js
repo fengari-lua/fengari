@@ -19,6 +19,7 @@ const lstate         = require('./lstate.js');
 const CallInfo       = lstate.CallInfo;
 const llimit         = require('./llimit.js');
 const ldo            = require('./ldo.js');
+const nil            = ldo.nil;
 const ltm            = require('./ltm.js');
 const ltable         = require('./ltable.js');
 const TMS            = ltm.TMS;
@@ -91,7 +92,7 @@ const luaV_execute = function(L) {
             }
             case "OP_LOADNIL": {
                 for (let j = 0; j <= i.B; j++)
-                    L.stack[ra + j] = ldo.nil;
+                    L.stack[ra + j] = nil;
                 break;
             }
             case "OP_GETUPVAL": {
@@ -106,11 +107,8 @@ const luaV_execute = function(L) {
                 let table = cl.upvals[i.B].val(L);
                 let key = RKC(L, base, k, i);
 
-                // if (!table.ttistable() || !table.__index(table, key)) {
-                //     // __index
-                // } else {
-                    L.stack[ra] = table.__index(table, key);
-                // }
+                gettable(L, table, key, ra);
+                base = ci.u.l.base;
                 break;
             }
             case "OP_SETTABUP": {
@@ -118,11 +116,8 @@ const luaV_execute = function(L) {
                 let key = RKB(L, base, k, i);
                 let v = RKC(L, base, k, i);
 
-                // if (!table.ttistable() || !table.__index(table, key)) {
-                //     // __index
-                // } else {
-                    table.__newindex(table, key, v);
-                // }
+                settable(L, table, key, v);
+                base = ci.u.l.base;
 
                 break;
             }
@@ -130,11 +125,8 @@ const luaV_execute = function(L) {
                 let table = RKB(L, base, k, i);
                 let key = RKC(L, base, k, i);
 
-                // if (!table.ttistable() || !table.__index(table, key)) {
-                //     // __index
-                // } else {
-                    L.stack[ra] = table.__index(table, key);
-                // }
+                gettable(L, table, key, ra);
+                base = ci.u.l.base;
                 break;
             }
             case "OP_SETTABLE": {
@@ -142,11 +134,8 @@ const luaV_execute = function(L) {
                 let key = RKB(L, base, k, i);
                 let v = RKC(L, base, k, i);
 
-                // if (!table.ttistable() || !table.__index(table, key)) {
-                //     // __index
-                // } else {
-                    table.__newindex(table, key, v);
-                // }
+                settable(L, table, key, v);
+                base = ci.u.l.base;
 
                 break;
             }
@@ -160,11 +149,8 @@ const luaV_execute = function(L) {
 
                 L.stack[ra + 1] = table;
 
-                // if (!table.ttistable() || !table.__index(table, key)) {
-                //     // __index
-                // } else {
-                    L.stack[ra] = table.__index(table, key);
-                // }
+                gettable(L, table, key, ra);
+                base = ci.u.l.base;
 
                 break;
             }
@@ -646,7 +632,7 @@ const luaV_execute = function(L) {
                     L.stack[ra + j] = L.stack[base - n + j];
 
                 for (; j < b; j++) /* complete required results with nil */
-                    L.stack[ra + j] = ldo.nil;
+                    L.stack[ra + j] = nil;
                 break;
             }
             case "OP_EXTRAARG": {
@@ -936,6 +922,94 @@ const luaV_concat = function(L, total) {
         L.top -= n - 1; /* popped 'n' strings and pushed one */
     } while (total > 1); /* repeat until only 1 result left */
 };
+
+const MAXTAGRECUR = 2000;
+
+const gettable = function(L, table, key, ra, recur) {
+    recur = recur ? recur : 0;
+
+    if (recur >= MAXTAGRECUR)
+        throw new Error("'__index' chain too long; possible loop"); // TODO: luaG_runerror
+
+    if (table.ttistable()) {
+        let element = table.__index(table, key);
+
+        if (!element.ttisnil()) {
+            L.stack[ra] = table.__index(table, key);
+        } else {
+            luaV_finishget(L, table, key, ra, element, recur);
+        }
+    } else {
+        luaV_finishget(L, table, key, ra, null, recur);
+    }
+};
+
+const luaV_finishget = function(L, t, key, val, slot, recur) {
+    let tm;
+    if (slot === null) { /* 't' is not a table? */
+        assert(!t.ttistable());
+        tm = ltm.luaT_gettmbyobj(L, t, TMS.TM_INDEX);
+        if (tm.ttisnil())
+            throw new Error(`attempt to index a ${tm.ttype()} value`); // TODO: luaG_typeerror
+    } else { /* 't' is a table */
+        assert(slot.ttisnil());
+        tm = ltm.luaT_gettmbyobj(L, t, TMS.TM_INDEX); // TODO: fasttm
+        if (tm.ttisnil()) {
+            L.stack[val] = nil;
+            return;
+        }
+    }
+
+    if (tm.ttisfunction()) {
+        ltm.luaT_callTM(L, tm, t, key, val, 1);
+        return;
+    }
+
+    gettable(L, tm, key, val, recur + 1);
+};
+
+const settable = function(L, table, key, v, recur) {
+    recur = recur ? recur : 0;
+
+    if (recur >= MAXTAGRECUR)
+        throw new Error("'__newindex' chain too long; possible loop"); // TODO: luaG_runerror
+
+    if (table.ttistable()) {
+        let element = table.__index(table, key);
+
+        if (!element.ttisnil()) {
+            table.__newindex(table, key, v);
+        } else {
+            luaV_finishset(L, table, key, v, element, recur);
+        }
+    } else {
+        luaV_finishset(L, table, key, v, null, recur);
+    }
+};
+
+const luaV_finishset = function(L, t, key, val, slot, recur) {
+    let tm;
+    if (slot !== null) { /* is 't' a table? */
+        assert(slot.ttisnil());
+        tm = ltm.luaT_gettmbyobj(L, t, TMS.TM_NEWINDEX); // TODO: fasttm
+        if (tm.ttisnil()) {
+            t.__newindex(t, key, val);
+            return;
+        }
+    } else { /* not a table; check metamethod */
+        tm = ltm.luaT_gettmbyobj(L, t, TMS.TM_NEWINDEX);
+        if (tm.ttisnil())
+            throw new Error(`attempt to index a ${tm.ttype()} value`); // TODO: luaG_typeerror
+    }
+
+    if (tm.ttisfunction()) {
+        ltm.luaT_callTM(L, tm, t, key, val, 1);
+        return;
+    }
+
+    settable(L, tm, key, val, recur + 1);
+}
+
 
 module.exports.RA             = RA;
 module.exports.RB             = RB;
