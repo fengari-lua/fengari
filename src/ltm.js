@@ -1,6 +1,8 @@
 /*jshint esversion: 6 */
 "use strict";
 
+const assert  = require('assert');
+
 const lobject = require('./lobject.js');
 const TValue  = lobject.TValue;
 const Table   = lobject.Table;
@@ -56,6 +58,7 @@ const luaT_callTM = function(L, f, p1, p2, p3, hasres) {
         ldo.luaD_callnoyield(L, func, hasres);
 
     if (hasres) {
+        assert(typeof result === "number");
         L.stack[result] = L.stack[--L.top];
     }
 };

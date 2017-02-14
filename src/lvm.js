@@ -1006,7 +1006,7 @@ const luaV_finishset = function(L, t, key, val, slot, recur) {
     }
 
     if (tm.ttisfunction()) {
-        ltm.luaT_callTM(L, tm, t, key, val, 1);
+        ltm.luaT_callTM(L, tm, t, key, val, 0);
         return;
     }
 
