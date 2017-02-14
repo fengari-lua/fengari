@@ -9,7 +9,7 @@ const VM             = require("../src/lvm.js");
 const getState       = require("./tests.js").getState;
 
 
-test('__index', function (t) {
+test('__index, __newindex: with actual table', function (t) {
     let luaCode = `
         local t = {yo=1}
         return t.yo, t.lo
@@ -35,4 +35,46 @@ test('__index', function (t) {
         1,
         "Program output is correct"
     );
+});
+
+
+test('__index: with non table', function (t) {
+    let luaCode = `
+        local t = "a string"
+        return t.yo
+    `, L;
+    
+    t.plan(2);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    t.doesNotThrow(function () {
+        L = getState(luaCode);
+    }, "Bytecode parsed without errors");
+
+    t.throws(function () {
+        VM.luaV_execute(L);
+    }, "Program executed with expected error");
+
+});
+
+
+test('__newindex: with non table', function (t) {
+    let luaCode = `
+        local t = "a string"
+        t.yo = "hello"
+    `, L;
+    
+    t.plan(2);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    t.doesNotThrow(function () {
+        L = getState(luaCode);
+    }, "Bytecode parsed without errors");
+
+    t.throws(function () {
+        VM.luaV_execute(L);
+    }, "Program executed with expected error");
+
 });
