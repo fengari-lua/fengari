@@ -17,10 +17,10 @@
     - [ ] userdata
     - [ ] thread
 - [ ] Tag Methods
-    - [ ] `__index`
-    - [ ] `__newindex`
+    - [x] `__index`
+    - [x] `__newindex`
     - [x] `__gc` (unavailable)
-    - [ ] `__mode`
+    - [x] `__mode` (unavailable)
     - [ ] `__len`
     - [ ] `__eq`
     - [ ] `__add`
@@ -41,6 +41,8 @@
     - [ ] `__le`
     - [ ] `__concat`
     - [ ] `__call`
+    - [ ] `__tostring`
+    - [ ] `__pairs`
 - [ ] Debug (errors)
 - [ ] C API
 - [ ] stdlib
