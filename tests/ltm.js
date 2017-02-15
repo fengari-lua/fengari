@@ -814,3 +814,257 @@ test('binary __xxx functions in metatable', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('__eq', function (t) {
+    let luaCode = `
+        local mt = {
+            __eq = function (a, b)
+                return true
+            end
+        }
+
+        local t = {}
+
+        -- setmetatable(t, mt)
+
+        return t == {}
+    `, L;
+    
+    t.plan(4);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    // main <hello.lua:0,0> (11 instructions at 0x7fce9fc03210)
+    // 0+ params, 3 slots, 1 upvalue, 2 locals, 1 constant, 1 function
+    //         1       [1]     NEWTABLE        0 0 1
+    //         2       [4]     CLOSURE         1 0     ; 0x7fce9fc03440
+    //         3       [4]     SETTABLE        0 -1 1  ; "__eq" -
+    //         4       [7]     NEWTABLE        1 0 0
+    //         5       [11]    NEWTABLE        2 0 0
+    //         6       [11]    EQ              1 1 2                    <=== We stop here
+    //         7       [11]    JMP             0 1     ; to 9
+    //         8       [11]    LOADBOOL        2 0 1
+    //         9       [11]    LOADBOOL        2 1 0
+    //         10      [11]    RETURN          2 2
+    //         11      [11]    RETURN          0 1
+    //
+    // ...
+
+    t.doesNotThrow(function () {
+        L = getState(luaCode);
+    }, "Bytecode parsed without errors");
+
+    L.stack[0].p.code[5].breakpoint = true;
+
+    t.doesNotThrow(function () {
+        ldo.luaD_call(L, 0, -1);
+    }, "First part of the program executed without errors");
+
+    L.ci.pcOff--;
+    L.stack[0].p.code[5].breakpoint = false;
+
+    t.comment("We manually set t's metatable to mt");
+    L.stack[2].metatable = L.stack[1];
+
+    t.doesNotThrow(function () {
+        VM.luaV_execute(L);
+    }, "Second part of the program executed without errors");
+
+    t.strictEqual(
+        L.stack[L.top - 1].value,
+        true,
+        "Program output is correct"
+    );
+});
+
+
+test('__lt', function (t) {
+    let luaCode = `
+        local mt = {
+            __lt = function (a, b)
+                return true
+            end
+        }
+
+        local t = {}
+
+        -- setmetatable(t, mt)
+
+        return t < {}
+    `, L;
+    
+    t.plan(4);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    // main <hello.lua:0,0> (11 instructions at 0x7fc879d00ac0)
+    // 0+ params, 3 slots, 1 upvalue, 2 locals, 1 constant, 1 function
+    //         1       [1]     NEWTABLE        0 0 1
+    //         2       [4]     CLOSURE         1 0     ; 0x7fc879d00d10
+    //         3       [4]     SETTABLE        0 -1 1  ; "__lt" -
+    //         4       [7]     NEWTABLE        1 0 0
+    //         5       [11]    NEWTABLE        2 0 0
+    //         6       [11]    LT              1 1 2                    <=== We stop here
+    //         7       [11]    JMP             0 1     ; to 9
+    //         8       [11]    LOADBOOL        2 0 1
+    //         9       [11]    LOADBOOL        2 1 0
+    //         10      [11]    RETURN          2 2
+    //         11      [11]    RETURN          0 1
+    //
+    // ...
+
+    t.doesNotThrow(function () {
+        L = getState(luaCode);
+    }, "Bytecode parsed without errors");
+
+    L.stack[0].p.code[5].breakpoint = true;
+
+    t.doesNotThrow(function () {
+        ldo.luaD_call(L, 0, -1);
+    }, "First part of the program executed without errors");
+
+    L.ci.pcOff--;
+    L.stack[0].p.code[5].breakpoint = false;
+
+    t.comment("We manually set t's metatable to mt");
+    L.stack[2].metatable = L.stack[1];
+
+    t.doesNotThrow(function () {
+        VM.luaV_execute(L);
+    }, "Second part of the program executed without errors");
+
+    t.strictEqual(
+        L.stack[L.top - 1].value,
+        true,
+        "Program output is correct"
+    );
+});
+
+
+test('__le', function (t) {
+    let luaCode = `
+        local mt = {
+            __le = function (a, b)
+                return true
+            end
+        }
+
+        local t = {}
+
+        -- setmetatable(t, mt)
+
+        return t <= {}
+    `, L;
+    
+    t.plan(4);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    // main <hello.lua:0,0> (11 instructions at 0x7fc879d00ac0)
+    // 0+ params, 3 slots, 1 upvalue, 2 locals, 1 constant, 1 function
+    //         1       [1]     NEWTABLE        0 0 1
+    //         2       [4]     CLOSURE         1 0     ; 0x7fc879d00d10
+    //         3       [4]     SETTABLE        0 -1 1  ; "__lt" -
+    //         4       [7]     NEWTABLE        1 0 0
+    //         5       [11]    NEWTABLE        2 0 0
+    //         6       [11]    LE              1 1 2                    <=== We stop here
+    //         7       [11]    JMP             0 1     ; to 9
+    //         8       [11]    LOADBOOL        2 0 1
+    //         9       [11]    LOADBOOL        2 1 0
+    //         10      [11]    RETURN          2 2
+    //         11      [11]    RETURN          0 1
+    //
+    // ...
+
+    t.doesNotThrow(function () {
+        L = getState(luaCode);
+    }, "Bytecode parsed without errors");
+
+    L.stack[0].p.code[5].breakpoint = true;
+
+    t.doesNotThrow(function () {
+        ldo.luaD_call(L, 0, -1);
+    }, "First part of the program executed without errors");
+
+    L.ci.pcOff--;
+    L.stack[0].p.code[5].breakpoint = false;
+
+    t.comment("We manually set t's metatable to mt");
+    L.stack[2].metatable = L.stack[1];
+
+    t.doesNotThrow(function () {
+        VM.luaV_execute(L);
+    }, "Second part of the program executed without errors");
+
+    t.strictEqual(
+        L.stack[L.top - 1].value,
+        true,
+        "Program output is correct"
+    );
+});
+
+
+
+
+test('__le that uses __lt', function (t) {
+    let luaCode = `
+        local mt = {
+            __lt = function (a, b)
+                return false
+            end
+        }
+
+        local t = {}
+
+        -- setmetatable(t, mt)
+
+        return {} <= t
+    `, L;
+    
+    t.plan(4);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    // main <hello.lua:0,0> (11 instructions at 0x7fc879d00ac0)
+    // 0+ params, 3 slots, 1 upvalue, 2 locals, 1 constant, 1 function
+    //         1       [1]     NEWTABLE        0 0 1
+    //         2       [4]     CLOSURE         1 0     ; 0x7fc879d00d10
+    //         3       [4]     SETTABLE        0 -1 1  ; "__lt" -
+    //         4       [7]     NEWTABLE        1 0 0
+    //         5       [11]    NEWTABLE        2 0 0
+    //         6       [11]    LE              1 1 2                    <=== We stop here
+    //         7       [11]    JMP             0 1     ; to 9
+    //         8       [11]    LOADBOOL        2 0 1
+    //         9       [11]    LOADBOOL        2 1 0
+    //         10      [11]    RETURN          2 2
+    //         11      [11]    RETURN          0 1
+    //
+    // ...
+
+    t.doesNotThrow(function () {
+        L = getState(luaCode);
+    }, "Bytecode parsed without errors");
+
+    L.stack[0].p.code[5].breakpoint = true;
+
+    t.doesNotThrow(function () {
+        ldo.luaD_call(L, 0, -1);
+    }, "First part of the program executed without errors");
+
+    L.ci.pcOff--;
+    L.stack[0].p.code[5].breakpoint = false;
+
+    t.comment("We manually set t's metatable to mt");
+    L.stack[2].metatable = L.stack[1];
+
+    t.doesNotThrow(function () {
+        VM.luaV_execute(L);
+    }, "Second part of the program executed without errors");
+
+    t.strictEqual(
+        L.stack[L.top - 1].value,
+        true,
+        "Program output is correct"
+    );
+});

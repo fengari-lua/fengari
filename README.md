@@ -37,8 +37,8 @@
     - [x] `__shr`
     - [ ] `__unm`
     - [ ] `__bnot`
-    - [ ] `__lt`
-    - [ ] `__le`
+    - [x] `__lt`
+    - [x] `__le`
     - [ ] `__concat`
     - [ ] `__call`
     - [ ] `__tostring`
