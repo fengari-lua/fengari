@@ -92,3 +92,4 @@ module.exports.Proto      = Proto;
 module.exports.UpVal      = UpVal;
 module.exports.findupval  = findupval;
 module.exports.luaF_close = luaF_close;
+module.exports.MAXUPVAL   = 255;

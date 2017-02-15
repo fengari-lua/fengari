@@ -11,7 +11,6 @@ const LUA_MULTRET    = lua.LUA_MULTRET;
 const lobject        = require('./lobject.js');
 const TValue         = lobject.TValue;
 const Table          = lobject.Table;
-const TString        = lobject.TString;
 const LClosure       = lobject.LClosure;
 const lfunc          = require('./lfunc.js');
 const UpVal          = lfunc.UpVal;
@@ -879,7 +878,7 @@ const tostring = function(L, i) {
     let str = `${o.value}`;
 
     if (o.ttisstring() || (o.ttisnumber() && !isNaN(parseFloat(`${str}`)))) {
-        L.stack[i] = new TString(str);
+        L.stack[i] = new TValue(CT.LUA_TLNGSTR, str);
         return true;
     }
 
@@ -914,7 +913,7 @@ const luaV_concat = function(L, total) {
                 tl += l;
             }
 
-            let ts = new TString("");
+            let ts = new TValue(CT.LUA_TLNGSTR, "");
             for (let i = n; i > 0; i--) {
                 ts.value = `${ts.value}${L.stack[top - i].value}`;
             }

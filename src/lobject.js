@@ -189,28 +189,22 @@ class LClosure extends TValue {
 
 }
 
-class TString extends TValue {
+class CClosure extends TValue {
 
-    constructor(string) {
-        super(CT.LUA_TSTRING, string);
-    }
+    constructor(n, f) {
+        super(CT.LUA_TCCL, null);
 
-}
+        this.f = f;
+        this.nupvalues = n;
+        this.upvalue = new Array(n);
 
-
-class Userdata extends TValue {
-
-    constructor(jsObject) {
-        super(CT.LUA_TUSERDATA, jsObject);
-
-        this.metatable = null;
+        this.value = this;
     }
 
 }
 
 
 module.exports.LClosure = LClosure;
+module.exports.CClosure = CClosure;
 module.exports.TValue   = TValue;
 module.exports.Table    = Table;
-module.exports.TString  = TString;
-module.exports.Userdata = Userdata;

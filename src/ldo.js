@@ -2,16 +2,17 @@
 "use strict";
 
 const lua            = require('./lua.js');
-const CT             = lua.constant_types;
-const LUA_MULTRET    = lua.LUA_MULTRET;
 const lobject        = require('./lobject.js');
-const TValue         = lobject.TValue;
 const lstate         = require('./lstate.js');
-const CallInfo       = lstate.CallInfo;
 const llimit         = require('./llimit.js');
 const ltm            = require('./ltm.js');
-const TMS            = ltm.TMS;
 const lvm            = require('./lvm.js');
+const CT             = lua.constant_types;
+const TS             = lua.thread_status;
+const LUA_MULTRET    = lua.LUA_MULTRET;
+const TValue         = lobject.TValue;
+const CallInfo       = lstate.CallInfo;
+const TMS            = ltm.TMS;
 
 const nil            = new TValue(CT.LUA_TNIL, null);
 
@@ -170,6 +171,49 @@ const luaD_call = function(L, off, nResults) {
     L.nCcalls--;
 };
 
+const luaD_rawrunprotected = function(L, f, ud) {
+    let oldnCcalls = L.nCcalls;
+    let lj = { // TODO: necessary when using try/catch ? (ldo.c:47-52)
+        status: TS.LUA_OK,
+        previous: L.errorJmp /* chain new error handler */
+    };
+    L.errorJmp = lj;
+
+    try {
+        f(L, ud);
+    } catch (e) {
+        if (lj.status == 0) lj.status = -1;
+    }
+
+    L.errorJmp = lj.previous;
+    L.nCcalls = oldnCcalls;
+
+    return lj.status;
+
+};
+
+const luaD_pcall = function(L, func, u, old_top, ef) {
+    let old_ci = L.ci;
+    // TODO: lu_byte old_allowhooks = L->allowhook;
+    let old_nny = L.nny;
+    let old_errfunc = L.errfunc;
+    L.errfunc = ef;
+
+    status = luaD_rawrunprotected(L, func, u);
+
+    if (status !== TS.LUA_OK) {
+        lfunc.luaF_close(L, old_top);
+        // TODO: seterrorobj(L, status, oldtop);
+        L.ci = old_ci;
+        // TODO: L->allowhook = old_allowhooks;
+        L.nny = old_nny;
+    }
+
+    L.errfunc = old_errfunc;
+
+    return status;
+};
+
 /*
 ** Similar to 'luaD_call', but does not allow yields during the call
 */
@@ -188,3 +232,4 @@ module.exports.tryfuncTM        = tryfuncTM;
 module.exports.stackerror       = stackerror;
 module.exports.luaD_call        = luaD_call;
 module.exports.luaD_callnoyield = luaD_callnoyield;
+module.exports.luaD_pcall       = luaD_pcall;

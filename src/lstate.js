@@ -1,7 +1,9 @@
 /*jshint esversion: 6 */
 "use strict";
 
-const LUA_MULTRET = require('./lua.js').LUA_MULTRET;
+const lua         = require('./lua.js');
+const LUA_MULTRET = lua.LUA_MULTRET;
+const TS          = lua.thread_status;
 const Table       = require('./lobject.js').Table;
 
 class CallInfo {
@@ -14,9 +16,14 @@ class CallInfo {
         this.next = next;
         this.pcOff = 0;
         this.u = {
-            l: {
-                base: base,
+            l: {  /* only for Lua functions */
+                base: base,  /* base for this function */
                 savedpc: []
+            },
+            c: {  /* only for JS functions */
+                k: null,  /* continuation in case of yields */
+                old_errfunc: null,
+                ctx: null  /* context info. in case of yields */
             }
         };
         this.nresults = 0;
@@ -37,6 +44,7 @@ class lua_State {
             cl
         ];
         this.openupval = [];
+        this.status = TS.LUA_OK;
     }
 
 }
