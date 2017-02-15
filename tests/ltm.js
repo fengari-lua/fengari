@@ -1138,3 +1138,62 @@ test('__unm, __bnot', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('__len', function (t) {
+    let luaCode = `
+        local mt = {
+            __len = function (a)
+                return "hello"
+            end
+        }
+
+        local t = {}
+
+        -- setmetatable(t, mt)
+
+        return #t
+    `, L;
+    
+    t.plan(4);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    // main <hello.lua:0,0> (7 instructions at 0x7f91f0600ac0)
+    // 0+ params, 3 slots, 1 upvalue, 2 locals, 1 constant, 1 function
+    //         1       [1]     NEWTABLE        0 0 1
+    //         2       [4]     CLOSURE         1 0     ; 0x7f91f0600d10
+    //         3       [4]     SETTABLE        0 -1 1  ; "__len" -
+    //         4       [7]     NEWTABLE        1 0 0
+    //         5       [11]    LEN             2 1                      <=== We stop here
+    //         6       [11]    RETURN          2 2
+    //         7       [11]    RETURN          0 1
+    //
+    // ...
+
+    t.doesNotThrow(function () {
+        L = getState(luaCode);
+    }, "Bytecode parsed without errors");
+
+    L.stack[0].p.code[4].breakpoint = true;
+
+    t.doesNotThrow(function () {
+        ldo.luaD_call(L, 0, -1);
+    }, "First part of the program executed without errors");
+
+    L.ci.pcOff--;
+    L.stack[0].p.code[4].breakpoint = false;
+
+    t.comment("We manually set t's metatable to mt");
+    L.stack[2].metatable = L.stack[1];
+
+    t.doesNotThrow(function () {
+        VM.luaV_execute(L);
+    }, "Second part of the program executed without errors");
+
+    t.strictEqual(
+        L.stack[L.top - 1].value,
+        "hello",
+        "Program output is correct"
+    );
+});

@@ -854,8 +854,8 @@ const luaV_objlen = function(L, ra, rb) {
     let tm;
     switch(rb.ttype()) {
         case CT.LUA_TTABLE: {
-            tm = rb.value.metatable;
-            if (tm) break;
+            tm = ltm.luaT_gettmbyobj(L, rb, TMS.TM_LEN);
+            if (!tm.ttisnil()) break;
             L.stack[ra] = rb.luaH_getn();
             return;
         }

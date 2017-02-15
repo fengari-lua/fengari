@@ -8,20 +8,17 @@
 - [ ] Basic types representation:
     - [x] nil
     - [x] boolean
+    - [x] table
+    - [x] function
+    - [ ] string (8-bit clean)
     - [ ] number (32-bit ?)
         - [ ] integer
         - [ ] float
-    - [ ] string (8-bit clean)
-    - [ ] table
-    - [ ] function
     - [ ] userdata
     - [ ] thread
 - [ ] Tag Methods
     - [x] `__index`
     - [x] `__newindex`
-    - [x] `__gc` (unavailable)
-    - [x] `__mode` (unavailable)
-    - [ ] `__len`
     - [x] `__add`
     - [x] `__sub`
     - [x] `__mul`
@@ -39,6 +36,9 @@
     - [x] `__eq`
     - [x] `__lt`
     - [x] `__le`
+    - [x] `__gc` (unavailable)
+    - [x] `__mode` (unavailable)
+    - [x] `__len`
     - [ ] `__concat`
     - [ ] `__call`
     - [ ] `__tostring`
