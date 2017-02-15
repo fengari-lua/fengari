@@ -29,7 +29,7 @@ const toByteCode = function (luaCode) {
     };
 };
 
-const getState = function (luaCode) {
+const getState = function(luaCode) {
     var bc = toByteCode(luaCode),
         dv = bc.dataView,
         bcl = bc.bclist;
