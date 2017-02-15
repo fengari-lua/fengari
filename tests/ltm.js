@@ -1197,3 +1197,64 @@ test('__len', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('__concat', function (t) {
+    let luaCode = `
+        local mt = {
+            __concat = function (a)
+                return "hello"
+            end
+        }
+
+        local t = {}
+
+        -- setmetatable(t, mt)
+
+        return t .. " world"
+    `, L;
+    
+    t.plan(4);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    // main <hello.lua:0,0> (9 instructions at 0x7ffacdc03210)
+    // 0+ params, 4 slots, 1 upvalue, 2 locals, 2 constants, 1 function
+    //         1       [1]     NEWTABLE        0 0 1
+    //         2       [4]     CLOSURE         1 0     ; 0x7ffacdc03440
+    //         3       [4]     SETTABLE        0 -1 1  ; "__concat" -
+    //         4       [7]     NEWTABLE        1 0 0
+    //         5       [11]    MOVE            2 1
+    //         6       [11]    LOADK           3 -2    ; " world"
+    //         7       [11]    CONCAT          2 2 3                    <=== We stop here
+    //         8       [11]    RETURN          2 2
+    //         9       [11]    RETURN          0 1
+    //
+    // ...
+
+    t.doesNotThrow(function () {
+        L = getState(luaCode);
+    }, "Bytecode parsed without errors");
+
+    L.stack[0].p.code[6].breakpoint = true;
+
+    t.doesNotThrow(function () {
+        ldo.luaD_call(L, 0, -1);
+    }, "First part of the program executed without errors");
+
+    L.ci.pcOff--;
+    L.stack[0].p.code[6].breakpoint = false;
+
+    t.comment("We manually set t's metatable to mt");
+    L.stack[2].metatable = L.stack[1];
+
+    t.doesNotThrow(function () {
+        VM.luaV_execute(L);
+    }, "Second part of the program executed without errors");
+
+    t.strictEqual(
+        L.stack[L.top - 1].value,
+        "hello",
+        "Program output is correct"
+    );
+});

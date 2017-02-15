@@ -39,7 +39,7 @@
     - [x] `__gc` (unavailable)
     - [x] `__mode` (unavailable)
     - [x] `__len`
-    - [ ] `__concat`
+    - [x] `__concat`
     - [ ] `__call`
     - [ ] `__tostring`
     - [ ] `__pairs`
