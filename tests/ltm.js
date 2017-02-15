@@ -1258,3 +1258,63 @@ test('__concat', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('__call', function (t) {
+    let luaCode = `
+        local mt = {
+            __call = function (a, ...)
+                return "hello", ...
+            end
+        }
+
+        local t = {}
+
+        -- setmetatable(t, mt)
+
+        return t("world","wow")
+    `, L;
+    
+    t.plan(4);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    // main <hello.lua:0,0> (10 instructions at 0x7fc4c9403210)
+    // 0+ params, 5 slots, 1 upvalue, 2 locals, 3 constants, 1 function
+    //         1       [1]     NEWTABLE        0 0 1
+    //         2       [4]     CLOSURE         1 0     ; 0x7fc4c9403440
+    //         3       [4]     SETTABLE        0 -1 1  ; "__call" -
+    //         4       [7]     NEWTABLE        1 0 0
+    //         5       [11]    MOVE            2 1
+    //         6       [11]    LOADK           3 -2    ; "world"
+    //         7       [11]    LOADK           4 -3    ; "wow"
+    //         8       [11]    TAILCALL        2 3 0                    <=== We stop here
+    //         9       [11]    RETURN          2 0
+    //         10      [11]    RETURN          0 1
+
+    t.doesNotThrow(function () {
+        L = getState(luaCode);
+    }, "Bytecode parsed without errors");
+
+    L.stack[0].p.code[7].breakpoint = true;
+
+    t.doesNotThrow(function () {
+        ldo.luaD_call(L, 0, -1);
+    }, "First part of the program executed without errors");
+
+    L.ci.pcOff--;
+    L.stack[0].p.code[7].breakpoint = false;
+
+    t.comment("We manually set t's metatable to mt");
+    L.stack[2].metatable = L.stack[1];
+
+    t.doesNotThrow(function () {
+        VM.luaV_execute(L);
+    }, "Second part of the program executed without errors");
+
+    t.deepEqual(
+        L.stack.slice(L.top - 3, L.top).map(function (e) { return e.value }),
+        ["hello", "world", "wow"],
+        "Program output is correct"
+    );
+});
