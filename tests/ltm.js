@@ -1005,8 +1005,6 @@ test('__le', function (t) {
 });
 
 
-
-
 test('__le that uses __lt', function (t) {
     let luaCode = `
         local mt = {
@@ -1065,6 +1063,78 @@ test('__le that uses __lt', function (t) {
     t.strictEqual(
         L.stack[L.top - 1].value,
         true,
+        "Program output is correct"
+    );
+});
+
+
+test('__unm, __bnot', function (t) {
+    let luaCode = `
+        local mt = {
+            __unm = function (a)
+                return "hello"
+            end,
+
+            __bnot = function (a)
+                return "world"
+            end
+        }
+
+        local t = {}
+
+        -- setmetatable(t, mt)
+
+        return -t, ~t
+    `, L;
+    
+    t.plan(5);
+
+    t.comment("Running following code: \n" + luaCode);
+
+    // main <hello.lua:0,0> (10 instructions at 0x7ff10e403210)
+    // 0+ params, 4 slots, 1 upvalue, 2 locals, 2 constants, 2 functions
+    //         1       [1]     NEWTABLE        0 0 2
+    //         2       [4]     CLOSURE         1 0     ; 0x7ff10e403440
+    //         3       [4]     SETTABLE        0 -1 1  ; "__unm" -
+    //         4       [8]     CLOSURE         1 1     ; 0x7ff10e4033c0
+    //         5       [8]     SETTABLE        0 -2 1  ; "__bnot" -
+    //         6       [11]    NEWTABLE        1 0 0
+    //         7       [15]    UNM             2 1                      <=== We stop here
+    //         8       [15]    BNOT            3 1
+    //         9       [15]    RETURN          2 3
+    //         10      [15]    RETURN          0 1
+    //
+    // ...
+
+    t.doesNotThrow(function () {
+        L = getState(luaCode);
+    }, "Bytecode parsed without errors");
+
+    L.stack[0].p.code[6].breakpoint = true;
+
+    t.doesNotThrow(function () {
+        ldo.luaD_call(L, 0, -1);
+    }, "First part of the program executed without errors");
+
+    L.ci.pcOff--;
+    L.stack[0].p.code[6].breakpoint = false;
+
+    t.comment("We manually set t's metatable to mt");
+    L.stack[2].metatable = L.stack[1];
+
+    t.doesNotThrow(function () {
+        VM.luaV_execute(L);
+    }, "Second part of the program executed without errors");
+
+    t.strictEqual(
+        L.stack[L.top - 1].value,
+        "world",
+        "Program output is correct"
+    );
+
+    t.strictEqual(
+        L.stack[L.top - 2].value,
+        "hello",
         "Program output is correct"
     );
 });

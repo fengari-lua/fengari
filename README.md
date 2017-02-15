@@ -22,7 +22,6 @@
     - [x] `__gc` (unavailable)
     - [x] `__mode` (unavailable)
     - [ ] `__len`
-    - [ ] `__eq`
     - [x] `__add`
     - [x] `__sub`
     - [x] `__mul`
@@ -35,8 +34,9 @@
     - [x] `__bxor`
     - [x] `__shl`
     - [x] `__shr`
-    - [ ] `__unm`
-    - [ ] `__bnot`
+    - [x] `__unm`
+    - [x] `__bnot`
+    - [x] `__eq`
     - [x] `__lt`
     - [x] `__le`
     - [ ] `__concat`
