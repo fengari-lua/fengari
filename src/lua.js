@@ -61,6 +61,14 @@ constant_types.LUA_TLCL = constant_types.LUA_TFUNCTION | (0 << 4);  /* Lua closu
 constant_types.LUA_TLCF = constant_types.LUA_TFUNCTION | (1 << 4);  /* light C function */
 constant_types.LUA_TCCL = constant_types.LUA_TFUNCTION | (2 << 4);  /* C closure */
 
+const LUA_NUMTAGS = 9;
+const LUA_MINSTACK = 20;
+
+/* predefined values in the registry */
+const LUA_RIDX_MAINTHREAD = 1;
+const LUA_RIDX_GLOBALS    = 2;
+const LUA_RIDX_LAST       = LUA_RIDX_GLOBALS;
+
 const print_version = function() {
     console.log(FENGARI_COPYRIGHT);
 };
@@ -123,3 +131,8 @@ module.exports.FENGARI_COPYRIGHT       = FENGARI_COPYRIGHT;
 module.exports.FENGARI_AUTHORS         = FENGARI_AUTHORS;
 module.exports.LUA_INIT_VAR            = LUA_INIT_VAR;
 module.exports.LUA_INITVARVERSION      = LUA_INITVARVERSION;
+module.exports.LUA_NUMTAGS             = LUA_NUMTAGS;
+module.exports.LUA_MINSTACK            = LUA_MINSTACK;
+module.exports.LUA_RIDX_MAINTHREAD     = LUA_RIDX_MAINTHREAD;
+module.exports.LUA_RIDX_GLOBALS        = LUA_RIDX_GLOBALS;
+module.exports.LUA_RIDX_LAST           = LUA_RIDX_LAST;

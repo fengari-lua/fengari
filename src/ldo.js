@@ -182,6 +182,7 @@ const luaD_rawrunprotected = function(L, f, ud) {
     try {
         f(L, ud);
     } catch (e) {
+        console.log(e);
         if (lj.status == 0) lj.status = -1;
     }
 
@@ -223,13 +224,14 @@ const luaD_callnoyield = function(L, off, nResults) {
   L.nny--;
 };
 
-module.exports.nil              = nil;
-module.exports.luaD_precall     = luaD_precall;
-module.exports.luaD_poscall     = luaD_poscall;
-module.exports.moveresults      = moveresults;
-module.exports.adjust_varargs   = adjust_varargs;
-module.exports.tryfuncTM        = tryfuncTM;
-module.exports.stackerror       = stackerror;
-module.exports.luaD_call        = luaD_call;
-module.exports.luaD_callnoyield = luaD_callnoyield;
-module.exports.luaD_pcall       = luaD_pcall;
+module.exports.nil                        = nil;
+module.exports.luaD_precall               = luaD_precall;
+module.exports.luaD_poscall               = luaD_poscall;
+module.exports.moveresults                = moveresults;
+module.exports.adjust_varargs             = adjust_varargs;
+module.exports.tryfuncTM                  = tryfuncTM;
+module.exports.stackerror                 = stackerror;
+module.exports.luaD_call                  = luaD_call;
+module.exports.luaD_callnoyield           = luaD_callnoyield;
+module.exports.luaD_pcall                 = luaD_pcall;
+module.exports.luaD_rawrunprotected       = luaD_rawrunprotected;

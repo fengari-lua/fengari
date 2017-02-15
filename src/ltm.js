@@ -40,6 +40,13 @@ const TMS = {
     TM_N:        26
 };
 
+const luaT_init = function(L) {
+    L.l_G.tmname = [];
+    for (let event in TMS) {
+        L.l_G.tmname.push(new TValue(CT.LUA_TLNGSTR, TMS[event])); // Strings are already interned by JS
+    }
+};
+
 const luaT_callTM = function(L, f, p1, p2, p3, hasres) {
     let result = p3;
     let func = L.top;
@@ -105,3 +112,4 @@ module.exports.luaT_callbinTM   = luaT_callbinTM;
 module.exports.luaT_trybinTM    = luaT_trybinTM;
 module.exports.luaT_callorderTM = luaT_callorderTM;
 module.exports.luaT_gettmbyobj  = luaT_gettmbyobj;
+module.exports.luaT_init        = luaT_init;

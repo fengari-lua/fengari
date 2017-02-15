@@ -21,21 +21,11 @@
     - [ ] `__tostring`
     - [ ] `__pairs`
 - [ ] C API
-    - [ ] lua_Alloc
-    - [ ] lua_CFunction
-    - [ ] lua_Debug
-    - [ ] lua_Hook
-    - [ ] lua_Integer
-    - [ ] lua_KContext
-    - [ ] lua_KFunction
-    - [ ] lua_Number
-    - [ ] lua_Reader
-    - [ ] lua_State
-    - [ ] lua_Unsigned
-    - [ ] lua_Writer
+    - [x] lua_atpanic
+    - [x] lua_newstate
+    - [x] lua_pushnil
     - [ ] lua_absindex
     - [ ] lua_arith
-    - [ ] lua_atpanic
     - [ ] lua_call
     - [ ] lua_callk
     - [ ] lua_checkstack
@@ -46,9 +36,9 @@
     - [ ] lua_createtable
     - [ ] lua_dump
     - [ ] lua_error
-    - [ ] lua_gc
-    - [ ] lua_getallocf
-    - [ ] lua_getextraspace
+    - [x] lua_gc (unvailable)
+    - [x] lua_getallocf (unvailable)
+    - [x] lua_getextraspace (unvailable)
     - [ ] lua_getfield
     - [ ] lua_getglobal
     - [ ] lua_gethook
@@ -80,7 +70,6 @@
     - [ ] lua_isyieldable
     - [ ] lua_len
     - [ ] lua_load
-    - [ ] lua_newstate
     - [ ] lua_newtable
     - [ ] lua_newthread
     - [ ] lua_newuserdata
@@ -98,7 +87,6 @@
     - [ ] lua_pushlightuserdata
     - [ ] lua_pushliteral
     - [ ] lua_pushlstring
-    - [ ] lua_pushnil
     - [ ] lua_pushnumber
     - [ ] lua_pushstring
     - [ ] lua_pushthread
@@ -151,6 +139,68 @@
     - [ ] lua_yield
     - [ ] lua_yieldk
 - [ ] Auxiliary library
+    - [x] luaL_newstate
+    - [ ] luaL_Buffer
+    - [ ] luaL_Reg
+    - [ ] luaL_Stream
+    - [ ] luaL_addchar
+    - [ ] luaL_addlstring
+    - [ ] luaL_addsize
+    - [ ] luaL_addstring
+    - [ ] luaL_addvalue
+    - [ ] luaL_argcheck
+    - [ ] luaL_argerror
+    - [ ] luaL_buffinit
+    - [ ] luaL_buffinitsize
+    - [ ] luaL_callmeta
+    - [ ] luaL_checkany
+    - [ ] luaL_checkinteger
+    - [ ] luaL_checklstring
+    - [ ] luaL_checknumber
+    - [ ] luaL_checkoption
+    - [ ] luaL_checkstack
+    - [ ] luaL_checkstring
+    - [ ] luaL_checktype
+    - [ ] luaL_checkudata
+    - [ ] luaL_checkversion
+    - [ ] luaL_dofile
+    - [ ] luaL_dostring
+    - [ ] luaL_error
+    - [ ] luaL_execresult
+    - [ ] luaL_fileresult
+    - [ ] luaL_getmetafield
+    - [ ] luaL_getmetatable
+    - [ ] luaL_getsubtable
+    - [ ] luaL_gsub
+    - [ ] luaL_len
+    - [ ] luaL_loadbuffer
+    - [ ] luaL_loadbufferx
+    - [ ] luaL_loadfile
+    - [ ] luaL_loadfilex
+    - [ ] luaL_loadstring
+    - [ ] luaL_newlib
+    - [ ] luaL_newlibtable
+    - [ ] luaL_newmetatable
+    - [ ] luaL_openlibs
+    - [ ] luaL_opt
+    - [ ] luaL_optinteger
+    - [ ] luaL_optlstring
+    - [ ] luaL_optnumber
+    - [ ] luaL_optstring
+    - [ ] luaL_prepbuffer
+    - [ ] luaL_prepbuffsize
+    - [ ] luaL_pushresult
+    - [ ] luaL_pushresultsize
+    - [ ] luaL_ref
+    - [ ] luaL_requiref
+    - [ ] luaL_setfuncs
+    - [ ] luaL_setmetatable
+    - [ ] luaL_testudata
+    - [ ] luaL_tolstring
+    - [ ] luaL_traceback
+    - [ ] luaL_typename
+    - [ ] luaL_unref
+    - [ ] luaL_where
 - [ ] Standard library
 - [ ] Debug (errors)
 - [ ] DOM API binding

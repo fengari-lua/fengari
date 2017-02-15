@@ -9,20 +9,19 @@ const getState      = require("./tests.js").getState;
 const VM            = require("../src/lvm.js");
 const ldo           = require("../src/ldo.js");
 const lapi          = require("../src/lapi.js");
+const lauxlib       = require("../src/lauxlib.js");
 const CT            = require('../src/lua.js').constant_types;
 
-test('lua_pushnil', function (t) {
+test('luaL_newstate, lua_pushnil', function (t) {
     let L;
     
-    t.plan(3);
+    t.plan(2);
 
     t.doesNotThrow(function () {
-        L = getState(`return "dummy"`);
-    }, "New Lua State initiliazed");
+        L = lauxlib.luaL_newstate()
 
-    // t.doesNotThrow(function () {
         lapi.lua_pushnil(L);
-    // }, "Pushed nil on the stack");
+    }, "JS Lua program ran without error");
 
     t.strictEqual(
         L.stack[L.top - 1].type,

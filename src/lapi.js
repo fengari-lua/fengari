@@ -2,6 +2,7 @@
 "use strict";
 
 const assert    = require('assert');
+
 const ldo       = require('./ldo.js');
 const lobject   = require('./lobject.js');
 const lfunc     = require('./lfunc.js');
@@ -14,6 +15,17 @@ const TS        = lua.thread_status;
 const l_isfalse = lobject.l_isfalse;
 const TValue    = lobject.TValue;
 const CClosure  = lobject.CClosure;
+
+const lua_version = function(L) {
+    if (L === null) return lua.LUA_VERSION_NUM;
+    else return L.l_G.version;
+};
+
+const lua_atpanic = function(L, panicf) {
+    let old = L.l_G.panic;
+    L.l_G.panic = panicf;
+    return old;
+};
 
 // Return real index on stack
 const index2addr = function(L, idx) {
@@ -212,3 +224,5 @@ module.exports.lua_pushnumber  = lua_pushnumber;
 module.exports.lua_pushinteger = lua_pushinteger;
 module.exports.lua_pushlstring = lua_pushlstring;
 module.exports.lua_pushstring  = lua_pushstring;
+module.exports.lua_version     = lua_version;
+module.exports.lua_atpanic     = lua_atpanic;
