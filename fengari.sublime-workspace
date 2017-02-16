@@ -1,0 +1,1849 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"LUA_INIT",
+				"LUA_INITVARVERSION"
+			],
+			[
+				"MAXARG",
+				"MAXARG_Bx"
+			],
+			[
+				"emsc",
+				"emscripten"
+			],
+			[
+				"unsee",
+				"unseen_pro"
+			],
+			[
+				"mpr",
+				"mprf"
+			],
+			[
+				"BEAM",
+				"BEAM_HEALING"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "tests/lapi.js",
+			"settings":
+			{
+				"buffer_size": 3978,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/lapi.js",
+			"settings":
+			{
+				"buffer_size": 7792,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/lobject.js",
+			"settings":
+			{
+				"buffer_size": 4246,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/Users/giann/lua-5.3.4/src/lapi.c",
+			"settings":
+			{
+				"buffer_size": 31323,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/Users/giann/lua-5.3.4/src/lfunc.c",
+			"settings":
+			{
+				"buffer_size": 3691,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 398.0,
+		"last_filter": "lint",
+		"selected_items":
+		[
+			[
+				"lint",
+				"SublimeLinter: Lint This View"
+			],
+			[
+				"sublimelinter",
+				"SublimeLinter: Disable Linting"
+			],
+			[
+				"sublimelinter err",
+				"SublimeLinter: Next Error"
+			],
+			[
+				"sublime",
+				"SublimeLinter: Choose Gutter Theme"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"inst",
+				"Package Control: Install Package"
+			],
+			[
+				"upg",
+				"Package Control: Upgrade/Overwrite All Packages"
+			],
+			[
+				"comp",
+				"GitGutter: Compare Against HEAD"
+			],
+			[
+				"js",
+				"JSHint"
+			],
+			[
+				"col",
+				"ColorSchemeSelector: Select Color Scheme"
+			],
+			[
+				"tod",
+				"TodoReview: Project Files"
+			],
+			[
+				"todo",
+				"TodoReview: Open Files"
+			],
+			[
+				"in",
+				"Package Control: Install Package"
+			],
+			[
+				"co",
+				"ColorSchemeSelector: Select Color Scheme"
+			],
+			[
+				"c",
+				"ColorSchemeSelector: Select Color Scheme"
+			],
+			[
+				"git",
+				"GitGutter: Compare Against HEAD"
+			],
+			[
+				"upgr",
+				"Package Control: Upgrade/Overwrite All Packages"
+			],
+			[
+				"web",
+				"Web Inspector"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"remo",
+				"Package Control: Remove Package"
+			],
+			[
+				"hex",
+				"HexViewer: Toggle Hex View"
+			],
+			[
+				"rem",
+				"Package Control: Remove Package"
+			],
+			[
+				"low",
+				"Convert Case: Lower Case"
+			],
+			[
+				"form",
+				"SublimeAStyleFormatter: Format Current File"
+			],
+			[
+				"format",
+				"CodeFormatter: Format Code"
+			],
+			[
+				"jsh",
+				"JSHint"
+			],
+			[
+				"up",
+				"Package Control: Upgrade/Overwrite All Packages"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"package",
+				"Preferences: Browse Packages"
+			],
+			[
+				"remove p",
+				"Package Control: Remove Package"
+			],
+			[
+				"satis",
+				"Package Control: Satisfy Dependencies"
+			],
+			[
+				"isntall",
+				"Package Control: Install Package"
+			],
+			[
+				"i",
+				"Package Control: Install Package"
+			],
+			[
+				"color",
+				"ColorSchemeSelector: Select Color Scheme"
+			]
+		],
+		"width": 599.0
+	},
+	"console":
+	{
+		"height": 246.0,
+		"history":
+		[
+			"import urllib.request,os,hashlib; h = 'df21e130d211cfc94d9b0905775a7c0f' + '1e3d39e33b79698005270310898eea76'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)",
+			"import urllib.request,os,hashlib; h = '2915d1851351e5ee549c20394736b442' + '8bc59f460fa1548d1514676163dafc88'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/Users/giann/fengari",
+		"/Users/giann/fengari/tests",
+		"/Users/giann/fengari/tests/C",
+		"/Users/giann/lua-5.3.4"
+	],
+	"file_history":
+	[
+		"/Users/giann/fengari/fengari.sublime-workspace",
+		"/Users/giann/fengari/src/fengari.sublime-workspace",
+		"/Users/giann/lua-5.3.4/src/lapi.c",
+		"/Users/giann/fengari/src/lobject.js",
+		"/Users/giann/fengari/src/lvm.js",
+		"/Users/giann/fengari/src/lua.js",
+		"/Users/giann/lua-5.3.4/src/lobject.c",
+		"/Users/giann/fengari/src/lstate.js",
+		"/Users/giann/fengari/src/lauxlib.js",
+		"/Users/giann/fengari/README.md",
+		"/Users/giann/lua-5.3.4/src/lvm.h",
+		"/Users/giann/lua-5.3.4/src/lvm.c",
+		"/Users/giann/lua-5.3.4/src/lauxlib.c",
+		"/Users/giann/lua-5.3.4/src/lua.h",
+		"/Users/giann/lua-5.3.4/src/lapi.h",
+		"/Users/giann/lua-5.3.4/src/lua.c",
+		"/Users/giann/fengari/tests/C/lua_pushinteger.c",
+		"/Users/giann/fengari/tests/C/lua_pushvalue.c",
+		"/Users/giann/fengari/tests/C/Makefile",
+		"/Users/giann/fengari/src/lapi.js",
+		"/Users/giann/fengari/tests/C/lua_pushboolean.c",
+		"/Users/giann/fengari/tests/tests.js",
+		"/Users/giann/fengari/src/lundump.js",
+		"/Users/giann/fengari/tests/C/lua_pushstring.c",
+		"/Users/giann/fengari/tests/C/lua_pushnumber.c",
+		"/Users/giann/fengari/tests/c/lua_pushnumber.c",
+		"/Users/giann/fengari/src/ldo.js",
+		"/Users/giann/fengari/tests/lvm.js",
+		"/Users/giann/fengari/tests/ltm.js",
+		"/Users/giann/lua-5.3.4/src/lobject.h",
+		"/Users/giann/fengari/tests/c/Makefile",
+		"/Users/giann/lua-5.3.4/src/Makefile",
+		"/Users/giann/fengari/tests/c/lua_pushnil.c",
+		"/Users/giann/fengari/src/ltm.js",
+		"/Users/giann/lua-5.3.4/src/lauxlib.h",
+		"/Users/giann/lua-5.3.4/src/ltm.h",
+		"/Users/giann/lua-5.3.4/src/llimits.h",
+		"/Users/giann/lua-5.3.4/src/ltm.c",
+		"/Users/giann/fengari/tests/lapi.js",
+		"/Users/giann/lua-5.3.4/src/lstate.c",
+		"/Users/giann/fengari/.gitignore",
+		"/Users/giann/fengari/tests/c/lapi.js",
+		"/Users/giann/lua-5.3.4/src/ldo.c",
+		"/Users/giann/fengari/src/lualib.js",
+		"/Users/giann/lua-5.3.4/src/lualib.h",
+		"/Users/giann/lua-5.3.4/src/lzio.c",
+		"/Users/giann/lua-5.3.4/hello.lua",
+		"/Users/giann/lua-5.3.4/src/linit.c",
+		"/Users/giann/fengari/src/lfunc.js",
+		"/Users/giann/lua-5.3.4/src/ldo.h",
+		"/Users/giann/lua-5.3.4/src/luaconf.h",
+		"/Users/giann/lua-5.3.4/doc/manual.html",
+		"/Users/giann/lua-5.3.4/hello.bcl",
+		"/Users/giann/lua-5.3.4/src/lgc.h",
+		"/Users/giann/lua-5.3.4/src/lgc.c",
+		"/Users/giann/lua-5.3.4/src/ltable.c",
+		"/Users/giann/fengari/src/ltable.js",
+		"/Users/giann/lua-5.3.4/src/ltable.h",
+		"/Users/giann/lua-5.3.4/src/ldebug.c",
+		"/Users/giann/fengari/src/lopcodes.js",
+		"/Users/giann/fengari/src/llimit.js",
+		"/Users/giann/bourso-smart.swift",
+		"/Users/giann/giann-arch-shared/lua-5.3.4/src/lvm.c",
+		"/Users/giann/giann-arch-shared/lua-5.3.4/hello.lua",
+		"/Users/giann/giann-arch-shared/lua-5.3.4/src/lobject.h",
+		"/Users/giann/giann-arch-shared/lua-5.3.4/src/ltable.c",
+		"/Users/giann/giann-arch-shared/lua-5.3.4/src/ltable.h",
+		"/Users/giann/giann-arch-shared/lua-5.3.4/src/lopcodes.h",
+		"/Users/giann/giann-arch-shared/lua-5.3.4/src/lua.c",
+		"/Users/giann/giann-arch-shared/lua-5.3.4/src/ldo.c",
+		"/Users/giann/giann-arch-shared/lua-5.3.4/src/lapi.c",
+		"/Users/giann/giann-arch-shared/lua-5.3.4/src/lua.h",
+		"/Users/giann/giann-arch-shared/lua-5.3.4/src/luac.c",
+		"/Users/giann/giann-arch-shared/lua-5.3.4/src/lbitlib.c",
+		"/Users/giann/giann-arch-shared/lua-5.3.4/src/lopcodes.c",
+		"/Users/giann/giann-arch-shared/lua-5.3.4/src/lfunc.c",
+		"/Users/giann/Library/Application Support/Sublime Text 3/Packages/GitGutter/GitGutter.sublime-settings",
+		"/Users/giann/Library/Application Support/Sublime Text 3/Packages/User/GitGutter.sublime-settings",
+		"/Users/giann/lua-5.3.4/src/lopcodes.c",
+		"/Users/giann/lua-5.3.4/src/lstate.h",
+		"/Users/giann/Library/Application Support/Sublime Text 3/Packages/Web Inspector/swi.sublime-settings",
+		"/Users/giann/fengari-jit/src/stdlib.js",
+		"/Users/giann/lua-5.3.4/src/lopcodes.h",
+		"/Users/giann/lua-5.3.4/src/lundump.c",
+		"/Users/giann/fengari/node_modules/lodash/lodash.min.js",
+		"/Users/giann/fengari-jit/tests/compiler.js",
+		"/Users/giann/fengari/sandbox/hello.js",
+		"/Users/giann/fengari/sandbox/hello.bc.txt",
+		"/Users/giann/lua-5.3.4/src/luac.c",
+		"/Users/giann/fengari/sandbox/hello2.lua",
+		"/Users/giann/fengari/sandbox/hello.bc",
+		"/Users/giann/fengari-jit/src/bytecodeparser.js",
+		"/Users/giann/fengari-jit/src/compiler.js",
+		"/Users/giann/fengari-jit/README.md",
+		"/Users/giann/fengari-jit/package.json",
+		"/Users/giann/lua-5.3.4/src/ldump.c",
+		"/Users/giann/lua-5.3.4/src/llex.h",
+		"/Users/giann/lua-5.3.4/src/lparser.h",
+		"/Users/giann/lua-5.3.4/src/llex.c",
+		"/Users/giann/lua-5.3.4/src/lparser.c",
+		"/Users/giann/lua-5.3.4/src/lzio.h",
+		"/Users/giann/fengari/src/compiler.js",
+		"/Users/giann/fengari/src/stdlib.js",
+		"/Users/giann/fengari/src/bytecodeparser.js",
+		"/Users/giann/lua-5.3.4/src/lundump.h",
+		"/Users/giann/fengari/src/parser.js",
+		"/Users/giann/Downloads/parser.js",
+		"/Users/giann/fengari/tests/stdlib.js",
+		"/Users/giann/fengari/tests/compiler.js",
+		"/Users/giann/fengari/tests/bytecodeparser.js",
+		"/Users/giann/fengari/tests/parser.js",
+		"/Users/giann/fengari/package.json",
+		"/Users/giann/fengari/tests/compiled/rawget.js",
+		"/Users/giann/fengari/tests/compiled/not_unm_len.js",
+		"/Users/giann/fengari/tests/compiled/while_loop_addvn.js",
+		"/Users/giann/fengari/tests/compiled/iseqs.js",
+		"/Users/giann/fengari/tests/compiled/isnes.js",
+		"/Users/giann/fengari/tests/compiled/ret1.js",
+		"/Users/giann/fengari/tests/compiled/call.js",
+		"/Users/giann/fengari/tests/compiled/knum.js",
+		"/Users/giann/fengari/tests/compiled/itern_isnext.js",
+		"/Users/giann/fengari/tests/compiled/kstr_ret0.js",
+		"/Users/giann/fengari/result.js",
+		"/Users/giann/luajit-2.0/src/lj_bcread.c",
+		"/Users/giann/fengari/tests/large.lua",
+		"/Users/giann/luajit-2.0/src/lj_debug.c",
+		"/Users/giann/luajit-2.0/src/lj_def.h",
+		"/Users/giann/luajit-2.0/src/lj_obj.h"
+	],
+	"find":
+	{
+		"height": 38.0
+	},
+	"find_in_files":
+	{
+		"height": 106.0,
+		"where_history":
+		[
+			"~/fengari/src",
+			"~/lua-5.3.4",
+			"~/fengari/src",
+			"~/lua-5.3.4",
+			"~/fengari/src",
+			"~/lua-5.3.4",
+			"~/fengari/src",
+			"~/lua-5.3.4",
+			"~/fengari/src",
+			"~/fengari",
+			"~/lua-5.3.4",
+			"~/fengari/src",
+			"~/lua-5.3.4",
+			"~/luat-5.3.4",
+			"~/fengari/src",
+			"~/lua-5.3.4",
+			"~/fengari/src",
+			"~/fengari/",
+			"~/fengari/src",
+			"<open folders>",
+			"/Users/giann/fengari",
+			"/Users/giann/lua-5.3.4",
+			"/Users/giann/fengari",
+			"/Users/giann/lua-5.3.4",
+			"~/fengari/",
+			"~/fengari/src",
+			"~/fengari/tests",
+			"~/fengari/src",
+			"~/fengari/",
+			"~/fengari/src",
+			"",
+			"~/fengari/src",
+			"",
+			"~/luajit-2.0",
+			"~/lujit-2.0",
+			"~/fengari/src",
+			"~/fengari",
+			"",
+			"/Users/giann/web-fr-front-20",
+			"/Users/giann/boursorama.com",
+			"",
+			"/Users/giann/web-fr-front-20",
+			"/Users/giann/boursorama.com",
+			"/Users/giann/web-fr-front-20",
+			"/Users/giann/boursorama.com",
+			"/Users/giann/web-fr-front-20",
+			"/Users/giann/boursorama.com",
+			"/Users/giann/web-fr-front-20",
+			"/Users/giann/application-ios-boursorama-v5/Boursorama",
+			"/Users/giann/application-ios-boursorama-v5",
+			"/Users/giann/web-fr-front-20",
+			"web-fr-front-20",
+			"",
+			"/Users/giann/crawl",
+			"/Users/giann/web-fr-front-20",
+			"/Users/giann/web-fr-subscription-01",
+			"/Users/giann/application-ios-boursorama-v5",
+			"/Users/giann/web-fr-front-20",
+			"/Users/giann/boursorama.com",
+			"/Users/giann/web-fr-front-20",
+			"/Users/giann/boursorama.com",
+			"/Users/giann/web-fr-front-20",
+			"/Users/giann/boursorama.com",
+			"/Users/giann/web-fr-front-20",
+			"web-fr-front-20",
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": true,
+		"find_history":
+		[
+			"CClosure",
+			"lua_tostring",
+			"L.stack[lapi.lua_gettop(L)].value",
+			"lua",
+			"parseFloat",
+			"tostring",
+			"lua_tostring",
+			"integer",
+			"lua_toboolean",
+			"lstate",
+			"lua_tonumber",
+			"type",
+			"integer",
+			"tonumber",
+			"tointeger",
+			"lua_tointeger",
+			"L.stack[index2addr",
+			"index2addr",
+			"boolean",
+			"lapi.lua_gettop(L)),",
+			"lapi.lua_gettop(L)",
+			"LUA_REGISTRYINDEX",
+			"->",
+			"->t",
+			"string",
+			"lua_pushboolean",
+			"string",
+			"console.log",
+			"console",
+			"-o",
+			"integer",
+			"10.5",
+			"number",
+			"= nil",
+			" nil",
+			"nil",
+			"l_isfalse",
+			"tonumber",
+			".value",
+			".value;",
+			".value",
+			"CallInfo",
+			"luaD_precall",
+			"luaV_tonumber_",
+			"tonumber",
+			"lua_pushnil",
+			"lua_",
+			"typename",
+			"lobject",
+			"luaT_init",
+			"luaL_newstate",
+			"gettop",
+			"luaT_init",
+			"udatatypename",
+			", ",
+			"luaT_typenames_",
+			"udatatypename",
+			"luaT_typenames_",
+			"lua_atpanic",
+			"->",
+			"d",
+			"getEmptyState",
+			"getState",
+			"=",
+			"getState",
+			"lua_State",
+			"getenv",
+			"lua",
+			"const",
+			"print_version",
+			"lua_ok",
+			"progname",
+			"constant_types",
+			"LUA",
+			"=",
+			"c",
+			"LUAI_TRY",
+			"lua_CFunction",
+			"lua_pushinteger",
+			".TString",
+			"new TString(",
+			"TString",
+			"=",
+			"lua_pushnil",
+			"lua_pushinteger",
+			"ldo",
+			"lvm_c",
+			"->",
+			"lua_lock",
+			"lua_pushinteger",
+			"lua_",
+			"[8]",
+			"[6]",
+			"[4]",
+			"len",
+			"LUA_TLCL",
+			"LUA_TFUNCTION",
+			"[6]",
+			"5",
+			"[5]",
+			"op_lt",
+			"luatT_callorderTM",
+			"[26]",
+			"op_eq",
+			"op_add",
+			"ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_",
+			"ltm.luaT_trybinTM(L, op1, op2, ra, TMS.TM_ADD);",
+			"+",
+			"[4]",
+			"end",
+			".. b",
+			"end",
+			"{}",
+			", ",
+			"__",
+			"functions",
+			"luaT_trybinTM",
+			"null",
+			"__index",
+			"// Stop just before 'return t.yo'",
+			"We set a breakpoint just before 'return t.yo'",
+			"__index",
+			"OP_GETTABLE",
+			"1",
+			"2",
+			"[6]",
+			"[4]",
+			"luaT_callTM"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"new TValue(CT.LUA_TLNGSTR, ",
+			"lobject.js\").Table;",
+			"lobject.js').Table",
+			"require('./lobject.js').Table",
+			"// TODO: ",
+			"// TODO:",
+			"BytecodeParser",
+			"src/bytecodeparser.js",
+			"[t1, t2]",
+			"t1, t2",
+			"",
+			"\"route\":",
+			"\"regex\":",
+			",",
+			"\",",
+			"\"",
+			"\"type\":",
+			"\"shortLabel\"",
+			"\"label\":",
+			"\"pattern\":",
+			"]",
+			"[",
+			"]))",
+			"]])\n                    ]))",
+			"\"routes\": JSON([[",
+			": ",
+			"Navigation.sharedInstance.addMainNavigationItem(\n                    NavigationItem(json: JSON([\n                        \"id\":",
+			"",
+			"ENABLE_BITCODE = NO"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 1,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "tests/lapi.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3978,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								752,
+								752
+							]
+						],
+						"settings":
+						{
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+									"1":
+									[
+										751,
+										752
+									]
+								},
+								"icon":
+								{
+									"1":
+									[
+										"Packages/BracketHighlighter/icons/double_quote.png",
+										"brackethighlighter.default"
+									]
+								},
+								"open":
+								{
+									"1":
+									[
+										736,
+										737
+									]
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content"
+							],
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "src/lapi.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7792,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2810,
+								2810
+							]
+						],
+						"settings":
+						{
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+									"1":
+									[
+										2811,
+										2812
+									]
+								},
+								"icon":
+								{
+									"1":
+									[
+										"Packages/BracketHighlighter/icons/curly_bracket.png",
+										"brackethighlighter.default"
+									]
+								},
+								"open":
+								{
+									"1":
+									[
+										2503,
+										2504
+									]
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content"
+							],
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1136.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "src/lobject.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4246,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3945,
+								3945
+							]
+						],
+						"settings":
+						{
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+									"1":
+									[
+										3945,
+										3946
+									]
+								},
+								"icon":
+								{
+									"1":
+									[
+										"Packages/BracketHighlighter/icons/round_bracket.png",
+										"brackethighlighter.default"
+									]
+								},
+								"open":
+								{
+									"1":
+									[
+										3940,
+										3941
+									]
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content"
+							],
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1724.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 3,
+					"file": "/Users/giann/lua-5.3.4/src/lapi.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 31323,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								12836,
+								12836
+							]
+						],
+						"settings":
+						{
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+									"1":
+									[
+										12851,
+										12852
+									]
+								},
+								"icon":
+								{
+									"1":
+									[
+										"Packages/BracketHighlighter/icons/curly_bracket.png",
+										"brackethighlighter.default"
+									]
+								},
+								"open":
+								{
+									"1":
+									[
+										12669,
+										12670
+									]
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content"
+							],
+							"syntax": "Packages/C Improved/C Improved.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 6256.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "/Users/giann/lua-5.3.4/src/lfunc.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3691,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								349,
+								349
+							]
+						],
+						"settings":
+						{
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content"
+							],
+							"syntax": "Packages/C Improved/C Improved.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 20.0
+	},
+	"input":
+	{
+		"height": 36.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			],
+			[
+				0,
+				1,
+				1,
+				2
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			0.614692947491,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.astyle_error_message":
+	{
+		"height": 0.0
+	},
+	"output.exec":
+	{
+		"height": 92.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.hex_viewer_inspector":
+	{
+		"height": 80.0
+	},
+	"output.nodejs":
+	{
+		"height": 261.0
+	},
+	"pinned_build_system": "",
+	"project": "fengari.sublime-project",
+	"replace":
+	{
+		"height": 72.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"lu",
+				"fengari/src/lua.js"
+			],
+			[
+				"lst",
+				"fengari/src/lstate.js"
+			],
+			[
+				"rea",
+				"fengari/README.md"
+			],
+			[
+				"lv",
+				"lua-5.3.4/src/lvm.c"
+			],
+			[
+				"lapi",
+				"lua-5.3.4/src/lapi.h"
+			],
+			[
+				"lo",
+				"fengari/src/lobject.js"
+			],
+			[
+				"lvm.c",
+				"lua-5.3.4/src/lvm.c"
+			],
+			[
+				"lap",
+				"fengari/src/lapi.js"
+			],
+			[
+				"push",
+				"fengari/tests/C/lua_pushinteger.c"
+			],
+			[
+				"t",
+				"fengari/tests/tests.js"
+			],
+			[
+				"lun",
+				"fengari/src/lundump.js"
+			],
+			[
+				"makefile",
+				"fengari/tests/C/Makefile"
+			],
+			[
+				"lua_pushnumber",
+				"fengari/tests/c/lua_pushnumber.c"
+			],
+			[
+				"ltm",
+				"fengari/tests/ltm.js"
+			],
+			[
+				"ldo",
+				"fengari/src/ldo.js"
+			],
+			[
+				"mak",
+				"lua-5.3.4/src/Makefile"
+			],
+			[
+				"lapi.j",
+				"fengari/src/lapi.js"
+			],
+			[
+				"laux",
+				"fengari/src/lauxlib.js"
+			],
+			[
+				"lua_pu",
+				"fengari/tests/c/lua_pushnil.c"
+			],
+			[
+				"lobj",
+				"fengari/src/lobject.js"
+			],
+			[
+				"lua.js",
+				"fengari/src/lua.js"
+			],
+			[
+				"tests/la",
+				"fengari/tests/lapi.js"
+			],
+			[
+				".gi",
+				"fengari/.gitignore"
+			],
+			[
+				"he",
+				"lua-5.3.4/hello.lua"
+			],
+			[
+				"ld",
+				"fengari/src/ldo.js"
+			],
+			[
+				"lua.j",
+				"fengari/src/lua.js"
+			],
+			[
+				"lua.c",
+				"lua-5.3.4/src/lua.c"
+			],
+			[
+				"re",
+				"fengari/README.md"
+			],
+			[
+				"lt",
+				"fengari/src/ltm.js"
+			],
+			[
+				"lvm",
+				"fengari/src/lvm.js"
+			],
+			[
+				"hell",
+				"lua-5.3.4/hello.bcl"
+			],
+			[
+				"read",
+				"fengari/README.md"
+			],
+			[
+				"hel",
+				"lua-5.3.4/hello.lua"
+			],
+			[
+				"tests/lv",
+				"fengari/tests/lvm.js"
+			],
+			[
+				"tests",
+				"fengari/tests/tests.js"
+			],
+			[
+				"lta",
+				"lua-5.3.4/src/ltable.c"
+			],
+			[
+				"lde",
+				"lua-5.3.4/src/ldebug.c"
+			],
+			[
+				"ltab",
+				"lua-5.3.4/src/ltable.c"
+			],
+			[
+				"lob",
+				"fengari/src/lobject.js"
+			],
+			[
+				"ltabl",
+				"lua-5.3.4/src/ltable.c"
+			],
+			[
+				"lua",
+				"fengari/src/lua.js"
+			],
+			[
+				"lopc",
+				"fengari/src/lopcodes.js"
+			],
+			[
+				"lf",
+				"lua-5.3.4/src/lfunc.c"
+			],
+			[
+				"lop",
+				"fengari/src/lopcodes.js"
+			],
+			[
+				".git",
+				"fengari/.gitignore"
+			],
+			[
+				"lstate",
+				"fengari/src/lstate.js"
+			],
+			[
+				"std",
+				"fengari-jit/src/stdlib.js"
+			],
+			[
+				"s",
+				"fengari-jit/src/stdlib.js"
+			],
+			[
+				"ltable.h",
+				"lua-5.3.4/src/ltable.h"
+			],
+			[
+				"lund",
+				"lua-5.3.4/src/lundump.c"
+			],
+			[
+				"tests/com",
+				"fengari-jit/tests/compiler.js"
+			],
+			[
+				"hello",
+				"fengari/sandbox/hello.js"
+			],
+			[
+				"lfun",
+				"fengari/src/lfunc.js"
+			],
+			[
+				"lopco",
+				"lua-5.3.4/src/lopcodes.c"
+			],
+			[
+				"luah.",
+				"lua-5.3.4/src/lua.h"
+			],
+			[
+				"lundu",
+				"lua-5.3.4/src/lundump.c"
+			],
+			[
+				"tests/comp",
+				"fengari-jit/tests/compiler.js"
+			],
+			[
+				"compi",
+				"fengari-jit/src/compiler.js"
+			],
+			[
+				"test/compiler",
+				"fengari-jit/tests/compiler.js"
+			],
+			[
+				"luaund",
+				"lua-5.3.4/src/lundump.c"
+			],
+			[
+				"lua.h",
+				"src/lua.h"
+			],
+			[
+				"luac",
+				"src/luac.c"
+			],
+			[
+				"ldu",
+				"src/ldump.c"
+			],
+			[
+				"llex",
+				"lua-5.3.4/src/llex.h"
+			],
+			[
+				"lparser",
+				"lua-5.3.4/src/lparser.h"
+			],
+			[
+				"compil",
+				"fengari/src/compiler.js"
+			],
+			[
+				"ldum",
+				"lua-5.3.4/src/ldump.c"
+			],
+			[
+				"by",
+				"fengari/src/bytecodeparser.js"
+			],
+			[
+				"rawg",
+				"fengari/tests/compiled/rawget.js"
+			],
+			[
+				"not",
+				"fengari/tests/compiled/not_unm_len.js"
+			],
+			[
+				"whil",
+				"fengari/tests/compiled/while_loop_addvn.js"
+			],
+			[
+				"isnes",
+				"fengari/tests/compiled/isnes.js"
+			],
+			[
+				"iseqs",
+				"fengari/tests/compiled/iseqs.js"
+			],
+			[
+				"cal",
+				"fengari/tests/compiled/call.js"
+			],
+			[
+				"ret1",
+				"fengari/tests/compiled/ret1.js"
+			],
+			[
+				"knu",
+				"fengari/tests/compiled/knum.js"
+			],
+			[
+				"itern",
+				"fengari/tests/compiled/itern_isnext.js"
+			],
+			[
+				"pack",
+				"fengari/package.json"
+			],
+			[
+				"kst",
+				"fengari/tests/compiled/kstr_ret0.js"
+			],
+			[
+				"tests/c",
+				"fengari/tests/compiler.js"
+			],
+			[
+				"res",
+				"fengari/result.js"
+			],
+			[
+				"larg",
+				"fengari/tests/large.lua"
+			],
+			[
+				"bcread",
+				"luajit-2.0/src/lj_bcread.c"
+			],
+			[
+				"read.c",
+				"luajit-2.0/src/lj_bcread.c"
+			],
+			[
+				"testspar",
+				"fengari/tests/parser.js"
+			],
+			[
+				"readm",
+				"fengari/README.md"
+			],
+			[
+				"",
+				"luajit-2.0/.gitignore"
+			],
+			[
+				"lj_read",
+				"luajit-2.0/src/lj_bcread.c"
+			],
+			[
+				"parser",
+				"fengari/src/parser.js"
+			],
+			[
+				"resu",
+				"fengari/result.js"
+			],
+			[
+				"compiler",
+				"fengari/tests/compiler.js"
+			],
+			[
+				"resul",
+				"pheggari/result"
+			],
+			[
+				"lj",
+				"luajit-2.0/src/lj_bcread.c"
+			],
+			[
+				"comp",
+				"pheggari/src/compiler.js"
+			],
+			[
+				"parser-",
+				"pheggari/sandbox/parser-test.js"
+			],
+			[
+				"parser-t",
+				"pheggari/sandbox/parser-test.html"
+			],
+			[
+				"ljread",
+				"luajit-2.0/src/lj_bcread.c"
+			],
+			[
+				".gitmodul",
+				".gitmodules"
+			],
+			[
+				"edittype",
+				"web-fr-front-20/src/AppBundle/Form/Type/Budget/EditType.php"
+			],
+			[
+				"edit.html",
+				"web-fr-front-20/src/AppBundle/Resources/views/Budget/Operation/edit.html.twig"
+			],
+			[
+				"opera",
+				"application-ios-boursorama-v5/Boursorama/Boursorama/OperationsViewController.swift"
+			],
+			[
+				"brsbu",
+				"application-ios-boursorama-v5/Boursorama/Boursorama/Views/BrsButton.swift"
+			],
+			[
+				"brsted",
+				"application-ios-boursorama-v5/Boursorama/Boursorama/Views/BrsTextField.swift"
+			],
+			[
+				"transfervi",
+				"application-ios-boursorama-v5/Boursorama/Boursorama/Views/TransfersAmountTableViewCell.swift"
+			],
+			[
+				"editac",
+				"application-ios-boursorama-v5/Boursorama/Boursorama/Views/EditActionView.swift"
+			],
+			[
+				"actionvi",
+				"application-ios-boursorama-v5/Boursorama/Boursorama/Views/ActionView.swift"
+			],
+			[
+				"selectbar",
+				"application-ios-boursorama-v5/Boursorama/Boursorama/Views/SelectBarView.swift"
+			],
+			[
+				"operationsvi",
+				"application-ios-boursorama-v5/Boursorama/Boursorama/OperationsViewController.swift"
+			],
+			[
+				"wbsapicontrolleroperation",
+				"boursorama.com/libs/localclass/wbs/api/controller/bank/operation.class.php"
+			],
+			[
+				"icomooncss",
+				"web-fr-front-20/src/Boursorama/DesignBundle/Resources/public/fonts/icomoon/style.css"
+			],
+			[
+				"movements.html",
+				"web-fr-front-20/src/AppBundle/Resources/views/Accounts/Bank/movements.html.twig"
+			],
+			[
+				"helpersession",
+				"boursorama.com/libs/localclass/wbs/api/helper/session.class.php"
+			],
+			[
+				"wbsapicontrollersessionauth",
+				"boursorama.com/libs/localclass/wbs/api/controller/session/auth.class.php"
+			],
+			[
+				"partials/assets.html.twig",
+				"web-fr-front-20/src/Boursorama/DesignBundle/Resources/views/partials/assets.html.twig"
+			],
+			[
+				"designbundle/resources/views/structure.html.twig",
+				"web-fr-front-20/src/Boursorama/DesignBundle/Resources/views/structure.html.twig"
+			],
+			[
+				"wbsapicontrollerauth",
+				"boursorama.com/libs/localclass/wbs/api/controller/session/auth.class.php"
+			],
+			[
+				"sass/layout/_nav.scss",
+				"web-fr-front-20/src/Boursorama/DesignBundle/Resources/public/sass/layout/_nav.scss"
+			],
+			[
+				"pods-boursoramawatchextension-frameworks.sh",
+				"application-ios-boursorama-v5/Boursorama/Pods/Target Support Files/Pods-BoursoramaWatch Extension/Pods-BoursoramaWatch Extension-frameworks.sh"
+			],
+			[
+				"podfile",
+				"application-ios-boursorama-v5/Boursorama/Podfile"
+			],
+			[
+				"main.json",
+				"application-ios-boursorama-v5/Boursorama/Boursorama/Resources/main.json"
+			],
+			[
+				"index.tw",
+				"web-fr-front-20/src/AppBundle/Resources/views/Dashboard/index.html.twig"
+			],
+			[
+				"widgetsbank",
+				"web-fr-front-20/src/AppBundle/Resources/views/Dashboard/partials/widgetsBank.html.twig"
+			],
+			[
+				"index.w",
+				"web-fr-front-20/src/AppBundle/Resources/views/Dashboard/index.html.twig"
+			],
+			[
+				"dgn-labyrinth.cc",
+				"crawl/crawl-ref/source/dgn-labyrinth.cc"
+			],
+			[
+				"hinclude",
+				"web-fr-front-20/vendor/symfony/symfony/src/Symfony/Component/HttpKernel/Fragment/HIncludeFragmentRenderer.php"
+			],
+			[
+				"defered",
+				"web-fr-front-20/src/Brs/TwigExtensionBundle/Twig/DeferedRenderer.php"
+			],
+			[
+				"help/mes",
+				"boursorama.com/libs/localclass/wbs/api/controller/help/messages.class.php"
+			],
+			[
+				"appd",
+				"application-ios-boursorama-v5/Boursorama/Boursorama/AppDelegate.swift"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": false,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 146.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

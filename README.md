@@ -38,6 +38,8 @@
     - [x] lua_tonumber
     - [x] lua_tonumberx
     - [x] lua_toboolean
+    - [x] lua_pushcclosure
+    - [x] lua_pushcfunction
     - [ ] lua_absindex
     - [ ] lua_arith
     - [ ] lua_call
@@ -91,8 +93,6 @@
     - [ ] lua_pcall
     - [ ] lua_pcallk
     - [ ] lua_pop
-    - [ ] lua_pushcclosure
-    - [ ] lua_pushcfunction
     - [ ] lua_pushfstring
     - [ ] lua_pushglobaltable
     - [ ] lua_pushlightuserdata

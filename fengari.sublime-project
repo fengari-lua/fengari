@@ -1,0 +1,12 @@
+{
+	"folders":
+	[
+		{
+			"path": ".",
+            "folder_exclude_patterns": ["*.dSYM", "*.out"]
+		},
+		{
+			"path": "/Users/giann/lua-5.3.4"
+		}
+	]
+}

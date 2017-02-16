@@ -216,3 +216,66 @@ test('lua_pushvalue', function (t) {
         "top is correct"
     );
 });
+
+
+test('lua_pushcclosure', function (t) {
+    let L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        let fn = function(L) {
+            return 0;
+        };
+
+        L = lauxlib.luaL_newstate();
+
+        lapi.lua_pushstring(L, "a value associated to the C closure");
+        lapi.lua_pushcclosure(L, fn, 1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_gettop(L),
+        1,
+        "top is correct"
+    );
+
+    t.strictEqual(
+        lauxlib.luaL_typename(L, lapi.lua_gettop(L)),
+        "function",
+        "Correct element(s) on the stack"
+    );
+});
+
+
+test('lua_pushcfunction', function (t) {
+    let L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        let fn = function(L) {
+            return 0;
+        };
+
+        L = lauxlib.luaL_newstate();
+
+        lapi.lua_pushcfunction(L, fn);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_gettop(L),
+        1,
+        "top is correct"
+    );
+
+    t.strictEqual(
+        lauxlib.luaL_typename(L, lapi.lua_gettop(L)),
+        "function",
+        "Correct element(s) on the stack"
+    );
+});

@@ -191,7 +191,7 @@ class LClosure extends TValue {
 
 class CClosure extends TValue {
 
-    constructor(n, f) {
+    constructor(f, n) {
         super(CT.LUA_TCCL, null);
 
         this.f = f;

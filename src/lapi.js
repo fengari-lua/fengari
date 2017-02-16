@@ -1,4 +1,4 @@
-/*jshint esversion: 6 */
+/* jshint esversion: 6 */
 "use strict";
 
 const assert    = require('assert');
@@ -36,7 +36,7 @@ const index2addr = function(L, idx) {
         assert(idx <= ci.top - (ci.funcOff + 1), "unacceptable index");
         if (o >= L.top) return nil;
         else return L.stack[o];
-    } else if (idx < 0) { // TODO: pseudo-indices
+    } else if (idx < 0) { // TODO: pseudo-indices relative to LUA_REGISTRYINDEX
         assert(idx !== 0 && -idx <= L.top, "invalid index");
         return L.stack[L.top + idx];
     // TODO: if (idx == LUA_REGISTRYINDEX) return &G(L)->l_registry;
@@ -134,16 +134,23 @@ const lua_pushcclosure = function(L, fn, n) {
     else {
         assert(n < L.top - L.ci.funcOff, "not enough elements in the stack");
         assert(n <= MAXUPVAL, "upvalue index too large");
-        let cl = new CClosure(L, n, fn);
+
+        let cl = new CClosure(L, fn, n);
+
         L.top -= n;
         while (n--) {
             cl.upvalue[n] = L.stack[L.top + n];
         }
+
         L.stack[L.top] = cl;
     }
 
     L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
+};
+
+const lua_pushcfunction = function(L, fn) {
+    lua_pushcclosure(L, fn, 0);
 };
 
 const lua_pushboolean = function(L, b) {
@@ -261,20 +268,22 @@ const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
     return status;
 };
 
-module.exports.lua_pushvalue   = lua_pushvalue;
-module.exports.lua_pushnil     = lua_pushnil;
-module.exports.lua_pushnumber  = lua_pushnumber;
-module.exports.lua_pushinteger = lua_pushinteger;
-module.exports.lua_pushlstring = lua_pushlstring;
-module.exports.lua_pushstring  = lua_pushstring;
-module.exports.lua_pushboolean = lua_pushboolean;
-module.exports.lua_version     = lua_version;
-module.exports.lua_atpanic     = lua_atpanic;
-module.exports.lua_gettop      = lua_gettop;
-module.exports.lua_typename    = lua_typename;
-module.exports.lua_type        = lua_type;
-module.exports.lua_tonumber    = lua_tonumber;
-module.exports.lua_tointeger   = lua_tointeger;
-module.exports.lua_toboolean   = lua_toboolean;
-module.exports.lua_tolstring   = lua_tolstring;
-module.exports.lua_tostring    = lua_tostring;
+module.exports.lua_pushvalue     = lua_pushvalue;
+module.exports.lua_pushnil       = lua_pushnil;
+module.exports.lua_pushnumber    = lua_pushnumber;
+module.exports.lua_pushinteger   = lua_pushinteger;
+module.exports.lua_pushlstring   = lua_pushlstring;
+module.exports.lua_pushstring    = lua_pushstring;
+module.exports.lua_pushboolean   = lua_pushboolean;
+module.exports.lua_pushcclosure  = lua_pushcclosure;
+module.exports.lua_pushcfunction = lua_pushcfunction;
+module.exports.lua_version       = lua_version;
+module.exports.lua_atpanic       = lua_atpanic;
+module.exports.lua_gettop        = lua_gettop;
+module.exports.lua_typename      = lua_typename;
+module.exports.lua_type          = lua_type;
+module.exports.lua_tonumber      = lua_tonumber;
+module.exports.lua_tointeger     = lua_tointeger;
+module.exports.lua_toboolean     = lua_toboolean;
+module.exports.lua_tolstring     = lua_tolstring;
+module.exports.lua_tostring      = lua_tostring;
