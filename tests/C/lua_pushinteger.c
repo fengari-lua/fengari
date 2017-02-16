@@ -12,7 +12,7 @@ int main(void) {
 
     lua_pushinteger(L, 10);
 
-    printf("L->top(%d): %s\n", lua_gettop(L), luaL_typename(L, lua_gettop(L)));
+    printf("L->top(%d): type %s, value %ld\n", lua_gettop(L), luaL_typename(L, lua_gettop(L)), lua_tointeger(L, -1));
 
     lua_close(L);
 

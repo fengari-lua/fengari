@@ -65,7 +65,7 @@ test('lua_pushnumber', function (t) {
     );
 
     t.strictEqual(
-        L.stack[lapi.lua_gettop(L)].value,
+        lapi.lua_tonumber(L, -1),
         10.5,
         "top is correct"
     );
@@ -81,7 +81,7 @@ test('lua_pushinteger', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lapi.lua_pushnumber(L, 10);
+        lapi.lua_pushinteger(L, 10);
 
     }, "JS Lua program ran without error");
 
@@ -98,7 +98,7 @@ test('lua_pushinteger', function (t) {
     );
 
     t.strictEqual(
-        L.stack[lapi.lua_gettop(L)].value,
+        lapi.lua_tointeger(L, -1),
         10,
         "top is correct"
     );
@@ -131,7 +131,7 @@ test('lua_pushstring', function (t) {
     );
 
     t.strictEqual(
-        L.stack[lapi.lua_gettop(L)].value,
+        lapi.lua_tostring(L, -1),
         "hello",
         "top is correct"
     );
@@ -164,7 +164,7 @@ test('lua_pushboolean', function (t) {
     );
 
     t.strictEqual(
-        L.stack[lapi.lua_gettop(L)].value,
+        lapi.lua_toboolean(L, -1),
         true,
         "top is correct"
     );
@@ -205,13 +205,13 @@ test('lua_pushvalue', function (t) {
     );
 
     t.strictEqual(
-        L.stack[lapi.lua_gettop(L)].value,
+        lapi.lua_tostring(L, -1),
         "hello",
         "top is correct"
     );
 
     t.strictEqual(
-        L.stack[lapi.lua_gettop(L) - 1].value,
+        lapi.lua_tostring(L, -2),
         "hello",
         "top is correct"
     );

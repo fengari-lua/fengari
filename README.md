@@ -32,6 +32,12 @@
     - [x] lua_pushnumber
     - [x] lua_pushstring
     - [x] lua_pushvalue
+    - [x] lua_tointeger
+    - [x] lua_tointegerx
+    - [x] lua_tolstring
+    - [x] lua_tonumber
+    - [x] lua_tonumberx
+    - [x] lua_toboolean
     - [ ] lua_absindex
     - [ ] lua_arith
     - [ ] lua_call
@@ -120,13 +126,7 @@
     - [ ] lua_setuservalue
     - [ ] lua_status
     - [ ] lua_stringtonumber
-    - [ ] lua_toboolean
     - [ ] lua_tocfunction
-    - [ ] lua_tointeger
-    - [ ] lua_tointegerx
-    - [ ] lua_tolstring
-    - [ ] lua_tonumber
-    - [ ] lua_tonumberx
     - [ ] lua_topointer
     - [ ] lua_tostring
     - [ ] lua_tothread

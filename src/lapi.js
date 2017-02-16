@@ -9,11 +9,11 @@ const ltm       = require('./ltm.js');
 const lfunc     = require('./lfunc.js');
 const lua       = require('./lua.js');
 const lstate    = require('./lstate.js');
+const lvm       = require('./lvm.js');
 const nil       = ldo.nil;
 const MAXUPVAL  = lfunc.MAXUPVAL;
 const CT        = lua.constant_types;
 const TS        = lua.thread_status;
-const l_isfalse = lobject.l_isfalse;
 const TValue    = lobject.TValue;
 const CClosure  = lobject.CClosure;
 
@@ -169,7 +169,28 @@ const lua_pushlightuserdata = function(L, p) {
 
 const lua_toboolean = function(L, idx) {
     let o = index2addr(L, idx);
-    return !l_isfalse(o);
+    return !o.l_isfalse();
+};
+
+const lua_tolstring = function(L, idx, len) {
+    let o = index2addr(L, idx);
+
+    if (!o.ttisstring() && !o.ttisnumber())
+        return null;
+
+    return len !== null ? `${o.value}`.substr(0, len) : `${o.value}`;
+};
+
+const lua_tostring = function(L, idx) {
+    return lua_tolstring(L, idx, null);
+};
+
+const lua_tointeger = function(L, idx) {
+    return lvm.tointeger(index2addr(L, idx))
+};
+
+const lua_tonumber = function(L, idx) {
+    return lvm.tonumber(index2addr(L, idx))
 };
 
 const f_call = function(L, ud) {
@@ -252,3 +273,8 @@ module.exports.lua_atpanic     = lua_atpanic;
 module.exports.lua_gettop      = lua_gettop;
 module.exports.lua_typename    = lua_typename;
 module.exports.lua_type        = lua_type;
+module.exports.lua_tonumber    = lua_tonumber;
+module.exports.lua_tointeger   = lua_tointeger;
+module.exports.lua_toboolean   = lua_toboolean;
+module.exports.lua_tolstring   = lua_tolstring;
+module.exports.lua_tostring    = lua_tostring;

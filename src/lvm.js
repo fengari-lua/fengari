@@ -785,11 +785,15 @@ const luaV_tointeger = function(obj, mode) {
     return false;
 };
 
+const tointeger = function(o) {
+    return o.ttisinteger() ? o.value : luaV_tointeger(o, 0);
+};
+
 const tonumber = function(v) {
-    if (v.type === CT.LUA_TNUMFLT || v.type === CT.LUA_TNUMINT)
+    if (v.ttnov() === CT.LUA_TNUMBER)
         return v.value;
 
-    if (v.type === CT.LUA_TSHRSTR || v.type === CT.LUA_TLNGSTR)
+    if (v.ttnov() === CT.LUA_TSTRING)
         return parseFloat(v.value); // TODO: luaO_str2num
 
     return false;
@@ -873,7 +877,7 @@ const tostring = function(L, i) {
     let o = L.stack[i];
     let str = `${o.value}`;
 
-    if (o.ttisstring() || (o.ttisnumber() && !isNaN(parseFloat(`${str}`)))) {
+    if (o.ttisstring() || (o.ttisnumber() && !isNaN(str))) {
         L.stack[i] = new TValue(CT.LUA_TLNGSTR, str);
         return true;
     }
@@ -1023,6 +1027,7 @@ module.exports.luaV_equalobj  = luaV_equalobj;
 module.exports.forlimit       = forlimit;
 module.exports.luaV_tointeger = luaV_tointeger;
 module.exports.tonumber       = tonumber;
+module.exports.tointeger      = tointeger;
 module.exports.LTnum          = LTnum;
 module.exports.LEnum          = LEnum;
 module.exports.LEintfloat     = LEintfloat;
