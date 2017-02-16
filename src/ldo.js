@@ -1,6 +1,8 @@
 /*jshint esversion: 6 */
 "use strict";
 
+const assert         = require('assert');
+
 const lua            = require('./lua.js');
 const lobject        = require('./lobject.js');
 const lstate         = require('./lstate.js');
@@ -15,15 +17,51 @@ const TMS            = ltm.TMS;
 
 const nil            = new TValue(CT.LUA_TNIL, null);
 
+/*
+** Prepares a function call: checks the stack, creates a new CallInfo
+** entry, fills in the relevant information, calls hook if needed.
+** If function is a JS function, does the call, too. (Otherwise, leave
+** the execution ('luaV_execute') to the caller, to allow stackless
+** calls.) Returns true iff function has been executed (JS function).
+*/
 const luaD_precall = function(L, off, nresults) {
     let func = L.stack[off];
     let ci;
 
     switch(func.type) {
-        case CT.LUA_TCCL: // JS function ?
-            throw new Error("LUA_TCCL not implemeted yet");
-        case CT.LUA_TLCF: // still JS function ?
-            throw new Error("LUA_TLCF not implemeted yet");
+        case CT.LUA_TCCL:
+        case CT.LUA_TLCF: {
+            let f = func.type === CT.LUA_TCCL ? func.f : func.value;
+
+            // next_ci
+            if (L.ci.next) {
+                L.ci = L.ci.next;
+                ci = L.ci;
+            } else {
+                ci = new lstate.CallInfo(off);
+                L.ci.next = ci;
+                ci.previous = L.ci;
+                ci.next = null;
+
+                L.ci = ci;
+                L.ciOff++;
+            }
+
+            ci.nresults = nresults;
+            ci.func = func;
+            ci.funcOff = off;
+            ci.top = L.top + lua.LUA_MINSTACK;
+            ci.callstatus = 0;
+            // TODO: hook
+            let n = f(L); /* do the actual call */
+
+            assert(n < L.top - L.ci.funcOff, "not enough elements in the stack");
+            
+            luaD_poscall(L, ci, L.top - n, n);
+
+            return true;
+            break;
+        }
         case CT.LUA_TLCL: {
             let p = func.p;
             let n = L.top - off - 1;

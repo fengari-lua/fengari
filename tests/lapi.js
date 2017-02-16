@@ -279,3 +279,37 @@ test('lua_pushcfunction', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('lua_call (calling a light JS function)', function (t) {
+    let L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        let fn = function(L) {
+            lapi.lua_pushstring(L, "hello");
+            return 1;
+        };
+
+        L = lauxlib.luaL_newstate();
+
+        lapi.lua_pushcfunction(L, fn);
+
+        lapi.lua_call(L, 0, 1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_gettop(L),
+        1,
+        "top is correct"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "hello",
+        "top is correct"
+    );
+});

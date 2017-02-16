@@ -219,10 +219,33 @@ const lua_typename = function(L, t) {
 ** 'load' and 'call' functions (run Lua code)
 */
 
-const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
-    assert(nargs + 1 < L.top - L.ci.func, "not enough elements in the stack");
+const lua_callk = function(L, nargs, nresults, ctx, k) {
+    assert(k === null || !(L.ci.callstatus & CIST_LUA), "cannot use continuations inside hooks");
+    assert(nargs + 1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     assert(L.status === TS.LUA_OK, "cannot do calls on non-normal thread");
-    assert(nargs == lua.LUA_MULTRET || (L.ci.top - L.top >= nargs - nresults, "results from function overflow current stack size"));
+    assert(nargs === lua.LUA_MULTRET || (L.ci.top - L.top >= nargs - nresults, "results from function overflow current stack size"));
+
+    let func = L.top - (nargs + 1);
+    if (k !== null && L.nny === 0) { /* need to prepare continuation? */
+        L.ci.u.c.k = k;
+        L.ci.u.c.ctx = ctx;
+        ldo.luaD_call(L, func, nresults);
+    } else { /* no continuation or no yieldable */
+        ldo.luaD_callnoyield(L, func, nresults);
+    }
+
+    if (nresults == lua.LUA_MULTRET && L.ci.top < L.top)
+        L.ci.top = L.top;
+};
+
+const lua_call = function(L, n, r) {
+    lua_callk(L, n, r, 0, null);
+};
+
+const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
+    assert(nargs + 1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    assert(L.status === TS.LUA_OK, "cannot do calls on non-normal thread");
+    assert(nargs === lua.LUA_MULTRET || (L.ci.top - L.top >= nargs - nresults, "results from function overflow current stack size"));
 
     let c = {
         func: null,
@@ -287,3 +310,5 @@ module.exports.lua_tointeger     = lua_tointeger;
 module.exports.lua_toboolean     = lua_toboolean;
 module.exports.lua_tolstring     = lua_tolstring;
 module.exports.lua_tostring      = lua_tostring;
+module.exports.lua_callk         = lua_callk;
+module.exports.lua_call          = lua_call;
