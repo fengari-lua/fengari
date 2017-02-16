@@ -40,6 +40,24 @@ const TMS = {
     TM_N:        26
 };
 
+const luaT_typenames_ = [
+    "no value",
+    "nil",
+    "boolean",
+    "userdata",
+    "number",
+    "string",
+    "table",
+    "function",
+    "userdata",
+    "thread",
+    "proto" /* this last case is used for tests only */
+];
+
+const ttypename = function(t) {
+    return luaT_typenames_[t + 1];
+};
+
 const luaT_init = function(L) {
     L.l_G.tmname = [];
     for (let event in TMS) {
@@ -113,3 +131,4 @@ module.exports.luaT_trybinTM    = luaT_trybinTM;
 module.exports.luaT_callorderTM = luaT_callorderTM;
 module.exports.luaT_gettmbyobj  = luaT_gettmbyobj;
 module.exports.luaT_init        = luaT_init;
+module.exports.ttypename        = ttypename;

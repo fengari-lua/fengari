@@ -18,4 +18,10 @@ const luaL_newstate = function() {
 };
 
 
+const luaL_typename = function(L, i) {
+    return lapi.lua_typename(L, lapi.lua_type(L, i));
+}
+
+
 module.exports.luaL_newstate = luaL_newstate;
+module.exports.luaL_typename = luaL_typename;

@@ -24,6 +24,9 @@
     - [x] lua_atpanic
     - [x] lua_newstate
     - [x] lua_pushnil
+    - [x] lua_gettop
+    - [x] lua_type
+    - [x] lua_typename
     - [ ] lua_absindex
     - [ ] lua_arith
     - [ ] lua_call
@@ -50,7 +53,6 @@
     - [ ] lua_getmetatable
     - [ ] lua_getstack
     - [ ] lua_gettable
-    - [ ] lua_gettop
     - [ ] lua_getupvalue
     - [ ] lua_getuservalue
     - [ ] lua_insert
@@ -129,8 +131,6 @@
     - [ ] lua_tostring
     - [ ] lua_tothread
     - [ ] lua_touserdata
-    - [ ] lua_type
-    - [ ] lua_typename
     - [ ] lua_upvalueid
     - [ ] lua_upvalueindex
     - [ ] lua_upvaluejoin
@@ -140,6 +140,7 @@
     - [ ] lua_yieldk
 - [ ] Auxiliary library
     - [x] luaL_newstate
+    - [x] luaL_typename
     - [ ] luaL_Buffer
     - [ ] luaL_Reg
     - [ ] luaL_Stream
@@ -198,7 +199,6 @@
     - [ ] luaL_testudata
     - [ ] luaL_tolstring
     - [ ] luaL_traceback
-    - [ ] luaL_typename
     - [ ] luaL_unref
     - [ ] luaL_where
 - [ ] Standard library

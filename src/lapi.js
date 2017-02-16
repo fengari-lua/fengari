@@ -5,6 +5,7 @@ const assert    = require('assert');
 
 const ldo       = require('./ldo.js');
 const lobject   = require('./lobject.js');
+const ltm       = require('./ltm.js');
 const lfunc     = require('./lfunc.js');
 const lua       = require('./lua.js');
 const lstate    = require('./lstate.js');
@@ -47,6 +48,14 @@ const index2addr = function(L, idx) {
         }
     }
 
+};
+
+/*
+** basic stack manipulation
+*/
+
+const lua_gettop = function(L) {
+    return L.top - 1;
 };
 
 const lua_pushvalue = function(L, idx) {
@@ -164,6 +173,16 @@ const f_call = function(L, ud) {
     ldo.luaD_callnoyield(L, ud.func, ud.nresults);
 };
 
+const lua_type = function(L, idx) {
+    let o = index2addr(L, idx);
+    return o.ttnov(); // TODO: isvalid ? luaO_nilobject != nil tvalue ?
+};
+
+const lua_typename = function(L, t) {
+    assert(CT.LUA_TNONE <= t && t < CT.LUA_NUMTAGS, "invalid tag");
+    return ltm.ttypename(t);
+};
+
 
 /*
 ** 'load' and 'call' functions (run Lua code)
@@ -226,3 +245,6 @@ module.exports.lua_pushlstring = lua_pushlstring;
 module.exports.lua_pushstring  = lua_pushstring;
 module.exports.lua_version     = lua_version;
 module.exports.lua_atpanic     = lua_atpanic;
+module.exports.lua_gettop      = lua_gettop;
+module.exports.lua_typename    = lua_typename;
+module.exports.lua_type        = lua_type;
