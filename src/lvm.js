@@ -18,7 +18,6 @@ const lstate         = require('./lstate.js');
 const CallInfo       = lstate.CallInfo;
 const llimit         = require('./llimit.js');
 const ldo            = require('./ldo.js');
-const nil            = ldo.nil;
 const ltm            = require('./ltm.js');
 const ltable         = require('./ltable.js');
 const TMS            = ltm.TMS;
@@ -94,7 +93,7 @@ const luaV_execute = function(L) {
             }
             case "OP_LOADNIL": {
                 for (let j = 0; j <= i.B; j++)
-                    L.stack[ra + j] = nil;
+                    L.stack[ra + j] = ldo.nil;
                 break;
             }
             case "OP_GETUPVAL": {
@@ -634,7 +633,7 @@ const luaV_execute = function(L) {
                     L.stack[ra + j] = L.stack[base - n + j];
 
                 for (; j < b; j++) /* complete required results with nil */
-                    L.stack[ra + j] = nil;
+                    L.stack[ra + j] = ldo.nil;
                 break;
             }
             case "OP_EXTRAARG": {
@@ -954,7 +953,7 @@ const luaV_finishget = function(L, t, key, val, slot, recur) {
         assert(slot.ttisnil());
         tm = ltm.luaT_gettmbyobj(L, t, TMS.TM_INDEX); // TODO: fasttm
         if (tm.ttisnil()) {
-            L.stack[val] = nil;
+            L.stack[val] = ldo.nil;
             return;
         }
     }
