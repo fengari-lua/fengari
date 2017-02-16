@@ -169,3 +169,50 @@ test('lua_pushboolean', function (t) {
         "top is correct"
     );
 });
+
+
+test('lua_pushvalue', function (t) {
+    let L;
+    
+    t.plan(6);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lapi.lua_pushstring(L, "hello");
+
+        lapi.lua_pushvalue(L, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_gettop(L),
+        2,
+        "top is correct"
+    );
+
+    t.strictEqual(
+        lauxlib.luaL_typename(L, -1),
+        "string",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lauxlib.luaL_typename(L, -2),
+        "string",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        L.stack[lapi.lua_gettop(L)].value,
+        "hello",
+        "top is correct"
+    );
+
+    t.strictEqual(
+        L.stack[lapi.lua_gettop(L) - 1].value,
+        "hello",
+        "top is correct"
+    );
+});

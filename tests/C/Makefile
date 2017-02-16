@@ -9,3 +9,4 @@ all:
 	$(CC) $(CFLAGS) $(LIBS) lua_pushinteger.c -o lua_pushinteger.out
 	$(CC) $(CFLAGS) $(LIBS) lua_pushstring.c  -o lua_pushstring.out
 	$(CC) $(CFLAGS) $(LIBS) lua_pushboolean.c  -o lua_pushboolean.out
+	$(CC) $(CFLAGS) $(LIBS) lua_pushvalue.c  -o lua_pushvalue.out

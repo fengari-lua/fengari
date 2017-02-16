@@ -36,9 +36,11 @@ const index2addr = function(L, idx) {
         assert(idx <= ci.top - (ci.funcOff + 1), "unacceptable index");
         if (o >= L.top) return nil;
         else return L.stack[o];
-    } else if (idx < 0) // TODO: pseudo-indices
-        return nil; // TODO: G(L)->l_registry
-    else { /* upvalues */
+    } else if (idx < 0) { // TODO: pseudo-indices
+        assert(idx !== 0 && -idx <= L.top, "invalid index");
+        return L.stack[L.top + idx];
+    // TODO: if (idx == LUA_REGISTRYINDEX) return &G(L)->l_registry;
+    } else { /* upvalues */
         idx = -idx;
         assert(idx <= MAXUPVAL + 1, "upvalue index too large");
         if (ci.func.ttislcf()) /* light C function? */
@@ -59,7 +61,7 @@ const lua_gettop = function(L) {
 };
 
 const lua_pushvalue = function(L, idx) {
-    L.stack[L.top] = L.stack[index2addr(L, idx)];
+    L.stack[L.top] = index2addr(L, idx);
 
     L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
@@ -166,7 +168,7 @@ const lua_pushlightuserdata = function(L, p) {
 */
 
 const lua_toboolean = function(L, idx) {
-    let o = L.stack[index2addr(L, idx)];
+    let o = index2addr(L, idx);
     return !l_isfalse(o);
 };
 
@@ -205,7 +207,7 @@ const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
     if (errfunc === 0)
         func = 0;
     else {
-        let o = L.stack[index2addr(L, errfunc)];
+        let o = index2addr(L, errfunc);
         // TODO: api_checkstackindex(L, errfunc, o);
         func = errfunc;
     }

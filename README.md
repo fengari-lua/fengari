@@ -31,6 +31,7 @@
     - [x] lua_pushinteger
     - [x] lua_pushnumber
     - [x] lua_pushstring
+    - [x] lua_pushvalue
     - [ ] lua_absindex
     - [ ] lua_arith
     - [ ] lua_call
@@ -92,7 +93,6 @@
     - [ ] lua_pushliteral
     - [ ] lua_pushlstring
     - [ ] lua_pushthread
-    - [ ] lua_pushvalue
     - [ ] lua_pushvfstring
     - [ ] lua_rawequal
     - [ ] lua_rawget
