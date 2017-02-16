@@ -42,7 +42,40 @@ test('luaL_newstate, lua_pushnil, lua_gettop, luaL_typename', function (t) {
 test('lua_pushnumber', function (t) {
     let L;
     
-    t.plan(3);
+    t.plan(4);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lapi.lua_pushnumber(L, 10.5);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_gettop(L),
+        1,
+        "top is correct"
+    );
+
+    t.strictEqual(
+        lauxlib.luaL_typename(L, lapi.lua_gettop(L)),
+        "number",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        L.stack[lapi.lua_gettop(L)].value,
+        10.5,
+        "top is correct"
+    );
+});
+
+
+test('lua_pushinteger', function (t) {
+    let L;
+    
+    t.plan(4);
 
     t.doesNotThrow(function () {
 
@@ -62,5 +95,77 @@ test('lua_pushnumber', function (t) {
         lauxlib.luaL_typename(L, lapi.lua_gettop(L)),
         "number",
         "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        L.stack[lapi.lua_gettop(L)].value,
+        10,
+        "top is correct"
+    );
+});
+
+
+test('lua_pushstring', function (t) {
+    let L;
+    
+    t.plan(4);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lapi.lua_pushstring(L, "hello");
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_gettop(L),
+        1,
+        "top is correct"
+    );
+
+    t.strictEqual(
+        lauxlib.luaL_typename(L, lapi.lua_gettop(L)),
+        "string",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        L.stack[lapi.lua_gettop(L)].value,
+        "hello",
+        "top is correct"
+    );
+});
+
+
+test('lua_pushboolean', function (t) {
+    let L;
+    
+    t.plan(4);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lapi.lua_pushboolean(L, true);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_gettop(L),
+        1,
+        "top is correct"
+    );
+
+    t.strictEqual(
+        lauxlib.luaL_typename(L, lapi.lua_gettop(L)),
+        "boolean",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        L.stack[lapi.lua_gettop(L)].value,
+        true,
+        "top is correct"
     );
 });

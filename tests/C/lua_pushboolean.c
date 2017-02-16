@@ -10,7 +10,7 @@ int main(void) {
 
     luaL_openlibs(L);
 
-    lua_pushnumber(L, 10.5);
+    lua_pushboolean(L, 1);
 
     printf("L->top(%d): %s\n", lua_gettop(L), luaL_typename(L, lua_gettop(L)));
 

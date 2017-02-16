@@ -94,7 +94,7 @@ const lua_pushinteger = function(L, n) {
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
-const lua_pushlstring = function(L, s, len) {
+const lua_pushlstring = function(L, s, len) { // TODO: embedded \0
     assert(typeof s === "string");
     assert(typeof n === "number");
 
@@ -113,6 +113,7 @@ const lua_pushstring = function (L, s) {
         L.stack[L.top] = nil;
     else {
         let ts = new TValue(CT.LUA_TLNGSTR, s);
+        L.stack[L.top] = ts;
         s = ts.value;
     }
 
@@ -243,6 +244,7 @@ module.exports.lua_pushnumber  = lua_pushnumber;
 module.exports.lua_pushinteger = lua_pushinteger;
 module.exports.lua_pushlstring = lua_pushlstring;
 module.exports.lua_pushstring  = lua_pushstring;
+module.exports.lua_pushboolean = lua_pushboolean;
 module.exports.lua_version     = lua_version;
 module.exports.lua_atpanic     = lua_atpanic;
 module.exports.lua_gettop      = lua_gettop;

@@ -27,6 +27,10 @@
     - [x] lua_gettop
     - [x] lua_type
     - [x] lua_typename
+    - [x] lua_pushboolean
+    - [x] lua_pushinteger
+    - [x] lua_pushnumber
+    - [x] lua_pushstring
     - [ ] lua_absindex
     - [ ] lua_arith
     - [ ] lua_call
@@ -80,17 +84,13 @@
     - [ ] lua_pcall
     - [ ] lua_pcallk
     - [ ] lua_pop
-    - [ ] lua_pushboolean
     - [ ] lua_pushcclosure
     - [ ] lua_pushcfunction
     - [ ] lua_pushfstring
     - [ ] lua_pushglobaltable
-    - [ ] lua_pushinteger
     - [ ] lua_pushlightuserdata
     - [ ] lua_pushliteral
     - [ ] lua_pushlstring
-    - [ ] lua_pushnumber
-    - [ ] lua_pushstring
     - [ ] lua_pushthread
     - [ ] lua_pushvalue
     - [ ] lua_pushvfstring

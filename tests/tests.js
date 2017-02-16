@@ -21,7 +21,7 @@ const toByteCode = function (luaCode) {
 
     bclist = fs.readFileSync(`${luaFile.name}.bc.txt`, 'utf8');
 
-    console.log(bclist);
+    // console.log(bclist);
 
     return {
         dataView: new DataView(fs.readFileSync(`${luaFile.name}.bc`)),
