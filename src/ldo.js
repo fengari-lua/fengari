@@ -11,7 +11,6 @@ const CT             = lua.constant_types;
 const TS             = lua.thread_status;
 const LUA_MULTRET    = lua.LUA_MULTRET;
 const TValue         = lobject.TValue;
-const CallInfo       = lstate.CallInfo;
 const TMS            = ltm.TMS;
 
 const nil            = new TValue(CT.LUA_TNIL, null);
@@ -44,7 +43,7 @@ const luaD_precall = function(L, off, nresults) {
                 L.ci = L.ci.next;
                 ci = L.ci;
             } else {
-                ci = new CallInfo(off);
+                ci = new lstate.CallInfo(off);
                 L.ci.next = ci;
                 ci.previous = L.ci;
                 ci.next = null;

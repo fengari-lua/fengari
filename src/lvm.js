@@ -535,19 +535,19 @@ const luaV_execute = function(L) {
                         throw new Error("'for' limit must be a number");
 
                     plimit.type = CT.LUA_TNUMFLT;
-                    plimit.value = nlimit.value;
+                    plimit.value = nlimit
 
                     if (nstep === false)
                         throw new Error("'for' step must be a number");
 
                     pstep.type = CT.LUA_TNUMFLT;
-                    pstep.value = nstep.value;
+                    pstep.value = nstep
 
                     if (ninit === false)
                         throw new Error("'for' initial value must be a number");
 
                     init.type = CT.LUA_TNUMFLT;
-                    init.value = ninit.value - nstep.value;
+                    init.value = ninit - nstep;
                 }
 
                 ci.pcOff += i.sBx;
@@ -787,14 +787,11 @@ const luaV_tointeger = function(obj, mode) {
 };
 
 const tonumber = function(v) {
-    if (v.type === CT.LUA_TNUMFLT)
-        return new TValue(v.type, v.value);
-
-    if (v.type === CT.LUA_TNUMINT)
-        return new TValue(CT.LUA_TNUMFLT, v.value);
+    if (v.type === CT.LUA_TNUMFLT || v.type === CT.LUA_TNUMINT)
+        return v.value;
 
     if (v.type === CT.LUA_TSHRSTR || v.type === CT.LUA_TLNGSTR)
-        return new TValue(CT.LUA_TNUMFLT, parseFloat(v.value)); // TODO: luaO_str2num
+        return parseFloat(v.value); // TODO: luaO_str2num
 
     return false;
 };
