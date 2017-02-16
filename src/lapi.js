@@ -10,7 +10,6 @@ const lfunc     = require('./lfunc.js');
 const lua       = require('./lua.js');
 const lstate    = require('./lstate.js');
 const lvm       = require('./lvm.js');
-const nil       = ldo.nil;
 const MAXUPVAL  = lfunc.MAXUPVAL;
 const CT        = lua.constant_types;
 const TS        = lua.thread_status;
@@ -34,7 +33,7 @@ const index2addr = function(L, idx) {
     if (idx > 0) {
         let o = ci.funcOff + idx;
         assert(idx <= ci.top - (ci.funcOff + 1), "unacceptable index");
-        if (o >= L.top) return nil;
+        if (o >= L.top) return ldo.nil;
         else return L.stack[o];
     } else if (idx < 0) { // TODO: pseudo-indices relative to LUA_REGISTRYINDEX
         assert(idx !== 0 && -idx <= L.top, "invalid index");
@@ -44,9 +43,9 @@ const index2addr = function(L, idx) {
         idx = -idx;
         assert(idx <= MAXUPVAL + 1, "upvalue index too large");
         if (ci.func.ttislcf()) /* light C function? */
-            return nil; /* it has no upvalues */
+            return ldo.nil; /* it has no upvalues */
         else {
-            return idx <= ci.func.nupvalues ? ci.func.upvalue[idx - 1] : nil;
+            return idx <= ci.func.nupvalues ? ci.func.upvalue[idx - 1] : ldo.nil;
         }
     }
 
@@ -67,12 +66,28 @@ const lua_pushvalue = function(L, idx) {
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
+const lua_settop = function(L, idx) {
+    let func = L.ci.funcOff;
+    if (idx >= 0) {
+        while (L.top < func + 1 + idx)
+            L.stack[L.top++] = ldo.nil;
+        L.top = func + 1 + idx;
+    } else {
+        assert(-(idx + 1) <= L.top - (func + 1), "invalid new top");
+        L.top += idx + 1; /* 'subtract' index (index is negative) */
+    }
+};
+
+const lua_pop = function(L, n) {
+    lua_settop(L, -n - 1);
+}
+
 /*
 ** push functions (JS -> stack)
 */
 
 const lua_pushnil = function(L) {
-    L.stack[L.top] = nil;
+    L.stack[L.top] = ldo.nil;
 
     L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
@@ -112,7 +127,7 @@ const lua_pushlstring = function(L, s, len) { // TODO: embedded \0
 const lua_pushstring = function (L, s) {
     assert(typeof s === "string");
     if (!s)
-        L.stack[L.top] = nil;
+        L.stack[L.top] = ldo.nil;
     else {
         let ts = new TValue(CT.LUA_TLNGSTR, s);
         L.stack[L.top] = ts;

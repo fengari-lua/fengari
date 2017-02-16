@@ -73,42 +73,6 @@ const print_version = function() {
     console.log(FENGARI_COPYRIGHT);
 };
 
-
-const handle_script = function(L, args) {
-    // TODO: stdin
-
-};
-
-const handle_luainit = function(L) {
-    // TODO: Should execute script in LUA_INIT_5_3
-    return thread_status.LUA_OK;
-};
-
-/*
-** Main body of stand-alone interpreter (to be called in protected mode).
-** Reads the options and handles them all.
-*/
-const pmain = function(L) {
-    // arguments are a userdata wrapping a plain JS object
-    let args = L.stack[1].value; // For now it should only hold a DataView containing bytecode
-
-    // TODO: luaL_checkversion(L);
-    // TODO: LUA_NOENV
-    // TODO: luaL_openlibs(L);
-    // TODO: createargtable(L, argv, argc, script);
-
-    if (!args.E) {
-        if (handle_luainit(L) != thread_status.LUA_OK)
-            return 0; /* error running LUA_INIT */
-    }
-
-    // TODO: runargs(L, argv, script)
-    if (args.script && handle_script(L, args) != thread_status.LUA_OK)
-        return 0;
-
-    // TODO: doREPL(L);
-};
-
 module.exports.constant_types          = constant_types;
 module.exports.thread_status           = thread_status;
 module.exports.LUA_MULTRET             = -1;

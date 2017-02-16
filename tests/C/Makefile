@@ -12,3 +12,4 @@ all:
 	$(CC) $(CFLAGS) $(LIBS) lua_pushvalue.c           -o lua_pushvalue.out
 	$(CC) $(CFLAGS) $(LIBS) lua_pushcclosure-light.c  -o lua_pushcclosure-light.out
 	$(CC) $(CFLAGS) $(LIBS) lua_call.c 				  -o lua_call.out
+	$(CC) $(CFLAGS) $(LIBS) lua_call-jsclosure.c      -o lua_call-jsclosure.out
