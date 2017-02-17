@@ -353,6 +353,63 @@ test('lua_call (calling a JS closure)', function (t) {
 });
 
 
+test('lua_pcall (calling a light JS function)', function (t) {
+    let L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        let fn = function(L) {
+            lapi.lua_pushstring(L, "hello");
+            return 1;
+        };
+
+        L = lauxlib.luaL_newstate();
+
+        lapi.lua_pushjsfunction(L, fn);
+
+        lapi.lua_pcall(L, 0, 1, 0);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_gettop(L),
+        1,
+        "top is correct"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "hello",
+        "top is correct"
+    );
+});
+
+
+test('lua_pcall that breaks', function (t) {
+    let L;
+    
+    t.plan(1);
+
+    t.doesNotThrow(function () {
+
+        let fn = function(L) {
+            return undefined_value;
+        };
+
+        L = lauxlib.luaL_newstate();
+
+        lapi.lua_pushjsfunction(L, fn);
+
+        lapi.lua_pcall(L, 0, 1, 0);
+
+    }, "JS Lua program ran without error");
+
+    console.log(L.stack[L.top - 1].value);
+});
+
+
 test('lua_pop', function (t) {
     let L;
     

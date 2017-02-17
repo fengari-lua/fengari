@@ -19,6 +19,23 @@ const TMS            = ltm.TMS;
 
 const nil            = new TValue(CT.LUA_TNIL, null);
 
+const seterrorobj = function(L, errcode, oldtop) {
+    switch (errcode) {
+        case TS.LUA_ERRMEM: {
+            L.stack[oldtop] = new TValue(CT.LUA_TLNGSTR, "not enough memory");
+            break;
+        }
+        case TS.LUA_ERRERR: {
+            L.stack[oldtop] = new TValue(CT.LUA_TLNGSTR, "error in error handling");
+        }
+        default: {
+            L.stack[oldtop] = L.stack[L.top - 1];
+        }
+    }
+
+    L.top = oldtop + 1;
+};
+
 /*
 ** Prepares a function call: checks the stack, creates a new CallInfo
 ** entry, fills in the relevant information, calls hook if needed.
@@ -221,7 +238,6 @@ const luaD_rawrunprotected = function(L, f, ud) {
     try {
         f(L, ud);
     } catch (e) {
-        console.log(e);
         if (lj.status == 0) lj.status = -1;
     }
 
@@ -243,7 +259,7 @@ const luaD_pcall = function(L, func, u, old_top, ef) {
 
     if (status !== TS.LUA_OK) {
         lfunc.luaF_close(L, old_top);
-        // TODO: seterrorobj(L, status, oldtop);
+        seterrorobj(L, status, old_top);
         L.ci = old_ci;
         // TODO: L->allowhook = old_allowhooks;
         L.nny = old_nny;

@@ -276,7 +276,7 @@ const lua_tonumber = function(L, idx) {
 };
 
 const f_call = function(L, ud) {
-    ldo.luaD_callnoyield(L, ud.func, ud.nresults);
+    ldo.luaD_callnoyield(L, ud.funcOff, ud.nresults);
 };
 
 const lua_type = function(L, idx) {
@@ -387,6 +387,10 @@ const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
     return status;
 };
 
+const lua_pcall = function(L, n, r, f) {
+    return lua_pcallk(L, n, r, f, 0, null);
+}
+
 module.exports.lua_pushvalue      = lua_pushvalue;
 module.exports.lua_pushnil        = lua_pushnil;
 module.exports.lua_pushnumber     = lua_pushnumber;
@@ -411,6 +415,8 @@ module.exports.lua_tostring       = lua_tostring;
 module.exports.lua_load           = lua_load;
 module.exports.lua_callk          = lua_callk;
 module.exports.lua_call           = lua_call;
+module.exports.lua_pcallk         = lua_pcallk;
+module.exports.lua_pcall          = lua_pcall;
 module.exports.lua_pop            = lua_pop;
 module.exports.lua_setglobal      = lua_setglobal;
 module.exports.lua_istable        = lua_istable;

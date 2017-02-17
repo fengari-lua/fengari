@@ -46,6 +46,7 @@
     - [x] lua_load
     - [x] lua_call
     - [x] lua_callk
+    - [x] lua_pcall
     - [x] lua_setglobal
     - [x] lua_upvalueindex
     - [x] lua_createtable
@@ -96,7 +97,6 @@
     - [ ] lua_newuserdata
     - [ ] lua_next
     - [ ] lua_numbertointeger
-    - [ ] lua_pcall
     - [ ] lua_pcallk
     - [ ] lua_pushfstring
     - [ ] lua_pushglobaltable
