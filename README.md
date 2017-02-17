@@ -50,6 +50,8 @@
     - [x] lua_upvalueindex
     - [x] lua_createtable
     - [x] lua_newtable
+    - [x] lua_gettable
+    - [x] lua_settable
     - [ ] lua_absindex
     - [ ] lua_arith
     - [ ] lua_checkstack
@@ -72,7 +74,6 @@
     - [ ] lua_getlocal
     - [ ] lua_getmetatable
     - [ ] lua_getstack
-    - [ ] lua_gettable
     - [ ] lua_getupvalue
     - [ ] lua_getuservalue
     - [ ] lua_insert
@@ -122,7 +123,6 @@
     - [ ] lua_seti
     - [ ] lua_setlocal
     - [ ] lua_setmetatable
-    - [ ] lua_settable
     - [ ] lua_settop
     - [ ] lua_setupvalue
     - [ ] lua_setuservalue

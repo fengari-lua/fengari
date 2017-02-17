@@ -1035,3 +1035,5 @@ module.exports.LTintfloat     = LTintfloat;
 module.exports.l_strcmp       = l_strcmp;
 module.exports.luaV_objlen    = luaV_objlen;
 module.exports.luaV_finishset = luaV_finishset;
+module.exports.gettable       = gettable;
+module.exports.settable       = settable;

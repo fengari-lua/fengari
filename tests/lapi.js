@@ -477,3 +477,31 @@ test('lua_newtable', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('lua_settable, lua_gettable', function (t) {
+    let L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+        L = lauxlib.luaL_newstate();
+
+        lapi.lua_newtable(L);
+
+        lapi.lua_pushstring(L, "key");
+        lapi.lua_pushstring(L, "value");
+
+        lapi.lua_settable(L, -3);
+
+        lapi.lua_pushstring(L, "key");
+        lapi.lua_gettable(L, -2);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "value",
+        "Correct element(s) on the stack"
+    );
+});

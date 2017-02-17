@@ -14,3 +14,4 @@ all:
 	$(CC) $(CFLAGS) $(LIBS) lua_call.c 				  -o lua_call.out
 	$(CC) $(CFLAGS) $(LIBS) lua_call-jsclosure.c      -o lua_call-jsclosure.out
 	$(CC) $(CFLAGS) $(LIBS) lua_pop.c 		          -o lua_pop.out
+	$(CC) $(CFLAGS) $(LIBS) lua_setgettable.c 		  -o lua_setgettable.out

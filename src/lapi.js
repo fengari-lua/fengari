@@ -210,6 +210,14 @@ const lua_setglobal = function(L, name) {
     auxsetstr(L, L.l_G.l_registry.value.array[lua.LUA_RIDX_GLOBALS], name);
 };
 
+const lua_settable = function(L, idx) {
+    assert(2 < L.top - L.ci.funcOff, "not enough elements in the stack");
+
+    let t = index2addr(L, idx);
+    lvm.settable(L, t, L.stack[L.top - 2], L.stack[L.top - 1]);
+    L.top -= 2;
+};
+
 
 /*
 ** get functions (Lua -> stack)
@@ -228,6 +236,12 @@ const lua_createtable = function(L, narray, nrec) {
 
 const lua_newtable = function(L) {
     lua_createtable(L, 0, 0);
+};
+
+const lua_gettable = function(L, idx) {
+    let t = index2addr(L, idx);
+    lvm.gettable(L, t, L.stack[L.top - 1], L.top - 1);
+    return L.stack[L.top - 1].ttnov();
 };
 
 
@@ -402,3 +416,5 @@ module.exports.lua_setglobal      = lua_setglobal;
 module.exports.lua_istable        = lua_istable;
 module.exports.lua_createtable    = lua_createtable;
 module.exports.lua_newtable       = lua_newtable;
+module.exports.lua_settable       = lua_settable;
+module.exports.lua_gettable       = lua_gettable;
