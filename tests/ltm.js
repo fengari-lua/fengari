@@ -457,8 +457,6 @@ test('__index table with own metatable', function (t) {
             __index = mmt
         }
 
-        -- setmetatable(mt, mmt)
-
         local t = {}
 
         -- setmetatable(t, mt)
@@ -466,7 +464,7 @@ test('__index table with own metatable', function (t) {
         return t.yo
     `, L;
     
-    t.plan(6);
+    t.plan(5);
 
     t.comment("Running following code: \n" + luaCode);
 
@@ -484,7 +482,7 @@ test('__index table with own metatable', function (t) {
     //         5       [8]     SETTABLE        1 -2 -3 ; "yo" "bye"
     //         6       [13]    NEWTABLE        2 0 1                     <=== We stop here
     //         7       [14]    SETTABLE        2 -1 1  ; "__index" -
-    //         8       [17]    NEWTABLE        3 0 0                     <=== We stop here
+    //         8       [17]    NEWTABLE        3 0 0
     //         9       [21]    GETTABLE        4 3 -2  ; "yo"            <=== We stop here
     //         10      [21]    RETURN          4 2
     //         11      [21]    RETURN          0 1
@@ -496,7 +494,6 @@ test('__index table with own metatable', function (t) {
     //         3       [4]     RETURN          0 1
 
     L.stack[1].p.code[5].breakpoint = true;
-    L.stack[1].p.code[7].breakpoint = true;
     L.stack[1].p.code[8].breakpoint = true;
 
     t.doesNotThrow(function () {
@@ -514,24 +511,14 @@ test('__index table with own metatable', function (t) {
     }, "Second part of the program executed without errors");
 
     L.ci.pcOff--;
-    L.stack[1].p.code[7].breakpoint = false;
+    L.stack[1].p.code[8].breakpoint = false;
 
-    t.comment("We manually set mt's metatable to mmt");
-    L.stack[4].metatable = L.stack[3];
+    t.comment("We manually set t's metatable to mt");
+    L.stack[5].metatable = L.stack[4];
 
     t.doesNotThrow(function () {
         VM.luaV_execute(L);
     }, "Third part of the program executed without errors");
-
-    L.ci.pcOff--;
-    L.stack[1].p.code[8].breakpoint = false;
-
-    t.comment("We manually set t's metatable to mt");
-    L.stack[4].metatable = L.stack[4];
-
-    t.doesNotThrow(function () {
-        VM.luaV_execute(L);
-    }, "Fourth part of the program executed without errors");
 
     t.strictEqual(
         L.stack[L.top - 1].value,
@@ -639,13 +626,13 @@ test('__newindex table with own metatable', function (t) {
     }, "Fourth part of the program executed without errors");
 
     t.strictEqual(
-        L.stack[L.top - 2].value,
+        L.stack[L.top - 1].value,
         "hello",
         "Program output is correct"
     );
 
     t.strictEqual(
-        L.stack[L.top - 1].value,
+        L.stack[L.top - 2].value,
         null,
         "Program output is correct"
     );
