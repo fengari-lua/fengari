@@ -10,7 +10,8 @@ const VM       = require("../src/lvm.js");
 const ldo      = require("../src/ldo.js");
 const lapi     = require("../src/lapi.js");
 const lauxlib  = require("../src/lauxlib.js");
-const CT       = require('../src/lua.js').constant_types;
+const lua      = require('../src/lua.js');
+const CT       = lua.constant_types;
 
 test('luaL_newstate, lua_pushnil, lua_gettop, luaL_typename', function (t) {
     let L;
@@ -218,7 +219,7 @@ test('lua_pushvalue', function (t) {
 });
 
 
-test('lua_pushcclosure', function (t) {
+test('lua_pushjsclosure', function (t) {
     let L;
     
     t.plan(3);
@@ -232,7 +233,7 @@ test('lua_pushcclosure', function (t) {
         L = lauxlib.luaL_newstate();
 
         lapi.lua_pushstring(L, "a value associated to the C closure");
-        lapi.lua_pushcclosure(L, fn, 1);
+        lapi.lua_pushjsclosure(L, fn, 1);
 
     }, "JS Lua program ran without error");
 
@@ -250,7 +251,7 @@ test('lua_pushcclosure', function (t) {
 });
 
 
-test('lua_pushcfunction', function (t) {
+test('lua_pushjsfunction', function (t) {
     let L;
     
     t.plan(3);
@@ -263,7 +264,7 @@ test('lua_pushcfunction', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lapi.lua_pushcfunction(L, fn);
+        lapi.lua_pushjsfunction(L, fn);
 
     }, "JS Lua program ran without error");
 
@@ -295,7 +296,7 @@ test('lua_call (calling a light JS function)', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lapi.lua_pushcfunction(L, fn);
+        lapi.lua_pushjsfunction(L, fn);
 
         lapi.lua_call(L, 0, 1);
 
@@ -310,6 +311,41 @@ test('lua_call (calling a light JS function)', function (t) {
     t.strictEqual(
         lapi.lua_tostring(L, -1),
         "hello",
+        "top is correct"
+    );
+});
+
+
+test('lua_call (calling a JS closure)', function (t) {
+    let L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        let fn = function(L) {
+            lapi.lua_pushstring(L, lapi.lua_tostring(L, lua.lua_upvalueindex(1)));
+            return 1;
+        };
+
+        L = lauxlib.luaL_newstate();
+
+        lapi.lua_pushstring(L, "upvalue hello !");
+        lapi.lua_pushjsclosure(L, fn, 1);
+
+        lapi.lua_call(L, 0, 1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_gettop(L),
+        1,
+        "top is correct"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "upvalue hello !",
         "top is correct"
     );
 });

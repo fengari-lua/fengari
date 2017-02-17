@@ -38,8 +38,8 @@
     - [x] lua_tonumber
     - [x] lua_tonumberx
     - [x] lua_toboolean
-    - [x] lua_pushcclosure
-    - [x] lua_pushcfunction
+    - [x] lua_pushjsclosure (lua_pushcclosure)
+    - [x] lua_pushjsfunction (lua_pushcfunction)
     - [ ] lua_absindex
     - [ ] lua_arith
     - [ ] lua_call

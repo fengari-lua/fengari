@@ -68,7 +68,7 @@ const LUA_MINSTACK = 20;
 const LUA_REGISTRYINDEX = -luaconf.LUAI_MAXSTACK - 1000;
 
 const lua_upvalueindex = function(i) {
-    LUA_REGISTRYINDEX - i;
+    return LUA_REGISTRYINDEX - i;
 };
 
 /* predefined values in the registry */
