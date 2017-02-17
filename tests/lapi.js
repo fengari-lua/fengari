@@ -409,3 +409,33 @@ test('lua_load and lua_call it', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('lua script reads js upvalues', function (t) {
+    let luaCode = `
+        return js .. " world"
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        lapi.lua_load(L, bc, "test-lua_load")
+
+        lapi.lua_pushstring(L, "hello");
+        lapi.lua_setglobal(L, "js");
+
+        lapi.lua_call(L, 0, 1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "hello world",
+        "Correct element(s) on the stack"
+    );
+});

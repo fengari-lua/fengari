@@ -50,7 +50,6 @@ const index2addr = function(L, idx) {
             return idx <= ci.func.nupvalues ? ci.func.upvalue[idx - 1] : ldo.nil;
         }
     }
-
 };
 
 /*
@@ -190,6 +189,33 @@ const lua_pushlightuserdata = function(L, p) {
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
+/*
+** set functions (stack -> Lua)
+*/
+
+/*
+** t[k] = value at the top of the stack (where 'k' is a string)
+*/
+const auxsetstr = function(L, t, k) {
+    let str = new TValue(CT.LUA_TLNGSTR, k);
+
+    assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+
+    if (t.ttistable() && !t.__index(t, k).ttisnil()) {
+        t.__newindex(t, k, L.stack[L.top - 1]);
+        L.top--; /* pop value */
+    } else {
+        L.stack[L.top] = str;
+        L.top++;
+        lvm.luaV_finishset(L, t, L.stack[L.top - 1], L.stack[L.top - 2], t.__index(t, k), 0);
+        L.top -= 2; /* pop value and key */
+    }
+};
+
+const lua_setglobal = function(L, name) {
+    auxsetstr(L, L.l_G.l_registry.value.array[lua.LUA_RIDX_GLOBALS], name);
+};
+
 
 /*
 ** access functions (stack -> JS)
@@ -251,7 +277,7 @@ const lua_load = function(L, data, chunckname) {
             let reg = L.l_G.l_registry;
             let gt = reg.value.array[lua.LUA_RIDX_GLOBALS];
             /* set global table as 1st upvalue of 'f' (may be LUA_ENV) */
-            f.upvals[0].v = gt; // TODO: is gt on the stack ? is that upvalue opened or closed ?
+            f.upvals[0].u.value = gt;
         }
     }
 
@@ -355,3 +381,4 @@ module.exports.lua_load           = lua_load;
 module.exports.lua_callk          = lua_callk;
 module.exports.lua_call           = lua_call;
 module.exports.lua_pop            = lua_pop;
+module.exports.lua_setglobal      = lua_setglobal;

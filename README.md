@@ -21,6 +21,7 @@
     - [ ] `__tostring`
     - [ ] `__pairs`
 - [ ] C API
+    - [x] lua_version
     - [x] lua_atpanic
     - [x] lua_newstate
     - [x] lua_pushnil
@@ -30,6 +31,7 @@
     - [x] lua_pushboolean
     - [x] lua_pushinteger
     - [x] lua_pushnumber
+    - [x] lua_pushlstring
     - [x] lua_pushstring
     - [x] lua_pushvalue
     - [x] lua_tointeger
@@ -44,6 +46,8 @@
     - [x] lua_load
     - [x] lua_call
     - [x] lua_callk
+    - [x] lua_setglobal
+    - [x] lua_upvalueindex
     - [ ] lua_absindex
     - [ ] lua_arith
     - [ ] lua_checkstack
@@ -97,7 +101,6 @@
     - [ ] lua_pushglobaltable
     - [ ] lua_pushlightuserdata
     - [ ] lua_pushliteral
-    - [ ] lua_pushlstring
     - [ ] lua_pushthread
     - [ ] lua_pushvfstring
     - [ ] lua_rawequal
@@ -115,7 +118,6 @@
     - [ ] lua_rotate
     - [ ] lua_setallocf
     - [ ] lua_setfield
-    - [ ] lua_setglobal
     - [ ] lua_sethook
     - [ ] lua_seti
     - [ ] lua_setlocal
@@ -132,9 +134,7 @@
     - [ ] lua_tothread
     - [ ] lua_touserdata
     - [ ] lua_upvalueid
-    - [ ] lua_upvalueindex
     - [ ] lua_upvaluejoin
-    - [ ] lua_version
     - [ ] lua_xmove
     - [ ] lua_yield
     - [ ] lua_yieldk
