@@ -42,6 +42,6 @@ const getState = function(luaCode) {
     return L;
 };
 
-module.exports = {
-    getState: getState
-}
+
+module.exports.getState = getState;
+module.exports.toByteCode = toByteCode;

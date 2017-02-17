@@ -1,17 +1,19 @@
 /*jshint esversion: 6 */
 "use strict";
 
-const test     = require('tape');
-const beautify = require('js-beautify').js_beautify;
+const test       = require('tape');
+const beautify   = require('js-beautify').js_beautify;
 
-const getState = require("./tests.js").getState;
+const tests      = require("./tests.js");
+const getState   = tests.getState;
+const toByteCode = tests.toByteCode;
 
-const VM       = require("../src/lvm.js");
-const ldo      = require("../src/ldo.js");
-const lapi     = require("../src/lapi.js");
-const lauxlib  = require("../src/lauxlib.js");
-const lua      = require('../src/lua.js');
-const CT       = lua.constant_types;
+const VM         = require("../src/lvm.js");
+const ldo        = require("../src/ldo.js");
+const lapi       = require("../src/lapi.js");
+const lauxlib    = require("../src/lauxlib.js");
+const lua        = require('../src/lua.js');
+const CT         = lua.constant_types;
 
 test('luaL_newstate, lua_pushnil, lua_gettop, luaL_typename', function (t) {
     let L;
@@ -376,6 +378,34 @@ test('lua_pop', function (t) {
     t.strictEqual(
         lapi.lua_tostring(L, -1),
         "hello",
+        "Correct element(s) on the stack"
+    );
+});
+
+
+test('lua_load and lua_call it', function (t) {
+    let luaCode = `
+        local a = "JS > Lua > JS \o/"
+        return a
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        lapi.lua_load(L, bc, "test-lua_load")
+
+        lapi.lua_call(L, 0, 1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "JS > Lua > JS \o/",
         "Correct element(s) on the stack"
     );
 });

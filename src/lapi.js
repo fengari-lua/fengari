@@ -240,6 +240,24 @@ const lua_typename = function(L, t) {
 ** 'load' and 'call' functions (run Lua code)
 */
 
+const lua_load = function(L, data, chunckname) {
+    if (!chunckname) chunckname = "?";
+    
+    let status = ldo.luaD_protectedparser(L, data, chunckname);
+    if (status === TS.LUA_OK) {
+        let f = L.stack[L.top - 1]; /* get newly created function */
+        if (f.nupvalues >= 1) { /* does it have an upvalue? */
+            /* get global table from registry */
+            let reg = L.l_G.l_registry;
+            let gt = reg.value.array[lua.LUA_RIDX_GLOBALS];
+            /* set global table as 1st upvalue of 'f' (may be LUA_ENV) */
+            f.upvals[0].v = gt; // TODO: is gt on the stack ? is that upvalue opened or closed ?
+        }
+    }
+
+    return status;
+};
+
 const lua_callk = function(L, nargs, nresults, ctx, k) {
     assert(k === null || !(L.ci.callstatus & CIST_LUA), "cannot use continuations inside hooks");
     assert(nargs + 1 < L.top - L.ci.funcOff, "not enough elements in the stack");
@@ -333,6 +351,7 @@ module.exports.lua_tointeger      = lua_tointeger;
 module.exports.lua_toboolean      = lua_toboolean;
 module.exports.lua_tolstring      = lua_tolstring;
 module.exports.lua_tostring       = lua_tostring;
+module.exports.lua_load           = lua_load;
 module.exports.lua_callk          = lua_callk;
 module.exports.lua_call           = lua_call;
 module.exports.lua_pop            = lua_pop;

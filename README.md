@@ -41,10 +41,11 @@
     - [x] lua_pushjsclosure (lua_pushcclosure)
     - [x] lua_pushjsfunction (lua_pushcfunction)
     - [x] lua_pop
+    - [x] lua_load
+    - [x] lua_call
+    - [x] lua_callk
     - [ ] lua_absindex
     - [ ] lua_arith
-    - [ ] lua_call
-    - [ ] lua_callk
     - [ ] lua_checkstack
     - [ ] lua_close
     - [ ] lua_compare
@@ -85,7 +86,6 @@
     - [ ] lua_isuserdata
     - [ ] lua_isyieldable
     - [ ] lua_len
-    - [ ] lua_load
     - [ ] lua_newtable
     - [ ] lua_newthread
     - [ ] lua_newuserdata

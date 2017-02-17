@@ -9,6 +9,8 @@ const lstate         = require('./lstate.js');
 const llimit         = require('./llimit.js');
 const ltm            = require('./ltm.js');
 const lvm            = require('./lvm.js');
+const lfunc          = require('./lfunc.js');
+const BytecodeParser = require('./lundump.js');
 const CT             = lua.constant_types;
 const TS             = lua.thread_status;
 const LUA_MULTRET    = lua.LUA_MULTRET;
@@ -237,7 +239,7 @@ const luaD_pcall = function(L, func, u, old_top, ef) {
     let old_errfunc = L.errfunc;
     L.errfunc = ef;
 
-    status = luaD_rawrunprotected(L, func, u);
+    let status = luaD_rawrunprotected(L, func, u);
 
     if (status !== TS.LUA_OK) {
         lfunc.luaF_close(L, old_top);
@@ -263,12 +265,10 @@ const luaD_callnoyield = function(L, off, nResults) {
 
 // TODO: since we only handle binary, no need for a reader or mode
 const f_parser = function(L, data) {
-    assert(data instanceof DataView, "data must be a DataView");
+    let p = new BytecodeParser(data);
+    let cl = p.luaU_undump(L);
 
-    let p = new lundump.BytecodeParser(data);
-    let cl = p.luaU_undump();
-
-    assert(cl.nupvalues == cl.p.sizeupvalues);
+    assert(cl.nupvalues == cl.p.upvalues.length);
 
     lfunc.luaF_initupvals(L, cl);
 };
@@ -283,14 +283,15 @@ const luaD_protectedparser = function(L, data, name) {
     return status;
 };
 
-module.exports.nil                        = nil;
-module.exports.luaD_precall               = luaD_precall;
-module.exports.luaD_poscall               = luaD_poscall;
-module.exports.moveresults                = moveresults;
-module.exports.adjust_varargs             = adjust_varargs;
-module.exports.tryfuncTM                  = tryfuncTM;
-module.exports.stackerror                 = stackerror;
-module.exports.luaD_call                  = luaD_call;
-module.exports.luaD_callnoyield           = luaD_callnoyield;
-module.exports.luaD_pcall                 = luaD_pcall;
-module.exports.luaD_rawrunprotected       = luaD_rawrunprotected;
+module.exports.nil                  = nil;
+module.exports.luaD_precall         = luaD_precall;
+module.exports.luaD_poscall         = luaD_poscall;
+module.exports.moveresults          = moveresults;
+module.exports.adjust_varargs       = adjust_varargs;
+module.exports.tryfuncTM            = tryfuncTM;
+module.exports.stackerror           = stackerror;
+module.exports.luaD_call            = luaD_call;
+module.exports.luaD_callnoyield     = luaD_callnoyield;
+module.exports.luaD_pcall           = luaD_pcall;
+module.exports.luaD_rawrunprotected = luaD_rawrunprotected;
+module.exports.luaD_protectedparser = luaD_protectedparser;
