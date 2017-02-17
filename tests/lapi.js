@@ -562,3 +562,17 @@ test('lua_settable, lua_gettable', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('print', function (t) {
+    let luaCode = `
+        print("hello world");
+    `, L;
+    
+    t.plan(1);
+
+    t.doesNotThrow(function () {
+        L = getState(luaCode);
+        lapi.lua_call(L, 0, -1);
+    }, "Program executed without errors");
+});

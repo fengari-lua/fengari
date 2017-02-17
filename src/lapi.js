@@ -8,6 +8,7 @@ const lobject   = require('./lobject.js');
 const ltm       = require('./ltm.js');
 const lfunc     = require('./lfunc.js');
 const lua       = require('./lua.js');
+const luaconf   = require('./luaconf.js');
 const lstate    = require('./lstate.js');
 const lvm       = require('./lvm.js');
 const lundump   = require('./lundump.js');
@@ -52,9 +53,22 @@ const index2addr = function(L, idx) {
     }
 };
 
+const lua_checkstack = function(L, n) {
+    return L.stack.length < luaconf.LUAI_MAXSTACK;
+};
+
 /*
 ** basic stack manipulation
 */
+
+/*
+** convert an acceptable stack index into an absolute index
+*/
+const lua_absindex = function(L, idx) {
+    return (idx > 0 || idx > lua.LUA_REGISTRYINDEX)
+         ? idx
+         : L.top - L.ci.funcOff + idx;
+};
 
 const lua_gettop = function(L) {
     return L.top - 1;
@@ -82,6 +96,37 @@ const lua_settop = function(L, idx) {
 const lua_pop = function(L, n) {
     lua_settop(L, -n - 1);
 }
+
+const reverse = function(L, from, to) {
+    for (; from < to; from++, to --) {
+        let temp = L.stack[from];
+        L.stack[from] = L.stack[to];
+        L.stack[to] = temp;
+    }
+};
+
+/*
+** Let x = AB, where A is a prefix of length 'n'. Then,
+** rotate x n == BA. But BA == (A^r . B^r)^r.
+*/
+const lua_rotate = function(L, idx, n) {
+    let t = L.stack[L.top - 1];
+    let p = index2addr(L, idx);
+
+    assert(!p.ttisnil() && idx > LUA_REGISTRYINDEX, "index not in the stack");
+    assert((n >= 0 ? n : -n) <= (L.top - idx), "invalid 'n'");
+
+    let m = n >= 0 ? L.top - 1 - n : idx - n - 1;  /* end of prefix */
+
+    reverse(L, idx, m);
+    reverse(L, m + 1, L.top - 1);
+    reverse(L, idx, L.top - 1);
+};
+
+const lua_remove = function(L, idx) {
+    lua_rotate(L, idx, -1);
+    lua_pop(L, 1);
+};
 
 /*
 ** push functions (JS -> stack)
@@ -137,6 +182,8 @@ const lua_pushstring = function (L, s) {
     return s;
 };
 
+const lua_pushliteral = lua_pushstring;
+
 const lua_pushcclosure = function(L, fn, n) {
     assert(typeof fn === "function");
     assert(typeof n === "number");
@@ -183,6 +230,10 @@ const lua_pushlightuserdata = function(L, p) {
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
+const lua_pushglobaltable = function(L) {
+    lua_rawgeti(L, lua.LUA_REGISTRYINDEX, lua.LUA_RIDX_GLOBALS);
+};
+
 /*
 ** set functions (stack -> Lua)
 */
@@ -218,10 +269,35 @@ const lua_settable = function(L, idx) {
     L.top -= 2;
 };
 
+const lua_setfield = function(L, idx, k) {
+    auxsetstr(L, index2addr(L, idx), k)
+};
 
 /*
 ** get functions (Lua -> stack)
 */
+
+const lua_rawgeti = function(L, idx, n) {
+    let t = index2addr(L, idx);
+
+    assert(t.ttistable(), "table expected");
+
+    L.stack[L.top++] = t.__index(t, n);
+
+    assert(L.top <= L.ci.top, "stack overflow");
+
+    return L.stack[L.top - 1].ttnov();
+};
+
+const lua_rawget = function(L, idx) {
+    let t = index2addr(L, idx);
+
+    assert(t.ttistable(t), "table expected");
+
+    L.stack[L.top - 1] = t.__index(t, L.stack[L.top - 1]);
+
+    return L.stack[L.top - 1].ttnov();
+};
 
 // narray and nrec are mostly useless for this implementation
 const lua_createtable = function(L, narray, nrec) {
@@ -243,7 +319,6 @@ const lua_gettable = function(L, idx) {
     lvm.gettable(L, t, L.stack[L.top - 1], L.top - 1);
     return L.stack[L.top - 1].ttnov();
 };
-
 
 /*
 ** access functions (stack -> JS)
@@ -292,6 +367,11 @@ const lua_typename = function(L, t) {
 const lua_istable = function(L, idx) {
     return index2addr(L, idx).ttistable();
 };
+
+const lua_isstring = function(L, idx) {
+    let o = index2addr(L, idx);
+    return o.ttisstring() || o.ttisnumber();
+}
 
 /*
 ** 'load' and 'call' functions (run Lua code)
@@ -391,36 +471,47 @@ const lua_pcall = function(L, n, r, f) {
     return lua_pcallk(L, n, r, f, 0, null);
 }
 
-module.exports.lua_pushvalue      = lua_pushvalue;
-module.exports.lua_pushnil        = lua_pushnil;
-module.exports.lua_pushnumber     = lua_pushnumber;
-module.exports.lua_pushinteger    = lua_pushinteger;
-module.exports.lua_pushlstring    = lua_pushlstring;
-module.exports.lua_pushstring     = lua_pushstring;
-module.exports.lua_pushboolean    = lua_pushboolean;
-module.exports.lua_pushcclosure   = lua_pushcclosure;
-module.exports.lua_pushcfunction  = lua_pushcfunction;
-module.exports.lua_pushjsclosure  = lua_pushjsclosure;
-module.exports.lua_pushjsfunction = lua_pushjsfunction;
-module.exports.lua_version        = lua_version;
-module.exports.lua_atpanic        = lua_atpanic;
-module.exports.lua_gettop         = lua_gettop;
-module.exports.lua_typename       = lua_typename;
-module.exports.lua_type           = lua_type;
-module.exports.lua_tonumber       = lua_tonumber;
-module.exports.lua_tointeger      = lua_tointeger;
-module.exports.lua_toboolean      = lua_toboolean;
-module.exports.lua_tolstring      = lua_tolstring;
-module.exports.lua_tostring       = lua_tostring;
-module.exports.lua_load           = lua_load;
-module.exports.lua_callk          = lua_callk;
-module.exports.lua_call           = lua_call;
-module.exports.lua_pcallk         = lua_pcallk;
-module.exports.lua_pcall          = lua_pcall;
-module.exports.lua_pop            = lua_pop;
-module.exports.lua_setglobal      = lua_setglobal;
-module.exports.lua_istable        = lua_istable;
-module.exports.lua_createtable    = lua_createtable;
-module.exports.lua_newtable       = lua_newtable;
-module.exports.lua_settable       = lua_settable;
-module.exports.lua_gettable       = lua_gettable;
+module.exports.lua_pushvalue       = lua_pushvalue;
+module.exports.lua_pushnil         = lua_pushnil;
+module.exports.lua_pushnumber      = lua_pushnumber;
+module.exports.lua_pushinteger     = lua_pushinteger;
+module.exports.lua_pushlstring     = lua_pushlstring;
+module.exports.lua_pushstring      = lua_pushstring;
+module.exports.lua_pushliteral     = lua_pushliteral;
+module.exports.lua_pushboolean     = lua_pushboolean;
+module.exports.lua_pushcclosure    = lua_pushcclosure;
+module.exports.lua_pushcfunction   = lua_pushcfunction;
+module.exports.lua_pushjsclosure   = lua_pushjsclosure;
+module.exports.lua_pushjsfunction  = lua_pushjsfunction;
+module.exports.lua_version         = lua_version;
+module.exports.lua_atpanic         = lua_atpanic;
+module.exports.lua_gettop          = lua_gettop;
+module.exports.lua_typename        = lua_typename;
+module.exports.lua_type            = lua_type;
+module.exports.lua_tonumber        = lua_tonumber;
+module.exports.lua_tointeger       = lua_tointeger;
+module.exports.lua_toboolean       = lua_toboolean;
+module.exports.lua_tolstring       = lua_tolstring;
+module.exports.lua_tostring        = lua_tostring;
+module.exports.lua_load            = lua_load;
+module.exports.lua_callk           = lua_callk;
+module.exports.lua_call            = lua_call;
+module.exports.lua_pcallk          = lua_pcallk;
+module.exports.lua_pcall           = lua_pcall;
+module.exports.lua_pop             = lua_pop;
+module.exports.lua_setglobal       = lua_setglobal;
+module.exports.lua_istable         = lua_istable;
+module.exports.lua_createtable     = lua_createtable;
+module.exports.lua_newtable        = lua_newtable;
+module.exports.lua_settable        = lua_settable;
+module.exports.lua_gettable        = lua_gettable;
+module.exports.lua_absindex        = lua_absindex;
+module.exports.index2addr          = index2addr;
+module.exports.lua_rawget          = lua_rawget;
+module.exports.lua_isstring        = lua_isstring;
+module.exports.lua_rotate          = lua_rotate;
+module.exports.lua_remove          = lua_remove;
+module.exports.lua_checkstack      = lua_checkstack;
+module.exports.lua_rawgeti         = lua_rawgeti;
+module.exports.lua_pushglobaltable = lua_pushglobaltable;
+module.exports.lua_setfield        = lua_setfield;
