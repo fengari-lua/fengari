@@ -261,6 +261,28 @@ const luaD_callnoyield = function(L, off, nResults) {
   L.nny--;
 };
 
+// TODO: since we only handle binary, no need for a reader or mode
+const f_parser = function(L, data) {
+    assert(data instanceof DataView, "data must be a DataView");
+
+    let p = new lundump.BytecodeParser(data);
+    let cl = p.luaU_undump();
+
+    assert(cl.nupvalues == cl.p.sizeupvalues);
+
+    lfunc.luaF_initupvals(L, cl);
+};
+
+const luaD_protectedparser = function(L, data, name) {
+    L.nny++;
+
+    let status = luaD_pcall(L, f_parser, data, L.top, L.errfunc);
+
+    L.nny--;
+
+    return status;
+};
+
 module.exports.nil                        = nil;
 module.exports.luaD_precall               = luaD_precall;
 module.exports.luaD_poscall               = luaD_poscall;

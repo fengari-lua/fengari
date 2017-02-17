@@ -6,7 +6,7 @@ const beautify       = require('js-beautify').js_beautify;
 
 const lua_State      = require("../src/lstate.js").lua_State;
 const VM             = require("../src/lvm.js");
-const ldo            = require("../src/ldo.js");
+const lapi           = require("../src/lapi.js");
 const Table          = require("../src/lobject.js").Table;;
 
 const getState       = require("./tests.js").getState;
@@ -23,7 +23,7 @@ test('LOADK, RETURN', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
@@ -47,7 +47,7 @@ test('MOV', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
@@ -70,7 +70,7 @@ test('Binary op', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.deepEqual(
@@ -94,7 +94,7 @@ test('Unary op, LOADBOOL', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.deepEqual(
@@ -117,7 +117,7 @@ test('NEWTABLE', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.ok(
@@ -144,7 +144,7 @@ test('CALL', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
@@ -176,7 +176,7 @@ test('Multiple return', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.deepEqual(
@@ -202,7 +202,7 @@ test('TAILCALL', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
@@ -228,7 +228,7 @@ test('VARARG', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.deepEqual(
@@ -252,7 +252,7 @@ test('LE, JMP', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
@@ -276,7 +276,7 @@ test('LT', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
@@ -300,7 +300,7 @@ test('EQ', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
@@ -325,7 +325,7 @@ test('TESTSET (and)', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
@@ -350,7 +350,7 @@ test('TESTSET (or)', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
@@ -379,7 +379,7 @@ test('TEST (true)', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
@@ -408,7 +408,7 @@ test('TEST (false)', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
@@ -436,7 +436,7 @@ test('FORPREP, FORLOOP (int)', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
@@ -463,7 +463,7 @@ test('FORPREP, FORLOOP (float)', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
@@ -490,7 +490,7 @@ test('SETTABLE, GETTABLE', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
@@ -526,7 +526,7 @@ test('SETUPVAL, GETUPVAL', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
@@ -553,7 +553,7 @@ test('SETTABUP, GETTABUP', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
@@ -588,7 +588,7 @@ test('SELF', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
@@ -612,7 +612,7 @@ test('SETLIST', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.deepEqual(
@@ -640,7 +640,7 @@ test('Variable SETLIST', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.deepEqual(
@@ -664,7 +664,7 @@ test('Long SETLIST', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.deepEqual(
@@ -688,7 +688,7 @@ test('Long SETLIST', function (t) {
 //
 //     // t.doesNotThrow(function () {
 //         L = getState(luaCode);
-//         ldo.luaD_call(L, 0, -1);
+//         lapi.lua_call(L, 0, -1);
 //     // }, "Program executed without errors");
 //
 //     t.deepEqual(
@@ -728,7 +728,7 @@ test('TFORCALL, TFORLOOP', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
@@ -754,7 +754,7 @@ test('LEN', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
@@ -788,7 +788,7 @@ test('CONCAT', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(

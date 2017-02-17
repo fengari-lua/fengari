@@ -5,7 +5,7 @@ const test     = require('tape');
 const beautify = require('js-beautify').js_beautify;
 
 const VM       = require("../src/lvm.js");
-const ldo      = require("../src/ldo.js");
+const lapi     = require("../src/lapi.js");
 const OC       = require('../src/lopcodes.js');
 
 const getState = require("./tests.js").getState;
@@ -23,7 +23,7 @@ test('__index, __newindex: with actual table', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
@@ -55,7 +55,7 @@ test('__index: with non table', function (t) {
     }, "Bytecode parsed without errors");
 
     t.throws(function () {
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed with expected error");
 });
 
@@ -75,7 +75,7 @@ test('__newindex: with non table', function (t) {
     }, "Bytecode parsed without errors");
 
     t.throws(function () {
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "Program executed with expected error");
 });
 
@@ -121,16 +121,16 @@ test('__index function in metatable', function (t) {
     //         3       [4]     RETURN          0 1
 
     t.strictEqual(
-        OC.OpCodes[L.stack[0].p.code[4].opcode],
+        OC.OpCodes[L.stack[1].p.code[4].opcode],
         "OP_GETTABLE",
         "Correct opcode marked as breakpoint"
     );
 
     t.comment("We set a breakpoint")
-    L.stack[0].p.code[4].breakpoint = true;
+    L.stack[1].p.code[4].breakpoint = true;
 
     t.doesNotThrow(function () {
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     t.strictEqual(
@@ -141,20 +141,20 @@ test('__index function in metatable', function (t) {
 
     t.comment("We unset the breakpoint and correct pcOff");
     L.ci.pcOff--;
-    L.stack[0].p.code[4].breakpoint = false;
+    L.stack[1].p.code[4].breakpoint = false;
 
     t.ok(
-        L.stack[2].ttistable() && !L.stack[2].value.hash.get("__index"),
-        "t is on stack at 2"
+        L.stack[3].ttistable() && !L.stack[3].value.hash.get("__index"),
+        "t is on stack at 3"
     );
 
     t.ok(
-        L.stack[1].ttistable() && L.stack[1].value.hash.get("__index"),
-        "mt is on stack at 1"
+        L.stack[2].ttistable() && L.stack[2].value.hash.get("__index"),
+        "mt is on stack at 2"
     );
 
     t.comment("We manually set t's metatable to mt");
-    L.stack[2].metatable = L.stack[1];
+    L.stack[3].metatable = L.stack[2];
 
     t.doesNotThrow(function () {
         VM.luaV_execute(L);
@@ -212,16 +212,16 @@ test('__newindex function in metatable', function (t) {
     //         3       [4]     RETURN          0 1
 
     t.strictEqual(
-        OC.OpCodes[L.stack[0].p.code[4].opcode],
+        OC.OpCodes[L.stack[1].p.code[4].opcode],
         "OP_SETTABLE",
         "Correct opcode marked as breakpoint"
     );
 
     t.comment("We set a breakpoint")
-    L.stack[0].p.code[4].breakpoint = true;
+    L.stack[1].p.code[4].breakpoint = true;
 
     t.doesNotThrow(function () {
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     t.strictEqual(
@@ -232,20 +232,20 @@ test('__newindex function in metatable', function (t) {
 
     t.comment("We unset the breakpoint and correct pcOff");
     L.ci.pcOff--;
-    L.stack[0].p.code[4].breakpoint = false;
+    L.stack[1].p.code[4].breakpoint = false;
 
     t.ok(
-        L.stack[2].ttistable() && !L.stack[2].value.hash.get("__newindex"),
-        "t is on stack at 2"
+        L.stack[3].ttistable() && !L.stack[3].value.hash.get("__newindex"),
+        "t is on stack at 3"
     );
 
     t.ok(
-        L.stack[1].ttistable() && L.stack[1].value.hash.get("__newindex"),
-        "mt is on stack at 1"
+        L.stack[2].ttistable() && L.stack[2].value.hash.get("__newindex"),
+        "mt is on stack at 2"
     );
 
     t.comment("We manually set t's metatable to mt");
-    L.stack[2].metatable = L.stack[1];
+    L.stack[3].metatable = L.stack[2];
 
     t.doesNotThrow(function () {
         VM.luaV_execute(L);
@@ -297,16 +297,16 @@ test('__index table in metatable', function (t) {
     //         8       [9]     RETURN          0 1
 
     t.strictEqual(
-        OC.OpCodes[L.stack[0].p.code[5].opcode],
+        OC.OpCodes[L.stack[1].p.code[5].opcode],
         "OP_GETTABLE",
         "Correct opcode marked as breakpoint"
     );
 
     t.comment("We set a breakpoint")
-    L.stack[0].p.code[5].breakpoint = true;
+    L.stack[1].p.code[5].breakpoint = true;
 
     t.doesNotThrow(function () {
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     t.strictEqual(
@@ -317,20 +317,20 @@ test('__index table in metatable', function (t) {
 
     t.comment("We unset the breakpoint and correct pcOff");
     L.ci.pcOff--;
-    L.stack[0].p.code[5].breakpoint = false;
+    L.stack[1].p.code[5].breakpoint = false;
 
     t.ok(
-        L.stack[3].ttistable() && !L.stack[3].value.hash.get("__index"),
-        "t is on stack at 3"
+        L.stack[4].ttistable() && !L.stack[4].value.hash.get("__index"),
+        "t is on stack at 4"
     );
 
     t.ok(
-        L.stack[2].ttistable() && L.stack[2].value.hash.get("__index"),
-        "mt is on stack at 2"
+        L.stack[3].ttistable() && L.stack[3].value.hash.get("__index"),
+        "mt is on stack at 3"
     );
 
     t.comment("We manually set t's metatable to mt");
-    L.stack[3].metatable = L.stack[2];
+    L.stack[4].metatable = L.stack[3];
 
     t.doesNotThrow(function () {
         VM.luaV_execute(L);
@@ -386,16 +386,16 @@ test('__newindex table in metatable', function (t) {
     //         10      [15]    RETURN          0 1
 
     t.strictEqual(
-        OC.OpCodes[L.stack[0].p.code[5].opcode],
+        OC.OpCodes[L.stack[1].p.code[5].opcode],
         "OP_SETTABLE",
         "Correct opcode marked as breakpoint"
     );
 
     t.comment("We set a breakpoint")
-    L.stack[0].p.code[5].breakpoint = true;
+    L.stack[1].p.code[5].breakpoint = true;
 
     t.doesNotThrow(function () {
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     t.strictEqual(
@@ -406,20 +406,20 @@ test('__newindex table in metatable', function (t) {
 
     t.comment("We unset the breakpoint and correct pcOff");
     L.ci.pcOff--;
-    L.stack[0].p.code[5].breakpoint = false;
+    L.stack[1].p.code[5].breakpoint = false;
 
     t.ok(
-        L.stack[3].ttistable() && !L.stack[3].value.hash.get("__newindex"),
-        "t is on stack at 3"
+        L.stack[4].ttistable() && !L.stack[4].value.hash.get("__newindex"),
+        "t is on stack at 4"
     );
 
     t.ok(
-        L.stack[2].ttistable() && L.stack[2].value.hash.get("__newindex"),
-        "mt is on stack at 2"
+        L.stack[3].ttistable() && L.stack[3].value.hash.get("__newindex"),
+        "mt is on stack at 3"
     );
 
     t.comment("We manually set t's metatable to mt");
-    L.stack[3].metatable = L.stack[2];
+    L.stack[4].metatable = L.stack[3];
 
     t.doesNotThrow(function () {
         VM.luaV_execute(L);
@@ -495,39 +495,39 @@ test('__index table with own metatable', function (t) {
     //         2       [3]     RETURN          2 2
     //         3       [4]     RETURN          0 1
 
-    L.stack[0].p.code[5].breakpoint = true;
-    L.stack[0].p.code[7].breakpoint = true;
-    L.stack[0].p.code[8].breakpoint = true;
+    L.stack[1].p.code[5].breakpoint = true;
+    L.stack[1].p.code[7].breakpoint = true;
+    L.stack[1].p.code[8].breakpoint = true;
 
     t.doesNotThrow(function () {
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     L.ci.pcOff--;
-    L.stack[0].p.code[5].breakpoint = false;
+    L.stack[1].p.code[5].breakpoint = false;
 
     t.comment("We manually set mmt's metatable to mmmt");
-    L.stack[2].metatable = L.stack[1];
+    L.stack[3].metatable = L.stack[2];
 
     t.doesNotThrow(function () {
         VM.luaV_execute(L);
     }, "Second part of the program executed without errors");
 
     L.ci.pcOff--;
-    L.stack[0].p.code[7].breakpoint = false;
+    L.stack[1].p.code[7].breakpoint = false;
 
     t.comment("We manually set mt's metatable to mmt");
-    L.stack[3].metatable = L.stack[2];
+    L.stack[4].metatable = L.stack[3];
 
     t.doesNotThrow(function () {
         VM.luaV_execute(L);
     }, "Third part of the program executed without errors");
 
     L.ci.pcOff--;
-    L.stack[0].p.code[8].breakpoint = false;
+    L.stack[1].p.code[8].breakpoint = false;
 
     t.comment("We manually set t's metatable to mt");
-    L.stack[4].metatable = L.stack[3];
+    L.stack[4].metatable = L.stack[4];
 
     t.doesNotThrow(function () {
         VM.luaV_execute(L);
@@ -600,39 +600,39 @@ test('__newindex table with own metatable', function (t) {
     //         1       [5]     SETUPVAL        2 0     ; up
     //         2       [6]     RETURN          0 1
 
-    L.stack[0].p.code[5].breakpoint = true;
-    L.stack[0].p.code[7].breakpoint = true;
-    L.stack[0].p.code[8].breakpoint = true;
+    L.stack[1].p.code[5].breakpoint = true;
+    L.stack[1].p.code[7].breakpoint = true;
+    L.stack[1].p.code[8].breakpoint = true;
 
     t.doesNotThrow(function () {
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     L.ci.pcOff--;
-    L.stack[0].p.code[5].breakpoint = false;
+    L.stack[1].p.code[5].breakpoint = false;
 
     t.comment("We manually set mmt's metatable to mmmt");
-    L.stack[2].metatable = L.stack[1];
+    L.stack[4].metatable = L.stack[3];
 
     t.doesNotThrow(function () {
         VM.luaV_execute(L);
     }, "Second part of the program executed without errors");
 
     L.ci.pcOff--;
-    L.stack[0].p.code[7].breakpoint = false;
+    L.stack[1].p.code[7].breakpoint = false;
 
     t.comment("We manually set mt's metatable to mmt");
-    L.stack[3].metatable = L.stack[2];
+    L.stack[5].metatable = L.stack[4];
 
     t.doesNotThrow(function () {
         VM.luaV_execute(L);
     }, "Third part of the program executed without errors");
 
     L.ci.pcOff--;
-    L.stack[0].p.code[8].breakpoint = false;
+    L.stack[1].p.code[8].breakpoint = false;
 
     t.comment("We manually set t's metatable to mt");
-    L.stack[4].metatable = L.stack[3];
+    L.stack[6].metatable = L.stack[5];
 
     t.doesNotThrow(function () {
         VM.luaV_execute(L);
@@ -779,17 +779,17 @@ test('binary __xxx functions in metatable', function (t) {
     //
     //    ...
 
-    L.stack[0].p.code[26].breakpoint = true;
+    L.stack[1].p.code[26].breakpoint = true;
 
     t.doesNotThrow(function () {
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     L.ci.pcOff--;
-    L.stack[0].p.code[26].breakpoint = false;
+    L.stack[1].p.code[26].breakpoint = false;
 
     t.comment("We manually set t's metatable to mt");
-    L.stack[2].metatable = L.stack[1];
+    L.stack[3].metatable = L.stack[2];
 
     t.doesNotThrow(function () {
         VM.luaV_execute(L);
@@ -855,17 +855,17 @@ test('__eq', function (t) {
         L = getState(luaCode);
     }, "Bytecode parsed without errors");
 
-    L.stack[0].p.code[5].breakpoint = true;
+    L.stack[1].p.code[5].breakpoint = true;
 
     t.doesNotThrow(function () {
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     L.ci.pcOff--;
-    L.stack[0].p.code[5].breakpoint = false;
+    L.stack[1].p.code[5].breakpoint = false;
 
     t.comment("We manually set t's metatable to mt");
-    L.stack[2].metatable = L.stack[1];
+    L.stack[3].metatable = L.stack[2];
 
     t.doesNotThrow(function () {
         VM.luaV_execute(L);
@@ -918,17 +918,17 @@ test('__lt', function (t) {
         L = getState(luaCode);
     }, "Bytecode parsed without errors");
 
-    L.stack[0].p.code[5].breakpoint = true;
+    L.stack[1].p.code[5].breakpoint = true;
 
     t.doesNotThrow(function () {
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     L.ci.pcOff--;
-    L.stack[0].p.code[5].breakpoint = false;
+    L.stack[1].p.code[5].breakpoint = false;
 
     t.comment("We manually set t's metatable to mt");
-    L.stack[2].metatable = L.stack[1];
+    L.stack[3].metatable = L.stack[2];
 
     t.doesNotThrow(function () {
         VM.luaV_execute(L);
@@ -981,17 +981,17 @@ test('__le', function (t) {
         L = getState(luaCode);
     }, "Bytecode parsed without errors");
 
-    L.stack[0].p.code[5].breakpoint = true;
+    L.stack[1].p.code[5].breakpoint = true;
 
     t.doesNotThrow(function () {
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     L.ci.pcOff--;
-    L.stack[0].p.code[5].breakpoint = false;
+    L.stack[1].p.code[5].breakpoint = false;
 
     t.comment("We manually set t's metatable to mt");
-    L.stack[2].metatable = L.stack[1];
+    L.stack[3].metatable = L.stack[2];
 
     t.doesNotThrow(function () {
         VM.luaV_execute(L);
@@ -1044,17 +1044,17 @@ test('__le that uses __lt', function (t) {
         L = getState(luaCode);
     }, "Bytecode parsed without errors");
 
-    L.stack[0].p.code[5].breakpoint = true;
+    L.stack[1].p.code[5].breakpoint = true;
 
     t.doesNotThrow(function () {
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     L.ci.pcOff--;
-    L.stack[0].p.code[5].breakpoint = false;
+    L.stack[1].p.code[5].breakpoint = false;
 
     t.comment("We manually set t's metatable to mt");
-    L.stack[2].metatable = L.stack[1];
+    L.stack[3].metatable = L.stack[2];
 
     t.doesNotThrow(function () {
         VM.luaV_execute(L);
@@ -1110,17 +1110,17 @@ test('__unm, __bnot', function (t) {
         L = getState(luaCode);
     }, "Bytecode parsed without errors");
 
-    L.stack[0].p.code[6].breakpoint = true;
+    L.stack[1].p.code[6].breakpoint = true;
 
     t.doesNotThrow(function () {
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     L.ci.pcOff--;
-    L.stack[0].p.code[6].breakpoint = false;
+    L.stack[1].p.code[6].breakpoint = false;
 
     t.comment("We manually set t's metatable to mt");
-    L.stack[2].metatable = L.stack[1];
+    L.stack[3].metatable = L.stack[2];
 
     t.doesNotThrow(function () {
         VM.luaV_execute(L);
@@ -1175,17 +1175,17 @@ test('__len', function (t) {
         L = getState(luaCode);
     }, "Bytecode parsed without errors");
 
-    L.stack[0].p.code[4].breakpoint = true;
+    L.stack[1].p.code[4].breakpoint = true;
 
     t.doesNotThrow(function () {
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     L.ci.pcOff--;
-    L.stack[0].p.code[4].breakpoint = false;
+    L.stack[1].p.code[4].breakpoint = false;
 
     t.comment("We manually set t's metatable to mt");
-    L.stack[2].metatable = L.stack[1];
+    L.stack[3].metatable = L.stack[2];
 
     t.doesNotThrow(function () {
         VM.luaV_execute(L);
@@ -1236,17 +1236,17 @@ test('__concat', function (t) {
         L = getState(luaCode);
     }, "Bytecode parsed without errors");
 
-    L.stack[0].p.code[6].breakpoint = true;
+    L.stack[1].p.code[6].breakpoint = true;
 
     t.doesNotThrow(function () {
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     L.ci.pcOff--;
-    L.stack[0].p.code[6].breakpoint = false;
+    L.stack[1].p.code[6].breakpoint = false;
 
     t.comment("We manually set t's metatable to mt");
-    L.stack[2].metatable = L.stack[1];
+    L.stack[3].metatable = L.stack[2];
 
     t.doesNotThrow(function () {
         VM.luaV_execute(L);
@@ -1296,17 +1296,17 @@ test('__call', function (t) {
         L = getState(luaCode);
     }, "Bytecode parsed without errors");
 
-    L.stack[0].p.code[7].breakpoint = true;
+    L.stack[1].p.code[7].breakpoint = true;
 
     t.doesNotThrow(function () {
-        ldo.luaD_call(L, 0, -1);
+        lapi.lua_call(L, 0, -1);
     }, "First part of the program executed without errors");
 
     L.ci.pcOff--;
-    L.stack[0].p.code[7].breakpoint = false;
+    L.stack[1].p.code[7].breakpoint = false;
 
     t.comment("We manually set t's metatable to mt");
-    L.stack[2].metatable = L.stack[1];
+    L.stack[3].metatable = L.stack[2];
 
     t.doesNotThrow(function () {
         VM.luaV_execute(L);

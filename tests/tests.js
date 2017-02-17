@@ -7,7 +7,7 @@ const tmp            = require('tmp');
 const DataView       = require('buffer-dataview');
 
 const BytecodeParser = require("../src/lundump.js");
-const lua_State      = require("../src/lstate.js").lua_State;
+const lauxlib        = require("../src/lauxlib.js");
 const VM             = require("../src/lvm.js");
 
 const toByteCode = function (luaCode) {
@@ -34,10 +34,12 @@ const getState = function(luaCode) {
         dv = bc.dataView,
         bcl = bc.bclist;
 
-    let p = new BytecodeParser(dv);
-    let cl = p.luaU_undump();
+    let L = lauxlib.luaL_newstate();
 
-    return new lua_State(cl);
+    let p = new BytecodeParser(dv);
+    let cl = p.luaU_undump(L);
+
+    return L;
 };
 
 module.exports = {

@@ -88,8 +88,18 @@ const luaF_close = function(L, level) {
     }
 };
 
-module.exports.Proto      = Proto;
-module.exports.UpVal      = UpVal;
-module.exports.findupval  = findupval;
-module.exports.luaF_close = luaF_close;
-module.exports.MAXUPVAL   = 255;
+const luaF_initupvals = function(L, cl) {
+    for (let i = 0; i < cl.nupvalues; i++) {
+        let uv = new UpVal();
+        uv.refcount = 1;
+        uv.u.value = null;
+        uv.v = uv.u.value;
+    }
+};
+
+module.exports.Proto            = Proto;
+module.exports.UpVal            = UpVal;
+module.exports.findupval        = findupval;
+module.exports.luaF_close       = luaF_close;
+module.exports.MAXUPVAL         = 255;
+module.exports.luaF_initupvals  = luaF_initupvals;

@@ -10,6 +10,7 @@ const lfunc     = require('./lfunc.js');
 const lua       = require('./lua.js');
 const lstate    = require('./lstate.js');
 const lvm       = require('./lvm.js');
+const lundump   = require('./lundump.js');
 const MAXUPVAL  = lfunc.MAXUPVAL;
 const CT        = lua.constant_types;
 const TS        = lua.thread_status;

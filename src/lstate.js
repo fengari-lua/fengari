@@ -44,22 +44,11 @@ class CallInfo {
 class lua_State {
 
     constructor(cl) {
-        if (cl) { // TODO: remove
-            this.top = 1;
-            this.ci = new CallInfo(0, cl, 1, 1, null, null);
-            this.ci.u.l.savedpc = cl.p.code;
-            this.ci.nresults = LUA_MULTRET;
-            this.ciOff = 0;
-            this.stack = [
-                cl
-            ];
-        } else {
-            this.base_ci = new CallInfo(); // Will be populated later
-            this.top = 0;
-            this.ci = null;
-            this.ciOff = null;
-            this.stack = [];
-        }
+        this.base_ci = new CallInfo(); // Will be populated later
+        this.top = 0;
+        this.ci = null;
+        this.ciOff = null;
+        this.stack = [];
         this.openupval = [];
         this.status = TS.LUA_OK;
         this.next = null;
