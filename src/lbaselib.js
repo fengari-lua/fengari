@@ -3,6 +3,7 @@
 
 const assert  = require('assert');
 
+const lua     = require('./lua.js');
 const lapi    = require('./lapi.js');
 const lauxlib = require('./lauxlib.js');
 
@@ -15,7 +16,7 @@ const luaB_print = function(L) {
         lapi.lua_pushvalue(L, -1);  /* function to be called */
         lapi.lua_pushvalue(L, i);  /* value to print */
         lapi.lua_call(L, 1, 1);
-        s = lapi.lua_tolstring(L, -1, null);
+        let s = lapi.lua_tolstring(L, -1, null);
         if (s === null)
             throw new Error("'tostring' must return a string to 'print");
         if (i > 1) s = `\t${s}`;
@@ -53,4 +54,5 @@ const luaopen_base = function(L) {
 };
 
 module.exports.luaB_tostring = luaB_tostring;
-module.exports.luaB_print = luaB_print;
+module.exports.luaB_print    = luaB_print;
+module.exports.luaopen_base  = luaopen_base;

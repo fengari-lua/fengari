@@ -65,9 +65,9 @@ const lua_checkstack = function(L, n) {
 ** convert an acceptable stack index into an absolute index
 */
 const lua_absindex = function(L, idx) {
-    return (idx > 0 || idx > lua.LUA_REGISTRYINDEX)
+    return (idx > 0 || idx <= lua.LUA_REGISTRYINDEX)
          ? idx
-         : L.top - L.ci.funcOff + idx;
+         : (L.top - L.ci.funcOff) + idx;
 };
 
 const lua_gettop = function(L) {
@@ -113,14 +113,14 @@ const lua_rotate = function(L, idx, n) {
     let t = L.stack[L.top - 1];
     let p = index2addr(L, idx);
 
-    assert(!p.ttisnil() && idx > LUA_REGISTRYINDEX, "index not in the stack");
+    assert(!p.ttisnil() && idx > lua.LUA_REGISTRYINDEX, "index not in the stack");
     assert((n >= 0 ? n : -n) <= (L.top - idx), "invalid 'n'");
 
-    let m = n >= 0 ? L.top - 1 - n : idx - n - 1;  /* end of prefix */
+    let m = n >= 0 ? L.top - 1 - n : L.top + idx - n - 1;  /* end of prefix */
 
-    reverse(L, idx, m);
+    reverse(L, L.top + idx, m);
     reverse(L, m + 1, L.top - 1);
-    reverse(L, idx, L.top - 1);
+    reverse(L, L.top + idx, L.top - 1);
 };
 
 const lua_remove = function(L, idx) {
@@ -250,15 +250,14 @@ const auxsetstr = function(L, t, k) {
         t.__newindex(t, k, L.stack[L.top - 1]);
         L.top--; /* pop value */
     } else {
-        L.stack[L.top] = str;
-        L.top++;
-        lvm.luaV_finishset(L, t, L.stack[L.top - 1], L.stack[L.top - 2], t.__index(t, k), 0);
+        L.stack[L.top++] = str;
+        lvm.settable(L, t, L.stack[L.top - 1], L.stack[L.top - 2]);
         L.top -= 2; /* pop value and key */
     }
 };
 
 const lua_setglobal = function(L, name) {
-    auxsetstr(L, L.l_G.l_registry.value.array[lua.LUA_RIDX_GLOBALS], name);
+    auxsetstr(L, L.l_G.l_registry.value.array[lua.LUA_RIDX_GLOBALS - 1], name);
 };
 
 const lua_settable = function(L, idx) {
@@ -276,6 +275,21 @@ const lua_setfield = function(L, idx, k) {
 /*
 ** get functions (Lua -> stack)
 */
+
+const auxgetstr = function(L, t, k) {
+    let str = new TValue(CT.LUA_TLNGSTR, k);
+    let slot = t.__index(t, k);
+    if (t.ttistable() && !slot.ttisnil()) {
+        L.stack[L.top++] = slot;
+        assert(L.top <= L.ci.top, "stack overflow");
+    } else {
+        L.stack[L.top++] = str;
+        assert(L.top <= L.ci.top, "stack overflow");
+        lvm.gettable(L, t, L.stack[L.top - 1], L.top - 1);
+    }
+
+    return L.stack[L.top - 1].ttnov();
+};
 
 const lua_rawgeti = function(L, idx, n) {
     let t = index2addr(L, idx);
@@ -314,10 +328,41 @@ const lua_newtable = function(L) {
     lua_createtable(L, 0, 0);
 };
 
+const lua_getmetatable = function(L, objindex) {
+    let obj = index2addr(L, objindex);
+    let mt;
+    let res = false;
+    switch (obj.ttnov()) {
+        case CT.LUA_TTABLE:
+        case CT.LUA_TUSERDATA:
+            mt = obj.metatable;
+            break;
+        default:
+            mt = L.l_G.mt[obj.ttnov];
+            break;
+    }
+
+    if (mt !== null && mt !== undefined) {
+        L.stack[L.top++] = mt;
+        assert(L.top <= L.ci.top, "stack overflow");
+        res = true;
+    }
+
+    return res;
+};
+
 const lua_gettable = function(L, idx) {
     let t = index2addr(L, idx);
     lvm.gettable(L, t, L.stack[L.top - 1], L.top - 1);
     return L.stack[L.top - 1].ttnov();
+};
+
+const lua_getfield = function(L, idx, k) {
+    return auxgetstr(L, index2addr(L, idx), k);
+};
+
+const lua_getglobal = function(L, name) {
+    return auxgetstr(L, L.l_G.l_registry.value.array[lua.LUA_RIDX_GLOBALS - 1], name);
 };
 
 /*
@@ -386,7 +431,7 @@ const lua_load = function(L, data, chunckname) {
         if (f.nupvalues >= 1) { /* does it have an upvalue? */
             /* get global table from registry */
             let reg = L.l_G.l_registry;
-            let gt = reg.value.array[lua.LUA_RIDX_GLOBALS];
+            let gt = reg.value.array[lua.LUA_RIDX_GLOBALS - 1];
             /* set global table as 1st upvalue of 'f' (may be LUA_ENV) */
             f.upvals[0].u.value = gt;
         }
@@ -515,3 +560,6 @@ module.exports.lua_checkstack      = lua_checkstack;
 module.exports.lua_rawgeti         = lua_rawgeti;
 module.exports.lua_pushglobaltable = lua_pushglobaltable;
 module.exports.lua_setfield        = lua_setfield;
+module.exports.lua_getfield        = lua_getfield;
+module.exports.lua_getglobal       = lua_getglobal;
+module.exports.lua_getmetatable    = lua_getmetatable;

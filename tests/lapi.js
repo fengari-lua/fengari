@@ -13,6 +13,7 @@ const ldo        = require("../src/ldo.js");
 const lapi       = require("../src/lapi.js");
 const lauxlib    = require("../src/lauxlib.js");
 const lua        = require('../src/lua.js');
+const linit      = require('../src/linit.js');
 const CT         = lua.constant_types;
 
 test('luaL_newstate, lua_pushnil, lua_gettop, luaL_typename', function (t) {
@@ -566,13 +567,22 @@ test('lua_settable, lua_gettable', function (t) {
 
 test('print', function (t) {
     let luaCode = `
-        print("hello world");
+        print("hello world")
     `, L;
     
     t.plan(1);
 
     t.doesNotThrow(function () {
-        L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
-    }, "Program executed without errors");
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-lua_load")
+
+        lapi.lua_call(L, 0, 1);
+
+    }, "JS Lua program ran without error");
 });

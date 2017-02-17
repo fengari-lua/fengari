@@ -8,6 +8,8 @@ const lapi   = require('./lapi.js');
 const lua    = require('./lua.js');
 const CT     = lua.constant_types;
 
+const LUA_LOADED_TABLE = "_LOADED"
+
 const panic = function(L) {
     console.log(`PANIC: unprotected error in call to Lua API (...)`);
     return 0;
@@ -86,7 +88,7 @@ const luaL_tolstring = function(L, idx, len) {
 ** Leaves resulting module on the top.
 */
 const luaL_requiref = function(L, modname, openf, glb) {
-    luaL_getsubtable(L, lua.LUA_REGISTRYINDEX, lua.LUA_LOADED_TABLE);
+    luaL_getsubtable(L, lua.LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
     lapi.lua_getfield(L, -1, modname); /* LOADED[modname] */
     if (!lapi.lua_toboolean(L, -1)) {  /* package not already loaded? */
         lapi.lua_pop(L, 1);  /* remove field */
@@ -98,8 +100,8 @@ const luaL_requiref = function(L, modname, openf, glb) {
     }
     lapi.lua_remove(L, -2);  /* remove LOADED table */
     if (glb) {
-        lua_pushvalue(L, -1);  /* copy of module */
-        lua_setglobal(L, modname);  /* _G[modname] = module */
+        lapi.lua_pushvalue(L, -1);  /* copy of module */
+        lapi.lua_setglobal(L, modname);  /* _G[modname] = module */
     }
 };
 
@@ -127,13 +129,13 @@ const luaL_getsubtable = function(L, idx, fname) {
 */
 const luaL_setfuncs = function(L, l, nup) {
     luaL_checkstack(L, nup, "too many upvalues");
-    for (lib in l) {  /* fill the table with given functions */
+    for (let lib in l) {  /* fill the table with given functions */
         for (let i = 0; i < nup; i++)  /* copy upvalues to the top */
             lapi.lua_pushvalue(L, -nup);
         lapi.lua_pushcclosure(L, l[lib], nup);  /* closure with those upvalues */
         lapi.lua_setfield(L, -(nup + 2), lib);
     }
-    lapi.lua_pop(l, nup);  /* remove upvalues */
+    lapi.lua_pop(L, nup);  /* remove upvalues */
 };
 
 /*
@@ -144,7 +146,7 @@ const luaL_setfuncs = function(L, l, nup) {
 ** but without 'msg'.)
 */
 const luaL_checkstack = function(L, space, msg) {
-    if (!lapi.luaL_checkstack(L, space)) {
+    if (!lapi.lua_checkstack(L, space)) {
         if (msg)
             throw new Error(L, `stack overflow (${msg})`);
         else
@@ -161,3 +163,5 @@ module.exports.luaL_requiref     = luaL_requiref;
 module.exports.luaL_getsubtable  = luaL_getsubtable;
 module.exports.luaL_setfuncs     = luaL_setfuncs;
 module.exports.luaL_checkstack   = luaL_checkstack;
+module.exports.LUA_LOADED_TABLE  = LUA_LOADED_TABLE;
+module.exports.luaL_tolstring    = luaL_tolstring;

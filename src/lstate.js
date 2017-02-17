@@ -96,8 +96,8 @@ const stack_init = function(L1, L) {
 const init_registry = function(L, g) {
     let registry = new Table();
     g.l_registry = registry;
-    registry.value.array[lua.LUA_RIDX_MAINTHREAD] = L;
-    registry.value.array[lua.LUA_RIDX_GLOBALS] = new Table();
+    registry.value.array[lua.LUA_RIDX_MAINTHREAD - 1] = L;
+    registry.value.array[lua.LUA_RIDX_GLOBALS - 1] = new Table();
 };
 
 /*

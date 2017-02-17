@@ -53,9 +53,19 @@
     - [x] lua_newtable
     - [x] lua_gettable
     - [x] lua_settable
-    - [ ] lua_absindex
+    - [x] lua_absindex
+    - [x] lua_checkstack
+    - [x] lua_getfield
+    - [x] lua_getglobal
+    - [x] lua_getmetatable
+    - [x] lua_pushglobaltable
+    - [x] lua_pushliteral
+    - [x] lua_rawget
+    - [x] lua_rawgeti
+    - [x] lua_setfield
+    - [x] lua_settop
+    - [x] lua_tostring
     - [ ] lua_arith
-    - [ ] lua_checkstack
     - [ ] lua_close
     - [ ] lua_compare
     - [ ] lua_concat
@@ -65,15 +75,12 @@
     - [x] lua_gc (unvailable)
     - [x] lua_getallocf (unvailable)
     - [x] lua_getextraspace (unvailable)
-    - [ ] lua_getfield
-    - [ ] lua_getglobal
     - [ ] lua_gethook
     - [ ] lua_gethookcount
     - [ ] lua_gethookmask
     - [ ] lua_geti
     - [ ] lua_getinfo
     - [ ] lua_getlocal
-    - [ ] lua_getmetatable
     - [ ] lua_getstack
     - [ ] lua_getupvalue
     - [ ] lua_getuservalue
@@ -99,14 +106,10 @@
     - [ ] lua_numbertointeger
     - [ ] lua_pcallk
     - [ ] lua_pushfstring
-    - [ ] lua_pushglobaltable
     - [ ] lua_pushlightuserdata
-    - [ ] lua_pushliteral
     - [ ] lua_pushthread
     - [ ] lua_pushvfstring
     - [ ] lua_rawequal
-    - [ ] lua_rawget
-    - [ ] lua_rawgeti
     - [ ] lua_rawgetp
     - [ ] lua_rawlen
     - [ ] lua_rawset
@@ -118,19 +121,16 @@
     - [ ] lua_resume
     - [ ] lua_rotate
     - [ ] lua_setallocf
-    - [ ] lua_setfield
     - [ ] lua_sethook
     - [ ] lua_seti
     - [ ] lua_setlocal
     - [ ] lua_setmetatable
-    - [ ] lua_settop
     - [ ] lua_setupvalue
     - [ ] lua_setuservalue
     - [ ] lua_status
     - [ ] lua_stringtonumber
     - [ ] lua_tocfunction
     - [ ] lua_topointer
-    - [ ] lua_tostring
     - [ ] lua_tothread
     - [ ] lua_touserdata
     - [ ] lua_upvalueid
@@ -141,6 +141,15 @@
 - [ ] Auxiliary library
     - [x] luaL_newstate
     - [x] luaL_typename
+    - [x] luaL_checkany
+    - [x] luaL_callmeta
+    - [x] luaL_getmetafield
+    - [x] luaL_setfuncs
+    - [x] luaL_checkstack
+    - [x] luaL_tolstring
+    - [x] luaL_openlibs
+    - [ ] luaL_getsubtable
+    - [ ] luaL_requiref
     - [ ] luaL_Buffer
     - [ ] luaL_Reg
     - [ ] luaL_Stream
@@ -153,13 +162,10 @@
     - [ ] luaL_argerror
     - [ ] luaL_buffinit
     - [ ] luaL_buffinitsize
-    - [ ] luaL_callmeta
-    - [ ] luaL_checkany
     - [ ] luaL_checkinteger
     - [ ] luaL_checklstring
     - [ ] luaL_checknumber
     - [ ] luaL_checkoption
-    - [ ] luaL_checkstack
     - [ ] luaL_checkstring
     - [ ] luaL_checktype
     - [ ] luaL_checkudata
@@ -169,9 +175,7 @@
     - [ ] luaL_error
     - [ ] luaL_execresult
     - [ ] luaL_fileresult
-    - [ ] luaL_getmetafield
     - [ ] luaL_getmetatable
-    - [ ] luaL_getsubtable
     - [ ] luaL_gsub
     - [ ] luaL_len
     - [ ] luaL_loadbuffer
@@ -182,7 +186,6 @@
     - [ ] luaL_newlib
     - [ ] luaL_newlibtable
     - [ ] luaL_newmetatable
-    - [ ] luaL_openlibs
     - [ ] luaL_opt
     - [ ] luaL_optinteger
     - [ ] luaL_optlstring
@@ -193,15 +196,15 @@
     - [ ] luaL_pushresult
     - [ ] luaL_pushresultsize
     - [ ] luaL_ref
-    - [ ] luaL_requiref
-    - [ ] luaL_setfuncs
     - [ ] luaL_setmetatable
     - [ ] luaL_testudata
-    - [ ] luaL_tolstring
     - [ ] luaL_traceback
     - [ ] luaL_unref
     - [ ] luaL_where
 - [ ] Standard library
+    - [x] tostring
+    - [x] print
+    - [ ] ...
 - [ ] Debug (errors)
 - [ ] DOM API binding
 - [ ] Parse Lua
