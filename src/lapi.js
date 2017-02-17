@@ -334,3 +334,4 @@ module.exports.lua_tolstring      = lua_tolstring;
 module.exports.lua_tostring       = lua_tostring;
 module.exports.lua_callk          = lua_callk;
 module.exports.lua_call           = lua_call;
+module.exports.lua_pop            = lua_pop;

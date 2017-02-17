@@ -349,3 +349,33 @@ test('lua_call (calling a JS closure)', function (t) {
         "top is correct"
     );
 });
+
+
+test('lua_pop', function (t) {
+    let L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lapi.lua_pushstring(L, "hello");
+        lapi.lua_pushstring(L, "world");
+
+        lapi.lua_pop(L, 1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_gettop(L),
+        1,
+        "top is correct"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "hello",
+        "Correct element(s) on the stack"
+    );
+});

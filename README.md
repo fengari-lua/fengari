@@ -40,6 +40,7 @@
     - [x] lua_toboolean
     - [x] lua_pushjsclosure (lua_pushcclosure)
     - [x] lua_pushjsfunction (lua_pushcfunction)
+    - [x] lua_pop
     - [ ] lua_absindex
     - [ ] lua_arith
     - [ ] lua_call
@@ -92,7 +93,6 @@
     - [ ] lua_numbertointeger
     - [ ] lua_pcall
     - [ ] lua_pcallk
-    - [ ] lua_pop
     - [ ] lua_pushfstring
     - [ ] lua_pushglobaltable
     - [ ] lua_pushlightuserdata
