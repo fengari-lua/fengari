@@ -439,3 +439,41 @@ test('lua script reads js upvalues', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('lua_createtable', function (t) {
+    let L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+        L = lauxlib.luaL_newstate();
+
+        lapi.lua_createtable(L, 3, 3);
+
+    }, "JS Lua program ran without error");
+
+    t.ok(
+        lapi.lua_istable(L, -1),
+        "Correct element(s) on the stack"
+    );
+});
+
+
+test('lua_newtable', function (t) {
+    let L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+        L = lauxlib.luaL_newstate();
+
+        lapi.lua_newtable(L);
+
+    }, "JS Lua program ran without error");
+
+    t.ok(
+        lapi.lua_istable(L, -1),
+        "Correct element(s) on the stack"
+    );
+});

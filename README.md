@@ -48,6 +48,8 @@
     - [x] lua_callk
     - [x] lua_setglobal
     - [x] lua_upvalueindex
+    - [x] lua_createtable
+    - [x] lua_newtable
     - [ ] lua_absindex
     - [ ] lua_arith
     - [ ] lua_checkstack
@@ -55,7 +57,6 @@
     - [ ] lua_compare
     - [ ] lua_concat
     - [ ] lua_copy
-    - [ ] lua_createtable
     - [ ] lua_dump
     - [ ] lua_error
     - [x] lua_gc (unvailable)
@@ -90,7 +91,6 @@
     - [ ] lua_isuserdata
     - [ ] lua_isyieldable
     - [ ] lua_len
-    - [ ] lua_newtable
     - [ ] lua_newthread
     - [ ] lua_newuserdata
     - [ ] lua_next

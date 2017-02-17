@@ -88,27 +88,24 @@ const lua_pop = function(L, n) {
 */
 
 const lua_pushnil = function(L) {
-    L.stack[L.top] = ldo.nil;
+    L.stack[L.top++] = ldo.nil;
 
-    L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
 const lua_pushnumber = function(L, n) {
     assert(typeof n === "number");
 
-    L.stack[L.top] = new TValue(CT.LUA_TNUMFLT, n);
+    L.stack[L.top++] = new TValue(CT.LUA_TNUMFLT, n);
 
-    L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
 const lua_pushinteger = function(L, n) {
     assert(typeof n === "number");
 
-    L.stack[L.top] = new TValue(CT.LUA_TNUMINT, n|0);
+    L.stack[L.top++] = new TValue(CT.LUA_TNUMINT, n|0);
 
-    L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
@@ -117,9 +114,8 @@ const lua_pushlstring = function(L, s, len) { // TODO: embedded \0
     assert(typeof n === "number");
 
     let ts = len === 0 ? new TValue(CT.LUA_TLNGSTR, "") : new TValue(CT.LUA_TLNGSTR, s.substr(0, len));
-    L.stack[L.top] = ts;
+    L.stack[L.top++] = ts;
 
-    L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
 
     return ts.value;
@@ -174,18 +170,16 @@ const lua_pushcfunction = function(L, fn) {
 const lua_pushjsfunction = lua_pushcfunction;
 
 const lua_pushboolean = function(L, b) {
-    L.stack[L.top] = new TValue(CT.LUA_TBOOLEAN, b ? true : false);
+    L.stack[L.top++] = new TValue(CT.LUA_TBOOLEAN, b ? true : false);
 
-    L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
 const lua_pushlightuserdata = function(L, p) {
     assert(typeof p === "object");
 
-    L.stack[L.top] = new TValue(CT.LUA_TLIGHTUSERDATA, p);
+    L.stack[L.top++] = new TValue(CT.LUA_TLIGHTUSERDATA, p);
 
-    L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
@@ -214,6 +208,26 @@ const auxsetstr = function(L, t, k) {
 
 const lua_setglobal = function(L, name) {
     auxsetstr(L, L.l_G.l_registry.value.array[lua.LUA_RIDX_GLOBALS], name);
+};
+
+
+/*
+** get functions (Lua -> stack)
+*/
+
+// narray and nrec are mostly useless for this implementation
+const lua_createtable = function(L, narray, nrec) {
+    let t = new lobject.Table();
+    L.stack[L.top++] = t;
+
+    assert(L.top <= L.ci.top, "stack overflow");
+
+    if (narray > 0)
+        t.value.array = new Array(narray);
+};
+
+const lua_newtable = function(L) {
+    lua_createtable(L, 0, 0);
 };
 
 
@@ -261,6 +275,9 @@ const lua_typename = function(L, t) {
     return ltm.ttypename(t);
 };
 
+const lua_istable = function(L, idx) {
+    return index2addr(L, idx).ttistable();
+};
 
 /*
 ** 'load' and 'call' functions (run Lua code)
@@ -382,3 +399,6 @@ module.exports.lua_callk          = lua_callk;
 module.exports.lua_call           = lua_call;
 module.exports.lua_pop            = lua_pop;
 module.exports.lua_setglobal      = lua_setglobal;
+module.exports.lua_istable        = lua_istable;
+module.exports.lua_createtable    = lua_createtable;
+module.exports.lua_newtable       = lua_newtable;
