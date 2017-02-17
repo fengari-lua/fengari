@@ -35,12 +35,13 @@ const index2addr = function(L, idx) {
         assert(idx <= ci.top - (ci.funcOff + 1), "unacceptable index");
         if (o >= L.top) return ldo.nil;
         else return L.stack[o];
-    } else if (idx < 0) { // TODO: pseudo-indices relative to LUA_REGISTRYINDEX
+    } else if (idx > lua.LUA_REGISTRYINDEX) {
         assert(idx !== 0 && -idx <= L.top, "invalid index");
         return L.stack[L.top + idx];
-    // TODO: if (idx == LUA_REGISTRYINDEX) return &G(L)->l_registry;
+    } else if (idx === lua.LUA_REGISTRYINDEX) {
+        return L.l_G.l_registry;
     } else { /* upvalues */
-        idx = -idx;
+        idx = lua.LUA_REGISTRYINDEX - idx;
         assert(idx <= MAXUPVAL + 1, "upvalue index too large");
         if (ci.func.ttislcf()) /* light C function? */
             return ldo.nil; /* it has no upvalues */

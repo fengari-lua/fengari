@@ -1,8 +1,9 @@
 /*jshint esversion: 6 */
 "use strict";
 
-const assert = require('assert');
-const lualib = require('./lualib.js');
+const assert  = require('assert');
+const lualib  = require('./lualib.js');
+const luaconf = require('./luaconf.js');
 
 const LUA_VERSION_MAJOR       = "5";
 const LUA_VERSION_MINOR       = "3";
@@ -64,6 +65,12 @@ constant_types.LUA_TCCL = constant_types.LUA_TFUNCTION | (2 << 4);  /* C closure
 const LUA_NUMTAGS = 9;
 const LUA_MINSTACK = 20;
 
+const LUA_REGISTRYINDEX = -luaconf.LUAI_MAXSTACK - 1000;
+
+const lua_upvalueindex = function(i) {
+    LUA_REGISTRYINDEX - i;
+};
+
 /* predefined values in the registry */
 const LUA_RIDX_MAINTHREAD = 1;
 const LUA_RIDX_GLOBALS    = 2;
@@ -100,3 +107,5 @@ module.exports.LUA_MINSTACK            = LUA_MINSTACK;
 module.exports.LUA_RIDX_MAINTHREAD     = LUA_RIDX_MAINTHREAD;
 module.exports.LUA_RIDX_GLOBALS        = LUA_RIDX_GLOBALS;
 module.exports.LUA_RIDX_LAST           = LUA_RIDX_LAST;
+module.exports.LUA_REGISTRYINDEX       = LUA_REGISTRYINDEX;
+module.exports.lua_upvalueindex        = lua_upvalueindex;
