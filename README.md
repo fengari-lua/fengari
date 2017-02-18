@@ -58,6 +58,7 @@
     - [x] lua_getfield
     - [x] lua_getglobal
     - [x] lua_getmetatable
+    - [x] lua_setmetatable
     - [x] lua_pushglobaltable
     - [x] lua_pushliteral
     - [x] lua_rawget
@@ -124,7 +125,6 @@
     - [ ] lua_sethook
     - [ ] lua_seti
     - [ ] lua_setlocal
-    - [ ] lua_setmetatable
     - [ ] lua_setupvalue
     - [ ] lua_setuservalue
     - [ ] lua_status
@@ -142,6 +142,7 @@
     - [x] luaL_newstate
     - [x] luaL_typename
     - [x] luaL_checkany
+    - [x] luaL_checktype
     - [x] luaL_callmeta
     - [x] luaL_getmetafield
     - [x] luaL_setfuncs
@@ -167,7 +168,6 @@
     - [ ] luaL_checknumber
     - [ ] luaL_checkoption
     - [ ] luaL_checkstring
-    - [ ] luaL_checktype
     - [ ] luaL_checkudata
     - [ ] luaL_checkversion
     - [ ] luaL_dofile
@@ -204,6 +204,8 @@
 - [ ] Standard library
     - [x] tostring
     - [x] print
+    - [x] getmetatable
+    - [x] setmetatable
     - [ ] ...
 - [ ] Debug (errors)
 - [ ] DOM API binding

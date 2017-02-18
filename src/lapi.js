@@ -260,6 +260,33 @@ const lua_setglobal = function(L, name) {
     auxsetstr(L, L.l_G.l_registry.value.array[lua.LUA_RIDX_GLOBALS - 1], name);
 };
 
+const lua_setmetatable = function(L, objindex) {
+    assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    let mt;
+    let obj = index2addr(L, objindex);
+    if (L.stack[L.top - 1].ttisnil())
+        mt = null;
+    else {
+        assert(L.stack[L.top - 1].ttistable(), "table expected");
+        mt = L.stack[L.top - 1];
+    }
+
+    switch (obj.ttnov()) {
+        case CT.LUA_TUSERDATA:
+        case CT.LUA_TTABLE: {
+            obj.metatable = mt;
+            break;
+        }
+        default: {
+            L.l_G.mt[obj.ttnov()] = mt;
+            break;
+        }
+    }
+
+    L.top--;
+    return true;
+};
+
 const lua_settable = function(L, idx) {
     assert(2 < L.top - L.ci.funcOff, "not enough elements in the stack");
 
@@ -563,3 +590,5 @@ module.exports.lua_setfield        = lua_setfield;
 module.exports.lua_getfield        = lua_getfield;
 module.exports.lua_getglobal       = lua_getglobal;
 module.exports.lua_getmetatable    = lua_getmetatable;
+module.exports.lua_setmetatable    = lua_setmetatable;
+module.exports.lua_settop          = lua_settop;

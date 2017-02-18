@@ -491,26 +491,3 @@ test('lua_settable, lua_gettable', function (t) {
         "Correct element(s) on the stack"
     );
 });
-
-
-test('print', function (t) {
-    let luaCode = `
-        print("hello", "world", 123)
-    `, L;
-    
-    t.plan(1);
-
-    t.doesNotThrow(function () {
-
-        let bc = toByteCode(luaCode).dataView;
-
-        L = lauxlib.luaL_newstate();
-
-        linit.luaL_openlibs(L);
-
-        lapi.lua_load(L, bc, "test-lua_load")
-
-        lapi.lua_call(L, 0, 1);
-
-    }, "JS Lua program ran without error");
-});

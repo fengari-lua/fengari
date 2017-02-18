@@ -6,6 +6,7 @@ const assert  = require('assert');
 const lua     = require('./lua.js');
 const lapi    = require('./lapi.js');
 const lauxlib = require('./lauxlib.js');
+const CT      = lua.constant_types;
 
 const luaB_print = function(L) {
     let n = lapi.lua_gettop(L); /* number of arguments */
@@ -35,9 +36,32 @@ const luaB_tostring = function(L) {
     return true;
 };
 
+const luaB_getmetatable = function(L) {
+    lauxlib.luaL_checkany(L, 1);
+    if (!lapi.lua_getmetatable(L, 1)) {
+        lapi.lua_pushnil(L);
+        return true;  /* no metatable */
+    }
+    lauxlib.luaL_getmetafield(L, 1, "__metatable");
+    return true;  /* returns either __metatable field (if present) or metatable */
+};
+
+const luaB_setmetatable = function(L) {
+    let t = lapi.lua_type(L, 2);
+    lauxlib.luaL_checktype(L, 1, CT.LUA_TTABLE);
+    lauxlib.luaL_argcheck(L, t === CT.LUA_TNIL || t === CT.LUA_TTABLE, 2, "nil or table expected");
+    if (lauxlib.luaL_getmetafield(L, 1, "__metatable") !== CT.LUA_TNIL)
+        throw new Error("cannot change a protected metatable");
+    lapi.lua_settop(L, 2);
+    lapi.lua_setmetatable(L, 1);
+    return true;
+};
+
 const base_funcs = {
-    "print":    luaB_print,
-    "tostring": luaB_tostring,
+    "print":        luaB_print,
+    "tostring":     luaB_tostring,
+    "getmetatable": luaB_getmetatable,
+    "setmetatable": luaB_setmetatable,
 };
 
 const luaopen_base = function(L) {
@@ -53,6 +77,8 @@ const luaopen_base = function(L) {
     return true;
 };
 
-module.exports.luaB_tostring = luaB_tostring;
-module.exports.luaB_print    = luaB_print;
-module.exports.luaopen_base  = luaopen_base;
+module.exports.luaB_tostring     = luaB_tostring;
+module.exports.luaB_print        = luaB_print;
+module.exports.luaB_getmetatable = luaB_getmetatable;
+module.exports.luaB_setmetatable = luaB_setmetatable;
+module.exports.luaopen_base      = luaopen_base;

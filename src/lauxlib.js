@@ -13,7 +13,27 @@ const LUA_LOADED_TABLE = "_LOADED"
 const panic = function(L) {
     console.log(`PANIC: unprotected error in call to Lua API (...)`);
     return 0;
-}
+};
+
+const typeerror = function(L, arg, tname) {
+    let typearg;
+    if (luaL_getmetafield(L, arg, "__name") === CT.LUA_TSTRING)
+        typearg = lapi.lua_tostring(L, -1);
+    else if (lapi.lua_type(L, arg) === CT.LUA_TLIGHTUSERDATA)
+        typearg = "light userdata";
+    else
+        typearg = luaL_typename(L, arg);
+
+    throw new Error(`${tname} expected, got ${typearg}`);
+
+    // TODO:
+    // let msg = lua_pushstring(L, `${tname} expected, got ${typearg}`);
+    // return luaL_argerror(L, arg, msg);
+};
+
+const tag_error = function(L, arg, tag) {
+    typeerror(L, arg, lapi.lua_typename(L, tag));
+};
 
 const luaL_newstate = function() {
     let L = lstate.lua_newstate();
@@ -26,9 +46,18 @@ const luaL_typename = function(L, i) {
     return lapi.lua_typename(L, lapi.lua_type(L, i));
 };
 
+const luaL_argcheck = function(L, cond, arg, extramsg) {
+    if (!cond) throw new Error("bad argument"); // TODO: luaL_argerror
+};
+
 const luaL_checkany = function(L, arg) {
     if (lapi.lua_type(L, arg) === CT.LUA_TNONE)
         throw new Error("value expected"); // TODO: luaL_argerror(L, arg, "value expected");
+};
+
+const luaL_checktype = function(L, arg, t) {
+    if (lapi.lua_type(L, arg) !== t)
+        tag_error(L, arg, t);
 };
 
 const luaL_getmetafield = function(L, obj, event) {
@@ -157,6 +186,7 @@ const luaL_checkstack = function(L, space, msg) {
 module.exports.luaL_newstate     = luaL_newstate;
 module.exports.luaL_typename     = luaL_typename;
 module.exports.luaL_checkany     = luaL_checkany;
+module.exports.luaL_checktype    = luaL_checktype;
 module.exports.luaL_callmeta     = luaL_callmeta;
 module.exports.luaL_getmetafield = luaL_getmetafield;
 module.exports.luaL_requiref     = luaL_requiref;
@@ -165,3 +195,4 @@ module.exports.luaL_setfuncs     = luaL_setfuncs;
 module.exports.luaL_checkstack   = luaL_checkstack;
 module.exports.LUA_LOADED_TABLE  = LUA_LOADED_TABLE;
 module.exports.luaL_tolstring    = luaL_tolstring;
+module.exports.luaL_argcheck     = luaL_argcheck;
