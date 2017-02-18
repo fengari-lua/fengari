@@ -71,7 +71,7 @@ const lua_absindex = function(L, idx) {
 };
 
 const lua_gettop = function(L) {
-    return L.top - 1;
+    return L.top - (L.ci.funcOff + 1);
 };
 
 const lua_pushvalue = function(L, idx) {

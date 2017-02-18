@@ -16,10 +16,10 @@ const lua        = require('../src/lua.js');
 const linit      = require('../src/linit.js');
 const CT         = lua.constant_types;
 
-test('luaL_newstate, lua_pushnil, lua_gettop, luaL_typename', function (t) {
+test('luaL_newstate, lua_pushnil, luaL_typename', function (t) {
     let L;
     
-    t.plan(3);
+    t.plan(2);
 
     t.doesNotThrow(function () {
 
@@ -30,13 +30,7 @@ test('luaL_newstate, lua_pushnil, lua_gettop, luaL_typename', function (t) {
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_gettop(L),
-        1,
-        "top is correct"
-    );
-
-    t.strictEqual(
-        lauxlib.luaL_typename(L, lapi.lua_gettop(L)),
+        lauxlib.luaL_typename(L, -1),
         "nil",
         "Correct element(s) on the stack"
     );
@@ -46,7 +40,7 @@ test('luaL_newstate, lua_pushnil, lua_gettop, luaL_typename', function (t) {
 test('lua_pushnumber', function (t) {
     let L;
     
-    t.plan(4);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -57,13 +51,7 @@ test('lua_pushnumber', function (t) {
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_gettop(L),
-        1,
-        "top is correct"
-    );
-
-    t.strictEqual(
-        lauxlib.luaL_typename(L, lapi.lua_gettop(L)),
+        lauxlib.luaL_typename(L, -1),
         "number",
         "Correct element(s) on the stack"
     );
@@ -79,7 +67,7 @@ test('lua_pushnumber', function (t) {
 test('lua_pushinteger', function (t) {
     let L;
     
-    t.plan(4);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -90,13 +78,7 @@ test('lua_pushinteger', function (t) {
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_gettop(L),
-        1,
-        "top is correct"
-    );
-
-    t.strictEqual(
-        lauxlib.luaL_typename(L, lapi.lua_gettop(L)),
+        lauxlib.luaL_typename(L, -1),
         "number",
         "Correct element(s) on the stack"
     );
@@ -112,7 +94,7 @@ test('lua_pushinteger', function (t) {
 test('lua_pushstring', function (t) {
     let L;
     
-    t.plan(4);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -123,13 +105,7 @@ test('lua_pushstring', function (t) {
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_gettop(L),
-        1,
-        "top is correct"
-    );
-
-    t.strictEqual(
-        lauxlib.luaL_typename(L, lapi.lua_gettop(L)),
+        lauxlib.luaL_typename(L, -1),
         "string",
         "Correct element(s) on the stack"
     );
@@ -145,7 +121,7 @@ test('lua_pushstring', function (t) {
 test('lua_pushboolean', function (t) {
     let L;
     
-    t.plan(4);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -156,13 +132,7 @@ test('lua_pushboolean', function (t) {
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_gettop(L),
-        1,
-        "top is correct"
-    );
-
-    t.strictEqual(
-        lauxlib.luaL_typename(L, lapi.lua_gettop(L)),
+        lauxlib.luaL_typename(L, -1),
         "boolean",
         "Correct element(s) on the stack"
     );
@@ -178,7 +148,7 @@ test('lua_pushboolean', function (t) {
 test('lua_pushvalue', function (t) {
     let L;
     
-    t.plan(6);
+    t.plan(5);
 
     t.doesNotThrow(function () {
 
@@ -189,12 +159,6 @@ test('lua_pushvalue', function (t) {
         lapi.lua_pushvalue(L, -1);
 
     }, "JS Lua program ran without error");
-
-    t.strictEqual(
-        lapi.lua_gettop(L),
-        2,
-        "top is correct"
-    );
 
     t.strictEqual(
         lauxlib.luaL_typename(L, -1),
@@ -211,13 +175,13 @@ test('lua_pushvalue', function (t) {
     t.strictEqual(
         lapi.lua_tostring(L, -1),
         "hello",
-        "top is correct"
+        "Correct element(s) on the stack"
     );
 
     t.strictEqual(
         lapi.lua_tostring(L, -2),
         "hello",
-        "top is correct"
+        "Correct element(s) on the stack"
     );
 });
 
@@ -225,7 +189,7 @@ test('lua_pushvalue', function (t) {
 test('lua_pushjsclosure', function (t) {
     let L;
     
-    t.plan(3);
+    t.plan(2);
 
     t.doesNotThrow(function () {
 
@@ -241,13 +205,7 @@ test('lua_pushjsclosure', function (t) {
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_gettop(L),
-        1,
-        "top is correct"
-    );
-
-    t.strictEqual(
-        lauxlib.luaL_typename(L, lapi.lua_gettop(L)),
+        lauxlib.luaL_typename(L, -1),
         "function",
         "Correct element(s) on the stack"
     );
@@ -257,7 +215,7 @@ test('lua_pushjsclosure', function (t) {
 test('lua_pushjsfunction', function (t) {
     let L;
     
-    t.plan(3);
+    t.plan(2);
 
     t.doesNotThrow(function () {
 
@@ -272,13 +230,7 @@ test('lua_pushjsfunction', function (t) {
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_gettop(L),
-        1,
-        "top is correct"
-    );
-
-    t.strictEqual(
-        lauxlib.luaL_typename(L, lapi.lua_gettop(L)),
+        lauxlib.luaL_typename(L, -1),
         "function",
         "Correct element(s) on the stack"
     );
@@ -288,7 +240,7 @@ test('lua_pushjsfunction', function (t) {
 test('lua_call (calling a light JS function)', function (t) {
     let L;
     
-    t.plan(3);
+    t.plan(2);
 
     t.doesNotThrow(function () {
 
@@ -306,12 +258,6 @@ test('lua_call (calling a light JS function)', function (t) {
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_gettop(L),
-        1,
-        "top is correct"
-    );
-
-    t.strictEqual(
         lapi.lua_tostring(L, -1),
         "hello",
         "top is correct"
@@ -322,7 +268,7 @@ test('lua_call (calling a light JS function)', function (t) {
 test('lua_call (calling a JS closure)', function (t) {
     let L;
     
-    t.plan(3);
+    t.plan(2);
 
     t.doesNotThrow(function () {
 
@@ -341,12 +287,6 @@ test('lua_call (calling a JS closure)', function (t) {
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_gettop(L),
-        1,
-        "top is correct"
-    );
-
-    t.strictEqual(
         lapi.lua_tostring(L, -1),
         "upvalue hello !",
         "top is correct"
@@ -357,7 +297,7 @@ test('lua_call (calling a JS closure)', function (t) {
 test('lua_pcall (calling a light JS function)', function (t) {
     let L;
     
-    t.plan(3);
+    t.plan(2);
 
     t.doesNotThrow(function () {
 
@@ -373,12 +313,6 @@ test('lua_pcall (calling a light JS function)', function (t) {
         lapi.lua_pcall(L, 0, 1, 0);
 
     }, "JS Lua program ran without error");
-
-    t.strictEqual(
-        lapi.lua_gettop(L),
-        1,
-        "top is correct"
-    );
 
     t.strictEqual(
         lapi.lua_tostring(L, -1),
@@ -414,7 +348,7 @@ test('lua_pcall that breaks', function (t) {
 test('lua_pop', function (t) {
     let L;
     
-    t.plan(3);
+    t.plan(2);
 
     t.doesNotThrow(function () {
 
@@ -426,12 +360,6 @@ test('lua_pop', function (t) {
         lapi.lua_pop(L, 1);
 
     }, "JS Lua program ran without error");
-
-    t.strictEqual(
-        lapi.lua_gettop(L),
-        1,
-        "top is correct"
-    );
 
     t.strictEqual(
         lapi.lua_tostring(L, -1),
@@ -567,7 +495,7 @@ test('lua_settable, lua_gettable', function (t) {
 
 test('print', function (t) {
     let luaCode = `
-        print("hello world")
+        print("hello", "world", 123)
     `, L;
     
     t.plan(1);
