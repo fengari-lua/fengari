@@ -210,6 +210,7 @@
         - [x] rawequal
         - [x] rawset
         - [x] rawget
+        - [x] type
         - [ ] assert
         - [ ] collectgarbage
         - [ ] dofile
@@ -224,7 +225,6 @@
         - [ ] rawlen
         - [ ] select
         - [ ] tonumber
-        - [ ] type
         - [ ] xpcall
     - [ ] ...
 - [ ] Debug (errors)

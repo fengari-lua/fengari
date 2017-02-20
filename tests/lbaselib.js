@@ -187,3 +187,56 @@ test('rawset, rawget', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('type', function (t) {
+    let luaCode = `
+        return type(1), type(true), type("hello"), type({}), type(nil)
+    `, L;
+    
+    t.plan(6);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-type");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -5),
+        "number",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -4),
+        "boolean",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -3),
+        "string",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -2),
+        "table",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "nil",
+        "Correct element(s) on the stack"
+    );
+});

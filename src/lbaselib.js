@@ -81,6 +81,13 @@ const luaB_rawset = function(L) {
     return 1;
 };
 
+const luaB_type = function(L) {
+    let t = lapi.lua_type(L, 1);
+    lauxlib.luaL_argcheck(L, t != CT.LUA_TNONE, 1, "value expected");
+    lapi.lua_pushstring(L, lapi.lua_typename(L, t));
+    return 1;
+};
+
 const base_funcs = {
     "print":        luaB_print,
     "tostring":     luaB_tostring,
@@ -89,6 +96,7 @@ const base_funcs = {
     "rawequal":     luaB_rawequal,
     "rawset":       luaB_rawset,
     "rawget":       luaB_rawget,
+    "type":         luaB_type
 };
 
 const luaopen_base = function(L) {
