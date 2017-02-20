@@ -66,6 +66,7 @@
     - [x] lua_setfield
     - [x] lua_settop
     - [x] lua_tostring
+    - [x] lua_rawequal
     - [ ] lua_arith
     - [ ] lua_close
     - [ ] lua_compare
@@ -110,7 +111,6 @@
     - [ ] lua_pushlightuserdata
     - [ ] lua_pushthread
     - [ ] lua_pushvfstring
-    - [ ] lua_rawequal
     - [ ] lua_rawgetp
     - [ ] lua_rawlen
     - [ ] lua_rawset
@@ -149,8 +149,8 @@
     - [x] luaL_checkstack
     - [x] luaL_tolstring
     - [x] luaL_openlibs
-    - [ ] luaL_getsubtable
-    - [ ] luaL_requiref
+    - [x] luaL_getsubtable
+    - [x] luaL_requiref
     - [ ] luaL_Buffer
     - [ ] luaL_Reg
     - [ ] luaL_Stream
@@ -206,6 +206,7 @@
     - [x] print
     - [x] getmetatable
     - [x] setmetatable
+    - [x] rawequal
     - [ ] ...
 - [ ] Debug (errors)
 - [ ] DOM API binding

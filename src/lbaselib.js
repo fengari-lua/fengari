@@ -33,17 +33,17 @@ const luaB_tostring = function(L) {
     lauxlib.luaL_checkany(L, 1);
     lauxlib.luaL_tolstring(L, 1, null);
 
-    return true;
+    return 1;
 };
 
 const luaB_getmetatable = function(L) {
     lauxlib.luaL_checkany(L, 1);
     if (!lapi.lua_getmetatable(L, 1)) {
         lapi.lua_pushnil(L);
-        return true;  /* no metatable */
+        return 1;  /* no metatable */
     }
     lauxlib.luaL_getmetafield(L, 1, "__metatable");
-    return true;  /* returns either __metatable field (if present) or metatable */
+    return 1;  /* returns either __metatable field (if present) or metatable */
 };
 
 const luaB_setmetatable = function(L) {
@@ -54,7 +54,14 @@ const luaB_setmetatable = function(L) {
         throw new Error("cannot change a protected metatable");
     lapi.lua_settop(L, 2);
     lapi.lua_setmetatable(L, 1);
-    return true;
+    return 1;
+};
+
+const luaB_rawequal = function(L) {
+    lauxlib.luaL_checkany(L, 1);
+    lauxlib.luaL_checkany(L, 2);
+    lapi.lua_pushboolean(L, lapi.lua_rawequal(L, 1, 2));
+    return 1;
 };
 
 const base_funcs = {
@@ -62,6 +69,7 @@ const base_funcs = {
     "tostring":     luaB_tostring,
     "getmetatable": luaB_getmetatable,
     "setmetatable": luaB_setmetatable,
+    "rawequal":     luaB_rawequal,
 };
 
 const luaopen_base = function(L) {
@@ -74,11 +82,7 @@ const luaopen_base = function(L) {
     /* set global _VERSION */
     lapi.lua_pushliteral(L, lua.LUA_VERSION);
     lapi.lua_setfield(L, -2, "_VERSION");
-    return true;
+    return 1;
 };
 
-module.exports.luaB_tostring     = luaB_tostring;
-module.exports.luaB_print        = luaB_print;
-module.exports.luaB_getmetatable = luaB_getmetatable;
-module.exports.luaB_setmetatable = luaB_setmetatable;
 module.exports.luaopen_base      = luaopen_base;

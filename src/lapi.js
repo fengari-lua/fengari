@@ -443,7 +443,13 @@ const lua_istable = function(L, idx) {
 const lua_isstring = function(L, idx) {
     let o = index2addr(L, idx);
     return o.ttisstring() || o.ttisnumber();
-}
+};
+
+const lua_rawequal = function(L, index1, index2) {
+    let o1 = index2addr(L, index1);
+    let o2 = index2addr(L, index2);
+    return lvm.luaV_equalobj(null, o1, o2); // TODO: isvalid ?
+};
 
 /*
 ** 'load' and 'call' functions (run Lua code)
@@ -592,3 +598,4 @@ module.exports.lua_getglobal       = lua_getglobal;
 module.exports.lua_getmetatable    = lua_getmetatable;
 module.exports.lua_setmetatable    = lua_setmetatable;
 module.exports.lua_settop          = lua_settop;
+module.exports.lua_rawequal        = lua_rawequal;

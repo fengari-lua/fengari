@@ -83,3 +83,47 @@ test('setmetatable, getmetatable', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('rawequal', function (t) {
+    let luaCode = `
+        local mt = {
+            __eq = function ()
+                return true
+            end
+        }
+
+        local t1 = {}
+        local t2 = {}
+
+        setmetatable(t1, mt);
+
+        return rawequal(t1, t2), t1 == t2
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-rawequal");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.notOk(
+        lapi.lua_toboolean(L, -2),
+        "Correct element(s) on the stack"
+    );
+
+    t.ok(
+        lapi.lua_toboolean(L, -1),
+        "Correct element(s) on the stack"
+    );
+});
