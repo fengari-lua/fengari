@@ -12,6 +12,7 @@ const luaconf   = require('./luaconf.js');
 const lstate    = require('./lstate.js');
 const lvm       = require('./lvm.js');
 const lundump   = require('./lundump.js');
+const ldebug    = require('./ldebug.js');
 const MAXUPVAL  = lfunc.MAXUPVAL;
 const CT        = lua.constant_types;
 const TS        = lua.thread_status;
@@ -409,18 +410,16 @@ const lua_toboolean = function(L, idx) {
     return !o.l_isfalse();
 };
 
-const lua_tolstring = function(L, idx, len) {
+const lua_tolstring = function(L, idx) {
     let o = index2addr(L, idx);
 
     if (!o.ttisstring() && !o.ttisnumber())
         return null;
 
-    return len !== null ? `${o.value}`.substr(0, len) : `${o.value}`;
+    return `${o.value}`;
 };
 
-const lua_tostring = function(L, idx) {
-    return lua_tolstring(L, idx, null);
-};
+const lua_tostring =  lua_tolstring;
 
 const lua_tointeger = function(L, idx) {
     return lvm.tointeger(index2addr(L, idx))
@@ -530,7 +529,7 @@ const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
 
     if (k === null || L.nny > 0) { /* no continuation or no yieldable? */
         c.nresults = nresults; /* do a 'conventional' protected call */
-        status = ldo.luaD_pcall(L, f_call, c, c.funcOff, c.func);
+        status = ldo.luaD_pcall(L, f_call, c, c.funcOff, func);
     } else { /* prepare continuation (call is already protected by 'resume') */
         let ci = L.ci;
         ci.u.c.k = k;  /* prepare continuation (call is already protected by 'resume') */
@@ -538,7 +537,7 @@ const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
         /* save information for error recovery */
         ci.extra = c.funcOff;
         ci.u.c.old_errfunc = L.errfunc;
-        L.errfunc = c.func;
+        L.errfunc = func;
         // TODO: setoah(ci->callstatus, L->allowhook);
         ci.callstatus |= lstate.CIST_YPCALL;  /* function can do error recovery */
         ldo.luaD_call(L, c.funcOff, nresults);  /* do the call */
@@ -555,7 +554,28 @@ const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
 
 const lua_pcall = function(L, n, r, f) {
     return lua_pcallk(L, n, r, f, 0, null);
-}
+};
+
+
+/*
+** miscellaneous functions
+*/
+
+const lua_error = function(L) {
+    assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    ldebug.luaG_errormsg(L);
+};
+
+const lua_concat = function(L, n) {
+    assert(n < L.top - L.ci.funcOff, "not enough elements in the stack");
+    if (n >= 2)
+        lvm.luaV_concat(L, n);
+    else if (n === 0) {
+        L.stack[L.top++] = new TValue("", CT.LUA_TLNGSTR);
+        assert(L.top <= L.ci.top, "stack overflow");
+    }
+};
+
 
 module.exports.lua_pushvalue       = lua_pushvalue;
 module.exports.lua_pushnil         = lua_pushnil;
@@ -608,3 +628,5 @@ module.exports.lua_getmetatable    = lua_getmetatable;
 module.exports.lua_setmetatable    = lua_setmetatable;
 module.exports.lua_settop          = lua_settop;
 module.exports.lua_rawequal        = lua_rawequal;
+module.exports.lua_concat          = lua_concat;
+module.exports.lua_error           = lua_error;

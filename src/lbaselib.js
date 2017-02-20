@@ -17,7 +17,7 @@ const luaB_print = function(L) {
         lapi.lua_pushvalue(L, -1);  /* function to be called */
         lapi.lua_pushvalue(L, i);  /* value to print */
         lapi.lua_call(L, 1, 1);
-        let s = lapi.lua_tolstring(L, -1, null);
+        let s = lapi.lua_tolstring(L, -1);
         if (s === null)
             throw new Error("'tostring' must return a string to 'print");
         if (i > 1) s = `\t${s}`;
@@ -31,7 +31,7 @@ const luaB_print = function(L) {
 
 const luaB_tostring = function(L) {
     lauxlib.luaL_checkany(L, 1);
-    lauxlib.luaL_tolstring(L, 1, null);
+    lauxlib.luaL_tolstring(L, 1);
 
     return 1;
 };
@@ -88,15 +88,28 @@ const luaB_type = function(L) {
     return 1;
 };
 
+const luaB_error = function(L) {
+    let level = lauxlib.luaL_optinteger(L, 2, 1);
+    lapi.lua_settop(L, 1);
+    if (lapi.lua_type(L, 1) === CT.LUA_TSTRING && level > 0) {
+        lauxlib.luaL_where(L, level);  /* add extra information */
+        lapi.lua_pushvalue(L, 1);
+        lapi.lua_concat(L, 2);
+    }
+    return lapi.lua_error(L);
+};
+
 const base_funcs = {
-    "print":        luaB_print,
-    "tostring":     luaB_tostring,
-    "getmetatable": luaB_getmetatable,
-    "setmetatable": luaB_setmetatable,
-    "rawequal":     luaB_rawequal,
-    "rawset":       luaB_rawset,
-    "rawget":       luaB_rawget,
-    "type":         luaB_type
+    "collectgarbage": function () {},
+    "print":          luaB_print,
+    "tostring":       luaB_tostring,
+    "getmetatable":   luaB_getmetatable,
+    "setmetatable":   luaB_setmetatable,
+    "rawequal":       luaB_rawequal,
+    "rawset":         luaB_rawset,
+    "rawget":         luaB_rawget,
+    "type":           luaB_type,
+    "error":          luaB_error
 };
 
 const luaopen_base = function(L) {

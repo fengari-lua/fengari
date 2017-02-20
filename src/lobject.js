@@ -203,8 +203,46 @@ class CClosure extends TValue {
 
 }
 
+const RETS = "...";
+const PRE  = "[string \"";
+const POS  = "\"]";
 
-module.exports.LClosure = LClosure;
-module.exports.CClosure = CClosure;
-module.exports.TValue   = TValue;
-module.exports.Table    = Table;
+const luaO_chunkid = function(source, bufflen) {
+    let l = source.length;
+    let out = "";
+    if (source[0] === '=') {  /* 'literal' source */
+        if (l < bufflen)  /* small enough? */
+            out = `${source.slice(1)}`;
+        else {  /* truncate it */
+            out += `${source.slice(1, bufflen)}`;
+        }
+    } else if (source[0] === '@') {  /* file name */
+        if (l <= bufflen)  /* small enough? */
+            out = `${source.slice(1)}`;
+        else {  /* add '...' before rest of name */
+            bufflen -= RETS.length;
+            out = `${RETS}${source.slice(1, l - bufflen)}`;
+        }
+    } else {  /* string; format as [string "source"] */
+        let nli = source.indexOf('\n');  /* find first new line (if any) */
+        let nl = nli ? source.slice(nli) : null;
+        out = `${PRE}`;  /* add prefix */
+        bufflen -= PRE.length - RETS.length; - POS.length + 1;  /* save space for prefix+suffix+'\0' */
+        if (l < bufflen && nl === null) {  /* small one-line source? */
+            out += `${source}`;  /* keep it */
+        } else {
+            if (nl !== null) l = nl.length - source.length;  /* stop at first newline */
+            if (l > bufflen) l = bufflen;
+            out += `${source}${RETS}`;
+        }
+        out += POS;
+    }
+
+    return out;
+};
+
+module.exports.LClosure     = LClosure;
+module.exports.CClosure     = CClosure;
+module.exports.TValue       = TValue;
+module.exports.Table        = Table;
+module.exports.luaO_chunkid = luaO_chunkid;

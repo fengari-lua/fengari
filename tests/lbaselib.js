@@ -34,7 +34,7 @@ test('print', function (t) {
 
         lapi.lua_load(L, bc, "test-print");
 
-        lapi.lua_call(L, 0, 1);
+        lapi.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 });
@@ -239,4 +239,55 @@ test('type', function (t) {
         "nil",
         "Correct element(s) on the stack"
     );
+});
+
+
+test('error', function (t) {
+    let luaCode = `
+        error("you fucked up")
+    `, L;
+    
+    t.plan(1);
+
+    t.throws(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-error");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+});
+
+
+test('error, protected', function (t) {
+    let luaCode = `
+        error("you fucked up")
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-error");
+
+        lapi.lua_pcall(L, 0, -1, 0);
+
+    }, "JS Lua program ran without error");
+
+    t.ok(
+        lapi.lua_tostring(L, -1).endsWith("you fucked up"),
+        "Error is on the stack"
+    )
 });

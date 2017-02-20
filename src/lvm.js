@@ -1037,3 +1037,4 @@ module.exports.luaV_objlen    = luaV_objlen;
 module.exports.luaV_finishset = luaV_finishset;
 module.exports.gettable       = gettable;
 module.exports.settable       = settable;
+module.exports.luaV_concat    = luaV_concat;

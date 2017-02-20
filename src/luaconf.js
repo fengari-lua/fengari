@@ -9,4 +9,12 @@
 */
 const LUAI_MAXSTACK = 1000000;
 
+/*
+@@ LUA_IDSIZE gives the maximum size for the description of the source
+@@ of a function in debug information.
+** CHANGE it if you want a different size.
+*/
+const LUA_IDSIZE = 60
+
 module.exports.LUAI_MAXSTACK = LUAI_MAXSTACK;
+module.exports.LUA_IDSIZE    = LUA_IDSIZE;

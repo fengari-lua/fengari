@@ -6,13 +6,15 @@ const assert = require('assert');
 const lstate = require('./lstate.js');
 const lapi   = require('./lapi.js');
 const lua    = require('./lua.js');
+const ldebug = require('./ldebug.js');
 const CT     = lua.constant_types;
 
 const LUA_LOADED_TABLE = "_LOADED"
 
 const panic = function(L) {
-    console.log(`PANIC: unprotected error in call to Lua API (...)`);
-    return 0;
+    let msg = `PANIC: unprotected error in call to Lua API (${lapi.lua_tostring(L, -1)})`;
+    console.error(msg);
+    throw new Error(msg);
 };
 
 const typeerror = function(L, arg, tname) {
@@ -29,6 +31,18 @@ const typeerror = function(L, arg, tname) {
     // TODO:
     // let msg = lua_pushstring(L, `${tname} expected, got ${typearg}`);
     // return luaL_argerror(L, arg, msg);
+};
+
+const luaL_where = function(L, level) {
+    let ar = new lua.lua_Debug();
+    if (ldebug.lua_getstack(L, level, ar)) {
+        ldebug.lua_getinfo(L, "Sl", ar);
+        if (ar.currentline > 0) {
+            lapi.lua_pushstring(L, `${ar.short_src}:${ar.currentline}:`);
+            return;
+        }
+    }
+    lapi.lua_pushstring(L, "");
 };
 
 const tag_error = function(L, arg, tag) {
@@ -60,6 +74,42 @@ const luaL_checktype = function(L, arg, t) {
         tag_error(L, arg, t);
 };
 
+const luaL_checklstring = function(L, arg) {
+    let s = lapi.lua_tolstring(L, arg);
+    if (!s) tag_error(L, arg, CT.LUA_TSTRING);
+    return s;
+};
+
+const luaL_optlstring = function(L, arg, def) {
+    if (lapi.lua_type(L, arg) <= 0) {
+        return def;
+    } else return luaL_checklstring(L, arg);
+};
+
+const luaL_optstring = luaL_optlstring;
+
+const interror = function(L, arg) {
+    if (lapi.lua_isnumber(L, arg))
+        throw new Error("number has no integer representation");
+    else
+        tag_error(L, arg, CT.LUA_TNUMBER);
+};
+
+const luaL_checkinteger = function(L, arg) {
+    let d = lapi.lua_tointeger(L, arg);
+    if (d === false)
+        interror(L, arg);
+    return d;
+};
+
+const luaL_optinteger = function(L, arg, def) {
+    return luaL_opt(L, luaL_checkinteger, arg, def);
+};
+
+const luaL_opt = function(L, f, n, d) {
+    return lapi.lua_type(L, n) <= 0 ? d : f(L, n);
+};
+
 const luaL_getmetafield = function(L, obj, event) {
     if (!lapi.lua_getmetatable(L, obj))
         return CT.LUA_TNIL;
@@ -83,7 +133,7 @@ const luaL_callmeta = function(L, obj, event) {
     return true;
 };
 
-const luaL_tolstring = function(L, idx, len) {
+const luaL_tolstring = function(L, idx) {
     if (luaL_callmeta(L, idx, "__tostring")) {
         if (!lapi.lua_isstring(L, -1))
             throw new Error("'__tostring' must return a string"); // TODO: luaL_error
@@ -107,7 +157,7 @@ const luaL_tolstring = function(L, idx, len) {
         }
     }
 
-    return lapi.lua_tolstring(L, -1, len);
+    return lapi.lua_tolstring(L, -1);
 };
 
 /*
@@ -196,3 +246,10 @@ module.exports.luaL_checkstack   = luaL_checkstack;
 module.exports.LUA_LOADED_TABLE  = LUA_LOADED_TABLE;
 module.exports.luaL_tolstring    = luaL_tolstring;
 module.exports.luaL_argcheck     = luaL_argcheck;
+module.exports.luaL_checklstring = luaL_checklstring;
+module.exports.luaL_optlstring   = luaL_optlstring;
+module.exports.luaL_optstring    = luaL_optstring;
+module.exports.luaL_checkinteger = luaL_checkinteger;
+module.exports.luaL_optinteger   = luaL_optinteger;
+module.exports.luaL_opt          = luaL_opt;
+module.exports.luaL_where        = luaL_where;

@@ -80,6 +80,29 @@ const print_version = function() {
     console.log(FENGARI_COPYRIGHT);
 };
 
+class lua_Debug {
+
+    constructor() {
+        // int event;
+        // const char *name;   /* (n) */
+        // const char *namewhat;   /* (n) 'global', 'local', 'field', 'method' */
+        // const char *what;   /* (S) 'Lua', 'C', 'main', 'tail' */
+        // const char *source; /* (S) */
+        // int currentline;    /* (l) */
+        // int linedefined;    /* (S) */
+        // int lastlinedefined;    /* (S) */
+        // unsigned char nups; /* (u) number of upvalues */
+        // unsigned char nparams;/* (u) number of parameters */
+        // char isvararg;        /* (u) */
+        // char istailcall;    /* (t) */
+        // char short_src[LUA_IDSIZE]; /* (S) */
+        /* private part */
+        // struct CallInfo *i_ci;  /* active function */
+    }
+
+}
+
+module.exports.lua_Debug               = lua_Debug;
 module.exports.constant_types          = constant_types;
 module.exports.thread_status           = thread_status;
 module.exports.LUA_MULTRET             = -1;

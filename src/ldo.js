@@ -227,6 +227,28 @@ const luaD_call = function(L, off, nResults) {
     L.nCcalls--;
 };
 
+const luaD_throw = function(L, errcode) {
+    if (L.errorJmp) {  /* thread has an error handler? */
+        L.errorJmp.status = errcode;  /* set status */
+        throw L.errorJmp;
+    } else {  /* thread has no error handler */
+        let g = L.l_G;
+        L.status = errcode;  /* mark it as dead */
+        if (g.mainthread.errorJmp) {  /* main thread has a handler? */
+            g.mainthread.stack[g.mainthread.top++] = L.stack[L.top - 1];  /* copy error obj. */
+            luaD_throw(g.mainthread, errcode);  /* re-throw in main thread */
+        } else {  /* no handler at all; abort */
+            if (g.panic) {  /* panic function? */
+                seterrorobj(L, errcode, L.top);  /* assume EXTRA_STACK */
+                if (L.ci.top < L.top)
+                    L.ci.top = L.top;  /* pushing msg. can break this invariant */
+                g.panic(L);  /* call panic function (last chance to jump out) */
+            }
+            throw new Error(`Aborted ${errcode}`);
+        }
+    }
+};
+
 const luaD_rawrunprotected = function(L, f, ud) {
     let oldnCcalls = L.nCcalls;
     let lj = { // TODO: necessary when using try/catch ? (ldo.c:47-52)
@@ -309,5 +331,6 @@ module.exports.stackerror           = stackerror;
 module.exports.luaD_call            = luaD_call;
 module.exports.luaD_callnoyield     = luaD_callnoyield;
 module.exports.luaD_pcall           = luaD_pcall;
+module.exports.luaD_throw           = luaD_throw;
 module.exports.luaD_rawrunprotected = luaD_rawrunprotected;
 module.exports.luaD_protectedparser = luaD_protectedparser;
