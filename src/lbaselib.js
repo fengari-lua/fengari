@@ -64,12 +64,31 @@ const luaB_rawequal = function(L) {
     return 1;
 };
 
+const luaB_rawget = function(L) {
+    lauxlib.luaL_checktype(L, 1, CT.LUA_TTABLE);
+    lauxlib.luaL_checkany(L, 2);
+    lapi.lua_settop(L, 2);
+    lapi.lua_rawget(L, 1);
+    return 1;
+};
+
+const luaB_rawset = function(L) {
+    lauxlib.luaL_checktype(L, 1, CT.LUA_TTABLE);
+    lauxlib.luaL_checkany(L, 2);
+    lauxlib.luaL_checkany(L, 3);
+    lapi.lua_settop(L, 3);
+    lapi.lua_rawset(L, 1);
+    return 1;
+};
+
 const base_funcs = {
     "print":        luaB_print,
     "tostring":     luaB_tostring,
     "getmetatable": luaB_getmetatable,
     "setmetatable": luaB_setmetatable,
     "rawequal":     luaB_rawequal,
+    "rawset":       luaB_rawset,
+    "rawget":       luaB_rawget,
 };
 
 const luaopen_base = function(L) {

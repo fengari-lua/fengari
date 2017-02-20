@@ -127,3 +127,63 @@ test('rawequal', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('rawset, rawget', function (t) {
+    let luaCode = `
+        local mt = {
+            __newindex = function (table, key, value)
+                rawset(table, key, "hello")
+            end
+        }
+
+        local t = {}
+
+        setmetatable(t, mt);
+
+        t["yo"] = "bye"
+        rawset(t, "yoyo", "bye")
+
+        return rawget(t, "yo"), t["yo"], rawget(t, "yoyo"), t["yoyo"]
+    `, L;
+    
+    t.plan(5);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-rawequal");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -4),
+        "hello",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -3),
+        "hello",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -2),
+        "bye",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "bye",
+        "Correct element(s) on the stack"
+    );
+});

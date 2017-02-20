@@ -63,6 +63,7 @@
     - [x] lua_pushliteral
     - [x] lua_rawget
     - [x] lua_rawgeti
+    - [x] lua_rawset
     - [x] lua_setfield
     - [x] lua_settop
     - [x] lua_tostring
@@ -113,7 +114,6 @@
     - [ ] lua_pushvfstring
     - [ ] lua_rawgetp
     - [ ] lua_rawlen
-    - [ ] lua_rawset
     - [ ] lua_rawseti
     - [ ] lua_rawsetp
     - [ ] lua_register
@@ -202,11 +202,30 @@
     - [ ] luaL_unref
     - [ ] luaL_where
 - [ ] Standard library
-    - [x] tostring
-    - [x] print
-    - [x] getmetatable
-    - [x] setmetatable
-    - [x] rawequal
+    - [ ] Base lib
+        - [x] tostring
+        - [x] print
+        - [x] getmetatable
+        - [x] setmetatable
+        - [x] rawequal
+        - [x] rawset
+        - [x] rawget
+        - [ ] assert
+        - [ ] collectgarbage
+        - [ ] dofile
+        - [ ] error
+        - [ ] ipairs
+        - [ ] loadfile
+        - [ ] load
+        - [ ] loadstring
+        - [ ] next
+        - [ ] pairs
+        - [ ] pcall
+        - [ ] rawlen
+        - [ ] select
+        - [ ] tonumber
+        - [ ] type
+        - [ ] xpcall
     - [ ] ...
 - [ ] Debug (errors)
 - [ ] DOM API binding

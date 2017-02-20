@@ -299,6 +299,14 @@ const lua_setfield = function(L, idx, k) {
     auxsetstr(L, index2addr(L, idx), k)
 };
 
+const lua_rawset = function(L, idx) {
+    assert(2 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    let o = index2addr(L, idx);
+    assert(o.ttistable(), "table expected");
+    o.__newindex(o, L.stack[L.top - 2], L.stack[L.top - 1]);
+    L.top -= 2;
+};
+
 /*
 ** get functions (Lua -> stack)
 */
@@ -586,6 +594,7 @@ module.exports.lua_gettable        = lua_gettable;
 module.exports.lua_absindex        = lua_absindex;
 module.exports.index2addr          = index2addr;
 module.exports.lua_rawget          = lua_rawget;
+module.exports.lua_rawset          = lua_rawset;
 module.exports.lua_isstring        = lua_isstring;
 module.exports.lua_rotate          = lua_rotate;
 module.exports.lua_remove          = lua_remove;
