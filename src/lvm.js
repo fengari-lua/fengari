@@ -20,6 +20,7 @@ const llimit         = require('./llimit.js');
 const ldo            = require('./ldo.js');
 const ltm            = require('./ltm.js');
 const ltable         = require('./ltable.js');
+const ldebug         = require('./ldebug.js');
 const TMS            = ltm.TMS;
 
 const RA = function(L, base, i) {
@@ -865,7 +866,7 @@ const luaV_objlen = function(L, ra, rb) {
         default: {
             tm = ltm.luaT_gettmbyobj(L, rb, TMS.TM_LEN);
             if (tm.ttisnil())
-                throw new Error("attempt to get length"); // TODO: luaG_typeerror
+                ldebug.luaG_typeerror(L, rb, "get length of");
             break;
         }
     }
@@ -952,7 +953,7 @@ const luaV_finishget = function(L, t, key, val, slot, recur) {
         assert(!t.ttistable());
         tm = ltm.luaT_gettmbyobj(L, t, TMS.TM_INDEX);
         if (tm.ttisnil())
-            throw new Error(`attempt to index a ${tm.ttype()} value`); // TODO: luaG_typeerror
+            ldebug.luaG_typeerror(L, t, 'index');
     } else { /* 't' is a table */
         assert(slot.ttisnil());
         tm = ltm.luaT_gettmbyobj(L, t, TMS.TM_INDEX); // TODO: fasttm
@@ -1001,7 +1002,7 @@ const luaV_finishset = function(L, t, key, val, slot, recur) {
     } else { /* not a table; check metamethod */
         tm = ltm.luaT_gettmbyobj(L, t, TMS.TM_NEWINDEX);
         if (tm.ttisnil())
-            throw new Error(`attempt to index a ${tm.ttype()} value`); // TODO: luaG_typeerror
+            ldebug.luaG_typeerror(L, t, 'index');
     }
 
     if (tm.ttisfunction()) {

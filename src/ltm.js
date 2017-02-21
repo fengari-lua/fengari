@@ -65,6 +65,21 @@ const luaT_init = function(L) {
     }
 };
 
+/*
+** Return the name of the type of an object. For tables and userdata
+** with metatable, use their '__name' metafield, if present.
+*/
+const luaT_objtypename = function(L, o) {
+    if ((o.ttistable() && o.metatable !== null)
+        || (o.ttisfulluserdata() && o.metatable !== null)) {
+        let name = o.__index(o, '__name');
+        if (name.ttisstring())
+            return name.value;
+    }
+
+    return ttypename(o.ttnov());
+};
+
 const luaT_callTM = function(L, f, p1, p2, p3, hasres) {
     let result = p3;
     let func = L.top;
@@ -131,4 +146,5 @@ module.exports.luaT_trybinTM    = luaT_trybinTM;
 module.exports.luaT_callorderTM = luaT_callorderTM;
 module.exports.luaT_gettmbyobj  = luaT_gettmbyobj;
 module.exports.luaT_init        = luaT_init;
+module.exports.luaT_objtypename = luaT_objtypename;
 module.exports.ttypename        = ttypename;

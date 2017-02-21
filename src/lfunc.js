@@ -99,9 +99,26 @@ const luaF_initupvals = function(L, cl) {
     }
 };
 
-module.exports.Proto            = Proto;
-module.exports.UpVal            = UpVal;
-module.exports.findupval        = findupval;
-module.exports.luaF_close       = luaF_close;
-module.exports.MAXUPVAL         = 255;
-module.exports.luaF_initupvals  = luaF_initupvals;
+/*
+** Look for n-th local variable at line 'line' in function 'func'.
+** Returns null if not found.
+*/
+const luaF_getlocalname = function(f, local_number, pc) {
+    for (let i = 0; i < f.locvars.length && f.locvars[i].startpc <= pc; i++) {
+        if (pc < f.locvars[i].endpc) {  /* is variable active? */
+            local_number--;
+            if (local_number == 0)
+                return f.locvars[i].varname;
+        }
+    }
+    return null;  /* not found */
+}
+
+
+module.exports.Proto             = Proto;
+module.exports.UpVal             = UpVal;
+module.exports.findupval         = findupval;
+module.exports.luaF_close        = luaF_close;
+module.exports.MAXUPVAL          = 255;
+module.exports.luaF_initupvals   = luaF_initupvals;
+module.exports.luaF_getlocalname = luaF_getlocalname

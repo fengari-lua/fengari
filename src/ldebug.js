@@ -9,6 +9,7 @@ const lobject = require('./lobject.js');
 const lstate  = require('./lstate.js');
 const luaconf = require('./luaconf.js');
 const OC      = require('./lopcodes.js');
+const lvm     = require('./lvm.js');
 const ltm     = require('./ltm.js');
 const lfunc   = require('./lfunc.js');
 const TMS     = ltm.TMS;
@@ -254,7 +255,7 @@ const findsetreg = function(p, lastpc, reg) {
             }
             default:
                 if (OC.testAMode(i.opcode) && reg === a)
-                    setreg= filterpc(pc, jmptarget);
+                    setreg = filterpc(pc, jmptarget);
                 break;
         }
     }
@@ -392,6 +393,92 @@ const funcnamefromcode = function(L, ci) {
     return r;
 };
 
+const isinstack = function(L, ci, o) {
+    for (let i = ci.u.l.base; i < ci.top; i++) {
+        if (L.stack[i] === o)
+            return i;
+    }
+
+    return false;
+}
+
+/*
+** Checks whether value 'o' came from an upvalue. (That can only happen
+** with instructions OP_GETTABUP/OP_SETTABUP, which operate directly on
+** upvalues.)
+*/
+const getupvalname = function(L, ci, o, name) {
+    let c = ci.func;
+    for (let i = 0; i < c.nupvalues; i++) {
+        if (c.upvals[i].val(L) === o) {
+            return {
+                name: upvalname(c.p, i),
+                funcname: 'upvalue'
+            }
+        }
+    }
+
+    return null;
+};
+
+const varinfo = function(L, o) {
+    let ci = L.ci;
+    let kind = null;
+    if (ci.callstatus & lstate.CIST_LUA) {
+        kind = getupvalname(L, ci, o);  /* check whether 'o' is an upvalue */
+        let stkid = isinstack(L, ci, o);
+        if (!kind && stkid)  /* no? try a register */
+            kind = getobjname(ci.func.p, ci.pcOff, stkid);
+    }
+
+    return kind ? ` (${kind.funcname} '${kind.name}')` : ``;
+};
+
+const luaG_typeerror = function(L, o, op) {
+    let t = ltm.luaT_objtypename(L, o);
+    luaG_runerror(L, `attempt to ${op} a ${t} value${varinfo(L, o)}`);
+};
+
+const luaG_concaterror = function(L, p1, p2) {
+    if (p1.ttisstring() || p1.ttisnumber()) p1 = p2;
+    luaG_typeerror(L, p1, 'concatenate');
+};
+
+/*
+** Error when both values are convertible to numbers, but not to integers
+*/
+const luaG_opinterror = function(L, p1, p2, msg) {
+    let temp = lvm.tonumber(p1);
+    if (temp !== false)
+        p2 = p1;
+    luaG_typeerror(L, p2, msg);
+};
+
+const luaG_ordererror = function(L, p1, p2) {
+    let t1 = ltm.luaT_objtypename(L, p1);
+    let t2 = ltm.luaT_objtypename(L, p2);
+    if (t1 === t2)
+        luaG_runerror(L, `attempt to compare two ${t1} values`);
+    else
+        luaG_runerror(L, `attempt to compare ${t1} with ${t2}`);
+};
+
+/* add src:line information to 'msg' */
+const luaG_addinfo = function(L, msg, src, line) {
+    let buff = '?';
+    if (src)
+        buff = lobject.luaO_chunkid(src, luaconf.LUA_IDSIZE);
+
+    return `${buff}:${line}: ${msg}`;
+};
+
+const luaG_runerror = function(L, msg) {
+    let ci = L.ci;
+    if (ci.callstatus & lstate.CIST_LUA)  /* if Lua function, add source:line information */
+        luaG_addinfo(L, msg, ci.func.p.source, currentline(ci));
+    luaG_errormsg(L);
+};
+
 const luaG_errormsg = function(L) {
     if (L.errfunc !== 0) {  /* is there an error handling function? */
         let errfunc = L.errfunc;
@@ -404,6 +491,12 @@ const luaG_errormsg = function(L) {
     ldo.luaD_throw(L, TS.LUA_ERRRUN);
 };
 
-module.exports.lua_getstack   = lua_getstack;
-module.exports.lua_getinfo    = lua_getinfo;
-module.exports.luaG_errormsg  = luaG_errormsg;
+module.exports.lua_getstack     = lua_getstack;
+module.exports.lua_getinfo      = lua_getinfo;
+module.exports.luaG_errormsg    = luaG_errormsg;
+module.exports.luaG_addinfo     = luaG_addinfo;
+module.exports.luaG_runerror    = luaG_runerror;
+module.exports.luaG_typeerror   = luaG_typeerror;
+module.exports.luaG_concaterror = luaG_concaterror;
+module.exports.luaG_opinterror  = luaG_opinterror;
+module.exports.luaG_ordererror  = luaG_ordererror;

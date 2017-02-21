@@ -17,6 +17,26 @@ const panic = function(L) {
     throw new Error(msg);
 };
 
+// const luaL_argerror = function(L, arg, extramsg) {
+//     let ar = new lua.lua_Debug();
+// 
+//     if (!lapi.lua_getstack(L, 0, ar))  /* no stack frame? */
+//         return luaL_error(L, 'bad argument #%d (%s)', arg, extramsg);
+// 
+//     ldebug.lua_getinfo(L, 'n', ar);
+// 
+//     if (ar.namewhat === 'method') {
+//         arg--;  /* do not count 'self' */
+//         if (arg === 0)  /* error is in the self argument itself? */
+//             return luaL_error(L, "calling '%s' on  bad self (%s)", ar.name, extramsg);
+//     }
+// 
+//     if (ar.name === null)
+//         ar.name = pushglobalfuncname(L, ar) ? lapi.lua_tostring(L, -1) : "?";
+// 
+//     return luaL_error(L, "bad argument #%d to '%s' (%s)", arg, ar.name, extramsg);
+// };
+
 const typeerror = function(L, arg, tname) {
     let typearg;
     if (luaL_getmetafield(L, arg, "__name") === CT.LUA_TSTRING)
@@ -43,6 +63,17 @@ const luaL_where = function(L, level) {
         }
     }
     lapi.lua_pushstring(L, "");
+};
+
+const luaL_error = function(L, fmt, ...args) {
+    let i = 0;
+
+    // TODO: bypassing lua_pushvstring for now
+    lapi.lua_pushstring(L, fmt.replace(/(^%[sfIpdcU]|([^%])%[sfIpdcU])/g, function (m, p1, p2, off) {
+        return p2 ? p2 + args[i++] : args[i++];
+    }));
+
+    return lapi.lua_error(L);
 };
 
 const tag_error = function(L, arg, tag) {
@@ -253,3 +284,4 @@ module.exports.luaL_checkinteger = luaL_checkinteger;
 module.exports.luaL_optinteger   = luaL_optinteger;
 module.exports.luaL_opt          = luaL_opt;
 module.exports.luaL_where        = luaL_where;
+module.exports.luaL_error        = luaL_error;
