@@ -13,7 +13,6 @@ const lvm     = require('./lvm.js');
 const ltm     = require('./ltm.js');
 const lfunc   = require('./lfunc.js');
 const lapi    = require('./lapi.js');
-const TMS     = ltm.TMS;
 const TValue  = lobject.TValue;
 const Table   = lobject.Table;
 const CT      = lua.constant_types;
@@ -360,31 +359,31 @@ const funcnamefromcode = function(L, ci) {
         case 'OP_SELF':
         case 'OP_GETTABUP':
         case 'OP_GETTABLE':
-            tm = TMS.TM_INDEX;
+            tm = ltm.TMS.TM_INDEX;
             break;
         case 'OP_SETTABUP':
         case 'OP_SETTABLE':
-            tm = TMS.TM_NEWINDEX;
+            tm = ltm.TMS.TM_NEWINDEX;
             break;
-        case 'OP_ADD':    tm = TMS.OP_ADD;    break;
-        case 'OP_SUB':    tm = TMS.OP_SUB;    break;
-        case 'OP_MUL':    tm = TMS.OP_MUL;    break;
-        case 'OP_MOD':    tm = TMS.OP_MOD;    break;
-        case 'OP_POW':    tm = TMS.OP_POW;    break;
-        case 'OP_DIV':    tm = TMS.OP_DIV;    break;
-        case 'OP_IDIV':   tm = TMS.OP_IDI;    break;
-        case 'OP_BAND':   tm = TMS.OP_BAN;    break;
-        case 'OP_BOR':    tm = TMS.OP_BOR;    break;
-        case 'OP_BXOR':   tm = TMS.OP_BXO;    break;
-        case 'OP_SHL':    tm = TMS.OP_SHL;    break;
-        case 'OP_SHR':    tm = TMS.OP_SHR;    break;
-        case 'OP_UNM':    tm = TMS.TM_UNM;    break;
-        case 'OP_BNOT':   tm = TMS.TM_BNOT;   break;
-        case 'OP_LEN':    tm = TMS.TM_LEN;    break;
-        case 'OP_CONCAT': tm = TMS.TM_CONCAT; break;
-        case 'OP_EQ':     tm = TMS.TM_EQ;     break;
-        case 'OP_LT':     tm = TMS.TM_LT;     break;
-        case 'OP_LE':     tm = TMS.TM_LE;     break;
+        case 'OP_ADD':    tm = ltm.TMS.OP_ADD;    break;
+        case 'OP_SUB':    tm = ltm.TMS.OP_SUB;    break;
+        case 'OP_MUL':    tm = ltm.TMS.OP_MUL;    break;
+        case 'OP_MOD':    tm = ltm.TMS.OP_MOD;    break;
+        case 'OP_POW':    tm = ltm.TMS.OP_POW;    break;
+        case 'OP_DIV':    tm = ltm.TMS.OP_DIV;    break;
+        case 'OP_IDIV':   tm = ltm.TMS.OP_IDI;    break;
+        case 'OP_BAND':   tm = ltm.TMS.OP_BAN;    break;
+        case 'OP_BOR':    tm = ltm.TMS.OP_BOR;    break;
+        case 'OP_BXOR':   tm = ltm.TMS.OP_BXO;    break;
+        case 'OP_SHL':    tm = ltm.TMS.OP_SHL;    break;
+        case 'OP_SHR':    tm = ltm.TMS.OP_SHR;    break;
+        case 'OP_UNM':    tm = ltm.TMS.TM_UNM;    break;
+        case 'OP_BNOT':   tm = ltm.TMS.TM_BNOT;   break;
+        case 'OP_LEN':    tm = ltm.TMS.TM_LEN;    break;
+        case 'OP_CONCAT': tm = ltm.TMS.TM_CONCAT; break;
+        case 'OP_EQ':     tm = ltm.TMS.TM_EQ;     break;
+        case 'OP_LT':     tm = ltm.TMS.TM_LT;     break;
+        case 'OP_LE':     tm = ltm.TMS.TM_LE;     break;
         default:
             return null;  /* cannot find a reasonable name */
     }
@@ -494,6 +493,16 @@ const luaG_errormsg = function(L) {
     ldo.luaD_throw(L, TS.LUA_ERRRUN);
 };
 
+/*
+** Error when both values are convertible to numbers, but not to integers
+*/
+const luaG_tointerror = function(L, p1, p2) {
+    let temp = lvm.tointeger(p1);
+    if (temp === false)
+        p2 = p1;
+    luaG_runerror(L, `number${varinfo(L, p2)} has no integer representation`);
+}
+
 module.exports.lua_getstack     = lua_getstack;
 module.exports.lua_getinfo      = lua_getinfo;
 module.exports.luaG_errormsg    = luaG_errormsg;
@@ -503,3 +512,4 @@ module.exports.luaG_typeerror   = luaG_typeerror;
 module.exports.luaG_concaterror = luaG_concaterror;
 module.exports.luaG_opinterror  = luaG_opinterror;
 module.exports.luaG_ordererror  = luaG_ordererror;
+module.exports.luaG_tointerror  = luaG_tointerror;

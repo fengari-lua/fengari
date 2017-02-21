@@ -15,7 +15,6 @@ const CT             = lua.constant_types;
 const TS             = lua.thread_status;
 const LUA_MULTRET    = lua.LUA_MULTRET;
 const TValue         = lobject.TValue;
-const TMS            = ltm.TMS;
 
 const nil            = new TValue(CT.LUA_TNIL, null);
 
@@ -189,7 +188,7 @@ const adjust_varargs = function(L, p, actual) {
 };
 
 const tryfuncTM = function(L, off, func) {
-    let tm = ltm.luaT_gettmbyobj(L, func, TMS.TM_CALL);
+    let tm = ltm.luaT_gettmbyobj(L, func, ltm.TMS.TM_CALL);
     if (!tm.ttisfunction(tm))
         throw new Error("__call metatable member is not a function"); // TODO: luaG_typeerror
     /* Open a hole inside the stack at 'func' */

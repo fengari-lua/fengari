@@ -130,3 +130,87 @@ test('luaG_typeerror', function (t) {
         "Correct error was thrown"
     )
 });
+
+
+test('luaG_concaterror', function (t) {
+    let luaCode = `
+        return {} .. 'hello'
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-typeerror");
+
+        lapi.lua_pcall(L, 0, -1, 0);
+
+    }, "JS Lua program ran without error");
+
+    t.ok(
+        lapi.lua_tostring(L, -1).endsWith("attempt to concatenate a table value"),
+        "Correct error was thrown"
+    )
+});
+
+
+test('luaG_opinterror', function (t) {
+    let luaCode = `
+        return {} + 'hello'
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-typeerror");
+
+        lapi.lua_pcall(L, 0, -1, 0);
+
+    }, "JS Lua program ran without error");
+
+    t.ok(
+        lapi.lua_tostring(L, -1).endsWith("attempt to perform arithmetic on a string value"),
+        "Correct error was thrown"
+    )
+});
+
+
+test('luaG_tointerror', function (t) {
+    let luaCode = `
+        return 123.5 & 12
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-typeerror");
+
+        lapi.lua_pcall(L, 0, -1, 0);
+
+    }, "JS Lua program ran without error");
+
+    t.ok(
+        lapi.lua_tostring(L, -1).endsWith("number has no integer representation"),
+        "Correct error was thrown"
+    )
+});
