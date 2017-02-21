@@ -30,7 +30,7 @@ const lua_atpanic = function(L, panicf) {
     return old;
 };
 
-// Return real index on stack
+// Return value for idx on stack
 const index2addr = function(L, idx) {
     let ci = L.ci;
     if (idx > 0) {
@@ -50,6 +50,30 @@ const index2addr = function(L, idx) {
             return ldo.nil; /* it has no upvalues */
         else {
             return idx <= ci.func.nupvalues ? ci.func.upvalue[idx - 1] : ldo.nil;
+        }
+    }
+};
+
+// Like index2addr but returns the index on stack
+const index2addr_ = function(L, idx) {
+    let ci = L.ci;
+    if (idx > 0) {
+        let o = ci.funcOff + idx;
+        assert(idx <= ci.top - (ci.funcOff + 1), "unacceptable index");
+        if (o >= L.top) return null;
+        else return o;
+    } else if (idx > lua.LUA_REGISTRYINDEX) {
+        assert(idx !== 0 && -idx <= L.top, "invalid index");
+        return L.top + idx;
+    } else if (idx === lua.LUA_REGISTRYINDEX) {
+        return null;
+    } else { /* upvalues */
+        idx = lua.LUA_REGISTRYINDEX - idx;
+        assert(idx <= MAXUPVAL + 1, "upvalue index too large");
+        if (ci.func.ttislcf()) /* light C function? */
+            return null; /* it has no upvalues */
+        else {
+            return idx <= ci.func.nupvalues ? idx - 1 : null;
         }
     }
 };
@@ -99,7 +123,7 @@ const lua_pop = function(L, n) {
 }
 
 const reverse = function(L, from, to) {
-    for (; from < to; from++, to --) {
+    for (; from < to; from++, to--) {
         let temp = L.stack[from];
         L.stack[from] = L.stack[to];
         L.stack[to] = temp;
@@ -113,20 +137,25 @@ const reverse = function(L, from, to) {
 const lua_rotate = function(L, idx, n) {
     let t = L.stack[L.top - 1];
     let p = index2addr(L, idx);
+    let pIdx = index2addr_(L, idx);
 
     assert(!p.ttisnil() && idx > lua.LUA_REGISTRYINDEX, "index not in the stack");
     assert((n >= 0 ? n : -n) <= (L.top - idx), "invalid 'n'");
 
-    let m = n >= 0 ? L.top - 1 - n : L.top + idx - n - 1;  /* end of prefix */
+    let m = n >= 0 ? L.top - 1 - n : pIdx - n - 1;  /* end of prefix */
 
-    reverse(L, L.top + idx, m);
+    reverse(L, pIdx, m);
     reverse(L, m + 1, L.top - 1);
-    reverse(L, L.top + idx, L.top - 1);
+    reverse(L, pIdx, L.top - 1);
 };
 
 const lua_remove = function(L, idx) {
     lua_rotate(L, idx, -1);
     lua_pop(L, 1);
+};
+
+const lua_insert = function(L, idx) {
+    lua_rotate(L, idx, 1);
 };
 
 /*
@@ -630,3 +659,4 @@ module.exports.lua_settop          = lua_settop;
 module.exports.lua_rawequal        = lua_rawequal;
 module.exports.lua_concat          = lua_concat;
 module.exports.lua_error           = lua_error;
+module.exports.lua_insert          = lua_insert;

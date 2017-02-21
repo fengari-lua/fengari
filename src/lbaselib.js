@@ -7,6 +7,7 @@ const lua     = require('./lua.js');
 const lapi    = require('./lapi.js');
 const lauxlib = require('./lauxlib.js');
 const CT      = lua.constant_types;
+const TS      = lua.thread_status;
 
 const luaB_print = function(L) {
     let n = lapi.lua_gettop(L); /* number of arguments */
@@ -99,6 +100,45 @@ const luaB_error = function(L) {
     return lapi.lua_error(L);
 };
 
+/*
+** Continuation function for 'pcall' and 'xpcall'. Both functions
+** already pushed a 'true' before doing the call, so in case of success
+** 'finishpcall' only has to return everything in the stack minus
+** 'extra' values (where 'extra' is exactly the number of items to be
+** ignored).
+*/
+const finishpcall = function(L, status, extra) {
+    if (status !== TS.LUA_OK && status !== TS.LUA_YIELD) {  /* error? */
+        lapi.lua_pushboolean(L, 0);  /* first result (false) */
+        lapi.lua_pushvalue(L, -2);  /* error message */
+        return 2;  /* return false, msg */
+    } else
+        return lapi.lua_gettop(L) - extra;
+};
+
+const luaB_pcall = function(L) {
+    lauxlib.luaL_checkany(L, 1);
+    lapi.lua_pushboolean(L, 1);  /* first result if no errors */
+    lapi.lua_insert(L, 1);  /* put it in place */
+    let status = lapi.lua_pcallk(L, lapi.lua_gettop(L) - 2, lua.LUA_MULTRET, 0, 0, finishpcall);
+    return finishpcall(L, status, 0);
+};
+
+/*
+** Do a protected call with error handling. After 'lua_rotate', the
+** stack will have <f, err, true, f, [args...]>; so, the function passes
+** 2 to 'finishpcall' to skip the 2 first values when returning results.
+*/
+const luaB_xpcall = function(L) {
+    let n = lapi.lua_gettop(L);
+    lauxlib.luaL_checktype(L, 2, CT.LUA_TFUNCTION);
+    lapi.lua_pushboolean(L, 1);
+    lapi.lua_pushvalue(L, 1);
+    lapi.lua_rotate(L, 3, 2);
+    let status = lapi.lua_pcallk(L, n - 2, lua.LUA_MULTRET, 2, 2, finishpcall);
+    return finishpcall(L, status, 2);
+};
+
 const base_funcs = {
     "collectgarbage": function () {},
     "print":          luaB_print,
@@ -109,7 +149,9 @@ const base_funcs = {
     "rawset":         luaB_rawset,
     "rawget":         luaB_rawget,
     "type":           luaB_type,
-    "error":          luaB_error
+    "error":          luaB_error,
+    "pcall":          luaB_pcall,
+    "xpcall":         luaB_xpcall,
 };
 
 const luaopen_base = function(L) {

@@ -291,3 +291,73 @@ test('error, protected', function (t) {
         "Error is on the stack"
     )
 });
+
+
+test('pcall', function (t) {
+    let luaCode = `
+        local willFail = function ()
+            error("you fucked up")
+        end
+
+        return pcall(willFail)
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-pcall");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.ok(
+        lapi.lua_tostring(L, -1).endsWith("you fucked up"),
+        "Error is on the stack"
+    )
+});
+
+
+test('xpcall', function (t) {
+    let luaCode = `
+        local willFail = function ()
+            error("you fucked up")
+        end
+
+        local msgh = function (err)
+            return "Something's wrong: " .. err
+        end
+
+        return xpcall(willFail, msgh)
+    `, L;
+    
+    t.plan(1);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-pcall");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    console.log(lapi.lua_tostring(L, -1));
+
+    // t.ok(
+    //     lapi.lua_tostring(L, -1).endsWith("you fucked up"),
+    //     "Error is on the stack"
+    // )
+});

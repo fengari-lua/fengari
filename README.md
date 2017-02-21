@@ -74,6 +74,7 @@
     - [x] lua_istable
     - [x] lua_remove
     - [x] lua_rotate
+    - [x] lua_insert
     - [ ] lua_arith
     - [ ] lua_close
     - [ ] lua_compare
@@ -91,7 +92,6 @@
     - [ ] lua_getstack
     - [ ] lua_getupvalue
     - [ ] lua_getuservalue
-    - [ ] lua_insert
     - [ ] lua_isboolean
     - [ ] lua_iscfunction
     - [ ] lua_isfunction
@@ -209,6 +209,7 @@
         - [x] rawget
         - [x] type
         - [x] error
+        - [x] pcall
         - [ ] assert
         - [ ] collectgarbage
         - [ ] dofile
@@ -218,7 +219,6 @@
         - [ ] loadstring
         - [ ] next
         - [ ] pairs
-        - [ ] pcall
         - [ ] rawlen
         - [ ] select
         - [ ] tonumber
