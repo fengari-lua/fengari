@@ -12,6 +12,7 @@ const OC      = require('./lopcodes.js');
 const lvm     = require('./lvm.js');
 const ltm     = require('./ltm.js');
 const lfunc   = require('./lfunc.js');
+const lapi    = require('./lapi.js');
 const TMS     = ltm.TMS;
 const TValue  = lobject.TValue;
 const Table   = lobject.Table;
@@ -428,7 +429,7 @@ const varinfo = function(L, o) {
         kind = getupvalname(L, ci, o);  /* check whether 'o' is an upvalue */
         let stkid = isinstack(L, ci, o);
         if (!kind && stkid)  /* no? try a register */
-            kind = getobjname(ci.func.p, ci.pcOff, stkid);
+            kind = getobjname(ci.func.p, ci.pcOff, stkid - ci.u.l.base);
     }
 
     return kind ? ` (${kind.funcname} '${kind.name}')` : ``;
@@ -469,7 +470,9 @@ const luaG_addinfo = function(L, msg, src, line) {
     if (src)
         buff = lobject.luaO_chunkid(src, luaconf.LUA_IDSIZE);
 
-    return `${buff}:${line}: ${msg}`;
+    L.stack[L.top++] = new TValue(CT.LUA_TLNGSTR, `${buff}:${line}: ${msg}`); // We don't need to check for overflow here
+
+    return L.stack[L.top - 1];
 };
 
 const luaG_runerror = function(L, msg) {
