@@ -19,7 +19,7 @@ const luaB_print = function(L) {
         lapi.lua_call(L, 1, 1);
         let s = lapi.lua_tolstring(L, -1);
         if (s === null)
-            throw new Error("'tostring' must return a string to 'print");
+            return lauxlib.luaL_error(L, "'tostring' must return a string to 'print'");
         if (i > 1) s = `\t${s}`;
         str = `${str}${s}`;
         lapi.lua_pop(L, 1);
@@ -51,7 +51,7 @@ const luaB_setmetatable = function(L) {
     lauxlib.luaL_checktype(L, 1, CT.LUA_TTABLE);
     lauxlib.luaL_argcheck(L, t === CT.LUA_TNIL || t === CT.LUA_TTABLE, 2, "nil or table expected");
     if (lauxlib.luaL_getmetafield(L, 1, "__metatable") !== CT.LUA_TNIL)
-        throw new Error("cannot change a protected metatable");
+        return lauxlib.luaL_error(L, "cannot change a protected metatable");
     lapi.lua_settop(L, 2);
     lapi.lua_setmetatable(L, 1);
     return 1;

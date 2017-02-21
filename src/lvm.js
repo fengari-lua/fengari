@@ -531,19 +531,19 @@ const luaV_execute = function(L) {
                     let nstep = tonumber(pstep);
 
                     if (nlimit === false)
-                        throw new Error("'for' limit must be a number");
+                        ldebug.luaG_runerror(L, "'for' limit must be a number");
 
                     plimit.type = CT.LUA_TNUMFLT;
                     plimit.value = nlimit
 
                     if (nstep === false)
-                        throw new Error("'for' step must be a number");
+                        ldebug.luaG_runerror(L, "'for' step must be a number");
 
                     pstep.type = CT.LUA_TNUMFLT;
                     pstep.value = nstep
 
                     if (ninit === false)
-                        throw new Error("'for' initial value must be a number");
+                        ldebug.luaG_runerror(L, "'for' initial value must be a number");
 
                     init.type = CT.LUA_TNUMFLT;
                     init.value = ninit - nstep;
@@ -662,7 +662,7 @@ const luaV_lessthan = function(L, l, r) {
     else {
         let res = ltm.luaT_callorderTM(L, l, r, ltm.TMS.TM_LT);
         if (res < 0)
-            throw new Error("TM order error"); // TODO: luaG_ordererror
+            ldebug.luaG_ordererror(L, l, r);
         return res;
     }
 };
@@ -684,7 +684,7 @@ const luaV_lessequal = function(L, l, r) {
     res = ltm.luaT_callorderTM(L, l, r, ltm.TMS.TM_LT);
     L.ci.callstatus ^= lstate.CIST_LEQ; /* clear mark */
     if (res < 0)
-        throw new Error("TM order error"); // TODO: luaG_ordererror
+        ldebug.luaG_ordererror(L, l, r);
     return res !== 1 ? 1 : 0; /* result is negated */
 };
 
@@ -931,7 +931,7 @@ const gettable = function(L, table, key, ra, recur) {
     recur = recur ? recur : 0;
 
     if (recur >= MAXTAGRECUR)
-        throw new Error("'__index' chain too long; possible loop"); // TODO: luaG_runerror
+        ldebug.luaG_runerror(L, "'__index' chain too long; possible loop");
 
     if (table.ttistable()) {
         let element = table.__index(table, key);
@@ -974,7 +974,7 @@ const settable = function(L, table, key, v, recur) {
     recur = recur ? recur : 0;
 
     if (recur >= MAXTAGRECUR)
-        throw new Error("'__newindex' chain too long; possible loop"); // TODO: luaG_runerror
+        ldebug.luaG_runerror(L, "'__newindex' chain too long; possible loop");
 
     if (table.ttistable()) {
         let element = table.__index(table, key);

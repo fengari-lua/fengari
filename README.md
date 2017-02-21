@@ -68,13 +68,17 @@
     - [x] lua_settop
     - [x] lua_tostring
     - [x] lua_rawequal
+    - [x] lua_error
+    - [x] lua_concat
+    - [x] lua_isstring
+    - [x] lua_istable
+    - [x] lua_remove
+    - [x] lua_rotate
     - [ ] lua_arith
     - [ ] lua_close
     - [ ] lua_compare
-    - [ ] lua_concat
     - [ ] lua_copy
     - [ ] lua_dump
-    - [ ] lua_error
     - [x] lua_gc (unvailable)
     - [x] lua_getallocf (unvailable)
     - [x] lua_getextraspace (unvailable)
@@ -97,8 +101,6 @@
     - [ ] lua_isnone
     - [ ] lua_isnoneornil
     - [ ] lua_isnumber
-    - [ ] lua_isstring
-    - [ ] lua_istable
     - [ ] lua_isthread
     - [ ] lua_isuserdata
     - [ ] lua_isyieldable
@@ -117,10 +119,8 @@
     - [ ] lua_rawseti
     - [ ] lua_rawsetp
     - [ ] lua_register
-    - [ ] lua_remove
     - [ ] lua_replace
     - [ ] lua_resume
-    - [ ] lua_rotate
     - [ ] lua_setallocf
     - [ ] lua_sethook
     - [ ] lua_seti
@@ -151,9 +151,12 @@
     - [x] luaL_openlibs
     - [x] luaL_getsubtable
     - [x] luaL_requiref
-    - [ ] luaL_Buffer
-    - [ ] luaL_Reg
-    - [ ] luaL_Stream
+    - [x] luaL_checkinteger
+    - [x] luaL_checklstring
+    - [x] luaL_opt
+    - [x] luaL_optinteger
+    - [x] luaL_optlstring
+    - [x] luaL_where
     - [ ] luaL_addchar
     - [ ] luaL_addlstring
     - [ ] luaL_addsize
@@ -163,8 +166,6 @@
     - [ ] luaL_argerror
     - [ ] luaL_buffinit
     - [ ] luaL_buffinitsize
-    - [ ] luaL_checkinteger
-    - [ ] luaL_checklstring
     - [ ] luaL_checknumber
     - [ ] luaL_checkoption
     - [ ] luaL_checkstring
@@ -186,9 +187,6 @@
     - [ ] luaL_newlib
     - [ ] luaL_newlibtable
     - [ ] luaL_newmetatable
-    - [ ] luaL_opt
-    - [ ] luaL_optinteger
-    - [ ] luaL_optlstring
     - [ ] luaL_optnumber
     - [ ] luaL_optstring
     - [ ] luaL_prepbuffer
@@ -200,7 +198,6 @@
     - [ ] luaL_testudata
     - [ ] luaL_traceback
     - [ ] luaL_unref
-    - [ ] luaL_where
 - [ ] Standard library
     - [ ] Base lib
         - [x] tostring
@@ -211,10 +208,10 @@
         - [x] rawset
         - [x] rawget
         - [x] type
+        - [x] error
         - [ ] assert
         - [ ] collectgarbage
         - [ ] dofile
-        - [ ] error
         - [ ] ipairs
         - [ ] loadfile
         - [ ] load

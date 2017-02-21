@@ -11,6 +11,7 @@ const ltm            = require('./ltm.js');
 const lvm            = require('./lvm.js');
 const lfunc          = require('./lfunc.js');
 const BytecodeParser = require('./lundump.js');
+const ldebug         = require('./ldebug.js');
 const CT             = lua.constant_types;
 const TS             = lua.thread_status;
 const LUA_MULTRET    = lua.LUA_MULTRET;
@@ -190,7 +191,7 @@ const adjust_varargs = function(L, p, actual) {
 const tryfuncTM = function(L, off, func) {
     let tm = ltm.luaT_gettmbyobj(L, func, ltm.TMS.TM_CALL);
     if (!tm.ttisfunction(tm))
-        throw new Error("__call metatable member is not a function"); // TODO: luaG_typeerror
+        ldebug.luaG_typeerror(L, func, "call");
     /* Open a hole inside the stack at 'func' */
     for (let p = L.top; p > off; p--)
         L.stack[p] = L.stack[p-1];
@@ -207,9 +208,9 @@ const tryfuncTM = function(L, off, func) {
 */
 const stackerror = function(L) {
     if (L.nCcalls === llimit.LUAI_MAXCCALLS)
-        throw new Error("JS stack overflow");
-    else if (L.nCcalls >= llimit.LUAI_MAXCCALLS + (llimit.LUAI_MAXCCALLS >> 3)) /* error while handing stack error */
-        throw new Error("stack overflow"); // TODO: luaD_throw(L, LUA_ERRERR);
+        ldebug.luaG_runerror(L, "JS stack overflow");
+    else if (L.nCcalls >= llimit.LUAI_MAXCCALLS + (llimit.LUAI_MAXCCALLS >> 3))
+        luaD_throw(L, TS.LUA_ERRERR);  /* error while handing stack error */
 };
 
 /*

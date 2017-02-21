@@ -14,7 +14,7 @@ const LUA_LOADED_TABLE = "_LOADED"
 const panic = function(L) {
     let msg = `PANIC: unprotected error in call to Lua API (${lapi.lua_tostring(L, -1)})`;
     console.error(msg);
-    throw new Error(msg);
+    return 0;
 };
 
 // const luaL_argerror = function(L, arg, extramsg) {
