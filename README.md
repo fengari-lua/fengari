@@ -210,19 +210,18 @@
         - [x] type
         - [x] error
         - [x] pcall
+        - [x] xpcall
+        - [x] collectgarbage (unavailable)
         - [ ] assert
-        - [ ] collectgarbage
         - [ ] dofile
         - [ ] ipairs
         - [ ] loadfile
         - [ ] load
-        - [ ] loadstring
         - [ ] next
         - [ ] pairs
         - [ ] rawlen
         - [ ] select
         - [ ] tonumber
-        - [ ] xpcall
     - [ ] ...
 - [ ] Debug (errors)
 - [ ] DOM API binding

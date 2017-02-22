@@ -548,9 +548,9 @@ const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
     if (errfunc === 0)
         func = 0;
     else {
-        let o = index2addr(L, errfunc);
+        // let o = index2addr(L, errfunc);
         // TODO: api_checkstackindex(L, errfunc, o);
-        func = errfunc;
+        func = index2addr_(L, errfunc);
     }
 
     c.funcOff = L.top - (nargs + 1); /* function to be called */
@@ -605,6 +605,17 @@ const lua_concat = function(L, n) {
     }
 };
 
+// This functions are only there for compatibility purposes
+const lua_gc = function () {};
+
+const lua_getallocf = function () {
+    console.warn("lua_getallocf is not available and will always return null");
+    return null;
+};
+const lua_getextraspace = function () {
+    console.warn("lua_getextraspace is not available and will always return null");
+    return null;
+};
 
 module.exports.lua_pushvalue       = lua_pushvalue;
 module.exports.lua_pushnil         = lua_pushnil;
@@ -660,3 +671,6 @@ module.exports.lua_rawequal        = lua_rawequal;
 module.exports.lua_concat          = lua_concat;
 module.exports.lua_error           = lua_error;
 module.exports.lua_insert          = lua_insert;
+module.exports.lua_gc              = lua_gc;
+module.exports.lua_getallocf       = lua_getallocf;
+module.exports.lua_getextraspace   = lua_getextraspace;

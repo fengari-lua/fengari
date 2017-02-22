@@ -485,7 +485,7 @@ const luaG_errormsg = function(L) {
     if (L.errfunc !== 0) {  /* is there an error handling function? */
         let errfunc = L.errfunc;
         L.stack[L.top] = L.stack[L.top - 1];
-        L.stack[L.top - 1] = errfunc;
+        L.stack[L.top - 1] = L.stack[errfunc];
         L.top++;
         ldo.luaD_callnoyield(L, L.top - 2, 1);
     }

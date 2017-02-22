@@ -131,10 +131,10 @@ const luaB_pcall = function(L) {
 */
 const luaB_xpcall = function(L) {
     let n = lapi.lua_gettop(L);
-    lauxlib.luaL_checktype(L, 2, CT.LUA_TFUNCTION);
-    lapi.lua_pushboolean(L, 1);
-    lapi.lua_pushvalue(L, 1);
-    lapi.lua_rotate(L, 3, 2);
+    lauxlib.luaL_checktype(L, 2, CT.LUA_TFUNCTION);  /* check error function */
+    lapi.lua_pushboolean(L, 1);  /* first result */
+    lapi.lua_pushvalue(L, 1);  /* function */
+    lapi.lua_rotate(L, 3, 2);  /* move them below function's arguments */
     let status = lapi.lua_pcallk(L, n - 2, lua.LUA_MULTRET, 2, 2, finishpcall);
     return finishpcall(L, status, 2);
 };
@@ -167,4 +167,4 @@ const luaopen_base = function(L) {
     return 1;
 };
 
-module.exports.luaopen_base      = luaopen_base;
+module.exports.luaopen_base = luaopen_base;

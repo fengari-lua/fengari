@@ -338,7 +338,7 @@ test('xpcall', function (t) {
         return xpcall(willFail, msgh)
     `, L;
     
-    t.plan(1);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -356,8 +356,13 @@ test('xpcall', function (t) {
 
     console.log(lapi.lua_tostring(L, -1));
 
-    // t.ok(
-    //     lapi.lua_tostring(L, -1).endsWith("you fucked up"),
-    //     "Error is on the stack"
-    // )
+    t.ok(
+        lapi.lua_tostring(L, -1).startsWith("Something's wrong:"),
+        "msgh was called and modified the error"
+    )
+
+    t.ok(
+        lapi.lua_tostring(L, -1).endsWith("you fucked up"),
+        "msgh was called and modified the error"
+    )
 });
