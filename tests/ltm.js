@@ -144,12 +144,12 @@ test('__index function in metatable', function (t) {
     L.stack[1].p.code[4].breakpoint = false;
 
     t.ok(
-        L.stack[3].ttistable() && !L.stack[3].value.hash.get("__index"),
+        L.stack[3].ttistable() && !L.stack[3].value.get("__index"),
         "t is on stack at 3"
     );
 
     t.ok(
-        L.stack[2].ttistable() && L.stack[2].value.hash.get("__index"),
+        L.stack[2].ttistable() && L.stack[2].value.get("__index"),
         "mt is on stack at 2"
     );
 
@@ -235,12 +235,12 @@ test('__newindex function in metatable', function (t) {
     L.stack[1].p.code[4].breakpoint = false;
 
     t.ok(
-        L.stack[3].ttistable() && !L.stack[3].value.hash.get("__newindex"),
+        L.stack[3].ttistable() && !L.stack[3].value.get("__newindex"),
         "t is on stack at 3"
     );
 
     t.ok(
-        L.stack[2].ttistable() && L.stack[2].value.hash.get("__newindex"),
+        L.stack[2].ttistable() && L.stack[2].value.get("__newindex"),
         "mt is on stack at 2"
     );
 
@@ -320,12 +320,12 @@ test('__index table in metatable', function (t) {
     L.stack[1].p.code[5].breakpoint = false;
 
     t.ok(
-        L.stack[4].ttistable() && !L.stack[4].value.hash.get("__index"),
+        L.stack[4].ttistable() && !L.stack[4].value.get("__index"),
         "t is on stack at 4"
     );
 
     t.ok(
-        L.stack[3].ttistable() && L.stack[3].value.hash.get("__index"),
+        L.stack[3].ttistable() && L.stack[3].value.get("__index"),
         "mt is on stack at 3"
     );
 
@@ -409,12 +409,12 @@ test('__newindex table in metatable', function (t) {
     L.stack[1].p.code[5].breakpoint = false;
 
     t.ok(
-        L.stack[4].ttistable() && !L.stack[4].value.hash.get("__newindex"),
+        L.stack[4].ttistable() && !L.stack[4].value.get("__newindex"),
         "t is on stack at 4"
     );
 
     t.ok(
-        L.stack[3].ttistable() && L.stack[3].value.hash.get("__newindex"),
+        L.stack[3].ttistable() && L.stack[3].value.get("__newindex"),
         "mt is on stack at 3"
     );
 

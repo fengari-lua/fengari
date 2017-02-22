@@ -78,14 +78,15 @@
     - [x] lua_insert
     - [x] lua_stringtonumber
     - [x] lua_rawlen
+    - [x] lua_next
+    - [x] lua_copy
     - [ ] lua_arith
     - [ ] lua_close
     - [ ] lua_compare
-    - [ ] lua_copy
     - [ ] lua_dump
-    - [x] lua_gc (unvailable)
-    - [x] lua_getallocf (unvailable)
-    - [x] lua_getextraspace (unvailable)
+    - [x] lua_gc (unavailable)
+    - [x] lua_getallocf (unavailable)
+    - [x] lua_getextraspace (unavailable)
     - [ ] lua_gethook
     - [ ] lua_gethookcount
     - [ ] lua_gethookmask
@@ -110,7 +111,6 @@
     - [ ] lua_len
     - [ ] lua_newthread
     - [ ] lua_newuserdata
-    - [ ] lua_next
     - [ ] lua_numbertointeger
     - [ ] lua_pcallk
     - [ ] lua_pushfstring
@@ -157,13 +157,14 @@
     - [x] luaL_optinteger
     - [x] luaL_optlstring
     - [x] luaL_where
+    - [x] luaL_argerror
+    - [x] luaL_argcheck
+    - [x] luaL_error
     - [ ] luaL_addchar
     - [ ] luaL_addlstring
     - [ ] luaL_addsize
     - [ ] luaL_addstring
     - [ ] luaL_addvalue
-    - [ ] luaL_argcheck
-    - [ ] luaL_argerror
     - [ ] luaL_buffinit
     - [ ] luaL_buffinitsize
     - [ ] luaL_checknumber
@@ -173,7 +174,6 @@
     - [ ] luaL_checkversion
     - [ ] luaL_dofile
     - [ ] luaL_dostring
-    - [ ] luaL_error
     - [ ] luaL_execresult
     - [ ] luaL_fileresult
     - [ ] luaL_getmetatable
@@ -217,7 +217,7 @@
         - [x] tonumber
         - [x] assert
         - [x] rawlen
-        - [ ] next
+        - [x] next
         - [ ] pairs
         - [ ] dofile
         - [ ] loadfile
