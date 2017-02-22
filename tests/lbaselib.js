@@ -490,3 +490,32 @@ test('tonumber', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('assert', function (t) {
+    let luaCode = `
+        assert(1 < 0, "this doesn't makes sense")
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-assert");
+
+        lapi.lua_pcall(L, 0, -1, 0);
+
+    }, "JS Lua program ran without error");
+
+    t.ok(
+        lapi.lua_tostring(L, -1).endsWith("this doesn't makes sense"),
+        "Error is on the stack"
+    );
+
+});

@@ -215,7 +215,7 @@
         - [x] ipairs
         - [x] select
         - [x] tonumber
-        - [ ] assert
+        - [x] assert
         - [ ] next
         - [ ] pairs
         - [ ] rawlen

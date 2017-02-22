@@ -12,9 +12,7 @@ const CT     = lua.constant_types;
 const LUA_LOADED_TABLE = "_LOADED"
 
 const panic = function(L) {
-    let msg = `PANIC: unprotected error in call to Lua API (${lapi.lua_tostring(L, -1)})`;
-    console.error(msg);
-    return 0;
+    throw new Error(`PANIC: unprotected error in call to Lua API (${lapi.lua_tostring(L, -1)})`);
 };
 
 // const luaL_argerror = function(L, arg, extramsg) {

@@ -165,6 +165,18 @@ const luaB_error = function(L) {
     return lapi.lua_error(L);
 };
 
+const luaB_assert = function(L) {
+    if (lapi.lua_toboolean(L, 1))  /* condition is true? */
+        return lapi.lua_gettop(L);  /* return all arguments */
+    else {
+        lauxlib.luaL_checkany(L, 1);  /* there must be a condition */
+        lapi.lua_remove(L, 1);  /* remove it */
+        lapi.lua_pushliteral(L, "assertion failed!");  /* default message */
+        lapi.lua_settop(L, 1);  /* leave only message (default if no other one) */
+        return luaB_error(L);  /* call 'error' */
+    }
+};
+
 const luaB_select = function(L) {
     let n = lapi.lua_gettop(L);
     if (lapi.lua_type(L, 1) === CT.LUA_TSTRING && lapi.lua_tostring(L, 1) === "#") {
@@ -220,6 +232,7 @@ const luaB_xpcall = function(L) {
 
 const base_funcs = {
     "collectgarbage": function () {},
+    "assert":         luaB_assert,
     "print":          luaB_print,
     "tostring":       luaB_tostring,
     "tonumber":       luaB_tonumber,
