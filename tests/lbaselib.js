@@ -426,19 +426,19 @@ test('select', function (t) {
     }, "JS Lua program ran without error");
 
     t.deepEqual(
-        lapi.lua_topointer(L, -3).map(e => e.value),
+        [...lapi.lua_topointer(L, -3).entries()].map(e => e[1].value),
         [3],
         "Correct element(s) on the stack"
     );
 
     t.deepEqual(
-        lapi.lua_topointer(L, -2).map(e => e.value),
+        [...lapi.lua_topointer(L, -2).entries()].map(e => e[1].value).sort(),
         [2, 3],
         "Correct element(s) on the stack"
     );
 
     t.deepEqual(
-        lapi.lua_topointer(L, -1).map(e => e.value),
+        [...lapi.lua_topointer(L, -1).entries()].map(e => e[1].value).sort(),
         [2, 3],
         "Correct element(s) on the stack"
     );
@@ -550,6 +550,47 @@ test('rawlen', function (t) {
     t.strictEqual(
         lapi.lua_tonumber(L, -1),
         5,
+        "Correct element(s) on the stack"
+    );
+});
+
+
+test('next', function (t) {
+    let luaCode = `
+        local total = 0
+        local t = {
+            1,
+            two = 2,
+            3,
+            four = 4
+        }
+
+        for k,v in next, t, nil do
+            total = total + v
+        end
+
+        return total
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-next");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tonumber(L, -1),
+        10,
         "Correct element(s) on the stack"
     );
 });

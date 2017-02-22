@@ -95,11 +95,8 @@ const typeerror = function(L, arg, tname) {
     else
         typearg = luaL_typename(L, arg);
 
-    throw new Error(`${tname} expected, got ${typearg}`);
-
-    // TODO:
-    // let msg = lua_pushstring(L, `${tname} expected, got ${typearg}`);
-    // return luaL_argerror(L, arg, msg);
+    let msg = lua_pushstring(L, `${tname} expected, got ${typearg}`);
+    return luaL_argerror(L, arg, msg);
 };
 
 const luaL_where = function(L, level) {
@@ -141,12 +138,12 @@ const luaL_typename = function(L, i) {
 };
 
 const luaL_argcheck = function(L, cond, arg, extramsg) {
-    if (!cond) throw new Error(extramsg); // TODO: luaL_argerror
+    if (!cond) luaL_argerror(L, arg, extramsg);
 };
 
 const luaL_checkany = function(L, arg) {
     if (lapi.lua_type(L, arg) === CT.LUA_TNONE)
-        throw new Error("value expected"); // TODO: luaL_argerror(L, arg, "value expected");
+        luaL_argerror(L, arg, "value expected");
 };
 
 const luaL_checktype = function(L, arg, t) {
@@ -170,7 +167,7 @@ const luaL_optstring = luaL_optlstring;
 
 const interror = function(L, arg) {
     if (lapi.lua_isnumber(L, arg))
-        throw new Error("number has no integer representation");
+        luaL_argerror(L, arg, "number has no integer representation");
     else
         tag_error(L, arg, CT.LUA_TNUMBER);
 };
@@ -216,7 +213,7 @@ const luaL_callmeta = function(L, obj, event) {
 const luaL_tolstring = function(L, idx) {
     if (luaL_callmeta(L, idx, "__tostring")) {
         if (!lapi.lua_isstring(L, -1))
-            throw new Error("'__tostring' must return a string"); // TODO: luaL_error
+            luaL_error(L, "'__tostring' must return a string");
     } else {
         switch(lapi.lua_type(L, idx)) {
             case CT.LUA_TNUMBER:
@@ -307,9 +304,9 @@ const luaL_setfuncs = function(L, l, nup) {
 const luaL_checkstack = function(L, space, msg) {
     if (!lapi.lua_checkstack(L, space)) {
         if (msg)
-            throw new Error(L, `stack overflow (${msg})`);
+            luaL_error(L, `stack overflow (${msg})`);
         else
-            throw new Error(L, 'stack overflow'); // TODO: luaL_error
+            luaL_error(L, 'stack overflow');
     }
 };
 

@@ -8,6 +8,7 @@ const lua     = require('./lua.js');
 const CT      = lua.constant_types;
 const nil     = require('./ldo.js').nil;
 const Table   = lobject.Table;
+const TValue  = lobject.TValue;
 
 
 Table.prototype.ordered_intindexes = function() {
@@ -37,9 +38,9 @@ Table.prototype.luaH_getn = function() {
     for (let i = 0; i < len; i++) {
         let key = indexes[i];
 
-        if (!this.value.get(key).ttisnil() // t[i] is non-nil
-            && (i === len - 1 || this.value.get(indexes[i + 1]).ttisinil())) { // t[i+1] is nil or is the last integer indexed element
-            return indexes[i];
+        if (!this.__index(this, key).ttisnil() // t[i] is non-nil
+            && (i === len - 1 || this.__index(this, indexes[i + 1]).ttisnil())) { // t[i+1] is nil or is the last integer indexed element
+            return indexes[i] + 1;
         }
     }
 
@@ -50,9 +51,13 @@ Table.prototype.luaH_next = function(L, keyI) {
     let keyO = L.stack[keyI];
     let key = Table.keyValue(keyO);
     let indexes = this.ordered_indexes();
+
+    if (indexes.length === 0) return 0;
+
     let i = indexes.indexOf(key);
 
-    if (i >= 0 && i < indexes.length - 1) {
+    if ((i >= 0 || key === null) && i < indexes.length - 1) {
+        if (key === null) i = -1;
         let nidx = indexes[i+1];
         let tnidx = typeof nidx;
 
@@ -63,7 +68,7 @@ Table.prototype.luaH_next = function(L, keyI) {
         else
             L.stack[keyI] = indexes[i + 1];
 
-        L.stack[keyI + 1] = this.map.get(indexes[i]);
+        L.stack[keyI + 1] = this.value.get(indexes[i + 1]);
         return 1;
     }
 

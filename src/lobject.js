@@ -121,7 +121,8 @@ class Table extends TValue {
     static keyValue(key) {
         // Those lua values are used by value, others by reference
         if (key instanceof TValue
-            && [CT.LUA_TSTRING,
+            && [CT.LUA_TNIL,
+                CT.LUA_TSTRING,
                 CT.LUA_TSHRSTR,
                 CT.LUA_TLNGSTR,
                 CT.LUA_TNUMINT].indexOf(key.type) > -1) {
@@ -135,9 +136,9 @@ class Table extends TValue {
         key = Table.keyValue(key);
 
         if (typeof key === 'number' && key > 0) {
-            table.value.hash.set(key - 1, value); // Lua array starts at 1
+            table.value.set(key - 1, value); // Lua array starts at 1
         } else {
-            table.value.hash.set(key, value);
+            table.value.set(key, value);
         }
     }
 
@@ -146,9 +147,9 @@ class Table extends TValue {
 
         let v = nil;
         if (typeof key === 'number' && key > 0) {
-            v = table.value.hash.get(key - 1); // Lua array starts at 1
+            v = table.value.get(key - 1); // Lua array starts at 1
         } else {
-            v = table.value.hash.get(key);
+            v = table.value.get(key);
         }
 
         return v ? v : nil;

@@ -110,6 +110,17 @@ const pairsmeta = function(L, method, iszero, iter) {
     return 3;
 };
 
+const luaB_next = function(L) {
+    lauxlib.luaL_checktype(L, 1, CT.LUA_TTABLE);
+    lapi.lua_settop(L, 2);  /* create a 2nd argument if there isn't one */
+    if (lapi.lua_next(L, 1))
+        return 2;
+    else {
+        lapi.lua_pushnil(L);
+        return 1;
+    }
+};
+
 /*
 ** Traversal function for 'ipairs'
 */
@@ -244,6 +255,7 @@ const base_funcs = {
     "tostring":       luaB_tostring,
     "tonumber":       luaB_tonumber,
     "getmetatable":   luaB_getmetatable,
+    "next":           luaB_next,
     "ipairs":         luaB_ipairs,
     "select":         luaB_select,
     "setmetatable":   luaB_setmetatable,
