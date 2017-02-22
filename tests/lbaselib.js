@@ -594,3 +594,94 @@ test('next', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('pairs', function (t) {
+    let luaCode = `
+        local total = 0
+        local t = {
+            1,
+            two = 2,
+            3,
+            four = 4
+        }
+
+        for k,v in pairs(t) do
+            total = total + v
+        end
+
+        return total
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-pairs");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tonumber(L, -1),
+        10,
+        "Correct element(s) on the stack"
+    );
+});
+
+
+test('pairs with __pairs', function (t) {
+    let luaCode = `
+        local total = 0
+
+        local mt = {
+            __pairs = function(t)
+                return next, {5, 6, 7, 8}, nil
+            end
+        }
+
+        local t = {
+            1,
+            two = 2,
+            3,
+            four = 4
+        }
+
+        setmetatable(t, mt)
+
+        for k,v in pairs(t) do
+            total = total + v
+        end
+
+        return total
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-pairs");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tonumber(L, -1),
+        26,
+        "Correct element(s) on the stack"
+    );
+});

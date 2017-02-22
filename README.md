@@ -213,12 +213,12 @@
         - [x] xpcall
         - [x] collectgarbage (unavailable)
         - [x] ipairs
+        - [x] pairs
         - [x] select
         - [x] tonumber
         - [x] assert
         - [x] rawlen
         - [x] next
-        - [ ] pairs
         - [ ] dofile
         - [ ] loadfile
         - [ ] load

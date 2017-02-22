@@ -98,7 +98,7 @@ const luaB_type = function(L) {
 
 const pairsmeta = function(L, method, iszero, iter) {
     lauxlib.luaL_checkany(L, 1);
-    if (lauxlib.luaL_getmetafield(L, 1, method).ttisnil()) {  /* no metamethod? */
+    if (lauxlib.luaL_getmetafield(L, 1, method) === CT.LUA_TNIL) {  /* no metamethod? */
         lapi.lua_pushcfunction(L, iter);  /* will return generator, */
         lapi.lua_pushvalue(L, 1);  /* state, */
         if (iszero) lapi.lua_pushinteger(L, 0);  /* and initial value */
@@ -119,6 +119,10 @@ const luaB_next = function(L) {
         lapi.lua_pushnil(L);
         return 1;
     }
+};
+
+const luaB_pairs = function(L) {
+    return pairsmeta(L, "__pairs", 0, luaB_next);
 };
 
 /*
@@ -256,6 +260,7 @@ const base_funcs = {
     "tonumber":       luaB_tonumber,
     "getmetatable":   luaB_getmetatable,
     "next":           luaB_next,
+    "pairs":          luaB_pairs,
     "ipairs":         luaB_ipairs,
     "select":         luaB_select,
     "setmetatable":   luaB_setmetatable,
