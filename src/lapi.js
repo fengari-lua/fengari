@@ -293,7 +293,7 @@ const auxsetstr = function(L, t, k) {
 };
 
 const lua_setglobal = function(L, name) {
-    auxsetstr(L, L.l_G.l_registry.value.array[lua.LUA_RIDX_GLOBALS - 1], name);
+    auxsetstr(L, L.l_G.l_registry.value.get(lua.LUA_RIDX_GLOBALS - 1), name);
 };
 
 const lua_setmetatable = function(L, objindex) {
@@ -390,9 +390,6 @@ const lua_createtable = function(L, narray, nrec) {
     L.stack[L.top++] = t;
 
     assert(L.top <= L.ci.top, "stack overflow");
-
-    if (narray > 0)
-        t.value.array = new Array(narray);
 };
 
 const lua_newtable = function(L) {
@@ -447,7 +444,7 @@ const lua_geti = function(L, idx, n) {
 };
 
 const lua_getglobal = function(L, name) {
-    return auxgetstr(L, L.l_G.l_registry.value.array[lua.LUA_RIDX_GLOBALS - 1], name);
+    return auxgetstr(L, L.l_G.l_registry.value.get(lua.LUA_RIDX_GLOBALS - 1), name);
 };
 
 /*
@@ -558,7 +555,7 @@ const lua_load = function(L, data, chunckname) {
         if (f.nupvalues >= 1) { /* does it have an upvalue? */
             /* get global table from registry */
             let reg = L.l_G.l_registry;
-            let gt = reg.value.array[lua.LUA_RIDX_GLOBALS - 1];
+            let gt = reg.value.get(lua.LUA_RIDX_GLOBALS - 1);
             /* set global table as 1st upvalue of 'f' (may be LUA_ENV) */
             f.upvals[0].u.value = gt;
         }
@@ -654,7 +651,16 @@ const lua_error = function(L) {
 };
 
 const lua_next = function(L, idx) {
-    
+    let t = index2addr(L, idx);
+    assert(t.ttistable(), "table expected");
+    let more = t.luaH_next(L, L.top - 1);
+    if (more) {
+        L.top++;
+        assert(L.top <= L.ci.top, "stack overflow");
+    } else
+        L.top--;
+
+    return more;
 };
 
 const lua_concat = function(L, n) {
@@ -741,3 +747,4 @@ module.exports.lua_getallocf       = lua_getallocf;
 module.exports.lua_getextraspace   = lua_getextraspace;
 module.exports.lua_stringtonumber  = lua_stringtonumber;
 module.exports.lua_copy            = lua_copy;
+module.exports.lua_next            = lua_next;

@@ -4,35 +4,68 @@
 const assert  = require('assert');
 
 const lobject = require('./lobject.js');
+const lua     = require('./lua.js');
+const CT      = lua.constant_types;
 const nil     = require('./ldo.js').nil;
 const Table   = lobject.Table;
 
+
+Table.prototype.ordered_intindexes = function() {
+    return [...this.value.keys()]
+        .filter(e => typeof e === 'number' && e % 1 === 0)  // Only integer indexes
+        .sort();
+};
+
+Table.prototype.ordered_indexes = function() {
+    return [...this.value.keys()]
+        .sort(function(a, b) {
+            if (typeof a !== "number") return 1;
+            if (typeof b !== "number") return -1;
+            return a > b ? 1 : -1
+        })
+};
 
 /*
 ** Try to find a boundary in table 't'. A 'boundary' is an integer index
 ** such that t[i] is non-nil and t[i+1] is nil (and 0 if t[1] is nil).
 */
 Table.prototype.luaH_getn = function() {
-    let array = this.value.array;
-    let hash = this.value.hash;
+    // TODO: is this costly ?
+    let indexes = this.ordered_intindexes();
+    let len = indexes.length;
 
-    let j = array.length;
-    if (j > 0 && array[j - 1].ttisnil()) {
-        /* there is a boundary in the array part: (binary) search for it */
-        let i = 0;
-        while (j - i > 1) {
-            let m = (i+j)/2;
-            if (array[m - 1].ttisnil()) j = m;
-            else i = m;
+    for (let i = 0; i < len; i++) {
+        let key = indexes[i];
+
+        if (!this.value.get(key).ttisnil() // t[i] is non-nil
+            && (i === len - 1 || this.value.get(indexes[i + 1]).ttisinil())) { // t[i+1] is nil or is the last integer indexed element
+            return indexes[i];
         }
-        return i;
     }
-    /* else must find a boundary in hash part */
-    else if (hash.size === 0)
-        return j;
-    else return hash.get(j);
+
+    return 0;
 };
 
-Table.prototype.luaH_next = function(key) {
-    
+Table.prototype.luaH_next = function(L, keyI) {
+    let keyO = L.stack[keyI];
+    let key = Table.keyValue(keyO);
+    let indexes = this.ordered_indexes();
+    let i = indexes.indexOf(key);
+
+    if (i >= 0 && i < indexes.length - 1) {
+        let nidx = indexes[i+1];
+        let tnidx = typeof nidx;
+
+        if (tnidx === 'number' && nidx % 1 === 0)
+            L.stack[keyI] = new TValue(CT.LUA_TNUMINT, indexes[i + 1]);
+        else if (tnidx === 'string')
+            L.stack[keyI] = new TValue(CT.LUA_TLNGSTR, indexes[i + 1]);
+        else
+            L.stack[keyI] = indexes[i + 1];
+
+        L.stack[keyI + 1] = this.map.get(indexes[i]);
+        return 1;
+    }
+
+    return 0;
 };
