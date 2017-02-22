@@ -127,6 +127,33 @@ const luaB_ipairs = function(L) {
     return 3;
 };
 
+const luaB_tonumber = function(L) {
+    if (lapi.lua_type(L, 2) <= 0) {  /* standard conversion? */
+        lauxlib.luaL_checkany(L, 1);
+        if (lapi.lua_type(L, 1) === CT.LUA_TNUMBER) {  /* already a number? */
+            lapi.lua_settop(L, 1);
+            return 1;
+        } else {
+            let s = lapi.lua_tostring(L, 1);
+            if (s !== null && lapi.lua_stringtonumber(L, s) === s.length)
+                return 1;  /* successful conversion to number */
+        }
+    } else {
+        let base = lauxlib.luaL_checkinteger(L, 2);
+        lauxlib.luaL_checktype(L, 1, CT.LUA_TSTRING);  /* no numbers as strings */
+        let s = lapi.lua_tostring(L, 1);
+        lauxlib.luaL_argcheck(L, 2 <= base && base <= 36, 2, "base out of range");
+        let n = parseInt(s, base);
+        if (!isNaN(n)) {
+            lapi.lua_pushinteger(L, n);
+            return 1;
+        }
+    }
+
+    lapi.lua_pushnil(L);
+    return 1;
+};
+
 const luaB_error = function(L) {
     let level = lauxlib.luaL_optinteger(L, 2, 1);
     lapi.lua_settop(L, 1);
@@ -195,6 +222,7 @@ const base_funcs = {
     "collectgarbage": function () {},
     "print":          luaB_print,
     "tostring":       luaB_tostring,
+    "tonumber":       luaB_tonumber,
     "getmetatable":   luaB_getmetatable,
     "ipairs":         luaB_ipairs,
     "select":         luaB_select,

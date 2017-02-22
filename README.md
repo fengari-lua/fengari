@@ -76,6 +76,7 @@
     - [x] lua_remove
     - [x] lua_rotate
     - [x] lua_insert
+    - [x] lua_stringtonumber
     - [ ] lua_arith
     - [ ] lua_close
     - [ ] lua_compare
@@ -129,7 +130,6 @@
     - [ ] lua_setupvalue
     - [ ] lua_setuservalue
     - [ ] lua_status
-    - [ ] lua_stringtonumber
     - [ ] lua_tocfunction
     - [ ] lua_tothread
     - [ ] lua_touserdata
@@ -214,11 +214,11 @@
         - [x] collectgarbage (unavailable)
         - [x] ipairs
         - [x] select
+        - [x] tonumber
         - [ ] assert
         - [ ] next
         - [ ] pairs
         - [ ] rawlen
-        - [ ] tonumber
         - [ ] dofile
         - [ ] loadfile
         - [ ] load

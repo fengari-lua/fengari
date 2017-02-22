@@ -488,6 +488,13 @@ const lua_topointer = function(L, idx) {
     }
 };
 
+const lua_stringtonumber = function(L, s) {
+    let number = parseFloat(s);
+    L.stack[L.top++] = new TValue(number % 1 !== 0 ? CT.LUA_TNUMFLT : CT.LUA_TNUMINT, number);
+    assert(L.top <= L.ci.top, "stack overflow");
+    return s.length;
+};
+
 const f_call = function(L, ud) {
     ldo.luaD_callnoyield(L, ud.funcOff, ud.nresults);
 };
@@ -706,3 +713,4 @@ module.exports.lua_insert          = lua_insert;
 module.exports.lua_gc              = lua_gc;
 module.exports.lua_getallocf       = lua_getallocf;
 module.exports.lua_getextraspace   = lua_getextraspace;
+module.exports.lua_stringtonumber  = lua_stringtonumber;

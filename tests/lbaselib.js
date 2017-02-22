@@ -443,3 +443,50 @@ test('select', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('tonumber', function (t) {
+    let luaCode = `
+        return tonumber('123'), tonumber('12.3'), tonumber('az', 36), tonumber('10', 2)
+    `, L;
+    
+    t.plan(5);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-tonumber");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tonumber(L, -4),
+        123,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tonumber(L, -3),
+        12.3,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tonumber(L, -2),
+        395,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tonumber(L, -1),
+        2,
+        "Correct element(s) on the stack"
+    );
+});
