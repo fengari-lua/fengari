@@ -89,6 +89,44 @@ const luaB_type = function(L) {
     return 1;
 };
 
+const pairsmeta = function(L, method, iszero, iter) {
+    lauxlib.luaL_checkany(L, 1);
+    if (lauxlib.luaL_getmetafield(L, 1, method).ttisnil()) {  /* no metamethod? */
+        lapi.lua_pushcfunction(L, iter);  /* will return generator, */
+        lapi.lua_pushvalue(L, 1);  /* state, */
+        if (iszero) lapi.lua_pushinteger(L, 0);  /* and initial value */
+        else lapi.lua_pushnil(L);
+    } else {
+        lapi.lua_pushvalue(L, 1);  /* argument 'self' to metamethod */
+        lapi.lua_call(L, 1, 3);  /* get 3 values from metamethod */
+    }
+    return 3;
+};
+
+/*
+** Traversal function for 'ipairs'
+*/
+const ipairsaux = function(L) {
+    let i = lauxlib.luaL_checkinteger(L, 2) + 1;
+    lapi.lua_pushinteger(L, i);
+    return lapi.lua_geti(L, 1, i) === CT.LUA_TNIL ? 1 : 2;
+};
+
+/*
+** 'ipairs' function. Returns 'ipairsaux', given "table", 0.
+** (The given "table" may not be a table.)
+*/
+const luaB_ipairs = function(L) {
+    // Lua 5.2
+    // return pairsmeta(L, "__ipairs", 1, ipairsaux);
+
+    lauxlib.luaL_checkany(L, 1);
+    lapi.lua_pushcfunction(L, ipairsaux);  /* iteration function */
+    lapi.lua_pushvalue(L, 1);  /* state */
+    lapi.lua_pushinteger(L, 0);  /* initial value */
+    return 3;
+};
+
 const luaB_error = function(L) {
     let level = lauxlib.luaL_optinteger(L, 2, 1);
     lapi.lua_settop(L, 1);
@@ -144,6 +182,7 @@ const base_funcs = {
     "print":          luaB_print,
     "tostring":       luaB_tostring,
     "getmetatable":   luaB_getmetatable,
+    "ipairs":         luaB_ipairs,
     "setmetatable":   luaB_setmetatable,
     "rawequal":       luaB_rawequal,
     "rawset":         luaB_rawset,

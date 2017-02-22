@@ -426,6 +426,20 @@ const lua_getfield = function(L, idx, k) {
     return auxgetstr(L, index2addr(L, idx), k);
 };
 
+const lua_geti = function(L, idx, n) {
+    let t = index2addr(L, idx);
+    let slot = t.__index(t, n);
+    if (!slot.ttisnil()) {
+        L.stack[L.top++] = slot;
+        assert(L.top <= L.ci.top, "stack overflow");
+    } else {
+        L.stack[L.top++] = new TValue(CT.LUA_TNUMINT, n);
+        assert(L.top <= L.ci.top, "stack overflow");
+        lvm.gettable(L, t, L.stack[L.top - 1], L.top - 1);
+    }
+    return L.stack[L.top - 1].ttnov();
+};
+
 const lua_getglobal = function(L, name) {
     return auxgetstr(L, L.l_G.l_registry.value.array[lua.LUA_RIDX_GLOBALS - 1], name);
 };
@@ -651,6 +665,7 @@ module.exports.lua_createtable     = lua_createtable;
 module.exports.lua_newtable        = lua_newtable;
 module.exports.lua_settable        = lua_settable;
 module.exports.lua_gettable        = lua_gettable;
+module.exports.lua_geti            = lua_geti;
 module.exports.lua_absindex        = lua_absindex;
 module.exports.index2addr          = index2addr;
 module.exports.lua_rawget          = lua_rawget;

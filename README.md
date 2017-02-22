@@ -212,16 +212,16 @@
         - [x] pcall
         - [x] xpcall
         - [x] collectgarbage (unavailable)
+        - [x] ipairs
         - [ ] assert
-        - [ ] dofile
-        - [ ] ipairs
-        - [ ] loadfile
-        - [ ] load
         - [ ] next
         - [ ] pairs
         - [ ] rawlen
         - [ ] select
         - [ ] tonumber
+        - [ ] dofile
+        - [ ] loadfile
+        - [ ] load
     - [ ] ...
 - [ ] Debug (errors)
 - [ ] DOM API binding

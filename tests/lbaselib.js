@@ -366,3 +366,39 @@ test('xpcall', function (t) {
         "msgh was called and modified the error"
     )
 });
+
+
+test('ipairs', function (t) {
+    let luaCode = `
+        local t = {1, 2, 3, 4, 5, ['yo'] = 'lo'}
+
+        local sum = 0
+        for i, v in ipairs(t) do
+            sum = sum + v
+        end
+
+        return sum
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-pcall");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -1),
+        15,
+        "Correct element(s) on the stack"
+    )
+});
