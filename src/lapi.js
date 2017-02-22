@@ -149,6 +149,12 @@ const lua_rotate = function(L, idx, n) {
     reverse(L, pIdx, L.top - 1);
 };
 
+const lua_copy = function(L, fromidx, toidx) {
+    let fr = index2addr_(L, fromidx);
+    let to = index2addr_(L, toidx);
+    L.stack[to] = fr;
+};
+
 const lua_remove = function(L, idx) {
     lua_rotate(L, idx, -1);
     lua_pop(L, 1);
@@ -647,6 +653,10 @@ const lua_error = function(L) {
     ldebug.luaG_errormsg(L);
 };
 
+const lua_next = function(L, idx) {
+    
+};
+
 const lua_concat = function(L, n) {
     assert(n < L.top - L.ci.funcOff, "not enough elements in the stack");
     if (n >= 2)
@@ -730,3 +740,4 @@ module.exports.lua_gc              = lua_gc;
 module.exports.lua_getallocf       = lua_getallocf;
 module.exports.lua_getextraspace   = lua_getextraspace;
 module.exports.lua_stringtonumber  = lua_stringtonumber;
+module.exports.lua_copy            = lua_copy;

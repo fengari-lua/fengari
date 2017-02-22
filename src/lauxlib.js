@@ -11,29 +11,80 @@ const CT     = lua.constant_types;
 
 const LUA_LOADED_TABLE = "_LOADED"
 
+
+/*
+** search for 'objidx' in table at index -1.
+** return 1 + string at top if find a good name.
+*/
+const findfield = function(L, objidx, level) {
+    if (level === 0 || !lapi.lua_istable(L, -1))
+        return 0;  /* not found */
+
+    lapi.lua_pushnil(L);  /* start 'next' loop */
+
+    while (lapi.lua_next(L, -2)) {  /* for each pair in table */
+        if (lapi.lua_type(L, -2) === CT.LUA_TSTRING) {  /* ignore non-string keys */
+            if (lapi.lua_rawequal(L, objidx, -1)) {  /* found object? */
+                lapi.lua_pop(L, 1);  /* remove value (but keep name) */
+                return 1;
+            } else if (findfield(L, objidx, level - 1)) {  /* try recursively */
+                lapi.lua_remove(L, -2);  /* remove table (but keep name) */
+                lapi.lua_pushliteral(L, ".");
+                lapi.lua_insert(L, -2);  /* place '.' between the two names */
+                lapi.lua_concat(L, 3);
+                return 1;
+            }
+        }
+        lapi.lua_pop(L, 1);  /* remove value */
+    }
+
+    return 0;  /* not found */
+};
+
+/*
+** Search for a name for a function in all loaded modules
+*/
+const pushglobalfuncname = function(L, ar) {
+    let top = lapi.lua_gettop(L);
+    lapi.lua_getinfo(L, 'f', ar);  /* push function */
+    lapi.lua_getfield(L, lua.LUA_REGISTRYINDEX, lua.LUA_LOADED_TABLE);
+    if (findfield(L, top + 1, 2)) {
+        let name = lapi.lua_tostring(L, -1);
+        if (name.startsWith("_G.")) {
+            lapi.lua_pushstring(L, name.slice(3));  /* name start with '_G.'? */
+            lapi.lua_remove(L, -2);  /* name start with '_G.'? */
+        }
+        lapi.lua_copy(L, -1, top + 1);  /* name start with '_G.'? */
+        lapi.lua_pop(L, 2);  /* name start with '_G.'? */
+    } else {
+        lapi.lua_settop(L, top);  /* remove function and global table */
+        return 0;
+    }
+};
+
 const panic = function(L) {
     throw new Error(`PANIC: unprotected error in call to Lua API (${lapi.lua_tostring(L, -1)})`);
 };
 
-// const luaL_argerror = function(L, arg, extramsg) {
-//     let ar = new lua.lua_Debug();
-// 
-//     if (!lapi.lua_getstack(L, 0, ar))  /* no stack frame? */
-//         return luaL_error(L, 'bad argument #%d (%s)', arg, extramsg);
-// 
-//     ldebug.lua_getinfo(L, 'n', ar);
-// 
-//     if (ar.namewhat === 'method') {
-//         arg--;  /* do not count 'self' */
-//         if (arg === 0)  /* error is in the self argument itself? */
-//             return luaL_error(L, "calling '%s' on  bad self (%s)", ar.name, extramsg);
-//     }
-// 
-//     if (ar.name === null)
-//         ar.name = pushglobalfuncname(L, ar) ? lapi.lua_tostring(L, -1) : "?";
-// 
-//     return luaL_error(L, "bad argument #%d to '%s' (%s)", arg, ar.name, extramsg);
-// };
+const luaL_argerror = function(L, arg, extramsg) {
+    let ar = new lua.lua_Debug();
+
+    if (!lapi.lua_getstack(L, 0, ar))  /* no stack frame? */
+        return luaL_error(L, 'bad argument #%d (%s)', arg, extramsg);
+
+    ldebug.lua_getinfo(L, 'n', ar);
+
+    if (ar.namewhat === 'method') {
+        arg--;  /* do not count 'self' */
+        if (arg === 0)  /* error is in the self argument itself? */
+            return luaL_error(L, "calling '%s' on  bad self (%s)", ar.name, extramsg);
+    }
+
+    if (ar.name === null)
+        ar.name = pushglobalfuncname(L, ar) ? lapi.lua_tostring(L, -1) : "?";
+
+    return luaL_error(L, `bad argument #${arg} to '${ar.name}' (${extramsg})`);
+};
 
 const typeerror = function(L, arg, tname) {
     let typearg;
@@ -283,3 +334,4 @@ module.exports.luaL_optinteger   = luaL_optinteger;
 module.exports.luaL_opt          = luaL_opt;
 module.exports.luaL_where        = luaL_where;
 module.exports.luaL_error        = luaL_error;
+module.exports.luaL_argerror     = luaL_argerror;

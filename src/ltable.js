@@ -32,3 +32,7 @@ Table.prototype.luaH_getn = function() {
         return j;
     else return hash.get(j);
 };
+
+Table.prototype.luaH_next = function(key) {
+    
+};
