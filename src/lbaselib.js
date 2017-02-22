@@ -138,6 +138,20 @@ const luaB_error = function(L) {
     return lapi.lua_error(L);
 };
 
+const luaB_select = function(L) {
+    let n = lapi.lua_gettop(L);
+    if (lapi.lua_type(L, 1) === CT.LUA_TSTRING && lapi.lua_tostring(L, 1) === "#") {
+        lapi.lua_pushinteger(L, n - 1);
+        return 1;
+    } else {
+        let i = lauxlib.luaL_checkinteger(L, 1);
+        if (i < 0) i = n + i;
+        else if (i > n) i = n;
+        lauxlib.luaL_argcheck(L, 1 <= i, 1, "index out of range");
+        return n - i;
+    }
+};
+
 /*
 ** Continuation function for 'pcall' and 'xpcall'. Both functions
 ** already pushed a 'true' before doing the call, so in case of success
@@ -183,6 +197,7 @@ const base_funcs = {
     "tostring":       luaB_tostring,
     "getmetatable":   luaB_getmetatable,
     "ipairs":         luaB_ipairs,
+    "select":         luaB_select,
     "setmetatable":   luaB_setmetatable,
     "rawequal":       luaB_rawequal,
     "rawset":         luaB_rawset,

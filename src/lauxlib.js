@@ -92,7 +92,7 @@ const luaL_typename = function(L, i) {
 };
 
 const luaL_argcheck = function(L, cond, arg, extramsg) {
-    if (!cond) throw new Error("bad argument"); // TODO: luaL_argerror
+    if (!cond) throw new Error(extramsg); // TODO: luaL_argerror
 };
 
 const luaL_checkany = function(L, arg) {

@@ -289,7 +289,7 @@ test('error, protected', function (t) {
     t.ok(
         lapi.lua_tostring(L, -1).endsWith("you fucked up"),
         "Error is on the stack"
-    )
+    );
 });
 
 
@@ -321,7 +321,7 @@ test('pcall', function (t) {
     t.ok(
         lapi.lua_tostring(L, -1).endsWith("you fucked up"),
         "Error is on the stack"
-    )
+    );
 });
 
 
@@ -359,12 +359,12 @@ test('xpcall', function (t) {
     t.ok(
         lapi.lua_tostring(L, -1).startsWith("Something's wrong:"),
         "msgh was called and modified the error"
-    )
+    );
 
     t.ok(
         lapi.lua_tostring(L, -1).endsWith("you fucked up"),
         "msgh was called and modified the error"
-    )
+    );
 });
 
 
@@ -390,7 +390,7 @@ test('ipairs', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-pcall");
+        lapi.lua_load(L, bc, "test-ipairs");
 
         lapi.lua_call(L, 0, -1);
 
@@ -400,5 +400,46 @@ test('ipairs', function (t) {
         lapi.lua_tointeger(L, -1),
         15,
         "Correct element(s) on the stack"
-    )
+    );
+});
+
+
+test('select', function (t) {
+    let luaCode = `
+        return {select('#', 1, 2, 3)}, {select(2, 1, 2, 3)}, {select(-2, 1, 2, 3)}
+    `, L;
+    
+    t.plan(4);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-select");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.deepEqual(
+        lapi.lua_topointer(L, -3).array.map(e => e.value),
+        [3],
+        "Correct element(s) on the stack"
+    );
+
+    t.deepEqual(
+        lapi.lua_topointer(L, -2).array.map(e => e.value),
+        [2, 3],
+        "Correct element(s) on the stack"
+    );
+
+    t.deepEqual(
+        lapi.lua_topointer(L, -1).array.map(e => e.value),
+        [2, 3],
+        "Correct element(s) on the stack"
+    );
 });

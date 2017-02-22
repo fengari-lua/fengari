@@ -472,6 +472,22 @@ const lua_tonumber = function(L, idx) {
     return lvm.tonumber(index2addr(L, idx))
 };
 
+const lua_topointer = function(L, idx) {
+    let o = index2addr(L, idx);
+    switch (o.ttype()) {
+        case CT.LUA_TTABLE:
+        case CT.LUA_TLCL:
+        case CT.LUA_TCCL:
+        case CT.LUA_TLCF:
+        case CT.LUA_TTHREAD:
+        case CT.LUA_TUSERDATA:
+        case CT.LUA_TLIGHTUSERDATA:
+            return o.value;
+        default:
+            return null;
+    }
+};
+
 const f_call = function(L, ud) {
     ldo.luaD_callnoyield(L, ud.funcOff, ud.nresults);
 };
@@ -653,6 +669,7 @@ module.exports.lua_tointeger       = lua_tointeger;
 module.exports.lua_toboolean       = lua_toboolean;
 module.exports.lua_tolstring       = lua_tolstring;
 module.exports.lua_tostring        = lua_tostring;
+module.exports.lua_topointer       = lua_topointer;
 module.exports.lua_load            = lua_load;
 module.exports.lua_callk           = lua_callk;
 module.exports.lua_call            = lua_call;

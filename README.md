@@ -40,6 +40,7 @@
     - [x] lua_tonumber
     - [x] lua_tonumberx
     - [x] lua_toboolean
+    - [x] lua_topointer
     - [x] lua_pushjsclosure (lua_pushcclosure)
     - [x] lua_pushjsfunction (lua_pushcfunction)
     - [x] lua_pop
@@ -130,7 +131,6 @@
     - [ ] lua_status
     - [ ] lua_stringtonumber
     - [ ] lua_tocfunction
-    - [ ] lua_topointer
     - [ ] lua_tothread
     - [ ] lua_touserdata
     - [ ] lua_upvalueid
@@ -213,11 +213,11 @@
         - [x] xpcall
         - [x] collectgarbage (unavailable)
         - [x] ipairs
+        - [x] select
         - [ ] assert
         - [ ] next
         - [ ] pairs
         - [ ] rawlen
-        - [ ] select
         - [ ] tonumber
         - [ ] dofile
         - [ ] loadfile
