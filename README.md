@@ -77,6 +77,7 @@
     - [x] lua_rotate
     - [x] lua_insert
     - [x] lua_stringtonumber
+    - [x] lua_rawlen
     - [ ] lua_arith
     - [ ] lua_close
     - [ ] lua_compare
@@ -117,7 +118,6 @@
     - [ ] lua_pushthread
     - [ ] lua_pushvfstring
     - [ ] lua_rawgetp
-    - [ ] lua_rawlen
     - [ ] lua_rawseti
     - [ ] lua_rawsetp
     - [ ] lua_register
@@ -216,9 +216,9 @@
         - [x] select
         - [x] tonumber
         - [x] assert
+        - [x] rawlen
         - [ ] next
         - [ ] pairs
-        - [ ] rawlen
         - [ ] dofile
         - [ ] loadfile
         - [ ] load

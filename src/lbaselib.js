@@ -65,6 +65,13 @@ const luaB_rawequal = function(L) {
     return 1;
 };
 
+const luaB_rawlen = function(L) {
+    let t = lapi.lua_type(L, 1);
+    lauxlib.luaL_argcheck(L, t === CT.LUA_TTABLE || t === CT.LUA_TSTRING, 1, "table or string expected");
+    lapi.lua_pushinteger(L, lapi.lua_rawlen(L, 1));
+    return 1;
+};
+
 const luaB_rawget = function(L) {
     lauxlib.luaL_checktype(L, 1, CT.LUA_TTABLE);
     lauxlib.luaL_checkany(L, 2);
@@ -241,6 +248,7 @@ const base_funcs = {
     "select":         luaB_select,
     "setmetatable":   luaB_setmetatable,
     "rawequal":       luaB_rawequal,
+    "rawlen":         luaB_rawlen,
     "rawset":         luaB_rawset,
     "rawget":         luaB_rawget,
     "type":           luaB_type,

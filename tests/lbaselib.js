@@ -517,5 +517,39 @@ test('assert', function (t) {
         lapi.lua_tostring(L, -1).endsWith("this doesn't makes sense"),
         "Error is on the stack"
     );
+});
 
+
+test('rawlen', function (t) {
+    let luaCode = `
+        return rawlen({1, 2, 3}), rawlen('hello')
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-rawlen");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tonumber(L, -2),
+        3,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tonumber(L, -1),
+        5,
+        "Correct element(s) on the stack"
+    );
 });

@@ -464,6 +464,21 @@ const lua_tolstring = function(L, idx) {
 
 const lua_tostring =  lua_tolstring;
 
+const lua_rawlen = function(L, idx) {
+    let o = index2addr(L, idx);
+    switch (o.ttype()) {
+        case CT.LUA_TSHRSTR:
+        case CT.LUA_TLNGSTR:
+            return o.value.length;
+        case CT.LUA_TUSERDATA:
+            return o.len;
+        case CT.LUA_TTABLE:
+            return o.luaH_getn();
+        default:
+            return 0;
+    }
+};
+
 const lua_tointeger = function(L, idx) {
     return lvm.tointeger(index2addr(L, idx))
 };
@@ -694,6 +709,7 @@ module.exports.lua_absindex        = lua_absindex;
 module.exports.index2addr          = index2addr;
 module.exports.lua_rawget          = lua_rawget;
 module.exports.lua_rawset          = lua_rawset;
+module.exports.lua_rawlen          = lua_rawlen;
 module.exports.lua_isstring        = lua_isstring;
 module.exports.lua_rotate          = lua_rotate;
 module.exports.lua_remove          = lua_remove;
