@@ -9,8 +9,15 @@ const lua    = require('./lua.js');
 const ldebug = require('./ldebug.js');
 const CT     = lua.constant_types;
 
-const LUA_LOADED_TABLE = "_LOADED"
+const LUA_LOADED_TABLE = "_LOADED";
 
+
+class luaL_Buffer {
+    constructor(L) {
+        this.L = L;
+        this.b = "";
+    }
+}
 
 /*
 ** search for 'objidx' in table at index -1.
@@ -95,7 +102,7 @@ const typeerror = function(L, arg, tname) {
     else
         typearg = luaL_typename(L, arg);
 
-    let msg = lua_pushstring(L, `${tname} expected, got ${typearg}`);
+    let msg = lapi.lua_pushstring(L, `${tname} expected, got ${typearg}`);
     return luaL_argerror(L, arg, msg);
 };
 
@@ -183,6 +190,30 @@ const luaL_optinteger = function(L, arg, def) {
     return luaL_opt(L, luaL_checkinteger, arg, def);
 };
 
+const luaL_buffinit = function(L, B) {
+    B.L = L;
+    B.b = "";
+};
+
+const luaL_addlstring = function(B, s) {
+    B.b += s;
+};
+
+const luaL_addstring = luaL_addlstring;
+
+const luaL_pushresult = function(B) {
+    let L = B.L;
+    lapi.lua_pushstring(L, B.b);
+};
+
+const luaL_addvalue = function(B) {
+    let L = B.L;
+    let s = lapi.lua_tostring(L, -1);
+    // TODO: buffonstack ? necessary ?
+    luaL_addstring(B, s);
+    lapi.lua_remove(L, -1);
+};
+
 const luaL_opt = function(L, f, n, d) {
     return lapi.lua_type(L, n) <= 0 ? d : f(L, n);
 };
@@ -210,6 +241,15 @@ const luaL_callmeta = function(L, obj, event) {
     return true;
 };
 
+const luaL_len = function(L, idx) {
+    lapi.lua_len(L, idx);
+    let l = lapi.lua_tointegerx(L, -1);
+    if (l === false)
+        luaL_error(L, "object length is not an integer");
+    lapi.lua_pop(L, 1);  /* remove object */
+    return l;
+};
+
 const luaL_tolstring = function(L, idx) {
     if (luaL_callmeta(L, idx, "__tostring")) {
         if (!lapi.lua_isstring(L, -1))
@@ -226,7 +266,7 @@ const luaL_tolstring = function(L, idx) {
                 break;
             default:
                 let tt = luaL_getmetafield(L, idx, "__name");
-                let kind = tt === CT.LUA_TSTRING ? lua_tostring(L, -1) : luaL_typename(L, idx);
+                let kind = tt === CT.LUA_TSTRING ? lapi.lua_tostring(L, -1) : luaL_typename(L, idx);
                 lapi.lua_pushstring(L, `${kind}`); // We can't print memory address in JS
                 if (tt !== CT.LUA_TNIL)
                     lapi.lua_remove(L, -2);
@@ -315,26 +355,33 @@ const luaL_newlib = function(L, l) {
     luaL_setfuncs(L, l, 0);
 };
 
-module.exports.luaL_newstate     = luaL_newstate;
-module.exports.luaL_typename     = luaL_typename;
-module.exports.luaL_checkany     = luaL_checkany;
-module.exports.luaL_checktype    = luaL_checktype;
-module.exports.luaL_callmeta     = luaL_callmeta;
-module.exports.luaL_getmetafield = luaL_getmetafield;
-module.exports.luaL_requiref     = luaL_requiref;
-module.exports.luaL_getsubtable  = luaL_getsubtable;
-module.exports.luaL_setfuncs     = luaL_setfuncs;
-module.exports.luaL_checkstack   = luaL_checkstack;
 module.exports.LUA_LOADED_TABLE  = LUA_LOADED_TABLE;
-module.exports.luaL_tolstring    = luaL_tolstring;
+module.exports.luaL_addlstring   = luaL_addlstring;
+module.exports.luaL_addstring    = luaL_addstring;
+module.exports.luaL_addvalue     = luaL_addvalue;
 module.exports.luaL_argcheck     = luaL_argcheck;
+module.exports.luaL_argerror     = luaL_argerror;
+module.exports.luaL_Buffer       = luaL_Buffer;
+module.exports.luaL_buffinit     = luaL_buffinit;
+module.exports.luaL_callmeta     = luaL_callmeta;
+module.exports.luaL_checkany     = luaL_checkany;
+module.exports.luaL_checkinteger = luaL_checkinteger;
 module.exports.luaL_checklstring = luaL_checklstring;
+module.exports.luaL_checkstack   = luaL_checkstack;
+module.exports.luaL_checktype    = luaL_checktype;
+module.exports.luaL_error        = luaL_error;
+module.exports.luaL_getmetafield = luaL_getmetafield;
+module.exports.luaL_getsubtable  = luaL_getsubtable;
+module.exports.luaL_len          = luaL_len;
+module.exports.luaL_newlib       = luaL_newlib;
+module.exports.luaL_newstate     = luaL_newstate;
+module.exports.luaL_opt          = luaL_opt;
+module.exports.luaL_optinteger   = luaL_optinteger;
 module.exports.luaL_optlstring   = luaL_optlstring;
 module.exports.luaL_optstring    = luaL_optstring;
-module.exports.luaL_checkinteger = luaL_checkinteger;
-module.exports.luaL_optinteger   = luaL_optinteger;
-module.exports.luaL_opt          = luaL_opt;
+module.exports.luaL_pushresult   = luaL_pushresult;
+module.exports.luaL_requiref     = luaL_requiref;
+module.exports.luaL_setfuncs     = luaL_setfuncs;
+module.exports.luaL_tolstring    = luaL_tolstring;
+module.exports.luaL_typename     = luaL_typename;
 module.exports.luaL_where        = luaL_where;
-module.exports.luaL_error        = luaL_error;
-module.exports.luaL_argerror     = luaL_argerror;
-module.exports.luaL_newlib       = luaL_newlib;

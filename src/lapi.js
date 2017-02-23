@@ -205,7 +205,7 @@ const lua_pushinteger = function(L, n) {
 
 const lua_pushlstring = function(L, s, len) { // TODO: embedded \0
     assert(typeof s === "string");
-    assert(typeof n === "number");
+    assert(typeof len === "number");
 
     let ts = len === 0 ? new TValue(CT.LUA_TLNGSTR, "") : new TValue(CT.LUA_TLNGSTR, s.substr(0, len));
     L.stack[L.top++] = ts;
@@ -538,6 +538,15 @@ const lua_stringtonumber = function(L, s) {
     return s.length;
 };
 
+// TODO: pisnum
+const lua_tointegerx = function(L, idx) {
+    let o = index2addr(L, idx);
+    let res = lvm.tointeger(o);
+    if (res === false)
+        res = 0;  /* call to 'tointeger' may change 'n' even if it fails */
+    return res;
+};
+
 const f_call = function(L, ud) {
     ldo.luaD_callnoyield(L, ud.funcOff, ud.nresults);
 };
@@ -701,6 +710,12 @@ const lua_concat = function(L, n) {
     }
 };
 
+const lua_len = function(L, idx) {
+    let t = index2addr(L, idx);
+    lvm.luaV_objlen(L, L.top++, t);
+    assert(L.top <= L.ci.top, "stack overflow");
+};
+
 // This functions are only there for compatibility purposes
 const lua_gc = function () {};
 
@@ -735,6 +750,7 @@ module.exports.lua_gettop          = lua_gettop;
 module.exports.lua_insert          = lua_insert;
 module.exports.lua_isstring        = lua_isstring;
 module.exports.lua_istable         = lua_istable;
+module.exports.lua_len             = lua_len;
 module.exports.lua_load            = lua_load;
 module.exports.lua_newtable        = lua_newtable;
 module.exports.lua_next            = lua_next;
@@ -771,6 +787,7 @@ module.exports.lua_status          = lua_status;
 module.exports.lua_stringtonumber  = lua_stringtonumber;
 module.exports.lua_toboolean       = lua_toboolean;
 module.exports.lua_tointeger       = lua_tointeger;
+module.exports.lua_tointegerx      = lua_tointegerx;
 module.exports.lua_tolstring       = lua_tolstring;
 module.exports.lua_tonumber        = lua_tonumber;
 module.exports.lua_topointer       = lua_topointer;

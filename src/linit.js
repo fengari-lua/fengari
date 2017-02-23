@@ -8,10 +8,12 @@ const lauxlib  = require('./lauxlib.js');
 const lualib   = require('./lualib.js');
 const lbaselib = require('./lbaselib.js');
 const lcorolib = require('./lcorolib.js');
+const ltablib  = require('./ltablib.js');
 
 const loadedlibs = {
-    [lualib.LUA_COLIBNAME]: lcorolib.luaopen_coroutine,
-    "_G":                  lbaselib.luaopen_base
+    [lualib.LUA_TABLIBNAME]: ltablib.luaopen_table,
+    [lualib.LUA_COLIBNAME]:  lcorolib.luaopen_coroutine,
+    "_G":                    lbaselib.luaopen_base
 };
 
 const luaL_openlibs = function(L) {

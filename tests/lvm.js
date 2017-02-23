@@ -758,19 +758,19 @@ test('LEN', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        L.stack[L.top - 1],
+        L.stack[L.top - 1].value,
         5,
         "Program output is correct"
     );
 
     t.strictEqual(
-        L.stack[L.top - 2],
+        L.stack[L.top - 2].value,
         3,
         "Program output is correct"
     );
 
     t.strictEqual(
-        L.stack[L.top - 3],
+        L.stack[L.top - 3].value,
         0,
         "Program output is correct"
     );
