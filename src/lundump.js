@@ -293,7 +293,7 @@ class BytecodeParser {
     luaU_undump(L) {
         this.checkHeader();
 
-        let cl = new LClosure(this.readByte());
+        let cl = new LClosure(L, this.readByte());
 
         L.stack[L.top] = cl;
         L.top++;

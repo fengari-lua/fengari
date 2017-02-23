@@ -659,7 +659,7 @@ const luaV_execute = function(L) {
                 let p = cl.p.p[i.Bx];
                 let nup = p.upvalues.length;
                 let uv = p.upvalues;
-                let ncl = new LClosure(nup);
+                let ncl = new LClosure(L, nup);
                 ncl.p = p;
 
                 L.stack[ra] = ncl;

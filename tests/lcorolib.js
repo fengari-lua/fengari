@@ -14,6 +14,7 @@ const lapi       = require("../src/lapi.js");
 const lauxlib    = require("../src/lauxlib.js");
 const lua        = require('../src/lua.js');
 const linit      = require('../src/linit.js');
+const lstate     = require('../src/lstate.js');
 const CT         = lua.constant_types;
 
 
@@ -130,15 +131,54 @@ test('coroutine.isyieldable', function (t) {
 
     }, "JS Lua program ran without error");
 
-    t.strictEqual(
+    t.ok(
         lapi.lua_toboolean(L, -2),
-        true,
         "Correct element(s) on the stack"
     );
 
-    t.strictEqual(
+    t.notOk(
         lapi.lua_toboolean(L, -1),
-        false,
+        "Correct element(s) on the stack"
+    );
+});
+
+
+test('coroutine.running', function (t) {
+    let luaCode = `
+        local running, ismain
+
+        local co = coroutine.create(function ()
+            running, ismain = coroutine.running()
+        end)
+
+        coroutine.resume(co)
+
+        return running, ismain
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-coroutine.running");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.ok(
+        lapi.lua_tothread(L, -2) instanceof lstate.lua_State,
+        "Correct element(s) on the stack"
+    );
+
+    t.notOk(
+        lapi.lua_toboolean(L, -1),
         "Correct element(s) on the stack"
     );
 });

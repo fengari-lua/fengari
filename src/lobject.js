@@ -163,13 +163,13 @@ class Table extends TValue {
 
 class LClosure extends TValue {
 
-    constructor(n) {
+    constructor(L, n) {
         super(CT.LUA_TLCL, null);
 
         this.p = null;
         this.nupvalues = n;
 
-        let _ENV = new UpVal();
+        let _ENV = new UpVal(L);
         _ENV.refcount = 0;
         _ENV.v = null;
         _ENV.u.open.next = null;

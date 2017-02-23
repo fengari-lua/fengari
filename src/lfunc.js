@@ -24,7 +24,8 @@ class Proto {
 
 class UpVal {
 
-    constructor() {
+    constructor(L) {
+        this.L = L; // Keep track of the thread it comes from
         this.v = null; /* if null, upval is closed, value is in u.value */
         this.u = {
             open: { /* (when open) */
@@ -41,7 +42,7 @@ class UpVal {
 
     setval(L, ra) {
         if (this.v !== null) {
-            L.stack[this.v] = L.stack[ra];
+            this.L.stack[this.v] = L.stack[ra];
             this.v = ra;
         } else this.u.value = L.stack[ra];
     }
@@ -64,7 +65,7 @@ const findupval = function(L, level) {
         pp = p.u.open.next;
     }
 
-    let uv = new UpVal();
+    let uv = new UpVal(L);
     uv.refcount = 0;
     uv.u.open.next = pp;
     uv.u.open.touched = true;
@@ -92,7 +93,7 @@ const luaF_close = function(L, level) {
 
 const luaF_initupvals = function(L, cl) {
     for (let i = 0; i < cl.nupvalues; i++) {
-        let uv = new UpVal();
+        let uv = new UpVal(L);
         uv.refcount = 1;
         uv.u.value = null;
         uv.v = uv.u.value;

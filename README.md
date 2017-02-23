@@ -9,6 +9,7 @@
     - [x] nil
     - [x] boolean
     - [x] table
+        - [ ] weak table
     - [x] function
     - [ ] string (8-bit clean)
     - [ ] number (32-bit ?)
@@ -226,9 +227,9 @@
         - [x] coroutine.create
         - [x] coroutine.isyieldable
         - [x] coroutine.resume
+        - [x] coroutine.running
         - [x] coroutine.status
         - [x] coroutine.yield
-        - [ ] coroutine.running
         - [ ] coroutine.wrap
 - [ ] Debug (errors)
 - [ ] DOM API binding
