@@ -22,6 +22,65 @@ const ltm            = require('./ltm.js');
 const ltable         = require('./ltable.js');
 const ldebug         = require('./ldebug.js');
 
+/*
+** finish execution of an opcode interrupted by an yield
+*/
+const luaV_finishOp = function(L) {
+    let ci = L.ci;
+    let base = ci.u.l.base;
+    let inst = ci.u.l.savedpc[ci.pcOff - 1];  /* interrupted instruction */
+    let op = OC.OpCodes[inst.opcode];
+
+    switch (op) {  /* finish its execution */
+        case "OP_ADD": case "OP_SUB": case "OP_MUL": case "OP_DIV": case "OP_IDIV":
+        case "OP_BAND": case "OP_BOR": case "OP_BXOR": case "OP_SHL": case "OP_SHR":
+        case "OP_MOD": case "OP_POW":
+        case "OP_UNM": case "OP_BNOT": case "OP_LEN":
+        case "OP_GETTABUP": case "OP_GETTABLE": case "OP_SELF": {
+            L.stack[base + inst.A] = L.stack[--L.top];
+            break;
+        }
+        case "OP_LE": case "OP_LT": case "OP_EQ": {
+            let res = !L.stack[L.top - 1].l_isfalse();
+            L.top--;
+            if (ci.callstatus & lstate.CIST_LEQ) {  /* "<=" using "<" instead? */
+                assert(op === "OP_LE");
+                ci.callstatus ^= lstate.CIST_LEQ;  /* clear mark */
+                res = res !== 1 ? 1 : 0;  /* negate result */
+            }
+            assert(OC.OpCodes[ci.u.l.savedpc[ci.pcOff]] === "OP_JMP");
+            if (res !== inst.A)  /* condition failed? */
+                ci.pcOff++;  /* skip jump instruction */
+            break;
+        }
+        case "OP_CONCAT": {
+            let top = L.top - 1;  /* top when 'luaT_trybinTM' was called */
+            let b = inst.B;  /* first element to concatenate */
+            let total = top - 1 - (base + b);  /* yet to concatenate */
+            L.stack[L.top - 2] = L.stack[top];  /* put TM result in proper position */
+            if (total > 1) {  /* are there elements to concat? */
+                L.top = top - 1;  /* top is one after last element (at top-2) */
+                luaV_concat(L, total);  /* concat them (may yield again) */
+            }
+
+            /* move final result to final position */
+            L.stack[ci.u.l.base + inst.A] = L.stack[L.top - 1];
+            L.top = ci.top;  /* restore top */
+            break;
+        }
+        case "OP_TFORCALL": {
+            assert(OC.OpCodes[ci.u.l.savedpc[ci.pcOff]] === "OP_TFORLOOP");
+            L.top = ci.top;  /* correct top */
+            break;
+        }
+        case "OP_CALL": {
+            if (inst.C - 1 >= 0)  /* nresults >= 0? */
+                L.top = ci.top;  /* adjust results */
+            break;
+        }
+    }
+};
+
 const RA = function(L, base, i) {
    return base + i.A;
 };
@@ -1013,28 +1072,29 @@ const luaV_finishset = function(L, t, key, val, slot, recur) {
 }
 
 
+module.exports.dojump         = dojump;
+module.exports.donextjump     = donextjump;
+module.exports.forlimit       = forlimit;
+module.exports.gettable       = gettable;
+module.exports.l_strcmp       = l_strcmp;
+module.exports.LEintfloat     = LEintfloat;
+module.exports.LEnum          = LEnum;
+module.exports.LTintfloat     = LTintfloat;
+module.exports.LTnum          = LTnum;
+module.exports.luaV_concat    = luaV_concat;
+module.exports.luaV_equalobj  = luaV_equalobj;
+module.exports.luaV_execute   = luaV_execute;
+module.exports.luaV_finishOp  = luaV_finishOp;
+module.exports.luaV_finishset = luaV_finishset;
+module.exports.luaV_lessequal = luaV_lessequal;
+module.exports.luaV_lessthan  = luaV_lessthan;
+module.exports.luaV_objlen    = luaV_objlen;
+module.exports.luaV_tointeger = luaV_tointeger;
 module.exports.RA             = RA;
 module.exports.RB             = RB;
 module.exports.RC             = RC;
 module.exports.RKB            = RKB;
 module.exports.RKC            = RKC;
-module.exports.luaV_execute   = luaV_execute;
-module.exports.dojump         = dojump;
-module.exports.donextjump     = donextjump;
-module.exports.luaV_lessequal = luaV_lessequal;
-module.exports.luaV_lessthan  = luaV_lessthan;
-module.exports.luaV_equalobj  = luaV_equalobj;
-module.exports.forlimit       = forlimit;
-module.exports.luaV_tointeger = luaV_tointeger;
-module.exports.tonumber       = tonumber;
-module.exports.tointeger      = tointeger;
-module.exports.LTnum          = LTnum;
-module.exports.LEnum          = LEnum;
-module.exports.LEintfloat     = LEintfloat;
-module.exports.LTintfloat     = LTintfloat;
-module.exports.l_strcmp       = l_strcmp;
-module.exports.luaV_objlen    = luaV_objlen;
-module.exports.luaV_finishset = luaV_finishset;
-module.exports.gettable       = gettable;
 module.exports.settable       = settable;
-module.exports.luaV_concat    = luaV_concat;
+module.exports.tointeger      = tointeger;
+module.exports.tonumber       = tonumber;

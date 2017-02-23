@@ -310,6 +310,11 @@ const luaL_checkstack = function(L, space, msg) {
     }
 };
 
+const luaL_newlib = function(L, l) {
+    lapi.lua_createtable(L);
+    luaL_setfuncs(L, l, 0);
+};
+
 module.exports.luaL_newstate     = luaL_newstate;
 module.exports.luaL_typename     = luaL_typename;
 module.exports.luaL_checkany     = luaL_checkany;
@@ -332,3 +337,4 @@ module.exports.luaL_opt          = luaL_opt;
 module.exports.luaL_where        = luaL_where;
 module.exports.luaL_error        = luaL_error;
 module.exports.luaL_argerror     = luaL_argerror;
+module.exports.luaL_newlib       = luaL_newlib;

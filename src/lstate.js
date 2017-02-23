@@ -1,8 +1,10 @@
 /*jshint esversion: 6 */
 "use strict";
 
+const assert               = require('assert');
+
 const lua                  = require('./lua.js');
-const Table                = require('./lobject.js').Table;
+const lobject              = require('./lobject.js');
 const ldo                  = require('./ldo.js');
 const lapi                 = require('./lapi.js');
 const nil                  = ldo.nil;
@@ -41,9 +43,10 @@ class CallInfo {
 
 }
 
-class lua_State {
+class lua_State extends lobject.TValue {
 
-    constructor(cl) {
+    constructor() {
+        super(CT.LUA_TTHREAD, null);
         this.base_ci = new CallInfo(); // Will be populated later
         this.top = 0;
         this.ci = null;
@@ -52,12 +55,12 @@ class lua_State {
         this.openupval = [];
         this.status = TS.LUA_OK;
         this.next = null;
-        this.tt = CT.LUA_TTHREAD;
         this.twups = [this];
         this.errorJmp = null;
-        // TODO: hooks
         this.nny = 1;
         this.errfunc = 0;
+
+        this.value = this;
     }
 
 }
@@ -94,10 +97,10 @@ const stack_init = function(L1, L) {
 ** Create registry table and its predefined values
 */
 const init_registry = function(L, g) {
-    let registry = new Table();
+    let registry = new lobject.Table();
     g.l_registry = registry;
     registry.value.set(lua.LUA_RIDX_MAINTHREAD - 1, L);
-    registry.value.set(lua.LUA_RIDX_GLOBALS - 1, new Table());
+    registry.value.set(lua.LUA_RIDX_GLOBALS - 1, new lobject.Table());
 };
 
 /*
@@ -113,11 +116,44 @@ const f_luaopen = function(L) {
     g.version = lapi.lua_version(null);
 };
 
+const preinit_thread = function(L, g) {
+    L.l_G = g;
+    L.stack = [];
+    L.ci = null;
+    L.nci = 0;
+    L.twups = [L];  /* thread has no upvalues */
+    L.errorJmp = null;
+    L.nCcalls = 0;
+    L.hook = null;
+    L.hookmask = 0;
+    L.basehookcount = 0;
+    L.allowhook = 1;
+    L.hookcount = L.basehookcount;
+    L.openupval = [];
+    L.nny = 1;
+    L.status = TS.LUA_OK;
+    L.errfunc = 0;
+};
+
+const lua_newthread = function(L) {
+    let g = L.l_G;
+    let L1 = new lua_State();
+    L.stack[L.top++] = L1;
+    assert(L.top <= L.ci.top, "stack overflow");
+    preinit_thread(L1, g);
+    L1.hookmask = L.hookmask;
+    L1.basehookcount = L.basehookcount;
+    L1.hook = L.hook;
+    L1.hookcount = L1.basehookcount;
+    stack_init(L1, L);
+    return L1;
+};
+
 const lua_newstate = function() {
     let L = new lua_State();
     let g = new global_State(L);
 
-    L.l_G = g;
+    preinit_thread(L, g);
 
     if (luaD_rawrunprotected(L, f_luaopen, null) !== TS.LUA_OK) {
         L = null;
@@ -138,3 +174,4 @@ module.exports.CIST_HOOKYIELD = (1<<6);  /* last hook called yielded */
 module.exports.CIST_LEQ       = (1<<7);  /* using __lt for __le */
 module.exports.CIST_FIN       = (1<<8);   /* call is running a finalizer */
 module.exports.lua_newstate   = lua_newstate;
+module.exports.lua_newthread  = lua_newthread;

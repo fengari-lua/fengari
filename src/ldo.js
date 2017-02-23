@@ -27,6 +27,7 @@ const seterrorobj = function(L, errcode, oldtop) {
         }
         case TS.LUA_ERRERR: {
             L.stack[oldtop] = new TValue(CT.LUA_TLNGSTR, "error in error handling");
+            break;
         }
         default: {
             L.stack[oldtop] = L.stack[L.top - 1];
@@ -79,7 +80,6 @@ const luaD_precall = function(L, off, nresults) {
             luaD_poscall(L, ci, L.top - n, n);
 
             return true;
-            break;
         }
         case CT.LUA_TLCL: {
             let p = func.p;
@@ -260,7 +260,7 @@ const luaD_rawrunprotected = function(L, f, ud) {
     try {
         f(L, ud);
     } catch (e) {
-        if (lj.status == 0) lj.status = -1;
+        if (lj.status === 0) lj.status = -1;
     }
 
     L.errorJmp = lj.previous;
@@ -268,6 +268,209 @@ const luaD_rawrunprotected = function(L, f, ud) {
 
     return lj.status;
 
+};
+
+/*
+** Completes the execution of an interrupted C function, calling its
+** continuation function.
+*/
+const finishCcall = function(L, status) {
+    let ci = L.ci;
+
+    /* must have a continuation and must be able to call it */
+    assert(ci.u.c.k !== null && L.nny === 0);
+    /* error status can only happen in a protected call */
+    assert(ci.callstatus & lstate.CIST_YPCALL || status === TS.LUA_YIELD);
+
+    if (ci.callstatus & TS.CIST_YPCALL) {  /* was inside a pcall? */
+        ci.callstatus &= ~TS.CIST_YPCALL;  /* continuation is also inside it */
+        L.errfunc = ci.u.c.old_errfunc;  /* with the same error function */
+    }
+
+    /* finish 'lua_callk'/'lua_pcall'; CIST_YPCALL and 'errfunc' already
+       handled */
+    if (ci.nresults === LUA_MULTRET && L.ci.top < L.top) L.ci.top = L.top;
+    let n = ci.u.c.k(L, status, ci.u.c.ctx);  /* call continuation function */
+    assert(n < (L.top - L.ci.funcOff), "not enough elements in the stack");
+    luaD_poscall(L, ci, L.top - n, n);  /* finish 'luaD_precall' */
+};
+
+/*
+** Executes "full continuation" (everything in the stack) of a
+** previously interrupted coroutine until the stack is empty (or another
+** interruption long-jumps out of the loop). If the coroutine is
+** recovering from an error, 'ud' points to the error status, which must
+** be passed to the first continuation function (otherwise the default
+** status is LUA_YIELD).
+*/
+const unroll = function(L, ud) {
+    if (ud !== null)  /* error status? */
+        finishCcall(L, ud);  /* finish 'lua_pcallk' callee */
+
+    while (L.ci !== L.base_ci) {  /* something in the stack */
+        if (!(L.ci.callstatus & lstate.CIST_LUA))  /* C function? */
+            finishCcall(L, lstate.LUA_YIELD);  /* complete its execution */
+        else {  /* Lua function */
+            lvm.luaV_finishOp(L);  /* finish interrupted instruction */
+            lvm.luaV_execute(L);  /* execute down to higher C 'boundary' */
+        }
+    }
+};
+
+/*
+** Try to find a suspended protected call (a "recover point") for the
+** given thread.
+*/
+const findpcall = function(L) {
+    for (let ci = L.ci; ci !== null; ci = ci.previous) {  /* search for a pcall */
+        if (ci.callstatus & lstate.CIST_YPCALL)
+            return ci;
+    }
+
+    return null;  /* no pending pcall */
+};
+
+/*
+** Recovers from an error in a coroutine. Finds a recover point (if
+** there is one) and completes the execution of the interrupted
+** 'luaD_pcall'. If there is no recover point, returns zero.
+*/
+const recover = function(L, status) {
+    let ci = findpcall(L);
+    if (ci === null) return 0;  /* no recovery point */
+    /* "finish" luaD_pcall */
+    let oldtop = L.stack[ci.extra];
+    lfunc.luaF_close(L, oldtop);
+    seterrorobj(L, status, oldtop);
+    L.ci = ci;
+    L.allowhook = ci.callstatus & lstate.CIST_OAH;  /* restore original 'allowhook' */
+    L.nny = 0;  /* should be zero to be yieldable */
+    L.errfunc = ci.u.c.old_errfunc;
+    return 1;  /* continue running the coroutine */
+};
+
+/*
+** Signal an error in the call to 'lua_resume', not in the execution
+** of the coroutine itself. (Such errors should not be handled by any
+** coroutine error handler and should not kill the coroutine.)
+*/
+const resume_error = function(L, msg, narg) {
+    L.top -= narg;  /* remove args from the stack */
+    L.stack[L.top++] = new TValue(CT.LUA_TLNGSTR, msg);  /* push error message */
+    assert(L.top <= L.ci.top, "stack overflow");
+    return TS.LUA_ERRRUN;
+};
+
+/*
+** Do the work for 'lua_resume' in protected mode. Most of the work
+** depends on the status of the coroutine: initial state, suspended
+** inside a hook, or regularly suspended (optionally with a continuation
+** function), plus erroneous cases: non-suspended coroutine or dead
+** coroutine.
+*/
+const resume = function(L, n) {
+    let firstArg = L.top - n;  /* first argument */
+    let ci = L.ci;
+    if (L.status === TS.LUA_OK) {  /* starting a coroutine? */
+        if (!luaD_precall(L, firstArg - 1, lua.LUA_MULTRET))  /* Lua function? */
+            lvm.luaV_execute(L);  /* call it */
+    } else {  /* resuming from previous yield */
+        assert(L.status === TS.LUA_YIELD);
+        L.status = TS.LUA_OK;  /* mark that it is running (again) */
+        ci.funcOff = ci.extra;
+        ci.func = L.stack[ci.funcOff];
+
+        if (ci.callstatus & lstate.CIST_LUA)  /* yielded inside a hook? */
+            lvm.luaV_execute(L);  /* just continue running Lua code */
+        else {  /* 'common' yield */
+            if (ci.u.c.k !== null) {  /* does it have a continuation function? */
+                n = ci.u.c.k(L, TS.LUA_YIELD, ci.u.c.ctx); /* call continuation */
+                assert(n < (L.top - L.ci.funcOff), "not enough elements in the stack");
+                firstArg = L.top - n;  /* yield results come from continuation */
+            }
+
+            luaD_poscall(L, ci, firstArg, n);  /* finish 'luaD_precall' */
+        }
+
+        unroll(L, null);  /* run continuation */
+    }
+};
+
+const lua_resume = function(L, from, nargs) {
+    let oldnny = L.nny;  /* save "number of non-yieldable" calls */
+
+    if (L.status === TS.LUA_OK) {  /* may be starting a coroutine */
+        if (L.ci !== L.base_ci)  /* not in base level? */
+            return resume_error(L, "cannot resume non-suspended coroutine", nargs);
+    } else if (L.status !== TS.LUA_YIELD)
+        return resume_error(L, "cannot resume dead coroutine", nargs);
+
+    L.nCcalls = from ? from.nCcalls + 1 : 1;
+    if (L.nCcalls >= llimit.LUAI_MAXCCALLS)
+        return resume_error(L, "JS stack overflow", nargs);
+
+    L.nny = 0;  /* allow yields */
+
+    assert((L.status === TS.LUA_OK ? nargs + 1: nargs) < (L.top - L.ci.funcOff),
+        "not enough elements in the stack");
+
+    let status = luaD_rawrunprotected(L, resume, nargs);
+    if (status === -1)  /* error calling 'lua_resume'? */
+        status = TS.LUA_ERRRUN;
+    else {  /* continue running after recoverable errors */
+        while (status > TS.LUA_YIELD && recover(L, status)) {
+            /* unroll continuation */
+            status = luaD_rawrunprotected(L, unroll, status);
+        }
+
+        if (status > TS.LUA_YIELD) {  /* unrecoverable error? */
+            L.status = status;  /* mark thread as 'dead' */
+            seterrorobj(L, status, L.top);  /* push error message */
+            L.ci.top = L.top;
+        } else
+            assert(status === L.status);  /* normal end or yield */
+    }
+
+    L.nny = oldnny;  /* restore 'nny' */
+    L.nCcalls--;
+    assert(L.nCcalls === (from ? from.nCcalls : 0));
+    return status;
+};
+
+const lua_isyieldable = function(L) {
+    return L.nny === 0;
+};
+
+const lua_yieldk = function(L, nresults, ctx, k) {
+    let ci = L.ci;
+    assert(nresults < (L.top - L.ci.funcOff), "not enough elements in the stack");
+
+    if (L.nny > 0) {
+        if (L !== L.l_G.mainthread)
+            ldebug.luaG_runerror(L, "attempt to yield across a JS-call boundary");
+        else
+            ldebug.luaG_runerror(L, "attempt to yield from outside a coroutine");
+    }
+
+    L.status = TS.LUA_YIELD;
+    ci.extra = ci.funcOff;  /* save current 'func' */
+    if (ci.callstatus & lstate.CIST_LUA)  /* inside a hook? */
+        assert(k === null, "hooks cannot continue after yielding");
+    else {
+        ci.u.c.k = k;
+        if (k !== null)  /* is there a continuation? */
+            ci.u.c.ctx = ctx;  /* save context */
+        ci.funcOff = L.top - nresults - 1;  /* protect stack below results */
+        ci.func = L.stack[ci.funcOff];
+        luaD_throw(L, TS.LUA_YIELD);
+    }
+
+    assert(ci.callstatus & lstate.CIST_HOOKED);  /* must be inside a hook */
+    return 0;  /* return to 'luaD_hook' */
+};
+
+const lua_yield = function(L, n) {
+    lua_yieldk(L, n, 0, null);
 };
 
 const luaD_pcall = function(L, func, u, old_top, ef) {
@@ -321,16 +524,20 @@ const luaD_protectedparser = function(L, data, name) {
     return status;
 };
 
-module.exports.nil                  = nil;
-module.exports.luaD_precall         = luaD_precall;
-module.exports.luaD_poscall         = luaD_poscall;
-module.exports.moveresults          = moveresults;
 module.exports.adjust_varargs       = adjust_varargs;
-module.exports.tryfuncTM            = tryfuncTM;
-module.exports.stackerror           = stackerror;
+module.exports.lua_isyieldable      = lua_isyieldable;
+module.exports.lua_resume           = lua_resume;
+module.exports.lua_yield            = lua_yield;
+module.exports.lua_yieldk           = lua_yieldk;
 module.exports.luaD_call            = luaD_call;
 module.exports.luaD_callnoyield     = luaD_callnoyield;
 module.exports.luaD_pcall           = luaD_pcall;
-module.exports.luaD_throw           = luaD_throw;
-module.exports.luaD_rawrunprotected = luaD_rawrunprotected;
+module.exports.luaD_poscall         = luaD_poscall;
+module.exports.luaD_precall         = luaD_precall;
 module.exports.luaD_protectedparser = luaD_protectedparser;
+module.exports.luaD_rawrunprotected = luaD_rawrunprotected;
+module.exports.luaD_throw           = luaD_throw;
+module.exports.moveresults          = moveresults;
+module.exports.nil                  = nil;
+module.exports.stackerror           = stackerror;
+module.exports.tryfuncTM            = tryfuncTM;

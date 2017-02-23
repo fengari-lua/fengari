@@ -5,10 +5,13 @@ const assert = require('assert');
 
 const lapi     = require('./lapi.js');
 const lauxlib  = require('./lauxlib.js');
+const lualib   = require('./lualib.js');
 const lbaselib = require('./lbaselib.js');
+const lcorolib = require('./lcorolib.js');
 
 const loadedlibs = {
-    "_G": lbaselib.luaopen_base
+    [lualib.LUA_COLIBNAME]: lcorolib.luaopen_coroutine,
+    "_G":                  lbaselib.luaopen_base
 };
 
 const luaL_openlibs = function(L) {

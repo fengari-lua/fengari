@@ -82,6 +82,19 @@ const lua_checkstack = function(L, n) {
     return L.stack.length < luaconf.LUAI_MAXSTACK;
 };
 
+const lua_xmove = function(from, to, n) {
+    if (from === to) return;
+    assert(n < (from.top - from.ci.funcOff), "not enough elements in the stack");
+    assert(from.l_G === to.l_G, "moving among independent states");
+    assert(to.ci.top - to.top >= n, "stack overflow");
+
+    from.top -= n;
+    for (let i = 0; i < n; i++) {
+        to.stack[to.top] = from.stack[from.top + i];
+        to.top++;
+    }
+};
+
 /*
 ** basic stack manipulation
 */
@@ -490,6 +503,11 @@ const lua_tonumber = function(L, idx) {
     return lvm.tonumber(index2addr(L, idx))
 };
 
+const lua_tothread = function(L, idx) {
+    let o = index2addr(L, idx);
+    return o.ttisthread() ? o.value : null;
+};
+
 const lua_topointer = function(L, idx) {
     let o = index2addr(L, idx);
     switch (o.ttype()) {
@@ -564,8 +582,12 @@ const lua_load = function(L, data, chunckname) {
     return status;
 };
 
+const lua_status = function(L) {
+    return L.status;
+};
+
 const lua_callk = function(L, nargs, nresults, ctx, k) {
-    assert(k === null || !(L.ci.callstatus & CIST_LUA), "cannot use continuations inside hooks");
+    assert(k === null || !(L.ci.callstatus & lstate.CIST_LUA), "cannot use continuations inside hooks");
     assert(nargs + 1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     assert(L.status === TS.LUA_OK, "cannot do calls on non-normal thread");
     assert(nargs === lua.LUA_MULTRET || (L.ci.top - L.top >= nargs - nresults, "results from function overflow current stack size"));
@@ -640,7 +662,6 @@ const lua_pcall = function(L, n, r, f) {
     return lua_pcallk(L, n, r, f, 0, null);
 };
 
-
 /*
 ** miscellaneous functions
 */
@@ -685,66 +706,69 @@ const lua_getextraspace = function () {
     return null;
 };
 
-module.exports.lua_pushvalue       = lua_pushvalue;
-module.exports.lua_pushnil         = lua_pushnil;
-module.exports.lua_pushnumber      = lua_pushnumber;
-module.exports.lua_pushinteger     = lua_pushinteger;
-module.exports.lua_pushlstring     = lua_pushlstring;
-module.exports.lua_pushstring      = lua_pushstring;
-module.exports.lua_pushliteral     = lua_pushliteral;
-module.exports.lua_pushboolean     = lua_pushboolean;
-module.exports.lua_pushcclosure    = lua_pushcclosure;
-module.exports.lua_pushcfunction   = lua_pushcfunction;
-module.exports.lua_pushjsclosure   = lua_pushjsclosure;
-module.exports.lua_pushjsfunction  = lua_pushjsfunction;
-module.exports.lua_version         = lua_version;
-module.exports.lua_atpanic         = lua_atpanic;
-module.exports.lua_gettop          = lua_gettop;
-module.exports.lua_typename        = lua_typename;
-module.exports.lua_type            = lua_type;
-module.exports.lua_tonumber        = lua_tonumber;
-module.exports.lua_tointeger       = lua_tointeger;
-module.exports.lua_toboolean       = lua_toboolean;
-module.exports.lua_tolstring       = lua_tolstring;
-module.exports.lua_tostring        = lua_tostring;
-module.exports.lua_topointer       = lua_topointer;
-module.exports.lua_load            = lua_load;
-module.exports.lua_callk           = lua_callk;
-module.exports.lua_call            = lua_call;
-module.exports.lua_pcallk          = lua_pcallk;
-module.exports.lua_pcall           = lua_pcall;
-module.exports.lua_pop             = lua_pop;
-module.exports.lua_setglobal       = lua_setglobal;
-module.exports.lua_istable         = lua_istable;
-module.exports.lua_createtable     = lua_createtable;
-module.exports.lua_newtable        = lua_newtable;
-module.exports.lua_settable        = lua_settable;
-module.exports.lua_gettable        = lua_gettable;
-module.exports.lua_geti            = lua_geti;
-module.exports.lua_absindex        = lua_absindex;
 module.exports.index2addr          = index2addr;
-module.exports.lua_rawget          = lua_rawget;
-module.exports.lua_rawset          = lua_rawset;
-module.exports.lua_rawlen          = lua_rawlen;
-module.exports.lua_isstring        = lua_isstring;
-module.exports.lua_rotate          = lua_rotate;
-module.exports.lua_remove          = lua_remove;
+module.exports.lua_absindex        = lua_absindex;
+module.exports.lua_atpanic         = lua_atpanic;
+module.exports.lua_call            = lua_call;
+module.exports.lua_callk           = lua_callk;
 module.exports.lua_checkstack      = lua_checkstack;
-module.exports.lua_rawgeti         = lua_rawgeti;
-module.exports.lua_pushglobaltable = lua_pushglobaltable;
-module.exports.lua_setfield        = lua_setfield;
-module.exports.lua_getfield        = lua_getfield;
-module.exports.lua_getglobal       = lua_getglobal;
-module.exports.lua_getmetatable    = lua_getmetatable;
-module.exports.lua_setmetatable    = lua_setmetatable;
-module.exports.lua_settop          = lua_settop;
-module.exports.lua_rawequal        = lua_rawequal;
 module.exports.lua_concat          = lua_concat;
+module.exports.lua_copy            = lua_copy;
+module.exports.lua_createtable     = lua_createtable;
 module.exports.lua_error           = lua_error;
-module.exports.lua_insert          = lua_insert;
 module.exports.lua_gc              = lua_gc;
 module.exports.lua_getallocf       = lua_getallocf;
 module.exports.lua_getextraspace   = lua_getextraspace;
-module.exports.lua_stringtonumber  = lua_stringtonumber;
-module.exports.lua_copy            = lua_copy;
+module.exports.lua_getfield        = lua_getfield;
+module.exports.lua_getglobal       = lua_getglobal;
+module.exports.lua_geti            = lua_geti;
+module.exports.lua_getmetatable    = lua_getmetatable;
+module.exports.lua_gettable        = lua_gettable;
+module.exports.lua_gettop          = lua_gettop;
+module.exports.lua_insert          = lua_insert;
+module.exports.lua_isstring        = lua_isstring;
+module.exports.lua_istable         = lua_istable;
+module.exports.lua_load            = lua_load;
+module.exports.lua_newtable        = lua_newtable;
 module.exports.lua_next            = lua_next;
+module.exports.lua_pcall           = lua_pcall;
+module.exports.lua_pcallk          = lua_pcallk;
+module.exports.lua_pop             = lua_pop;
+module.exports.lua_pushboolean     = lua_pushboolean;
+module.exports.lua_pushcclosure    = lua_pushcclosure;
+module.exports.lua_pushcfunction   = lua_pushcfunction;
+module.exports.lua_pushglobaltable = lua_pushglobaltable;
+module.exports.lua_pushinteger     = lua_pushinteger;
+module.exports.lua_pushjsclosure   = lua_pushjsclosure;
+module.exports.lua_pushjsfunction  = lua_pushjsfunction;
+module.exports.lua_pushliteral     = lua_pushliteral;
+module.exports.lua_pushlstring     = lua_pushlstring;
+module.exports.lua_pushnil         = lua_pushnil;
+module.exports.lua_pushnumber      = lua_pushnumber;
+module.exports.lua_pushstring      = lua_pushstring;
+module.exports.lua_pushvalue       = lua_pushvalue;
+module.exports.lua_rawequal        = lua_rawequal;
+module.exports.lua_rawget          = lua_rawget;
+module.exports.lua_rawgeti         = lua_rawgeti;
+module.exports.lua_rawlen          = lua_rawlen;
+module.exports.lua_rawset          = lua_rawset;
+module.exports.lua_remove          = lua_remove;
+module.exports.lua_rotate          = lua_rotate;
+module.exports.lua_setfield        = lua_setfield;
+module.exports.lua_setglobal       = lua_setglobal;
+module.exports.lua_setmetatable    = lua_setmetatable;
+module.exports.lua_settable        = lua_settable;
+module.exports.lua_settop          = lua_settop;
+module.exports.lua_status          = lua_status;
+module.exports.lua_stringtonumber  = lua_stringtonumber;
+module.exports.lua_toboolean       = lua_toboolean;
+module.exports.lua_tointeger       = lua_tointeger;
+module.exports.lua_tolstring       = lua_tolstring;
+module.exports.lua_tonumber        = lua_tonumber;
+module.exports.lua_topointer       = lua_topointer;
+module.exports.lua_tostring        = lua_tostring;
+module.exports.lua_tothread        = lua_tothread;
+module.exports.lua_type            = lua_type;
+module.exports.lua_typename        = lua_typename;
+module.exports.lua_version         = lua_version;
+module.exports.lua_xmove           = lua_xmove;
