@@ -17,7 +17,7 @@ const linit      = require('../src/linit.js');
 const CT         = lua.constant_types;
 
 
-test('simple coroutine', function (t) {
+test('coroutine.create, coroutine.yield, coroutine.resume', function (t) {
     let luaCode = `
         local co = coroutine.create(function (start)
             local b = coroutine.yield(start * start);
@@ -54,7 +54,7 @@ test('simple coroutine', function (t) {
 });
 
 
-test('simple coroutine', function (t) {
+test('coroutine.status', function (t) {
     let luaCode = `
         local co = coroutine.create(function (start)
             local b = coroutine.yield(start * start);
@@ -75,7 +75,7 @@ test('simple coroutine', function (t) {
     
     t.plan(3);
 
-    // t.doesNotThrow(function () {
+    t.doesNotThrow(function () {
 
         let bc = toByteCode(luaCode).dataView;
 
@@ -83,11 +83,11 @@ test('simple coroutine', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-coroutine");
+        lapi.lua_load(L, bc, "test-coroutine.status");
 
         lapi.lua_call(L, 0, -1);
 
-    // }, "JS Lua program ran without error");
+    }, "JS Lua program ran without error");
 
     t.strictEqual(
         lapi.lua_tostring(L, -2),
@@ -98,6 +98,47 @@ test('simple coroutine', function (t) {
     t.strictEqual(
         lapi.lua_tostring(L, -1),
         "dead",
+        "Correct element(s) on the stack"
+    );
+});
+
+
+test('coroutine.isyieldable', function (t) {
+    let luaCode = `
+        local co = coroutine.create(function ()
+            coroutine.yield(coroutine.isyieldable());
+        end)
+
+        local succes, yieldable = coroutine.resume(co)
+
+        return yieldable, coroutine.isyieldable()
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-coroutine.isyieldable");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_toboolean(L, -2),
+        true,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_toboolean(L, -1),
+        false,
         "Correct element(s) on the stack"
     );
 });

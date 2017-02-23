@@ -521,6 +521,7 @@ const luaV_execute = function(L) {
                     for (let aux = 0; nfuncOff + aux < lim; aux++)
                         L.stack[ofuncOff + aux] = L.stack[nfuncOff + aux];
                     oci.func = nci.func;
+                    oci.funcOff = nci.funcOff;
                     oci.u.l.base = ofuncOff + (nci.u.l.base - nfuncOff);
                     L.top = ofuncOff + (L.top - nfuncOff);
                     oci.top = L.top;

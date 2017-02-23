@@ -56,6 +56,7 @@
     - [x] lua_pushnil
     - [x] lua_pushnumber
     - [x] lua_pushstring
+    - [x] lua_pushthread
     - [x] lua_pushvalue
     - [x] lua_rawequal
     - [x] lua_rawget
@@ -121,7 +122,6 @@
     - [ ] lua_pcallk
     - [ ] lua_pushfstring
     - [ ] lua_pushlightuserdata
-    - [ ] lua_pushthread
     - [ ] lua_pushvfstring
     - [ ] lua_rawgetp
     - [ ] lua_rawseti
@@ -224,11 +224,11 @@
         - [ ] load
     - [ ] Coroutine
         - [x] coroutine.create
+        - [x] coroutine.isyieldable
         - [x] coroutine.resume
+        - [x] coroutine.status
         - [x] coroutine.yield
-        - [ ] coroutine.isyieldable
         - [ ] coroutine.running
-        - [ ] coroutine.status
         - [ ] coroutine.wrap
 - [ ] Debug (errors)
 - [ ] DOM API binding

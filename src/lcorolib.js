@@ -32,7 +32,7 @@ const auxresume = function(L, co, narg) {
     lapi.lua_xmove(L, co, narg);
     let status = ldo.lua_resume(co, L, narg);
     if (status === TS.LUA_OK || status === TS.LUA_YIELD) {
-        let nres = lapi.lua_gettop(L);
+        let nres = lapi.lua_gettop(co);
         if (!lapi.lua_checkstack(L, nres + 1)) {
             lapi.lua_pop(co, nres);  /* remove results anyway */
             lapi.lua_pushliteral(L, "too many results to resume");
@@ -123,7 +123,7 @@ const luaB_costatus = function(L) {
 };
 
 const luaB_yieldable = function(L) {
-    lapi.lua_pushboolean(L, lapi.lua_isyieldable(L));
+    lapi.lua_pushboolean(L, ldo.lua_isyieldable(L));
     return 1;
 };
 
