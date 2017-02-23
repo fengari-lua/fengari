@@ -8,6 +8,7 @@ const lapi    = require('./lapi.js');
 const lauxlib = require('./lauxlib.js');
 const lstate  = require('./lstate.js');
 const ldo     = require('./ldo.js');
+const ldebug  = require('./ldebug.js');
 const CT      = lua.constant_types;
 const TS      = lua.thread_status;
 
@@ -46,7 +47,7 @@ const auxresume = function(L, co, narg) {
     }
 };
 
-const luaB_resume = function(L) {
+const luaB_coresume = function(L) {
     let co = getco(L);
     let r = auxresume(L, co, lapi.lua_gettop(L) - 1);
     if (r < 0) {
@@ -60,6 +61,22 @@ const luaB_resume = function(L) {
     }
 };
 
+const luaB_auxwrap = function(L) {
+    let co = lapi.lua_tothread(L, lapi.lua_upvalueindex(1));
+    let r = auxresume(L, co, lapi.lua_gettop(L));
+    if (r < 0) {
+        if (lapi.lua_type(L, -1) === CT.LUA_TSTRING) {  /* error object is a string? */
+            lauxlib.luaL_where(L, 1);  /* add extra info */
+            lapi.lua_insert(L, -2);
+            lapi.lua_concat(L, 2);
+        }
+
+        return lapi.lua_error(L);  /* propagate error */
+    }
+
+    return r;
+};
+
 const luaB_cocreate = function(L) {
     lauxlib.luaL_checktype(L, 1, CT.LUA_TFUNCTION);
     let NL = lstate.lua_newthread(L);
@@ -68,14 +85,61 @@ const luaB_cocreate = function(L) {
     return 1;
 };
 
+const luaB_cowrap = function(L) {
+    luaB_cocreate(L);
+    lapi.lua_pushcclosure(L, luaB_auxwrap, 1);
+    return 1;
+};
+
 const luaB_yield = function(L) {
     return ldo.lua_yield(L, lapi.lua_gettop(L));
 };
 
+const luaB_costatus = function(L) {
+    let co = getco(L);
+    if (L === co) lapi.lua_pushliteral(L, "running");
+    else {
+        switch (lapi.lua_status(co)) {
+            case TS.LUA_YIELD:
+                lapi.lua_pushliteral(L, "suspended");
+                break;
+            case TS.LUA_OK: {
+                let ar = new lua.lua_Debug();
+                if (ldebug.lua_getstack(co, 0, ar) > 0)  /* does it have frames? */
+                    lapi.lua_pushliteral(L, "normal");  /* it is running */
+                else if (lapi.lua_gettop(co) === 0)
+                    lapi.lua_pushliteral(L, "dead");
+                else
+                    lapi.lua_pushliteral(L, "suspended");  /* initial state */
+                break;
+            }
+            default:  /* some error occurred */
+                lapi.lua_pushliteral(L, "dead");
+                break;
+        }
+    }
+
+    return 1;
+};
+
+const luaB_yieldable = function(L) {
+    lapi.lua_pushboolean(L, lapi.lua_isyieldable(L));
+    return 1;
+};
+
+const luaB_corunning = function(L) {
+    lapi.lua_pushboolean(L, lapi.lua_pushthread(L));
+    return 2;
+};
+
 const co_funcs = {
-    "create":  luaB_cocreate,
-    "yield":   luaB_yield,
-    "resume":  luaB_resume
+    "create":      luaB_cocreate,
+    "isyieldable": luaB_yieldable,
+    "resume":      luaB_coresume,
+    "running":     luaB_corunning,
+    "status":      luaB_costatus,
+    "wrap":        luaB_cowrap,
+    "yield":       luaB_yield
 };
 
 const luaopen_coroutine = function(L) {

@@ -16,6 +16,7 @@ const lua        = require('../src/lua.js');
 const linit      = require('../src/linit.js');
 const CT         = lua.constant_types;
 
+
 test('simple coroutine', function (t) {
     let luaCode = `
         local co = coroutine.create(function (start)
@@ -48,6 +49,55 @@ test('simple coroutine', function (t) {
     t.strictEqual(
         lapi.lua_tonumber(L, -1),
         625,
+        "Correct element(s) on the stack"
+    );
+});
+
+
+test('simple coroutine', function (t) {
+    let luaCode = `
+        local co = coroutine.create(function (start)
+            local b = coroutine.yield(start * start);
+            coroutine.yield(b * b)
+        end)
+
+        local s1 = coroutine.status(co)
+
+        local success, pow = coroutine.resume(co, 5)
+        success, pow = coroutine.resume(co, pow)
+
+        coroutine.resume(co, pow)
+
+        local s2 = coroutine.status(co)
+
+        return s1, s2
+    `, L;
+    
+    t.plan(3);
+
+    // t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-coroutine");
+
+        lapi.lua_call(L, 0, -1);
+
+    // }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -2),
+        "suspended",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "dead",
         "Correct element(s) on the stack"
     );
 });

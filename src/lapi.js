@@ -279,6 +279,13 @@ const lua_pushlightuserdata = function(L, p) {
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
+const lua_pushthread = function(L) {
+    L.stack[L.top++] = L;
+    assert(L.top <= L.ci.top, "stack overflow");
+
+    return L.l_G.mainthread === L;
+};
+
 const lua_pushglobaltable = function(L) {
     lua_rawgeti(L, lua.LUA_REGISTRYINDEX, lua.LUA_RIDX_GLOBALS);
 };
@@ -746,6 +753,7 @@ module.exports.lua_pushlstring     = lua_pushlstring;
 module.exports.lua_pushnil         = lua_pushnil;
 module.exports.lua_pushnumber      = lua_pushnumber;
 module.exports.lua_pushstring      = lua_pushstring;
+module.exports.lua_pushthread      = lua_pushthread;
 module.exports.lua_pushvalue       = lua_pushvalue;
 module.exports.lua_rawequal        = lua_rawequal;
 module.exports.lua_rawget          = lua_rawget;
