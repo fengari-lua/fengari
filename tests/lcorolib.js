@@ -182,3 +182,40 @@ test('coroutine.running', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('coroutine.wrap', function (t) {
+    let luaCode = `
+        local co = coroutine.wrap(function (start)
+            local b = coroutine.yield(start * start);
+            coroutine.yield(b * b)
+        end)
+
+        pow = co(5)
+        pow = co(pow)
+
+        return pow
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-coroutine.wrap");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tonumber(L, -1),
+        625,
+        "Correct element(s) on the stack"
+    );
+});

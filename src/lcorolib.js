@@ -62,7 +62,7 @@ const luaB_coresume = function(L) {
 };
 
 const luaB_auxwrap = function(L) {
-    let co = lapi.lua_tothread(L, lapi.lua_upvalueindex(1));
+    let co = lapi.lua_tothread(L, lua.lua_upvalueindex(1));
     let r = auxresume(L, co, lapi.lua_gettop(L));
     if (r < 0) {
         if (lapi.lua_type(L, -1) === CT.LUA_TSTRING) {  /* error object is a string? */
