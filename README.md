@@ -213,7 +213,7 @@
         - [ ] table.move
         - [ ] table.remove
         - [ ] table.sort
-- [ ] Debug (errors)
+- [ ] Run [Lua test suite](https://github.com/lua/tests)
 - [ ] DOM API binding
 - [ ] Parse Lua
 - [ ] Generate bytecode
