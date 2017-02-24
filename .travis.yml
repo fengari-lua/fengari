@@ -13,3 +13,6 @@ install:
 
 script:
     - $NPM t
+
+notifications:
+    email: false

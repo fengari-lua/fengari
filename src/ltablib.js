@@ -9,6 +9,7 @@ const lauxlib = require('./lauxlib.js');
 const lstate  = require('./lstate.js');
 const ldo     = require('./ldo.js');
 const ldebug  = require('./ldebug.js');
+const llimit  = require('./llimit.js');
 const CT      = lua.constant_types;
 const TS      = lua.thread_status;
 
@@ -98,6 +99,41 @@ const tremove = function(L) {
     return 1;
 };
 
+/*
+** Copy elements (1[f], ..., 1[e]) into (tt[t], tt[t+1], ...). Whenever
+** possible, copy in increasing order, which is better for rehashing.
+** "possible" means destination after original range, or smaller
+** than origin, or copying to another table.
+*/
+const tmove = function(L) {
+    let f = lauxlib.luaL_checkinteger(L, 2);
+    let e = lauxlib.luaL_checkinteger(L, 3);
+    let t = lauxlib.luaL_checkinteger(L, 4);
+    let tt = !lapi.lua_isnoneornil(L, 5) ? 5 : 1;  /* destination table */
+    checktab(L, 1, TAB_R);
+    checktab(L, tt, TAB_W);
+    if (e >= f) {  /* otherwise, nothing to move */
+        lauxlib.luaL_argcheck(L, f > 0 || e < llimit.LUA_MAXINTEGER + f, 3, "too many elements to move");
+        let n = e - f + 1;  /* number of elements to move */
+        lauxlib.luaL_argcheck(L, t <= llimit.LUA_MAXINTEGER - n + 1, 4, "destination wrap around");
+
+        if (t > e || t <= f || (tt !== 1 && lapi.lua_compare(L, 1, tt, lua.LUA_OPEQ) !== 1)) {
+            for (let i = 0; i < n; i++) {
+                lapi.lua_geti(L, 1, f + i);
+                lapi.lua_seti(L, tt, t + i);
+            }
+        } else {
+            for (let i = n - 1; i >= 0; i--) {
+                lapi.lua_geti(L, 1, f + i);
+                lapi.lua_seti(L, tt, t + i);
+            }
+        }
+    }
+
+    lapi.lua_pushvalue(L, tt);  /* return destination table */
+    return 1;
+};
+
 const tconcat = function(L) {
     let last = aux_getn(L, 1, TAB_R);
     let sep = lauxlib.luaL_optlstring(L, 2, "");
@@ -147,6 +183,7 @@ const unpack = function(L) {
 const tab_funcs = {
     "concat": tconcat,
     "insert": tinsert,
+    "move":   tmove,
     "pack":   pack,
     "remove": tremove,
     "unpack": unpack

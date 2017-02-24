@@ -26,6 +26,7 @@
     - [x] lua_call
     - [x] lua_callk
     - [x] lua_checkstack
+    - [x] lua_compare
     - [x] lua_concat
     - [x] lua_copy
     - [x] lua_createtable
@@ -36,6 +37,7 @@
     - [x] lua_gettable
     - [x] lua_gettop
     - [x] lua_insert
+    - [x] lua_isnoneornil
     - [x] lua_isstring
     - [x] lua_istable
     - [x] lua_isyieldable
@@ -93,7 +95,6 @@
     - [x] lua_yieldk
     - [ ] lua_arith
     - [ ] lua_close
-    - [ ] lua_compare
     - [ ] lua_dump
     - [x] lua_gc (unavailable)
     - [x] lua_getallocf (unavailable)
@@ -114,7 +115,6 @@
     - [ ] lua_islightuserdata
     - [ ] lua_isnil
     - [ ] lua_isnone
-    - [ ] lua_isnoneornil
     - [ ] lua_isnumber
     - [ ] lua_isthread
     - [ ] lua_isuserdata
@@ -208,10 +208,10 @@
     - [ ] Table
         - [x] table.concat
         - [x] table.insert
+        - [x] table.move
         - [x] table.pack
         - [x] table.remove
         - [x] table.unpack
-        - [ ] table.move
         - [ ] table.sort
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
 - [ ] DOM API binding

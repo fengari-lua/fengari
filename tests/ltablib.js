@@ -185,3 +185,36 @@ test('table.remove', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('table.move', function (t) {
+    let luaCode = `
+        local t1 = {3, 4, 5}
+        local t2 = {1, 2, nil, nil, nil, 6}
+        return table.move(t1, 1, #t1, 3, t2)
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-table.insert");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.deepEqual(
+        [...lapi.lua_topointer(L, -1).entries()]
+            .filter(e => typeof e[0] === 'number')
+            .map(e => e[1].value).sort(),
+        [1, 2, 3, 4, 5, 6],
+        "Correct element(s) on the stack"
+    );
+});

@@ -538,6 +538,23 @@ const lua_topointer = function(L, idx) {
     }
 };
 
+const lua_compare = function(L, index1, index2, op) {
+    let i = 0;
+    let o1 = index2addr(L, index1);
+    let o2 = index2addr(L, index1);
+
+    if (!o1.ttisnil() && !o2.ttisnil()) {
+        switch (op) {
+            case lua.LUA_OPEQ: i = lvm.luaV_equalobj(L, o1, o2); break;
+            case lua.LUA_OPLT: i = lvm.luaV_lessthan(L, o1, o2); break;
+            case lua.LUA_OPLE: i = lvm.luaV_lessequal(L, o1, o2); break;
+            default: assert(false, "invalid option");
+        }
+    }
+
+    return i;
+};
+
 const lua_stringtonumber = function(L, s) {
     let number = parseFloat(s);
     L.stack[L.top++] = new TValue(number % 1 !== 0 ? CT.LUA_TNUMFLT : CT.LUA_TNUMINT, number);
@@ -567,6 +584,10 @@ const lua_typename = function(L, t) {
     assert(CT.LUA_TNONE <= t && t < CT.LUA_NUMTAGS, "invalid tag");
     return ltm.ttypename(t);
 };
+
+const lua_isnoneornil = function(L, n) {
+    return lua_type(L, n) <= 0;
+}
 
 const lua_istable = function(L, idx) {
     return index2addr(L, idx).ttistable();
@@ -741,6 +762,7 @@ module.exports.lua_atpanic         = lua_atpanic;
 module.exports.lua_call            = lua_call;
 module.exports.lua_callk           = lua_callk;
 module.exports.lua_checkstack      = lua_checkstack;
+module.exports.lua_compare         = lua_compare;
 module.exports.lua_concat          = lua_concat;
 module.exports.lua_copy            = lua_copy;
 module.exports.lua_createtable     = lua_createtable;
@@ -755,6 +777,7 @@ module.exports.lua_getmetatable    = lua_getmetatable;
 module.exports.lua_gettable        = lua_gettable;
 module.exports.lua_gettop          = lua_gettop;
 module.exports.lua_insert          = lua_insert;
+module.exports.lua_isnoneornil     = lua_isnoneornil;
 module.exports.lua_isstring        = lua_isstring;
 module.exports.lua_istable         = lua_istable;
 module.exports.lua_len             = lua_len;
