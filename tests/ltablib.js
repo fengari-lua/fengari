@@ -117,3 +117,37 @@ test('table.unpack', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('table.insert', function (t) {
+    let luaCode = `
+        local t = {1, 3, 4}
+        table.insert(t, 5)
+        table.insert(t, 2, 2)
+        return t
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-table.insert");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.deepEqual(
+        [...lapi.lua_topointer(L, -1).entries()]
+            .filter(e => typeof e[0] === 'number') // Filter out the 'n' field
+            .map(e => e[1].value).sort(),
+        [1, 2, 3, 4, 5],
+        "Correct element(s) on the stack"
+    );
+});

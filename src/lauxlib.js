@@ -53,7 +53,7 @@ const findfield = function(L, objidx, level) {
 */
 const pushglobalfuncname = function(L, ar) {
     let top = lapi.lua_gettop(L);
-    lapi.lua_getinfo(L, 'f', ar);  /* push function */
+    ldebug.lua_getinfo(L, 'f', ar);  /* push function */
     lapi.lua_getfield(L, lua.LUA_REGISTRYINDEX, lua.LUA_LOADED_TABLE);
     if (findfield(L, top + 1, 2)) {
         let name = lapi.lua_tostring(L, -1);
@@ -76,7 +76,7 @@ const panic = function(L) {
 const luaL_argerror = function(L, arg, extramsg) {
     let ar = new lua.lua_Debug();
 
-    if (!lapi.lua_getstack(L, 0, ar))  /* no stack frame? */
+    if (!ldebug.lua_getstack(L, 0, ar))  /* no stack frame? */
         return luaL_error(L, 'bad argument #%d (%s)', arg, extramsg);
 
     ldebug.lua_getinfo(L, 'n', ar);

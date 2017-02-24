@@ -47,7 +47,7 @@ const checktab = function(L, arg, what) {
 
 const aux_getn = function(L, n, w) {
     checktab(L, n, w | TAB_L);
-    lauxlib.luaL_len(L, n);
+    return lauxlib.luaL_len(L, n);
 };
 
 const addfield = function(L, b, i) {
@@ -56,6 +56,31 @@ const addfield = function(L, b, i) {
         lauxlib.luaL_error(L, `invalid value (${lauxlib.luaL_typename(L, -1)}) at index ${i} in table for 'concat'`);
 
     lauxlib.luaL_addvalue(b);
+};
+
+const tinsert = function(L) {
+    let e = aux_getn(L, 1, TAB_RW) + 1;  /* first empty element */
+    let pos;
+    switch (lapi.lua_gettop(L)) {
+        case 2:
+            pos = e;
+            break;
+        case 3: {
+            pos = lauxlib.luaL_checkinteger(L, 2);  /* 2nd argument is the position */
+            lauxlib.luaL_argcheck(L, 1 <= pos && pos <= e, 2, "position out of bounds");
+            for (let i = e; i > pos; i--) {  /* move up elements */
+                lapi.lua_geti(L, 1, i - 1);
+                lapi.lua_seti(L, 1, i);  /* t[i] = t[i - 1] */
+            }
+            break;
+        }
+        default: {
+            return lauxlib.luaL_error(L, "wrong number of arguments to 'insert'");
+        }
+    }
+
+    lapi.lua_seti(L, 1, pos);  /* t[pos] = v */
+    return 0;
 };
 
 const tconcat = function(L) {
@@ -106,8 +131,9 @@ const unpack = function(L) {
 
 const tab_funcs = {
     "concat": tconcat,
+    "insert": tinsert,
     "pack":   pack,
-    "unpack": unpack,
+    "unpack": unpack
 };
 
 const luaopen_table = function(L) {

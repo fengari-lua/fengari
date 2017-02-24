@@ -207,7 +207,7 @@
         - [x] table.concat
         - [x] table.pack
         - [x] table.unpack
-        - [ ] table.insert
+        - [x] table.insert
         - [ ] table.move
         - [ ] table.remove
         - [ ] table.sort
