@@ -207,11 +207,11 @@
     - [x] Coroutine
     - [ ] Table
         - [x] table.concat
-        - [x] table.pack
-        - [x] table.unpack
         - [x] table.insert
+        - [x] table.pack
+        - [x] table.remove
+        - [x] table.unpack
         - [ ] table.move
-        - [ ] table.remove
         - [ ] table.sort
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
 - [ ] DOM API binding

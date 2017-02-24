@@ -83,6 +83,21 @@ const tinsert = function(L) {
     return 0;
 };
 
+const tremove = function(L) {
+    let size = aux_getn(L, 1, TAB_RW);
+    let pos = lauxlib.luaL_optinteger(L, 2, size);
+    if (pos !== size)  /* validate 'pos' if given */
+        lauxlib.luaL_argcheck(L, 1 <= pos && pos <= size + 1, 1, "position out of bounds");
+    lapi.lua_geti(L, 1, pos);  /* result = t[pos] */
+    for (; pos < size; pos++) {
+        lapi.lua_geti(L, 1, pos + 1);
+        lapi.lua_seti(L, 1, pos);  /* t[pos] = t[pos + 1] */
+    }
+    lapi.lua_pushnil(L);
+    lapi.lua_seti(L, 1, pos);  /* t[pos] = nil */
+    return 1;
+};
+
 const tconcat = function(L) {
     let last = aux_getn(L, 1, TAB_R);
     let sep = lauxlib.luaL_optlstring(L, 2, "");
@@ -133,6 +148,7 @@ const tab_funcs = {
     "concat": tconcat,
     "insert": tinsert,
     "pack":   pack,
+    "remove": tremove,
     "unpack": unpack
 };
 

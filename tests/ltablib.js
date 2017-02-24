@@ -145,9 +145,43 @@ test('table.insert', function (t) {
 
     t.deepEqual(
         [...lapi.lua_topointer(L, -1).entries()]
-            .filter(e => typeof e[0] === 'number') // Filter out the 'n' field
+            .filter(e => typeof e[0] === 'number')
             .map(e => e[1].value).sort(),
         [1, 2, 3, 4, 5],
+        "Correct element(s) on the stack"
+    );
+});
+
+
+test('table.remove', function (t) {
+    let luaCode = `
+        local t = {1, 2, 3, 3, 4, 4}
+        table.remove(t)
+        table.remove(t, 3)
+        return t
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-table.insert");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.deepEqual(
+        [...lapi.lua_topointer(L, -1).entries()]
+            .filter(e => typeof e[0] === 'number')
+            .map(e => e[1].value).sort(),
+        [1, 2, 3, 4, null, null],
         "Correct element(s) on the stack"
     );
 });
