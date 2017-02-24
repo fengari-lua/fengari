@@ -845,7 +845,7 @@ const luaV_tointeger = function(obj, mode) {
 };
 
 const tointeger = function(o) {
-    return o.ttisinteger() ? o.value : luaV_tointeger(o, 0);
+    return o.ttisinteger() ? o.value|0 : luaV_tointeger(o, 0);
 };
 
 const tonumber = function(v) {

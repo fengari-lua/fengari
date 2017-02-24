@@ -603,6 +603,14 @@ const lua_istable = function(L, idx) {
     return index2addr(L, idx).ttistable();
 };
 
+const lua_isinteger = function(L, idx) {
+    return index2addr(L, idx).ttisinteger();
+};
+
+const lua_isnumber = function(L, idx) {
+    return lvm.tonumber(L, idx);
+};
+
 const lua_isstring = function(L, idx) {
     let o = index2addr(L, idx);
     return o.ttisstring() || o.ttisnumber();
@@ -789,7 +797,9 @@ module.exports.lua_getmetatable    = lua_getmetatable;
 module.exports.lua_gettable        = lua_gettable;
 module.exports.lua_gettop          = lua_gettop;
 module.exports.lua_insert          = lua_insert;
+module.exports.lua_isinteger       = lua_isinteger;
 module.exports.lua_isnoneornil     = lua_isnoneornil;
+module.exports.lua_isnumber        = lua_isnumber;
 module.exports.lua_isstring        = lua_isstring;
 module.exports.lua_istable         = lua_istable;
 module.exports.lua_len             = lua_len;

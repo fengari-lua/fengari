@@ -37,7 +37,9 @@
     - [x] lua_gettable
     - [x] lua_gettop
     - [x] lua_insert
+    - [x] lua_isinteger
     - [x] lua_isnoneornil
+    - [x] lua_isnumber
     - [x] lua_isstring
     - [x] lua_istable
     - [x] lua_isyieldable
@@ -111,11 +113,9 @@
     - [ ] lua_isboolean
     - [ ] lua_iscfunction
     - [ ] lua_isfunction
-    - [ ] lua_isinteger
     - [ ] lua_islightuserdata
     - [ ] lua_isnil
     - [ ] lua_isnone
-    - [ ] lua_isnumber
     - [ ] lua_isthread
     - [ ] lua_isuserdata
     - [ ] lua_newuserdata
@@ -149,6 +149,7 @@
     - [x] luaL_checkany
     - [x] luaL_checkinteger
     - [x] luaL_checklstring
+    - [x] luaL_checknumber
     - [x] luaL_checkstack
     - [x] luaL_checktype
     - [x] luaL_error
@@ -170,7 +171,6 @@
     - [ ] luaL_addchar
     - [ ] luaL_addsize
     - [ ] luaL_buffinitsize
-    - [ ] luaL_checknumber
     - [ ] luaL_checkoption
     - [ ] luaL_checkstring
     - [ ] luaL_checkudata
@@ -206,6 +206,34 @@
         - [ ] load
     - [x] Coroutine
     - [x] Table
+    - [ ] Math
+        - [x] math.abs
+        - [x] math.acos
+        - [x] math.asin
+        - [x] math.atan
+        - [x] math.cos
+        - [x] math.sin
+        - [x] math.tan
+        - [ ] math.ceil
+        - [ ] math.deg
+        - [ ] math.exp
+        - [ ] math.floor
+        - [ ] math.fmod
+        - [ ] math.huge
+        - [ ] math.log
+        - [ ] math.max
+        - [ ] math.maxinteger
+        - [ ] math.min
+        - [ ] math.mininteger
+        - [ ] math.modf
+        - [ ] math.pi
+        - [ ] math.rad
+        - [ ] math.random
+        - [ ] math.randomseed
+        - [ ] math.sqrt
+        - [ ] math.tointeger
+        - [ ] math.type
+        - [ ] math.ult
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
 - [ ] DOM API binding
 - [ ] Parse Lua

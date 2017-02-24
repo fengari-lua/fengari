@@ -179,6 +179,13 @@ const interror = function(L, arg) {
         tag_error(L, arg, CT.LUA_TNUMBER);
 };
 
+const luaL_checknumber = function(L, arg) {
+    let d = lapi.lua_tonumber(L, arg);
+    if (d === false)
+        tag_error(L, arg, CT.LUA_TNUMBER);
+    return d;
+};
+
 const luaL_checkinteger = function(L, arg) {
     let d = lapi.lua_tointeger(L, arg);
     if (d === false)
@@ -356,17 +363,18 @@ const luaL_newlib = function(L, l) {
 };
 
 module.exports.LUA_LOADED_TABLE  = LUA_LOADED_TABLE;
+module.exports.luaL_Buffer       = luaL_Buffer;
 module.exports.luaL_addlstring   = luaL_addlstring;
 module.exports.luaL_addstring    = luaL_addstring;
 module.exports.luaL_addvalue     = luaL_addvalue;
 module.exports.luaL_argcheck     = luaL_argcheck;
 module.exports.luaL_argerror     = luaL_argerror;
-module.exports.luaL_Buffer       = luaL_Buffer;
 module.exports.luaL_buffinit     = luaL_buffinit;
 module.exports.luaL_callmeta     = luaL_callmeta;
 module.exports.luaL_checkany     = luaL_checkany;
 module.exports.luaL_checkinteger = luaL_checkinteger;
 module.exports.luaL_checklstring = luaL_checklstring;
+module.exports.luaL_checknumber  = luaL_checknumber;
 module.exports.luaL_checkstack   = luaL_checkstack;
 module.exports.luaL_checktype    = luaL_checktype;
 module.exports.luaL_error        = luaL_error;
