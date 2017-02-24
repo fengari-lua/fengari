@@ -205,14 +205,7 @@
         - [ ] loadfile
         - [ ] load
     - [x] Coroutine
-    - [ ] Table
-        - [x] table.concat
-        - [x] table.insert
-        - [x] table.move
-        - [x] table.pack
-        - [x] table.remove
-        - [x] table.unpack
-        - [ ] table.sort
+    - [x] Table
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
 - [ ] DOM API binding
 - [ ] Parse Lua

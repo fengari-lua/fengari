@@ -180,12 +180,56 @@ const unpack = function(L) {
     return n;
 };
 
+
+// TODO: Maybe do the quicksort after all
+const auxsort = function(L) {
+    let t = lapi.index2addr(L, 1);
+
+    if (lapi.lua_type(L, 2) !== CT.LUA_TFUNCTION) {  /* no function? */
+        [...t.value.entries()]
+            .sort(function (a, b) {
+                if (typeof a[0] !== 'number') return 1;
+                else if (typeof b[0] !== 'number') return -1;
+                return lapi.lua_compare_(L, a[1], b[1], lua.LUA_OPLT) === 1 ? -1 : 1;  /* a < b */
+            })
+            .forEach((e, i) => typeof e[0] === 'number' ? t.value.set(i, e[1]) : true);
+    } else {
+        [...t.value.entries()]
+            .sort(function (a, b) {
+                if (typeof a[0] !== 'number') return 1;
+                else if (typeof b[0] !== 'number') return -1;
+
+                lapi.lua_pushvalue(L, 2);  /* push function */
+                lapi.lua_pushtvalue(L, a[1]);  /* since we use Map.sort, a and b are not on the stack */
+                lapi.lua_pushtvalue(L, b[1]);
+                lapi.lua_call(L, 2, 1);  /* call function */
+                let res = lapi.lua_toboolean(L, -1);  /* get result */
+                lapi.lua_pop(L, 1);  /* pop result */
+                return res ? -1 : 1;
+            })
+            .forEach((e, i) => typeof e[0] === 'number' ? t.value.set(i, e[1]) : true);
+    }
+};
+
+const sort = function(L) {
+    let n = aux_getn(L, 1, TAB_RW);
+    if (n > 1) {  /* non-trivial interval? */
+        lauxlib.luaL_argcheck(L, n < Number.MAX_SAFE_INTEGER, 1, "array too big");
+        if (!lapi.lua_isnoneornil(L, 2))  /* is there a 2nd argument? */
+            lauxlib.luaL_checktype(L, 2, CT.LUA_TFUNCTION);  /* must be a function */
+        lapi.lua_settop(L, 2);  /* make sure there are two arguments */
+        auxsort(L);
+    }
+    return 0;
+};
+
 const tab_funcs = {
     "concat": tconcat,
     "insert": tinsert,
     "move":   tmove,
     "pack":   pack,
     "remove": tremove,
+    "sort":   sort,
     "unpack": unpack
 };
 

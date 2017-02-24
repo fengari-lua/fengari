@@ -119,6 +119,11 @@ const lua_pushvalue = function(L, idx) {
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
+const lua_pushtvalue = function(L, tvalue) {
+    L.stack[L.top++] = tvalue;
+    assert(L.top <= L.ci.top, "stack overflow");
+};
+
 const lua_settop = function(L, idx) {
     let func = L.ci.funcOff;
     if (idx >= 0) {
@@ -539,9 +544,14 @@ const lua_topointer = function(L, idx) {
 };
 
 const lua_compare = function(L, index1, index2, op) {
-    let i = 0;
     let o1 = index2addr(L, index1);
     let o2 = index2addr(L, index1);
+
+    return lua_compare_(L, o1, o2, op);
+};
+
+const lua_compare_ = function(L, o1, o2, op) {
+    let i = 0;
 
     if (!o1.ttisnil() && !o2.ttisnil()) {
         switch (op) {
@@ -757,12 +767,14 @@ const lua_getextraspace = function () {
 };
 
 module.exports.index2addr          = index2addr;
+module.exports.index2addr_         = index2addr_;
 module.exports.lua_absindex        = lua_absindex;
 module.exports.lua_atpanic         = lua_atpanic;
 module.exports.lua_call            = lua_call;
 module.exports.lua_callk           = lua_callk;
 module.exports.lua_checkstack      = lua_checkstack;
 module.exports.lua_compare         = lua_compare;
+module.exports.lua_compare_        = lua_compare_;
 module.exports.lua_concat          = lua_concat;
 module.exports.lua_copy            = lua_copy;
 module.exports.lua_createtable     = lua_createtable;
@@ -800,6 +812,7 @@ module.exports.lua_pushnil         = lua_pushnil;
 module.exports.lua_pushnumber      = lua_pushnumber;
 module.exports.lua_pushstring      = lua_pushstring;
 module.exports.lua_pushthread      = lua_pushthread;
+module.exports.lua_pushtvalue      = lua_pushtvalue;
 module.exports.lua_pushvalue       = lua_pushvalue;
 module.exports.lua_rawequal        = lua_rawequal;
 module.exports.lua_rawget          = lua_rawget;

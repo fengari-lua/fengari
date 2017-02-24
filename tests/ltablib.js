@@ -17,6 +17,16 @@ const linit      = require('../src/linit.js');
 const lstate     = require('../src/lstate.js');
 const CT         = lua.constant_types;
 
+const inttable2array = function(t) {
+    let a = [];
+
+    t.forEach(function (v, k) {
+        if (typeof k === 'number')
+            a[k] = v;
+    });
+
+    return a.map(e => e.value);
+};
 
 test('table.concat', function (t) {
     let luaCode = `
@@ -171,7 +181,7 @@ test('table.remove', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-table.insert");
+        lapi.lua_load(L, bc, "test-table.remove");
 
         lapi.lua_call(L, 0, -1);
 
@@ -204,7 +214,7 @@ test('table.move', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-table.insert");
+        lapi.lua_load(L, bc, "test-table.move");
 
         lapi.lua_call(L, 0, -1);
 
@@ -215,6 +225,70 @@ test('table.move', function (t) {
             .filter(e => typeof e[0] === 'number')
             .map(e => e[1].value).sort(),
         [1, 2, 3, 4, 5, 6],
+        "Correct element(s) on the stack"
+    );
+});
+
+
+test('table.sort (<)', function (t) {
+    let luaCode = `
+        local t = {3, 1, 5, ['just'] = 'tofuckitup', 2, 4}
+        table.sort(t)
+        return t
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-table.sort");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.deepEqual(
+        inttable2array(lapi.lua_topointer(L, -1)),
+        [1, 2, 3, 4, 5],
+        "Correct element(s) on the stack"
+    );
+});
+
+
+test('table.sort with cmp function', function (t) {
+    let luaCode = `
+        local t = {3, 1, 5, ['just'] = 'tofuckitup', 2, 4}
+        table.sort(t, function (a, b)
+            return a > b
+        end)
+        return t
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-table.sort");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.deepEqual(
+        inttable2array(lapi.lua_topointer(L, -1)),
+        [5, 4, 3, 2, 1],
         "Correct element(s) on the stack"
     );
 });
