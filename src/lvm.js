@@ -521,7 +521,6 @@ const luaV_execute = function(L) {
                     for (let aux = 0; nfuncOff + aux < lim; aux++)
                         L.stack[ofuncOff + aux] = L.stack[nfuncOff + aux];
                     oci.func = nci.func;
-                    oci.funcOff = nci.funcOff;
                     oci.u.l.base = ofuncOff + (nci.u.l.base - nfuncOff);
                     L.top = ofuncOff + (L.top - nfuncOff);
                     oci.top = L.top;
@@ -920,7 +919,7 @@ const luaV_objlen = function(L, ra, rb) {
         }
         case CT.LUA_TSHRSTR:
         case CT.LUA_TLNGSTR:
-            L.stack[ra] = rb.value.length; // TODO: 8-byte clean string
+            L.stack[ra] = new TValue(CT.LUA_TNUMINT, rb.value.length); // TODO: 8-byte clean string
             return;
         default: {
             tm = ltm.luaT_gettmbyobj(L, rb, ltm.TMS.TM_LEN);

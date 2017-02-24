@@ -16,8 +16,8 @@ const toByteCode = function (luaCode) {
 
     fs.writeSync(luaFile.fd, luaCode);
 
-    child_process.execSync(`luac-5.3 -o ${luaFile.name}.bc ${luaFile.name}`);
-    child_process.execSync(`luac-5.3 -l ${luaFile.name} > ${luaFile.name}.bc.txt`);
+    child_process.execSync(`luac -o ${luaFile.name}.bc ${luaFile.name}`);
+    child_process.execSync(`luac -l ${luaFile.name} > ${luaFile.name}.bc.txt`);
 
     bclist = fs.readFileSync(`${luaFile.name}.bc.txt`, 'utf8');
 

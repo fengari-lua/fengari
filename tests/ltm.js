@@ -783,7 +783,7 @@ test('binary __xxx functions in metatable', function (t) {
     }, "Second part of the program executed without errors");
 
     t.deepEqual(
-        L.stack.slice(L.top - 12, L.top).map(function (e) { return e.value }),
+        L.stack.slice(L.top - 12, L.top).map(e => e.value),
         [
             "{} + 1",
             "{} - 1",
@@ -1300,7 +1300,7 @@ test('__call', function (t) {
     }, "Second part of the program executed without errors");
 
     t.deepEqual(
-        L.stack.slice(L.top - 3, L.top).map(function (e) { return e.value }),
+        L.stack.slice(L.top - 3, L.top).map(e => e.value),
         ["hello", "world", "wow"],
         "Program output is correct"
     );

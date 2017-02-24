@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/giann/fengari.svg?token=PSYuVp8qrrdszprvDFz7&branch=master)](https://travis-ci.com/giann/fengari)
+
 # fengari
 🐺 φεγγάρι - A Lua VM written in JS ES6 targeting the browser
 

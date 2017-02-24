@@ -1,3 +1,15 @@
-language: node_js
-node_js:
-  - "node"
+language: node
+
+before_install:
+    - pip install --user hererocks
+    - hererocks lua53 -l5.3 -rlatest
+    - source lua53/bin/activate
+    - nvm install node
+    - export NODE=$(nvm which node)
+    - export NPM=${NODE%node}npm
+
+install:
+    - $NPM i
+
+script:
+    - $NPM t
