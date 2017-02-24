@@ -91,9 +91,23 @@ const pack = function(L) {
     return 1;  /* return table */
 };
 
+const unpack = function(L) {
+    let i = lauxlib.luaL_optinteger(L, 2, 1);
+    let e = lauxlib.luaL_opt(L, lauxlib.luaL_checkinteger, 3, lapi.lua_len(L, 1));
+    if (i > e) return 0;  /* empty range */
+    let n = e - i;  /* number of elements minus 1 (avoid overflows) */
+    if (n >= Number.MAX_SAFE_INTEGER || !lapi.lua_checkstack(L, ++n))
+        return lauxlib.luaL_error(L, "too many results to unpack");
+    for (; i < e; i++)  /* push arg[i..e - 1] (to avoid overflows) */
+        lapi.lua_geti(L, 1, i);
+    lapi.lua_geti(L, 1, e);  /* push last element */
+    return n;
+};
+
 const tab_funcs = {
     "concat": tconcat,
-    "pack":   pack
+    "pack":   pack,
+    "unpack": unpack,
 };
 
 const luaopen_table = function(L) {

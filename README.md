@@ -206,11 +206,11 @@
     - [ ] Table
         - [x] table.concat
         - [x] table.pack
+        - [x] table.unpack
         - [ ] table.insert
         - [ ] table.move
         - [ ] table.remove
         - [ ] table.sort
-        - [ ] table.unpack
 - [ ] Debug (errors)
 - [ ] DOM API binding
 - [ ] Parse Lua

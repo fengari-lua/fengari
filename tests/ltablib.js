@@ -76,3 +76,44 @@ test('table.pack', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('table.unpack', function (t) {
+    let luaCode = `
+        return table.unpack({1, 2, 3, 4, 5}, 2, 4)
+    `, L;
+    
+    t.plan(4);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, bc, "test-table.unpack");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -3),
+        2,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -2),
+        3,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -1),
+        4,
+        "Correct element(s) on the stack"
+    );
+});
