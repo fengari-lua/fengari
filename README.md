@@ -37,6 +37,7 @@
     - [x] lua_isstring
     - [x] lua_istable
     - [x] lua_isyieldable
+    - [x] lua_len
     - [x] lua_load
     - [x] lua_newstate
     - [x] lua_newtable
@@ -66,6 +67,7 @@
     - [x] lua_rotate
     - [x] lua_setfield
     - [x] lua_setglobal
+    - [x] lua_seti
     - [x] lua_setmetatable
     - [x] lua_settable
     - [x] lua_settop
@@ -114,7 +116,6 @@
     - [ ] lua_isnumber
     - [ ] lua_isthread
     - [ ] lua_isuserdata
-    - [ ] lua_len
     - [ ] lua_newuserdata
     - [ ] lua_numbertointeger
     - [ ] lua_pcallk
@@ -128,7 +129,6 @@
     - [ ] lua_replace
     - [ ] lua_setallocf
     - [ ] lua_sethook
-    - [ ] lua_seti
     - [ ] lua_setlocal
     - [ ] lua_setupvalue
     - [ ] lua_setuservalue
@@ -137,8 +137,12 @@
     - [ ] lua_upvalueid
     - [ ] lua_upvaluejoin
 - [ ] Auxiliary library
+    - [x] luaL_addlstring
+    - [x] luaL_addstring
+    - [x] luaL_addvalue
     - [x] luaL_argcheck
     - [x] luaL_argerror
+    - [x] luaL_buffinit
     - [x] luaL_callmeta
     - [x] luaL_checkany
     - [x] luaL_checkinteger
@@ -148,23 +152,21 @@
     - [x] luaL_error
     - [x] luaL_getmetafield
     - [x] luaL_getsubtable
+    - [x] luaL_len
     - [x] luaL_newlib
     - [x] luaL_newstate
     - [x] luaL_openlibs
     - [x] luaL_opt
     - [x] luaL_optinteger
     - [x] luaL_optlstring
+    - [x] luaL_pushresult
     - [x] luaL_requiref
     - [x] luaL_setfuncs
     - [x] luaL_tolstring
     - [x] luaL_typename
     - [x] luaL_where
     - [ ] luaL_addchar
-    - [ ] luaL_addlstring
     - [ ] luaL_addsize
-    - [ ] luaL_addstring
-    - [ ] luaL_addvalue
-    - [ ] luaL_buffinit
     - [ ] luaL_buffinitsize
     - [ ] luaL_checknumber
     - [ ] luaL_checkoption
@@ -177,7 +179,6 @@
     - [ ] luaL_fileresult
     - [ ] luaL_getmetatable
     - [ ] luaL_gsub
-    - [ ] luaL_len
     - [ ] luaL_loadbuffer
     - [ ] luaL_loadbufferx
     - [ ] luaL_loadfile
@@ -189,7 +190,6 @@
     - [ ] luaL_optstring
     - [ ] luaL_prepbuffer
     - [ ] luaL_prepbuffsize
-    - [ ] luaL_pushresult
     - [ ] luaL_pushresultsize
     - [ ] luaL_ref
     - [ ] luaL_setmetatable
@@ -203,6 +203,14 @@
         - [ ] loadfile
         - [ ] load
     - [x] Coroutine
+    - [ ] Table
+        - [x] table.concat
+        - [x] table.pack
+        - [ ] table.insert
+        - [ ] table.move
+        - [ ] table.remove
+        - [ ] table.sort
+        - [ ] table.unpack
 - [ ] Debug (errors)
 - [ ] DOM API binding
 - [ ] Parse Lua

@@ -80,8 +80,20 @@ const tconcat = function(L) {
     return 1;
 };
 
+const pack = function(L) {
+    let n = lapi.lua_gettop(L);  /* number of elements to pack */
+    lapi.lua_createtable(L, n, 1);  /* create result table */
+    lapi.lua_insert(L, 1);  /* put it at index 1 */
+    for (let i = n; i >= 1; i--)  /* assign elements */
+        lapi.lua_seti(L, 1, i);
+    lapi.lua_pushinteger(L, n);
+    lapi.lua_setfield(L, 1, "n");  /* t.n = number of elements */
+    return 1;  /* return table */
+};
+
 const tab_funcs = {
-    "concat": tconcat
+    "concat": tconcat,
+    "pack":   pack
 };
 
 const luaopen_table = function(L) {

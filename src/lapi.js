@@ -355,6 +355,13 @@ const lua_setfield = function(L, idx, k) {
     auxsetstr(L, index2addr(L, idx), k)
 };
 
+const lua_seti = function(L, idx, n) {
+    assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    let t = index2addr(L, idx);
+    lvm.settable(L, t, n, L.stack[L.top - 1]);
+    L.top--;  /* pop value */
+};
+
 const lua_rawset = function(L, idx) {
     assert(2 < L.top - L.ci.funcOff, "not enough elements in the stack");
     let o = index2addr(L, idx);
@@ -780,6 +787,7 @@ module.exports.lua_remove          = lua_remove;
 module.exports.lua_rotate          = lua_rotate;
 module.exports.lua_setfield        = lua_setfield;
 module.exports.lua_setglobal       = lua_setglobal;
+module.exports.lua_seti            = lua_seti;
 module.exports.lua_setmetatable    = lua_setmetatable;
 module.exports.lua_settable        = lua_settable;
 module.exports.lua_settop          = lua_settop;
