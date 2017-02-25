@@ -52,14 +52,54 @@ const math_atan = function(L) {
     return 1;
 };
 
+const math_toint = function(L) {
+    let n = lapi.lua_tointegerx(L, 1)
+    if (n !== false)
+        lapi.lua_pushinteger(L, n);
+    else {
+        lauxlib.luaL_checkany(L, 1);
+        lapi.lua_pushnil(L);  /* value is not convertible to integer */
+    }
+    return 1;
+};
+
+const pushnumint = function(L, d) {
+    let n = luaconf.lua_numbertointeger(d);
+    if (n !== false)  /* does 'd' fit in an integer? */
+        lapi.lua_pushinteger(L, n);  /* result is integer */
+    else
+        lapi.lua_pushnumber(L, d);  /* result is float */
+};
+
+const math_floor = function(L) {
+    if (lapi.lua_isinteger(L, 1))
+        lapi.lua_settop(L, 1);
+    else
+        pushnumint(L, lauxlib.luaL_checknumber(L, 1));
+
+    return 1;
+};
+
+const math_ceil = function(L) {
+    if (lapi.lua_isinteger(L, 1))
+        lapi.lua_settop(L, 1);
+    else
+        pushnumint(L, Math.ceil(lauxlib.luaL_checknumber(L, 1)));
+
+    return 1;
+};
+
 const mathlib = {
-    "abs":  math_abs,
-    "sin":  math_sin,
-    "cos":  math_cos,
-    "tan":  math_tan,
-    "asin": math_asin,
-    "acos": math_acos,
-    "atan": math_atan
+    "abs":       math_abs,
+    "acos":      math_acos,
+    "asin":      math_asin,
+    "atan":      math_atan,
+    "ceil":      math_ceil,
+    "cos":       math_cos,
+    "floor":     math_floor,
+    "sin":       math_sin,
+    "tan":       math_tan,
+    "tointeger": math_toint
 };
 
 const luaopen_math = function(L) {

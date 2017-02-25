@@ -14,7 +14,11 @@ const LUAI_MAXSTACK = 1000000;
 @@ of a function in debug information.
 ** CHANGE it if you want a different size.
 */
-const LUA_IDSIZE = 60
+const LUA_IDSIZE = 60;
+
+const lua_numbertointeger = function(n) {
+    return n|0;
+};
 
 module.exports.LUAI_MAXSTACK = LUAI_MAXSTACK;
 module.exports.LUA_IDSIZE    = LUA_IDSIZE;
