@@ -838,7 +838,7 @@ const luaV_tointeger = function(obj, mode) {
     } else if (obj.ttisinteger()) {
         return obj.value|0;
     } else if (obj.ttisstring()) {
-        return luaV_tointeger(parseFloat(obj.value), mode); // TODO: luaO_str2num
+        return luaV_tointeger(new TValue(CT.LUA_TNUMFLT, parseFloat(obj.value)), mode); // TODO: luaO_str2num
     }
 
     return false;

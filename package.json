@@ -33,6 +33,7 @@
     "tmp": "0.0.31"
   },
   "dependencies": {
-    "buffer-dataview": "0.0.2"
+    "buffer-dataview": "0.0.2",
+    "seedrandom": "^2.4.2"
   }
 }

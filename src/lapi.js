@@ -545,7 +545,7 @@ const lua_topointer = function(L, idx) {
 
 const lua_compare = function(L, index1, index2, op) {
     let o1 = index2addr(L, index1);
-    let o2 = index2addr(L, index1);
+    let o2 = index2addr(L, index2);
 
     return lua_compare_(L, o1, o2, op);
 };
