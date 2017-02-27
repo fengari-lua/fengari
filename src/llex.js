@@ -4,11 +4,12 @@
 const assert  = require('assert');
 
 const lapi    = require('./lapi.js');
+const lauxlib = require('./lauxlib.js');
 const ldebug  = require('./ldebug.js');
 const ldo     = require('./ldo.js');
-const lua     = require('./lua.js');
-const lobject = require('./lobject');
 const ljstype = require('./ljstype');
+const lobject = require('./lobject');
+const lua     = require('./lua.js');
 const TValue  = lobject.TValue;
 const CT      = lua.constant_types;
 const TS      = lua.thread_status;
@@ -24,72 +25,40 @@ const RESERVED = {
     TK_ELSEIF:   FIRST_RESERVED + 4,
     TK_END:      FIRST_RESERVED + 5,
     TK_FALSE:    FIRST_RESERVED + 6,
-    TK_FOR:      FIRST_RESERVED + 8,
-    TK_FUNCTION: FIRST_RESERVED + 10,
-    TK_GOTO:     FIRST_RESERVED + 11,
-    TK_IF:       FIRST_RESERVED + 12,
-    TK_IN:       FIRST_RESERVED + 13,
-    TK_LOCAL:    FIRST_RESERVED + 14,
-    TK_NIL:      FIRST_RESERVED + 15,
-    TK_NOT:      FIRST_RESERVED + 16,
-    TK_OR:       FIRST_RESERVED + 17,
-    TK_REPEAT:   FIRST_RESERVED + 18,
-    TK_RETURN:   FIRST_RESERVED + 19,
-    TK_THEN:     FIRST_RESERVED + 20,
-    TK_TRUE:     FIRST_RESERVED + 21,
-    TK_UNTIL:    FIRST_RESERVED + 22,
-    TK_WHILE:    FIRST_RESERVED + 23,
+    TK_FOR:      FIRST_RESERVED + 7,
+    TK_FUNCTION: FIRST_RESERVED + 8,
+    TK_GOTO:     FIRST_RESERVED + 9,
+    TK_IF:       FIRST_RESERVED + 10,
+    TK_IN:       FIRST_RESERVED + 11,
+    TK_LOCAL:    FIRST_RESERVED + 12,
+    TK_NIL:      FIRST_RESERVED + 13,
+    TK_NOT:      FIRST_RESERVED + 14,
+    TK_OR:       FIRST_RESERVED + 15,
+    TK_REPEAT:   FIRST_RESERVED + 16,
+    TK_RETURN:   FIRST_RESERVED + 17,
+    TK_THEN:     FIRST_RESERVED + 18,
+    TK_TRUE:     FIRST_RESERVED + 19,
+    TK_UNTIL:    FIRST_RESERVED + 20,
+    TK_WHILE:    FIRST_RESERVED + 21,
     /* other terminal symbols */
-    TK_IDIV:     FIRST_RESERVED + 24,
-    TK_CONCAT:   FIRST_RESERVED + 25,
-    TK_DOTS:     FIRST_RESERVED + 26,
-    TK_EQ:       FIRST_RESERVED + 27,
-    TK_GE:       FIRST_RESERVED + 28,
-    TK_LE:       FIRST_RESERVED + 29,
-    TK_NE:       FIRST_RESERVED + 30,
-    TK_SHL:      FIRST_RESERVED + 31,
-    TK_SHR:      FIRST_RESERVED + 32,
-    TK_DBCOLON:  FIRST_RESERVED + 33,
-    TK_EOS:      FIRST_RESERVED + 34,
-    TK_FLT:      FIRST_RESERVED + 35,
-    TK_INT:      FIRST_RESERVED + 36,
-    TK_NAME:     FIRST_RESERVED + 37,
-    TK_STRING:   FIRST_RESERVED + 38
+    TK_IDIV:     FIRST_RESERVED + 22,
+    TK_CONCAT:   FIRST_RESERVED + 23,
+    TK_DOTS:     FIRST_RESERVED + 24,
+    TK_EQ:       FIRST_RESERVED + 25,
+    TK_GE:       FIRST_RESERVED + 26,
+    TK_LE:       FIRST_RESERVED + 27,
+    TK_NE:       FIRST_RESERVED + 28,
+    TK_SHL:      FIRST_RESERVED + 29,
+    TK_SHR:      FIRST_RESERVED + 30,
+    TK_DBCOLON:  FIRST_RESERVED + 31,
+    TK_EOS:      FIRST_RESERVED + 32,
+    TK_FLT:      FIRST_RESERVED + 33,
+    TK_INT:      FIRST_RESERVED + 34,
+    TK_NAME:     FIRST_RESERVED + 35,
+    TK_STRING:   FIRST_RESERVED + 36
 };
 
 const R = RESERVED;
-
-const reserved_keywords = [
-    "and", "break", "do", "else", "elseif",
-    "end", "false", "for", "function", "goto", "if",
-    "in", "local", "nil", "not", "or", "repeat",
-    "return", "then", "true", "until", "while"
-];
-
-const reserved_keywords_tokens = [
-    R.TK_AND,
-    R.TK_BREAK,
-    R.TK_DO,
-    R.TK_ELSE,
-    R.TK_ELSEIF,
-    R.TK_END,
-    R.TK_FALSE,
-    R.TK_FOR,
-    R.TK_FUNCTION,
-    R.TK_GOTO,
-    R.TK_IF,
-    R.TK_IN,
-    R.TK_LOCAL,
-    R.TK_NIL,
-    R.TK_NOT,
-    R.TK_OR,
-    R.TK_REPEAT,
-    R.TK_RETURN,
-    R.TK_THEN,
-    R.TK_TRUE,
-    R.TK_UNTIL,
-    R.TK_WHILE,
-];
 
 const luaX_tokens = [
     "and", "break", "do", "else", "elseif",
@@ -103,7 +72,7 @@ const luaX_tokens = [
 
 const NUM_RESERVED = Object.keys(RESERVED).length;
 
-class Buffer {
+class MBuffer {
     constructor(string) {
         this.buffer = string ? string.split('') : [];
         this.n = this.buffer.length;
@@ -137,8 +106,8 @@ class LexState {
         this.lookahead = null;  /* look ahead token */
         this.fs = null;  /* current function (parser) */
         this.L = null;
-        this.z = new Buffer();
-        this.buff = new Buffer();  /* buffer for tokens */
+        this.z = new MBuffer();
+        this.buff = new MBuffer();  /* buffer for tokens */
         this.h = null;  /* to avoid collection/reuse strings */
         this.dyd = null;  /* dynamic structures used by the parser */
         this.source = null;  /* current source name */
@@ -195,10 +164,24 @@ const inclinenumber = function(ls) {
 };
 
 const luaX_setinput = function(L, ls, z, source, firstchar) {
-    ls.t.token = 0;
+    ls.t = {
+        token: 0,
+        seminfo: {
+            i: NaN,
+            r: NaN,
+            ts: null
+        }
+    };
     ls.L = L;
     ls.current = firstchar;
-    ls.lookahead.token = R.TK_EOS;
+    ls.lookahead = {
+        token: R.TK_EOS,
+        seminfo: {
+            i: NaN,
+            r: NaN,
+            ts: null
+        }
+    };
     ls.z = z;
     ls.fs = null;
     ls.linenumber = 1;
@@ -562,8 +545,9 @@ const llex = function(ls, seminfo) {
 
                     let ts = new TValue(CT.LUA_TLNGSTR, ls.buff.buffer.join(''));
                     seminfo.ts = ts;
-                    if (reserved_keywords.indexOf(ts.value) >= 0)  /* reserved word? */
-                        return reserved_keywords_tokens[reserved_keywords.indexOf(ts.value)];
+                    let kidx = luaX_tokens.slice(0, 22).indexOf(ts.value)
+                    if (kidx >= 0)  /* reserved word? */
+                        return kidx + FIRST_RESERVED;
                     else
                         return R.TK_NAME;
                 } else {  /* single-char tokens (+ - / ...) */
@@ -591,6 +575,11 @@ const luaX_lookahead = function(ls) {
     return ls.lookahead.token;
 };
 
+module.exports.FIRST_RESERVED = FIRST_RESERVED;
+module.exports.LexState       = LexState;
 module.exports.luaX_lookahead = luaX_lookahead;
 module.exports.luaX_next      = luaX_next;
 module.exports.luaX_setinput  = luaX_setinput;
+module.exports.MBuffer        = MBuffer;
+module.exports.RESERVED       = RESERVED;
+module.exports.luaX_tokens    = luaX_tokens;
