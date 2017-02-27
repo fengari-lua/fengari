@@ -126,11 +126,11 @@ const save = function(ls, c) {
 
 const luaX_token2str = function(ls, token) {
     if (token < FIRST_RESERVED) {  /* single-byte symbols? */
-        return lapi.lua_pushstring(ls.L, `'%{String.fromCharCode(token)}'`);
+        return `'${String.fromCharCode(token)}'`;
     } else {
         let s = luaX_tokens[token - FIRST_RESERVED];
         if (token < R.TK_EOS)  /* fixed format (symbols and reserved words)? */
-            return lapi.lua_pushstring(ls.L, `'${s}'`);
+            return `'${s}'`;
         else  /* names, strings, and numerals */
             return s;
     }
@@ -250,7 +250,7 @@ const txtToken = function(ls, token) {
         case R.TK_NAME: case R.TK_STRING:
         case R.TK_FLT: case R.TK_INT:
             save(ls, '\0');
-            return lapi.lua_pushstring(ls.L, `'${ls.buff.buffer.join('')}'`);
+            return `'${ls.buff.buffer.join('')}'`;
         default:
             return luaX_token2str(ls, token);
     }
@@ -262,6 +262,10 @@ const lexerror = function(ls, msg, token) {
         lapi.lua_pushstring(ls.L, `${msg} near ${txtToken(ls, token)}`);
     ldo.luaD_throw(ls.L, TS.LUA_ERRSYNTAX);
 };
+
+const luaX_syntaxerror = function(ls, msg) {
+    lexerror(ls, msg, ls.t.token);
+}
 
 /*
 ** skip a sequence '[=*[' or ']=*]'; if sequence is well formed, return
@@ -292,7 +296,7 @@ const read_long_string = function(ls, seminfo, sep) {
         switch (ls.current) {
             case -1: {  /* error */
                 let what = seminfo ? "string" : "comment";
-                let msg = lapi.lua_pushstring(ls.L, `unfinished long ${what} (starting at line ${line})`);
+                let msg = `unfinished long ${what} (starting at line ${line})`;
                 lexerror(ls, msg, R.TK_EOS);
                 break;
             }
@@ -445,6 +449,10 @@ const read_string = function(ls, del, seminfo) {
     seminfo.ts = new TValue(CT.LUA_TLNGSTR, ls.buff.buffer.slice(1).join(''));
 };
 
+const isreserved = function(w) {
+    return luaX_tokens.slice(0, 22).indexOf(w) >= 0;
+};
+
 const llex = function(ls, seminfo) {
     ls.buff.n = 0;
     ls.buff.buffer = [];
@@ -581,11 +589,14 @@ const luaX_lookahead = function(ls) {
     return ls.lookahead.token;
 };
 
-module.exports.FIRST_RESERVED = FIRST_RESERVED;
-module.exports.LexState       = LexState;
-module.exports.luaX_lookahead = luaX_lookahead;
-module.exports.luaX_next      = luaX_next;
-module.exports.luaX_setinput  = luaX_setinput;
-module.exports.MBuffer        = MBuffer;
-module.exports.RESERVED       = RESERVED;
-module.exports.luaX_tokens    = luaX_tokens;
+module.exports.FIRST_RESERVED   = FIRST_RESERVED;
+module.exports.LexState         = LexState;
+module.exports.MBuffer          = MBuffer;
+module.exports.RESERVED         = RESERVED;
+module.exports.isreserved       = isreserved;
+module.exports.luaX_lookahead   = luaX_lookahead;
+module.exports.luaX_next        = luaX_next;
+module.exports.luaX_setinput    = luaX_setinput;
+module.exports.luaX_syntaxerror = luaX_syntaxerror;
+module.exports.luaX_token2str   = luaX_token2str;
+module.exports.luaX_tokens      = luaX_tokens;
