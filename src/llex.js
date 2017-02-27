@@ -250,7 +250,7 @@ const txtToken = function(ls, token) {
         case R.TK_NAME: case R.TK_STRING:
         case R.TK_FLT: case R.TK_INT:
             save(ls, '\0');
-            return lapi.lua_pushstring(ls.L, `'${ls.buff.buffer}'`);
+            return lapi.lua_pushstring(ls.L, `'${ls.buff.buffer.join('')}'`);
         default:
             return luaX_token2str(ls, token);
     }
@@ -306,7 +306,10 @@ const read_long_string = function(ls, seminfo, sep) {
             case '\n': case '\r': {
                 save(ls, '\n');
                 inclinenumber(ls);
-                if (!seminfo) ls.buff.n = 0;
+                if (!seminfo) {
+                    ls.buff.n = 0;
+                    ls.buff.buffer = [];
+                }
                 break;
             }
             default: {
@@ -444,6 +447,7 @@ const read_string = function(ls, del, seminfo) {
 
 const llex = function(ls, seminfo) {
     ls.buff.n = 0;
+    ls.buff.buffer = [];
 
     for (;;) {
         switch (ls.current) {
@@ -463,9 +467,11 @@ const llex = function(ls, seminfo) {
                 if (ls.current === '[') {  /* long comment? */
                     let sep = skip_sep(ls);
                     ls.buff.n = 0;  /* 'skip_sep' may dirty the buffer */
+                    ls.buff.buffer = [];
                     if (sep >= 0) {
                         read_long_string(ls, null, sep);  /* skip long comment */
                         ls.buff.n = 0;  /* previous call may dirty the buff. */
+                        ls.buff.buffer = [];
                         break;
                     }
                 }

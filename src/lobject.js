@@ -294,22 +294,22 @@ const l_str2int = function(s) {
     let empty = true;
     let neg;
 
-    while (ljstype.lisspace(s.charAt(0))) s = s.slice(1);  /* skip initial spaces */
-    neg = s.charAt(0) === '-';
+    while (ljstype.lisspace(s[0])) s = s.slice(1);  /* skip initial spaces */
+    neg = s[0] === '-';
 
-    if (neg || s.charAt(0) === '+')
+    if (neg || s[0] === '+')
         s = s.slice(1);
 
     if (s[0] === '0' && (s[1] === 'x' || s[1] === 'X')) {  /* hex? */
         s = s.slice(2);  /* skip '0x' */
 
-        for (; ljstype.lisxdigit(s); s = s.slice(1)) {
+        for (; ljstype.lisxdigit(s[0]); s = s.slice(1)) {
             a = a * 16 + luaO_hexavalue(s);
             empty = false;
         }
     } else {  /* decimal */
-        for (; ljstype.lisdigit(s); s = s.slice(1)) {
-            let d = parseInt(s.charAt(0));
+        for (; ljstype.lisdigit(s[0]); s = s.slice(1)) {
+            let d = parseInt(s[0]);
             if (a >= MAXBY10 && (a > MAXBY10 || d > MAXLASTD + neg))  /* overflow? */
                 return null;  /* do not accept it (as integer) */
             a = a * 10 + d;
@@ -317,9 +317,9 @@ const l_str2int = function(s) {
         }
     }
 
-    while (ljstype.lisspace(s.charAt(0))) s = s.slice(1);  /* skip trailing spaces */
+    while (ljstype.lisspace(s[0])) s = s.slice(1);  /* skip trailing spaces */
 
-    if (empty || s.charAt(0) !== "") return null;  /* something wrong in the numeral */
+    if (empty)/* TODO: || s[0] !== "") */ return null;  /* something wrong in the numeral */
     else {
         result[1] = neg ? -a : a;
         result[0] = s;
@@ -332,19 +332,17 @@ const luaO_str2num = function(s) {
     let e = s2i[0];
     let i = s2i[1];
 
-    let o;
-    if (e !== null)   /* try as an integer */
-        o = new TValue(CT.LUA_TNUMINT, i);
-    else {   /* else try as a float */
+    if (e !== null) {   /* try as an integer */
+        return new TValue(CT.LUA_TNUMINT, i);;
+    } else {   /* else try as a float */
         s2i = l_str2d(s);
         e = s2i[0];
         i = s2i[1];
 
         if (e !== null) {
-            o = new TValue(CT.LUA_TNUMFLT, i);
+            return new TValue(CT.LUA_TNUMFLT, i);
         } else
             return false;  /* conversion failed */
-        return (e - s) + 1; // TODO: wrong
     }
 };
 
