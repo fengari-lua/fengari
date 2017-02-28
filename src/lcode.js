@@ -14,6 +14,39 @@ const OpCodesI = lopcode.OpCodesI;
 */
 const NO_JUMP = -1;
 
+const BinOpr = {
+    OPR_ADD:      0,
+    OPR_SUB:      1,
+    OPR_MUL:      2,
+    OPR_MOD:      3,
+    OPR_POW:      4,
+    OPR_DIV:      5,
+    OPR_IDIV:     6,
+    OPR_BAND:     7,
+    OPR_BOR:      8,
+    OPR_BXOR:     9,
+    OPR_SHL:      10,
+    OPR_SHR:      11,
+    OPR_CONCAT:   12,
+    OPR_EQ:       13,
+    OPR_LT:       14,
+    OPR_LE:       15,
+    OPR_NE:       16,
+    OPR_GT:       17,
+    OPR_GE:       18,
+    OPR_AND:      19,
+    OPR_OR:       21,
+    OPR_NOBINOPR: 22
+};
+
+const UnOpr = {
+    OPR_MINUS:    0,
+    OPR_BNOT:     1,
+    OPR_NOT:      2,
+    OPR_LEN:      3,
+    OPR_NOUNOPR:  4
+};
+
 /*
 ** Gets the destination address of a jump instruction. Used to traverse
 ** a list of jumps.
@@ -45,9 +78,9 @@ const fixjump = function(fs, pc, dest) {
 const luaK_concat = function(fs, l1, l2) {
     if (l2 === NO_JUMP) return;  /* nothing to concatenate? */
     else if (l1 === NO_JUMP)  /* no original list? */
-        l1[0] = l2;
+        l1 = l2;
     else {
-        let list = l1[0];
+        let list = l1;
         let next = getjump(fs, list);
         while (next !== NO_JUMP) {  /* find last element */
             list = next;
@@ -55,6 +88,8 @@ const luaK_concat = function(fs, l1, l2) {
         }
         fixjump(fs, list, l2);
     }
+
+    return l1;
 };
 
 /*
@@ -67,7 +102,7 @@ const luaK_jump = function (fs) {
     let jpc = fs.jpc;  /* save list of jumps to here */
     fs.jpc = NO_JUMP;  /* no more jumps to here */
     let j = luaK_codeAsBx(fs, OpCodesI.OP_JMP, 0, NO_JUMP);
-    luaK_concat(fs, j, jpc);  /* keep them on hold */
+    j = luaK_concat(fs, j, jpc);  /* keep them on hold */
     return j;
 };
 
@@ -142,7 +177,7 @@ const patchlistaux = function(fs, list, vtarget, reg, dtarget) {
 */
 const luaK_patchtohere = function(fs, list) {
     luaK_getlabel(fs);  /* mark "here" as a jump target */
-    luaK_concat(fs, fs.jpc, list);
+    fs.jpc = luaK_concat(fs, fs.jpc, list);
 };
 
 /*
@@ -212,7 +247,10 @@ const luaK_codeAsBx = function(fs,o,A,sBx) {
     return luaK_codeABx(fs, o, A, (sBx) + lopcode.MAXARG_sBx);
 };
 
+module.exports.BinOpr           = BinOpr;
 module.exports.NO_JUMP          = NO_JUMP;
+module.exports.UnOpr            = UnOpr;
+module.exports.luaK_codeABC     = luaK_codeABC;
 module.exports.luaK_codeABx     = luaK_codeABx;
 module.exports.luaK_codeAsBx    = luaK_codeAsBx;
 module.exports.luaK_getlabel    = luaK_getlabel;

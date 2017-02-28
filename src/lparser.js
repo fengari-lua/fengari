@@ -3,17 +3,22 @@
 
 const assert = require('assert');
 
-const lua     = require('./lua.js');
-const llex    = require('./llex.js');
-const lfunc   = require('./lfunc.js');
-const lobject = require('./lobject.js');
-const lcode   = require('./lcode.js');
-const R       = llex.RESERVED;
-const TValue  = lobject.TValue;
-const CT      = lua.constants_type;
-const Table   = lobject.Table;
-const Proto   = lfunc.Proto;
-const UpVal   = lfunc.UpVal;
+const lcode    = require('./lcode.js');
+const lfunc    = require('./lfunc.js');
+const llex     = require('./llex.js');
+const llimit   = require('./llimit.js');
+const lobject  = require('./lobject.js');
+const lopcode  = require('./lopcode.js');
+const lua      = require('./lua.js');
+const BinOpr   = lcode.BinOpr;
+const CT       = lua.constants_type;
+const OpCodesI = lopcode.OpCodesI;
+const Proto    = lfunc.Proto;
+const R        = llex.RESERVED;
+const TValue   = lobject.TValue;
+const Table    = lobject.Table;
+const UnOpr    = lcode.UnOpr;
+const UpVal    = lfunc.UpVal;
 
 class BlockCnt {
     constructor() {
@@ -109,15 +114,59 @@ const checklimit = function(fs, v, l, what) {
     if (v > l) errorlimit(fs, l, what);
 };
 
+const testnext = function(ls, c) {
+    if (ls.t.token === c) {
+        llex.luaX_next(ls);
+        return true;
+    }
+
+    return false;
+};
+
 const check = function(ls, c) {
     if (ls.t.token !== c)
         error_expected(ls, c);
+};
+
+const checknext = function(ls, c) {
+    check(ls, c);
+    llex.luaX_next(ls);
+};
+
+const check_condition = function(ls, c, msg) {
+    if (!c)
+        llex.luaX_syntaxerror(ls, msg);
+};
+
+const check_match = function(ls, what, who, where) {
+    if (!testnext(ls, what)) {
+        if (where === ls.linenumber)
+            error_expected(ls, what);
+        else
+            llex.luaX_syntaxerror(ls,
+                `${llex.luaX_token2str(ls, what)} expected (to close ${llex.luaX_token2str(ls, who)} at line ${where}`);
+    }
+};
+
+const str_checkname = function(ls) {
+    check(ls, R.TK_NAME);
+    let ts = ls.t.seminfo.ts;
+    llex.luaX_next(ls);
+    return ts;
 };
 
 const init_exp = function(e, k, i) {
     e.f = e.t = lcode.NO_JUMP;
     e.k = k;
     e.u.info = i;
+};
+
+const codestring = function(ls, e, s) {
+    init_exp(e, expkind.VK, lcode.luaK_stringK(ls.fs, s));
+};
+
+const checkname = function(ls, e) {
+    codestring(ls, e, str_checkname(ls));
 };
 
 const getlocvar = function(fs, i) {
@@ -140,6 +189,16 @@ const newupvalue = function(fs, name, v) {
     f.upvalues[fs.nups].idx = v.u.info;
     f.upvalues[fs.nups].name = name;
     return fs.nups++;
+};
+
+const enterlevel = function(ls) {
+    let L = ls.L;
+    ++L.nCcalls;
+    checklimit(ls.fs, L.nCcalls, llimit.LUAI_MAXCCALLS, "JS levels");
+};
+
+const leavelevel = function(ls) {
+    return ls.L.nCcalls--;
 };
 
 const closegoto = function(ls, g, label) {
@@ -311,6 +370,401 @@ const close_func = function(ls) {
     lcode.luaK_ret(fs, 0, 0);  /* final return */
     leaveblock(fs);
     ls.fs = fs.prev;
+};
+
+/*============================================================*/
+/* GRAMMAR RULES */
+/*============================================================*/
+
+const statlist = function(ls) {
+    /* statlist -> { stat [';'] } */
+    while (!block_follow(ls, 1)) {
+        if (ls.t.token === R.TK_RETURN) {
+            statement(ls);
+            return;  /* 'return' must be last statement */
+        }
+        statement(ls);
+    }
+};
+
+const yindex = function(ls, v) {
+    /* index -> '[' expr ']' */
+    llex.luaX_next(ls);  /* skip the '[' */
+    expr(ls, v);
+    lcode.luaK_exp2val(ls.fs, v);
+    checknext(ls, ']');
+};
+
+/*
+** {======================================================================
+** Rules for Constructors
+** =======================================================================
+*/
+
+class ConsControl {
+    constructor() {
+        this.v = new expdesc(); /* last list item read */
+        this.t = new expdesc(); /* table descriptor */
+        this.nh = NaN;          /* total number of 'record' elements */
+        this.na = NaN;          /* total number of array elements */
+        this.tostore = NaN;     /* number of array elements pending to be stored */
+    }
+}
+
+const recfield = function(ls, cc) {
+    /* recfield -> (NAME | '['exp1']') = exp1 */
+    let fs = ls.fs;
+    let reg = ls.fs.freereg;
+    let key = new expdesc();
+    let val = new expdesc();
+
+    if (ls.t.token === R.TK_NAME) {
+        checklimit(fs, cc.nh, Number.MAX_SAFE_INTEGER, "items in a constructor");
+        checkname(ls, key);
+    } else  /* ls->t.token == '[' */
+        yindex(ls, key);
+    cc.nh++;
+    checknext(ls, '=');
+    let rkkey = lcode.luaK_exp2RK(fs, key);
+    expr(ls, val);
+    lcode.luaK_codeABC(fs, OpCodesI.OP_SETTABLE, cc.t.u.info, rkkey, lcode.luaK_exp2RK(fs, val));
+    fs.freereg = reg;  /* free registers */
+};
+
+const closelistfield = function(fs, cc) {
+    if (cc.v.k === expkind.VVOID) return;  /* there is no list item */
+    lcode.luaK_exp2nextreg(fs, cc.v);
+    cc.v.k = expkind.VVOID;
+    if (cc.tostore === lopcode.LFIELDS_PER_FLUSH) {
+        luaK_setlist(fs, cc.t.u.info, cc.na, cc.tostore);  /* flush */
+        cc.tostore = 0;  /* no more items pending */
+    }
+};
+
+const lastlistfield = function(fs, cc) {
+    if (cc.tostore === 0) return;
+    if (hasmultret(cc.v.k)) {
+        lcode.luaK_setmultret(fs, cc.v);
+        lcode.luaK_setlist(fs, cc.t.u.info, cc.na, lua.LUA_MULTRET);
+        cc.na--;  /* do not count last expression (unknown number of elements) */
+    } else {
+        if (cc.v.k !== expkind.VVOID)
+            lcode.luaK_exp2nextreg(fs, cc.v);
+        lcode.luaK_setlist(fs, cc.t.u.info, cc.na, cc.tostore);
+    }
+};
+
+const listfield = function(ls, cc) {
+    /* listfield -> exp */
+    expr(ls, cc.v);
+    checklimit(ls.fs, cc.na, Number.MAX_SAFE_INTEGER, "items in a constructor");
+    cc.na++;
+    cc.tostore++;
+};
+
+const field = function(ls, cc) {
+    /* field -> listfield | recfield */
+    switch (ls.t.token) {
+        case R.TK_NAME: {  /* may be 'listfield' or 'recfield' */
+            if (llex.luaX_lookahead(ls) !== '=')  /* expression? */
+                listfield(ls, cc);
+            else
+                recfield(ls, cc);
+            break;
+        }
+        case '[': {
+            recfield(ls, cc);
+            break;
+        }
+        default: {
+            listfield(ls, cc);
+            break;
+        }
+    }
+};
+
+const constructor = function(ls, t) {
+    /* constructor -> '{' [ field { sep field } [sep] ] '}'
+       sep -> ',' | ';' */
+    let fs = ls.fs;
+    let line = ls.linenumber;
+    let pc = lcode.luaK_codeABC(fs, OpCodesI.OP_NEWTABLE, 0, 0, 0);
+    let cc = new ConsControl();
+    cc.na = cc.nh = cc.tostore = 0;
+    cc.t = t;
+    init_exp(t, expkind.VRELOCABLE, pc);
+    init_exp(cc.v, expkind.VVOID, 0);  /* no value (yet) */
+    lcode.luaK_exp2nextreg(ls.fs, t);  /* fix it at stack top */
+    checknext(ls, '{');
+    do {
+        assert(cc.v.k === expkind.VVOID || cc.tostore > 0);
+        if (ls.t.token === '}') break;
+        closelistfield(fs, cc);
+        field(ls, cc);
+    } while (testnext(ls, ',') || testnext(ls, ';'));
+    check_match(ls, '}', '{', line);
+    lastlistfield(fs, cc);
+    lopcode.SETARG_B(fs.f.code[pc], lobject.luaO_int2fb(cc.na));  /* set initial array size */
+    lopcode.SETARG_C(fs.f.code[pc], lobject.luaO_int2fb(cc.nh));  /* set initial table size */
+};
+
+/*
+** {======================================================================
+** Expression parsing
+** =======================================================================
+*/
+
+const simpleexp = function(ls, v) {
+    /* simpleexp -> FLT | INT | STRING | NIL | TRUE | FALSE | ... |
+       constructor | FUNCTION body | suffixedexp */
+    switch (ls.t.token) {
+        case R.TK_FLT: {
+            init_exp(v, expkind.VFLT, 0);
+            v.u.nval = ls.t.seminfo.r;
+            break;
+        }
+        case R.TK_INT: {
+            init_exp(v, expkind.VKINT, 0);
+            v.u.ival = ls.t.seminfo.i;
+            break;
+        }
+        case R.TK_STRING: {
+            codestring(ls, v, ls.t.seminfo.ts);
+            break;
+        }
+        case R.TK_NIL: {
+            init_exp(v, expkind.VNIL, 0);
+            break;
+        }
+        case R.TK_TRUE: {
+            init_exp(v, expkind.VTRUE, 0);
+            break;
+        }
+        case R.TK_FALSE: {
+            init_exp(v, expkind.VFALSE, 0);
+            break;
+        }
+        case R.TK_DOTS: {  /* vararg */
+            let fs = ls.fs;
+            check_condition(ls, fs.f.is_vararg, "cannot use '...' outside a vararg function");
+            init_exp(v, expkind.VVARARG, lcode.luaK_codeABC(fs, OpCodesI.OP_VARARG, 0, 1, 0));
+        }
+        case '{': {  /* constructor */
+            constructor(ls, v);
+            return;
+        }
+        case R.TK_FUNCTION: {
+            llex.luaX_next(ls);
+            body(ls, v, 0, ls.linenumber);
+            return;
+        }
+        default: {
+            suffixedexp(ls, v);
+            return;
+        }
+    }
+    llex.luaX_next(ls);
+};
+
+const getunopr = function(op) {
+    switch (op) {
+        case R.TK_NOT: return UnOpr.OPR_NOT;
+        case '-':      return UnOpr.OPR_MINUS;
+        case '~':      return UnOpr.OPR_BNOT;
+        case '#':      return UnOpr.OPR_LEN;
+        default:       return UnOpr.OPR_NOUNOPR;
+    }
+};
+
+const getbinopr = function(op) {
+    switch (op) {
+        case '+':         return BinOpr.OPR_ADD;
+        case '-':         return BinOpr.OPR_SUB;
+        case '*':         return BinOpr.OPR_MUL;
+        case '%':         return BinOpr.OPR_MOD;
+        case '^':         return BinOpr.OPR_POW;
+        case '/':         return BinOpr.OPR_DIV;
+        case R.TK_IDIV:   return BinOpr.OPR_IDIV;
+        case '&':         return BinOpr.OPR_BAND;
+        case '|':         return BinOpr.OPR_BOR;
+        case '~':         return BinOpr.OPR_BXOR;
+        case R.TK_SHL:    return BinOpr.OPR_SHL;
+        case R.TK_SHR:    return BinOpr.OPR_SHR;
+        case R.TK_CONCAT: return BinOpr.OPR_CONCAT;
+        case R.TK_NE:     return BinOpr.OPR_NE;
+        case R.TK_EQ:     return BinOpr.OPR_EQ;
+        case '<':         return BinOpr.OPR_LT;
+        case R.TK_LE:     return BinOpr.OPR_LE;
+        case '>':         return BinOpr.OPR_GT;
+        case R.TK_GE:     return BinOpr.OPR_GE;
+        case R.TK_AND:    return BinOpr.OPR_AND;
+        case R.TK_OR:     return BinOpr.OPR_OR;
+        default:          return BinOpr.OPR_NOBINOPR;
+    }
+};
+
+const priority = [  /* ORDER OPR */
+    {10, 10}, {10, 10},     /* '+' '-' */
+    {11, 11}, {11, 11},     /* '*' '%' */
+    {14, 13},               /* '^' (right associative) */
+    {11, 11}, {11, 11},     /* '/' '//' */
+    {6, 6}, {4, 4}, {5, 5}, /* '&' '|' '~' */
+    {7, 7}, {7, 7},         /* '<<' '>>' */
+    {9, 8},                 /* '..' (right associative) */
+    {3, 3}, {3, 3}, {3, 3}, /* ==, <, <= */
+    {3, 3}, {3, 3}, {3, 3}, /* ~=, >, >= */
+    {2, 2}, {1, 1}          /* and, or */
+];
+
+const UNARY_PRIORITY = 12;
+
+/*
+** subexpr -> (simpleexp | unop subexpr) { binop subexpr }
+** where 'binop' is any binary operator with a priority higher than 'limit'
+*/
+const subexpr = function(ls, v, limit) {
+    enterlevel(ls);
+    let uop = getunopr(ls.t.token);
+    if (uop !== UnOpr.OPR_NOUNOPR) {
+        let line = ls.linenumber;
+        llex.luaX_next(ls);
+        subexpr(ls, v, UNARY_PRIORITY);
+        lcode.luaK_prefix(ls.fs, uop, v, line);
+    } else
+        simpleexp(ls, v);
+    /* expand while operators have priorities higher than 'limit' */
+    let op = getbinopr(ls.t.token);
+    while (op !== BinOpr.OPR_NOBINOPR && priority[op].left > limit) {
+        let v2 = new expdesc();
+        let line = ls.linenumber;
+        llex.luaX_next(ls);
+        lcode.luaK_infix(ls.fs, op, v);
+        /* read sub-expression with higher priority */
+        let nextop = subexpr(ls, v2, priority[op].right);
+        lcode.luaK_posfix(ls.fs, op, v, v2, line);
+        op = nextop;
+    }
+    leavelevel(ls);
+    return op;  /* return first untreated operator */
+};
+
+const expr = function(ls, v) {
+    subexpr(ls, v, 0);
+}
+
+const test_then_block = function(ls, escapelist) {
+    /* test_then_block -> [IF | ELSEIF] cond THEN block */
+    let bl = new BlockCnt();
+    let fs = ls.fs;
+    let v = new expdesc();
+    let jf;  /* instruction to skip 'then' code (if condition is false) */
+
+    llex.luaX_next(ls);  /* skip IF or ELSEIF */
+    expr(ls, v);  /* read condition */
+    checknext(ls, R.TK_THEN);
+
+    if (ls.t.token === R.TK_GOTO || ls.t.token === R.TK_BREAK) {
+        lcode.luaK_goiffalse(ls.fs, v);  /* will jump to label if condition is true */
+        enterblock(fs, bl, false);  /* must enter block before 'goto' */
+        gotostat(ls, v.t);   /* handle goto/break */
+        skipnoopstat(ls);  /* skip other no-op statements */
+        if (block_follow(ls, 0)) {  /* 'goto' is the entire block? */
+            leaveblock(fs);
+            return;  /* and that is it */
+        } else  /* must skip over 'then' part if condition is false */
+            jf = lcode.luaK_jump(fs);
+    } else {  /* regular case (not goto/break) */
+        lcode.luaK_goiftrue(ls.fs, v);  /* skip over block if condition is false */
+        enterblock(fs, bl, false);
+        jf = v.f;
+    }
+
+    statlist(ls);  /* 'then' part */
+    leaveblock(fs);
+    if (ls.t.token === R.TK_ELSE || ls.t.token === R.TK_ELSEIF)  /* followed by 'else'/'elseif'? */
+        escapelist = lcode.luaK_concat(fs, escapelist, lcode.luaK_jump(fs));  /* must jump over it */
+    lcode.luaK_patchtohere(fs, jf);
+};
+
+const ifstat = function(ls, line) {
+    /* ifstat -> IF cond THEN block {ELSEIF cond THEN block} [ELSE block] END */
+    let fs = ls.fs;
+    let escapelist = lcode.NO_JUMP;  /* exit list for finished parts */
+    test_then_block(ls, escapelist);  /* IF cond THEN block */
+    while (ls.t.token === R.TK_ELSEIF)
+        test_then_block(ls, escapelist);  /* ELSEIF cond THEN block */
+    if (testnext(ls, R.TK_ELSE))
+        block(ls);  /* 'else' part */
+    check_match(ls, R.TK_END, R.TK_IF, line);
+    lcode.luaK_patchtohere(fs, escapelist);  /* patch escape list to 'if' end */
+};
+
+const statement = function(ls) {
+    let line = ls.linenumber;  /* may be needed for error messages */
+    enterlevel(ls);
+    switch(ls.t.token) {
+        case ';': {  /* stat -> ';' (empty statement) */
+            llex.luaX_next(ls);  /* skip ';' */
+            break;
+        }
+        case R.TK_IF: {  /* stat -> ifstat */
+            ifstat(ls, line);
+            break;
+        }
+        case R.TK_WHILE: {  /* stat -> whilestat */
+            whilestat(ls, line);
+            break;
+        }
+        case R.TK_DO: {  /* stat -> DO block END */
+            llex.luaX_next(ls);  /* skip DO */
+            block(ls);
+            check_match(ls, R.TK_END, R.TK_DO, line);
+            break;
+        }
+        case R.TK_FOR: {  /* stat -> forstat */
+            forstat(ls, line);
+            break;
+        }
+        case R.TK_REPEAT: {  /* stat -> repeatstat */
+            repeatstat(ls, line);
+            break;
+        }
+        case R.TK_FUNCTION: {  /* stat -> funcstat */
+            funcstat(ls, line);
+            break;
+        }
+        case R.TK_LOCAL: {  /* stat -> localstat */
+            llex.luaX_next(ls);  /* skip LOCAL */
+            if (testnext(ls, R.TK_FUNCTION))  /* local function? */
+                localfunc(ls);
+            else
+                localstat(ls);
+            break;
+        }
+        case R.TK_DBCOLON: {  /* stat -> label */
+            llex.luaX_next(ls);  /* skip double colon */
+            labelstat(ls, str_checkname(ls), line);
+            break;
+        }
+        case R.TK_RETURN: {  /* skip double colon */
+            llex.luaX_next(ls);  /* skip RETURN */
+            retstat(ls);
+            break;
+        }
+        case R.TK_BREAK:   /* stat -> breakstat */
+        case R.TK_GOTO: {  /* stat -> 'goto' NAME */
+            gotostat(ls, lcode.luaK_jump(ls.fs));
+            break;
+        }
+        default: {  /* stat -> func | assignment */
+            exprstat(ls);
+            break;
+        }
+    }
+
+    assert(ls.fs.f.maxstacksize >= ls.fs.freereg && ls.fs.freereg >= ls.fs.nactvar);
+    ls.fs.freereg = ls.fs.nactvar;  /* free registers */
+    leavelevel(ls);
 };
 
 /*

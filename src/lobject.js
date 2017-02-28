@@ -346,12 +346,32 @@ const luaO_str2num = function(s) {
     }
 };
 
+/*
+** converts an integer to a "floating point byte", represented as
+** (eeeeexxx), where the real value is (1xxx) * 2^(eeeee - 1) if
+** eeeee != 0 and (xxx) otherwise.
+*/
+int luaO_int2fb (unsigned int x) {
+    int e = 0;  /* exponent */
+    if (x < 8) return x;
+    while (x >= (8 << 4)) {  /* coarse steps */
+        x = (x + 0xf) >> 4;  /* x = ceil(x / 16) */
+        e += 4;
+    }
+    while (x >= (8 << 1)) {  /* fine steps */
+        x = (x + 1) >> 1;  /* x = ceil(x / 2) */
+        e++;
+    }
+    return ((e+1) << 3) | (x - 8);
+}
+
 module.exports.CClosure       = CClosure;
 module.exports.LClosure       = LClosure;
-module.exports.TValue         = TValue;
-module.exports.Table          = Table;
-module.exports.UTF8BUFFSZ     = UTF8BUFFSZ;
 module.exports.luaO_chunkid   = luaO_chunkid;
 module.exports.luaO_hexavalue = luaO_hexavalue;
+module.exports.luaO_int2fb    = luaO_int2fb;
 module.exports.luaO_str2num   = luaO_str2num;
 module.exports.luaO_utf8desc  = luaO_utf8desc;
+module.exports.Table          = Table;
+module.exports.TValue         = TValue;
+module.exports.UTF8BUFFSZ     = UTF8BUFFSZ;
