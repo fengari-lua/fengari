@@ -22,7 +22,7 @@ const UpVal    = lfunc.UpVal;
 const MAXVARS = 200;
 
 const hasmultret = function(k) {
-    return k == expkind.VCALL || k == expkind.VVARARG;
+    return k === expkind.VCALL || k === expkind.VVARARG;
 };
 
 class BlockCnt {
@@ -63,6 +63,10 @@ const expkind = {
 
 const vkisvar = function(k) {
     return expkind.VLOCAL <= k && k <= expkind.VINDEXED;
+};
+
+const vkisinreg = function(k) {
+    return k === expkind.VNONRELOC || k === expkind.VLOCAL;
 };
 
 class expdesc {
@@ -586,7 +590,7 @@ const recfield = function(ls, cc) {
     if (ls.t.token === R.TK_NAME) {
         checklimit(fs, cc.nh, Number.MAX_SAFE_INTEGER, "items in a constructor");
         checkname(ls, key);
-    } else  /* ls->t.token == '[' */
+    } else  /* ls->t.token === '[' */
         yindex(ls, key);
     cc.nh++;
     checknext(ls, '=');
@@ -1334,9 +1338,9 @@ const funcname = function(ls, v) {
     /* funcname -> NAME {fieldsel} [':' NAME] */
     let ismethod = 0;
     singlevar(ls, v);
-    while (ls.t.token == '.')
+    while (ls.t.token === '.')
         fieldsel(ls, v);
-    if (ls.t.token == ':') {
+    if (ls.t.token === ':') {
         ismethod = 1;
         fieldsel(ls, v);
     }
@@ -1392,7 +1396,7 @@ const retstat = function(ls) {
             else {
                 lcode.luaK_exp2nextreg(fs, e);  /* values must go to the stack */
                 first = fs.nactvar;  /* return all active values */
-                assert(nret == fs.freereg - first);
+                assert(nret === fs.freereg - first);
             }
         }
     }
@@ -1507,4 +1511,6 @@ const luaY_parser = function(L, z, buff, dyd, name, firstchar) {
 };
 
 
+module.exports.expkind     = expkind;
 module.exports.luaY_parser = luaY_parser;
+module.exports.vkisinreg   = vkisinreg;

@@ -90,7 +90,7 @@ const luaB_rawset = function(L) {
 
 const luaB_type = function(L) {
     let t = lapi.lua_type(L, 1);
-    lauxlib.luaL_argcheck(L, t != CT.LUA_TNONE, 1, "value expected");
+    lauxlib.luaL_argcheck(L, t !== CT.LUA_TNONE, 1, "value expected");
     lapi.lua_pushstring(L, lapi.lua_typename(L, t));
     return 1;
 };

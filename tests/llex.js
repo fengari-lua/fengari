@@ -45,7 +45,7 @@ test('basic lexing: TK_RETURN, TK_STRING', function (t) {
         readTokens,
         [R.TK_RETURN, R.TK_STRING],
         "Correct tokens found"
-    )
+    );
 
 });
 
@@ -93,6 +93,6 @@ test('TK_LOCAL, TK_NAME, TK_INT', function (t) {
             R.TK_RETURN, R.TK_NAME, '(', R.TK_STRING, ')', '+', R.TK_INT
         ],
         "Correct tokens found"
-    )
+    );
 
 });

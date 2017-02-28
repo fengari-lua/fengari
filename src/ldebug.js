@@ -60,7 +60,7 @@ const upvalname = function(p, uv) {
 };
 
 const funcinfo = function(ar, cl) {
-    if (cl === null || cl.type == CT.LUA_TCCL) {
+    if (cl === null || cl.type === CT.LUA_TCCL) {
         ar.source = "=[JS]";
         ar.linedefined = -1;
         ar.lastlinedefined = -1;
@@ -77,7 +77,7 @@ const funcinfo = function(ar, cl) {
 };
 
 const collectvalidlines = function(L, f) {
-    if (f === null || f.c.type == CT.LUA_TCCL) {
+    if (f === null || f.c.type === CT.LUA_TCCL) {
         L.stack[L.top++] = ldo.nil;
         assert(L.top <= L.ci.top, "stack overflow");
     } else {
@@ -123,7 +123,7 @@ const auxgetinfo = function(L, what, ar, f, ci) {
             }
             case 'u': {
                 ar.nups = f === null ? 0 : f.c.nupvalues;
-                if (f === null || f.c.type == CT.LUA_TCCL) {
+                if (f === null || f.c.type === CT.LUA_TCCL) {
                     ar.isvararg = true;
                     ar.nparams = 0;
                 } else {

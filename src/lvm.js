@@ -792,6 +792,10 @@ const luaV_equalobj = function(L, t1, t2) {
     return L.stack[L.top].l_isfalse() ? 0 : 1;
 };
 
+const luaV_rawequalobj = function(t1, t2) {
+    return luaV_equalobj(null, t1, t2);
+};
+
 const forlimit = function(obj, step) {
     let stopnow = false;
     let ilimit = luaV_tointeger(obj, step < 0 ? 2 : 1);
@@ -818,9 +822,9 @@ const forlimit = function(obj, step) {
 
 /*
 ** try to convert a value to an integer, rounding according to 'mode':
-** mode == 0: accepts only integral values
-** mode == 1: takes the floor of the number
-** mode == 2: takes the ceil of the number
+** mode === 0: accepts only integral values
+** mode === 1: takes the floor of the number
+** mode === 2: takes the ceil of the number
 */
 const luaV_tointeger = function(obj, mode) {
     if (obj.ttisfloat()) {
@@ -831,7 +835,7 @@ const luaV_tointeger = function(obj, mode) {
             if (mode === 0)
                 return false;  /* fails if mode demands integral value */
             else if (mode > 1)  /* needs ceil? */
-                f += 1;  /* convert floor to ceil (remember: n != f) */
+                f += 1;  /* convert floor to ceil (remember: n !== f) */
         }
 
         return f|0;
@@ -1072,29 +1076,30 @@ const luaV_finishset = function(L, t, key, val, slot, recur) {
 }
 
 
-module.exports.dojump         = dojump;
-module.exports.donextjump     = donextjump;
-module.exports.forlimit       = forlimit;
-module.exports.gettable       = gettable;
-module.exports.l_strcmp       = l_strcmp;
-module.exports.LEintfloat     = LEintfloat;
-module.exports.LEnum          = LEnum;
-module.exports.LTintfloat     = LTintfloat;
-module.exports.LTnum          = LTnum;
-module.exports.luaV_concat    = luaV_concat;
-module.exports.luaV_equalobj  = luaV_equalobj;
-module.exports.luaV_execute   = luaV_execute;
-module.exports.luaV_finishOp  = luaV_finishOp;
-module.exports.luaV_finishset = luaV_finishset;
-module.exports.luaV_lessequal = luaV_lessequal;
-module.exports.luaV_lessthan  = luaV_lessthan;
-module.exports.luaV_objlen    = luaV_objlen;
-module.exports.luaV_tointeger = luaV_tointeger;
-module.exports.RA             = RA;
-module.exports.RB             = RB;
-module.exports.RC             = RC;
-module.exports.RKB            = RKB;
-module.exports.RKC            = RKC;
-module.exports.settable       = settable;
-module.exports.tointeger      = tointeger;
-module.exports.tonumber       = tonumber;
+module.exports.LEintfloat        = LEintfloat;
+module.exports.LEnum             = LEnum;
+module.exports.LTintfloat        = LTintfloat;
+module.exports.LTnum             = LTnum;
+module.exports.RA                = RA;
+module.exports.RB                = RB;
+module.exports.RC                = RC;
+module.exports.RKB               = RKB;
+module.exports.RKC               = RKC;
+module.exports.dojump            = dojump;
+module.exports.donextjump        = donextjump;
+module.exports.forlimit          = forlimit;
+module.exports.gettable          = gettable;
+module.exports.l_strcmp          = l_strcmp;
+module.exports.luaV_concat       = luaV_concat;
+module.exports.luaV_equalobj     = luaV_equalobj;
+module.exports.luaV_execute      = luaV_execute;
+module.exports.luaV_finishOp     = luaV_finishOp;
+module.exports.luaV_finishset    = luaV_finishset;
+module.exports.luaV_lessequal    = luaV_lessequal;
+module.exports.luaV_lessthan     = luaV_lessthan;
+module.exports.luaV_objlen       = luaV_objlen;
+module.exports.luaV_rawequalobj = luaV_rawequalobj;
+module.exports.luaV_tointeger    = luaV_tointeger;
+module.exports.settable          = settable;
+module.exports.tointeger         = tointeger;
+module.exports.tonumber          = tonumber;

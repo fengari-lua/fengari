@@ -4,6 +4,9 @@
 const assert = require('assert');
 
 const ljstype = require('./ljstype.js');
+const ltm     = require('./ltm.js');
+const lua     = require('./lua.js');
+const lvm     = require('./lvm.js');
 const CT      = require('./lua.js').constant_types;
 const UpVal   = require('./lfunc.js').UpVal;
 
@@ -125,6 +128,7 @@ class Table extends TValue {
         // Those lua values are used by value, others by reference
         if (key instanceof TValue
             && [CT.LUA_TNIL,
+                CT.LUA_TBOOLEAN,
                 CT.LUA_TSTRING,
                 CT.LUA_TSHRSTR,
                 CT.LUA_TLNGSTR,
@@ -349,7 +353,7 @@ const luaO_str2num = function(s) {
 /*
 ** converts an integer to a "floating point byte", represented as
 ** (eeeeexxx), where the real value is (1xxx) * 2^(eeeee - 1) if
-** eeeee != 0 and (xxx) otherwise.
+** eeeee !== 0 and (xxx) otherwise.
 */
 const luaO_int2fb = function(x) {
     let e = 0;  /* exponent */
@@ -365,13 +369,90 @@ const luaO_int2fb = function(x) {
     return ((e+1) << 3) | (x - 8);
 };
 
+const intarith = function(L, op, v1, v2) {
+    switch (op) {
+        case lua.LUA_OPADD:  return (v1 + v2)|0;
+        case lua.LUA_OPSUB:  return (v1 - v2)|0;
+        case lua.LUA_OPMUL:  return (v1 * v2)|0;
+        case lua.LUA_OPMOD:  return (v1 % v2)|0;
+        case lua.LUA_OPIDIV: return (v1 / v2)|0;
+        case lua.LUA_OPBAND: return (v1 & v2)|0;
+        case lua.LUA_OPBOR:  return (v1 | v2)|0;
+        case lua.LUA_OPBXOR: return (v1 ^ v2)|0;
+        case lua.LUA_OPSHL:  return (v1 << v2)|0;
+        case lua.LUA_OPSHR:  return (v1 >> v2)|0;
+        case lua.LUA_OPUNM:  return (-v1)|0;
+        case lua.LUA_OPBNOT: return (~v1)|0;
+    }
+};
+
+
+const numarith = function(L, op, v1, v2) {
+    switch (op) {
+        case lua.LUA_OPADD:  return v1 + v2;
+        case lua.LUA_OPSUB:  return v1 - v2;
+        case lua.LUA_OPMUL:  return v1 * v2;
+        case lua.LUA_OPDIV:  return v1 / v2;
+        case lua.LUA_OPPOW:  return Math.pow(v1, v2);
+        case lua.LUA_OPIDIV: return (v1 / v2)|0;
+        case lua.LUA_OPUNM:  return -v1;
+        case lua.LUA_OPMOD:  return v1 % v2;
+    }
+};
+
+const luaO_arith = function(L, op, p1, p2, res) {
+    switch (op) {
+        case lvm.LUA_OPBAND: case lvm.LUA_OPBOR: case lvm.LUA_OPBXOR:
+        case lvm.LUA_OPSHL: case lvm.LUA_OPSHR:
+        case lvm.LUA_OPBNOT: {  /* operate only on integers */
+            let i1 = lvm.tointeger(p1);
+            let i2 = lvm.tointeger(p2);
+            if (i1 !== false && i2 !== false) {
+                res.type  = CT.LUA_TNUMINT;
+                res.value = intarith(L, op, i1, i2);
+                return;
+            }
+            else break;  /* go to the end */
+        }
+        case lvm.LUA_OPDIV: case lvm.LUA_OPPOW: {  /* operate only on floats */
+            let n1 = lvm.tonumber(p1);
+            let n2 = lvm.tonumber(p2);
+            if (n1 !== false && n2 !== false) {
+                res.type  = CT.LUA_TNUMFLT;
+                res.value = numarith(L, op, n1, n2);
+                return;
+            }
+            else break;  /* go to the end */
+        }
+        default: {  /* other operations */
+            let n1 = lvm.tonumber(p1);
+            let n2 = lvm.tonumber(p2);
+            if (p1.ttisinteger() && p2.ttisinteger()) {
+                res.type  = CT.LUA_TNUMINT;
+                res.value = intarith(L, op, p1.value, p2.value);
+                return;
+            }
+            else if (n1 !== false && n2 !== false) {
+                res.type  = CT.LUA_TNUMFLT;
+                res.value = numarith(L, op, n1, n2);
+                return;
+            }
+            else break;  /* go to the end */
+        }
+    }
+    /* could not perform raw operation; try metamethod */
+    assert(L !== null);  /* should not fail when folding (compile time) */
+    ltm.luaT_trybinTM(L, p1, p2, res, (op - lua.LUA_OPADD) + ltm.TMS.TM_ADD);
+};
+
 module.exports.CClosure       = CClosure;
 module.exports.LClosure       = LClosure;
+module.exports.TValue         = TValue;
+module.exports.Table          = Table;
+module.exports.UTF8BUFFSZ     = UTF8BUFFSZ;
+module.exports.luaO_arith     = luaO_arith;
 module.exports.luaO_chunkid   = luaO_chunkid;
 module.exports.luaO_hexavalue = luaO_hexavalue;
 module.exports.luaO_int2fb    = luaO_int2fb;
 module.exports.luaO_str2num   = luaO_str2num;
 module.exports.luaO_utf8desc  = luaO_utf8desc;
-module.exports.Table          = Table;
-module.exports.TValue         = TValue;
-module.exports.UTF8BUFFSZ     = UTF8BUFFSZ;

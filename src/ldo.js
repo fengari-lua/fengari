@@ -509,7 +509,7 @@ const f_parser = function(L, data) {
     let p = new BytecodeParser(data);
     let cl = p.luaU_undump(L);
 
-    assert(cl.nupvalues == cl.p.upvalues.length);
+    assert(cl.nupvalues === cl.p.upvalues.length);
 
     lfunc.luaF_initupvals(L, cl);
 };

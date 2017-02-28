@@ -62,6 +62,25 @@ constant_types.LUA_TLCL = constant_types.LUA_TFUNCTION | (0 << 4);  /* Lua closu
 constant_types.LUA_TLCF = constant_types.LUA_TFUNCTION | (1 << 4);  /* light C function */
 constant_types.LUA_TCCL = constant_types.LUA_TFUNCTION | (2 << 4);  /* C closure */
 
+/*
+** Comparison and arithmetic functions
+*/
+
+const LUA_OPADD  = 0;   /* ORDER TM, ORDER OP */
+const LUA_OPSUB  = 1;
+const LUA_OPMUL  = 2;
+const LUA_OPMOD  = 3;
+const LUA_OPPOW  = 4;
+const LUA_OPDIV  = 5;
+const LUA_OPIDIV = 6;
+const LUA_OPBAND = 7;
+const LUA_OPBOR  = 8;
+const LUA_OPBXOR = 9;
+const LUA_OPSHL  = 10;
+const LUA_OPSHR  = 11;
+const LUA_OPUNM  = 12;
+const LUA_OPBNOT = 13;
+
 const LUA_OPEQ = 0;
 const LUA_OPLT = 1;
 const LUA_OPLE = 2;
@@ -121,9 +140,23 @@ module.exports.LUA_INIT_VAR            = LUA_INIT_VAR;
 module.exports.LUA_MINSTACK            = LUA_MINSTACK;
 module.exports.LUA_MULTRET             = -1;
 module.exports.LUA_NUMTAGS             = LUA_NUMTAGS;
+module.exports.LUA_OPADD               = LUA_OPADD;
+module.exports.LUA_OPBAND              = LUA_OPBAND;
+module.exports.LUA_OPBNOT              = LUA_OPBNOT;
+module.exports.LUA_OPBOR               = LUA_OPBOR;
+module.exports.LUA_OPBXOR              = LUA_OPBXOR;
+module.exports.LUA_OPDIV               = LUA_OPDIV;
 module.exports.LUA_OPEQ                = LUA_OPEQ;
+module.exports.LUA_OPIDIV              = LUA_OPIDIV;
 module.exports.LUA_OPLE                = LUA_OPLE;
 module.exports.LUA_OPLT                = LUA_OPLT;
+module.exports.LUA_OPMOD               = LUA_OPMOD;
+module.exports.LUA_OPMUL               = LUA_OPMUL;
+module.exports.LUA_OPPOW               = LUA_OPPOW;
+module.exports.LUA_OPSHL               = LUA_OPSHL;
+module.exports.LUA_OPSHR               = LUA_OPSHR;
+module.exports.LUA_OPSUB               = LUA_OPSUB;
+module.exports.LUA_OPUNM               = LUA_OPUNM;
 module.exports.LUA_REGISTRYINDEX       = LUA_REGISTRYINDEX;
 module.exports.LUA_RELEASE             = LUA_RELEASE;
 module.exports.LUA_RIDX_GLOBALS        = LUA_RIDX_GLOBALS;

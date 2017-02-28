@@ -149,7 +149,7 @@ const reverse = function(L, from, to) {
 
 /*
 ** Let x = AB, where A is a prefix of length 'n'. Then,
-** rotate x n == BA. But BA == (A^r . B^r)^r.
+** rotate x n === BA. But BA === (A^r . B^r)^r.
 */
 const lua_rotate = function(L, idx, n) {
     let t = L.stack[L.top - 1];
@@ -586,7 +586,7 @@ const f_call = function(L, ud) {
 
 const lua_type = function(L, idx) {
     let o = index2addr(L, idx);
-    return o.ttnov(); // TODO: isvalid ? luaO_nilobject != nil tvalue ?
+    return o.ttnov(); // TODO: isvalid ? luaO_nilobject !== nil tvalue ?
 };
 
 const lua_typename = function(L, t) {
@@ -662,7 +662,7 @@ const lua_callk = function(L, nargs, nresults, ctx, k) {
         ldo.luaD_callnoyield(L, func, nresults);
     }
 
-    if (nresults == lua.LUA_MULTRET && L.ci.top < L.top)
+    if (nresults === lua.LUA_MULTRET && L.ci.top < L.top)
         L.ci.top = L.top;
 };
 
@@ -713,7 +713,7 @@ const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
         status = TS.LUA_OK;
     }
 
-    if (nresults == lua.LUA_MULTRET && L.ci.top < L.top)
+    if (nresults === lua.LUA_MULTRET && L.ci.top < L.top)
         L.ci.top = L.top;
 
     return status;

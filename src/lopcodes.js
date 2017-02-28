@@ -299,7 +299,7 @@ const CREATE_ABx = function(o, a, bc) {
     return fullins(o << POS_OP | a << POS_A | bc << POS_Bx);
 };
 
-const CREATE_Ax = function(o a) {
+const CREATE_Ax = function(o, a) {
     return fullins(o << POS_OP | a << POS_Ax);
 };
 
