@@ -46,6 +46,10 @@ const UnOpr = {
     OPR_NOUNOPR:  4
 };
 
+const getinstruction = function(fs, e) {
+    return fs.f.code[e.u.info];
+};
+
 /*
 ** Gets the destination address of a jump instruction. Used to traverse
 ** a list of jumps.
@@ -249,6 +253,7 @@ const luaK_codeAsBx = function(fs,o,A,sBx) {
 module.exports.BinOpr           = BinOpr;
 module.exports.NO_JUMP          = NO_JUMP;
 module.exports.UnOpr            = UnOpr;
+module.exports.getinstruction   = getinstruction;
 module.exports.luaK_codeABC     = luaK_codeABC;
 module.exports.luaK_codeABx     = luaK_codeABx;
 module.exports.luaK_codeAsBx    = luaK_codeAsBx;

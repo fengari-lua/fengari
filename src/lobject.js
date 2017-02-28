@@ -333,7 +333,7 @@ const luaO_str2num = function(s) {
     let i = s2i[1];
 
     if (e !== null) {   /* try as an integer */
-        return new TValue(CT.LUA_TNUMINT, i);;
+        return new TValue(CT.LUA_TNUMINT, i);
     } else {   /* else try as a float */
         s2i = l_str2d(s);
         e = s2i[0];
@@ -351,8 +351,8 @@ const luaO_str2num = function(s) {
 ** (eeeeexxx), where the real value is (1xxx) * 2^(eeeee - 1) if
 ** eeeee != 0 and (xxx) otherwise.
 */
-int luaO_int2fb (unsigned int x) {
-    int e = 0;  /* exponent */
+const luaO_int2fb = function(x) {
+    let e = 0;  /* exponent */
     if (x < 8) return x;
     while (x >= (8 << 4)) {  /* coarse steps */
         x = (x + 0xf) >> 4;  /* x = ceil(x / 16) */
@@ -363,7 +363,7 @@ int luaO_int2fb (unsigned int x) {
         e++;
     }
     return ((e+1) << 3) | (x - 8);
-}
+};
 
 module.exports.CClosure       = CClosure;
 module.exports.LClosure       = LClosure;
