@@ -1,4 +1,3 @@
-/* jshint esversion: 6 */
 "use strict";
 
 const assert   = require('assert');
@@ -203,7 +202,7 @@ const luaK_patchclose = function(fs, list, level) {
     level++;  /* argument is +1 to reserve 0 as non-op */
     for (; list !== NO_JUMP; list = getjump(fs, list)) {
         let ins = fs.f.code[list];
-        assert(ins.opcode === OpCodesI.OP_JMP && (ins.A === 0 || i.A >= level);
+        assert(ins.opcode === OpCodesI.OP_JMP && (ins.A === 0 || ins.A >= level));
         lopcode.SETARG_A(ins, level);
     }
 };
@@ -237,9 +236,9 @@ const luaK_codeABC = function(fs, o, a, b, c) {
 ** Format and emit an 'iABx' instruction.
 */
 const luaK_codeABx = function(fs, o, a, bc) {
-    lua_assert(lopcode.getOpMode(o) == lopcode.iABx || getOpMode(o) == lopcode.iAsBx);
-    lua_assert(lopcode.getCMode(o) == lopcode.OpArgN);
-    lua_assert(a <= lopcode.MAXARG_A && bc <= lopcode.MAXARG_Bx);
+    assert(lopcode.getOpMode(o) == lopcode.iABx || lopcode.getOpMode(o) == lopcode.iAsBx);
+    assert(lopcode.getCMode(o) == lopcode.OpArgN);
+    assert(a <= lopcode.MAXARG_A && bc <= lopcode.MAXARG_Bx);
     return luaK_code(fs, lopcode.CREATE_ABx(o, a, bc));
 };
 

@@ -1,4 +1,3 @@
-/* jshint esversion: 6 */
 "use strict";
 
 const assert  = require('assert');
@@ -265,7 +264,7 @@ const lexerror = function(ls, msg, token) {
 
 const luaX_syntaxerror = function(ls, msg) {
     lexerror(ls, msg, ls.t.token);
-}
+};
 
 /*
 ** skip a sequence '[=*[' or ']=*]'; if sequence is well formed, return

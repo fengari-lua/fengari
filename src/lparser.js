@@ -1,4 +1,3 @@
-/* jshint esversion: 6 */
 "use strict";
 
 const assert = require('assert');
@@ -19,6 +18,12 @@ const TValue   = lobject.TValue;
 const Table    = lobject.Table;
 const UnOpr    = lcode.UnOpr;
 const UpVal    = lfunc.UpVal;
+
+const MAXVARS = 200;
+
+const hasmultret = function(k) {
+    return k == expkind.VCALL || k == expkind.VVARARG;
+};
 
 class BlockCnt {
     constructor() {
@@ -376,6 +381,16 @@ const close_func = function(ls) {
 /* GRAMMAR RULES */
 /*============================================================*/
 
+const block_follow = function(ls, withuntil) {
+    switch (ls.t.token) {
+        case R.TK_ELSE: case R.TK_ELSEIF:
+        case R.TK_END: case R.TK_EOS:
+            return true;
+        case R.TK_UNTIL: return withuntil;
+        default: return false;
+    }
+};
+
 const statlist = function(ls) {
     /* statlist -> { stat [';'] } */
     while (!block_follow(ls, 1)) {
@@ -436,7 +451,7 @@ const closelistfield = function(fs, cc) {
     lcode.luaK_exp2nextreg(fs, cc.v);
     cc.v.k = expkind.VVOID;
     if (cc.tostore === lopcode.LFIELDS_PER_FLUSH) {
-        luaK_setlist(fs, cc.t.u.info, cc.na, cc.tostore);  /* flush */
+        lcode.luaK_setlist(fs, cc.t.u.info, cc.na, cc.tostore);  /* flush */
         cc.tostore = 0;  /* no more items pending */
     }
 };
@@ -548,6 +563,7 @@ const simpleexp = function(ls, v) {
             let fs = ls.fs;
             check_condition(ls, fs.f.is_vararg, "cannot use '...' outside a vararg function");
             init_exp(v, expkind.VVARARG, lcode.luaK_codeABC(fs, OpCodesI.OP_VARARG, 0, 1, 0));
+            break;
         }
         case '{': {  /* constructor */
             constructor(ls, v);
@@ -604,16 +620,16 @@ const getbinopr = function(op) {
 };
 
 const priority = [  /* ORDER OPR */
-    {10, 10}, {10, 10},     /* '+' '-' */
-    {11, 11}, {11, 11},     /* '*' '%' */
-    {14, 13},               /* '^' (right associative) */
-    {11, 11}, {11, 11},     /* '/' '//' */
-    {6, 6}, {4, 4}, {5, 5}, /* '&' '|' '~' */
-    {7, 7}, {7, 7},         /* '<<' '>>' */
-    {9, 8},                 /* '..' (right associative) */
-    {3, 3}, {3, 3}, {3, 3}, /* ==, <, <= */
-    {3, 3}, {3, 3}, {3, 3}, /* ~=, >, >= */
-    {2, 2}, {1, 1}          /* and, or */
+    {left: 10, right: 10}, {left: 10, right: 10},     /* '+' '-' */
+    {left: 11, right: 11}, {left: 11, right: 11},     /* '*' '%' */
+    {left: 14, right: 13},               /* '^' (right associative) */
+    {left: 11, right: 11}, {left: 11, right: 11},     /* '/' '//' */
+    {left: 6, right: 6}, {left: 4, right: 4}, {left: 5, right: 5}, /* '&' '|' '~' */
+    {left: 7, right: 7}, {left: 7, right: 7},         /* '<<' '>>' */
+    {left: 9, right: 8},                 /* '..' (right associative) */
+    {left: 3, right: 3}, {left: 3, right: 3}, {left: 3, right: 3}, /* ==, <, <= */
+    {left: 3, right: 3}, {left: 3, right: 3}, {left: 3, right: 3}, /* ~=, >, >= */
+    {left: 2, right: 2}, {left: 1, right: 1}          /* and, or */
 ];
 
 const UNARY_PRIORITY = 12;
@@ -650,7 +666,7 @@ const subexpr = function(ls, v, limit) {
 
 const expr = function(ls, v) {
     subexpr(ls, v, 0);
-}
+};
 
 const test_then_block = function(ls, escapelist) {
     /* test_then_block -> [IF | ELSEIF] cond THEN block */
