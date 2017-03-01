@@ -189,3 +189,39 @@ test('CALL', function (t) {
         "Program output is correct"
     );
 });
+
+test('Multiple return', function (t) {
+    let luaCode = `
+        local f = function (a, b)
+            return a + b, a - b, a * b
+        end
+
+        local c
+        local d
+        local e
+
+        c, d, e = f(1,2)
+
+        return c, d, e
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, null, luaCode, "test", "text");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.deepEqual(
+        L.stack.slice(L.top - 3, L.top).map(e => e.value),
+        [3, -1, 2],
+        "Program output is correct"
+    );
+});
