@@ -329,7 +329,7 @@ test('lua_pcall that breaks', function (t) {
     t.doesNotThrow(function () {
 
         let fn = function(L) {
-            return undefined_value;
+            return "undefined_value";
         };
 
         L = lauxlib.luaL_newstate();
@@ -382,7 +382,7 @@ test('lua_load and lua_call it', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lapi.lua_load(L, bc, "test-lua_load")
+        lapi.lua_load(L, null, bc, "test-lua_load", "binary");
 
         lapi.lua_call(L, 0, 1);
 
@@ -409,7 +409,7 @@ test('lua script reads js upvalues', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lapi.lua_load(L, bc, "test-lua_load")
+        lapi.lua_load(L, null, bc, "test-lua_load", "binary");
 
         lapi.lua_pushstring(L, "hello");
         lapi.lua_setglobal(L, "js");

@@ -102,12 +102,16 @@ const luaF_close = function(L, level) {
     }
 };
 
+/*
+** fill a closure with new closed upvalues
+*/
 const luaF_initupvals = function(L, cl) {
     for (let i = 0; i < cl.nupvalues; i++) {
         let uv = new UpVal(L);
         uv.refcount = 1;
         uv.u.value = null;
         uv.v = uv.u.value;
+        cl.upvals[i] = uv;
     }
 };
 

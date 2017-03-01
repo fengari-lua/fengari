@@ -10,7 +10,7 @@ const lparser  = require('./lparser.js');
 const ltm      = require('./ltm.js');
 const lua      = require('./lua.js');
 const lvm      = require('./lvm.js');
-const CT       = lua.constants_type;
+const CT       = lua.CT;
 const OpCodesI = lopcode.OpCodesI;
 const TValue   = lobject.TValue;
 
@@ -483,7 +483,7 @@ const freeexps = function(fs, e1, e2) {
 const addk = function(fs, key, v) {
     let f = fs.f;
     let idx = fs.ls.h.__index(fs.ls.h, key);  /* index scanner table */
-    if (idx) {  /* is there an index there? */
+    if (idx && !idx.ttisnil()) {  /* is there an index there? */
         /* correct value? (warning: must distinguish floats from integers!) */
         if (f.k[idx].ttype() === v.ttype() && f.k[idx].value === v.value)
             return idx;  /* reuse index */
@@ -500,8 +500,7 @@ const addk = function(fs, key, v) {
 ** Add a string to list of constants and return its index.
 */
 const luaK_stringK = function(fs, s) {
-    let o = new TValue(CT.LUA_TLNGSTR, s);
-    return addk(fs, o, o);  /* use string itself as key */
+    return addk(fs, s, s);  /* use string itself as key */
 };
 
 
@@ -512,8 +511,8 @@ const luaK_stringK = function(fs, s) {
 ** are no "precision" problems.
 */
 const luaK_intK = function(fs, n) {
-    let k = new TValue(CT.LUA_TLNGSTR, `n`);
-    let o = new TValue(CT.LUA_TNUMINT, n);
+    let k = new TValue(CT.LUA_TLNGSTR, `${n.value}`);
+    let o = new TValue(CT.LUA_TNUMINT, n.value);
     return addk(fs, k, o);
 };
 
@@ -521,8 +520,7 @@ const luaK_intK = function(fs, n) {
 ** Add a float to list of constants and return its index.
 */
 const luaK_numberK = function(fs, r) {
-    let o = new TValue(CT.LUA_TNUMFLT, r);
-    return addk(fs, o, o);  /* use number itself as key */
+    return addk(fs, r, r);  /* use number itself as key */
 };
 
 
@@ -530,8 +528,7 @@ const luaK_numberK = function(fs, r) {
 ** Add a boolean to list of constants and return its index.
 */
 const boolK = function(fs, b) {
-    let o = new TValue(CT.LUA_TBOOLEAN, b);
-    return addk(fs, o, o);  /* use boolean itself as key */
+    return addk(fs, b, b);  /* use boolean itself as key */
 };
 
 
@@ -539,8 +536,7 @@ const boolK = function(fs, b) {
 ** Add nil to list of constants and return its index.
 */
 const nilK = function(fs) {
-    let o = new TValue(CT.LUA_TNIL, null);
-    return addk(fs, o, o);
+    return addk(fs, new TValue(CT.LUA_TLNGSTR, `null`), new TValue(CT.LUA_TNIL, null));
 };
 
 /*

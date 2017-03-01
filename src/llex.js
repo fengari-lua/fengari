@@ -453,7 +453,7 @@ const read_string = function(ls, del, seminfo) {
         }
     }
     save_and_next(ls);  /* skip delimiter */
-    seminfo.ts = new TValue(CT.LUA_TLNGSTR, ls.buff.buffer.slice(1).join(''));
+    seminfo.ts = new TValue(CT.LUA_TLNGSTR, ls.buff.buffer.slice(1, ls.buff.buffer.length-1).join(''));
 };
 
 const isreserved = function(w) {
@@ -566,7 +566,7 @@ const llex = function(ls, seminfo) {
 
                     let ts = new TValue(CT.LUA_TLNGSTR, ls.buff.buffer.join(''));
                     seminfo.ts = ts;
-                    let kidx = luaX_tokens.slice(0, 22).indexOf(ts.value)
+                    let kidx = luaX_tokens.slice(0, 22).indexOf(ts.value);
                     if (kidx >= 0)  /* reserved word? */
                         return kidx + FIRST_RESERVED;
                     else

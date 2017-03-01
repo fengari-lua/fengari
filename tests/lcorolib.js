@@ -40,7 +40,7 @@ test('coroutine.create, coroutine.yield, coroutine.resume', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-coroutine");
+        lapi.lua_load(L, null, bc, "test-coroutine", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -83,7 +83,7 @@ test('coroutine.status', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-coroutine.status");
+        lapi.lua_load(L, null, bc, "test-coroutine.status", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -124,7 +124,7 @@ test('coroutine.isyieldable', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-coroutine.isyieldable");
+        lapi.lua_load(L, null, bc, "test-coroutine.isyieldable", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -165,7 +165,7 @@ test('coroutine.running', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-coroutine.running");
+        lapi.lua_load(L, null, bc, "test-coroutine.running", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -206,7 +206,7 @@ test('coroutine.wrap', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-coroutine.wrap");
+        lapi.lua_load(L, null, bc, "test-coroutine.wrap", "binary");
 
         lapi.lua_call(L, 0, -1);
 

@@ -28,8 +28,10 @@ const FENGARI_RELEASE         = FENGARI_VERSION + "." + FENGARI_VERSION_RELEASE;
 const FENGARI_COPYRIGHT       = FENGARI_RELEASE + "  Copyright (C) 2017 Benoît Giannangeli\nBased on: " + LUA_COPYRIGHT;
 const FENGARI_AUTHORS         = "B. Giannangeli";
 
+const LUA_VERSUFFIX           = "_" + LUA_VERSION_MAJOR + "_" + LUA_VERSION_MINOR;
+
 const LUA_INIT_VAR            = "LUA_INIT";
-const LUA_INITVARVERSION      = LUA_INIT_VAR + lualib.LUA_VERSUFFIX;
+const LUA_INITVARVERSION      = LUA_INIT_VAR + LUA_VERSUFFIX;
 
 const thread_status = {
     LUA_OK:        0,
@@ -54,6 +56,8 @@ const constant_types = {
     LUA_TTHREAD:        8,
     LUA_NUMTAGS:        9
 };
+
+const CT = constant_types;
 
 constant_types.LUA_TSHRSTR = constant_types.LUA_TSTRING | (0 << 4);  /* short strings */
 constant_types.LUA_TLNGSTR = constant_types.LUA_TSTRING | (1 << 4);  /* long strings */
@@ -128,6 +132,7 @@ class lua_Debug {
 
 }
 
+module.exports.CT                      = CT;
 module.exports.FENGARI_AUTHORS         = FENGARI_AUTHORS;
 module.exports.FENGARI_COPYRIGHT       = FENGARI_COPYRIGHT;
 module.exports.FENGARI_RELEASE         = FENGARI_RELEASE;
@@ -171,6 +176,7 @@ module.exports.LUA_VERSION_MAJOR       = LUA_VERSION_MAJOR;
 module.exports.LUA_VERSION_MINOR       = LUA_VERSION_MINOR;
 module.exports.LUA_VERSION_NUM         = LUA_VERSION_NUM;
 module.exports.LUA_VERSION_RELEASE     = LUA_VERSION_RELEASE;
+module.exports.LUA_VERSUFFIX           = LUA_VERSUFFIX;
 module.exports.constant_types          = constant_types;
 module.exports.lua_Debug               = lua_Debug;
 module.exports.lua_upvalueindex        = lua_upvalueindex;

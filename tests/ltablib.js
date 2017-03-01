@@ -42,7 +42,7 @@ test('table.concat', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-table.concat");
+        lapi.lua_load(L, null, bc, "test-table.concat", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -71,7 +71,7 @@ test('table.pack', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-table.pack");
+        lapi.lua_load(L, null, bc, "test-table.pack", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -102,7 +102,7 @@ test('table.unpack', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-table.unpack");
+        lapi.lua_load(L, null, bc, "test-table.unpack", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -146,7 +146,7 @@ test('table.insert', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-table.insert");
+        lapi.lua_load(L, null, bc, "test-table.insert", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -180,7 +180,7 @@ test('table.remove', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-table.remove");
+        lapi.lua_load(L, null, bc, "test-table.remove", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -213,7 +213,7 @@ test('table.move', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-table.move");
+        lapi.lua_load(L, null, bc, "test-table.move", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -246,7 +246,7 @@ test('table.sort (<)', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-table.sort");
+        lapi.lua_load(L, null, bc, "test-table.sort", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -279,7 +279,7 @@ test('table.sort with cmp function', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-table.sort");
+        lapi.lua_load(L, null, bc, "test-table.sort", "binary");
 
         lapi.lua_call(L, 0, -1);
 

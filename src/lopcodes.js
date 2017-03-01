@@ -209,6 +209,7 @@ const MAXARG_A   = ((1 << SIZE_A) - 1);
 const MAXARG_B   = ((1 << SIZE_B) - 1);
 const MAXARG_C   = ((1 << SIZE_C) - 1);
 
+/* this bit 1 means constant (0 means register) */
 const BITRK      = (1 << (SIZE_B - 1));
 
 /*
@@ -216,13 +217,21 @@ const BITRK      = (1 << (SIZE_B - 1));
 */
 const NO_REG     = MAXARG_A;
 
+/* test whether value is a constant */
 const ISK = function (x) {
     return x & BITRK;
 };
 
+/* gets the index of the constant */
 const INDEXK = function (r) {
     return r & ~BITRK;
 };
+
+/* code a constant index as a RK value */
+const RKASK = function(x) {
+    return x | BITRK;
+};
+
 
 /* creates a mask with 'n' 1 bits at position 'p' */
 const MASK1 = function(n, p) {
@@ -267,7 +276,7 @@ const SETARG_sBx = function(i, b) {
 ** Pre-calculate all possible part of the instruction
 */
 const fullins = function(ins) {
-    if (typeof ins === "integer") {
+    if (typeof ins === "number") {
         return {
             code:   ins,
             opcode: (ins >> POS_OP) & MASK1(SIZE_OP, 0),
@@ -280,13 +289,13 @@ const fullins = function(ins) {
         };
     } else {
         let i = ins.code;
-        ins.opcode = (i >> POS_OP) & MASK1(SIZE_OP, 0),
-        ins.A      = (i >> POS_A)  & MASK1(SIZE_A,  0),
-        ins.B      = (i >> POS_B)  & MASK1(SIZE_B,  0),
-        ins.C      = (i >> POS_C)  & MASK1(SIZE_C,  0),
-        ins.Bx     = (i >> POS_Bx) & MASK1(SIZE_Bx, 0),
-        ins.Ax     = (i >> POS_Ax) & MASK1(SIZE_Ax, 0),
-        ins.sBx    = ((i >> POS_Bx) & MASK1(SIZE_Bx, 0)) - MAXARG_sBx
+        ins.opcode = (i >> POS_OP) & MASK1(SIZE_OP, 0);
+        ins.A      = (i >> POS_A)  & MASK1(SIZE_A,  0);
+        ins.B      = (i >> POS_B)  & MASK1(SIZE_B,  0);
+        ins.C      = (i >> POS_C)  & MASK1(SIZE_C,  0);
+        ins.Bx     = (i >> POS_Bx) & MASK1(SIZE_Bx, 0);
+        ins.Ax     = (i >> POS_Ax) & MASK1(SIZE_Ax, 0);
+        ins.sBx    = ((i >> POS_Bx) & MASK1(SIZE_Bx, 0)) - MAXARG_sBx;
         return ins;
     }
 };
@@ -320,6 +329,10 @@ module.exports.MAXARG_Bx           = MAXARG_Bx;
 module.exports.MAXARG_C            = MAXARG_C;
 module.exports.MAXARG_sBx          = MAXARG_sBx;
 module.exports.NO_REG              = NO_REG;
+module.exports.OpArgK              = OpArgK;
+module.exports.OpArgN              = OpArgN;
+module.exports.OpArgR              = OpArgR;
+module.exports.OpArgU              = OpArgU;
 module.exports.OpCodes             = OpCodes;
 module.exports.OpCodesI            = OpCodesI;
 module.exports.POS_A               = POS_A;
@@ -328,6 +341,7 @@ module.exports.POS_B               = POS_B;
 module.exports.POS_Bx              = POS_Bx;
 module.exports.POS_C               = POS_C;
 module.exports.POS_OP              = POS_OP;
+module.exports.RKASK               = RKASK;
 module.exports.SETARG_A            = SETARG_A;
 module.exports.SETARG_Ax           = SETARG_Ax;
 module.exports.SETARG_B            = SETARG_B;
@@ -344,5 +358,9 @@ module.exports.fullins             = fullins;
 module.exports.getBMode            = getBMode;
 module.exports.getCMode            = getCMode;
 module.exports.getOpMode           = getOpMode;
+module.exports.iABC                = iABC;
+module.exports.iABx                = iABx;
+module.exports.iAsBx               = iAsBx;
+module.exports.iAx                 = iAx;
 module.exports.testAMode           = testAMode;
 module.exports.testTMode           = testTMode;
