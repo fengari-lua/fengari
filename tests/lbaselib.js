@@ -1,4 +1,3 @@
-/*jshint esversion: 6 */
 "use strict";
 
 const test       = require('tape');

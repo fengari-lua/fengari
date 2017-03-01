@@ -7,7 +7,7 @@ const lfunc    = require('./lfunc.js');
 const llex     = require('./llex.js');
 const llimit   = require('./llimit.js');
 const lobject  = require('./lobject.js');
-const lopcode  = require('./lopcode.js');
+const lopcode  = require('./lopcodes.js');
 const lua      = require('./lua.js');
 const BinOpr   = lcode.BinOpr;
 const CT       = lua.constants_type;
@@ -103,6 +103,47 @@ class FuncState {
         this.nactvar = NaN;    /* number of active local variables */
         this.nups = NaN;       /* number of upvalues */
         this.freereg = NaN;    /* first free register */
+    }
+}
+
+    /* description of active local variable */
+class Vardesc {
+    constructor() {
+        this.idx = NaN;  /* variable index in stack */
+    }
+}
+
+
+/* description of pending goto statements and label statements */
+class Labeldesc {
+    constructor() {
+        this.name = null;  /* label identifier */
+        this.pc = NaN;  /* position in code */
+        this.line = NaN;  /* line where it appeared */
+        this.nactvar = NaN;  /* local level where it appears in current block */
+    }
+}
+
+
+/* list of labels or gotos */
+class Labellist {
+    constructor() {
+        this.arr = []; /* array */
+        this.n = NaN;  /* number of entries in use */
+        this.size = NaN;  /* array size */
+    }
+}
+
+/* dynamic structures used by the parser */
+class Dyndata {
+    constructor() {
+        this.actvar = {  /* list of active local variables */
+            arr: [],
+            n: NaN,
+            size: NaN
+        };
+        this.gt = new Labellist();
+        this.label = new Labellist();
     }
 }
 
@@ -1511,6 +1552,7 @@ const luaY_parser = function(L, z, buff, dyd, name, firstchar) {
 };
 
 
+module.exports.Dyndata     = Dyndata;
 module.exports.expkind     = expkind;
 module.exports.luaY_parser = luaY_parser;
 module.exports.vkisinreg   = vkisinreg;

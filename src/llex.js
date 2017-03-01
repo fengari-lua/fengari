@@ -1,17 +1,18 @@
 "use strict";
 
-const assert  = require('assert');
+const DataView = require('buffer-dataview');
+const assert   = require('assert');
 
-const lapi    = require('./lapi.js');
-const lauxlib = require('./lauxlib.js');
-const ldebug  = require('./ldebug.js');
-const ldo     = require('./ldo.js');
-const ljstype = require('./ljstype');
-const lobject = require('./lobject');
-const lua     = require('./lua.js');
-const TValue  = lobject.TValue;
-const CT      = lua.constant_types;
-const TS      = lua.thread_status;
+const lapi     = require('./lapi.js');
+const lauxlib  = require('./lauxlib.js');
+const ldebug   = require('./ldebug.js');
+const ldo      = require('./ldo.js');
+const ljstype  = require('./ljstype');
+const lobject  = require('./lobject');
+const lua      = require('./lua.js');
+const TValue   = lobject.TValue;
+const CT       = lua.constant_types;
+const TS       = lua.thread_status;
 
 const FIRST_RESERVED = 257;
 
@@ -72,10 +73,17 @@ const luaX_tokens = [
 const NUM_RESERVED = Object.keys(RESERVED).length;
 
 class MBuffer {
-    constructor(string) {
-        this.buffer = string ? string.split('') : [];
-        this.n = this.buffer.length;
+    constructor(data) {
+        this.buffer = typeof data === "string" ? data.split('') : (data ? data : []);
+        this.n = this.buffer instanceof DataView ? this.buffer.byteLength : this.buffer.length;
         this.off = 0;
+    }
+
+    getc() {
+        if (this.buffer instanceof DataView)
+            return this.n-- > 0 ? this.buffer.getUint8(this.off++, true) : -1;
+
+        return this.n-- > 0 ? this.buffer[this.off++] : -1;
     }
 }
 
@@ -90,7 +98,7 @@ class SemInfo {
 class Token {
     constructor() {
         this.token = NaN;
-        this.seminfo = null;
+        this.seminfo = new SemInfo();
     }
 }
 
@@ -101,8 +109,8 @@ class LexState {
         this.current = NaN;  /* current character (charint) */
         this.linenumber = NaN;  /* input line counter */
         this.lastline = NaN;  /* line of last token 'consumed' */
-        this.t = null;  /* current token */
-        this.lookahead = null;  /* look ahead token */
+        this.t = new Token();  /* current token */
+        this.lookahead = new Token();  /* look ahead token */
         this.fs = null;  /* current function (parser) */
         this.L = null;
         this.z = new MBuffer();
@@ -140,7 +148,7 @@ const currIsNewline = function(ls) {
 };
 
 const next = function(ls) {
-    ls.current = ls.z.n-- > 0 ? ls.z.buffer[ls.z.off++] : -1;
+    ls.current = ls.z.getc();
 };
 
 const save_and_next = function(ls) {

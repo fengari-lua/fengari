@@ -5,13 +5,59 @@ const assert   = require('assert');
 const llex     = require('./llex.js');
 const llimit   = require('./llimit.js');
 const lobject  = require('./lobject.js');
-const lopcode  = require('./lopcode.js');
+const lopcode  = require('./lopcodes.js');
 const lparser  = require('./lparser.js');
+const ltm      = require('./ltm.js');
 const lua      = require('./lua.js');
 const lvm      = require('./lvm.js');
 const CT       = lua.constants_type;
 const OpCodesI = lopcode.OpCodesI;
 const TValue   = lobject.TValue;
+
+const luaO_arith = function(L, op, p1, p2, res) {
+    switch (op) {
+        case lvm.LUA_OPBAND: case lvm.LUA_OPBOR: case lvm.LUA_OPBXOR:
+        case lvm.LUA_OPSHL: case lvm.LUA_OPSHR:
+        case lvm.LUA_OPBNOT: {  /* operate only on integers */
+            let i1 = lvm.tointeger(p1);
+            let i2 = lvm.tointeger(p2);
+            if (i1 !== false && i2 !== false) {
+                res.type  = CT.LUA_TNUMINT;
+                res.value = lobject.intarith(L, op, i1, i2);
+                return;
+            }
+            else break;  /* go to the end */
+        }
+        case lvm.LUA_OPDIV: case lvm.LUA_OPPOW: {  /* operate only on floats */
+            let n1 = lvm.tonumber(p1);
+            let n2 = lvm.tonumber(p2);
+            if (n1 !== false && n2 !== false) {
+                res.type  = CT.LUA_TNUMFLT;
+                res.value = lobject.numarith(L, op, n1, n2);
+                return;
+            }
+            else break;  /* go to the end */
+        }
+        default: {  /* other operations */
+            let n1 = lvm.tonumber(p1);
+            let n2 = lvm.tonumber(p2);
+            if (p1.ttisinteger() && p2.ttisinteger()) {
+                res.type  = CT.LUA_TNUMINT;
+                res.value = lobject.intarith(L, op, p1.value, p2.value);
+                return;
+            }
+            else if (n1 !== false && n2 !== false) {
+                res.type  = CT.LUA_TNUMFLT;
+                res.value = lobject.numarith(L, op, n1, n2);
+                return;
+            }
+            else break;  /* go to the end */
+        }
+    }
+    /* could not perform raw operation; try metamethod */
+    assert(L !== null);  /* should not fail when folding (compile time) */
+    ltm.luaT_trybinTM(L, p1, p2, res, (op - lua.LUA_OPADD) + ltm.TMS.TM_ADD);
+};
 
 /* Maximum number of registers in a Lua function (must fit in 8 bits) */
 const MAXREGS = 255;
@@ -964,7 +1010,7 @@ const constfolding = function(fs, op, e1, e2) {
     let res = new TValue();
     if (!tonumeral(e1, v1) || !tonumeral(e2, v2) || !validop(op, v1, v2))
         return 0;  /* non-numeric operands or not safe to fold */
-    lobject.luaO_arith(fs.ls.L, op, v1, v2, res);  /* does operation */
+    luaO_arith(fs.ls.L, op, v1, v2, res);  /* does operation */
     if (res.ttisinteger()) {
         e1.k = ek.VKINT;
         e1.u.ival = res.value;

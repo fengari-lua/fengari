@@ -5,6 +5,9 @@ const assert  = require('assert');
 const lualib  = require('./lualib.js');
 const luaconf = require('./luaconf.js');
 
+/* mark for precompiled code ('<esc>Lua') */
+const LUA_SIGNATURE           = "\x1bLua";
+
 const LUA_VERSION_MAJOR       = "5";
 const LUA_VERSION_MINOR       = "3";
 const LUA_VERSION_NUM         = 503;
@@ -106,21 +109,21 @@ const print_version = function() {
 class lua_Debug {
 
     constructor() {
-        // int event;
-        // const char *name;   /* (n) */
-        // const char *namewhat;   /* (n) 'global', 'local', 'field', 'method' */
-        // const char *what;   /* (S) 'Lua', 'C', 'main', 'tail' */
-        // const char *source; /* (S) */
-        // int currentline;    /* (l) */
-        // int linedefined;    /* (S) */
-        // int lastlinedefined;    /* (S) */
-        // unsigned char nups; /* (u) number of upvalues */
-        // unsigned char nparams;/* (u) number of parameters */
-        // char isvararg;        /* (u) */
-        // char istailcall;    /* (t) */
-        // char short_src[LUA_IDSIZE]; /* (S) */
+        this.event = NaN;
+        this.name = null;           /* (n) */
+        this.namewhat = null;       /* (n) 'global', 'local', 'field', 'method' */
+        this.what = null;           /* (S) 'Lua', 'C', 'main', 'tail' */
+        this.source = null;         /* (S) */
+        this.currentline = NaN;     /* (l) */
+        this.linedefined = NaN;     /* (S) */
+        this.lastlinedefined = NaN; /* (S) */
+        this.nups = NaN;            /* (u) number of upvalues */
+        this.nparams = NaN;         /* (u) number of parameters */
+        this.isvararg = NaN;        /* (u) */
+        this.istailcall = NaN;      /* (t) */
+        this.short_src = null;      /* (S) */
         /* private part */
-        // struct CallInfo *i_ci;  /* active function */
+        this.i_ci = null;           /* active function */
     }
 
 }
@@ -162,6 +165,7 @@ module.exports.LUA_RELEASE             = LUA_RELEASE;
 module.exports.LUA_RIDX_GLOBALS        = LUA_RIDX_GLOBALS;
 module.exports.LUA_RIDX_LAST           = LUA_RIDX_LAST;
 module.exports.LUA_RIDX_MAINTHREAD     = LUA_RIDX_MAINTHREAD;
+module.exports.LUA_SIGNATURE           = LUA_SIGNATURE;
 module.exports.LUA_VERSION             = LUA_VERSION;
 module.exports.LUA_VERSION_MAJOR       = LUA_VERSION_MAJOR;
 module.exports.LUA_VERSION_MINOR       = LUA_VERSION_MINOR;
