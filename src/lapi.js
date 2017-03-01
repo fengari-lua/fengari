@@ -1,18 +1,18 @@
-/* jshint esversion: 6 */
 "use strict";
 
 const assert    = require('assert');
 
+const ldebug    = require('./ldebug.js');
 const ldo       = require('./ldo.js');
-const lobject   = require('./lobject.js');
-const ltm       = require('./ltm.js');
 const lfunc     = require('./lfunc.js');
+const llex      = require('./llex.js');
+const lobject   = require('./lobject.js');
+const lstate    = require('./lstate.js');
+const ltm       = require('./ltm.js');
 const lua       = require('./lua.js');
 const luaconf   = require('./luaconf.js');
-const lstate    = require('./lstate.js');
-const lvm       = require('./lvm.js');
 const lundump   = require('./lundump.js');
-const ldebug    = require('./ldebug.js');
+const lvm       = require('./lvm.js');
 const MAXUPVAL  = lfunc.MAXUPVAL;
 const CT        = lua.constant_types;
 const TS        = lua.thread_status;
@@ -138,7 +138,7 @@ const lua_settop = function(L, idx) {
 
 const lua_pop = function(L, n) {
     lua_settop(L, -n - 1);
-}
+};
 
 const reverse = function(L, from, to) {
     for (; from < to; from++, to--) {
@@ -150,7 +150,7 @@ const reverse = function(L, from, to) {
 
 /*
 ** Let x = AB, where A is a prefix of length 'n'. Then,
-** rotate x n == BA. But BA == (A^r . B^r)^r.
+** rotate x n === BA. But BA === (A^r . B^r)^r.
 */
 const lua_rotate = function(L, idx, n) {
     let t = L.stack[L.top - 1];
@@ -357,7 +357,7 @@ const lua_settable = function(L, idx) {
 };
 
 const lua_setfield = function(L, idx, k) {
-    auxsetstr(L, index2addr(L, idx), k)
+    auxsetstr(L, index2addr(L, idx), k);
 };
 
 const lua_seti = function(L, idx, n) {
@@ -515,11 +515,11 @@ const lua_rawlen = function(L, idx) {
 };
 
 const lua_tointeger = function(L, idx) {
-    return lvm.tointeger(index2addr(L, idx))
+    return lvm.tointeger(index2addr(L, idx));
 };
 
 const lua_tonumber = function(L, idx) {
-    return lvm.tonumber(index2addr(L, idx))
+    return lvm.tonumber(index2addr(L, idx));
 };
 
 const lua_tothread = function(L, idx) {
@@ -587,7 +587,7 @@ const f_call = function(L, ud) {
 
 const lua_type = function(L, idx) {
     let o = index2addr(L, idx);
-    return o.ttnov(); // TODO: isvalid ? luaO_nilobject != nil tvalue ?
+    return o.ttnov(); // TODO: isvalid ? luaO_nilobject !== nil tvalue ?
 };
 
 const lua_typename = function(L, t) {
@@ -597,7 +597,7 @@ const lua_typename = function(L, t) {
 
 const lua_isnoneornil = function(L, n) {
     return lua_type(L, n) <= 0;
-}
+};
 
 const lua_istable = function(L, idx) {
     return index2addr(L, idx).ttistable();
@@ -626,13 +626,14 @@ const lua_rawequal = function(L, index1, index2) {
 ** 'load' and 'call' functions (run Lua code)
 */
 
-const lua_load = function(L, data, chunckname) {
+// TODO: reader is ignored because we don't implement ZIO
+const lua_load = function(L, reader, data, chunckname, mode) {
+    let z = new llex.MBuffer(data);
     if (!chunckname) chunckname = "?";
-    
-    let status = ldo.luaD_protectedparser(L, data, chunckname);
-    if (status === TS.LUA_OK) {
+    let status = ldo.luaD_protectedparser(L, z, chunckname, mode);
+    if (status === TS.LUA_OK) {  /* no errors? */
         let f = L.stack[L.top - 1]; /* get newly created function */
-        if (f.nupvalues >= 1) { /* does it have an upvalue? */
+        if (f.nupvalues >= 1) {  /* does it have an upvalue? */
             /* get global table from registry */
             let reg = L.l_G.l_registry;
             let gt = reg.value.get(lua.LUA_RIDX_GLOBALS - 1);
@@ -640,7 +641,6 @@ const lua_load = function(L, data, chunckname) {
             f.upvals[0].u.value = gt;
         }
     }
-
     return status;
 };
 
@@ -663,7 +663,7 @@ const lua_callk = function(L, nargs, nresults, ctx, k) {
         ldo.luaD_callnoyield(L, func, nresults);
     }
 
-    if (nresults == lua.LUA_MULTRET && L.ci.top < L.top)
+    if (nresults === lua.LUA_MULTRET && L.ci.top < L.top)
         L.ci.top = L.top;
 };
 
@@ -714,7 +714,7 @@ const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
         status = TS.LUA_OK;
     }
 
-    if (nresults == lua.LUA_MULTRET && L.ci.top < L.top)
+    if (nresults === lua.LUA_MULTRET && L.ci.top < L.top)
         L.ci.top = L.top;
 
     return status;

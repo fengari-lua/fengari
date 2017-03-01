@@ -3,15 +3,18 @@
 
 const assert         = require('assert');
 
-const lua            = require('./lua.js');
-const lobject        = require('./lobject.js');
-const lstate         = require('./lstate.js');
-const llimit         = require('./llimit.js');
-const ltm            = require('./ltm.js');
-const lvm            = require('./lvm.js');
-const lfunc          = require('./lfunc.js');
 const BytecodeParser = require('./lundump.js');
+const lapi           = require('./lapi.js');
 const ldebug         = require('./ldebug.js');
+const lfunc          = require('./lfunc.js');
+const llex           = require('./llex.js');
+const llimit         = require('./llimit.js');
+const lobject        = require('./lobject.js');
+const lparser        = require('./lparser.js');
+const lstate         = require('./lstate.js');
+const ltm            = require('./ltm.js');
+const lua            = require('./lua.js');
+const lvm            = require('./lvm.js');
 const CT             = lua.constant_types;
 const TS             = lua.thread_status;
 const LUA_MULTRET    = lua.LUA_MULTRET;
@@ -475,7 +478,7 @@ const lua_yield = function(L, n) {
 
 const luaD_pcall = function(L, func, u, old_top, ef) {
     let old_ci = L.ci;
-    // TODO: lu_byte old_allowhooks = L->allowhook;
+    let old_allowhooks = L.allowhook;
     let old_nny = L.nny;
     let old_errfunc = L.errfunc;
     L.errfunc = ef;
@@ -486,7 +489,7 @@ const luaD_pcall = function(L, func, u, old_top, ef) {
         lfunc.luaF_close(L, old_top);
         seterrorobj(L, status, old_top);
         L.ci = old_ci;
-        // TODO: L->allowhook = old_allowhooks;
+        L.allowhook = old_allowhooks;
         L.nny = old_nny;
     }
 
@@ -504,31 +507,64 @@ const luaD_callnoyield = function(L, off, nResults) {
   L.nny--;
 };
 
-// TODO: since we only handle binary, no need for a reader or mode
-const f_parser = function(L, data) {
-    let p = new BytecodeParser(data);
-    let cl = p.luaU_undump(L);
+/*
+** Execute a protected parser.
+*/
+class SParser {
+    constructor() {  /* data to 'f_parser' */
+        this.z = new llex.MBuffer();
+        this.buff = new llex.MBuffer();  /* dynamic structure used by the scanner */
+        this.dyd = new lparser.Dyndata();  /* dynamic structures used by the parser */
+        this.mode = null;
+        this.name = null;
+    }
+}
 
-    assert(cl.nupvalues == cl.p.upvalues.length);
+const checkmode = function(L, mode, x) {
+    if (mode && mode !== x) {
+        lapi.lua_pushstring(L, `attempt to load a ${x} chunk (mode is '${mode}')`);
+        luaD_throw(L, TS.LUA_ERRSYNTAX);
+    }
+};
 
+const f_parser = function(L, p) {
+    let cl;
+    let c = p.z.getc();  /* read first character */
+    if (String.fromCharCode(c) === lua.LUA_SIGNATURE.charAt(0)) {
+        checkmode(L, p.mode, "binary");
+        cl = new BytecodeParser(p.z.buffer).luaU_undump(L);
+    } else {
+        checkmode(L, p.mode, "text");
+        cl = lparser.luaY_parser(L, p.z, p.buff, p.dyd, p.name, c);
+    }
+
+    assert(cl.nupvalues === cl.p.upvalues.length);
     lfunc.luaF_initupvals(L, cl);
 };
 
-const luaD_protectedparser = function(L, data, name) {
-    L.nny++;
+const luaD_protectedparser = function(L, z, name, mode) {
+    let p = new SParser();
+    L.nny++;  /* cannot yield during parsing */
 
-    let status = luaD_pcall(L, f_parser, data, L.top, L.errfunc);
+    p.z = z;
+    p.name = name;
+    p.mode = mode;
+    p.dyd.actvar.arr = [];
+    p.dyd.actvar.size = 0;
+    p.dyd.gt.arr = [];
+    p.dyd.gt.size = 0;
+    p.dyd.label.arr = [];
+    p.dyd.label.size = 0;
+
+    let status = luaD_pcall(L, f_parser, p, L.top, L.errfunc);
 
     L.nny--;
 
     return status;
 };
 
+module.exports.SParser              = SParser;
 module.exports.adjust_varargs       = adjust_varargs;
-module.exports.lua_isyieldable      = lua_isyieldable;
-module.exports.lua_resume           = lua_resume;
-module.exports.lua_yield            = lua_yield;
-module.exports.lua_yieldk           = lua_yieldk;
 module.exports.luaD_call            = luaD_call;
 module.exports.luaD_callnoyield     = luaD_callnoyield;
 module.exports.luaD_pcall           = luaD_pcall;
@@ -537,6 +573,10 @@ module.exports.luaD_precall         = luaD_precall;
 module.exports.luaD_protectedparser = luaD_protectedparser;
 module.exports.luaD_rawrunprotected = luaD_rawrunprotected;
 module.exports.luaD_throw           = luaD_throw;
+module.exports.lua_isyieldable      = lua_isyieldable;
+module.exports.lua_resume           = lua_resume;
+module.exports.lua_yield            = lua_yield;
+module.exports.lua_yieldk           = lua_yieldk;
 module.exports.moveresults          = moveresults;
 module.exports.nil                  = nil;
 module.exports.stackerror           = stackerror;

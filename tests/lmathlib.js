@@ -1,4 +1,3 @@
-/*jshint esversion: 6 */
 "use strict";
 
 const test       = require('tape');
@@ -34,7 +33,7 @@ test('math.abs, math.sin, math.cos, math.tan, math.asin, math.acos, math.atan', 
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-math");
+        lapi.lua_load(L, null, bc, "test-math", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -99,7 +98,7 @@ test('math.ceil, math.floor', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-math");
+        lapi.lua_load(L, null, bc, "test-math", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -135,7 +134,7 @@ test('math.deg, math.rad', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-math");
+        lapi.lua_load(L, null, bc, "test-math", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -171,7 +170,7 @@ test('math.log', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-math");
+        lapi.lua_load(L, null, bc, "test-math", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -213,7 +212,7 @@ test('math.exp', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-math");
+        lapi.lua_load(L, null, bc, "test-math", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -243,7 +242,7 @@ test('math.min, math.max', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-math");
+        lapi.lua_load(L, null, bc, "test-math", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -279,7 +278,7 @@ test('math.random', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-math");
+        lapi.lua_load(L, null, bc, "test-math", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -313,7 +312,7 @@ test('math.sqrt', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-math");
+        lapi.lua_load(L, null, bc, "test-math", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -343,7 +342,7 @@ test('math.tointeger', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-math");
+        lapi.lua_load(L, null, bc, "test-math", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -373,7 +372,7 @@ test('math.type', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-math");
+        lapi.lua_load(L, null, bc, "test-math", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -415,7 +414,7 @@ test('math.ult', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-math");
+        lapi.lua_load(L, null, bc, "test-math", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -445,7 +444,7 @@ test('math.fmod', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-math");
+        lapi.lua_load(L, null, bc, "test-math", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -475,7 +474,7 @@ test('math.modf', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-math");
+        lapi.lua_load(L, null, bc, "test-math", "binary");
 
         lapi.lua_call(L, 0, -1);
 

@@ -1,4 +1,3 @@
-/*jshint esversion: 6 */
 "use strict";
 
 const test       = require('tape');
@@ -32,7 +31,7 @@ test('print', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-print");
+        lapi.lua_load(L, null, bc, "test-print", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -66,7 +65,7 @@ test('setmetatable, getmetatable', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-setmetatable-getmetatable");
+        lapi.lua_load(L, null, bc, "test-setmetatable-getmetatable", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -111,7 +110,7 @@ test('rawequal', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-rawequal");
+        lapi.lua_load(L, null, bc, "test-rawequal", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -157,7 +156,7 @@ test('rawset, rawget', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-rawequal");
+        lapi.lua_load(L, null, bc, "test-rawequal", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -204,7 +203,7 @@ test('type', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-type");
+        lapi.lua_load(L, null, bc, "test-type", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -257,7 +256,7 @@ test('error', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-error");
+        lapi.lua_load(L, null, bc, "test-error", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -280,7 +279,7 @@ test('error, protected', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-error");
+        lapi.lua_load(L, null, bc, "test-error", "binary");
 
         lapi.lua_pcall(L, 0, -1, 0);
 
@@ -312,7 +311,7 @@ test('pcall', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-pcall");
+        lapi.lua_load(L, null, bc, "test-pcall", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -348,7 +347,7 @@ test('xpcall', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-pcall");
+        lapi.lua_load(L, null, bc, "test-pcall", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -390,7 +389,7 @@ test('ipairs', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-ipairs");
+        lapi.lua_load(L, null, bc, "test-ipairs", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -419,7 +418,7 @@ test('select', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-select");
+        lapi.lua_load(L, null, bc, "test-select", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -460,7 +459,7 @@ test('tonumber', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-tonumber");
+        lapi.lua_load(L, null, bc, "test-tonumber", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -507,7 +506,7 @@ test('assert', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-assert");
+        lapi.lua_load(L, null, bc, "test-assert", "binary");
 
         lapi.lua_pcall(L, 0, -1, 0);
 
@@ -535,7 +534,7 @@ test('rawlen', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-rawlen");
+        lapi.lua_load(L, null, bc, "test-rawlen", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -582,7 +581,7 @@ test('next', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-next");
+        lapi.lua_load(L, null, bc, "test-next", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -623,7 +622,7 @@ test('pairs', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-pairs");
+        lapi.lua_load(L, null, bc, "test-pairs", "binary");
 
         lapi.lua_call(L, 0, -1);
 
@@ -673,7 +672,7 @@ test('pairs with __pairs', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-pairs");
+        lapi.lua_load(L, null, bc, "test-pairs", "binary");
 
         lapi.lua_call(L, 0, -1);
 

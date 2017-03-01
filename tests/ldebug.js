@@ -1,4 +1,3 @@
-/*jshint esversion: 6 */
 "use strict";
 
 const test       = require('tape');
@@ -31,7 +30,7 @@ test('luaG_typeerror', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-typeerror");
+        lapi.lua_load(L, null, bc, "test-typeerror", "binary");
 
         lapi.lua_pcall(L, 0, -1, 0);
 
@@ -61,7 +60,7 @@ test('luaG_typeerror', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-typeerror");
+        lapi.lua_load(L, null, bc, "test-typeerror", "binary");
 
         lapi.lua_pcall(L, 0, -1, 0);
 
@@ -90,7 +89,7 @@ test('luaG_typeerror', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-typeerror");
+        lapi.lua_load(L, null, bc, "test-typeerror", "binary");
 
         lapi.lua_pcall(L, 0, -1, 0);
 
@@ -119,7 +118,7 @@ test('luaG_typeerror', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-typeerror");
+        lapi.lua_load(L, null, bc, "test-typeerror", "binary");
 
         lapi.lua_pcall(L, 0, -1, 0);
 
@@ -147,7 +146,7 @@ test('luaG_concaterror', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-typeerror");
+        lapi.lua_load(L, null, bc, "test-typeerror", "binary");
 
         lapi.lua_pcall(L, 0, -1, 0);
 
@@ -175,7 +174,7 @@ test('luaG_opinterror', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-typeerror");
+        lapi.lua_load(L, null, bc, "test-typeerror", "binary");
 
         lapi.lua_pcall(L, 0, -1, 0);
 
@@ -203,7 +202,7 @@ test('luaG_tointerror', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, bc, "test-typeerror");
+        lapi.lua_load(L, null, bc, "test-typeerror", "binary");
 
         lapi.lua_pcall(L, 0, -1, 0);
 

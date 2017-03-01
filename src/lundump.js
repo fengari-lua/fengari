@@ -5,6 +5,7 @@ const DataView       = require('buffer-dataview');
 const fs             = require('fs');
 const assert         = require('assert');
 
+const lua            = require('./lua.js');
 const LClosure       = require('./lobject.js').LClosure;
 const TValue         = require('./lobject.js').TValue;
 const Proto          = require('./lfunc.js').Proto;
@@ -256,7 +257,7 @@ class BytecodeParser {
     }
 
     checkHeader() {
-        if (this.readString(4) !== "\x1bLua")
+        if (this.readString(4) !== lua.LUA_SIGNATURE)
             throw new Error("bad LUA_SIGNATURE, expected '<esc>Lua'");
 
         if (this.readByte() !== 0x53)

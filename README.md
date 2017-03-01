@@ -201,6 +201,7 @@
 - [ ] Standard library
     - [ ] Base lib
         - [x] ...
+        - [ ] require
         - [ ] dofile
         - [ ] loadfile
         - [ ] load

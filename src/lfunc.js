@@ -1,6 +1,8 @@
 /*jshint esversion: 6 */
 "use strict";
-const assert = require('assert');
+const assert  = require('assert');
+
+const lobject = require('./lobject.js');
 
 class Proto {
 
@@ -53,6 +55,15 @@ class UpVal {
 
 }
 
+const luaF_newLclosure = function(L, n) {
+    let c = new lobject.LClosure();
+    c.p = null;
+    c.nupvalues = n;
+    while (n--) c.upvals[n] = null;
+    return c;
+};
+
+
 const findupval = function(L, level) {
     let pp = L.openupval;
     
@@ -91,12 +102,16 @@ const luaF_close = function(L, level) {
     }
 };
 
+/*
+** fill a closure with new closed upvalues
+*/
 const luaF_initupvals = function(L, cl) {
     for (let i = 0; i < cl.nupvalues; i++) {
         let uv = new UpVal(L);
         uv.refcount = 1;
         uv.u.value = null;
         uv.v = uv.u.value;
+        cl.upvals[i] = uv;
     }
 };
 
@@ -108,7 +123,7 @@ const luaF_getlocalname = function(f, local_number, pc) {
     for (let i = 0; i < f.locvars.length && f.locvars[i].startpc <= pc; i++) {
         if (pc < f.locvars[i].endpc) {  /* is variable active? */
             local_number--;
-            if (local_number == 0)
+            if (local_number === 0)
                 return f.locvars[i].varname;
         }
     }
@@ -116,10 +131,11 @@ const luaF_getlocalname = function(f, local_number, pc) {
 }
 
 
+module.exports.MAXUPVAL          = 255;
 module.exports.Proto             = Proto;
 module.exports.UpVal             = UpVal;
 module.exports.findupval         = findupval;
 module.exports.luaF_close        = luaF_close;
-module.exports.MAXUPVAL          = 255;
-module.exports.luaF_initupvals   = luaF_initupvals;
 module.exports.luaF_getlocalname = luaF_getlocalname
+module.exports.luaF_initupvals   = luaF_initupvals;
+module.exports.luaF_newLclosure  = luaF_newLclosure;

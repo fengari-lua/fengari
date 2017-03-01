@@ -105,7 +105,7 @@ const init_registry = function(L, g) {
 
 /*
 ** open parts of the state that may cause memory-allocation errors.
-** ('g->version' != NULL flags that the state was completely build)
+** ('g->version' !== NULL flags that the state was completely build)
 */
 const f_luaopen = function(L) {
     let g = L.l_G;

@@ -1,4 +1,3 @@
-/*jshint esversion: 6 */
 "use strict";
 
 const test           = require('tape');
@@ -7,7 +6,7 @@ const beautify       = require('js-beautify').js_beautify;
 const lua_State      = require("../src/lstate.js").lua_State;
 const VM             = require("../src/lvm.js");
 const lapi           = require("../src/lapi.js");
-const Table          = require("../src/lobject.js").Table;;
+const Table          = require("../src/lobject.js").Table;
 
 const getState       = require("./tests.js").getState;
 
