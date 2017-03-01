@@ -1556,5 +1556,6 @@ const luaY_parser = function(L, z, buff, dyd, name, firstchar) {
 
 module.exports.Dyndata     = Dyndata;
 module.exports.expkind     = expkind;
+module.exports.expdesc     = expdesc;
 module.exports.luaY_parser = luaY_parser;
 module.exports.vkisinreg   = vkisinreg;

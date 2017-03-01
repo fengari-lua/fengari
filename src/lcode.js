@@ -1092,16 +1092,16 @@ const codecomp = function(fs, opr, e1, e2) {
 const luaK_prefix = function(fs, op, e, line) {
     let ef = new lparser.expdesc();
     ef.k = lparser.expkind.VKINT;
-    ef.u.ival = e.u.nval = e.u.info = 0;
-    e.t = NO_JUMP;
-    e.f = NO_JUMP;
+    ef.u.ival = ef.u.nval = ef.u.info = 0;
+    ef.t = NO_JUMP;
+    ef.f = NO_JUMP;
     switch (op) {
         case UnOpr.OPR_MINUS: case UnOpr.OPR_BNOT:  /* use 'ef' as fake 2nd operand */
             if (constfolding(fs, op + lua.LUA_OPUNM, e, ef))
                 break;
             /* FALLTHROUGH */
         case UnOpr.OPR_LEN:
-            codeunexpval(fs, op + UnOpr.OP_UNM, e, line);
+            codeunexpval(fs, op + OpCodesI.OP_UNM, e, line);
             break;
         case UnOpr.OPR_NOT: codenot(fs, e); break;
     }
