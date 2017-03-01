@@ -156,3 +156,36 @@ test('NEWTABLE', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('CALL', function (t) {
+    let luaCode = `
+        local f = function (a, b)
+            return a + b
+        end
+
+        local c = f(1, 2)
+
+        return c
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, null, luaCode, "test", "text");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -1),
+        3,
+        "Program output is correct"
+    );
+});

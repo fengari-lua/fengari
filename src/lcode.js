@@ -359,7 +359,7 @@ const luaK_patchclose = function(fs, list, level) {
 ** line information. Return 'i' position.
 */
 const luaK_code = function(fs, i) {
-    console.log(OpCodes[i.opcode]);
+    // console.log(OpCodes[i.opcode]);
     let f = fs.f;
     dischargejpc(fs);  /* 'pc' will change */
     /* put new instruction in code array */
