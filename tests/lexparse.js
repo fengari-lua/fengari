@@ -68,3 +68,33 @@ test('MOVE', function (t) {
     );
 
 });
+
+
+test('Binary op', function (t) {
+    let luaCode = `
+        local a = 5
+        local b = 10
+        return a + b, a - b, a * b, a / b, a % b, a^b, a // b, a & b, a | b, a ~ b, a << b, a >> b
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, null, luaCode, "test", "text");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.deepEqual(
+        L.stack.slice(L.top - 12, L.top).map(e => e.value),
+        [15, -5, 50, 0.5, 5, 9765625.0, 0, 0, 15, 15, 5120, 0],
+        "Program output is correct"
+    );
+
+});

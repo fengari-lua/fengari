@@ -513,8 +513,8 @@ const luaK_stringK = function(fs, s) {
 ** are no "precision" problems.
 */
 const luaK_intK = function(fs, n) {
-    let k = new TValue(CT.LUA_TLNGSTR, `${n.value}`);
-    let o = new TValue(CT.LUA_TNUMINT, n.value);
+    let k = new TValue(CT.LUA_TLNGSTR, `${n}`);
+    let o = new TValue(CT.LUA_TNUMINT, n);
     return addk(fs, k, o);
 };
 
@@ -522,7 +522,8 @@ const luaK_intK = function(fs, n) {
 ** Add a float to list of constants and return its index.
 */
 const luaK_numberK = function(fs, r) {
-    return addk(fs, r, r);  /* use number itself as key */
+    let o = new TValue(CT.LUA_TNUMFLT, r);
+    return addk(fs, o, o);  /* use number itself as key */
 };
 
 
@@ -530,7 +531,8 @@ const luaK_numberK = function(fs, r) {
 ** Add a boolean to list of constants and return its index.
 */
 const boolK = function(fs, b) {
-    return addk(fs, b, b);  /* use boolean itself as key */
+    let o = new TValue(CT.LUA_TBOOLEAN, b);
+    return addk(fs, o, o);  /* use boolean itself as key */
 };
 
 
