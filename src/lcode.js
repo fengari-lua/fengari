@@ -11,6 +11,7 @@ const ltm      = require('./ltm.js');
 const lua      = require('./lua.js');
 const lvm      = require('./lvm.js');
 const CT       = lua.CT;
+const OpCodes  = lopcode.OpCodes;
 const OpCodesI = lopcode.OpCodesI;
 const TValue   = lobject.TValue;
 
@@ -358,6 +359,7 @@ const luaK_patchclose = function(fs, list, level) {
 ** line information. Return 'i' position.
 */
 const luaK_code = function(fs, i) {
+    console.log(OpCodes[i.opcode]);
     let f = fs.f;
     dischargejpc(fs);  /* 'pc' will change */
     /* put new instruction in code array */

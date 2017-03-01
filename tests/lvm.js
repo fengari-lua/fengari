@@ -33,7 +33,7 @@ test('LOADK, RETURN', function (t) {
 });
 
 
-test('MOV', function (t) {
+test('MOVE', function (t) {
     let luaCode = `
         local a = "hello world"
         local b = a
