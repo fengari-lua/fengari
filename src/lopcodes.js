@@ -243,6 +243,11 @@ const MASK0 = function(n, p) {
     return (~MASK1(n, p));
 };
 
+const SET_OPCODE = function(i, o) {
+    i.code = (i.code & MASK0(SIZE_OP, POS_OP)) | ((o << POS_OP) & MASK1(SIZE_OP, POS_OP));
+    fullins(i);
+};
+
 const setarg = function(i, v, pos, size) {
     i.code = (i.code & MASK0(size, pos)) | ((v << pos) & MASK1(size, pos));
     fullins(i);
@@ -348,6 +353,7 @@ module.exports.SETARG_B            = SETARG_B;
 module.exports.SETARG_Bx           = SETARG_Bx;
 module.exports.SETARG_C            = SETARG_C;
 module.exports.SETARG_sBx          = SETARG_sBx;
+module.exports.SET_OPCODE          = SET_OPCODE;
 module.exports.SIZE_A              = SIZE_A;
 module.exports.SIZE_Ax             = SIZE_Ax;
 module.exports.SIZE_B              = SIZE_B;
