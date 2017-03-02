@@ -487,12 +487,12 @@ const addk = function(fs, key, v) {
     let idx = fs.ls.h.__index(fs.ls.h, key);  /* index scanner table */
     if (idx && !idx.ttisnil()) {  /* is there an index there? */
         /* correct value? (warning: must distinguish floats from integers!) */
-        if (f.k[idx].ttype() === v.ttype() && f.k[idx].value === v.value)
-            return idx;  /* reuse index */
+        if (f.k[idx.value].ttype() === v.ttype() && f.k[idx.value].value === v.value)
+            return idx.value;  /* reuse index */
     }
     /* constant not found; create a new entry */
     let k = fs.nk;
-    fs.ls.h.__newindex(fs.ls.h, key, k);
+    fs.ls.h.__newindex(fs.ls.h, key, new TValue(CT.LUA_TNUMINT, k));
     f.k[k] = v;
     fs.nk++;
     return k;
@@ -616,7 +616,7 @@ const luaK_dischargevars = function(fs, e) {
                 op = OpCodesI.OP_GETTABUP;  /* 't' is in an upvalue */
             }
             e.u.info = luaK_codeABC(fs, op, 0, e.u.ind.t, e.u.ind.idx);
-            e.k = OpCodesI.VRELOCABLE;
+            e.k = ek.VRELOCABLE;
             break;
         }
         case ek.VVARARG: case ek.VCALL: {
