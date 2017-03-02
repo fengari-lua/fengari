@@ -498,7 +498,7 @@ const llex = function(ls, seminfo) {
             }
             case '[': {  /* long string or simply '[' */
                 let sep = skip_sep(ls);
-                if (sep.charCodeAt(0) >= 0) {
+                if (sep >= 0) {
                     read_long_string(ls, seminfo, sep);
                     return R.TK_STRING;
                 } else if (sep !== -1)  /* '[=...' missing second bracket */

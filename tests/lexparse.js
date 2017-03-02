@@ -534,3 +534,41 @@ test('FORPREP, FORLOOP (float)', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('SETTABLE, GETTABLE', function (t) {
+    let luaCode = `
+        local t = {}
+
+        t[1] = "hello"
+        t["two"] = "world"
+
+        return t
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, null, luaCode, "test", "text");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_topointer(L, -1).get(0).value,
+        "hello",
+        "Program output is correct"
+    );
+
+    t.strictEqual(
+        lapi.lua_topointer(L, -1).get("two").value,
+        "world",
+        "Program output is correct"
+    );
+});
