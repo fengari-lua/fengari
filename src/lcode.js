@@ -191,7 +191,7 @@ const fixjump = function(fs, pc, dest) {
 ** Concatenate jump-list 'l2' into jump-list 'l1'
 */
 const luaK_concat = function(fs, l1, l2) {
-    if (l2 === NO_JUMP) return;  /* nothing to concatenate? */
+    if (l2 === NO_JUMP) return l1;  /* nothing to concatenate? */
     else if (l1 === NO_JUMP)  /* no original list? */
         l1 = l2;
     else {
@@ -1063,7 +1063,15 @@ const codebinexpval = function(fs, op, e1, e2, line) {
 */
 const codecomp = function(fs, opr, e1, e2) {
     let ek = lparser.expkind;
-    let rk1 = (e1.k === ek.VK) ? lopcode.RKASK(e1.u.info) : llimit.check_exp(e1.k === ek.VNONRELOC, e1.u.info);
+
+    let rk1;
+    if (e1.k === ek.VK)
+        rk1 = lopcode.RKASK(e1.u.info);
+    else {
+        assert(e1.k === ek.VNONRELOC);
+        rk1 = e1.u.info;
+    }
+
     let rk2 = luaK_exp2RK(fs, e2);
     freeexps(fs, e1, e2);
     switch (opr) {

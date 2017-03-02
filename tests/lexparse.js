@@ -287,3 +287,90 @@ test('VARARG', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('LE, JMP', function (t) {
+    let luaCode = `
+        local a, b = 1, 1
+
+        return a >= b
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, null, luaCode, "test", "text");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_toboolean(L, -1),
+        true,
+        "Program output is correct"
+    );
+});
+
+
+test('LT', function (t) {
+    let luaCode = `
+        local a, b = 1, 1
+
+        return a > b
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, null, luaCode, "test", "text");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_toboolean(L, -1),
+        false,
+        "Program output is correct"
+    );
+});
+
+
+test('EQ', function (t) {
+    let luaCode = `
+        local a, b = 1, 1
+
+        return a == b
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, null, luaCode, "test", "text");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_toboolean(L, -1),
+        true,
+        "Program output is correct"
+    );
+});
