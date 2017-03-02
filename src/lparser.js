@@ -84,6 +84,13 @@ class expdesc {
         this.t = NaN;     /* patch list of 'exit when true' */
         this.f = NaN;     /* patch list of 'exit when false' */
     }
+
+    to(e) { // Copy e content to this, cf. luaK_posfix
+        this.k = e.k;
+        this.u = e.u;
+        this.t = e.t;
+        this.f = e.f;
+    }
 }
 
 class FuncState {

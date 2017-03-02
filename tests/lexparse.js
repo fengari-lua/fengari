@@ -374,3 +374,63 @@ test('EQ', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('TESTSET (and)', function (t) {
+    let luaCode = `
+        local a = true
+        local b = "hello"
+
+        return a and b
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, null, luaCode, "test", "text");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "hello",
+        "Program output is correct"
+    );
+});
+
+
+test('TESTSET (or)', function (t) {
+    let luaCode = `
+        local a = false
+        local b = "hello"
+
+        return a or b
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, null, luaCode, "test", "text");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "hello",
+        "Program output is correct"
+    );
+});

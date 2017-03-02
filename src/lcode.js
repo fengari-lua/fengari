@@ -90,8 +90,8 @@ const BinOpr = {
     OPR_GT:       17,
     OPR_GE:       18,
     OPR_AND:      19,
-    OPR_OR:       21,
-    OPR_NOBINOPR: 22
+    OPR_OR:       20,
+    OPR_NOBINOPR: 21
 };
 
 const UnOpr = {
@@ -359,7 +359,7 @@ const luaK_patchclose = function(fs, list, level) {
 ** line information. Return 'i' position.
 */
 const luaK_code = function(fs, i) {
-    // console.log(OpCodes[i.opcode]);
+    console.log(`${i.opcode}\t${i.A}\t${i.B}\t${i.C}\t${i.Ax}\t${i.Bx}\t${i.sBx}`);
     let f = fs.f;
     dischargejpc(fs);  /* 'pc' will change */
     /* put new instruction in code array */
@@ -1163,14 +1163,14 @@ const luaK_posfix = function(fs, op, e1, e2, line) {
             assert(e1.t === NO_JUMP);  /* list closed by 'luK_infix' */
             luaK_dischargevars(fs, e2);
             e2.f = luaK_concat(fs, e2.f, e1.f);
-            // WARN: *e1 = *e2;
+            e1.to(e2);
             break;
         }
         case BinOpr.OPR_OR: {
             assert(e1.f === NO_JUMP);  /* list closed by 'luK_infix' */
             luaK_dischargevars(fs, e2);
             e2.t = luaK_concat(fs, e2.t, e1.t);
-            // WARN: *e1 = *e2;
+            e1.to(e2);
             break;
         }
         case BinOpr.OPR_CONCAT: {
@@ -1202,6 +1202,8 @@ const luaK_posfix = function(fs, op, e1, e2, line) {
             break;
         }
     }
+
+    return e1;
 };
 
 /*
