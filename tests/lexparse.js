@@ -914,3 +914,81 @@ test('TFORCALL, TFORLOOP', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('LEN', function (t) {
+    let luaCode = `
+        local t = {[10000] = "foo"}
+        local t2 = {1, 2, 3}
+        local s = "hello"
+
+        return #t, #t2, #s
+    `, L;
+    
+    t.plan(5);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, null, luaCode, "test", "text");
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tonumber(L, -1),
+        5,
+        "Program output is correct"
+    );
+
+    t.strictEqual(
+        lapi.lua_tonumber(L, -2),
+        3,
+        "Program output is correct"
+    );
+
+    t.strictEqual(
+        lapi.lua_tonumber(L, -3),
+        0,
+        "Program output is correct"
+    );
+});
+
+
+test('CONCAT', function (t) {
+    let luaCode = `
+        return "hello " .. 2 .. " you"
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, null, luaCode, "test", "text");
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        L.stack[L.top - 1].value,
+        "hello 2 you",
+        "Program output is correct"
+    );
+});

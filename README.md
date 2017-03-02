@@ -5,6 +5,7 @@
 
 ## So far
 
+- [x] Lexing/Parsing
 - [x] Parse bytecode
 - [x] Opcodes
 - [ ] Basic types representation:
@@ -210,8 +211,6 @@
     - [x] Math
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
 - [ ] DOM API binding
-- [ ] Parse Lua
-- [ ] Generate bytecode
 
 ## References
 
