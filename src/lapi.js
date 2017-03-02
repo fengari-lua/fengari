@@ -628,7 +628,7 @@ const lua_rawequal = function(L, index1, index2) {
 
 // TODO: reader is ignored because we don't implement ZIO
 const lua_load = function(L, reader, data, chunckname, mode) {
-    let z = new llex.MBuffer(data);
+    let z = new llex.MBuffer(L, data, reader);
     if (!chunckname) chunckname = "?";
     let status = ldo.luaD_protectedparser(L, z, chunckname, mode);
     if (status === TS.LUA_OK) {  /* no errors? */

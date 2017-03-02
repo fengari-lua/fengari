@@ -547,6 +547,7 @@ const luaD_protectedparser = function(L, z, name, mode) {
     L.nny++;  /* cannot yield during parsing */
 
     p.z = z;
+    p.buff.L = L;
     p.name = name;
     p.mode = mode;
     p.dyd.actvar.arr = [];

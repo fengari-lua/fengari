@@ -73,17 +73,42 @@ const luaX_tokens = [
 const NUM_RESERVED = Object.keys(RESERVED).length;
 
 class MBuffer {
-    constructor(data) {
-        this.buffer = typeof data === "string" ? data.split('') : (data ? data : []);
-        this.n = this.buffer instanceof DataView ? this.buffer.byteLength : this.buffer.length;
+    constructor(L, data, reader) {
+        this.L = L;
+        this.data = data;
+        this.n = 0;
+        this.buffer = null;
         this.off = 0;
+        this.reader = reader ? reader : null;
+
+        if (!this.reader) {
+            this.buffer = typeof data === "string" ? data.split('') : (data ? data : []);
+            this.n = this.buffer instanceof DataView ? this.buffer.byteLength : this.buffer.length;
+            this.off = 0;
+        }
     }
 
     getc() {
         if (this.buffer instanceof DataView)
-            return this.n-- > 0 ? this.buffer.getUint8(this.off++, true) : -1;
+            return this.n-- > 0 ? this.buffer.getUint8(this.off++, true) : this.fill();
 
-        return this.n-- > 0 ? this.buffer[this.off++] : -1;
+        return this.n-- > 0 ? this.buffer[this.off++] : this.fill();
+    }
+
+    fill() {
+        if (this.reader) {
+            this.buffer = this.reader(this.L, this.data);
+            this.buffer = typeof this.buffer === "string" ? this.buffer.split('') : this.buffer;
+            if (this.buffer === null)
+                return -1;
+            this.n = this.buffer instanceof DataView ? this.buffer.byteLength - 1 : this.buffer.length - 1;
+            this.off = 0;
+        } else return -1;
+
+        if (this.buffer instanceof DataView)
+            return this.buffer.getUint8(this.off++, true);
+
+        return this.buffer[this.off++];
     }
 }
 
