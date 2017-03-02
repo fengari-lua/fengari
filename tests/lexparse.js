@@ -865,3 +865,52 @@ test('Long SETLIST', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('TFORCALL, TFORLOOP', function (t) {
+    let luaCode = `
+        local iterator = function (t, i)
+            i = i + 1
+            local v = t[i]
+            if v then
+                return i, v
+            end
+        end
+
+        local iprs = function(t)
+            return iterator, t, 0
+        end
+
+        local t = {1, 2, 3}
+        local r = 0
+        for k,v in iprs(t) do
+            r = r + v
+        end
+
+        return r
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, null, luaCode, "test", "text");
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tonumber(L, -1),
+        6,
+        "Program output is correct"
+    );
+});

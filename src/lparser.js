@@ -1240,7 +1240,7 @@ const forbody = function(ls, base, line, nvars, isnum) {
     if (isnum)  /* end of scope for declared variables */
         endfor = lcode.luaK_codeAsBx(fs, OpCodesI.OP_FORLOOP, base, lcode.NO_JUMP);
     else {  /* generic for */
-        lcode.luaK_codeABC(fs, OpCodesI.OP_TFORLOOP, base + 2, lcode.NO_JUMP);
+        lcode.luaK_codeABC(fs, OpCodesI.OP_TFORCALL, base, 0, nvars);
         lcode.luaK_fixline(fs, line);
         endfor = lcode.luaK_codeAsBx(fs, OpCodesI.OP_TFORLOOP, base + 2, lcode.NO_JUMP);
     }
@@ -1274,7 +1274,7 @@ const forlist = function(ls, indexname) {
     let fs = ls.fs;
     let e = new expdesc();
     let nvars = 4;  /* gen, state, control, plus at least one declared var */
-    let base = fs.freereg();
+    let base = fs.freereg;
     /* create control variables */
     new_localvarliteral(ls, "(for generator)");
     new_localvarliteral(ls, "(for state)");
