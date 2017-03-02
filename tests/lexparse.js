@@ -256,3 +256,34 @@ test('TAILCALL', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('VARARG', function (t) {
+    let luaCode = `
+        local f = function (...)
+            return ...
+        end
+
+        return f(1,2,3)
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, null, luaCode, "test", "text");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.deepEqual(
+        L.stack.slice(L.top - 3, L.top).map(e => e.value),
+        [1, 2, 3],
+        "Program output is correct"
+    );
+});
