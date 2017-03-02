@@ -645,3 +645,37 @@ test('SETTABUP, GETTABUP', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('SELF', function (t) {
+    let luaCode = `
+        local t = {}
+
+        t.value = "hello"
+        t.get = function (self)
+            return self.value
+        end
+
+        return t:get()
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, null, luaCode, "test", "text");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+    
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "hello",
+        "Program output is correct"
+    );
+});

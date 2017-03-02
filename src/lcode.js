@@ -487,7 +487,7 @@ const addk = function(fs, key, v) {
     let idx = fs.ls.h.__index(fs.ls.h, key);  /* index scanner table */
     if (idx && !idx.ttisnil()) {  /* is there an index there? */
         /* correct value? (warning: must distinguish floats from integers!) */
-        if (f.k[idx.value].ttype() === v.ttype() && f.k[idx.value].value === v.value)
+        if (idx.value < fs.nk && f.k[idx.value].ttype() === v.ttype() && f.k[idx.value].value === v.value)
             return idx.value;  /* reuse index */
     }
     /* constant not found; create a new entry */
