@@ -449,7 +449,7 @@ const findgotos = function(ls, lb) {
 */
 const movegotosout = function(fs, bl) {
     let i = bl.firstgoto;
-    let gl = fs.ls.dydy.gt;
+    let gl = fs.ls.dyd.gt;
     /* correct pending gotos to current block and try to close it
        with visible labels */
     while (i < gl.n) {
