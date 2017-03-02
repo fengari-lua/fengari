@@ -19,7 +19,7 @@ test('LOADK, RETURN', function (t) {
         return a
     `, L;
     
-    t.plan(2);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -29,9 +29,13 @@ test('LOADK, RETURN', function (t) {
 
         lapi.lua_load(L, null, luaCode, "test", "text");
 
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
         lapi.lua_call(L, 0, -1);
 
-    }, "JS Lua program ran without error");
+    }, "Lua program ran without error");
 
     t.strictEqual(
         lapi.lua_tostring(L, -1),
@@ -49,7 +53,7 @@ test('MOVE', function (t) {
         return b
     `, L;
     
-    t.plan(2);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -59,9 +63,13 @@ test('MOVE', function (t) {
 
         lapi.lua_load(L, null, luaCode, "test", "text");
 
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
         lapi.lua_call(L, 0, -1);
 
-    }, "JS Lua program ran without error");
+    }, "Lua program ran without error");
 
     t.strictEqual(
         lapi.lua_tostring(L, -1),
@@ -79,7 +87,7 @@ test('Binary op', function (t) {
         return a + b, a - b, a * b, a / b, a % b, a^b, a // b, a & b, a | b, a ~ b, a << b, a >> b
     `, L;
     
-    t.plan(2);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -89,9 +97,13 @@ test('Binary op', function (t) {
 
         lapi.lua_load(L, null, luaCode, "test", "text");
 
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
         lapi.lua_call(L, 0, -1);
 
-    }, "JS Lua program ran without error");
+    }, "Lua program ran without error");
 
     t.deepEqual(
         L.stack.slice(L.top - 12, L.top).map(e => e.value),
@@ -109,7 +121,7 @@ test('Unary op, LOADBOOL', function (t) {
         return -a, not b, ~a
     `, L;
     
-    t.plan(2);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -119,9 +131,13 @@ test('Unary op, LOADBOOL', function (t) {
 
         lapi.lua_load(L, null, luaCode, "test", "text");
 
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
         lapi.lua_call(L, 0, -1);
 
-    }, "JS Lua program ran without error");
+    }, "Lua program ran without error");
 
     t.deepEqual(
         L.stack.slice(L.top - 3, L.top).map(e => e.value),
@@ -137,7 +153,7 @@ test('NEWTABLE', function (t) {
         return a
     `, L;
     
-    t.plan(2);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -147,9 +163,13 @@ test('NEWTABLE', function (t) {
 
         lapi.lua_load(L, null, luaCode, "test", "text");
 
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
         lapi.lua_call(L, 0, -1);
 
-    }, "JS Lua program ran without error");
+    }, "Lua program ran without error");
 
     t.ok(
         L.stack[lapi.index2addr_(L, -1)] instanceof Table,
@@ -169,7 +189,7 @@ test('CALL', function (t) {
         return c
     `, L;
     
-    t.plan(2);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -179,9 +199,13 @@ test('CALL', function (t) {
 
         lapi.lua_load(L, null, luaCode, "test", "text");
 
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
         lapi.lua_call(L, 0, -1);
 
-    }, "JS Lua program ran without error");
+    }, "Lua program ran without error");
 
     t.strictEqual(
         lapi.lua_tointeger(L, -1),
@@ -205,7 +229,7 @@ test('Multiple return', function (t) {
         return c, d, e
     `, L;
     
-    t.plan(2);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -215,9 +239,13 @@ test('Multiple return', function (t) {
 
         lapi.lua_load(L, null, luaCode, "test", "text");
 
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
         lapi.lua_call(L, 0, -1);
 
-    }, "JS Lua program ran without error");
+    }, "Lua program ran without error");
 
     t.deepEqual(
         L.stack.slice(L.top - 3, L.top).map(e => e.value),
@@ -236,7 +264,7 @@ test('TAILCALL', function (t) {
         return f(1,2)
     `, L;
     
-    t.plan(2);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -246,9 +274,13 @@ test('TAILCALL', function (t) {
 
         lapi.lua_load(L, null, luaCode, "test", "text");
 
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
         lapi.lua_call(L, 0, -1);
 
-    }, "JS Lua program ran without error");
+    }, "Lua program ran without error");
 
     t.strictEqual(
         lapi.lua_tointeger(L, -1),
@@ -267,7 +299,7 @@ test('VARARG', function (t) {
         return f(1,2,3)
     `, L;
     
-    t.plan(2);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -277,9 +309,13 @@ test('VARARG', function (t) {
 
         lapi.lua_load(L, null, luaCode, "test", "text");
 
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
         lapi.lua_call(L, 0, -1);
 
-    }, "JS Lua program ran without error");
+    }, "Lua program ran without error");
 
     t.deepEqual(
         L.stack.slice(L.top - 3, L.top).map(e => e.value),
@@ -296,7 +332,7 @@ test('LE, JMP', function (t) {
         return a >= b
     `, L;
     
-    t.plan(2);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -306,9 +342,13 @@ test('LE, JMP', function (t) {
 
         lapi.lua_load(L, null, luaCode, "test", "text");
 
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
         lapi.lua_call(L, 0, -1);
 
-    }, "JS Lua program ran without error");
+    }, "Lua program ran without error");
 
     t.strictEqual(
         lapi.lua_toboolean(L, -1),
@@ -325,7 +365,7 @@ test('LT', function (t) {
         return a > b
     `, L;
     
-    t.plan(2);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -335,9 +375,13 @@ test('LT', function (t) {
 
         lapi.lua_load(L, null, luaCode, "test", "text");
 
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
         lapi.lua_call(L, 0, -1);
 
-    }, "JS Lua program ran without error");
+    }, "Lua program ran without error");
 
     t.strictEqual(
         lapi.lua_toboolean(L, -1),
@@ -354,7 +398,7 @@ test('EQ', function (t) {
         return a == b
     `, L;
     
-    t.plan(2);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -364,9 +408,13 @@ test('EQ', function (t) {
 
         lapi.lua_load(L, null, luaCode, "test", "text");
 
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
         lapi.lua_call(L, 0, -1);
 
-    }, "JS Lua program ran without error");
+    }, "Lua program ran without error");
 
     t.strictEqual(
         lapi.lua_toboolean(L, -1),
@@ -384,7 +432,7 @@ test('TESTSET (and)', function (t) {
         return a and b
     `, L;
     
-    t.plan(2);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -394,9 +442,13 @@ test('TESTSET (and)', function (t) {
 
         lapi.lua_load(L, null, luaCode, "test", "text");
 
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
         lapi.lua_call(L, 0, -1);
 
-    }, "JS Lua program ran without error");
+    }, "Lua program ran without error");
 
     t.strictEqual(
         lapi.lua_tostring(L, -1),
@@ -414,7 +466,7 @@ test('TESTSET (or)', function (t) {
         return a or b
     `, L;
     
-    t.plan(2);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -424,9 +476,13 @@ test('TESTSET (or)', function (t) {
 
         lapi.lua_load(L, null, luaCode, "test", "text");
 
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
         lapi.lua_call(L, 0, -1);
 
-    }, "JS Lua program ran without error");
+    }, "Lua program ran without error");
 
     t.strictEqual(
         lapi.lua_tostring(L, -1),
@@ -448,7 +504,7 @@ test('TEST (false)', function (t) {
         return "goodbye"
     `, L;
     
-    t.plan(2);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -458,9 +514,13 @@ test('TEST (false)', function (t) {
 
         lapi.lua_load(L, null, luaCode, "test", "text");
 
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
         lapi.lua_call(L, 0, -1);
 
-    }, "JS Lua program ran without error");
+    }, "Lua program ran without error");
 
     t.strictEqual(
         lapi.lua_tostring(L, -1),
@@ -481,7 +541,7 @@ test('FORPREP, FORLOOP (int)', function (t) {
         return total
     `, L;
     
-    t.plan(2);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -491,9 +551,13 @@ test('FORPREP, FORLOOP (int)', function (t) {
 
         lapi.lua_load(L, null, luaCode, "test", "text");
 
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
         lapi.lua_call(L, 0, -1);
 
-    }, "JS Lua program ran without error");
+    }, "Lua program ran without error");
 
     t.strictEqual(
         lapi.lua_tointeger(L, -1),
@@ -514,7 +578,7 @@ test('FORPREP, FORLOOP (float)', function (t) {
         return total
     `, L;
     
-    t.plan(2);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -524,9 +588,13 @@ test('FORPREP, FORLOOP (float)', function (t) {
 
         lapi.lua_load(L, null, luaCode, "test", "text");
 
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
         lapi.lua_call(L, 0, -1);
 
-    }, "JS Lua program ran without error");
+    }, "Lua program ran without error");
 
     t.strictEqual(
         lapi.lua_tonumber(L, -1),
@@ -546,7 +614,7 @@ test('SETTABLE, GETTABLE', function (t) {
         return t
     `, L;
     
-    t.plan(3);
+    t.plan(4);
 
     t.doesNotThrow(function () {
 
@@ -556,9 +624,13 @@ test('SETTABLE, GETTABLE', function (t) {
 
         lapi.lua_load(L, null, luaCode, "test", "text");
 
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
         lapi.lua_call(L, 0, -1);
 
-    }, "JS Lua program ran without error");
+    }, "Lua program ran without error");
 
     t.strictEqual(
         lapi.lua_topointer(L, -1).get(0).value,
@@ -587,7 +659,7 @@ test('SETUPVAL, GETUPVAL', function (t) {
         return f()
     `, L;
     
-    t.plan(2);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -597,9 +669,13 @@ test('SETUPVAL, GETUPVAL', function (t) {
 
         lapi.lua_load(L, null, luaCode, "test", "text");
 
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
         lapi.lua_call(L, 0, -1);
 
-    }, "JS Lua program ran without error");
+    }, "Lua program ran without error");
 
     t.strictEqual(
         lapi.lua_tostring(L, -1),
@@ -619,7 +695,7 @@ test('SETTABUP, GETTABUP', function (t) {
         return t
     `, L;
     
-    t.plan(3);
+    t.plan(4);
 
     t.doesNotThrow(function () {
 
@@ -629,9 +705,13 @@ test('SETTABUP, GETTABUP', function (t) {
 
         lapi.lua_load(L, null, luaCode, "test", "text");
 
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
         lapi.lua_call(L, 0, -1);
 
-    }, "JS Lua program ran without error");
+    }, "Lua program ran without error");
 
     t.strictEqual(
         lapi.lua_topointer(L, -1).get(0).value,
@@ -659,7 +739,7 @@ test('SELF', function (t) {
         return t:get()
     `, L;
     
-    t.plan(2);
+    t.plan(3);
 
     t.doesNotThrow(function () {
 
@@ -669,13 +749,119 @@ test('SELF', function (t) {
 
         lapi.lua_load(L, null, luaCode, "test", "text");
 
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
         lapi.lua_call(L, 0, -1);
 
-    }, "JS Lua program ran without error");
-    
+    }, "Lua program ran without error");
+
     t.strictEqual(
         lapi.lua_tostring(L, -1),
         "hello",
+        "Program output is correct"
+    );
+});
+
+
+test('SETLIST', function (t) {
+    let luaCode = `
+        local t = {1, 2, 3, 4, 5, 6, 7, 8, 9}
+
+        return t
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, null, luaCode, "test", "text");
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.deepEqual(
+        [...lapi.lua_topointer(L, -1).entries()].map(e => e[1].value).sort(),
+        [1, 2, 3, 4, 5, 6, 7, 8, 9],
+        "Program output is correct"
+    );
+});
+
+
+test('Variable SETLIST', function (t) {
+    let luaCode = `
+        local a = function ()
+            return 6, 7, 8, 9
+        end
+
+        local t = {1, 2, 3, 4, 5, a()}
+
+        return t
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, null, luaCode, "test", "text");
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.deepEqual(
+        [...lapi.lua_topointer(L, -1).entries()].map(e => e[1].value).sort(),
+        [1, 2, 3, 4, 5, 6, 7, 8, 9],
+        "Program output is correct"
+    );
+});
+
+test('Long SETLIST', function (t) {
+    let luaCode = `
+        local t = {1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5}
+
+        return t
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, null, luaCode, "test", "text");
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.deepEqual(
+        [...lapi.lua_topointer(L, -1).entries()].map(e => e[1].value).reverse(),
+        [1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5],
         "Program output is correct"
     );
 });

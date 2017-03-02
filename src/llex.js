@@ -132,8 +132,8 @@ const save = function(ls, c) {
 };
 
 const luaX_token2str = function(ls, token) {
-    if (token < FIRST_RESERVED) {  /* single-byte symbols? */
-        return `'${String.fromCharCode(token)}'`;
+    if (typeof token === "string" || token < FIRST_RESERVED) {  /* single-byte symbols? */
+        return `'${typeof token === "string" ? token : String.fromCharCode(token)}'`;
     } else {
         let s = luaX_tokens[token - FIRST_RESERVED];
         if (token < R.TK_EOS)  /* fixed format (symbols and reserved words)? */
@@ -266,11 +266,12 @@ const txtToken = function(ls, token) {
 const lexerror = function(ls, msg, token) {
     msg = ldebug.luaG_addinfo(ls.L, msg, ls.source, ls.linenumber);
     if (token)
-        lapi.lua_pushstring(ls.L, `${msg} near ${txtToken(ls, token)}`);
+        lapi.lua_pushstring(ls.L, `${msg instanceof TValue ? msg.value : msg} near ${txtToken(ls, token)}`);
     ldo.luaD_throw(ls.L, TS.LUA_ERRSYNTAX);
 };
 
 const luaX_syntaxerror = function(ls, msg) {
+    msg = msg instanceof TValue ? msg.value : msg;
     lexerror(ls, msg, ls.t.token);
 };
 
@@ -584,7 +585,10 @@ const llex = function(ls, seminfo) {
 const luaX_next = function(ls) {
     ls.lastline = ls.linenumber;
     if (ls.lookahead.token !== R.TK_EOS) {  /* is there a look-ahead token? */
-        ls.t = ls.lookahead;  /* use this one */
+        ls.t.token = ls.lookahead.token;  /* use this one */
+        ls.t.seminfo.i = ls.lookahead.seminfo.i;
+        ls.t.seminfo.r = ls.lookahead.seminfo.r;
+        ls.t.seminfo.ts = ls.lookahead.seminfo.ts; // TODO ?
         ls.lookahead.token = R.TK_EOS;  /* and discharge it */
     } else
         ls.t.token = llex(ls, ls.t.seminfo);  /* read next token */
@@ -592,7 +596,7 @@ const luaX_next = function(ls) {
 
 const luaX_lookahead = function(ls) {
     assert(ls.lookahead.token === R.TK_EOS);
-    ls.lookahead.token = llex(ls. ls.lookahead.seminfo);
+    ls.lookahead.token = llex(ls, ls.lookahead.seminfo);
     return ls.lookahead.token;
 };
 

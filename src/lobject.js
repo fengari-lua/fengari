@@ -221,6 +221,8 @@ const PRE  = "[string \"";
 const POS  = "\"]";
 
 const luaO_chunkid = function(source, bufflen) {
+    source = source instanceof TValue ? source.value : source;
+    bufflen = bufflen instanceof TValue ? bufflen.value : bufflen;
     let l = source.length;
     let out = "";
     if (source[0] === '=') {  /* 'literal' source */
