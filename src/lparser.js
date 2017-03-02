@@ -902,7 +902,7 @@ const simpleexp = function(ls, v) {
        constructor | FUNCTION body | suffixedexp */
     switch (ls.t.token) {
         case R.TK_FLT: {
-            init_exp(v, expkind.VFLT, 0);
+            init_exp(v, expkind.VKFLT, 0);
             v.u.nval = ls.t.seminfo.r;
             break;
         }

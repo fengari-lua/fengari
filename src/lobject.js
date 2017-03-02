@@ -278,32 +278,28 @@ const luaO_utf8desc = function(buff, x) {
     return n;
 };
 
-const l_str2dloc = function(s, result, mode) {
-    result[0] = mode === 'x' ? parseInt(s, '16') : parseInt(s);
-    if (isNaN(result[0])) return null;  /* nothing recognized? */
-    while (ljstype.lisspace(result[0])) result[0] = result[0].slice(1);  /* skip trailing spaces */
-    return result[0] === '\0' ? result : null;  /* OK if no trailing characters */
+const l_str2dloc = function(s, mode) {
+    let flt = mode === 'x' ? parseInt(s, '16') : parseFloat(s);
+    return !isNaN(flt) && /^\d+(\.\d+)?\0?$/.test(s) ? flt : null;  /* OK if no trailing characters */
 };
 
 const l_str2d = function(s) {
-    let result = [null, null];
     let pidx = /[.xXnN]/g.exec(s).index;
-    let pmode = pidx ? s.slice(pidx) : null;
+    let pmode = pidx ? s[pidx] : null;
     let mode = pmode ? pmode.toLowerCase() : 0;
     if (mode === 'n')  /* reject 'inf' and 'nan' */
         return null;
-    let end = l_str2dloc(s, result, mode)[0];  /* try to convert */
+    let end = l_str2dloc(s, mode);  /* try to convert */
     if (end === null) {   /* failed? may be a different locale */
         throw new Error("Locale not available to handle number"); // TODO
     }
-    return [end, result[1]];
+    return end;
 };
 
 const MAXBY10  = Number.MAX_SAFE_INTEGER / 10;
 const MAXLASTD = Number.MAX_SAFE_INTEGER % 10;
 
 const l_str2int = function(s) {
-    let result = [null, null];
     let a = 0;
     let empty = true;
     let neg;
@@ -333,28 +329,22 @@ const l_str2int = function(s) {
 
     while (ljstype.lisspace(s[0])) s = s.slice(1);  /* skip trailing spaces */
 
-    if (empty)/* TODO: || s[0] !== "") */ return null;  /* something wrong in the numeral */
+    if (empty || s[0] !== "\0") return null;  /* something wrong in the numeral */
     else {
-        result[1] = neg ? -a : a;
-        result[0] = s;
-        return result;
+        return neg ? -a : a;
     }
 };
 
 const luaO_str2num = function(s) {
     let s2i = l_str2int(s);
-    let e = s2i[0];
-    let i = s2i[1];
 
-    if (e !== null) {   /* try as an integer */
-        return new TValue(CT.LUA_TNUMINT, i);
+    if (s2i !== null) {   /* try as an integer */
+        return new TValue(CT.LUA_TNUMINT, s2i);
     } else {   /* else try as a float */
-        s2i = l_str2d(s);
-        e = s2i[0];
-        i = s2i[1];
+        s2i = l_str2d(s.join(''));
 
-        if (e !== null) {
-            return new TValue(CT.LUA_TNUMFLT, i);
+        if (s2i !== null) {
+            return new TValue(CT.LUA_TNUMFLT, s2i);
         } else
             return false;  /* conversion failed */
     }

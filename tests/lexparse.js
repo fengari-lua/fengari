@@ -468,3 +468,69 @@ test('TEST (false)', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('FORPREP, FORLOOP (int)', function (t) {
+    let luaCode = `
+        local total = 0
+
+        for i = 0, 10 do
+            total = total + i
+        end
+
+        return total
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, null, luaCode, "test", "text");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -1),
+        55,
+        "Program output is correct"
+    );
+});
+
+
+test('FORPREP, FORLOOP (float)', function (t) {
+    let luaCode = `
+        local total = 0
+
+        for i = 0.5, 10.5 do
+            total = total + i
+        end
+
+        return total
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, null, luaCode, "test", "text");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tonumber(L, -1),
+        60.5,
+        "Program output is correct"
+    );
+});
