@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/giann/fengari.svg?token=PSYuVp8qrrdszprvDFz7&branch=master)](https://travis-ci.com/giann/fengari) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Build Status](https://travis-ci.org/giann/fengari.svg?branch=master)](https://travis-ci.org/giann/fengari) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # fengari
 🐺 φεγγάρι - A Lua VM written in JS ES6 targeting the browser
