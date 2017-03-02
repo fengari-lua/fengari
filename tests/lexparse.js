@@ -572,3 +572,38 @@ test('SETTABLE, GETTABLE', function (t) {
         "Program output is correct"
     );
 });
+
+
+test('SETUPVAL, GETUPVAL', function (t) {
+    let luaCode = `
+        local up = "hello"
+
+        local f = function ()
+            upup = "yo"
+            up = "world"
+            return up;
+        end
+
+        return f()
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lapi.lua_load(L, null, luaCode, "test", "text");
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "world",
+        "Program output is correct"
+    );
+});
