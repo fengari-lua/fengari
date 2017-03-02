@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/giann/fengari.svg?token=PSYuVp8qrrdszprvDFz7&branch=master)](https://travis-ci.com/giann/fengari) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Build Status](https://travis-ci.org/giann/fengari.svg?branch=master)](https://travis-ci.org/giann/fengari) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # fengari
 🐺 φεγγάρι - A Lua VM written in JS ES6 targeting the browser
@@ -39,6 +39,8 @@
     - [x] lua_gettop
     - [x] lua_insert
     - [x] lua_isinteger
+    - [x] lua_isnil
+    - [x] lua_isnone
     - [x] lua_isnoneornil
     - [x] lua_isnumber
     - [x] lua_isstring
@@ -71,6 +73,7 @@
     - [x] lua_rawlen
     - [x] lua_rawset
     - [x] lua_remove
+    - [x] lua_replace
     - [x] lua_resume
     - [x] lua_rotate
     - [x] lua_setfield
@@ -79,6 +82,7 @@
     - [x] lua_setmetatable
     - [x] lua_settable
     - [x] lua_settop
+    - [x] lua_setupvalue
     - [x] lua_status
     - [x] lua_stringtonumber
     - [x] lua_toboolean
@@ -116,8 +120,6 @@
     - [ ] lua_iscfunction
     - [ ] lua_isfunction
     - [ ] lua_islightuserdata
-    - [ ] lua_isnil
-    - [ ] lua_isnone
     - [ ] lua_isthread
     - [ ] lua_isuserdata
     - [ ] lua_newuserdata
@@ -129,11 +131,9 @@
     - [ ] lua_rawseti
     - [ ] lua_rawsetp
     - [ ] lua_register
-    - [ ] lua_replace
     - [ ] lua_setallocf
     - [ ] lua_sethook
     - [ ] lua_setlocal
-    - [ ] lua_setupvalue
     - [ ] lua_setuservalue
     - [ ] lua_tocfunction
     - [ ] lua_touserdata
@@ -157,6 +157,9 @@
     - [x] luaL_getmetafield
     - [x] luaL_getsubtable
     - [x] luaL_len
+    - [x] luaL_loadbuffer
+    - [x] luaL_loadbufferx
+    - [x] luaL_loadstring
     - [x] luaL_newlib
     - [x] luaL_newstate
     - [x] luaL_openlibs
@@ -182,11 +185,8 @@
     - [ ] luaL_fileresult
     - [ ] luaL_getmetatable
     - [ ] luaL_gsub
-    - [ ] luaL_loadbuffer
-    - [ ] luaL_loadbufferx
     - [ ] luaL_loadfile
     - [ ] luaL_loadfilex
-    - [ ] luaL_loadstring
     - [ ] luaL_newlibtable
     - [ ] luaL_newmetatable
     - [ ] luaL_optnumber
@@ -202,10 +202,10 @@
 - [ ] Standard library
     - [ ] Base lib
         - [x] ...
+        - [x] load
         - [ ] require
         - [ ] dofile
         - [ ] loadfile
-        - [ ] load
     - [x] Coroutine
     - [x] Table
     - [x] Math

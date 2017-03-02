@@ -182,6 +182,11 @@ const lua_insert = function(L, idx) {
     lua_rotate(L, idx, 1);
 };
 
+const lua_replace = function(L, idx) {
+    lua_copy(L, -1, idx);
+    lua_pop(L, 1);
+};
+
 /*
 ** push functions (JS -> stack)
 */
@@ -424,6 +429,45 @@ const lua_createtable = function(L, narray, nrec) {
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
+const aux_upvalue = function(fi, n) {
+    switch(fi.ttype()) {
+        case CT.LUAT_TCCL: {  /* C closure */
+            let f = fi.value;
+            if (!(1 <= n && n <= f.nupvalues)) return null;
+            return {
+                name: "",
+                val: f.upvalue[n-1]
+            };
+        }
+        case CT.LUA_TLCL: {  /* Lua closure */
+            let f = fi.value;
+            let p = f.p;
+            if (!(1 <= n && n <= p.upvalues.length)) return null;
+            let name = p.upvalues[n-1].name;
+            return {
+                name: name ? name : "(*no name)",
+                val: f.upvals[n-1].val()
+            };
+        }
+        default: return null;  /* not a closure */
+    }
+};
+
+const lua_setupvalue = function(L, funcindex, n) {
+    let fi = index2addr(L, funcindex);
+    assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    let aux = aux_upvalue(fi, n);
+    let name = aux.name;
+    let val = aux.val;
+    if (name) {
+        L.top--;
+        // TODO: what if it's not a pure TValue (closure, table)
+        val.type = L.stack[L.top].type;
+        val.value = L.stack[L.top].value;
+    }
+    return name;
+};
+
 const lua_newtable = function(L) {
     lua_createtable(L, 0, 0);
 };
@@ -593,6 +637,14 @@ const lua_type = function(L, idx) {
 const lua_typename = function(L, t) {
     assert(CT.LUA_TNONE <= t && t < CT.LUA_NUMTAGS, "invalid tag");
     return ltm.ttypename(t);
+};
+
+const lua_isnil = function(L, n) {
+    return lua_type(L, n) === CT.LUA_TNIL;
+};
+
+const lua_isnone = function(L, n) {
+    return lua_type(L, n) === CT.LUA_TNONE;
 };
 
 const lua_isnoneornil = function(L, n) {
@@ -798,6 +850,8 @@ module.exports.lua_gettable        = lua_gettable;
 module.exports.lua_gettop          = lua_gettop;
 module.exports.lua_insert          = lua_insert;
 module.exports.lua_isinteger       = lua_isinteger;
+module.exports.lua_isnil           = lua_isnil;
+module.exports.lua_isnone          = lua_isnone;
 module.exports.lua_isnoneornil     = lua_isnoneornil;
 module.exports.lua_isnumber        = lua_isnumber;
 module.exports.lua_isstring        = lua_isstring;
@@ -830,6 +884,7 @@ module.exports.lua_rawgeti         = lua_rawgeti;
 module.exports.lua_rawlen          = lua_rawlen;
 module.exports.lua_rawset          = lua_rawset;
 module.exports.lua_remove          = lua_remove;
+module.exports.lua_replace         = lua_replace;
 module.exports.lua_rotate          = lua_rotate;
 module.exports.lua_setfield        = lua_setfield;
 module.exports.lua_setglobal       = lua_setglobal;
@@ -837,6 +892,7 @@ module.exports.lua_seti            = lua_seti;
 module.exports.lua_setmetatable    = lua_setmetatable;
 module.exports.lua_settable        = lua_settable;
 module.exports.lua_settop          = lua_settop;
+module.exports.lua_setupvalue      = lua_setupvalue;
 module.exports.lua_status          = lua_status;
 module.exports.lua_stringtonumber  = lua_stringtonumber;
 module.exports.lua_toboolean       = lua_toboolean;

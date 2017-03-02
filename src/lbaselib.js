@@ -251,26 +251,85 @@ const luaB_xpcall = function(L) {
     return finishpcall(L, status, 2);
 };
 
+const load_aux = function(L, status, envidx) {
+    if (status === TS.LUA_OK) {
+        if (envidx !== 0) {  /* 'env' parameter? */
+            lapi.lua_pushvalue(L, envidx);  /* environment for loaded function */
+            if (!lapi.lua_setupvalue(L, -2, 1))  /* set it as 1st upvalue */
+                lapi.lua_pop(L, 1);  /* remove 'env' if not used by previous call */
+        }
+        return 1;
+    } else {  /* error (message is on top of the stack) */
+        lapi.lua_pushnil(L);
+        lapi.lua_insert(L, -2);  /* put before error message */
+        return 2;  /* return nil plus error message */
+    }
+};
+
+/*
+** reserved slot, above all arguments, to hold a copy of the returned
+** string to avoid it being collected while parsed. 'load' has four
+** optional arguments (chunk, source name, mode, and environment).
+*/
+const RESERVEDSLOT = 5;
+
+/*
+** Reader for generic 'load' function: 'lua_load' uses the
+** stack for internal stuff, so the reader cannot change the
+** stack top. Instead, it keeps its resulting string in a
+** reserved slot inside the stack.
+*/
+const generic_reader = function(L, ud) {
+    lauxlib.luaL_checkstack(L, 2, "too many nested functions");
+    lapi.lua_pushvalue(L, 1);  /* get function */
+    lapi.lua_call(L, 0, 1);  /* call it */
+    if (lapi.lua_isnil(L, -1)) {
+        lapi.lua_pop(L, 1);  /* pop result */
+        return null;
+    } else if (!lapi.lua_isstring(L, -1))
+        lauxlib.luaL_error(L, "reader function must return a string");
+    lapi.lua_replace(L, RESERVEDSLOT);  /* save string in reserved slot */
+    return lapi.lua_tostring(L, RESERVEDSLOT);
+};
+
+const luaB_load = function(L) {
+    let s = lapi.lua_tostring(L, 1);
+    let mode = lauxlib.luaL_optstring(L, 3, "bt");
+    let env = !lapi.lua_isnone(L, 4) ? 4 : 0;  /* 'env' index or 0 if no 'env' */
+    let status;
+    if (s !== null) {  /* loading a string? */
+        let chunkname = lauxlib.luaL_optstring(L, 2, s);
+        status = lauxlib.luaL_loadbufferx(L, s, chunkname, mode);
+    } else {  /* loading from a reader function */
+        let chunkname = lauxlib.luaL_optstring(L, 2, "=(load)");
+        lauxlib.luaL_checktype(L, 1, CT.LUA_TFUNCTION);
+        lapi.lua_settop(L, RESERVEDSLOT);  /* create reserved slot */
+        status = lapi.lua_load(L, generic_reader, null, chunkname, mode);
+    }
+    return load_aux(L, status, env);
+};
+
 const base_funcs = {
     "collectgarbage": function () {},
     "assert":         luaB_assert,
-    "print":          luaB_print,
-    "tostring":       luaB_tostring,
-    "tonumber":       luaB_tonumber,
+    "error":          luaB_error,
     "getmetatable":   luaB_getmetatable,
+    "ipairs":         luaB_ipairs,
+    "load":           luaB_load,
     "next":           luaB_next,
     "pairs":          luaB_pairs,
-    "ipairs":         luaB_ipairs,
-    "select":         luaB_select,
-    "setmetatable":   luaB_setmetatable,
+    "pcall":          luaB_pcall,
+    "print":          luaB_print,
     "rawequal":       luaB_rawequal,
+    "rawget":         luaB_rawget,
     "rawlen":         luaB_rawlen,
     "rawset":         luaB_rawset,
-    "rawget":         luaB_rawget,
+    "select":         luaB_select,
+    "setmetatable":   luaB_setmetatable,
+    "tonumber":       luaB_tonumber,
+    "tostring":       luaB_tostring,
     "type":           luaB_type,
-    "error":          luaB_error,
-    "pcall":          luaB_pcall,
-    "xpcall":         luaB_xpcall,
+    "xpcall":         luaB_xpcall
 };
 
 const luaopen_base = function(L) {

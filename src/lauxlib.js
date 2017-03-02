@@ -225,6 +225,24 @@ const luaL_opt = function(L, f, n, d) {
     return lapi.lua_type(L, n) <= 0 ? d : f(L, n);
 };
 
+const getS = function(L, ud) {
+    let s = ud.string;
+    ud.string = null;
+    return s;
+};
+
+const luaL_loadbufferx = function(L, buff, size, name, mode) {
+    return lapi.lua_load(L, getS, {string: buff}, name, mode);
+};
+
+const luaL_loadbuffer = function(L, s, sz, n) {
+    return luaL_loadbufferx(L, s, sz, n, null);
+};
+
+const luaL_loadstring = function(L, s) {
+    return luaL_loadbuffer(L, s, s.length, s);
+};
+
 const luaL_getmetafield = function(L, obj, event) {
     if (!lapi.lua_getmetatable(L, obj))
         return CT.LUA_TNIL;
@@ -381,6 +399,9 @@ module.exports.luaL_error        = luaL_error;
 module.exports.luaL_getmetafield = luaL_getmetafield;
 module.exports.luaL_getsubtable  = luaL_getsubtable;
 module.exports.luaL_len          = luaL_len;
+module.exports.luaL_loadbuffer   = luaL_loadbuffer;
+module.exports.luaL_loadbufferx  = luaL_loadbufferx;
+module.exports.luaL_loadstring   = luaL_loadstring;
 module.exports.luaL_newlib       = luaL_newlib;
 module.exports.luaL_newstate     = luaL_newstate;
 module.exports.luaL_opt          = luaL_opt;
