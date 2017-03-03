@@ -3,7 +3,6 @@
 const fs             = require('fs');
 const child_process  = require('child_process');
 const tmp            = require('tmp');
-const DataView       = require('buffer-dataview');
 
 const BytecodeParser = require("../src/lundump.js");
 const lauxlib        = require("../src/lauxlib.js");
@@ -20,10 +19,11 @@ const toByteCode = function (luaCode) {
 
     bclist = fs.readFileSync(`${luaFile.name}.bc.txt`, 'utf8');
 
-    // console.log(bclist);
+    let b = fs.readFileSync(`${luaFile.name}.bc`);
+    let dv = new DataView(b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength));
 
     return {
-        dataView: new DataView(fs.readFileSync(`${luaFile.name}.bc`)),
+        dataView: dv,
         bclist: bclist
     };
 };
