@@ -203,12 +203,17 @@
     - [ ] Base lib
         - [x] ...
         - [x] load
-        - [ ] require
         - [ ] dofile
         - [ ] loadfile
     - [x] Coroutine
     - [x] Table
     - [x] Math
+    - [ ] String
+    - [ ] Package
+    - [ ] os
+    - [ ] io
+    - [ ] Debug
+    - [ ] utf8
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
 - [ ] DOM API binding
 
