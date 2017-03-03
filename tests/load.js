@@ -80,3 +80,38 @@ test('load', function (t) {
     );
 
 });
+
+
+test('luaL_loadbuffer', function (t) {
+    let luaCode = `
+        local a = "hello world"
+        return a
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCode).dataView;
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadbuffer(L, bc, null, "test");
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "hello world",
+        "Correct element(s) on the stack"
+    );
+
+});

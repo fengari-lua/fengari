@@ -678,7 +678,6 @@ const lua_rawequal = function(L, index1, index2) {
 ** 'load' and 'call' functions (run Lua code)
 */
 
-// TODO: reader is ignored because we don't implement ZIO
 const lua_load = function(L, reader, data, chunckname, mode) {
     let z = new llex.MBuffer(L, data, reader);
     if (!chunckname) chunckname = "?";
