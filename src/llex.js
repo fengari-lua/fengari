@@ -1,6 +1,5 @@
 "use strict";
 
-const DataView = require('buffer-dataview');
 const assert   = require('assert');
 
 const lapi     = require('./lapi.js');

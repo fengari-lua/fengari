@@ -1,7 +1,6 @@
 /*jshint esversion: 6 */
 "use strict";
 
-const DataView       = require('buffer-dataview');
 const fs             = require('fs');
 const assert         = require('assert');
 
@@ -110,7 +109,7 @@ class BytecodeParser {
     }
 
     readInstruction() {
-        let ins = new DataView(new Buffer(this.instructionSize));
+        let ins = new DataView(new ArrayBuffer(this.instructionSize));
         for (let i = 0; i < this.instructionSize; i++)
             ins.setUint8(i, this.readByte());
 
