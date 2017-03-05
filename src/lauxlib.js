@@ -158,6 +158,10 @@ const luaL_checktype = function(L, arg, t) {
         tag_error(L, arg, t);
 };
 
+const luaL_checkstring = function(L, n) {
+    luaL_checklstring(L, n, null);
+};
+
 const luaL_checklstring = function(L, arg) {
     let s = lapi.lua_tolstring(L, arg);
     if (!s) tag_error(L, arg, CT.LUA_TSTRING);
@@ -394,6 +398,7 @@ module.exports.luaL_checkinteger = luaL_checkinteger;
 module.exports.luaL_checklstring = luaL_checklstring;
 module.exports.luaL_checknumber  = luaL_checknumber;
 module.exports.luaL_checkstack   = luaL_checkstack;
+module.exports.luaL_checkstring  = luaL_checkstring;
 module.exports.luaL_checktype    = luaL_checktype;
 module.exports.luaL_error        = luaL_error;
 module.exports.luaL_getmetafield = luaL_getmetafield;

@@ -594,13 +594,13 @@ const luaV_execute = function(L) {
                         ldebug.luaG_runerror(L, "'for' limit must be a number");
 
                     plimit.type = CT.LUA_TNUMFLT;
-                    plimit.value = nlimit
+                    plimit.value = nlimit;
 
                     if (nstep === false)
                         ldebug.luaG_runerror(L, "'for' step must be a number");
 
                     pstep.type = CT.LUA_TNUMFLT;
-                    pstep.value = nstep
+                    pstep.value = nstep;
 
                     if (ninit === false)
                         ldebug.luaG_runerror(L, "'for' initial value must be a number");

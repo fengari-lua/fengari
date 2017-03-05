@@ -149,7 +149,7 @@ const luaT_gettmbyobj = function(L, o, event) {
             mt = o.metatable;
             break;
         default:
-            // TODO: mt = G(L)->mt[ttnov(o)];
+            mt = L.l_G.mt[o.ttnov()];
     }
 
     return mt ? mt.__index(mt, event) : ldo.nil;

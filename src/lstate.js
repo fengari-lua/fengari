@@ -69,7 +69,7 @@ class global_State {
 
     constructor(L) {
         this.mainthread = L;
-        this.strt = null // TODO: string hash table
+        this.strt = null; // TODO: string hash table
         this.l_registry = nil;
         this.panic = null;
         this.version = null;
