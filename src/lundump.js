@@ -13,18 +13,8 @@ const OpCodes        = require('./lopcodes.js');
 
 const LUAI_MAXSHORTLEN = 40;
 
-/**
- * Parse Lua 5.3 bytecode
- * @see {@link http://www.lua.org/source/5.3/lundump.c.html|lundump.c}
- */
 class BytecodeParser {
 
-    /**
-     * Initilialize bytecode parser
-     * @constructor
-     * @param {lua_State} Lua state object
-     * @param {DataView} dataView Contains the binary data
-     */
     constructor(dataView) {
         this.intSize = 4;
         this.size_tSize = 8;
@@ -79,7 +69,6 @@ class BytecodeParser {
         return number;
     }
 
-    // TODO: 8-bit clean strings
     readString(n) {
         let size = typeof n !== 'undefined' ? n : this.readByte() - 1;
 
@@ -90,10 +79,10 @@ class BytecodeParser {
             return null;
         }
 
-        let string = "";
+        let string = new Uint8Array();
 
         for (let i = 0; i < size; i++)
-            string += String.fromCharCode(this.readByte());
+            string.push(this.readByte());
 
         return string;
     }
@@ -133,8 +122,6 @@ class BytecodeParser {
                 Ax:     (ins >> o.POS_Ax) & p.MASK1(o.SIZE_Ax, 0),
                 sBx:    ((ins >> o.POS_Bx) & p.MASK1(o.SIZE_Bx, 0)) - o.MAXARG_sBx
             };
-
-            // console.log(`   [${i}]    Op: ${o.OpCodes[f.code[i].opcode]}  A: ${f.code[i].A}  B: ${f.code[i].B}  C: ${f.code[i].C}  Ax: ${f.code[i].Ax}  Bx: ${f.code[i].Bx}  sBx: ${f.code[i].sBx}`);
         }
     }
 
@@ -147,12 +134,6 @@ class BytecodeParser {
                 instack: this.readByte(),
                 idx:     this.readByte()
             };
-
-            // console.log(`
-            //     f.upvalues[${i}].name    = ${f.upvalues[i].name}
-            //     f.upvalues[${i}].instack = ${f.upvalues[i].instack}
-            //     f.upvalues[${i}].idx     = ${f.upvalues[i].idx}
-            // `);
         }
     }
 
@@ -165,24 +146,19 @@ class BytecodeParser {
             switch (t) {
             case constant_types.LUA_TNIL:
                 f.k.push(new TValue(constant_types.LUA_TNIL, null));
-                // console.log(`   LUA_TNIL     = ${f.k[f.k.length - 1].value}`);
                 break;
             case constant_types.LUA_TBOOLEAN:
                 f.k.push(new TValue(constant_types.LUA_TBOOLEAN, this.readByte()));
-                // console.log(`   LUA_TBOOLEAN = ${f.k[f.k.length - 1].value}`);
                 break;
             case constant_types.LUA_TNUMFLT:
                 f.k.push(new TValue(constant_types.LUA_TNUMFLT, this.readNumber()));
-                // console.log(`   LUA_TNUMFLT  = ${f.k[f.k.length - 1].value}`);
                 break;
             case constant_types.LUA_TNUMINT:
                 f.k.push(new TValue(constant_types.LUA_TNUMINT, this.readInteger()));
-                // console.log(`   LUA_TNUMINT  = ${f.k[f.k.length - 1].value}`);
                 break;
             case constant_types.LUA_TSHRSTR:
             case constant_types.LUA_TLNGSTR:
                 f.k.push(new TValue(constant_types.LUA_TLNGSTR, this.readString()));
-                // console.log(`   LUA_TLNGSTR  = ${f.k[f.k.length - 1].value}`);
                 break;
             default:
                 throw new Error(`unrecognized constant '${t}'`);
@@ -211,21 +187,11 @@ class BytecodeParser {
                 startpc: this.readInt(),
                 endpc:   this.readInt()
             };
-
-            // console.log(`
-            //     f.locvars[${i}].varname = ${f.locvars[i].varname}
-            //     f.locvars[${i}].startpc = ${f.locvars[i].startpc}
-            //     f.locvars[${i}].endpc   = ${f.locvars[i].endpc}
-            // `);
         }
 
         n = this.readInt();
         for (let i = 0; i < n; i++) {
             f.upvalues[i].name = this.readString();
-
-            // console.log(`
-            //     f.upvalues[${i}].name = ${f.upvalues[i].name}
-            // `);
         }
     }
 
@@ -238,16 +204,6 @@ class BytecodeParser {
         f.numparams = this.readByte();
         f.is_vararg = this.readByte();
         f.maxstacksize = this.readByte();
-
-        // console.log(`
-        //     f.source          = ${f.source}
-        //     f.linedefined     = ${f.linedefined}
-        //     f.lastlinedefined = ${f.lastlinedefined}
-        //     f.numparams       = ${f.numparams}
-        //     f.is_vararg       = ${f.is_vararg}
-        //     f.maxstacksize    = ${f.maxstacksize}
-        // `);
-
         this.readCode(f);
         this.readConstants(f);
         this.readUpvalues(f);
@@ -273,14 +229,6 @@ class BytecodeParser {
         this.instructionSize = this.readByte();
         this.integerSize     = this.readByte();
         this.numberSize      = this.readByte();
-
-        // console.log(`
-        //     intSize         = ${this.intSize}
-        //     size_tSize      = ${this.size_tSize}
-        //     instructionSize = ${this.instructionSize}
-        //     integerSize     = ${this.integerSize}
-        //     numberSize      = ${this.numberSize}
-        // `)
 
         if (this.readInteger() !== 0x5678)
             throw new Error("endianness mismatch");
