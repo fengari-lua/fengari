@@ -211,13 +211,14 @@
     - [ ] String
         - [x] string.char
         - [x] string.len
+        - [x] string.lower
+        - [x] string.upper
         - [ ] string.byte
         - [ ] string.dump
         - [ ] string.find
         - [ ] string.format
         - [ ] string.gmatch
         - [ ] string.gsub
-        - [ ] string.lower
         - [ ] string.match
         - [ ] string.pack
         - [ ] string.packsize
@@ -225,7 +226,6 @@
         - [ ] string.reverse
         - [ ] string.sub
         - [ ] string.unpack
-        - [ ] string.upper
     - [ ] Package
     - [ ] os
     - [ ] io

@@ -25,9 +25,21 @@ const str_char = function(L) {
     return 1;
 };
 
+const str_lower = function(L) {
+    lapi.lua_pushstring(L, lauxlib.luaL_checkstring(L, 1).toLowerCase());
+    return 1;
+};
+
+const str_upper = function(L) {
+    lapi.lua_pushstring(L, lauxlib.luaL_checkstring(L, 1).toUpperCase());
+    return 1;
+};
+
 const strlib = {
-    "len": str_len,
-    "char": str_char
+    "char":  str_char,
+    "len":   str_len,
+    "lower": str_lower,
+    "upper": str_upper
 };
 
 const createmetatable = function(L) {
