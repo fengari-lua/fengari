@@ -132,6 +132,61 @@ class lua_Debug {
 
 }
 
+const to_luastring = function(str, maxBytesToWrite) {
+    let outU8Array = new Array(maxBytesToWrite);
+
+    if (!(maxBytesToWrite > 0)) // Parameter maxBytesToWrite is not optional. Negative values, 0, null, undefined and false each don't write out any bytes.
+      return 0;
+  
+    let outIdx = 0;
+    let startIdx = 0;
+    let endIdx = maxBytesToWrite - 1; // -1 for string null terminator.
+    for (let i = 0; i < str.length; ++i) {
+        // Gotcha: charCodeAt returns a 16-bit word that is a UTF-16 encoded code unit, not a Unicode code point of the character! So decode UTF16->UTF32->UTF8.
+        // See http://unicode.org/faq/utf_bom.html#utf16-3
+        // For UTF8 byte structure, see http://en.wikipedia.org/wiki/UTF-8#Description and https://www.ietf.org/rfc/rfc2279.txt and https://tools.ietf.org/html/rfc3629
+        let u = str.charCodeAt(i); // possibly a lead surrogate
+        if (u >= 0xD800 && u <= 0xDFFF) u = 0x10000 + ((u & 0x3FF) << 10) | (str.charCodeAt(++i) & 0x3FF);
+        if (u <= 0x7F) {
+            if (outIdx >= endIdx) break;
+            outU8Array[outIdx++] = u;
+        } else if (u <= 0x7FF) {
+            if (outIdx + 1 >= endIdx) break;
+            outU8Array[outIdx++] = 0xC0 | (u >> 6);
+            outU8Array[outIdx++] = 0x80 | (u & 63);
+        } else if (u <= 0xFFFF) {
+            if (outIdx + 2 >= endIdx) break;
+            outU8Array[outIdx++] = 0xE0 | (u >> 12);
+            outU8Array[outIdx++] = 0x80 | ((u >> 6) & 63);
+            outU8Array[outIdx++] = 0x80 | (u & 63);
+        } else if (u <= 0x1FFFFF) {
+            if (outIdx + 3 >= endIdx) break;
+            outU8Array[outIdx++] = 0xF0 | (u >> 18);
+            outU8Array[outIdx++] = 0x80 | ((u >> 12) & 63);
+            outU8Array[outIdx++] = 0x80 | ((u >> 6) & 63);
+            outU8Array[outIdx++] = 0x80 | (u & 63);
+        } else if (u <= 0x3FFFFFF) {
+            if (outIdx + 4 >= endIdx) break;
+            outU8Array[outIdx++] = 0xF8 | (u >> 24);
+            outU8Array[outIdx++] = 0x80 | ((u >> 18) & 63);
+            outU8Array[outIdx++] = 0x80 | ((u >> 12) & 63);
+            outU8Array[outIdx++] = 0x80 | ((u >> 6) & 63);
+            outU8Array[outIdx++] = 0x80 | (u & 63);
+        } else {
+            if (outIdx + 5 >= endIdx) break;
+            outU8Array[outIdx++] = 0xFC | (u >> 30);
+            outU8Array[outIdx++] = 0x80 | ((u >> 24) & 63);
+            outU8Array[outIdx++] = 0x80 | ((u >> 18) & 63);
+            outU8Array[outIdx++] = 0x80 | ((u >> 12) & 63);
+            outU8Array[outIdx++] = 0x80 | ((u >> 6) & 63);
+            outU8Array[outIdx++] = 0x80 | (u & 63);
+        }
+    }
+    // Null-terminate the pointer to the buffer.
+    outU8Array[outIdx] = 0;
+    return outU8Array;
+};
+
 module.exports.CT                      = CT;
 module.exports.FENGARI_AUTHORS         = FENGARI_AUTHORS;
 module.exports.FENGARI_COPYRIGHT       = FENGARI_COPYRIGHT;
@@ -182,3 +237,4 @@ module.exports.lua_Debug               = lua_Debug;
 module.exports.lua_upvalueindex        = lua_upvalueindex;
 module.exports.print_version           = print_version;
 module.exports.thread_status           = thread_status;
+module.exports.to_luastring            = to_luastring;

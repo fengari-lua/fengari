@@ -69,12 +69,21 @@ class global_State {
 
     constructor(L) {
         this.mainthread = L;
-        this.strt = null; // TODO: string hash table
+        this.strt = new Map();
         this.l_registry = nil;
         this.panic = null;
         this.version = null;
         this.twups = [];
         this.mt = new Array(LUA_NUMTAGS);
+    }
+
+    intern(stringArray) {
+        let key = stringArray.map(e => `${e}|`).join('');
+
+        if (!this.strt.has(key))
+            this.strt.set(key, new lobject.TValue(CT.LUA_TLNGSTR, stringArray));
+
+        return this.strt.get(key);
     }
 
 }
