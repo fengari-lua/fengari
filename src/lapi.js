@@ -226,8 +226,7 @@ const lua_pushlstring = function(L, s, len) { // TODO: embedded \0
 };
 
 const lua_pushstring = function (L, s) {
-    assert(typeof s === "string");
-    if (!s)
+    if (typeof s !== "string")
         L.stack[L.top] = ldo.nil;
     else {
         let ts = new TValue(CT.LUA_TLNGSTR, s);

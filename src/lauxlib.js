@@ -159,7 +159,7 @@ const luaL_checktype = function(L, arg, t) {
 };
 
 const luaL_checkstring = function(L, n) {
-    luaL_checklstring(L, n, null);
+    return luaL_checklstring(L, n, null);
 };
 
 const luaL_checklstring = function(L, arg) {
@@ -201,9 +201,18 @@ const luaL_optinteger = function(L, arg, def) {
     return luaL_opt(L, luaL_checkinteger, arg, def);
 };
 
+const luaL_prepbuffsize = function(B, sz) {
+    return B;
+};
+
 const luaL_buffinit = function(L, B) {
     B.L = L;
     B.b = "";
+};
+
+const luaL_buffinitsize = function(L, B, sz) {
+    luaL_buffinit(L, B);
+    return B;
 };
 
 const luaL_addlstring = function(B, s) {
@@ -392,6 +401,7 @@ module.exports.luaL_addvalue     = luaL_addvalue;
 module.exports.luaL_argcheck     = luaL_argcheck;
 module.exports.luaL_argerror     = luaL_argerror;
 module.exports.luaL_buffinit     = luaL_buffinit;
+module.exports.luaL_buffinitsize = luaL_buffinitsize;
 module.exports.luaL_callmeta     = luaL_callmeta;
 module.exports.luaL_checkany     = luaL_checkany;
 module.exports.luaL_checkinteger = luaL_checkinteger;
@@ -413,6 +423,7 @@ module.exports.luaL_opt          = luaL_opt;
 module.exports.luaL_optinteger   = luaL_optinteger;
 module.exports.luaL_optlstring   = luaL_optlstring;
 module.exports.luaL_optstring    = luaL_optstring;
+module.exports.luaL_prepbuffsize = luaL_prepbuffsize;
 module.exports.luaL_pushresult   = luaL_pushresult;
 module.exports.luaL_requiref     = luaL_requiref;
 module.exports.luaL_setfuncs     = luaL_setfuncs;

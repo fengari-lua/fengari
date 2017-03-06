@@ -111,7 +111,6 @@ const f_luaopen = function(L) {
     let g = L.l_G;
     stack_init(L, L);
     init_registry(L, g);
-    // TODO: luaS_init(L);
     luaT_init(L);
     g.version = lapi.lua_version(null);
 };

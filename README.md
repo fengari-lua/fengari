@@ -146,12 +146,14 @@
     - [x] luaL_argcheck
     - [x] luaL_argerror
     - [x] luaL_buffinit
+    - [x] luaL_buffinitsize
     - [x] luaL_callmeta
     - [x] luaL_checkany
     - [x] luaL_checkinteger
     - [x] luaL_checklstring
     - [x] luaL_checknumber
     - [x] luaL_checkstack
+    - [x] luaL_checkstring
     - [x] luaL_checktype
     - [x] luaL_error
     - [x] luaL_getmetafield
@@ -166,6 +168,7 @@
     - [x] luaL_opt
     - [x] luaL_optinteger
     - [x] luaL_optlstring
+    - [x] luaL_prepbuffsize
     - [x] luaL_pushresult
     - [x] luaL_requiref
     - [x] luaL_setfuncs
@@ -174,9 +177,7 @@
     - [x] luaL_where
     - [ ] luaL_addchar
     - [ ] luaL_addsize
-    - [ ] luaL_buffinitsize
     - [ ] luaL_checkoption
-    - [ ] luaL_checkstring
     - [ ] luaL_checkudata
     - [ ] luaL_checkversion
     - [ ] luaL_dofile
@@ -192,7 +193,6 @@
     - [ ] luaL_optnumber
     - [ ] luaL_optstring
     - [ ] luaL_prepbuffer
-    - [ ] luaL_prepbuffsize
     - [ ] luaL_pushresultsize
     - [ ] luaL_ref
     - [ ] luaL_setmetatable
@@ -209,6 +209,23 @@
     - [x] Table
     - [x] Math
     - [ ] String
+        - [x] string.char
+        - [x] string.len
+        - [ ] string.byte
+        - [ ] string.dump
+        - [ ] string.find
+        - [ ] string.format
+        - [ ] string.gmatch
+        - [ ] string.gsub
+        - [ ] string.lower
+        - [ ] string.match
+        - [ ] string.pack
+        - [ ] string.packsize
+        - [ ] string.rep
+        - [ ] string.reverse
+        - [ ] string.sub
+        - [ ] string.unpack
+        - [ ] string.upper
     - [ ] Package
     - [ ] os
     - [ ] io

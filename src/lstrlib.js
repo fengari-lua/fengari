@@ -9,13 +9,25 @@ const CT      = lua.constant_types;
 const TS      = lua.thread_status;
 
 const str_len = function(L) {
-    lauxlib.luaL_checkstring(L, 1);
-    lapi.lua_pushinteger(L, lapi.lua_tostring(L, 1).length);
+    lapi.lua_pushinteger(L, lauxlib.luaL_checkstring(L, 1).length);
+    return 1;
+};
+
+const str_char = function(L) {
+    let n = lapi.lua_gettop(L);  /* number of arguments */
+    let p = "";
+    for (let i = 1; i <= n; i++) {
+        let c = lauxlib.luaL_checkinteger(L, i);
+        lauxlib.luaL_argcheck(L, c >= 0 && c <= 255, "value out of range"); // Strings are 8-bit clean
+        p += String.fromCharCode(c);
+    }
+    lapi.lua_pushstring(L, p);
     return 1;
 };
 
 const strlib = {
-    "len": str_len
+    "len": str_len,
+    "char": str_char
 };
 
 const createmetatable = function(L) {
@@ -34,3 +46,5 @@ const luaopen_string = function(L) {
     createmetatable(L);
     return 1;
 };
+
+module.exports.luaopen_string = luaopen_string;

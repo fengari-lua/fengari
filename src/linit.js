@@ -4,16 +4,18 @@ const assert = require('assert');
 
 const lapi     = require('./lapi.js');
 const lauxlib  = require('./lauxlib.js');
-const lualib   = require('./lualib.js');
 const lbaselib = require('./lbaselib.js');
 const lcorolib = require('./lcorolib.js');
-const ltablib  = require('./ltablib.js');
 const lmathlib = require('./lmathlib.js');
+const lstrlib  = require('./lstrlib.js');
+const ltablib  = require('./ltablib.js');
+const lualib   = require('./lualib.js');
 
 const loadedlibs = {
-    [lualib.LUA_MATHLIBNAME]: lmathlib.luaopen_math,
-    [lualib.LUA_TABLIBNAME]:  ltablib.luaopen_table,
     [lualib.LUA_COLIBNAME]:   lcorolib.luaopen_coroutine,
+    [lualib.LUA_MATHLIBNAME]: lmathlib.luaopen_math,
+    [lualib.LUA_STRLIBNAME]:  lstrlib.luaopen_string,
+    [lualib.LUA_TABLIBNAME]:  ltablib.luaopen_table,
     "_G":                     lbaselib.luaopen_base
 };
 

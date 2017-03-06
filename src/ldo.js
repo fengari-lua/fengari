@@ -521,7 +521,7 @@ class SParser {
 }
 
 const checkmode = function(L, mode, x) {
-    if (mode && mode.indexOf(x.charAt(0))) {
+    if (mode && mode.indexOf(x.charAt(0)) !== -1) {
         lapi.lua_pushstring(L, `attempt to load a ${x} chunk (mode is '${mode}')`);
         luaD_throw(L, TS.LUA_ERRSYNTAX);
     }
