@@ -35,10 +35,20 @@ const str_upper = function(L) {
     return 1;
 };
 
+const str_rep = function(L) {
+    let s = lauxlib.luaL_checkstring(L, 1);
+    let n = lauxlib.luaL_checkinteger(L, 2);
+    let sep = lauxlib.luaL_optstring(L, 3, "");
+
+    lapi.lua_pushstring(L, (s + sep).repeat(n - 1) + s);
+    return 1;
+};
+
 const strlib = {
     "char":  str_char,
     "len":   str_len,
     "lower": str_lower,
+    "rep": str_rep,
     "upper": str_upper
 };
 
