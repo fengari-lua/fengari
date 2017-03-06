@@ -213,6 +213,7 @@
         - [x] string.len
         - [x] string.lower
         - [x] string.rep
+        - [x] string.reverse
         - [x] string.upper
         - [ ] string.byte
         - [ ] string.dump
@@ -223,7 +224,6 @@
         - [ ] string.match
         - [ ] string.pack
         - [ ] string.packsize
-        - [ ] string.reverse
         - [ ] string.sub
         - [ ] string.unpack
     - [ ] Package

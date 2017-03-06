@@ -25,6 +25,11 @@ const str_char = function(L) {
     return 1;
 };
 
+const str_reverse = function(L) {
+    lapi.lua_pushstring(L, lauxlib.luaL_checkstring(L, 1).split("").reverse().join(""));
+    return 1;
+};
+
 const str_lower = function(L) {
     lapi.lua_pushstring(L, lauxlib.luaL_checkstring(L, 1).toLowerCase());
     return 1;
@@ -49,6 +54,7 @@ const strlib = {
     "len":   str_len,
     "lower": str_lower,
     "rep": str_rep,
+    "reverse": str_reverse,
     "upper": str_upper
 };
 

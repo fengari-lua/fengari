@@ -147,3 +147,34 @@ test('string.rep', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('string.reverse', function (t) {
+    let luaCode = `
+        return string.reverse("olleh")
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "hello",
+        "Correct element(s) on the stack"
+    );
+});
