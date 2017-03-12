@@ -80,7 +80,7 @@ class BytecodeParser {
             return null;
         }
 
-        let string = [];//new Uint8Array();
+        let string = [];
 
         for (let i = 0; i < size; i++)
             string.push(this.readByte());

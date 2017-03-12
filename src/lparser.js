@@ -248,7 +248,7 @@ const new_localvar = function(ls, name) {
 };
 
 const new_localvarliteral = function(ls, name) {
-    new_localvar(ls, new TValue(lua.CT.LUA_TLNGSTR, name));
+    new_localvar(ls, new TValue(lua.CT.LUA_TLNGSTR, lua.to_luastring(name)));
 };
 
 const getlocvar = function(fs, i) {
@@ -479,7 +479,7 @@ const enterblock = function(fs, bl, isloop) {
 ** create a label named 'break' to resolve break statements
 */
 const breaklabel = function(ls) {
-    let n = new TValue(lua.CT.LUA_TLNGSTR, "break");
+    let n = new TValue(lua.CT.LUA_TLNGSTR, lua.to_luastring("break"));
     let l = newlabelentry(ls, ls.dyd.label, n, 0, ls.fs.pc);
     findgotos(ls, ls.dyd.label.arr[l]);
 };
@@ -1141,7 +1141,7 @@ const gotostat = function(ls, pc) {
         label = str_checkname(ls);
     else {
         llex.luaX_next(ls);  /* skip break */
-        label = new TValue(lua.CT.LUA_TLNGSTR, "break");
+        label = new TValue(lua.CT.LUA_TLNGSTR, lua.to_luastring("break"));
     }
     let g = newlabelentry(ls, ls.dyd.gt, label, line, pc);
     findlabel(ls, g);  /* close it if label already defined */
@@ -1547,7 +1547,7 @@ const luaY_parser = function(L, z, buff, dyd, name, firstchar) {
     lexstate.h = new Table();  /* create table for scanner */
     L.stack[L.top++] = lexstate.h;
     funcstate.f = cl.p = new Proto(L);
-    funcstate.f.source = new TValue(lua.CT.LUA_TLNGSTR, name);
+    funcstate.f.source = new TValue(lua.CT.LUA_TLNGSTR, lua.to_luastring(name));
     lexstate.buff = buff;
     lexstate.dyd = dyd;
     dyd.actvar.n = dyd.gt.n = dyd.label.n = 0;

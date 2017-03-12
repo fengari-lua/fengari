@@ -513,7 +513,7 @@ const luaK_stringK = function(fs, s) {
 ** are no "precision" problems.
 */
 const luaK_intK = function(fs, n) {
-    let k = new TValue(CT.LUA_TLNGSTR, `${n}`);
+    let k = new TValue(CT.LUA_TLNGSTR, lua.to_luastring(`${n}`));
     let o = new TValue(CT.LUA_TNUMINT, n);
     return addk(fs, k, o);
 };
@@ -540,7 +540,7 @@ const boolK = function(fs, b) {
 ** Add nil to list of constants and return its index.
 */
 const nilK = function(fs) {
-    return addk(fs, new TValue(CT.LUA_TLNGSTR, `null`), new TValue(CT.LUA_TNIL, null));
+    return addk(fs, new TValue(CT.LUA_TLNGSTR, lua.to_luastring(`null`)), new TValue(CT.LUA_TNIL, null));
 };
 
 /*
