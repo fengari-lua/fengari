@@ -400,7 +400,7 @@ const isinstack = function(L, ci, o) {
     }
 
     return false;
-}
+};
 
 /*
 ** Checks whether value 'o' came from an upvalue. (That can only happen
@@ -414,7 +414,7 @@ const getupvalname = function(L, ci, o, name) {
             return {
                 name: upvalname(c.p, i),
                 funcname: 'upvalue'
-            }
+            };
         }
     }
 
@@ -469,7 +469,7 @@ const luaG_addinfo = function(L, msg, src, line) {
     if (src)
         buff = lobject.luaO_chunkid(src, luaconf.LUA_IDSIZE);
 
-    L.stack[L.top++] = new TValue(CT.LUA_TLNGSTR, `${buff}:${line}: ${msg}`); // We don't need to check for overflow here
+    L.stack[L.top++] = L.l_G.intern(lua.to_luastring(`${buff}:${line}: ${msg}`)); // We don't need to check for overflow here
 
     return L.stack[L.top - 1];
 };
@@ -501,7 +501,7 @@ const luaG_tointerror = function(L, p1, p2) {
     if (temp === false)
         p2 = p1;
     luaG_runerror(L, `number${varinfo(L, p2)} has no integer representation`);
-}
+};
 
 module.exports.lua_getstack     = lua_getstack;
 module.exports.lua_getinfo      = lua_getinfo;

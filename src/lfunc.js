@@ -128,7 +128,7 @@ const luaF_getlocalname = function(f, local_number, pc) {
         }
     }
     return null;  /* not found */
-}
+};
 
 
 module.exports.MAXUPVAL          = 255;
@@ -136,6 +136,6 @@ module.exports.Proto             = Proto;
 module.exports.UpVal             = UpVal;
 module.exports.findupval         = findupval;
 module.exports.luaF_close        = luaF_close;
-module.exports.luaF_getlocalname = luaF_getlocalname
+module.exports.luaF_getlocalname = luaF_getlocalname;
 module.exports.luaF_initupvals   = luaF_initupvals;
 module.exports.luaF_newLclosure  = luaF_newLclosure;
