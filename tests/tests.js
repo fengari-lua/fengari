@@ -35,8 +35,7 @@ const getState = function(luaCode) {
 
     let L = lauxlib.luaL_newstate();
 
-    let p = new BytecodeParser(dv);
-    let cl = p.luaU_undump(L);
+    let p = new BytecodeParser(L, dv).luaU_undump();
 
     return L;
 };

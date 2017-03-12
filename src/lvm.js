@@ -768,9 +768,22 @@ const luaV_equalobj = function(L, t1, t2) {
         case CT.LUA_TNUMFLT:
         case CT.LUA_TBOOLEAN:
         case CT.LUA_TLCF:
-        case CT.LUA_TSHRSTR:
-        case CT.LUA_TLNGSTR:
             return t1.value === t2.value ? 1 : 0;
+        case CT.LUA_TSHRSTR:
+        case CT.LUA_TLNGSTR: {
+            let l1 = t1.value.length;
+            let l2 = t2.value.length;
+
+            if (l1 !== l2) return 0;
+
+            let i;
+            for (i = 0; i < l1; i++) {
+                if (t1.value[i] !== t2.value[i])
+                    return 0;
+            }
+
+            return 1;
+        }
         case CT.LUA_TLIGHTUSERDATA:
         case CT.LUA_TUSERDATA:
         case CT.LUA_TTABLE:
@@ -843,7 +856,8 @@ const luaV_tointeger = function(obj, mode) {
     } else if (obj.ttisinteger()) {
         return obj.value|0;
     } else if (obj.ttisstring()) {
-        return luaV_tointeger(new TValue(CT.LUA_TNUMFLT, parseFloat(obj.value)), mode); // TODO: luaO_str2num
+        let str = String.fromCharCode(...obj.value);
+        return luaV_tointeger(new TValue(CT.LUA_TNUMFLT, parseFloat(str)), mode); // TODO: luaO_str2num
     }
 
     return false;
@@ -872,7 +886,7 @@ const LTnum = function(l, r) {
     } else {
         if (r.ttisfloat())
             return l.value < r.value ? 1 : 0;
-        else if (isNan(l.value))
+        else if (isNaN(l.value))
             return 0;
         else
             return !LEintfloat(r.value, l.value);
@@ -888,7 +902,7 @@ const LEnum = function(l, r) {
     } else {
         if (r.ttisfloat())
             return l.value <= r.value ? 1 : 0;
-        else if (isNan(l.value))
+        else if (isNaN(l.value))
             return false;
         else
             return !LTintfloat(r.value, l.value);
@@ -907,7 +921,9 @@ const LTintfloat = function(l, r) {
 
 const l_strcmp = function(ls, rs) {
     // TODO: lvm.c:248 static int l_strcmp (const TString *ls, const TString *rs)
-    return ls.value === rs.value ? 0 : (ls.value < rs.value ? -1 : 1);
+    ls = String.fromCharCode(...ls.value);
+    rs = String.fromCharCode(...rs.value);
+    return ls === rs ? 0 : (ls < rs ? -1 : 1);
 };
 
 /*
@@ -924,7 +940,7 @@ const luaV_objlen = function(L, ra, rb) {
         }
         case CT.LUA_TSHRSTR:
         case CT.LUA_TLNGSTR:
-            L.stack[ra] = new TValue(CT.LUA_TNUMINT, rb.value.length); // TODO: 8-byte clean string
+            L.stack[ra] = new TValue(CT.LUA_TNUMINT, rb.value.length);
             return;
         default: {
             tm = ltm.luaT_gettmbyobj(L, rb, ltm.TMS.TM_LEN);
@@ -940,9 +956,10 @@ const luaV_objlen = function(L, ra, rb) {
 const tostring = function(L, i) {
     let o = L.stack[i];
     let str = `${o.value}`;
+    str = lua.to_luastring(str, str.length);
 
     if (o.ttisstring() || (o.ttisnumber() && !isNaN(str))) {
-        L.stack[i] = new TValue(CT.LUA_TLNGSTR, str);
+        L.stack[i] = L.l_G.intern(str);
         return true;
     }
 
@@ -964,7 +981,7 @@ const luaV_concat = function(L, total) {
         if (!(v.ttisstring() || v.ttisnumber()) || !tostring(L, top - 2)) // TODO: tostring
             ltm.luaT_trybinTM(L, v, v2, top-2, ltm.TMS.TM_CONCAT);
         else if (v2.ttisstring() && v2.value.length === 0)
-            tostring(L, top - 2)
+            tostring(L, top - 2);
         else if (v.ttisstring() && v.value.length === 0)
             L.stack[top - 2] = L.stack[top - 1];
         else {
@@ -977,12 +994,12 @@ const luaV_concat = function(L, total) {
                 tl += l;
             }
 
-            let ts = new TValue(CT.LUA_TLNGSTR, "");
+            let ts = [];
             for (let i = n; i > 0; i--) {
-                ts.value = `${ts.value}${L.stack[top - i].value}`;
+                ts = ts.concat(L.stack[top - i].value);
             }
 
-            L.stack[top - n] = ts;
+            L.stack[top - n] = L.l_G.intern(ts);
         }
         total -= n - 1; /* got 'n' strings to create 1 new */
         L.top -= n - 1; /* popped 'n' strings and pushed one */
@@ -1074,7 +1091,7 @@ const luaV_finishset = function(L, t, key, val, slot, recur) {
     }
 
     settable(L, tm, key, val, recur + 1);
-}
+};
 
 
 module.exports.LEintfloat        = LEintfloat;
