@@ -22,8 +22,8 @@ Table.prototype.ordered_indexes = function() {
         .sort(function(a, b) {
             if (typeof a !== "number") return 1;
             if (typeof b !== "number") return -1;
-            return a > b ? 1 : -1
-        })
+            return a > b ? 1 : -1;
+        });
 };
 
 /*
@@ -64,7 +64,7 @@ Table.prototype.luaH_next = function(L, keyI) {
         if (tnidx === 'number' && nidx % 1 === 0)
             L.stack[keyI] = new TValue(CT.LUA_TNUMINT, indexes[i + 1]);
         else if (tnidx === 'string')
-            L.stack[keyI] = new TValue(CT.LUA_TLNGSTR, indexes[i + 1]);
+            L.stack[keyI] = L.l_G.strt.get(indexes[i + 1]);
         else
             L.stack[keyI] = indexes[i + 1];
 

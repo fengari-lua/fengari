@@ -63,7 +63,8 @@ const ttypename = function(t) {
 const luaT_init = function(L) {
     L.l_G.tmname = [];
     for (let event in TMS) {
-        L.l_G.tmname.push(new TValue(CT.LUA_TLNGSTR, TMS[event])); // Strings are already interned by JS
+        let name = lua.to_luastring(TMS[event], TMS[event].length);
+        L.l_G.tmname.push(L.l_G.intern(name)); // Strings are already interned by JS
     }
 };
 
@@ -76,7 +77,7 @@ const luaT_objtypename = function(L, o) {
         || (o.ttisfulluserdata() && o.metatable !== null)) {
         let name = o.__index(o, '__name');
         if (name.ttisstring())
-            return name.value;
+            return String.fromCharCode(...name.value);
     }
 
     return ttypename(o.ttnov());
