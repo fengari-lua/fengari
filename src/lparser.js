@@ -273,7 +273,7 @@ const removevars = function(fs, tolevel) {
 const searchupvalue = function(fs, name) {
     let up = fs.f.upvalues;
     for (let i = 0; i < fs.nups; i++) {
-        if (up[i].name.value === name.value)
+        if (up[i].name.jsstring() === name.jsstring())
             return i;
     }
     return -1;  /* not found */
@@ -291,7 +291,7 @@ const newupvalue = function(fs, name, v) {
 
 const searchvar = function(fs, n) {
     for (let i = fs.nactvar - 1; i >= 0; i--) {
-        if (n.value === getlocvar(fs, i).varname.value)
+        if (n.jsstring() === getlocvar(fs, i).varname.jsstring())
             return i;
     }
 
@@ -383,7 +383,7 @@ const closegoto = function(ls, g, label) {
     let fs = ls.fs;
     let gl = ls.dyd.gt;
     let gt = gl.arr[g];
-    assert(gt.name.value === label.name.value);
+    assert(gt.name.jsstring() === label.name.jsstring());
     if (gt.nactvar < label.nactvar) {
         let vname = getlocvar(fs, gt.nactvar).varname;
         semerror(ls, `<goto ${gt.name.value}> at line ${gt.line} jumps into the scope of local '${vname.value}'`);
@@ -405,7 +405,7 @@ const findlabel = function(ls, g) {
     /* check labels in current block for a match */
     for (let i = bl.firstlabel; i < dyd.label.n; i++) {
         let lb = dyd.label.arr[i];
-        if (lb.name.value === gt.name.value) {  /* correct label? */
+        if (lb.name.jsstring() === gt.name.jsstring()) {  /* correct label? */
             if (gt.nactvar > lb.nactvar && (bl.upval || dyd.label.n > bl.firstlabel))
                 lcode.luaK_patchclose(ls.fs, gt.pc, lb.nactvar);
             closegoto(ls, g, lb);  /* close it */
@@ -434,7 +434,7 @@ const findgotos = function(ls, lb) {
     let gl = ls.dyd.gt;
     let i = ls.fs.bl.firstgoto;
     while (i < gl.n) {
-        if (gl.arr[i].name.value === lb.name.value)
+        if (gl.arr[i].name.jsstring() === lb.name.jsstring())
             closegoto(ls, i, lb);
         else
             i++;
@@ -1150,7 +1150,7 @@ const gotostat = function(ls, pc) {
 /* check for repeated labels on the same block */
 const checkrepeated = function(fs, ll, label) {
     for (let i = fs.bl.firstlabel; i < ll.n; i++) {
-        if (label.value === ll.arr[i].name.value) {
+        if (label.jsstring() === ll.arr[i].name.jsstring()) {
             semerror(fs.ls, `label '${label}' already defined on line ${ll.arr[i].line}`);
         }
     }

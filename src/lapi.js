@@ -231,7 +231,6 @@ const lua_pushstring = function (L, s) {
     else {
         let ts = L.l_G.intern(lua.to_luastring(s));
         L.stack[L.top] = ts;
-        s = ts.value;
     }
 
     L.top++;
@@ -537,7 +536,7 @@ const lua_tolstring = function(L, idx) {
     if (!o.ttisstring() && !o.ttisnumber())
         return null;
 
-    return o.ttisstring() ? String.fromCharCode(...o.value) : `${o.value}`;
+    return o.ttisstring() ? o.jsstring() : `${o.value}`;
 };
 
 const lua_tostring =  lua_tolstring;
