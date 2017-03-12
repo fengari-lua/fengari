@@ -124,14 +124,15 @@ class Table extends TValue {
 
     static keyValue(key) {
         // Those lua values are used by value, others by reference
-        if (key instanceof TValue
-            && [CT.LUA_TNIL,
+        if (key instanceof TValue) {
+            if ([CT.LUA_TNIL,
                 CT.LUA_TBOOLEAN,
                 CT.LUA_TSTRING,
-                CT.LUA_TSHRSTR,
-                CT.LUA_TLNGSTR,
                 CT.LUA_TNUMINT].indexOf(key.type) > -1) {
-            key = key.value;
+                key = key.value;
+            } else if ([CT.LUA_TSHRSTR, CT.LUA_TLNGSTR].indexOf(key.type) > -1) {
+                key = key.value.map(e => `${e}|`).join('');
+            }
         }
 
         return key;

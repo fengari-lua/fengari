@@ -15,7 +15,8 @@ const LUAI_MAXSHORTLEN = 40;
 
 class BytecodeParser {
 
-    constructor(dataView) {
+    constructor(L, dataView) {
+        this.L = L;
         this.intSize = 4;
         this.size_tSize = 8;
         this.instructionSize = 4;
@@ -69,6 +70,24 @@ class BytecodeParser {
         return number;
     }
 
+    read8bitString(n) {
+        let size = typeof n !== 'undefined' ? n : this.readByte() - 1;
+
+        if (size === 0xFF) // TODO: test
+            this.offset += this.size_tSize;
+
+        if (size === 0) {
+            return null;
+        }
+
+        let string = [];//new Uint8Array();
+
+        for (let i = 0; i < size; i++)
+            string.push(this.readByte());
+
+        return string;
+    }
+
     readString(n) {
         let size = typeof n !== 'undefined' ? n : this.readByte() - 1;
 
@@ -79,10 +98,10 @@ class BytecodeParser {
             return null;
         }
 
-        let string = new Uint8Array();
+        let string = "";
 
         for (let i = 0; i < size; i++)
-            string.push(this.readByte());
+            string += String.fromCharCode(this.readByte());
 
         return string;
     }
@@ -158,7 +177,7 @@ class BytecodeParser {
                 break;
             case constant_types.LUA_TSHRSTR:
             case constant_types.LUA_TLNGSTR:
-                f.k.push(new TValue(constant_types.LUA_TLNGSTR, this.readString()));
+                f.k.push(this.L.l_G.intern(this.read8bitString()));
                 break;
             default:
                 throw new Error(`unrecognized constant '${t}'`);
@@ -238,13 +257,13 @@ class BytecodeParser {
 
     }
 
-    luaU_undump(L) {
+    luaU_undump() {
         this.checkHeader();
 
-        let cl = new LClosure(L, this.readByte());
+        let cl = new LClosure(this.L, this.readByte());
 
-        L.stack[L.top] = cl;
-        L.top++;
+        this.L.stack[this.L.top] = cl;
+        this.L.top++;
 
         cl.p = new Proto();
 
