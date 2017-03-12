@@ -217,7 +217,7 @@ const lua_pushlstring = function(L, s, len) { // TODO: embedded \0
     assert(typeof s === "string");
     assert(typeof len === "number");
 
-    let ts = len === 0 ? new TValue(CT.LUA_TLNGSTR, "") : new TValue(CT.LUA_TLNGSTR, s.substr(0, len));
+    let ts = len === 0 ? L.l_G.intern(lua.to_luastring("")) : L.l_G.intern(lua.to_luastring(s.substr(0, len)));
     L.stack[L.top++] = ts;
 
     assert(L.top <= L.ci.top, "stack overflow");
@@ -229,7 +229,7 @@ const lua_pushstring = function (L, s) {
     if (typeof s !== "string")
         L.stack[L.top] = ldo.nil;
     else {
-        let ts = new TValue(CT.LUA_TLNGSTR, s);
+        let ts = L.l_G.intern(lua.to_luastring(s));
         L.stack[L.top] = ts;
         s = ts.value;
     }
@@ -307,7 +307,7 @@ const lua_pushglobaltable = function(L) {
 ** t[k] = value at the top of the stack (where 'k' is a string)
 */
 const auxsetstr = function(L, t, k) {
-    let str = new TValue(CT.LUA_TLNGSTR, k);
+    let str = L.l_G.intern(lua.to_luastring(k));
 
     assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
 
@@ -384,7 +384,7 @@ const lua_rawset = function(L, idx) {
 */
 
 const auxgetstr = function(L, t, k) {
-    let str = new TValue(CT.LUA_TLNGSTR, k);
+    let str = L.l_G.intern(lua.to_luastring(k));
     let slot = t.__index(t, k);
     if (t.ttistable() && !slot.ttisnil()) {
         L.stack[L.top++] = slot;
@@ -537,7 +537,7 @@ const lua_tolstring = function(L, idx) {
     if (!o.ttisstring() && !o.ttisnumber())
         return null;
 
-    return `${o.value}`;
+    return o.ttisstring() ? String.fromCharCode(...o.value) : `${o.value}`;
 };
 
 const lua_tostring =  lua_tolstring;
@@ -801,7 +801,7 @@ const lua_concat = function(L, n) {
     if (n >= 2)
         lvm.luaV_concat(L, n);
     else if (n === 0) {
-        L.stack[L.top++] = new TValue("", CT.LUA_TLNGSTR);
+        L.stack[L.top++] = L.l_G.intern(lua.to_luastring(""));
         assert(L.top <= L.ci.top, "stack overflow");
     }
 };

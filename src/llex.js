@@ -218,7 +218,7 @@ const luaX_setinput = function(L, ls, z, source, firstchar) {
     ls.linenumber = 1;
     ls.lastline = 1;
     ls.source = source;
-    ls.envn = new TValue(CT.LUA_TLNGSTR, "_ENV");
+    ls.envn = L.l_G.intern(lua.to_luastring("_ENV"));
 };
 
 const check_next1 = function(ls, c) {
@@ -356,7 +356,7 @@ const read_long_string = function(ls, seminfo, sep) {
     }
 
     if (seminfo)
-        seminfo.ts = new TValue(CT.LUA_TLNGSTR, ls.buff.buffer.slice(2 + sep).join(''));
+        seminfo.ts = new TValue(CT.LUA_TLNGSTR, lua.to_luastring(ls.buff.buffer.slice(2 + sep).join('')));
 };
 
 const esccheck = function(ls, c, msg) {
@@ -478,7 +478,12 @@ const read_string = function(ls, del, seminfo) {
         }
     }
     save_and_next(ls);  /* skip delimiter */
-    seminfo.ts = new TValue(CT.LUA_TLNGSTR, ls.buff.buffer.slice(1, ls.buff.buffer.length-1).join(''));
+    seminfo.ts = new TValue(
+        CT.LUA_TLNGSTR,
+        lua.to_luastring(
+            ls.buff.buffer.slice(1, ls.buff.buffer.length-1).join('')
+        )
+    );
 };
 
 const isreserved = function(w) {
@@ -589,7 +594,7 @@ const llex = function(ls, seminfo) {
                         save_and_next(ls);
                     } while (ljstype.lislalnum(ls.current));
 
-                    let ts = new TValue(CT.LUA_TLNGSTR, ls.buff.buffer.join(''));
+                    let ts = new TValue(CT.LUA_TLNGSTR, lua.to_luastring(ls.buff.buffer.join('')));
                     seminfo.ts = ts;
                     let kidx = luaX_tokens.slice(0, 22).indexOf(ts.value);
                     if (kidx >= 0)  /* reserved word? */
