@@ -25,11 +25,11 @@ const nil            = new TValue(CT.LUA_TNIL, null);
 const seterrorobj = function(L, errcode, oldtop) {
     switch (errcode) {
         case TS.LUA_ERRMEM: {
-            L.stack[oldtop] = new TValue(CT.LUA_TLNGSTR, "not enough memory");
+            L.stack[oldtop] = L.l_G.intern(lua.to_luastring("not enough memory"));
             break;
         }
         case TS.LUA_ERRERR: {
-            L.stack[oldtop] = new TValue(CT.LUA_TLNGSTR, "error in error handling");
+            L.stack[oldtop] = L.l_G.intern(lua.to_luastring("error in error handling"));
             break;
         }
         default: {
@@ -359,7 +359,7 @@ const recover = function(L, status) {
 */
 const resume_error = function(L, msg, narg) {
     L.top -= narg;  /* remove args from the stack */
-    L.stack[L.top++] = new TValue(CT.LUA_TLNGSTR, msg);  /* push error message */
+    L.stack[L.top++] = L.l_G.intern(lua.to_luastring(msg));  /* push error message */
     assert(L.top <= L.ci.top, "stack overflow");
     return TS.LUA_ERRRUN;
 };
