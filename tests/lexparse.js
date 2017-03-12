@@ -741,13 +741,13 @@ test('SETTABLE, GETTABLE', function (t) {
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_topointer(L, -1).get(0).value,
+        lapi.lua_topointer(L, -1).get(0).jsstring(),
         "hello",
         "Program output is correct"
     );
 
     t.strictEqual(
-        lapi.lua_topointer(L, -1).get("two").value,
+        lapi.lua_topointer(L, -1).get('116|119|111|').jsstring(),
         "world",
         "Program output is correct"
     );
@@ -834,13 +834,13 @@ test('SETTABUP, GETTABUP', function (t) {
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_topointer(L, -1).get(0).value,
+        lapi.lua_topointer(L, -1).get(0).jsstring(),
         "hello",
         "Program output is correct"
     );
 
     t.strictEqual(
-        lapi.lua_topointer(L, -1).get("two").value,
+        lapi.lua_topointer(L, -1).get('116|119|111|').jsstring(),
         "world",
         "Program output is correct"
     );
@@ -1149,7 +1149,7 @@ test('CONCAT', function (t) {
     }, "Lua program ran without error");
 
     t.strictEqual(
-        L.stack[L.top - 1].value,
+        lapi.lua_tostring(L, -1),
         "hello 2 you",
         "Program output is correct"
     );

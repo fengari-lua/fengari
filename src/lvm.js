@@ -856,8 +856,7 @@ const luaV_tointeger = function(obj, mode) {
     } else if (obj.ttisinteger()) {
         return obj.value|0;
     } else if (obj.ttisstring()) {
-        let str = String.fromCharCode(...obj.value);
-        return luaV_tointeger(new TValue(CT.LUA_TNUMFLT, parseFloat(str)), mode); // TODO: luaO_str2num
+        return luaV_tointeger(new TValue(CT.LUA_TNUMFLT, parseFloat(obj.jsstring())), mode); // TODO: luaO_str2num
     }
 
     return false;
@@ -921,8 +920,8 @@ const LTintfloat = function(l, r) {
 
 const l_strcmp = function(ls, rs) {
     // TODO: lvm.c:248 static int l_strcmp (const TString *ls, const TString *rs)
-    ls = String.fromCharCode(...ls.value);
-    rs = String.fromCharCode(...rs.value);
+    ls = ls.jsstring();
+    rs = rs.jsstring();
     return ls === rs ? 0 : (ls < rs ? -1 : 1);
 };
 
@@ -955,11 +954,11 @@ const luaV_objlen = function(L, ra, rb) {
 
 const tostring = function(L, i) {
     let o = L.stack[i];
-    let str = `${o.value}`;
-    str = lua.to_luastring(str, str.length);
 
-    if (o.ttisstring() || (o.ttisnumber() && !isNaN(str))) {
-        L.stack[i] = L.l_G.intern(str);
+    if (o.ttisstring()) return true;
+
+    if (o.ttisnumber() && !isNaN(o.value)) {
+        L.stack[i] = L.l_G.intern(lua.to_luastring(`${o.value}`));
         return true;
     }
 
@@ -975,18 +974,16 @@ const luaV_concat = function(L, total) {
     do {
         let top = L.top;
         let n = 2; /* number of elements handled in this pass (at least 2) */
-        let v = L.stack[top-2];
-        let v2 = L.stack[top-1];
 
-        if (!(v.ttisstring() || v.ttisnumber()) || !tostring(L, top - 2)) // TODO: tostring
-            ltm.luaT_trybinTM(L, v, v2, top-2, ltm.TMS.TM_CONCAT);
-        else if (v2.ttisstring() && v2.value.length === 0)
+        if (!(L.stack[top-2].ttisstring() || L.stack[top-2].ttisnumber()) || !tostring(L, top - 1))
+            ltm.luaT_trybinTM(L, L.stack[top-2], L.stack[top-1], top-2, ltm.TMS.TM_CONCAT);
+        else if (L.stack[top-1].ttisstring() && L.stack[top-1].value.length === 0)
             tostring(L, top - 2);
-        else if (v.ttisstring() && v.value.length === 0)
+        else if (L.stack[top-2].ttisstring() && L.stack[top-2].value.length === 0)
             L.stack[top - 2] = L.stack[top - 1];
         else {
             /* at least two non-empty string values; get as many as possible */
-            let tl = v.value.length;
+            let tl = L.stack[top-2].value.length;
             /* collect total length and number of strings */
             for (n = 1; n < total && tostring(L, top - n - 1); n++) {
                 let l = L.stack[top - n - 1].value.length;
@@ -1018,7 +1015,7 @@ const gettable = function(L, table, key, ra, recur) {
         let element = table.__index(table, key);
 
         if (!element.ttisnil()) {
-            L.stack[ra] = table.__index(table, key);
+            L.stack[ra] = element;
         } else {
             luaV_finishget(L, table, key, ra, element, recur);
         }

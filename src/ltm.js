@@ -38,8 +38,34 @@ const TMS = {
     TM_LT:       "__lt",
     TM_LE:       "__le",
     TM_CONCAT:   "__concat",
-    TM_CALL:     "__call",
-    TM_N:        26
+    TM_CALL:     "__call"
+};
+
+const TMS8 = {
+    TM_INDEX:    lua.to_luastring(TMS.TM_INDEX),
+    TM_NEWINDEX: lua.to_luastring(TMS.TM_NEWINDEX),
+    TM_GC:       lua.to_luastring(TMS.TM_GC),
+    TM_MODE:     lua.to_luastring(TMS.TM_MODE),
+    TM_LEN:      lua.to_luastring(TMS.TM_LEN),
+    TM_EQ:       lua.to_luastring(TMS.TM_EQ),  /* last tag method with fast access */
+    TM_ADD:      lua.to_luastring(TMS.TM_ADD),
+    TM_SUB:      lua.to_luastring(TMS.TM_SUB),
+    TM_MUL:      lua.to_luastring(TMS.TM_MUL),
+    TM_MOD:      lua.to_luastring(TMS.TM_MOD),
+    TM_POW:      lua.to_luastring(TMS.TM_POW),
+    TM_DIV:      lua.to_luastring(TMS.TM_DIV),
+    TM_IDIV:     lua.to_luastring(TMS.TM_IDIV),
+    TM_BAND:     lua.to_luastring(TMS.TM_BAND),
+    TM_BOR:      lua.to_luastring(TMS.TM_BOR),
+    TM_BXOR:     lua.to_luastring(TMS.TM_BXOR),
+    TM_SHL:      lua.to_luastring(TMS.TM_SHL),
+    TM_SHR:      lua.to_luastring(TMS.TM_SHR),
+    TM_UNM:      lua.to_luastring(TMS.TM_UNM),
+    TM_BNOT:     lua.to_luastring(TMS.TM_BNOT),
+    TM_LT:       lua.to_luastring(TMS.TM_LT),
+    TM_LE:       lua.to_luastring(TMS.TM_LE),
+    TM_CONCAT:   lua.to_luastring(TMS.TM_CONCAT),
+    TM_CALL:     lua.to_luastring(TMS.TM_CALL)
 };
 
 const luaT_typenames_ = [
@@ -77,7 +103,7 @@ const luaT_objtypename = function(L, o) {
         || (o.ttisfulluserdata() && o.metatable !== null)) {
         let name = o.__index(o, '__name');
         if (name.ttisstring())
-            return String.fromCharCode(...name.value);
+            return name.jsstring();
     }
 
     return ttypename(o.ttnov());

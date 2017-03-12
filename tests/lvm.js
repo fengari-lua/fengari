@@ -26,7 +26,7 @@ test('LOADK, RETURN', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        L.stack[L.top - 1].value,
+        lapi.lua_tostring(L, -1),
         "hello world",
         "Program output is correct"
     );
@@ -50,7 +50,7 @@ test('MOVE', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        L.stack[L.top - 1].value,
+        lapi.lua_tostring(L, -1),
         "hello world",
         "Program output is correct"
     );
@@ -147,7 +147,7 @@ test('CALL', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        L.stack[L.top - 1].value,
+        lapi.lua_tointeger(L, -1),
         3,
         "Program output is correct"
     );
@@ -205,7 +205,7 @@ test('TAILCALL', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        L.stack[L.top - 1].value,
+        lapi.lua_tointeger(L, -1),
         3,
         "Program output is correct"
     );
@@ -255,7 +255,7 @@ test('LE, JMP', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        L.stack[L.top - 1].value,
+        lapi.lua_toboolean(L, -1),
         true,
         "Program output is correct"
     );
@@ -279,7 +279,7 @@ test('LT', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        L.stack[L.top - 1].value,
+        lapi.lua_toboolean(L, -1),
         false,
         "Program output is correct"
     );
@@ -303,7 +303,7 @@ test('EQ', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        L.stack[L.top - 1].value,
+        lapi.lua_toboolean(L, -1),
         true,
         "Program output is correct"
     );
@@ -328,7 +328,7 @@ test('TESTSET (and)', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        L.stack[L.top - 1].value,
+        lapi.lua_tostring(L, -1),
         "hello",
         "Program output is correct"
     );
@@ -353,7 +353,7 @@ test('TESTSET (or)', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        L.stack[L.top - 1].value,
+        lapi.lua_tostring(L, -1),
         "hello",
         "Program output is correct"
     );
@@ -382,7 +382,7 @@ test('TEST (true)', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        L.stack[L.top - 1].value,
+        lapi.lua_tostring(L, -1),
         "hello",
         "Program output is correct"
     );
@@ -411,7 +411,7 @@ test('TEST (false)', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        L.stack[L.top - 1].value,
+        lapi.lua_tostring(L, -1),
         "goodbye",
         "Program output is correct"
     );
@@ -439,7 +439,7 @@ test('FORPREP, FORLOOP (int)', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        L.stack[L.top - 1].value,
+        lapi.lua_tointeger(L, -1),
         55,
         "Program output is correct"
     );
@@ -467,7 +467,7 @@ test('FORPREP, FORLOOP (float)', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        L.stack[L.top - 1].value,
+        lapi.lua_tonumber(L, -1),
         60.5,
         "Program output is correct"
     );
@@ -493,14 +493,16 @@ test('SETTABLE, GETTABLE', function (t) {
         lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
-    t.strictEqual(
-        L.stack[L.top - 1].value.get(0).value,
+    console.log(L.stack[L.top - 1]);
+
+    t.deepEqual(
+        L.stack[L.top - 1].value.get(0).jsstring(),
         "hello",
         "Program output is correct"
     );
 
-    t.strictEqual(
-        L.stack[L.top - 1].value.get("two").value,
+    t.deepEqual(
+        L.stack[L.top - 1].value.get('116|119|111|').jsstring(), // "two"
         "world",
         "Program output is correct"
     );
@@ -530,7 +532,7 @@ test('SETUPVAL, GETUPVAL', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        L.stack[L.top - 1].value,
+        lapi.lua_tostring(L, -1),
         "world",
         "Program output is correct"
     );
@@ -556,15 +558,15 @@ test('SETTABUP, GETTABUP', function (t) {
         lapi.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
-    t.strictEqual(
-        L.stack[L.top - 1].value.get(0).value,
-        "hello",
+    t.deepEqual(
+        L.stack[L.top - 1].value.get(0).jsstring(),
+        "hello", // "hello"
         "Program output is correct"
     );
 
-    t.strictEqual(
-        L.stack[L.top - 1].value.get("two").value,
-        "world",
+    t.deepEqual(
+        L.stack[L.top - 1].value.get('116|119|111|').jsstring(), // "two"
+        "world", // "world"
         "Program output is correct"
     );
 });
@@ -592,7 +594,7 @@ test('SELF', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        L.stack[L.top - 1].value,
+        lapi.lua_tostring(L, -1),
         "hello",
         "Program output is correct"
     );
@@ -732,7 +734,7 @@ test('TFORCALL, TFORLOOP', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        L.stack[L.top - 1].value,
+        lapi.lua_tointeger(L, -1),
         6,
         "Program output is correct"
     );
@@ -758,19 +760,19 @@ test('LEN', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        L.stack[L.top - 1].value,
+        lapi.lua_tointeger(L, -1),
         5,
         "Program output is correct"
     );
 
     t.strictEqual(
-        L.stack[L.top - 2].value,
+        lapi.lua_tointeger(L, -2),
         3,
         "Program output is correct"
     );
 
     t.strictEqual(
-        L.stack[L.top - 3].value,
+        lapi.lua_tointeger(L, -3),
         0,
         "Program output is correct"
     );
@@ -792,7 +794,7 @@ test('CONCAT', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        L.stack[L.top - 1].value,
+        lapi.lua_tostring(L, -1),
         "hello 2 you",
         "Program output is correct"
     );

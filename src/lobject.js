@@ -110,6 +110,10 @@ class TValue {
         return this.ttisnil() || (this.ttisboolean() && this.value === false);
     }
 
+    jsstring() {
+        return this.ttisstring() ? String.fromCharCode(...this.value) : null;
+    }
+
 }
 
 const nil   = new TValue(CT.LUA_TNIL, null);
@@ -133,6 +137,8 @@ class Table extends TValue {
             } else if ([CT.LUA_TSHRSTR, CT.LUA_TLNGSTR].indexOf(key.type) > -1) {
                 key = key.value.map(e => `${e}|`).join('');
             }
+        } else if (typeof key === "string") { // To avoid
+            key = lua.to_luastring(key).map(e => `${e}|`).join('');
         }
 
         return key;
