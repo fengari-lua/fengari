@@ -14,12 +14,11 @@
     - [x] table
         - [ ] weak table
     - [x] function
-    - [ ] string (8-bit clean)
+    - [x] string (8-bit clean)
     - [ ] number (32-bit ?)
         - [ ] integer
         - [ ] float
     - [ ] userdata
-    - [ ] thread
 - [x] Tag Methods
 - [ ] C API
     - [x] lua_absindex
