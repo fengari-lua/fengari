@@ -64,7 +64,7 @@ Table.prototype.luaH_next = function(L, keyI) {
         if (tnidx === 'number' && nidx % 1 === 0)
             L.stack[keyI] = new TValue(CT.LUA_TNUMINT, indexes[i + 1]);
         else if (tnidx === 'string')
-            L.stack[keyI] = L.l_G.strt.get(indexes[i + 1]);
+            L.stack[keyI] = new TValue(CT.LUA_TLNGSTR, indexes[i + 1].split('|').map(e => Number.parseInt(e)).slice(0, -1));
         else
             L.stack[keyI] = indexes[i + 1];
 

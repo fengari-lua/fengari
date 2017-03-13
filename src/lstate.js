@@ -78,12 +78,15 @@ class global_State {
     }
 
     intern(stringArray) {
-        let key = stringArray.map(e => `${e}|`).join('');
+        // TODO: when weak value maps are available
+        // let key = stringArray.map(e => `${e}|`).join('');
 
-        if (!this.strt.has(key))
-            this.strt.set(key, new lobject.TValue(CT.LUA_TLNGSTR, stringArray));
+        // if (!this.strt.has(key)) 
+        //     this.strt.set(key, new lobject.TValue(CT.LUA_TLNGSTR, stringArray));
 
-        return this.strt.get(key);
+        // return this.strt.get(key);
+        
+        return new lobject.TValue(CT.LUA_TLNGSTR, stringArray);
     }
 
 }
