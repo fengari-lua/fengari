@@ -5,8 +5,6 @@ const assert  = require('assert');
 const lua     = require('./lua.js');
 const lapi    = require('./lapi.js');
 const lauxlib = require('./lauxlib.js');
-const CT      = lua.constant_types;
-const TS      = lua.thread_status;
 
 const str_len = function(L) {
     lapi.lua_pushinteger(L, lauxlib.luaL_checkstring(L, 1).length);
