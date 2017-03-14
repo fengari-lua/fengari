@@ -133,7 +133,7 @@ class lua_Debug {
 }
 
 const to_luastring = function(str, maxBytesToWrite) {
-    maxBytesToWrite = maxBytesToWrite !== undefined ? maxBytesToWrite : str.length + 1;
+    maxBytesToWrite = maxBytesToWrite !== undefined ? maxBytesToWrite : Number.MAX_SAFE_INTEGER;
     let outU8Array = [];
 
     if (!(maxBytesToWrite > 0)) // Parameter maxBytesToWrite is not optional. Negative values, 0, null, undefined and false each don't write out any bytes.

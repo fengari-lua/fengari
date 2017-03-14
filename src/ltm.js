@@ -89,7 +89,7 @@ const ttypename = function(t) {
 const luaT_init = function(L) {
     L.l_G.tmname = [];
     for (let event in TMS) {
-        let name = lua.to_luastring(TMS[event], TMS[event].length);
+        let name = lua.to_luastring(TMS[event]);
         L.l_G.tmname.push(L.l_G.intern(name)); // Strings are already interned by JS
     }
 };

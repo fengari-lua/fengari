@@ -8,7 +8,8 @@ const lauxlib = require('./lauxlib.js');
 
 
 const iscont = function(p) {
-    return p & 0xC0 === 0x80;
+    let c = p & 0xC0;
+    return c === 0x80;
 };
 
 /* translate a relative string position: negative means back from end */
@@ -24,6 +25,7 @@ const u_posrelat = function(pos, len) {
 */
 const byteoffset = function(L) {
     let s = lauxlib.luaL_checkstring(L, 1);
+    s = L.stack[lapi.index2addr_(L, 1)].value;
     let n = lauxlib.luaL_checkinteger(L, 2);
     let posi = n >= 0 ? 1 : s.length + 1;
     posi = u_posrelat(lauxlib.luaL_optinteger(L, 3, posi), s.length);
@@ -31,16 +33,16 @@ const byteoffset = function(L) {
 
     if (n === 0) {
         /* find beginning of current byte sequence */
-        while (posi > 0 && iscont(s.slice(posi))) posi--;
+        while (posi > 0 && iscont(s[posi])) posi--;
     } else {
-        if (iscont(s.slice(posi)))
+        if (iscont(s[posi]))
             lauxlib.luaL_error(L, "initial position is a continuation byte");
 
         if (n < 0) {
             while (n < 0 && posi > 0) {  /* move back */
                 do {  /* find beginning of previous character */
                     posi--;
-                } while (posi > 0 && iscont(s.slice(posi)));
+                } while (posi > 0 && iscont(s[posi]));
                 n++;
             }
         } else {
@@ -48,7 +50,7 @@ const byteoffset = function(L) {
             while (n > 0 && posi < s.length) {
                 do {  /* find beginning of next character */
                     posi++;
-                } while (iscont(s.slice(posi)));  /* (cannot pass final '\0') */
+                } while (iscont(s[posi]));  /* (cannot pass final '\0') */
                 n--;
             }
         }

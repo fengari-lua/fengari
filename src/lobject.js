@@ -111,7 +111,44 @@ class TValue {
     }
 
     jsstring() {
-        return this.ttisstring() ? String.fromCharCode(...this.value) : null;
+        //return this.ttisstring() ? String.fromCharCode(...this.value) : null;
+        let u0, u1, u2, u3, u4, u5;
+        let idx = 0;
+
+        var str = '';
+        while (1) {
+            // For UTF8 byte structure, see http://en.wikipedia.org/wiki/UTF-8#Description and https://www.ietf.org/rfc/rfc2279.txt and https://tools.ietf.org/html/rfc3629
+            u0 = this.value[idx++];
+            if (!u0) return str;
+            if (!(u0 & 0x80)) { str += String.fromCharCode(u0); continue; }
+            u1 = this.value[idx++] & 63;
+            if ((u0 & 0xE0) == 0xC0) { str += String.fromCharCode(((u0 & 31) << 6) | u1); continue; }
+            u2 = this.value[idx++] & 63;
+            if ((u0 & 0xF0) == 0xE0) {
+                u0 = ((u0 & 15) << 12) | (u1 << 6) | u2;
+            } else {
+                u3 = this.value[idx++] & 63;
+                if ((u0 & 0xF8) == 0xF0) {
+                    u0 = ((u0 & 7) << 18) | (u1 << 12) | (u2 << 6) | u3;
+                } else {
+                    u4 = this.value[idx++] & 63;
+                    if ((u0 & 0xFC) == 0xF8) {
+                        u0 = ((u0 & 3) << 24) | (u1 << 18) | (u2 << 12) | (u3 << 6) | u4;
+                    } else {
+                        u5 = this.value[idx++] & 63;
+                        u0 = ((u0 & 1) << 30) | (u1 << 24) | (u2 << 18) | (u3 << 12) | (u4 << 6) | u5;
+                    }
+                }
+            }
+            if (u0 < 0x10000) {
+                str += String.fromCharCode(u0);
+            } else {
+                var ch = u0 - 0x10000;
+                str += String.fromCharCode(0xD800 | (ch >> 10), 0xDC00 | (ch & 0x3FF));
+            }
+        }
+
+        return str;
     }
 
 }
