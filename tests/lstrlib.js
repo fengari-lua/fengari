@@ -178,3 +178,46 @@ test('string.reverse', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('string.byte', function (t) {
+    let luaCode = `
+        return string.byte("hello", 2, 4)
+    `, L;
+    
+    t.plan(5);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -3),
+        101,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -2),
+        108,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -1),
+        108,
+        "Correct element(s) on the stack"
+    );
+});

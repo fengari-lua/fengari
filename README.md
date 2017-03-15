@@ -213,13 +213,13 @@
     - [x] Math
     - [x] utf8
     - [ ] String
+        - [x] string.byte
         - [x] string.char
         - [x] string.len
         - [x] string.lower
         - [x] string.rep
         - [x] string.reverse
         - [x] string.upper
-        - [ ] string.byte
         - [ ] string.dump
         - [ ] string.find
         - [ ] string.format
