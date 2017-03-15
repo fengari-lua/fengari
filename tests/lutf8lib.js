@@ -113,3 +113,72 @@ test('utf8.char', function (t) {
     );
 
 });
+
+
+test('utf8.len', function (t) {
+    let luaCode = `
+        return utf8.len("( ͡° ͜ʖ ͡° )")
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -1),
+        12,
+        "Correct element(s) on the stack"
+    );
+
+});
+
+
+test('utf8.codes', function (t) {
+    let luaCode = `
+        local s = "( ͡° ͜ʖ ͡° )"
+        local results = ""
+        for p, c in utf8.codes(s) do
+            results = results .. "[" .. p .. "," .. c .. "] "
+        end
+        return results
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "[1,40] [2,32] [3,865] [5,176] [7,32] [8,860] [10,662] [12,32] [13,865] [15,176] [17,32] [18,41] ",
+        "Correct element(s) on the stack"
+    );
+
+});
