@@ -50,6 +50,31 @@ const utf8_decode = function(s, val) {
     };
 };
 
+const pushutfchar = function(L, arg) {
+    let code = lauxlib.luaL_checkinteger(L, arg);
+    lauxlib.luaL_argcheck(L, 0 <= code && code <= MAXUNICODE, arg, "value out of range");
+    lapi.lua_pushstring(L, `${String.fromCharCode(code)}`);
+};
+
+/*
+** utfchar(n1, n2, ...)  -> char(n1)..char(n2)...
+*/
+const utfchar = function(L) {
+    let n = lapi.lua_gettop(L);  /* number of arguments */
+    if (n === 1)  /* optimize common case of single char */
+        pushutfchar(L, 1);
+    else {
+        let b = new lauxlib.luaL_Buffer();
+        lauxlib.luaL_buffinit(L, b);
+        for (let i = 1; i <= n; i++) {
+            pushutfchar(L, i);
+            lauxlib.luaL_addvalue(b);
+        }
+        lauxlib.luaL_pushresult(b);
+    }
+    return 1;
+};
+
 /*
 ** offset(s, n, [i])  -> index where n-th character counting from
 **   position 'i' starts; 0 means character at 'i'.
@@ -128,8 +153,9 @@ const codepoint = function(L) {
 };
 
 const funcs = {
+    "char":      utfchar,
     "codepoint": codepoint,
-    "offset":    byteoffset
+    "offset":    byteoffset,
 };
 
 /* pattern to match a single UTF-8 character */

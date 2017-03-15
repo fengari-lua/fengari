@@ -234,6 +234,12 @@
     - [ ] io
     - [ ] Debug
     - [ ] utf8
+        - [x] utf8.char
+        - [x] utf8.codepoint
+        - [x] utf8.offset
+        - [ ] utf8.charpattern
+        - [ ] utf8.codes
+        - [ ] utf8.len
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
 - [ ] DOM API binding
 
