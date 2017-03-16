@@ -284,6 +284,7 @@ test('string.format', function (t) {
     );
 });
 
+
 test('string.format', function (t) {
     let luaCode = `
         return string.format("%q", 'a string with "quotes" and \\n new line')
@@ -310,6 +311,107 @@ test('string.format', function (t) {
     t.strictEqual(
         lapi.lua_tostring(L, -1),
         '"a string with \\"quotes\\" and \\\n new line"',
+        "Correct element(s) on the stack"
+    );
+});
+
+
+test('string.sub', function (t) {
+    let luaCode = `
+        return string.sub("123456789",2,4),  -- "234"
+            string.sub("123456789",7),       -- "789"
+            string.sub("123456789",7,6),     --  ""
+            string.sub("123456789",7,7),     -- "7"
+            string.sub("123456789",0,0),     --  ""
+            string.sub("123456789",-10,10),  -- "123456789"
+            string.sub("123456789",1,9),     -- "123456789"
+            string.sub("123456789",-10,-20), --  ""
+            string.sub("123456789",-1),      -- "9"
+            string.sub("123456789",-4),      -- "6789"
+            string.sub("123456789",-6, -4)   -- "456"
+    `, L;
+    
+    t.plan(13);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -11),
+        "234",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -10),
+        "789",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -9),
+         "",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -8),
+        "7",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -7),
+         "",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -6),
+        "123456789",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -5),
+        "123456789",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -4),
+         "",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -3),
+        "9",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -2),
+        "6789",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "456",
         "Correct element(s) on the stack"
     );
 });

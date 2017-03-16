@@ -104,6 +104,7 @@
         - [x] string.lower
         - [x] string.rep
         - [x] string.reverse
+        - [x] string.sub
         - [x] string.upper
         - [ ] string.dump
         - [ ] string.find
@@ -112,7 +113,6 @@
         - [ ] string.match
         - [ ] string.pack
         - [ ] string.packsize
-        - [ ] string.sub
         - [ ] string.unpack
     - [ ] Package
     - [ ] os

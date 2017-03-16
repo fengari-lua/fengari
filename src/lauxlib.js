@@ -54,7 +54,7 @@ const findfield = function(L, objidx, level) {
 const pushglobalfuncname = function(L, ar) {
     let top = lapi.lua_gettop(L);
     ldebug.lua_getinfo(L, 'f', ar);  /* push function */
-    lapi.lua_getfield(L, lua.LUA_REGISTRYINDEX, lua.LUA_LOADED_TABLE);
+    lapi.lua_getfield(L, lua.LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
     if (findfield(L, top + 1, 2)) {
         let name = lapi.lua_tostring(L, -1);
         if (name.startsWith("_G.")) {

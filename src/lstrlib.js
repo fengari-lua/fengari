@@ -18,6 +18,19 @@ const posrelat = function(pos, len) {
     else return len + pos + 1;
 };
 
+const str_sub = function(L) {
+    let s = lauxlib.luaL_checkstring(L, 1);
+    let l = s.length;
+    let start = posrelat(lauxlib.luaL_checkinteger(L, 2), l);
+    let end = posrelat(lauxlib.luaL_optinteger(L, 3, -1), l);
+    if (start < 1) start = 1;
+    if (end > l) end = l;
+    if (start <= end)
+        lapi.lua_pushstring(L, s.slice(start - 1, (start - 1) + (end - start + 1)));
+    else lapi.lua_pushliteral(L, "");
+    return 1;
+};
+
 const str_len = function(L) {
     lapi.lua_pushinteger(L, lauxlib.luaL_checkstring(L, 1).length);
     return 1;
@@ -371,6 +384,7 @@ const strlib = {
     "lower":   str_lower,
     "rep":     str_rep,
     "reverse": str_reverse,
+    "sub":     str_sub,
     "upper":   str_upper
 };
 
