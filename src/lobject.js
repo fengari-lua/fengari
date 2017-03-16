@@ -360,7 +360,7 @@ const l_str2int = function(s) {
         s = s.slice(2);  /* skip '0x' */
 
         for (; ljstype.lisxdigit(s[0]); s = s.slice(1)) {
-            a = a * 16 + luaO_hexavalue(s);
+            a = a * 16 + luaO_hexavalue(s[0]);
             empty = false;
         }
     } else {  /* decimal */

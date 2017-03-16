@@ -467,11 +467,13 @@ const read_string = function(ls, del, seminfo) {
 
                 if (will === 'read_save')
                     next(ls);
-                else if (will === 'only_save') {
+                
+                if (will === 'read_save' || will === 'only_save') {
                     ls.buff.n -= 1;  /* remove '\\' */
                     save(ls, c);
-                } else if (will === 'no_save')
-                    break;
+                }
+
+                break;
             }
             default:
                 save_and_next(ls);

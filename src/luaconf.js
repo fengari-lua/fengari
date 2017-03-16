@@ -20,6 +20,21 @@ const lua_numbertointeger = function(n) {
     return n|0;
 };
 
-module.exports.LUAI_MAXSTACK       = LUAI_MAXSTACK;
-module.exports.LUA_IDSIZE          = LUA_IDSIZE;
-module.exports.lua_numbertointeger = lua_numbertointeger;
+const LUA_INTEGER_FRMLEN = "";
+const LUA_NUMBER_FRMLEN = "";
+
+const LUA_INTEGER_FMT = `%${LUA_INTEGER_FRMLEN}d`;
+const LUA_NUMBER_FMT  = "%.7g";
+
+const lua_getlocaledecpoint = function() {
+    return (1.1).toLocaleString().substring(1, 2);
+};
+
+module.exports.LUAI_MAXSTACK         = LUAI_MAXSTACK;
+module.exports.LUA_IDSIZE            = LUA_IDSIZE;
+module.exports.LUA_INTEGER_FMT       = LUA_INTEGER_FMT;
+module.exports.LUA_INTEGER_FRMLEN    = LUA_INTEGER_FRMLEN;
+module.exports.LUA_NUMBER_FMT        = LUA_NUMBER_FMT;
+module.exports.LUA_NUMBER_FRMLEN     = LUA_NUMBER_FRMLEN;
+module.exports.lua_getlocaledecpoint = lua_getlocaledecpoint;
+module.exports.lua_numbertointeger   = lua_numbertointeger;

@@ -139,7 +139,7 @@ const tconcat = function(L) {
     let i = lauxlib.luaL_optinteger(L, 3, 1);
     last = lauxlib.luaL_optinteger(L, 4, last);
 
-    let b = new lauxlib.luaL_Buffer();
+    let b = new lauxlib.luaL_Buffer(L);
     lauxlib.luaL_buffinit(L, b);
 
     for (; i < last; i++) {

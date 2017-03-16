@@ -221,3 +221,95 @@ test('string.byte', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('string.format', function (t) {
+    let luaCode = `
+        return string.format("%%%d %010d", 10, 23)
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "%10 0000000023",
+        "Correct element(s) on the stack"
+    );
+});
+
+
+test('string.format', function (t) {
+    let luaCode = `
+        return string.format("%07X", 0xFFFFFFF)
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "FFFFFFF",
+        "Correct element(s) on the stack"
+    );
+});
+
+test('string.format', function (t) {
+    let luaCode = `
+        return string.format("%q", 'a string with "quotes" and \\n new line')
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        '"a string with \\"quotes\\" and \\\n new line"',
+        "Correct element(s) on the stack"
+    );
+});

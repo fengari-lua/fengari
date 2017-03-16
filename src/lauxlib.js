@@ -226,6 +226,10 @@ const luaL_pushresult = function(B) {
     lapi.lua_pushstring(L, B.b);
 };
 
+const luaL_addchar = function(B, c) {
+    B.b += c;
+};
+
 const luaL_addvalue = function(B) {
     let L = B.L;
     let s = lapi.lua_tostring(L, -1);
@@ -395,6 +399,7 @@ const luaL_newlib = function(L, l) {
 
 module.exports.LUA_LOADED_TABLE  = LUA_LOADED_TABLE;
 module.exports.luaL_Buffer       = luaL_Buffer;
+module.exports.luaL_addchar      = luaL_addchar;
 module.exports.luaL_addlstring   = luaL_addlstring;
 module.exports.luaL_addstring    = luaL_addstring;
 module.exports.luaL_addvalue     = luaL_addvalue;

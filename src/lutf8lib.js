@@ -112,7 +112,7 @@ const utfchar = function(L) {
     if (n === 1)  /* optimize common case of single char */
         pushutfchar(L, 1);
     else {
-        let b = new lauxlib.luaL_Buffer();
+        let b = new lauxlib.luaL_Buffer(L);
         lauxlib.luaL_buffinit(L, b);
         for (let i = 1; i <= n; i++) {
             pushutfchar(L, i);
