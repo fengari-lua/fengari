@@ -48,6 +48,10 @@ class BytecodeParser {
         return integer;
     }
 
+    readSize_t() {
+        return this.readInteger();
+    }
+
     peekInt() {
         return this.dataView.getInt32(this.offset, true);
     }
@@ -71,10 +75,10 @@ class BytecodeParser {
     }
 
     read8bitString(n) {
-        let size = typeof n !== 'undefined' ? n : this.readByte() - 1;
+        let size = typeof n !== 'undefined' ? n : Math.max(this.readByte() - 1, 0);
 
-        if (size === 0xFF) // TODO: test
-            this.offset += this.size_tSize;
+        if (size + 1 === 0xFF)
+            size = this.readSize_t() - 1;
 
         if (size === 0) {
             return null;
@@ -89,10 +93,10 @@ class BytecodeParser {
     }
 
     readString(n) {
-        let size = typeof n !== 'undefined' ? n : this.readByte() - 1;
+        let size = typeof n !== 'undefined' ? n : Math.max(this.readByte() - 1, 0);
 
-        if (size === 0xFF) // TODO: test
-            this.offset += this.size_tSize;
+        if (size + 1 === 0xFF)
+            size = this.readSize_t() - 1;
 
         if (size === 0) {
             return null;

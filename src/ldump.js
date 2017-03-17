@@ -76,7 +76,7 @@ const DumpString = function(s, D) {
             DumpByte(size, D);
         else {
             DumpByte(0xFF, D);
-            DumpInt(size, D);
+            DumpInteger(size, D);
         }
         DumpBlock(str, size - 1, D);  /* no need to save '\0' */
     }
@@ -135,7 +135,8 @@ const DumpUpvalues = function(f, D) {
 const DumpDebug = function(f, D) {
     let n = D.strip ? 0 : f.lineinfo.length;
     DumpInt(n, D);
-    DumpBlock(f.lineinfo, n, D);
+    for (let i = 0; i < n; i++)
+        DumpInt(f.lineinfo[i], D);
     n = D.strip ? 0 : f.locvars.length;
     DumpInt(n, D);
     for (let i = 0; i < n; i++) {
