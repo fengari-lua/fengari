@@ -38,7 +38,7 @@ class BytecodeParser {
     }
 
     peekInteger() {
-        return this.dataView.getInt32(this.offset, true);
+        return this.dataView.getInt32(this.offset, true); // TODO: 64b ?
     }
 
     readInteger() {

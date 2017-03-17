@@ -4,6 +4,7 @@ const assert    = require('assert');
 
 const ldebug    = require('./ldebug.js');
 const ldo       = require('./ldo.js');
+const ldump     = require('./ldump.js');
 const lfunc     = require('./lfunc.js');
 const llex      = require('./llex.js');
 const lobject   = require('./lobject.js');
@@ -236,6 +237,18 @@ const lua_pushstring = function (L, s) {
     L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
 
+    return s;
+};
+
+// Push string without 8-bit conversion
+const lua_pushrawstring = function(L, s) {
+    if (typeof s !== "string")
+        L.stack[L.top] = ldo.nil;
+    else {
+        L.stack[L.top] = new TValue(CT.LUA_TLNGSTR, s.split('').map(e => e.charCodeAt(0)));
+    }
+    L.top++;
+    assert(L.top <= L.ci.top, "stack overflow");
     return s;
 };
 
@@ -693,6 +706,14 @@ const lua_load = function(L, reader, data, chunckname, mode) {
     return status;
 };
 
+const lua_dump = function(L, writer, data, strip) {
+    assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    let o = L.stack[L.top -1];
+    if (o.ttisLclosure())
+        return ldump.luaU_dump(L, o.p, writer, data, strip);
+    return 1;
+};
+
 const lua_status = function(L) {
     return L.status;
 };
@@ -835,6 +856,7 @@ module.exports.lua_compare_        = lua_compare_;
 module.exports.lua_concat          = lua_concat;
 module.exports.lua_copy            = lua_copy;
 module.exports.lua_createtable     = lua_createtable;
+module.exports.lua_dump            = lua_dump;
 module.exports.lua_error           = lua_error;
 module.exports.lua_gc              = lua_gc;
 module.exports.lua_getallocf       = lua_getallocf;
@@ -871,6 +893,7 @@ module.exports.lua_pushliteral     = lua_pushliteral;
 module.exports.lua_pushlstring     = lua_pushlstring;
 module.exports.lua_pushnil         = lua_pushnil;
 module.exports.lua_pushnumber      = lua_pushnumber;
+module.exports.lua_pushrawstring   = lua_pushrawstring;
 module.exports.lua_pushstring      = lua_pushstring;
 module.exports.lua_pushthread      = lua_pushthread;
 module.exports.lua_pushtvalue      = lua_pushtvalue;

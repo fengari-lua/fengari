@@ -415,3 +415,49 @@ test('string.sub', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('string.dump', function (t) {
+    let luaCodeToDump = `
+        local todump = function(p1, p2, p3)
+            local s = "hello"
+            local i = 12
+            local f = 12.5
+            local b = true
+
+            return p1 + p2 + p3
+        end`,
+        luaCode = `
+            ${luaCodeToDump}
+
+            return string.dump(todump)
+        `, L, bytes = [];
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        let bc = toByteCode(luaCodeToDump).dataView;
+        for (let i = 0; i < bc.byteLength; i++)
+            bytes.push(bc.getUint8(i, true));
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.deepEqual(
+        L.stack[L.top -1].value,
+        bytes,
+        "Correct element(s) on the stack"
+    );
+});
