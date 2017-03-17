@@ -48,6 +48,23 @@ const str_char = function(L) {
     return 1;
 };
 
+const writer = function(L, b, size, B) {
+    assert(Array.isArray(b));
+    B.push(...b.slice(0, size));
+    return 0;
+};
+
+const str_dump = function(L) {
+    let b = [];
+    let strip = lapi.lua_toboolean(L, 2);
+    lauxlib.luaL_checktype(L, 1, CT.LUA_TFUNCTION);
+    lapi.lua_settop(L, 1);
+    if (lapi.lua_dump(L, writer, b, strip) !== 0)
+        return lauxlib.luaL_error(L, "unable to dump given function");
+    lapi.lua_pushrawstring(L, b.map(e => String.fromCharCode(e)).join(''));
+    return 1;
+};
+
 const SIZELENMOD = luaconf.LUA_NUMBER_FRMLEN.length;
 
 const L_NBFD = 16; // TODO: arbitrary
@@ -379,6 +396,7 @@ const str_byte = function(L) {
 const strlib = {
     "byte":    str_byte,
     "char":    str_char,
+    "dump":    str_dump,
     "format":  str_format,
     "len":     str_len,
     "lower":   str_lower,

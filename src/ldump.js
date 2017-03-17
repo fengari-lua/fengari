@@ -10,7 +10,7 @@ const CT      = lua.constant_types;
 const LUAC_DATA    = "\x19\x93\r\n\x1a\n";
 const LUAC_INT     = 0x5678;
 const LUAC_NUM     = 370.5;
-const LUAC_VERSION = lua.LUA_VERSION_MAJOR.charCodeAt(0) * 16 + lua.LUA_VERSION_MINOR.charCodeAt(0);
+const LUAC_VERSION = Number.parseInt(lua.LUA_VERSION_MAJOR) * 16 + Number.parseInt(lua.LUA_VERSION_MINOR);
 const LUAC_FORMAT  = 0;   /* this is the official format */
 
 class DumpState {
@@ -28,51 +28,66 @@ const DumpBlock = function(b, size, D) {
         D.status = D.writer(D.L, b, size, D.data);
 };
 
-const DumpVector = function(v, n, D) {
-    DumpBlock(v, n, D);
-};
-
 const DumpLiteral = function(s, D) {
+    s = lua.to_luastring(s);
     DumpBlock(s, s.length, D);
 };
 
-const DumpVar = function (x,D) {
-    DumpVector(x, 1, D);
-};
-
 const DumpByte = function(y, D) {
-    DumpVar(y, D);
+    DumpBlock([y], 1, D);
 };
 
 const DumpInt = function(x, D) {
-    DumpVar(x, D);
+    let dv = new DataView(new ArrayBuffer(4));
+    dv.setInt32(0, x, true);
+    let t = [];
+    for (let i = 0; i < 4; i++)
+        t.push(dv.getUint8(i, true));
+
+    DumpBlock(t, 4, D);
 };
 
-const DumpInteger = DumpInt;
+const DumpInteger = function(x, D) {
+    let dv = new DataView(new ArrayBuffer(8));
+    dv.setInt32(0, x, true);
+    let t = [];
+    for (let i = 0; i < 8; i++)
+        t.push(dv.getUint8(i, true));
+    DumpBlock(t, 8, D);
+};
 
 const DumpNumber = function(x, D) {
-    DumpVar(x, D);
+    let dv = new DataView(new ArrayBuffer(8));
+    dv.setFloat64(0, x, true);
+    let t = [];
+    for (let i = 0; i < 8; i++)
+        t.push(dv.getUint8(i, true));
+
+    DumpBlock(t, 8, D);
 };
 
 const DumpString = function(s, D) {
     if (s === null)
         DumpByte(0, D);
     else {
-        let size = s.value.length + 1;
-        let str = s.value;
+        let size = s.length + 1;
+        let str = s;
         if (size < 0xFF)
             DumpByte(size, D);
         else {
             DumpByte(0xFF, D);
-            DumpVar(size, D);
+            DumpInt(size, D);
         }
-        DumpVector(str, size - 1, D);  /* no need to save '\0' */
+        DumpBlock(str, size - 1, D);  /* no need to save '\0' */
     }
 };
 
 const DumpCode = function(f, D) {
-    DumpInt(f.code.length, D);
-    DumpVector(f.code, f.code.length, D);
+    let s = f.code.map(e => e.code);
+    DumpInt(s.length, D);
+
+    for (let i = 0; i < s.length; i++)
+        DumpInt(s[i], D);
 };
 
 const DumpConstants = function(f, D) {
@@ -120,25 +135,25 @@ const DumpUpvalues = function(f, D) {
 const DumpDebug = function(f, D) {
     let n = D.strip ? 0 : f.lineinfo.length;
     DumpInt(n, D);
-    DumpVector(f.lineinfo, n, D);
+    DumpBlock(f.lineinfo, n, D);
     n = D.strip ? 0 : f.locvars.length;
     DumpInt(n, D);
     for (let i = 0; i < n; i++) {
-        DumpString(f.locvars[i].varname, D);
+        DumpString(f.locvars[i].varname.value, D);
         DumpInt(f.locvars[i].startpc, D);
         DumpInt(f.locvars[i].endpc, D);
     }
     n = D.strip ? 0 : f.upvalues.length;
     DumpInt(n, D);
     for (let i = 0; i < n; i++)
-        DumpString(f.upvalues[i].name, D);
+        DumpString(f.upvalues[i].name.value, D);
 };
 
 const DumpFunction = function(f, psource, D) {
     if (D.strip || f.source === psource)
         DumpString(null, D);  /* no debug info or same source as its parent */
     else
-        DumpString(f.source, D);
+        DumpString(f.source.value, D);
     DumpInt(f.linedefined, D);
     DumpInt(f.lastlinedefined, D);
     DumpByte(f.numparams, D);
@@ -155,7 +170,8 @@ const DumpHeader = function(D) {
   DumpLiteral(lua.LUA_SIGNATURE, D);
   DumpByte(LUAC_VERSION, D);
   DumpByte(LUAC_FORMAT, D);
-  DumpLiteral(LUAC_DATA, D);
+  let cdata = LUAC_DATA.split('').map(e => e.charCodeAt(0));
+  DumpBlock(cdata, cdata.length, D);
   DumpByte(4, D); // intSize
   DumpByte(8, D); // size_tSize
   DumpByte(4, D); // instructionSize

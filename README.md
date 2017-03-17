@@ -28,7 +28,6 @@
     - [x] ...
     - [ ] lua_arith
     - [ ] lua_close
-    - [ ] lua_dump
     - [ ] lua_gethook
     - [ ] lua_gethookcount
     - [ ] lua_gethookmask
@@ -99,6 +98,7 @@
     - [ ] String
         - [x] string.byte
         - [x] string.char
+        - [x] string.dump
         - [x] string.format
         - [x] string.len
         - [x] string.lower
@@ -106,7 +106,6 @@
         - [x] string.reverse
         - [x] string.sub
         - [x] string.upper
-        - [ ] string.dump
         - [ ] string.find
         - [ ] string.gmatch
         - [ ] string.gsub
