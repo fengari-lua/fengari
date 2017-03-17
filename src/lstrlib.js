@@ -366,7 +366,7 @@ const SZINT = 8; // Size of lua_Integer
 const NB = 8;
 
 /* mask for one character (NB 1's) */
-const MC = ((1 << NB) - 1)
+const MC = ((1 << NB) - 1);
 
 /*
 ** information to pack/unpack stuff
@@ -648,6 +648,104 @@ const str_byte = function(L) {
     return n;
 };
 
+/*
+** Unpack an integer with 'size' bytes and 'islittle' endianness.
+** If size is smaller than the size of a Lua integer and integer
+** is signed, must do sign extension (propagating the sign to the
+** higher bits); if size is larger than the size of a Lua integer,
+** it must check the unread bytes to see whether they do not cause an
+** overflow.
+*/
+const unpackint = function(L, str, islittle, size, issigned) {
+    let res = 0;
+    let limit = size <= SZINT ? size : SZINT;
+    for (let i = limit - 1; i >= 0; i--) {
+        res <<= NB;
+        res |= str[islittle ? i : size - 1 - i];
+    }
+    if (size < SZINT) {  /* real size smaller than lua_Integer? */
+        if (issigned) {  /* needs sign extension? */
+            let mask = 1 << (size * NB - 1);
+            res = ((res ^ mask) - mask);  /* do sign extension */
+        }
+    } else if (size > SZINT) {  /* must check unread bytes */
+        let mask = issigned || res >= 0 ? 0 : MC;
+        for (let i = limit; i < size; i++) {
+            if (str[islittle ? i : size - 1 - i] !== mask)
+                lauxlib.luaL_error(L, `${size}-byte integer does not fit into Lua Integer`);
+        }
+    }
+    return res;
+};
+
+const unpacknum = function(L, b, islittle, size) {
+    assert(b.length >= size);
+
+    let dv = new DataView(new ArrayBuffer(size));
+    b.forEach((e, i) => dv.setUint8(i, e, islittle));
+
+    return dv.getFloat64(0, islittle);
+};
+
+const str_unpack = function(L) {
+    let h = new Header(L);
+    let fmt = lauxlib.luaL_checkstring(L, 1);
+    let data = lauxlib.luaL_checkstring(L, 2);
+    data = L.stack[lapi.index2addr_(L, 2)];
+    let ld = data.length;
+    let pos = posrelat(lauxlib.luaL_optinteger(L, 3, 1), ld) - 1;
+    let n = 0;  /* number of results */
+    lauxlib.luaL_argcheck(L, pos <= ld, 3, "initial position out of string");
+    while (fmt.length > 0) {
+        let details = getdetails(h, pos, fmt);
+        let opt = details.opt;
+        let size = details.size;
+        let ntoalign = details.ntoalign;
+        if (ntoalign + size > ~pos || pos + ntoalign + size > ld)
+            lauxlib.luaL_argerror(L, 2, "data string too short");
+        pos += ntoalign;  /* skip alignment */
+        /* stack space for item + next position */
+        lauxlib.luaL_checkstack(L, 2, "too many results");
+        n++;
+        switch (opt) {
+            case KOption.Kint:
+            case KOption.Kuint: {
+                let res = unpackint(L, data.slice(pos), h.islittle, size, opt === KOption.Kint);
+                lapi.lua_pushinteger(L, res);
+                break;
+            }
+            case KOption.Kfloat: {
+                let res = unpacknum(L, data.slice(pos), h.islittle, size);
+                lapi.lua_pushnumber(L, res);
+                break;
+            }
+            case KOption.Kchar: {
+                lapi.lua_pushstring(L, data.slice(pos, pos + size));
+                break;
+            }
+            case KOption.Kstring: {
+                let len = unpackint(L, data.slice(pos), h.islittle, size, 0);
+                lauxlib.luaL_argcheck(L, pos + len + size <= ld, 2, "data string too short");
+                lapi.lua_pushstring(L, data.slice(pos + size, pos + size + len));
+                pos += len;  /* skip string */
+                break;
+            }
+            case KOption.Kzstr: {
+                let len = data.slice(pos).indexOf(0);
+                lapi.lua_pushstring(L, data.slice(pos, pos + len));
+                pos += len + 1;  /* skip string plus final '\0' */
+                break;
+            }
+            case KOption.Kpaddalign: case KOption.Kpadding: case KOption.Knop:
+                n--;  /* undo increment */
+                break;
+        }
+        pos += size;
+    }
+    lapi.lua_pushinteger(L, pos + 1);  /* next position */
+    return n + 1;
+};
+
 const strlib = {
     "byte":    str_byte,
     "char":    str_char,
@@ -659,6 +757,7 @@ const strlib = {
     "rep":     str_rep,
     "reverse": str_reverse,
     "sub":     str_sub,
+    "unpack":  str_unpack,
     "upper":   str_upper
 };
 
