@@ -12,6 +12,10 @@ const CT      = lua.constant_types;
 
 const L_ESC   = '%'.charCodeAt(0);
 
+// (sizeof(size_t) < sizeof(int) ? MAX_SIZET : (size_t)(INT_MAX))
+const MAXSIZE = Number.MAX_SAFE_INTEGER;
+
+
 /* translate a relative string position: negative means back from end */
 const posrelat = function(pos, len) {
     if (pos >= 0) return pos;
@@ -350,6 +354,256 @@ const str_format = function(L) {
     return 1;
 };
 
+/* value used for padding */
+const LUAL_PACKPADBYTE = 0x00;
+
+/* maximum size for the binary representation of an integer */
+const MAXINTSIZE = 16;
+
+const SZINT = 8; // Size of lua_Integer
+
+/* number of bits in a character */
+const NB = 8;
+
+/* mask for one character (NB 1's) */
+const MC = ((1 << NB) - 1)
+
+/*
+** information to pack/unpack stuff
+*/
+class Header {
+    constructor(L) {
+        this.L = L;
+        this.islittle = true;
+        this.maxalign = 1;
+    }
+}
+
+/*
+** options for pack/unpack
+*/
+const KOption = {
+    Kint:       0, /* signed integers */
+    Kuint:      1, /* unsigned integers */
+    Kfloat:     2, /* floating-point numbers */
+    Kchar:      3, /* fixed-length strings */
+    Kstring:    4, /* strings with prefixed length */
+    Kzstr:      5, /* zero-terminated strings */
+    Kpadding:   6, /* padding */
+    Kpaddalign: 7, /* padding for alignment */
+    Knop:       8  /* no-op (configuration or spaces) */
+};
+
+const digit = function(c) {
+    return '0'.charCodeAt(0) <= c && c <= '9'.charCodeAt(0);
+};
+
+const getnum = function(fmt, df) {
+    if (!digit(fmt))  /* no number? */
+        return df;  /* return default value */
+    else {
+        let a = 0;
+        do {
+            a = a * 10 + ((fmt = fmt.slice(1))[0] - '0'.charCodeAt(0));
+        } while (digit(fmt[0]) && a <= (MAXSIZE - 9)/10);
+        return a;
+    }
+};
+
+/*
+** Read an integer numeral and raises an error if it is larger
+** than the maximum size for integers.
+*/
+const getnumlimit = function(h, fmt, df) {
+    let sz = getnum(fmt, df);
+    if (sz > MAXINTSIZE || sz <= 0)
+        lauxlib.luaL_error(h.L, `integral size (${sz}) out of limits [1,${MAXINTSIZE}]`);
+    return sz;
+};
+
+/*
+** Read and classify next option. 'size' is filled with option's size.
+*/
+const getoption = function(h, fmt) {
+    let r = {
+        opt: NaN,
+        size: NaN
+    };
+
+    r.opt = (fmt = fmt.slice(1))[0];
+    r.size = 0;  /* default */
+    switch (r.opt) {
+        case 'b': r.size = 1; r.opt = KOption.Kint;   return r; // sizeof(char): 1
+        case 'B': r.size = 1; r.opt = KOption.Kuint;  return r;
+        case 'h': r.size = 2; r.opt = KOption.Kint;   return r; // sizeof(short): 2
+        case 'H': r.size = 2; r.opt = KOption.Kuint;  return r;
+        case 'l': r.size = 8; r.opt = KOption.Kint;   return r; // sizeof(long): 8
+        case 'L': r.size = 8; r.opt = KOption.Kuint;  return r;
+        case 'j': r.size = 8; r.opt = KOption.Kint;   return r; // sizeof(lua_Integer): 8
+        case 'J': r.size = 8; r.opt = KOption.Kuint;  return r;
+        case 'T': r.size = 8; r.opt = KOption.Kuint;  return r; // sizeof(size_t): 8
+        case 'f': r.size = 4; r.opt = KOption.Kfloat; return r; // sizeof(float): 4
+        case 'd': r.size = 8; r.opt = KOption.Kfloat; return r; // sizeof(double): 8
+        case 'n': r.size = 8; r.opt = KOption.Kfloat; return r; // sizeof(lua_Number): 8
+        case 'i': r.size = getnumlimit(h, fmt, 4); r.opt = KOption.Kint;    return r; // sizeof(int): 4
+        case 'I': r.size = getnumlimit(h, fmt, 4); r.opt = KOption.Kuint;   return r;
+        case 's': r.size = getnumlimit(h, fmt, 8); r.opt = KOption.Kstring; return r;
+    }
+
+    r.opt = KOption.Knop;
+    return r;
+};
+
+/*
+** Read, classify, and fill other details about the next option.
+** 'psize' is filled with option's size, 'notoalign' with its
+** alignment requirements.
+** Local variable 'size' gets the size to be aligned. (Kpadal option
+** always gets its full alignment, other options are limited by
+** the maximum alignment ('maxalign'). Kchar option needs no alignment
+** despite its size.
+*/
+const getdetails = function(h, totalsize, fmt) {
+    let r = {
+        opt: NaN,
+        size: NaN,
+        ntoalign: NaN
+    };
+
+    let opt = getoption(h, fmt);
+    r.size = opt.size;
+    r.opt = opt.opt;
+    let align = r.size;  /* usually, alignment follows size */
+    if (opt === KOption.Kpaddalign) {  /* 'X' gets alignment from following option */
+        if (fmt[0] === 0)
+            lauxlib.luaL_argerror(h.L, 1, "invalid next option for option 'X'");
+        else {
+            let o = getoption(h, fmt);
+            align = o.size;
+            o = o.opt;
+            if (o === KOption.Kchar || align === 0)
+                lauxlib.luaL_argerror(h.L, 1, "invalid next option for option 'X'");
+        }
+    }
+    if (align <= 1 || opt === KOption.Kchar)  /* need no alignment? */
+        r.ntoalign = 0;
+    else {
+        if (align > h.maxalign)  /* enforce maximum alignment */
+            align = h.maxalign;
+        if ((align & (align -1)) !== 0)  /* is 'align' not a power of 2? */
+            lauxlib.luaL_argerror(h.L, 1, "format asks for alignment not power of 2");
+        r.ntoalign = (align - (totalsize & (align - 1))) & (align - 1);
+    }
+    return r;
+};
+
+/*
+** Pack integer 'n' with 'size' bytes and 'islittle' endianness.
+** The final 'if' handles the case when 'size' is larger than
+** the size of a Lua integer, correcting the extra sign-extension
+** bytes if necessary (by default they would be zeros).
+*/
+const packint = function(b, n, islittle, size, neg) {
+    let buff = new Array(size);
+
+    buff[islittle ? 0 :  size - 1] = n & MC;  /* first byte */
+    for (let i = 1; i < size; i++) {
+        n >>= NB;
+        buff[islittle ? i : size - 1 - i] = n & MC;
+    }
+    if (neg && size > SZINT) {  /* negative number need sign extension? */
+        for (let i = SZINT; i < size; i++)  /* correct extra bytes */
+            buff[islittle ? i : size - 1 - i] = MC;
+    }
+    b.concat(buff);  /* add result to buffer */
+};
+
+const packnum = function(b, n, islittle, size) {
+    let dv = new DataView(new ArrayBuffer(size));
+    dv.setFloat64(0, n, islittle);
+
+    for (let i = 0; i < 8; i++)
+        b.push(dv.getUint8(i, islittle));
+};
+
+const str_pack = function(L) {
+    let b = [];
+    let h = new Header();
+    let fmt = lauxlib.luaL_checkstring(L, 1);  /* format string */
+    let arg = 1;  /* current argument to pack */
+    let totalsize = 0;  /* accumulate total size of result */
+    lapi.lua_pushnil(L);  /* mark to separate arguments from string buffer */
+    while (fmt.length > 0) {
+        let details = getdetails(h, totalsize, fmt);
+        let opt = details.opt;
+        let size = details.size;
+        let ntoalign = details.ntoalign;
+        totalsize += ntoalign + size;
+        while (ntoalign-- > 0)
+            b.push(LUAL_PACKPADBYTE);  /* fill alignment */
+        arg++;
+        switch (opt) {
+            case KOption.Kint: {  /* signed integers */
+                let n = lauxlib.luaL_checkinteger(L, arg);
+                if (size < SZINT) {  /* need overflow check? */
+                    let lim = 1 << (size * 8) - 1;
+                    lauxlib.luaL_argcheck(L, -lim <= n && n < lim, arg, "integer overflow");
+                }
+                packint(b, n, h.islittle, size, n < 0);
+                break;
+            }
+            case KOption.Kuint: {  /* unsigned integers */
+                let n = lauxlib.luaL_checkinteger(L, arg);
+                if (size < SZINT)
+                    lauxlib.luaL_argcheck(L, n < (1 << (size * NB)), arg, "unsigned overflow");
+                packint(b, n, h.islittle, size, false);
+                break;
+            }
+            case KOption.Kfloat: {  /* floating-point options */
+                let n = lauxlib.luaL_checknumber(L, arg);  /* get argument */
+                packnum(b, n, h.islittle, size);
+                break;
+            }
+            case KOption.Kchar: {  /* fixed-size string */
+                let s = lauxlib.luaL_checkstring(L, arg);
+                s = L.stack[lapi.index2addr_(L, arg)].value;
+                let len = s.value.length;
+                lauxlib.luaL_argcheck(L, len <= size, arg, "string long than given size");
+                b.concat(s.value);  /* add string */
+                while (len++ < size)  /* pad extra space */
+                    b.push(LUAL_PACKPADBYTE);
+                break;
+            }
+            case KOption.Kstring: {  /* strings with length count */
+                let s = lauxlib.luaL_checkstring(L, arg);
+                s = L.stack[lapi.index2addr_(L, arg)].value;
+                let len = s.value.length;
+                lauxlib.luaL_argcheck(L, size >= NB || len < (1 << size * NB), arg, "string length does not fit in given size");
+                packint(b, len, h.islittle, size, 0);  /* pack length */
+                b.concat(s.value);
+                totalsize += len;
+                break;
+            }
+            case KOption.Kzstr: {  /* zero-terminated string */
+                let s = lauxlib.luaL_checkstring(L, arg);
+                s = L.stack[lapi.index2addr_(L, arg)].value;
+                let len = s.value.length;
+                lauxlib.luaL_argcheck(L, s.value.length === String.fromCharCode(...s.value).length, arg, "strings contains zeros");
+                b.concat(s.value);
+                b.push(0);  /* add zero at the end */
+                totalsize += len + 1;
+                break;
+            }
+            case KOption.Kpadding: b.push(LUAL_PACKPADBYTE);
+            case KOption.Kpaddalign: case KOption.Knop:
+                arg--;  /* undo increment */
+                break;
+        }
+    }
+    L.stack[L.top++] = new lobject.TValue(CT.LUA_TLNGSTR, b); // We don't want lua > js > lua string conversion here
+    return 1;
+};
+
 const str_reverse = function(L) {
     lapi.lua_pushstring(L, lauxlib.luaL_checkstring(L, 1).split("").reverse().join(""));
     return 1;
@@ -401,6 +655,7 @@ const strlib = {
     "format":  str_format,
     "len":     str_len,
     "lower":   str_lower,
+    "pack":    str_pack,
     "rep":     str_rep,
     "reverse": str_reverse,
     "sub":     str_sub,
