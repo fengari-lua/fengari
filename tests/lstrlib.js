@@ -460,3 +460,37 @@ test('string.dump', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('string.pack/unpack/packsize', function (t) {
+    let luaCode = `
+        local s1, n, s2 = "hello", 2, "you"
+        local packed = string.pack("zjz", s1, n, s2)
+        local us1, un, us2 = string.unpack("zjz", packed)
+        return s1 == us1 and n == un and s2 == us2
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "FFFFFFF",
+        "Correct element(s) on the stack"
+    );
+});

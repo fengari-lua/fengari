@@ -368,6 +368,8 @@ const NB = 8;
 /* mask for one character (NB 1's) */
 const MC = ((1 << NB) - 1);
 
+const MAXALIGN = 8;
+
 /*
 ** information to pack/unpack stuff
 */
@@ -448,6 +450,22 @@ const getoption = function(h, fmt) {
         case 'i': r.size = getnumlimit(h, fmt, 4); r.opt = KOption.Kint;    return r; // sizeof(int): 4
         case 'I': r.size = getnumlimit(h, fmt, 4); r.opt = KOption.Kuint;   return r;
         case 's': r.size = getnumlimit(h, fmt, 8); r.opt = KOption.Kstring; return r;
+        case 'c': {
+            r.size = getnum(fmt, -1);
+            if (r.size === -1)
+                lauxlib.luaL_error(h.L, "missing size for format option 'c'");
+            r.opt = KOption.Kchar;
+            return r;
+        }
+        case 'z':             r.opt = KOption.Kzstr;      return r;
+        case 'x': r.size = 1; r.opt = KOption.Kpadding;   return r;
+        case 'X':             r.opt = KOption.Kpaddalign; return r;
+        case ' ': break;
+        case '<': h.islittle = true; break;
+        case '>': h.islittle = false; break;
+        case '=': h.islittle = true; break;
+        case '!': h.maxalign = getnumlimit(h, fmt, MAXALIGN); break;
+        default: lauxlib.luaL_error(h.L, `invalid format option '${r.opt}'`);
     }
 
     r.opt = KOption.Knop;
@@ -529,7 +547,7 @@ const packnum = function(b, n, islittle, size) {
 const str_pack = function(L) {
     let b = [];
     let h = new Header();
-    let fmt = lauxlib.luaL_checkstring(L, 1);  /* format string */
+    let fmt = lauxlib.luaL_checkstring(L, 1).split('');  /* format string */
     let arg = 1;  /* current argument to pack */
     let totalsize = 0;  /* accumulate total size of result */
     lapi.lua_pushnil(L);  /* mark to separate arguments from string buffer */
@@ -648,6 +666,29 @@ const str_byte = function(L) {
     return n;
 };
 
+const str_packsize = function(L) {
+    let h = new Header(L);
+    let fmt = lauxlib.luaL_checkstring(L, 1).split('');
+    let totalsize = 0;  /* accumulate total size of result */
+    while (fmt.length > 0) {
+        let details = getdetails(h, totalsize, fmt);
+        let opt = details.opt;
+        let size = details.size;
+        let ntoalign = details.ntoalign;
+        size += ntoalign;  /* total space used by option */
+        lauxlib.luaL_argcheck(L, totalsize <= MAXSIZE - size - 1, "format result too large");
+        totalsize += size;
+        switch (opt) {
+            case KOption.Kstring:  /* strings with length count */
+            case KOption.Kzstr:    /* zero-terminated string */
+                lauxlib.luaL_argerror(L, 1, "variable-length format");
+            default:  break;
+        }
+    }
+    lapi.lua_pushinteger(L, totalsize);
+    return 1;
+};
+
 /*
 ** Unpack an integer with 'size' bytes and 'islittle' endianness.
 ** If size is smaller than the size of a Lua integer and integer
@@ -689,7 +730,7 @@ const unpacknum = function(L, b, islittle, size) {
 
 const str_unpack = function(L) {
     let h = new Header(L);
-    let fmt = lauxlib.luaL_checkstring(L, 1);
+    let fmt = lauxlib.luaL_checkstring(L, 1).split('');
     let data = lauxlib.luaL_checkstring(L, 2);
     data = L.stack[lapi.index2addr_(L, 2)];
     let ld = data.length;
@@ -747,18 +788,19 @@ const str_unpack = function(L) {
 };
 
 const strlib = {
-    "byte":    str_byte,
-    "char":    str_char,
-    "dump":    str_dump,
-    "format":  str_format,
-    "len":     str_len,
-    "lower":   str_lower,
-    "pack":    str_pack,
-    "rep":     str_rep,
-    "reverse": str_reverse,
-    "sub":     str_sub,
-    "unpack":  str_unpack,
-    "upper":   str_upper
+    "byte":     str_byte,
+    "char":     str_char,
+    "dump":     str_dump,
+    "format":   str_format,
+    "len":      str_len,
+    "lower":    str_lower,
+    "pack":     str_pack,
+    "packsize": str_packsize,
+    "rep":      str_rep,
+    "reverse":  str_reverse,
+    "sub":      str_sub,
+    "unpack":   str_unpack,
+    "upper":    str_upper
 };
 
 const createmetatable = function(L) {
