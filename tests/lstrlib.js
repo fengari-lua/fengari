@@ -418,17 +418,15 @@ test('string.sub', function (t) {
 
 
 test('string.dump', function (t) {
-    let luaCodeToDump = `
-        local todump = function(p1, p2, p3)
-            local s = "hello"
-            local i = 12
-            local f = 12.5
-            local b = true
+    let luaCode = `
+            local todump = function()
+                local s = "hello"
+                local i = 12
+                local f = 12.5
+                local b = true
 
-            return p1 + p2 + p3
-        end`,
-        luaCode = `
-            ${luaCodeToDump}
+                return s .. i .. f
+            end
 
             return string.dump(todump)
         `, L, bytes = [];
@@ -436,11 +434,6 @@ test('string.dump', function (t) {
     t.plan(3);
 
     t.doesNotThrow(function () {
-
-        let bc = toByteCode(luaCodeToDump).dataView;
-        for (let i = 0; i < bc.byteLength; i++)
-            bytes.push(bc.getUint8(i, true));
-
         L = lauxlib.luaL_newstate();
 
         linit.luaL_openlibs(L);
@@ -453,11 +446,15 @@ test('string.dump', function (t) {
 
         lapi.lua_call(L, 0, -1);
 
+        let dv = lapi.lua_todataview(L, -1);
+
+        lapi.lua_load(L, null, dv, "test", "binary");
+
     }, "Lua program ran without error");
 
-    t.deepEqual(
-        L.stack[L.top -1].value,
-        bytes,
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "hello1212.5",
         "Correct element(s) on the stack"
     );
 });

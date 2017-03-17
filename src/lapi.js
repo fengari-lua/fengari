@@ -240,18 +240,6 @@ const lua_pushstring = function (L, s) {
     return s;
 };
 
-// Push string without 8-bit conversion
-const lua_pushrawstring = function(L, s) {
-    if (typeof s !== "string")
-        L.stack[L.top] = ldo.nil;
-    else {
-        L.stack[L.top] = new TValue(CT.LUA_TLNGSTR, s.split('').map(e => e.charCodeAt(0)));
-    }
-    L.top++;
-    assert(L.top <= L.ci.top, "stack overflow");
-    return s;
-};
-
 const lua_pushliteral = lua_pushstring;
 
 const lua_pushcclosure = function(L, fn, n) {
@@ -553,6 +541,19 @@ const lua_tolstring = function(L, idx) {
 };
 
 const lua_tostring =  lua_tolstring;
+
+// Convert a string on the stack to a dataview, because lua_tostring will perform utf-8 to utf-16 conversion
+const lua_todataview = function(L, idx) {
+    let o = index2addr(L, idx);
+
+    if (!o.ttisstring() && !o.ttisnumber())
+        return null;
+
+    let dv = new DataView(new ArrayBuffer(o.value.length));
+    o.value.forEach((e, i) => dv.setUint8(i, e, true));
+
+    return dv;
+};
 
 const lua_rawlen = function(L, idx) {
     let o = index2addr(L, idx);
@@ -893,7 +894,6 @@ module.exports.lua_pushliteral     = lua_pushliteral;
 module.exports.lua_pushlstring     = lua_pushlstring;
 module.exports.lua_pushnil         = lua_pushnil;
 module.exports.lua_pushnumber      = lua_pushnumber;
-module.exports.lua_pushrawstring   = lua_pushrawstring;
 module.exports.lua_pushstring      = lua_pushstring;
 module.exports.lua_pushthread      = lua_pushthread;
 module.exports.lua_pushtvalue      = lua_pushtvalue;
@@ -916,6 +916,7 @@ module.exports.lua_setupvalue      = lua_setupvalue;
 module.exports.lua_status          = lua_status;
 module.exports.lua_stringtonumber  = lua_stringtonumber;
 module.exports.lua_toboolean       = lua_toboolean;
+module.exports.lua_todataview      = lua_todataview;
 module.exports.lua_tointeger       = lua_tointeger;
 module.exports.lua_tointegerx      = lua_tointegerx;
 module.exports.lua_tolstring       = lua_tolstring;
