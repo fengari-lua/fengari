@@ -438,7 +438,7 @@ test('string.dump', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, luaCode.trim());
 
     }, "Lua program loaded without error");
 
@@ -449,6 +449,8 @@ test('string.dump', function (t) {
         let dv = lapi.lua_todataview(L, -1);
 
         lapi.lua_load(L, null, dv, "test", "binary");
+
+        lapi.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
