@@ -3,9 +3,10 @@
 const assert  = require('assert');
 const sprintf = require('sprintf');
 
-const lua     = require('./lua.js');
 const lapi    = require('./lapi.js');
 const lauxlib = require('./lauxlib.js');
+const lobject = require('./lobject.js');
+const lua     = require('./lua.js');
 const luaconf = require('./luaconf.js');
 const CT      = lua.constant_types;
 
@@ -61,7 +62,7 @@ const str_dump = function(L) {
     lapi.lua_settop(L, 1);
     if (lapi.lua_dump(L, writer, b, strip) !== 0)
         return lauxlib.luaL_error(L, "unable to dump given function");
-    lapi.lua_pushrawstring(L, b.map(e => String.fromCharCode(e)).join(''));
+    L.stack[L.top++] = new lobject.TValue(CT.LUA_TLNGSTR, b); // We don't want lua > js > lua string conversion here
     return 1;
 };
 
