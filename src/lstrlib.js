@@ -397,17 +397,18 @@ const KOption = {
 };
 
 const digit = function(c) {
-    return '0'.charCodeAt(0) <= c && c <= '9'.charCodeAt(0);
+    return '0'.charCodeAt(0) <= c.charCodeAt(0) && c.charCodeAt(0) <= '9'.charCodeAt(0);
 };
 
 const getnum = function(fmt, df) {
-    if (!digit(fmt))  /* no number? */
+    if (!digit(fmt.s[0]))  /* no number? */
         return df;  /* return default value */
     else {
         let a = 0;
         do {
-            a = a * 10 + ((fmt = fmt.slice(1))[0] - '0'.charCodeAt(0));
-        } while (digit(fmt[0]) && a <= (MAXSIZE - 9)/10);
+            a = a * 10 + (fmt.s[0].charCodeAt(0) - '0'.charCodeAt(0));
+            fmt.s = fmt.s.slice(1);
+        } while (digit(fmt.s[0]) && a <= (MAXSIZE - 9)/10);
         return a;
     }
 };
@@ -432,7 +433,8 @@ const getoption = function(h, fmt) {
         size: NaN
     };
 
-    r.opt = (fmt = fmt.slice(1))[0];
+    r.opt = fmt.s[0];
+    fmt.s = fmt.s.slice(1);
     r.size = 0;  /* default */
     switch (r.opt) {
         case 'b': r.size = 1; r.opt = KOption.Kint;   return r; // sizeof(char): 1
@@ -492,8 +494,8 @@ const getdetails = function(h, totalsize, fmt) {
     r.size = opt.size;
     r.opt = opt.opt;
     let align = r.size;  /* usually, alignment follows size */
-    if (opt === KOption.Kpaddalign) {  /* 'X' gets alignment from following option */
-        if (fmt[0] === 0)
+    if (r.opt === KOption.Kpaddalign) {  /* 'X' gets alignment from following option */
+        if (fmt.s[0] === 0)
             lauxlib.luaL_argerror(h.L, 1, "invalid next option for option 'X'");
         else {
             let o = getoption(h, fmt);
@@ -503,7 +505,7 @@ const getdetails = function(h, totalsize, fmt) {
                 lauxlib.luaL_argerror(h.L, 1, "invalid next option for option 'X'");
         }
     }
-    if (align <= 1 || opt === KOption.Kchar)  /* need no alignment? */
+    if (align <= 1 || r.opt === KOption.Kchar)  /* need no alignment? */
         r.ntoalign = 0;
     else {
         if (align > h.maxalign)  /* enforce maximum alignment */
@@ -533,7 +535,7 @@ const packint = function(b, n, islittle, size, neg) {
         for (let i = SZINT; i < size; i++)  /* correct extra bytes */
             buff[islittle ? i : size - 1 - i] = MC;
     }
-    b.concat(buff);  /* add result to buffer */
+    b.push(...buff);  /* add result to buffer */
 };
 
 const packnum = function(b, n, islittle, size) {
@@ -546,12 +548,17 @@ const packnum = function(b, n, islittle, size) {
 
 const str_pack = function(L) {
     let b = [];
-    let h = new Header();
+    let h = new Header(L);
     let fmt = lauxlib.luaL_checkstring(L, 1).split('');  /* format string */
+    fmt.push('\0'); // Add \0 to avoid overflow
+    fmt = {
+        s: fmt,
+        off: 0
+    };
     let arg = 1;  /* current argument to pack */
     let totalsize = 0;  /* accumulate total size of result */
     lapi.lua_pushnil(L);  /* mark to separate arguments from string buffer */
-    while (fmt.length > 0) {
+    while (fmt.s.length - 1 > 0) {
         let details = getdetails(h, totalsize, fmt);
         let opt = details.opt;
         let size = details.size;
@@ -584,10 +591,10 @@ const str_pack = function(L) {
             }
             case KOption.Kchar: {  /* fixed-size string */
                 let s = lauxlib.luaL_checkstring(L, arg);
-                s = L.stack[lapi.index2addr_(L, arg)].value;
+                s = L.stack[lapi.index2addr_(L, arg)];
                 let len = s.value.length;
                 lauxlib.luaL_argcheck(L, len <= size, arg, "string long than given size");
-                b.concat(s.value);  /* add string */
+                b.push(...s.value);  /* add string */
                 while (len++ < size)  /* pad extra space */
                     b.push(LUAL_PACKPADBYTE);
                 break;
@@ -598,7 +605,7 @@ const str_pack = function(L) {
                 let len = s.value.length;
                 lauxlib.luaL_argcheck(L, size >= NB || len < (1 << size * NB), arg, "string length does not fit in given size");
                 packint(b, len, h.islittle, size, 0);  /* pack length */
-                b.concat(s.value);
+                b.push(...s.value);
                 totalsize += len;
                 break;
             }
@@ -607,7 +614,7 @@ const str_pack = function(L) {
                 s = L.stack[lapi.index2addr_(L, arg)].value;
                 let len = s.value.length;
                 lauxlib.luaL_argcheck(L, s.value.length === String.fromCharCode(...s.value).length, arg, "strings contains zeros");
-                b.concat(s.value);
+                b.push(...s.value);
                 b.push(0);  /* add zero at the end */
                 totalsize += len + 1;
                 break;
@@ -669,8 +676,13 @@ const str_byte = function(L) {
 const str_packsize = function(L) {
     let h = new Header(L);
     let fmt = lauxlib.luaL_checkstring(L, 1).split('');
+    fmt.push('\0'); // Add \0 to avoid overflow
+    fmt = {
+        s: fmt,
+        off: 0
+    };
     let totalsize = 0;  /* accumulate total size of result */
-    while (fmt.length > 0) {
+    while (fmt.s.length - 1 > 0) {
         let details = getdetails(h, totalsize, fmt);
         let opt = details.opt;
         let size = details.size;
@@ -731,18 +743,23 @@ const unpacknum = function(L, b, islittle, size) {
 const str_unpack = function(L) {
     let h = new Header(L);
     let fmt = lauxlib.luaL_checkstring(L, 1).split('');
+    fmt.push('\0'); // Add \0 to avoid overflow
+    fmt = {
+        s: fmt,
+        off: 0
+    };
     let data = lauxlib.luaL_checkstring(L, 2);
-    data = L.stack[lapi.index2addr_(L, 2)];
+    data = L.stack[lapi.index2addr_(L, 2)].value;
     let ld = data.length;
     let pos = posrelat(lauxlib.luaL_optinteger(L, 3, 1), ld) - 1;
     let n = 0;  /* number of results */
     lauxlib.luaL_argcheck(L, pos <= ld, 3, "initial position out of string");
-    while (fmt.length > 0) {
+    while (fmt.s.length - 1 > 0) {
         let details = getdetails(h, pos, fmt);
         let opt = details.opt;
         let size = details.size;
         let ntoalign = details.ntoalign;
-        if (ntoalign + size > ~pos || pos + ntoalign + size > ld)
+        if (/*ntoalign + size > ~pos ||*/ pos + ntoalign + size > ld)
             lauxlib.luaL_argerror(L, 2, "data string too short");
         pos += ntoalign;  /* skip alignment */
         /* stack space for item + next position */
@@ -761,19 +778,22 @@ const str_unpack = function(L) {
                 break;
             }
             case KOption.Kchar: {
-                lapi.lua_pushstring(L, data.slice(pos, pos + size));
+                // lapi.lua_pushstring(L, data.slice(pos, pos + size));
+                L.stack[L.top++] = new lobject.TValue(CT.LUA_TLNGSTR, data.slice(pos, pos + size));
                 break;
             }
             case KOption.Kstring: {
                 let len = unpackint(L, data.slice(pos), h.islittle, size, 0);
                 lauxlib.luaL_argcheck(L, pos + len + size <= ld, 2, "data string too short");
-                lapi.lua_pushstring(L, data.slice(pos + size, pos + size + len));
+                // lapi.lua_pushstring(L, data.slice(pos + size, pos + size + len));
+                L.stack[L.top++] = new lobject.TValue(CT.LUA_TLNGSTR, data.slice(pos + size, pos + size + len));
                 pos += len;  /* skip string */
                 break;
             }
             case KOption.Kzstr: {
                 let len = data.slice(pos).indexOf(0);
-                lapi.lua_pushstring(L, data.slice(pos, pos + len));
+                // lapi.lua_pushstring(L, data.slice(pos, pos + len));
+                L.stack[L.top++] = new lobject.TValue(CT.LUA_TLNGSTR, data.slice(pos, pos + len));
                 pos += len + 1;  /* skip string plus final '\0' */
                 break;
             }

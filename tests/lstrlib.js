@@ -465,12 +465,12 @@ test('string.dump', function (t) {
 test('string.pack/unpack/packsize', function (t) {
     let luaCode = `
         local s1, n, s2 = "hello", 2, "you"
-        local packed = string.pack("zjz", s1, n, s2)
-        local us1, un, us2 = string.unpack("zjz", packed)
-        return s1 == us1 and n == un and s2 == us2
+        local packed = string.pack("c5jc3", s1, n, s2)
+        local us1, un, us2 = string.unpack("c5jc3", packed)
+        return string.packsize("c5jc3"), s1 == us1 and n == un and s2 == us2
     `, L;
     
-    t.plan(3);
+    t.plan(4);
 
     t.doesNotThrow(function () {
 
@@ -489,8 +489,13 @@ test('string.pack/unpack/packsize', function (t) {
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
-        "FFFFFFF",
+        lapi.lua_tointeger(L, -2),
+        16,
+        "Correct element(s) on the stack"
+    );
+
+    t.ok(
+        lapi.lua_toboolean(L, -1),
         "Correct element(s) on the stack"
     );
 });
