@@ -499,3 +499,126 @@ test('string.pack/unpack/packsize', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('string.find without pattern', function (t) {
+    let luaCode = `
+        return string.find("hello to you", " to ")
+    `, L;
+    
+    t.plan(4);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -2),
+        6,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -1),
+        9,
+        "Correct element(s) on the stack"
+    );
+});
+
+
+test('string.match', function (t) {
+    let luaCode = `
+        return string.match("foo: 123 bar: 456", "(%a+):%s*(%d+)")
+    `, L;
+    
+    t.plan(4);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -2),
+        "foo",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "123",
+        "Correct element(s) on the stack"
+    );
+});
+
+
+test('string.find', function (t) {
+    let luaCode = `
+        return string.find("foo: 123 bar: 456", "(%a+):%s*(%d+)")
+    `, L;
+    
+    t.plan(6);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -4),
+        1,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -3),
+        8,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -2),
+        "foo",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "123",
+        "Correct element(s) on the stack"
+    );
+});

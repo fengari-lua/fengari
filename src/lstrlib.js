@@ -10,7 +10,8 @@ const lua     = require('./lua.js');
 const luaconf = require('./luaconf.js');
 const CT      = lua.constant_types;
 
-const L_ESC   = '%'.charCodeAt(0);
+const sL_ESC  = '%';
+const L_ESC   = sL_ESC.charCodeAt(0);
 
 // (sizeof(size_t) < sizeof(int) ? MAX_SIZET : (size_t)(INT_MAX))
 const MAXSIZE = Number.MAX_SAFE_INTEGER;
@@ -836,13 +837,27 @@ class MatchState {
         this.L = L;
         this.matchdepth = NaN;  /* control for recursive depth */
         this.level = NaN;  /* total number of captures (finished or unfinished) */
-        this.captures = [];
+        this.capture = [];
     }
 }
 
+const check_capture = function(ms, l) {
+    l = String.fromCharCode(l - '1'.charCodeAt(0));
+    if (l < 0 || l >= ms.level || ms.capture[l].len === CAP_UNFINISHED)
+        return lauxlib.luaL_error(ms.L, `invalid capture index %${l + 1}`);
+    return l;
+};
+
+const capture_to_close = function(ms) {
+    let level = ms.level;
+    for (level--; level >= 0; level--)
+        if (ms.capture[level].len === CAP_UNFINISHED) return level;
+    return lauxlib.luaL_error(ms.L, "invalid pattern capture");
+};
+
 const classend = function(ms, p) {
     switch(ms.p.charAt(p++)) {
-        case L_ESC: {
+        case sL_ESC: {
             if (p === ms.p_end)
                 lauxlib.luaL_error(ms.L, "malformed pattern (ends with '%')");
             return p + 1;
@@ -863,12 +878,12 @@ const classend = function(ms, p) {
     }
 };
 
-const match_class = function(ms, c, cl) {
+const match_class = function(c, cl) {
     let res;
     switch (cl.toLowerCase()) {
         case 'a' : res = isalpha(c); break;
         case 'c' : res = iscntrl(c); break;
-        case 'd' : res = isdigit(c); break;
+        case 'd' : res = isdigit(c.charCodeAt(0)); break;
         case 'g' : res = isgraph(c); break;
         case 'l' : res = islower(c); break;
         case 'p' : res = ispunct(c); break;
@@ -909,7 +924,7 @@ const singlematch = function(ms, s, p, ep) {
         let c = ms.src.charAt(s);
         switch (ms.p.charAt(p)) {
             case '.': return true;  /* matches any char */
-            case L_ESC: return match_class(c, ms.p.charAt(p + 1));
+            case sL_ESC: return match_class(c, ms.p.charAt(p + 1));
             case '[': return matchbracketclass(ms, c, p, ep - 1);
             default: return ms.p.charAt(p) === c;
         }
@@ -962,6 +977,7 @@ const min_expand = function(ms, s, p, ep) {
 const start_capture = function(ms, s, p, what) {
     let level = ms.level;
     if (level >= LUA_MAXCAPTURES) lauxlib.luaL_error(ms.L, "too many captures");
+    ms.capture[level] = ms.capture[level] ? ms.capture[level] : {};
     ms.capture[level].init = s;
     ms.capture[level].len = what;
     ms.level = level + 1;
@@ -1001,13 +1017,13 @@ const match = function(ms, s, p) {
             switch (gotodefault ? 'x' : ms.p.charAt(p)) {
                 case '(': {  /* start capture */
                     if (ms.p.charAt(p + 1) === ')')  /* position capture? */
-                        s = start_capture(ms, s, 2, CAP_POSITION);
+                        s = start_capture(ms, s, p + 2, CAP_POSITION);
                     else
-                        s = start_capture(ms, s, 1, CAP_UNFINISHED);
+                        s = start_capture(ms, s, p + 1, CAP_UNFINISHED);
                     break;
                 }
                 case ')': {  /* end capture */
-                    s = end_capture(ms, s, 1);
+                    s = end_capture(ms, s, p + 1);
                     break;
                 }
                 case '$': {
@@ -1018,7 +1034,7 @@ const match = function(ms, s, p) {
                     s = ms.src.slice(s).length === 0 ? s : null;  /* check end of string */
                     break;
                 }
-                case L_ESC: {  /* escaped sequences not in the format class[*+?-]? */
+                case sL_ESC: {  /* escaped sequences not in the format class[*+?-]? */
                     switch (ms.p.charAt(p + 1)) {
                         case 'b': {  /* balanced string? */
                             s = matchbalance(ms, s, p + 2);
@@ -1058,7 +1074,7 @@ const match = function(ms, s, p) {
                     let ep = classend(ms, p);  /* points to optional suffix */
                     /* does not match at least once? */
                     if (!singlematch(ms, s, p, ep)) {
-                        if (ep.charAt(0) === '*' || ep.charAt(0) === '?' || ep.charAt(0) === '-') {  /* accept empty? */
+                        if (ms.p.charAt(ep) === '*' || ms.p.charAt(ep) === '?' || ms.p.charAt(ep) === '-') {  /* accept empty? */
                             p = ep + 1; gotoinit = true; break;
                         } else  /* '+' or no suffix */
                             s = null;  /* fail */
@@ -1094,7 +1110,7 @@ const match = function(ms, s, p) {
     return s;
 };
 
-const push_onecatpure = function(ms, i, s, e) {
+const push_onecapture = function(ms, i, s, e) {
     if (i >= ms.level) {
         if (i === 0)
             lapi.lua_pushlstring(ms.L, s, e);  /* add whole match */
@@ -1106,7 +1122,7 @@ const push_onecatpure = function(ms, i, s, e) {
         if (l === CAP_POSITION)
             lapi.lua_pushinteger(ms.L, ms.src_init + 1);
         else
-            lapi.lua_pushlstring(ms.L, ms.capture[i].init, l);
+            lapi.lua_pushlstring(ms.L, ms.src.slice(ms.capture[i].init), l);
     }
 };
 
@@ -1114,7 +1130,7 @@ const push_captures = function(ms, s, e) {
     let nlevels = ms.level === 0 && s ? 1 : ms.level;
     lauxlib.luaL_checkstack(ms.L, nlevels, "too many catpures");
     for (let i = 0; i < nlevels; i++)
-        push_onecatpure(ms, i, s, e);
+        push_onecapture(ms, i, s, e);
     return nlevels;  /* number of strings pushed */
 };
 
@@ -1168,7 +1184,7 @@ const str_find_aux = function(L, find) {
         /* do a plain search */
         let f = s.indexOf(p);
         if (f > -1) {
-            lapi.lua_pushinteger(L, f);
+            lapi.lua_pushinteger(L, f + 1);
             lapi.lua_pushinteger(L, f + lp);
             return 2;
         }
@@ -1185,7 +1201,7 @@ const str_find_aux = function(L, find) {
             reprepstate(ms);
             if ((res = match(ms, s1, 0)) !== null) {
                 if (find) {
-                    lapi.lua_pushinteger(L, s1);  /* start */
+                    lapi.lua_pushinteger(L, s1 + 1);  /* start */
                     lapi.lua_pushinteger(L, res);   /* end */
                     return push_captures(ms, null, 0) + 2;
                 } else
@@ -1193,6 +1209,8 @@ const str_find_aux = function(L, find) {
             }
         } while (s1++ < ms.src_end && !anchor);
     }
+    lapi.lua_pushnil(L);  /* not found */
+    return 1;
 };
 
 const str_find = function(L) {
@@ -1200,7 +1218,7 @@ const str_find = function(L) {
 };
 
 const str_match = function(L) {
-    return str_find_aux(L, 1);
+    return str_find_aux(L, 0);
 };
 
 const strlib = {
