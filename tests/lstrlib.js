@@ -622,3 +622,59 @@ test('string.find', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('string.gmatch', function (t) {
+    let luaCode = `
+        local s = "hello world from Lua"
+        local t = {}
+
+        for w in string.gmatch(s, "%a+") do
+            table.insert(t, w)
+        end
+
+        return table.unpack(t)
+    `, L;
+    
+    t.plan(6);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -4),
+        "hello",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -3),
+        "world",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -2),
+        "from",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "Lua",
+        "Correct element(s) on the stack"
+    );
+});

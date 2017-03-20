@@ -1221,12 +1221,52 @@ const str_match = function(L) {
     return str_find_aux(L, 0);
 };
 
+/* state for 'gmatch' */
+class GMatchState {
+    constructor() {
+        this.src = NaN;  /* current position */
+        this.p = NaN;  /* pattern */
+        this.lastmatch = NaN;  /* end of last match */
+        this.ms = new MatchState();  /* match state */
+    }
+}
+
+const gmatch_aux = function(L) {
+    let gm = lapi.lua_touserdata(L, lua.lua_upvalueindex(3));
+    gm.ms.L = L;
+    for (let src = 0; src < gm.ms.src_end; src++) {
+        reprepstate(gm.ms);
+        let e;
+        if ((e = match(gm.ms, src, gm.p)) !== null && e !== gm.lastmatch) {
+            gm.src = gm.lastmatch = e;
+            return push_captures(gm.ms, src, e);
+        }
+    }
+    return 0;  /* not found */
+};
+
+const str_gmatch = function(L) {
+    let s = lauxlib.luaL_checkstring(L, 1);
+    let p = lauxlib.luaL_checkstring(L, 2);
+    let ls = s.length;
+    let lp = p.length;
+    lapi.lua_settop(L, 2);  /* keep them on closure to avoid being collected */
+    let gm = lapi.lua_newuserdata(L, new GMatchState());
+    prepstate(gm.ms, L, s, ls, p, lp);
+    gm.src = s;
+    gm.p = p;
+    gm.lastmatch = null;
+    lapi.lua_pushcclosure(L, gmatch_aux, 3);
+    return 1;
+};
+
 const strlib = {
     "byte":     str_byte,
     "char":     str_char,
     "dump":     str_dump,
     "find":     str_find,
     "format":   str_format,
+    "gmatch":   str_gmatch,
     "len":      str_len,
     "lower":    str_lower,
     "match":    str_match,

@@ -43,7 +43,6 @@
     - [ ] lua_islightuserdata
     - [ ] lua_isthread
     - [ ] lua_isuserdata
-    - [ ] lua_newuserdata
     - [ ] lua_pcallk
     - [ ] lua_pushfstring
     - [ ] lua_pushlightuserdata
@@ -57,7 +56,6 @@
     - [ ] lua_setlocal
     - [ ] lua_setuservalue
     - [ ] lua_tocfunction
-    - [ ] lua_touserdata
     - [ ] lua_upvalueid
     - [ ] lua_upvaluejoin
 - [ ] Auxiliary library
@@ -99,20 +97,20 @@
         - [x] string.byte
         - [x] string.char
         - [x] string.dump
+        - [x] string.find
         - [x] string.format
+        - [x] string.gsub
         - [x] string.len
         - [x] string.lower
+        - [x] string.match
+        - [x] string.pack
+        - [x] string.packsize
         - [x] string.rep
         - [x] string.reverse
         - [x] string.sub
+        - [x] string.unpack
         - [x] string.upper
-        - [ ] string.find
         - [ ] string.gmatch
-        - [ ] string.gsub
-        - [ ] string.match
-        - [ ] string.pack
-        - [ ] string.packsize
-        - [ ] string.unpack
     - [ ] Package
     - [ ] os
     - [ ] io
