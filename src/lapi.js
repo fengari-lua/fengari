@@ -428,6 +428,14 @@ const lua_createtable = function(L, narray, nrec) {
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
+const lua_newuserdata = function(L, u) {
+    L.stack[L.top++] = new lobject.TValue(CT.LUA_TUSERDATA, u);
+
+    assert(L.top <= L.ci.top, "stack overflow");
+
+    return L.stack[L.top - 1].value;
+};
+
 const aux_upvalue = function(fi, n) {
     switch(fi.ttype()) {
         case CT.LUAT_TCCL: {  /* C closure */
@@ -534,7 +542,7 @@ const lua_toboolean = function(L, idx) {
 const lua_tolstring = function(L, idx) {
     let o = index2addr(L, idx);
 
-    if (!o.ttisstring() && !o.ttisnumber())
+    if ((!o.ttisstring() && !o.ttisnumber()))
         return null;
 
     return o.ttisstring() ? o.jsstring() : `${o.value}`;
@@ -576,6 +584,16 @@ const lua_tointeger = function(L, idx) {
 
 const lua_tonumber = function(L, idx) {
     return lvm.tonumber(index2addr(L, idx));
+};
+
+const lua_touserdata = function(L, idx) {
+    let o = index2addr(L, idx);
+    switch (o.ttnov()) {
+        case CT.LUA_TUSERDATA:
+        case CT.LUA_TLIGHTUSERDATA:
+            return o.value;
+        default: return null;
+    }
 };
 
 const lua_tothread = function(L, idx) {
@@ -879,6 +897,7 @@ module.exports.lua_istable         = lua_istable;
 module.exports.lua_len             = lua_len;
 module.exports.lua_load            = lua_load;
 module.exports.lua_newtable        = lua_newtable;
+module.exports.lua_newuserdata     = lua_newuserdata;
 module.exports.lua_next            = lua_next;
 module.exports.lua_pcall           = lua_pcall;
 module.exports.lua_pcallk          = lua_pcallk;
@@ -924,6 +943,7 @@ module.exports.lua_tonumber        = lua_tonumber;
 module.exports.lua_topointer       = lua_topointer;
 module.exports.lua_tostring        = lua_tostring;
 module.exports.lua_tothread        = lua_tothread;
+module.exports.lua_touserdata      = lua_touserdata;
 module.exports.lua_type            = lua_type;
 module.exports.lua_typename        = lua_typename;
 module.exports.lua_version         = lua_version;

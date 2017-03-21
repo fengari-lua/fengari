@@ -143,7 +143,7 @@ const moveresults = function(L, firstResult, res, nres, wanted) {
             break;
         case 1: {
             if (nres === 0)
-                firstResult = nil;
+                L.stack[firstResult] = nil;
             L.stack[res] = L.stack[firstResult];
             break;
         }

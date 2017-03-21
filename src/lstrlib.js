@@ -10,7 +10,15 @@ const lua     = require('./lua.js');
 const luaconf = require('./luaconf.js');
 const CT      = lua.constant_types;
 
-const L_ESC   = '%'.charCodeAt(0);
+const sL_ESC  = '%';
+const L_ESC   = sL_ESC.charCodeAt(0);
+
+/*
+** maximum number of captures that a pattern can do during
+** pattern-matching. This limit is arbitrary, but must fit in
+** an unsigned char.
+*/
+const LUA_MAXCAPTURES = 32;
 
 // (sizeof(size_t) < sizeof(int) ? MAX_SIZET : (size_t)(INT_MAX))
 const MAXSIZE = Number.MAX_SAFE_INTEGER;
@@ -165,9 +173,17 @@ const FLAGS      = ["-", "+", " ", "#", "0"].map(e => e.charCodeAt(0));
 */
 const MAX_FORMAT = 32;
 
+// TODO: locale ?
+const isalpha = e => /^[a-zA-Z]$/.test(e.charAt(0));
 const isdigit = e => "0".charCodeAt(0) <= e && e <= "9".charCodeAt(0);
-
 const iscntrl = e => (0x00 <= e && e <= 0x1f) || e === 0x7f;
+const isgraph = e => e.charCodeAt(0) > 32 && e.charCodeAt(0) < 127; // TODO: Will only work for ASCII
+const islower = e => /^(?![A-Z]).*$/.test(e.charAt(0));
+const isupper = e => /^(?![a-z]).*$/.test(e.charAt(0));
+const isalnum = e => /^[a-zA-Z0-9]$/.test(e.charAt(0));
+const ispunct = e => isgraph(e) && !isalnum(e);
+const isspace = e => /^\s$/.test(e.charAt(0));
+const isxdigit = e => /^[0-9A-Fa-f]$/.test(e.charAt(0));
 
 const addquoted = function(b, s) {
     lauxlib.luaL_addchar(b, '"');
@@ -807,13 +823,545 @@ const str_unpack = function(L) {
     return n + 1;
 };
 
+const CAP_UNFINISHED = -1;
+const CAP_POSITION   = -2;
+const MAXCCALLS      = 200;
+const SPECIALS       = ["^", "$", "*", "+", "?", ".", "(", "[", "%", "-"];
+
+class MatchState {
+    constructor(L) {
+        this.src = null;  /* unmodified source string */
+        this.src_init = null;  /* init of source string */
+        this.src_end = null;  /* end ('\0') of source string */
+        this.p = null;  /* unmodified pattern string */
+        this.p_end = null;  /* end ('\0') of pattern */
+        this.L = L;
+        this.matchdepth = NaN;  /* control for recursive depth */
+        this.level = NaN;  /* total number of captures (finished or unfinished) */
+        this.capture = [];
+    }
+}
+
+const check_capture = function(ms, l) {
+    l = String.fromCharCode(l - '1'.charCodeAt(0));
+    if (l < 0 || l >= ms.level || ms.capture[l].len === CAP_UNFINISHED)
+        return lauxlib.luaL_error(ms.L, `invalid capture index %${l + 1}`);
+    return l;
+};
+
+const capture_to_close = function(ms) {
+    let level = ms.level;
+    for (level--; level >= 0; level--)
+        if (ms.capture[level].len === CAP_UNFINISHED) return level;
+    return lauxlib.luaL_error(ms.L, "invalid pattern capture");
+};
+
+const classend = function(ms, p) {
+    switch(ms.p.charAt(p++)) {
+        case sL_ESC: {
+            if (p === ms.p_end)
+                lauxlib.luaL_error(ms.L, "malformed pattern (ends with '%')");
+            return p + 1;
+        }
+        case '[': {
+            if (ms.p.charAt(p) === '^') p++;
+            do {  /* look for a ']' */
+                if (p === ms.p_end)
+                    lauxlib.luaL_error(ms.L, "malformed pattern (missing ']')");
+                if (ms.p.charAt(p++) === L_ESC && p < ms.p_end)
+                    p++;  /* skip escapes (e.g. '%]') */
+            } while (ms.p.charAt(p) !== ']');
+            return p + 1;
+        }
+        default: {
+            return p;
+        }
+    }
+};
+
+const match_class = function(c, cl) {
+    let res;
+    switch (cl.toLowerCase()) {
+        case 'a' : res = isalpha(c); break;
+        case 'c' : res = iscntrl(c); break;
+        case 'd' : res = isdigit(c.charCodeAt(0)); break;
+        case 'g' : res = isgraph(c); break;
+        case 'l' : res = islower(c); break;
+        case 'p' : res = ispunct(c); break;
+        case 's' : res = isspace(c); break;
+        case 'u' : res = isupper(c); break;
+        case 'w' : res = isalnum(c); break;
+        case 'x' : res = isxdigit(c); break;
+        case 'z' : res = (c.charCodeAt(0) === 0); break;  /* deprecated option */
+        default: return (cl === c);
+    }
+    return (islower(cl) ? res : !res);
+};
+
+const matchbracketclass = function(ms, c, p, ec) {
+    let sig = true;
+    if (ms.p.charAt(p + 1) === '^') {
+        sig = false;
+        p++;  /* skip the '^' */
+    }
+    while (++p < ec) {
+        if (ms.p.charAt(p) === L_ESC) {
+            p++;
+            if (match_class(c, ms.p.charAt(p)))
+                return sig;
+        } else if (ms.p.charAt(p + 1) === '-' && p + 2 < ec) {
+            p += 2;
+            if (ms.p.charAt(p - 2) <= c.charCodeAt(0) && c.charCodeAt(0) <= ms.p.charAt(p))
+                return sig;
+        } else if (ms.p.charAt(p) === c) return sig;
+    }
+    return !sig;
+};
+
+const singlematch = function(ms, s, p, ep) {
+    if (s >= ms.src_end)
+        return false;
+    else {
+        let c = ms.src.charAt(s);
+        switch (ms.p.charAt(p)) {
+            case '.': return true;  /* matches any char */
+            case sL_ESC: return match_class(c, ms.p.charAt(p + 1));
+            case '[': return matchbracketclass(ms, c, p, ep - 1);
+            default: return ms.p.charAt(p) === c;
+        }
+    }
+};
+
+const matchbalance = function(ms, s, p) {
+    if (p >= ms.p_end - 1)
+        lauxlib.luaL_error(ms.L, "malformed pattern (missing arguments to '%b'");
+    if (ms.src.charAt(s) !== ms.p.charAt(p))
+        return null;
+    else {
+        let b = ms.p.charAt(p);
+        let e = ms.p.charAt(p + 1);
+        let cont = 1;
+        while (++s < ms.src_end) {
+            if (ms.src.charAt(s) === e) {
+                if (--cont === 0) return s + 1;
+            }
+            else if (s === b) cont++;
+        }
+    }
+    return null;  /* string ends out of balance */
+};
+
+const max_expand = function(ms, s, p, ep) {
+    let i = 0;  /* counts maximum expand for item */
+    while (singlematch(ms, s + i, p, ep))
+        i++;
+    /* keeps trying to match with the maximum repetitions */
+    while (i >= 0) {
+        let res = match(ms, s + i, ep + 1);
+        if (res) return res;
+        i--;  /* else didn't match; reduce 1 repetition to try again */
+    }
+    return null;
+};
+
+const min_expand = function(ms, s, p, ep) {
+    for (;;) {
+        let res = match(ms, s, ep + 1);
+        if (res !== null)
+            return res;
+        else if (singlematch(ms, s, p, ep))
+            s++;  /* try with one more repetition */
+        else return null;
+    }
+};
+
+const start_capture = function(ms, s, p, what) {
+    let level = ms.level;
+    if (level >= LUA_MAXCAPTURES) lauxlib.luaL_error(ms.L, "too many captures");
+    ms.capture[level] = ms.capture[level] ? ms.capture[level] : {};
+    ms.capture[level].init = s;
+    ms.capture[level].len = what;
+    ms.level = level + 1;
+    let res;
+    if ((res = match(ms, s, p)) === null)  /* match failed? */
+        ms.level--;  /* undo capture */
+    return res;
+};
+
+const end_capture = function(ms, s, p) {
+    let l = capture_to_close(ms);
+    ms.capture[l].len = s - ms.capture[l].init;  /* close capture */
+    let res;
+    if ((res = match(ms, s, p)) === null)  /* match failed? */
+        ms.capture[l].len = CAP_UNFINISHED;  /* undo capture */
+    return res;
+};
+
+const match_capture = function(ms, s, l) {
+    l = check_capture(ms, l);
+    let len = ms.capture[l].len;
+    if (ms.src_end >= len && ms.src.slice(ms.capture[l].init, ms.capture[l].init + len) === ms.src.slice(s, s + len))
+        return s+len;
+    else return null;
+};
+
+const match = function(ms, s, p) {
+    let gotodefault = false;
+    let gotoinit = true;
+
+    if (ms.matchdepth-- === 0)
+        lauxlib.luaL_error(ms.L, "pattern too complex");
+
+    while (gotoinit || gotodefault) {
+        gotoinit = false;
+        if (p !== ms.p_end) {  /* end of pattern? */
+            switch (gotodefault ? 'x' : ms.p.charAt(p)) {
+                case '(': {  /* start capture */
+                    if (ms.p.charAt(p + 1) === ')')  /* position capture? */
+                        s = start_capture(ms, s, p + 2, CAP_POSITION);
+                    else
+                        s = start_capture(ms, s, p + 1, CAP_UNFINISHED);
+                    break;
+                }
+                case ')': {  /* end capture */
+                    s = end_capture(ms, s, p + 1);
+                    break;
+                }
+                case '$': {
+                    if (p + 1 !== ms.p_end) {  /* is the '$' the last char in pattern? */
+                        gotodefault = true;  /* no; go to default */
+                        break;
+                    }
+                    s = ms.src.slice(s).length === 0 ? s : null;  /* check end of string */
+                    break;
+                }
+                case sL_ESC: {  /* escaped sequences not in the format class[*+?-]? */
+                    switch (ms.p.charAt(p + 1)) {
+                        case 'b': {  /* balanced string? */
+                            s = matchbalance(ms, s, p + 2);
+                            if (s !== null) {
+                                p = p.slice(4);
+                                gotoinit = true;
+                            }
+                            break;
+                        }
+                        case 'f': {
+                            p += 2;
+                            if (ms.p.charAt(p) !== '[')
+                                lauxlib.luaL_error(ms.L, `missing '[' after '%f' in pattern`);
+                            let ep = classend(ms, p);  /* points to what is next */
+                            let previous = s === ms.src_init ? '\0' : ms.s.charAt(s - 1);
+                            if (!matchbracketclass(ms, previous, p, ep - 1) && matchbracketclass(ms, ms.src.charAt(s), p, ep - 1)) {
+                                p = ep; gotoinit = true; break;
+                            }
+                            s = null;  /* match failed */
+                            break;
+                        }
+                        case '0': case '1': case '2': case '3':
+                        case '4': case '5': case '6': case '7':
+                        case '8': case '9': {  /* capture results (%0-%9)? */
+                            s = match_capture(ms, s, ms.p.charAt(p + 1));
+                            if (s !== null) {
+                                p += 2; gotoinit = true;
+                            }
+                            break;
+                        }
+                        default: gotodefault = true;
+                    }
+                    break;
+                }
+                default: {  /* pattern class plus optional suffix */
+                    gotodefault = false;
+                    let ep = classend(ms, p);  /* points to optional suffix */
+                    /* does not match at least once? */
+                    if (!singlematch(ms, s, p, ep)) {
+                        if (ms.p.charAt(ep) === '*' || ms.p.charAt(ep) === '?' || ms.p.charAt(ep) === '-') {  /* accept empty? */
+                            p = ep + 1; gotoinit = true; break;
+                        } else  /* '+' or no suffix */
+                            s = null;  /* fail */
+                    } else {  /* matched once */
+                        switch (ms.p.charAt(ep)) {  /* handle optional suffix */
+                            case '?': {  /* optional */
+                                let res;
+                                if ((res = match(ms, s + 1, ep + 1)) !== null)
+                                    s = res;
+                                else {
+                                    p = ep + 1; gotoinit = true;
+                                }
+                                break;
+                            }
+                            case '+':  /* 1 or more repetitions */
+                                s++;  /* 1 match already done */
+                            case '*':  /* 0 or more repetitions */
+                                s = max_expand(ms, s, p, ep);
+                                break;
+                            case '-':  /* 0 or more repetitions (minimum) */
+                                s = min_expand(ms, s, p, ep);
+                                break;
+                            default:  /* no suffix */
+                                s++; p = ep; gotoinit = true;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    ms.matchdepth++;
+    return s;
+};
+
+const push_onecapture = function(ms, i, s, e) {
+    if (i >= ms.level) {
+        if (i === 0)
+            lapi.lua_pushlstring(ms.L, ms.src.slice(s), e - s);  /* add whole match */
+        else
+            lauxlib.luaL_error(ms.L, `invalid capture index %${i + 1}`);
+    } else {
+        let l = ms.capture[i].len;
+        if (l === CAP_UNFINISHED) lauxlib.luaL_error(ms.L, "unfinished capture");
+        if (l === CAP_POSITION)
+            lapi.lua_pushinteger(ms.L, ms.src_init + 1);
+        else
+            lapi.lua_pushlstring(ms.L, ms.src.slice(ms.capture[i].init), l);
+    }
+};
+
+const push_captures = function(ms, s, e) {
+    let nlevels = ms.level === 0 && ms.src.slice(s) ? 1 : ms.level;
+    lauxlib.luaL_checkstack(ms.L, nlevels, "too many catpures");
+    for (let i = 0; i < nlevels; i++)
+        push_onecapture(ms, i, s, e);
+    return nlevels;  /* number of strings pushed */
+};
+
+const nospecials = function(p, l) {
+    let upto = 0;
+    do {
+        let special = false;
+        let supto = p.slice(upto);
+        for (let i = 0; i < SPECIALS.length; i++) {
+            if (supto.indexOf(SPECIALS[i]) > -1) {
+                special = true;
+                break;
+            }
+        }
+
+        if (special)
+            return false;  /* pattern has a special character */
+        upto = upto + 1;  /* may have more after \0 */
+    } while (upto <= l);
+    return true;  /* no special chars found */
+};
+
+const prepstate = function(ms, L, s, ls, p, lp) {
+    ms.L = L;
+    ms.matchdepth = MAXCCALLS;
+    ms.src = s;
+    ms.src_init = 0;
+    ms.src_end = ls;
+    ms.p = p;
+    ms.p_end = lp;
+};
+
+const reprepstate = function(ms) {
+    ms.level = 0;
+    assert(ms.matchdepth === MAXCCALLS);
+};
+
+const str_find_aux = function(L, find) {
+    let s = lauxlib.luaL_checkstring(L, 1);
+    let p = lauxlib.luaL_checkstring(L, 2);
+    let ls = s.length;
+    let lp = p.length;
+    let init = posrelat(lauxlib.luaL_optinteger(L, 3, 1), ls);
+    if (init < 1) init = 1;
+    else if (init > ls + 1) {  /* start after string's end? */
+        lauxlib.lua_pushnil(L);  /* cannot find anything */
+        return 1;
+    }
+    /* explicit request or no special characters? */
+    if (find && (lapi.lua_toboolean(L, 4) || nospecials(p, lp))) {
+        /* do a plain search */
+        let f = s.indexOf(p);
+        if (f > -1) {
+            lapi.lua_pushinteger(L, f + 1);
+            lapi.lua_pushinteger(L, f + lp);
+            return 2;
+        }
+    } else {
+        let ms = new MatchState(L);
+        let s1 = init - 1;
+        let anchor = s.charAt(0) === '^';
+        if (anchor) {
+            p = p.slice(1); lp--;  /* skip anchor character */
+        }
+        prepstate(ms, L, s, ls, p, lp);
+        do {
+            let res;
+            reprepstate(ms);
+            if ((res = match(ms, s1, 0)) !== null) {
+                if (find) {
+                    lapi.lua_pushinteger(L, s1 + 1);  /* start */
+                    lapi.lua_pushinteger(L, res);   /* end */
+                    return push_captures(ms, null, 0) + 2;
+                } else
+                    return push_captures(ms, s1, res);
+            }
+        } while (s1++ < ms.src_end && !anchor);
+    }
+    lapi.lua_pushnil(L);  /* not found */
+    return 1;
+};
+
+const str_find = function(L) {
+    return str_find_aux(L, 1);
+};
+
+const str_match = function(L) {
+    return str_find_aux(L, 0);
+};
+
+/* state for 'gmatch' */
+class GMatchState {
+    constructor() {
+        this.src = NaN;  /* current position */
+        this.p = NaN;  /* pattern */
+        this.lastmatch = NaN;  /* end of last match */
+        this.ms = new MatchState();  /* match state */
+    }
+}
+
+const gmatch_aux = function(L) {
+    let gm = lapi.lua_touserdata(L, lua.lua_upvalueindex(3));
+    gm.ms.L = L;
+    for (let src = gm.src; src < gm.ms.src_end; src++) {
+        reprepstate(gm.ms);
+        let e;
+        if ((e = match(gm.ms, src, gm.p)) !== null && e !== gm.lastmatch) {
+            gm.src = gm.lastmatch = e;
+            return push_captures(gm.ms, src, e);
+        }
+    }
+    return 0;  /* not found */
+};
+
+const str_gmatch = function(L) {
+    let s = lauxlib.luaL_checkstring(L, 1);
+    let p = lauxlib.luaL_checkstring(L, 2);
+    let ls = s.length;
+    let lp = p.length;
+    lapi.lua_settop(L, 2);  /* keep them on closure to avoid being collected */
+    let gm = lapi.lua_newuserdata(L, new GMatchState());
+    prepstate(gm.ms, L, s, ls, p, lp);
+    gm.src = 0;
+    gm.p = 0;
+    gm.lastmatch = null;
+    lapi.lua_pushcclosure(L, gmatch_aux, 3);
+    return 1;
+};
+
+const add_s = function(ms, b, s, e) {
+    let L = ms.L;
+    let news = lapi.lua_tostring(L, 3);
+    let l = news.length;
+    for (let i = 0; i < l; i++) {
+        if (news.charAt(i) !== sL_ESC)
+            lauxlib.luaL_addchar(b, news.charAt(i));
+        else {
+            i++;  /* skip ESC */
+            if (!isdigit(news.charCodeAt(i))) {
+                if (news.charAt(i) !== sL_ESC)
+                    lauxlib.luaL_error(L, `invalid use of '${sL_ESC}' in replacement string`);
+                lauxlib.luaL_addchar(b, news.charAt(i));
+            } else if (news.charAt(i) === '0')
+                lauxlib.luaL_addlstring(b, ms.src.slice(s), e - s);
+            else {
+                push_onecapture(ms, news.charCodeAt(i) - '1'.charCodeAt(0), s, e);
+                lauxlib.luaL_tolstring(L, -1);
+                lapi.lua_remove(L, -2);  /* remove original value */
+                lauxlib.luaL_addvalue(b);  /* add capture to accumulated result */
+            }
+        }
+    }
+};
+
+const add_value = function(ms, b, s, e, tr) {
+    let L = ms.L;
+    switch (tr) {
+        case CT.LUA_TFUNCTION: {
+            lapi.lua_pushvalue(L, 3);
+            let n = push_captures(ms, s, e);
+            lapi.lua_call(L, n, 1);
+            break;
+        }
+        case CT.LUA_TTABLE: {
+            push_onecapture(ms, 0, s, e);
+            lapi.lua_gettable(L, 3);
+            break;
+        }
+        default: {  /* LUA_TNUMBER or LUA_TSTRING */
+            add_s(ms, b, s, e);
+            return;
+        }
+    }
+    if (!lapi.lua_toboolean(L, -1)) {  /* nil or false? */
+        lapi.lua_pop(L, 1);
+        lapi.lua_pushlstring(L, s, e - s);  /* keep original text */
+    } else if (!lapi.lua_isstring(L, -1))
+        lauxlib.luaL_error(L, `invalid replacement value (a ${lauxlib.luaL_typename(L, -1)})`);
+        lauxlib.luaL_addvalue(b);  /* add result to accumulator */
+};
+
+const str_gsub = function(L) {
+    let src = lauxlib.luaL_checkstring(L, 1);  /* subject */
+    let srcl = src.length;
+    let p = lauxlib.luaL_checkstring(L, 2);  /* pattern */
+    let lp = p.length;
+    let lastmatch = null;  /* end of last match */
+    let tr = lapi.lua_type(L, 3);  /* replacement type */
+    let max_s = lauxlib.luaL_optinteger(L, 4, srcl + 1);  /* max replacements */
+    let anchor = p.charAt(0) === '^';
+    let n = 0;  /* replacement count */
+    let ms = new MatchState(L);
+    let b = new lauxlib.luaL_Buffer(L);
+    lauxlib.luaL_argcheck(L, tr === CT.LUA_TNUMBER || tr === CT.LUA_TSTRING || tr === CT.LUA_TFUNCTION || tr === CT.LUA_TTABLE, 3,
+        "string/function/table expected");
+    lauxlib.luaL_buffinit(L, b);
+    if (anchor) {
+        p = p.slice(1); lp--;  /* skip anchor character */
+    }
+    prepstate(ms, L, src, srcl, p, lp);
+    src = 0; p = 0;
+    while (n < max_s) {
+        let e;
+        reprepstate(ms);
+        if ((e = match(ms, src, p)) !== null && e !== lastmatch) {  /* match? */
+            n++;
+            add_value(ms, b, src, e, tr);  /* add replacement to buffer */
+            src = lastmatch = e;
+        } else if (src < ms.src_end)  /* otherwise, skip one character */
+            lauxlib.luaL_addchar(b, ms.src.charAt(src++));
+        else break;  /* end of subject */
+        if (anchor) break;
+    }
+    lauxlib.luaL_addlstring(b, ms.src.slice(src), ms.src_end - src);
+    lauxlib.luaL_pushresult(b);
+    lapi.lua_pushinteger(L, n);  /* number of substitutions */
+    return 2;
+};
+
 const strlib = {
     "byte":     str_byte,
     "char":     str_char,
     "dump":     str_dump,
+    "find":     str_find,
     "format":   str_format,
+    "gmatch":   str_gmatch,
+    "gsub":     str_gsub,
     "len":      str_len,
     "lower":    str_lower,
+    "match":    str_match,
     "pack":     str_pack,
     "packsize": str_packsize,
     "rep":      str_rep,
