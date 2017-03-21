@@ -1252,7 +1252,8 @@ const str_gmatch = function(L) {
     let ls = s.length;
     let lp = p.length;
     lapi.lua_settop(L, 2);  /* keep them on closure to avoid being collected */
-    let gm = lapi.lua_newuserdata(L, new GMatchState());
+    let gm = new GMatchState();
+    lapi.lua_pushobject(L, gm);
     prepstate(gm.ms, L, s, ls, p, lp);
     gm.src = 0;
     gm.p = 0;

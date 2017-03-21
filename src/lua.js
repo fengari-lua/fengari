@@ -60,6 +60,9 @@ const constant_types = {
 constant_types.LUA_TSHRSTR = constant_types.LUA_TSTRING | (0 << 4);  /* short strings */
 constant_types.LUA_TLNGSTR = constant_types.LUA_TSTRING | (1 << 4);  /* long strings */
 
+constant_types.LUA_TLIGHTUSERDATA_PTR = constant_types.LUA_TLIGHTUSERDATA | (0 << 4);  /* short strings */
+constant_types.LUA_TLIGHTUSERDATA_OBJ = constant_types.LUA_TLIGHTUSERDATA | (1 << 4);  /* long strings */
+
 constant_types.LUA_TNUMFLT = constant_types.LUA_TNUMBER | (0 << 4);  /* float numbers */
 constant_types.LUA_TNUMINT = constant_types.LUA_TNUMBER | (1 << 4);  /* integer numbers */
 
