@@ -542,7 +542,7 @@ const lua_toboolean = function(L, idx) {
 const lua_tolstring = function(L, idx) {
     let o = index2addr(L, idx);
 
-    if (!o.ttisstring() && !o.ttisnumber())
+    if ((!o.ttisstring() && !o.ttisnumber()))
         return null;
 
     return o.ttisstring() ? o.jsstring() : `${o.value}`;

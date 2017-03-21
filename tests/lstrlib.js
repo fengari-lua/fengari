@@ -678,3 +678,192 @@ test('string.gmatch', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('string.gsub', function (t) {
+    let luaCode = `
+        return string.gsub("hello world", "(%w+)", "%1 %1")
+    `, L;
+    
+    t.plan(4);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -2),
+        "hello hello world world",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -1),
+        2,
+        "Correct element(s) on the stack"
+    );
+});
+
+
+test('string.gsub (number)', function (t) {
+    let luaCode = `
+        return string.gsub("hello world", "%w+", "%0 %0", 1)
+    `, L;
+    
+    t.plan(4);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -2),
+        "hello hello world",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -1),
+        1,
+        "Correct element(s) on the stack"
+    );
+});
+
+
+test('string.gsub (pattern)', function (t) {
+    let luaCode = `
+        return string.gsub("hello world from Lua", "(%w+)%s*(%w+)", "%2 %1")
+    `, L;
+    
+    t.plan(4);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -2),
+        "world hello Lua from",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -1),
+        2,
+        "Correct element(s) on the stack"
+    );
+});
+
+
+test('string.gsub (function)', function (t) {
+    let luaCode = `
+        return string.gsub("4+5 = $return 4+5$", "%$(.-)%$", function (s)
+            return load(s)()
+        end)
+    `, L;
+    
+    t.plan(4);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -2),
+        "4+5 = 9",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -1),
+        1,
+        "Correct element(s) on the stack"
+    );
+});
+
+
+
+test('string.gsub (table)', function (t) {
+    let luaCode = `
+        local t = {name="lua", version="5.3"}
+        return string.gsub("$name-$version.tar.gz", "%$(%w+)", t)
+    `, L;
+    
+    t.plan(4);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -2),
+        "lua-5.3.tar.gz",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -1),
+        2,
+        "Correct element(s) on the stack"
+    );
+});

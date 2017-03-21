@@ -299,9 +299,11 @@ const luaL_tolstring = function(L, idx) {
     } else {
         switch(lapi.lua_type(L, idx)) {
             case CT.LUA_TNUMBER:
-            case CT.LUA_TSTRING:
             case CT.LUA_TBOOLEAN:
                 lapi.lua_pushstring(L, `${lapi.index2addr(L, idx).value}`);
+                break;
+            case CT.LUA_TSTRING:
+                lapi.lua_pushstring(L, lapi.index2addr(L, idx).jsstring());
                 break;
             case CT.LUA_TNIL:
                 lapi.lua_pushstring(L, `nil`);

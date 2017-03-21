@@ -3,23 +3,23 @@
 const assert = require('assert');
 
 const lisdigit = function(c) {
-    return /^\d$/.test(c.charAt(0));
+    return typeof c === 'string' && /^\d$/.test(c.charAt(0));
 };
 
 const lisxdigit = function(c) {
-    return /^[0-9a-fA-F]$/.test(c.charAt(0));
+    return typeof c === 'string' && /^[0-9a-fA-F]$/.test(c.charAt(0));
 };
 
 const lisspace = function(c) {
-    return /^\s$/.test(c.charAt(0));
+    return typeof c === 'string' && /^\s$/.test(c.charAt(0));
 };
 
 const lislalpha = function(c) {
-    return /^[_a-zA-Z]$/.test(c.charAt(0));
+    return typeof c === 'string' && /^[_a-zA-Z]$/.test(c.charAt(0));
 };
 
 const lislalnum = function(c) {
-    return /^[_a-zA-Z0-9]$/.test(c.charAt(0));
+    return typeof c === 'string' && /^[_a-zA-Z0-9]$/.test(c.charAt(0));
 };
 
 module.exports.lisdigit   = lisdigit;
