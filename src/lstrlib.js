@@ -13,15 +13,16 @@ const CT      = lua.constant_types;
 const sL_ESC  = '%';
 const L_ESC   = sL_ESC.charCodeAt(0);
 
-// (sizeof(size_t) < sizeof(int) ? MAX_SIZET : (size_t)(INT_MAX))
-const MAXSIZE = Number.MAX_SAFE_INTEGER;
-
 /*
 ** maximum number of captures that a pattern can do during
 ** pattern-matching. This limit is arbitrary, but must fit in
 ** an unsigned char.
 */
 const LUA_MAXCAPTURES = 32;
+
+// (sizeof(size_t) < sizeof(int) ? MAX_SIZET : (size_t)(INT_MAX))
+const MAXSIZE = Number.MAX_SAFE_INTEGER;
+
 
 /* translate a relative string position: negative means back from end */
 const posrelat = function(pos, len) {
