@@ -332,6 +332,36 @@ const base_funcs = {
     "xpcall":         luaB_xpcall
 };
 
+// Only with Node
+if (typeof window === "undefined") {
+
+    const load_aux = function(L, status, envidx) {
+        if (status === TS.LUA_OK) {
+            if (envidx !== 0) {  /* 'env' parameter? */
+                lapi.lua_pushvalue(L, envidx);  /* environment for loaded function */
+                if (!lapi.lua_setupvalue(L, -2, 1))  /* set it as 1st upvalue */
+                    lapi.lua_pop(L, 1);  /* remove 'env' if not used by previous call */
+            }
+            return 1;
+        } else {  /* error (message is on top of the stack) */
+            lapi.lua_pushnil(L);
+            lapi.lua_insert(L, -2);  /* put before error message */
+            return 2;  /* return nil plus error message */
+        }
+    };
+
+    const luaB_loadfile = function(L) {
+        let fname = lauxlib.luaL_optstring(L, 1, null);
+        let mode = lauxlib.luaL_optstring(L, 2, null);
+        let env = !lapi.lua_isnone(L, 3) ? 3 : 0;  /* 'env' index or 0 if no 'env' */
+        let status = lauxlib.luaL_loadfilex(L, fname, mode);
+        return load_aux(L, status, env);
+    };
+
+    base_funcs.loadfile = luaB_loadfile;
+    
+}
+
 const luaopen_base = function(L) {
     /* open lib into global table */
     lapi.lua_pushglobaltable(L);

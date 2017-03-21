@@ -119,7 +119,6 @@ class TValue {
     }
 
     jsstring() {
-        //return this.ttisstring() ? String.fromCharCode(...this.value) : null;
         let u0, u1, u2, u3, u4, u5;
         let idx = 0;
 
@@ -273,17 +272,17 @@ const PRE  = "[string \"";
 const POS  = "\"]";
 
 const luaO_chunkid = function(source, bufflen) {
-    source = source instanceof TValue ? source.value : source;
+    source = source instanceof TValue ? source.jsstring() : source;
     bufflen = bufflen instanceof TValue ? bufflen.value : bufflen;
     let l = source.length;
     let out = "";
-    if (source[0] === '=') {  /* 'literal' source */
+    if (source.charAt(0) === '=') {  /* 'literal' source */
         if (l < bufflen)  /* small enough? */
             out = `${source.slice(1)}`;
         else {  /* truncate it */
             out += `${source.slice(1, bufflen)}`;
         }
-    } else if (source[0] === '@') {  /* file name */
+    } else if (source.charAt(0) === '@') {  /* file name */
         if (l <= bufflen)  /* small enough? */
             out = `${source.slice(1)}`;
         else {  /* add '...' before rest of name */

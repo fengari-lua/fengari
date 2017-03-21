@@ -115,3 +115,36 @@ test('luaL_loadbuffer', function (t) {
     );
 
 });
+
+// TODO: test stdin
+test('loadfile', function (t) {
+    let luaCode = `
+        local f = loadfile("tests/loadfile-test.lua")
+        return f()
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "hello world",
+        "Correct element(s) on the stack"
+    );
+
+});

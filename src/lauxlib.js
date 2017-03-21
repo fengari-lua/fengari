@@ -3,11 +3,12 @@
 
 const assert = require('assert');
 
-const lstate = require('./lstate.js');
-const lapi   = require('./lapi.js');
-const lua    = require('./lua.js');
-const ldebug = require('./ldebug.js');
-const CT     = lua.constant_types;
+const lstate  = require('./lstate.js');
+const lapi    = require('./lapi.js');
+const lua     = require('./lua.js');
+const ldebug  = require('./ldebug.js');
+const lobject = require('./lobject.js');
+const CT      = lua.constant_types;
 
 const LUA_LOADED_TABLE = "_LOADED";
 
@@ -398,6 +399,124 @@ const luaL_newlib = function(L, l) {
     lapi.lua_createtable(L);
     luaL_setfuncs(L, l, 0);
 };
+
+// Only with Node
+if (typeof window === "undefined") {
+    const fs = require('fs');
+
+    class LoadF {
+        constructor() {
+            this.n = NaN;  /* number of pre-read characters */
+            this.f = null;  /* file being read */
+            this.buff = new Buffer(1024);  /* area for reading file */
+            this.pos = 0;  /* current position in file */
+        }
+    }
+
+    const getF = function(L, ud) {
+        let lf = ud;
+        let bytes = 0;
+        if (lf.n > 0) {  /* are there pre-read characters to be read? */
+            lf.n = 0;  /* no more pre-read characters */
+        } else {  /* read a block from file */
+            lf.buff.fill(0);
+            bytes = fs.readSync(lf.f, lf.buff, 0, lf.buff.length, lf.pos); /* read block */
+            lf.pos += bytes;
+        }
+        return bytes > 0 ? new lobject.TValue(0, lf.buff).jsstring() : null; // TODO: Here reading utf8 only
+    };
+
+    const errfile = function(L, what, fnameindex, error) {
+        let serr = error.message;
+        let filename = lapi.lua_tostring(L, fnameindex).slice(1);
+        lapi.lua_pushstring(L, `cannot ${what} ${filename}: ${serr}`);
+        lapi.lua_remove(L, fnameindex);
+        return lua.thread_status.LUA_ERRFILE;
+    };
+
+    const getc = function(lf) {
+        let b = new Buffer(1);
+        let bytes = fs.readSync(lf.f, b, 0, 1, lf.pos);
+        lf.pos += bytes;
+        return bytes > 0 ? b.readUInt8() : null;
+    };
+
+    const skipBOM = function(lf) {
+        let p = "\xEF\xBB\xBF";  /* UTF-8 BOM mark */
+        lf.n = 0;
+        let c;
+        do {
+            c = getc(lf);
+            if (c === null || c !== p.charCodeAt(0)) return c;
+            p = p.slice(1);
+            lf.buff[lf.n++] = c;  /* to be read by the parser */
+        } while (p.length > 0);
+        lf.n = 0;  /* prefix matched; discard it */
+        return getc(lf);  /* return next character */
+    };
+
+    /*
+    ** reads the first character of file 'f' and skips an optional BOM mark
+    ** in its beginning plus its first line if it starts with '#'. Returns
+    ** true if it skipped the first line.  In any case, '*cp' has the
+    ** first "valid" character of the file (after the optional BOM and
+    ** a first-line comment).
+    */
+    const skipcomment = function(lf) {
+        let c = skipBOM(lf);
+        if (c === '#'.charCodeAt(0)) {  /* first line is a comment (Unix exec. file)? */
+            do {  /* skip first line */
+                c = getc(lf);
+            } while (c && c !== '\n'.charCodeAt(0));
+            return getc(lf);  /* skip end-of-line, if present */
+        } else {
+            lf.pos--;
+            return false;
+        }
+    };
+
+    const luaL_loadfilex = function(L, filename, mode) {
+        let lf = new LoadF();
+        let fnameindex = lapi.lua_gettop(L) + 1;  /* index of filename on the stack */
+        if (filename === null) {
+            lapi.lua_pushliteral(L, "=stdin");
+            lf.f = process.stdin.fd;
+        } else {
+            lapi.lua_pushstring(L, `@${filename}`);
+            try {
+                lf.f = fs.openSync(filename, "r");
+            } catch (e) {
+                return errfile(L, "open", fnameindex, e);
+            }
+        }
+
+        try {
+            let c;
+            if ((c = skipcomment(lf)))  /* read initial portion */
+                lf.buff[lf.n++] = '\n'.charCodeAt(0);  /* add line to correct line numbers */
+
+            if (c === lua.LUA_SIGNATURE.charCodeAt(0) && filename) {  /* binary file? */
+                // ...
+            }
+
+            let status = lapi.lua_load(L, getF, lf, lapi.lua_tostring(L, -1), mode);
+            if (filename) fs.closeSync(lf.f);  /* close file (even in case of errors) */
+            lapi.lua_remove(L, fnameindex);
+            return status;
+        } catch (err) {
+            lapi.lua_settop(L, fnameindex);  /* ignore results from 'lua_load' */
+            return errfile(L, "read", fnameindex);
+        }
+    };
+
+    const luaL_loadfile = function(L, filename) {
+        return luaL_loadfilex(L, filename, null);
+    };
+
+    module.exports.luaL_loadfilex = luaL_loadfilex;
+    module.exports.luaL_loadfile  = luaL_loadfile;
+
+}
 
 module.exports.LUA_LOADED_TABLE  = LUA_LOADED_TABLE;
 module.exports.luaL_Buffer       = luaL_Buffer;

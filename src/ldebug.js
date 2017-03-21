@@ -431,7 +431,7 @@ const varinfo = function(L, o) {
             kind = getobjname(ci.func.p, ci.pcOff, stkid - ci.u.l.base);
     }
 
-    return kind ? ` (${kind.funcname} '${kind.name}')` : ``;
+    return kind ? ` (${kind.funcname} '${kind.name.jsstring()}')` : ``;
 };
 
 const luaG_typeerror = function(L, o, op) {

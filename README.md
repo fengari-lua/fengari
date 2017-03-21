@@ -70,8 +70,6 @@
     - [ ] luaL_fileresult
     - [ ] luaL_getmetatable
     - [ ] luaL_gsub
-    - [ ] luaL_loadfile
-    - [ ] luaL_loadfilex
     - [ ] luaL_newlibtable
     - [ ] luaL_newmetatable
     - [ ] luaL_optnumber
@@ -87,8 +85,8 @@
     - [ ] Base lib
         - [x] ...
         - [x] load
+        - [x] loadfile
         - [ ] dofile
-        - [ ] loadfile
     - [x] Coroutine
     - [x] Table
     - [x] Math
