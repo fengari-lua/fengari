@@ -678,3 +678,40 @@ test('string.gmatch', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+
+test('string.gsub', function (t) {
+    let luaCode = `
+        return string.gsub("hello world", "(%w+)", "%1 %1")
+    `, L;
+    
+    t.plan(4);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -2),
+        "hello hello world world",
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -1),
+        2,
+        "Correct element(s) on the stack"
+    );
+});

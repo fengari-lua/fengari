@@ -176,7 +176,7 @@ const MAX_FORMAT = 32;
 const isalpha = e => /^[a-zA-Z]$/.test(e.charAt(0));
 const isdigit = e => "0".charCodeAt(0) <= e && e <= "9".charCodeAt(0);
 const iscntrl = e => (0x00 <= e && e <= 0x1f) || e === 0x7f;
-const isgraph = e => e.charCodeAt(0) > 32 && e.charCodeAt < 127; // TODO: Will only work for ASCII
+const isgraph = e => e.charCodeAt(0) > 32 && e.charCodeAt(0) < 127; // TODO: Will only work for ASCII
 const islower = e => /^(?![A-Z]).*$/.test(e.charAt(0));
 const isupper = e => /^(?![a-z]).*$/.test(e.charAt(0));
 const isalnum = e => /^[a-zA-Z0-9]$/.test(e.charAt(0));
@@ -1269,7 +1269,7 @@ const add_s = function(ms, b, s, e) {
             lauxlib.luaL_addchar(b, news.charAt(i));
         else {
             i++;  /* skip ESC */
-            if (!isdigit(news.charAt(i))) {
+            if (!isdigit(news.charCodeAt(i))) {
                 if (news.charAt(i) !== sL_ESC)
                     lauxlib.luaL_error(L, `invalid use of '${sL_ESC}' in replacement string`);
                 lauxlib.luaL_addchar(b, news.charAt(i));
@@ -1277,7 +1277,7 @@ const add_s = function(ms, b, s, e) {
                 lauxlib.luaL_addlstring(b, ms.src.slice(s), e - s);
             else {
                 push_onecapture(ms, news.charCodeAt(i) - '1'.charCodeAt(0), s, e);
-                lauxlib.luaL_tostring(L, -1);
+                lauxlib.luaL_tolstring(L, -1);
                 lapi.lua_remove(L, -2);  /* remove original value */
                 lauxlib.luaL_addvalue(b);  /* add capture to accumulated result */
             }
