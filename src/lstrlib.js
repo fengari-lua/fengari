@@ -1113,7 +1113,7 @@ const match = function(ms, s, p) {
 const push_onecapture = function(ms, i, s, e) {
     if (i >= ms.level) {
         if (i === 0)
-            lapi.lua_pushlstring(ms.L, s, e);  /* add whole match */
+            lapi.lua_pushlstring(ms.L, ms.src.slice(s), e - s);  /* add whole match */
         else
             lauxlib.luaL_error(ms.L, `invalid capture index %${i + 1}`);
     } else {
@@ -1127,7 +1127,7 @@ const push_onecapture = function(ms, i, s, e) {
 };
 
 const push_captures = function(ms, s, e) {
-    let nlevels = ms.level === 0 && s ? 1 : ms.level;
+    let nlevels = ms.level === 0 && ms.src.slice(s) ? 1 : ms.level;
     lauxlib.luaL_checkstack(ms.L, nlevels, "too many catpures");
     for (let i = 0; i < nlevels; i++)
         push_onecapture(ms, i, s, e);
@@ -1234,7 +1234,7 @@ class GMatchState {
 const gmatch_aux = function(L) {
     let gm = lapi.lua_touserdata(L, lua.lua_upvalueindex(3));
     gm.ms.L = L;
-    for (let src = 0; src < gm.ms.src_end; src++) {
+    for (let src = gm.src; src < gm.ms.src_end; src++) {
         reprepstate(gm.ms);
         let e;
         if ((e = match(gm.ms, src, gm.p)) !== null && e !== gm.lastmatch) {
@@ -1253,11 +1253,101 @@ const str_gmatch = function(L) {
     lapi.lua_settop(L, 2);  /* keep them on closure to avoid being collected */
     let gm = lapi.lua_newuserdata(L, new GMatchState());
     prepstate(gm.ms, L, s, ls, p, lp);
-    gm.src = s;
-    gm.p = p;
+    gm.src = 0;
+    gm.p = 0;
     gm.lastmatch = null;
     lapi.lua_pushcclosure(L, gmatch_aux, 3);
     return 1;
+};
+
+const add_s = function(ms, b, s, e) {
+    let L = ms.L;
+    let news = lapi.lua_tostring(L, 3);
+    let l = news.length;
+    for (let i = 0; i < l; i++) {
+        if (news.charAt(i) !== sL_ESC)
+            lauxlib.luaL_addchar(b, news.charAt(i));
+        else {
+            i++;  /* skip ESC */
+            if (!isdigit(news.charAt(i))) {
+                if (news.charAt(i) !== sL_ESC)
+                    lauxlib.luaL_error(L, `invalid use of '${sL_ESC}' in replacement string`);
+                lauxlib.luaL_addchar(b, news.charAt(i));
+            } else if (news.charAt(i) === '0')
+                lauxlib.luaL_addlstring(b, ms.src.slice(s), e - s);
+            else {
+                push_onecapture(ms, news.charCodeAt(i) - '1'.charCodeAt(0), s, e);
+                lauxlib.luaL_tostring(L, -1);
+                lapi.lua_remove(L, -2);  /* remove original value */
+                lauxlib.luaL_addvalue(b);  /* add capture to accumulated result */
+            }
+        }
+    }
+};
+
+const add_value = function(ms, b, s, e, tr) {
+    let L = ms.L;
+    switch (tr) {
+        case CT.LUA_TFUNCTION: {
+            lapi.lua_pushvalue(L, 3);
+            let n = push_captures(ms, s, e);
+            lapi.lua_call(L, n, 1);
+            break;
+        }
+        case CT.LUA_TTABLE: {
+            push_onecapture(ms, 0, s, e);
+            lapi.lua_gettable(L, 3);
+            break;
+        }
+        default: {  /* LUA_TNUMBER or LUA_TSTRING */
+            add_s(ms, b, s, e);
+            return;
+        }
+    }
+    if (!lapi.lua_toboolean(L, -1)) {  /* nil or false? */
+        lapi.lua_pop(L, 1);
+        lapi.lua_pushlstring(L, s, e - s);  /* keep original text */
+    } else if (!lapi.lua_isstring(L, -1))
+        lauxlib.luaL_error(L, `invalid replacement value (a ${lauxlib.luaL_typename(L, -1)})`);
+        lauxlib.luaL_addvalue(b);  /* add result to accumulator */
+};
+
+const str_gsub = function(L) {
+    let src = lauxlib.luaL_checkstring(L, 1);  /* subject */
+    let srcl = src.length;
+    let p = lauxlib.luaL_checkstring(L, 2);  /* pattern */
+    let lp = p.length;
+    let lastmatch = null;  /* end of last match */
+    let tr = lapi.lua_type(L, 3);  /* replacement type */
+    let max_s = lauxlib.luaL_optinteger(L, 4, srcl + 1);  /* max replacements */
+    let anchor = p.charAt(0) === '^';
+    let n = 0;  /* replacement count */
+    let ms = new MatchState(L);
+    let b = new lauxlib.luaL_Buffer(L);
+    lauxlib.luaL_argcheck(L, tr === CT.LUA_TNUMBER || tr === CT.LUA_TSTRING || tr === CT.LUA_TFUNCTION || tr === CT.LUA_TTABLE, 3,
+        "string/function/table expected");
+    lauxlib.luaL_buffinit(L, b);
+    if (anchor) {
+        p = p.slice(1); lp--;  /* skip anchor character */
+    }
+    prepstate(ms, L, src, srcl, p, lp);
+    src = 0; p = 0;
+    while (n < max_s) {
+        let e;
+        reprepstate(ms);
+        if ((e = match(ms, src, p)) !== null && e !== lastmatch) {  /* match? */
+            n++;
+            add_value(ms, b, src, e, tr);  /* add replacement to buffer */
+            src = lastmatch = e;
+        } else if (src < ms.src_end)  /* otherwise, skip one character */
+            lauxlib.luaL_addchar(b, ms.src.charAt(src++));
+        else break;  /* end of subject */
+        if (anchor) break;
+    }
+    lauxlib.luaL_addlstring(b, ms.src.slice(src), ms.src_end - src);
+    lauxlib.luaL_pushresult(b);
+    lapi.lua_pushinteger(L, n);  /* number of substitutions */
+    return 2;
 };
 
 const strlib = {
@@ -1267,6 +1357,7 @@ const strlib = {
     "find":     str_find,
     "format":   str_format,
     "gmatch":   str_gmatch,
+    "gsub":     str_gsub,
     "len":      str_len,
     "lower":    str_lower,
     "match":    str_match,

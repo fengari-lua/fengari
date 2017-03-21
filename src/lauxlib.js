@@ -215,8 +215,8 @@ const luaL_buffinitsize = function(L, B, sz) {
     return B;
 };
 
-const luaL_addlstring = function(B, s) {
-    B.b += s;
+const luaL_addlstring = function(B, s, l) {
+    B.b += s.slice(0, l);
 };
 
 const luaL_addstring = luaL_addlstring;

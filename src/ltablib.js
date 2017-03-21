@@ -168,7 +168,7 @@ const pack = function(L) {
 
 const unpack = function(L) {
     let i = lauxlib.luaL_optinteger(L, 2, 1);
-    let e = lauxlib.luaL_opt(L, lauxlib.luaL_checkinteger, 3, lapi.lua_len(L, 1));
+    let e = lauxlib.luaL_opt(L, lauxlib.luaL_checkinteger, 3, lauxlib.luaL_len(L, 1));
     if (i > e) return 0;  /* empty range */
     let n = e - i;  /* number of elements minus 1 (avoid overflows) */
     if (n >= Number.MAX_SAFE_INTEGER || !lapi.lua_checkstack(L, ++n))
