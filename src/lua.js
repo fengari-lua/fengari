@@ -2,7 +2,6 @@
 "use strict";
 
 const assert  = require('assert');
-const lualib  = require('./lualib.js');
 const luaconf = require('./luaconf.js');
 
 /* mark for precompiled code ('<esc>Lua') */
