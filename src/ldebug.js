@@ -388,7 +388,7 @@ const funcnamefromcode = function(L, ci) {
             return null;  /* cannot find a reasonable name */
     }
 
-    r.name = L.l_G.tmname[tm];
+    r.name = L.l_G.tmname[tm].jsstring();
     r.funcname = "metamethod";
     return r;
 };
@@ -431,14 +431,7 @@ const varinfo = function(L, o) {
             kind = getobjname(ci.func.p, ci.pcOff, stkid - ci.u.l.base);
     }
 
-    if (kind) {
-        let funcname = kind.funcname instanceof TValue ? kind.funcname.jsstring() : kind.funcname;
-        let name = kind.name instanceof TValue ? kind.name.jsstring() : kind.name;
-
-        return ` (${funcname} '${name}')`;
-    }
-
-    return ``;
+    return kind ? ` (${kind.funcname} '${kind.name}')` : ``;
 };
 
 const luaG_typeerror = function(L, o, op) {
