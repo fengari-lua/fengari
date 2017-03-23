@@ -410,8 +410,17 @@ if (typeof window === "undefined") {
             this.f = null;  /* file being read */
             this.buff = new Buffer(1024);  /* area for reading file */
             this.pos = 0;  /* current position in file */
+            this.binary = false;
         }
     }
+
+    const toDataView = function(buffer) {
+        let ab = new ArrayBuffer(buffer.length);
+        let au = new Uint8Array(ab);
+        for (let i = 0; i < buffer.length; i++)
+            au[i] = buffer[i];
+        return new DataView(ab);
+    };
 
     const getF = function(L, ud) {
         let lf = ud;
@@ -423,7 +432,9 @@ if (typeof window === "undefined") {
             bytes = fs.readSync(lf.f, lf.buff, 0, lf.buff.length, lf.pos); /* read block */
             lf.pos += bytes;
         }
-        return bytes > 0 ? new lobject.TValue(0, lf.buff).jsstring() : null; // TODO: Here reading utf8 only
+        if (bytes > 0)
+            return lf.binary ? toDataView(lf.buff) : new lobject.TValue(0, lf.buff).jsstring(); // TODO: Here reading utf8 only
+        else return null;
     };
 
     const errfile = function(L, what, fnameindex, error) {
@@ -468,10 +479,17 @@ if (typeof window === "undefined") {
             do {  /* skip first line */
                 c = getc(lf);
             } while (c && c !== '\n'.charCodeAt(0));
-            return getc(lf);  /* skip end-of-line, if present */
+
+            return {
+                skipped: true,
+                c: getc(lf)  /* skip end-of-line, if present */
+            };
         } else {
             lf.pos--;
-            return false;
+            return {
+                skipped: false,
+                c: c
+            };
         }
     };
 
@@ -491,12 +509,12 @@ if (typeof window === "undefined") {
         }
 
         try {
-            let c;
-            if ((c = skipcomment(lf)))  /* read initial portion */
+            let com;
+            if ((com = skipcomment(lf)).skipped)  /* read initial portion */
                 lf.buff[lf.n++] = '\n'.charCodeAt(0);  /* add line to correct line numbers */
 
-            if (c === lua.LUA_SIGNATURE.charCodeAt(0) && filename) {  /* binary file? */
-                // ...
+            if (com.c === lua.LUA_SIGNATURE.charCodeAt(0) && filename) {  /* binary file? */
+                lf.binary = true;
             }
 
             let status = lapi.lua_load(L, getF, lf, lapi.lua_tostring(L, -1), mode);

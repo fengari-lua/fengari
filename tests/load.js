@@ -150,6 +150,39 @@ test('loadfile', function (t) {
 });
 
 
+test('loadfile (binary)', function (t) {
+    let luaCode = `
+        local f = loadfile("tests/loadfile-test.bc")
+        return f()
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, luaCode);
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tostring(L, -1),
+        "hello world",
+        "Correct element(s) on the stack"
+    );
+
+});
+
+
 test('dofile', function (t) {
     let luaCode = `
         return dofile("tests/loadfile-test.lua")
