@@ -7,6 +7,9 @@ const lua = require("./lua.js");
 const LUA_VERSUFFIX = "_" + lua.LUA_VERSION_MAJOR + "_" + lua.LUA_VERSION_MINOR;
 module.exports.LUA_VERSUFFIX = LUA_VERSUFFIX;
 
+
+module.exports.luaopen_base = require("./lbaselib.js").luaopen_base;
+
 const LUA_COLIBNAME = "coroutine";
 module.exports.LUA_COLIBNAME = LUA_COLIBNAME;
 module.exports.luaopen_coroutine = require("./lcorolib.js").luaopen_coroutine;
