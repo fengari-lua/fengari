@@ -333,46 +333,53 @@ const base_funcs = {
 };
 
 // Only with Node
-if (typeof window === "undefined") {
+if (typeof require === "function") {
 
-    const load_aux = function(L, status, envidx) {
-        if (status === TS.LUA_OK) {
-            if (envidx !== 0) {  /* 'env' parameter? */
-                lapi.lua_pushvalue(L, envidx);  /* environment for loaded function */
-                if (!lapi.lua_setupvalue(L, -2, 1))  /* set it as 1st upvalue */
-                    lapi.lua_pop(L, 1);  /* remove 'env' if not used by previous call */
+    let fs = false;
+    try {
+        fs = require('fs');
+    } catch (e) {}
+
+    if (fs) {
+        const load_aux = function(L, status, envidx) {
+            if (status === TS.LUA_OK) {
+                if (envidx !== 0) {  /* 'env' parameter? */
+                    lapi.lua_pushvalue(L, envidx);  /* environment for loaded function */
+                    if (!lapi.lua_setupvalue(L, -2, 1))  /* set it as 1st upvalue */
+                        lapi.lua_pop(L, 1);  /* remove 'env' if not used by previous call */
+                }
+                return 1;
+            } else {  /* error (message is on top of the stack) */
+                lapi.lua_pushnil(L);
+                lapi.lua_insert(L, -2);  /* put before error message */
+                return 2;  /* return nil plus error message */
             }
-            return 1;
-        } else {  /* error (message is on top of the stack) */
-            lapi.lua_pushnil(L);
-            lapi.lua_insert(L, -2);  /* put before error message */
-            return 2;  /* return nil plus error message */
-        }
-    };
+        };
 
-    const luaB_loadfile = function(L) {
-        let fname = lauxlib.luaL_optstring(L, 1, null);
-        let mode = lauxlib.luaL_optstring(L, 2, null);
-        let env = !lapi.lua_isnone(L, 3) ? 3 : 0;  /* 'env' index or 0 if no 'env' */
-        let status = lauxlib.luaL_loadfilex(L, fname, mode);
-        return load_aux(L, status, env);
-    };
+        const luaB_loadfile = function(L) {
+            let fname = lauxlib.luaL_optstring(L, 1, null);
+            let mode = lauxlib.luaL_optstring(L, 2, null);
+            let env = !lapi.lua_isnone(L, 3) ? 3 : 0;  /* 'env' index or 0 if no 'env' */
+            let status = lauxlib.luaL_loadfilex(L, fname, mode);
+            return load_aux(L, status, env);
+        };
 
-    const dofilecont = function(L, d1, d2) {
-        return lapi.lua_gettop(L) - 1;
-    };
+        const dofilecont = function(L, d1, d2) {
+            return lapi.lua_gettop(L) - 1;
+        };
 
-    const luaB_dofile = function(L) {
-        let fname = lauxlib.luaL_optstring(L, 1, null);
-        lapi.lua_settop(L, 1);
-        if (lauxlib.luaL_loadfile(L, fname) !== TS.LUA_OK)
-            return lapi.lua_error(L);
-        lapi.lua_callk(L, 0, lua.LUA_MULTRET, 0, dofilecont);
-        return dofilecont(L, 0, 0);
-    };
+        const luaB_dofile = function(L) {
+            let fname = lauxlib.luaL_optstring(L, 1, null);
+            lapi.lua_settop(L, 1);
+            if (lauxlib.luaL_loadfile(L, fname) !== TS.LUA_OK)
+                return lapi.lua_error(L);
+            lapi.lua_callk(L, 0, lua.LUA_MULTRET, 0, dofilecont);
+            return dofilecont(L, 0, 0);
+        };
 
-    base_funcs.loadfile = luaB_loadfile;
-    base_funcs.dofile   = luaB_dofile;
+        base_funcs.loadfile = luaB_loadfile;
+        base_funcs.dofile   = luaB_dofile;
+    }
     
 }
 
