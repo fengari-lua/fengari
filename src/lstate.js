@@ -7,8 +7,6 @@ const lua                  = require('./lua.js');
 const lobject              = require('./lobject.js');
 const ldo                  = require('./ldo.js');
 const lapi                 = require('./lapi.js');
-const nil                  = ldo.nil;
-const luaD_rawrunprotected = ldo.luaD_rawrunprotected;
 const luaT_init            = require('./ltm.js').luaT_init;
 const CT                   = lua.constant_types;
 const LUA_MULTRET          = lua.LUA_MULTRET;
@@ -70,7 +68,7 @@ class global_State {
     constructor(L) {
         this.mainthread = L;
         this.strt = new Map();
-        this.l_registry = nil;
+        this.l_registry = ldo.nil;
         this.panic = null;
         this.version = null;
         this.twups = [];
@@ -100,7 +98,7 @@ const stack_init = function(L1, L) {
     ci.callstatus = 0;
     ci.func = L1.stack[L1.top];
     ci.funcOff = L1.top;
-    L1.stack[L1.top++] = nil;
+    L1.stack[L1.top++] = ldo.nil;
     ci.top = L1.top + lua.LUA_MINSTACK;
     L1.ci = ci;
 };
@@ -166,7 +164,7 @@ const lua_newstate = function() {
 
     preinit_thread(L, g);
 
-    if (luaD_rawrunprotected(L, f_luaopen, null) !== TS.LUA_OK) {
+    if (ldo.luaD_rawrunprotected(L, f_luaopen, null) !== TS.LUA_OK) {
         L = null;
     }
 
