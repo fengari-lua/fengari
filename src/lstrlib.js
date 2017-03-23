@@ -109,7 +109,7 @@ const ldexp = function(mantissa, exponent) {
 ** Add integer part of 'x' to buffer and return new 'x'
 */
 const adddigit = function(buff, n, x) {
-    let d = Math.floor(x)|0;  /* get integer part from 'x' */
+    let d = Math.floor(x);  /* get integer part from 'x' */
     buff[n] = d < 10 ? d + '0'.charCodeAt(0) : d - 10 + 'a'.charCodeAt(0);  /* add to buffer */
     return x - d;  /* return what is left */
 };
@@ -233,7 +233,7 @@ const addliteral = function(L, b, arg) {
             } else {  /* integers */
                 let n = lapi.lua_tointeger(L, arg);
                 let format = (n === Number.MIN_SAFE_INTEGER) ? `0x%${luaconf.LUA_INTEGER_FRMLEN}x` : luaconf.LUA_INTEGER_FMT;
-                buff.b += sprintf(format, n|0);
+                buff.b += sprintf(format, n);
             }
             break;
         }
@@ -319,7 +319,7 @@ const str_format = function(L) {
                     strfrmt = strfrmt.slice(1);
                     let n = lauxlib.luaL_checkinteger(L, arg);
                     form = addlenmod(form, luaconf.LUA_INTEGER_FRMLEN.split('').map(e => e.charCodeAt(0)));
-                    buff.b += sprintf(String.fromCharCode(...form), n|0);
+                    buff.b += sprintf(String.fromCharCode(...form), n);
                     break;
                 }
                 case 'a': case 'A': {
@@ -1177,16 +1177,16 @@ const str_find_aux = function(L, find) {
     let init = posrelat(lauxlib.luaL_optinteger(L, 3, 1), ls);
     if (init < 1) init = 1;
     else if (init > ls + 1) {  /* start after string's end? */
-        lauxlib.lua_pushnil(L);  /* cannot find anything */
+        lapi.lua_pushnil(L);  /* cannot find anything */
         return 1;
     }
     /* explicit request or no special characters? */
     if (find && (lapi.lua_toboolean(L, 4) || nospecials(p, lp))) {
         /* do a plain search */
-        let f = s.indexOf(p);
+        let f = s.slice(init - 1).indexOf(p);
         if (f > -1) {
-            lapi.lua_pushinteger(L, f + 1);
-            lapi.lua_pushinteger(L, f + lp);
+            lapi.lua_pushinteger(L, init + f);
+            lapi.lua_pushinteger(L, init + f + lp - 1);
             return 2;
         }
     } else {

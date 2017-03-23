@@ -1,10 +1,8 @@
 "use strict";
 
 const test       = require('tape');
-const beautify   = require('js-beautify').js_beautify;
 
 const tests      = require("./tests.js");
-const getState   = tests.getState;
 const toByteCode = tests.toByteCode;
 
 const VM         = require("../src/lvm.js");

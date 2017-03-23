@@ -268,9 +268,9 @@ const luaopen_math = function(L) {
     lapi.lua_setfield(L, -2, "pi");
     lapi.lua_pushnumber(L, Number.MAX_VALUE);
     lapi.lua_setfield(L, -2, "huge");
-    lapi.lua_pushnumber(L, Number.MAX_SAFE_INTEGER);
+    lapi.lua_pushinteger(L, Number.MAX_SAFE_INTEGER);
     lapi.lua_setfield(L, -2, "maxinteger");
-    lapi.lua_pushnumber(L, Number.MIN_SAFE_INTEGER);
+    lapi.lua_pushinteger(L, Number.MIN_SAFE_INTEGER);
     lapi.lua_setfield(L, -2, "mininteger");
     return 1;
 };

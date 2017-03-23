@@ -424,18 +424,18 @@ const luaO_int2fb = function(x) {
 
 const intarith = function(L, op, v1, v2) {
     switch (op) {
-        case lua.LUA_OPADD:  return (v1 + v2)|0;
-        case lua.LUA_OPSUB:  return (v1 - v2)|0;
-        case lua.LUA_OPMUL:  return (v1 * v2)|0;
-        case lua.LUA_OPMOD:  return (v1 % v2)|0;
-        case lua.LUA_OPIDIV: return (v1 / v2)|0;
-        case lua.LUA_OPBAND: return (v1 & v2)|0;
-        case lua.LUA_OPBOR:  return (v1 | v2)|0;
-        case lua.LUA_OPBXOR: return (v1 ^ v2)|0;
-        case lua.LUA_OPSHL:  return (v1 << v2)|0;
-        case lua.LUA_OPSHR:  return (v1 >> v2)|0;
-        case lua.LUA_OPUNM:  return (-v1)|0;
-        case lua.LUA_OPBNOT: return (~v1)|0;
+        case lua.LUA_OPADD:  return (v1 + v2);
+        case lua.LUA_OPSUB:  return (v1 - v2);
+        case lua.LUA_OPMUL:  return (v1 * v2);
+        case lua.LUA_OPMOD:  return (v1 % v2);
+        case lua.LUA_OPIDIV: return (v1 / v2);
+        case lua.LUA_OPBAND: return (v1 & v2);
+        case lua.LUA_OPBOR:  return (v1 | v2);
+        case lua.LUA_OPBXOR: return (v1 ^ v2);
+        case lua.LUA_OPSHL:  return (v1 << v2);
+        case lua.LUA_OPSHR:  return (v1 >> v2);
+        case lua.LUA_OPUNM:  return (-v1);
+        case lua.LUA_OPBNOT: return (~v1);
     }
 };
 
@@ -447,7 +447,7 @@ const numarith = function(L, op, v1, v2) {
         case lua.LUA_OPMUL:  return v1 * v2;
         case lua.LUA_OPDIV:  return v1 / v2;
         case lua.LUA_OPPOW:  return Math.pow(v1, v2);
-        case lua.LUA_OPIDIV: return (v1 / v2)|0;
+        case lua.LUA_OPIDIV: return (v1 / v2);
         case lua.LUA_OPUNM:  return -v1;
         case lua.LUA_OPMOD:  return v1 % v2;
     }

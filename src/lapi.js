@@ -209,7 +209,7 @@ const lua_pushnumber = function(L, n) {
 const lua_pushinteger = function(L, n) {
     assert(typeof n === "number");
 
-    L.stack[L.top++] = new TValue(CT.LUA_TNUMINT, n|0);
+    L.stack[L.top++] = new TValue(CT.LUA_TNUMINT, n);
 
     assert(L.top <= L.ci.top, "stack overflow");
 };

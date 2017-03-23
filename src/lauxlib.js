@@ -165,7 +165,7 @@ const luaL_checkstring = function(L, n) {
 
 const luaL_checklstring = function(L, arg) {
     let s = lapi.lua_tolstring(L, arg);
-    if (!s) tag_error(L, arg, CT.LUA_TSTRING);
+    if (typeof s !== "string") tag_error(L, arg, CT.LUA_TSTRING);
     return s;
 };
 

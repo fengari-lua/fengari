@@ -222,7 +222,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value + op2.value)|0);
+                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value + op2.value));
                 } else if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, op1.value + op2.value);
                 } else {
@@ -238,7 +238,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value - op2.value)|0);
+                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value - op2.value));
                 } else if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, op1.value - op2.value);
                 } else {
@@ -254,7 +254,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value * op2.value)|0);
+                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value * op2.value));
                 } else if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, k[i.B].value * op2.value);
                 } else {
@@ -270,7 +270,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value % op2.value)|0);
+                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value % op2.value));
                 } else if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, k[i.B].value % op2.value);
                 } else {
@@ -314,9 +314,9 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value / op2.value)|0);
+                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value / op2.value));
                 } else if (numberop1 !== false && numberop2 !== false) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMFLT, (op1.value / op2.value)|0);
+                    L.stack[ra] = new TValue(CT.LUA_TNUMFLT, (op1.value / op2.value));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_IDIV);
                     base = ci.u.l.base;
@@ -330,7 +330,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value & op2.value)|0);
+                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value & op2.value));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_BAND);
                     base = ci.u.l.base;
@@ -344,7 +344,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value | op2.value)|0);
+                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value | op2.value));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_BOR);
                     base = ci.u.l.base;
@@ -358,7 +358,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value ^ op2.value)|0);
+                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value ^ op2.value));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_BXOR);
                     base = ci.u.l.base;
@@ -372,7 +372,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value << op2.value)|0);
+                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value << op2.value));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_SHL);
                     base = ci.u.l.base;
@@ -386,7 +386,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value >> op2.value)|0);
+                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value >> op2.value));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_SHR);
                     base = ci.u.l.base;
@@ -716,14 +716,14 @@ const donextjump = function(L, ci) {
 
 const luaV_lessthan = function(L, l, r) {
     if (l.ttisnumber() && r.ttisnumber())
-        return LTnum(l, r);
+        return LTnum(l, r) ? 1 : 0;
     else if (l.ttisstring() && r.ttisstring())
-        return l_strcmp(l, r) < 0;
+        return l_strcmp(l, r) < 0 ? 1 : 0;
     else {
         let res = ltm.luaT_callorderTM(L, l, r, ltm.TMS.TM_LT);
         if (res < 0)
             ldebug.luaG_ordererror(L, l, r);
-        return res;
+        return res ? 1 : 0;
     }
 };
 
@@ -731,13 +731,13 @@ const luaV_lessequal = function(L, l, r) {
     let res;
 
     if (l.ttisnumber() && r.ttisnumber())
-        return LEnum(l, r);
+        return LEnum(l, r) ? 1 : 0;
     else if (l.ttisstring() && r.ttisstring())
-        return l_strcmp(l, r) <= 0;
+        return l_strcmp(l, r) <= 0 ? 1 : 0;
     else {
         res = ltm.luaT_callorderTM(L, l, r, ltm.TMS.TM_LE);
         if (res >= 0)
-            return res;
+            return res ? 1 : 0;
     }
 
     L.ci.callstatus |= lstate.CIST_LEQ; /* mark it is doing 'lt' for 'le' */
@@ -843,7 +843,7 @@ const forlimit = function(obj, step) {
 const luaV_tointeger = function(obj, mode) {
     if (obj.ttisfloat()) {
         let n = obj.value;
-        let f = n|0;
+        let f = n;
 
         if (n !== f) { /* not an integral value? */
             if (mode === 0)
@@ -852,9 +852,9 @@ const luaV_tointeger = function(obj, mode) {
                 f += 1;  /* convert floor to ceil (remember: n !== f) */
         }
 
-        return f|0;
+        return f;
     } else if (obj.ttisinteger()) {
-        return obj.value|0;
+        return obj.value;
     } else if (obj.ttisstring()) {
         return luaV_tointeger(new TValue(CT.LUA_TNUMFLT, parseFloat(obj.jsstring())), mode); // TODO: luaO_str2num
     }
@@ -863,7 +863,7 @@ const luaV_tointeger = function(obj, mode) {
 };
 
 const tointeger = function(o) {
-    return o.ttisinteger() ? o.value|0 : luaV_tointeger(o, 0);
+    return o.ttisinteger() ? o.value : luaV_tointeger(o, 0);
 };
 
 const tonumber = function(v) {
