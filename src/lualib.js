@@ -1,6 +1,7 @@
 /*jshint esversion: 6 */
 "use strict";
 
+const linit = require("./linit.js");
 const lua = require("./lua.js");
 
 const LUA_VERSUFFIX = "_" + lua.LUA_VERSION_MAJOR + "_" + lua.LUA_VERSION_MINOR;
@@ -45,3 +46,5 @@ module.exports[LUA_DBLIBNAME] = require("./ldebug.js").luaopen_debug;
 const LUA_LOADLIBNAME = "package";
 module.exports.LUA_LOADLIBNAME = LUA_LOADLIBNAME;
 // module.exports[LUA_LOADLIBNAME] = require("./loadlib.js").luaopen_package;
+
+module.exports.luaL_openlibs = linit.luaL_openlibs;
