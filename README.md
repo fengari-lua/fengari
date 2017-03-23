@@ -19,10 +19,8 @@
         - [ ] weak table
     - [x] function
     - [x] string (8-bit clean)
-    - [ ] number (32-bit ?)
-        - [ ] integer
-        - [ ] float
-    - [ ] userdata
+    - [x] number (32-bit)
+    - [x] userdata
 - [x] Tag Methods
 - [ ] C API
     - [x] ...
@@ -82,11 +80,7 @@
     - [ ] luaL_traceback
     - [ ] luaL_unref
 - [ ] Standard library
-    - [ ] Base lib
-        - [x] ...
-        - [x] load
-        - [x] loadfile
-        - [ ] dofile
+    - [x] Base lib
     - [x] Coroutine
     - [x] Table
     - [x] Math

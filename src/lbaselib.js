@@ -358,7 +358,21 @@ if (typeof window === "undefined") {
         return load_aux(L, status, env);
     };
 
+    const dofilecont = function(L, d1, d2) {
+        return lapi.lua_gettop(L) - 1;
+    };
+
+    const luaB_dofile = function(L) {
+        let fname = lauxlib.luaL_optstring(L, 1, null);
+        lapi.lua_settop(L, 1);
+        if (lauxlib.luaL_loadfile(L, fname) !== TS.LUA_OK)
+            return lapi.lua_error(L);
+        lapi.lua_callk(L, 0, lua.LUA_MULTRET, 0, dofilecont);
+        return dofilecont(L, 0, 0);
+    };
+
     base_funcs.loadfile = luaB_loadfile;
+    base_funcs.dofile   = luaB_dofile;
     
 }
 
