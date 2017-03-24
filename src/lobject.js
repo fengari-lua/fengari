@@ -8,9 +8,12 @@ const lua     = require('./lua.js');
 const CT      = lua.constant_types;
 const UpVal   = require('./lfunc.js').UpVal;
 
+let tvalueCount = 0;
+
 class TValue {
 
     constructor(type, value) {
+        this.id = tvalueCount++;
         this.type = type;
         this.value = value;
         this.metatable = null;

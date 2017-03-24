@@ -158,7 +158,7 @@ const lua_rotate = function(L, idx, n) {
     let p = index2addr(L, idx);
     let pIdx = index2addr_(L, idx);
 
-    assert(!p.ttisnil() && idx > lua.LUA_REGISTRYINDEX, "index not in the stack");
+    assert(/*!p.ttisnil() && */idx > lua.LUA_REGISTRYINDEX, "index not in the stack");
     assert((n >= 0 ? n : -n) <= (L.top - idx), "invalid 'n'");
 
     let m = n >= 0 ? L.top - 1 - n : pIdx - n - 1;  /* end of prefix */

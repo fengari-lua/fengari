@@ -312,7 +312,7 @@ const luaL_tolstring = function(L, idx) {
             default:
                 let tt = luaL_getmetafield(L, idx, "__name");
                 let kind = tt === CT.LUA_TSTRING ? lapi.lua_tostring(L, -1) : luaL_typename(L, idx);
-                lapi.lua_pushstring(L, `${kind}`); // We can't print memory address in JS
+                lapi.lua_pushstring(L, `${kind}: 0x${lapi.index2addr(L, -1).id.toString(16)}`);
                 if (tt !== CT.LUA_TNIL)
                     lapi.lua_remove(L, -2);
                 break;
