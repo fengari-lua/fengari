@@ -452,7 +452,7 @@ const read_string = function(ls, del, seminfo) {
                     case 'x': c = readhexaesc(ls); will = 'read_save'; break;
                     case 'u': utf8esc(ls); will = 'read_save'; break;
                     case '\n': case '\r':
-                        inclinenumber(ls); c = '\n'; will = 'read_save'; break;
+                        inclinenumber(ls); c = '\n'; will = 'only_save'; break;
                     case '\\': case '\"': case '\'':
                         c = ls.current; will = 'read_save'; break;
                     case -1: will = 'read_save'; break;  /* will raise an error next loop */
