@@ -151,3 +151,8 @@ end
 x = '"ílo"\n\\'
 assert(string.format('%q%s', x, x) == '"\\"ílo\\"\\\n\\\\""ílo"\n\\')
 assert(string.format('%q', "\0") == [["\0"]])
+assert(load(string.format('return %q', x))() == x)
+x = "\0\1\0023\5\0009"
+assert(load(string.format('return %q', x))() == x)
+assert(string.format("\0%c\0%c%x\0", string.byte("\xe4"), string.byte("b"), 140) ==
+              "\0\xe4\0b8c\0")

@@ -319,7 +319,8 @@ const str_format = function(L) {
             switch (String.fromCharCode(strfrmt[0])) {
                 case 'c': {
                     strfrmt = strfrmt.slice(1);
-                    concat(b, lua.to_luastring(sprintf(String.fromCharCode(...form), lauxlib.luaL_checkinteger(L, arg))));
+                    // concat(b, lua.to_luastring(sprintf(String.fromCharCode(...form), lauxlib.luaL_checkinteger(L, arg))));
+                    b.push(lauxlib.luaL_checkinteger(L, arg));
                     break;
                 }
                 case 'd': case 'i':
