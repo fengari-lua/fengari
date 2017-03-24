@@ -111,7 +111,7 @@ const math_floor = function(L) {
     if (lapi.lua_isinteger(L, 1))
         lapi.lua_settop(L, 1);
     else
-        pushnumint(L, lauxlib.luaL_checknumber(L, 1));
+        pushnumint(L, Math.floor(lauxlib.luaL_checknumber(L, 1)));
 
     return 1;
 };
