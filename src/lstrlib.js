@@ -21,7 +21,7 @@ const L_ESC   = sL_ESC.charCodeAt(0);
 const LUA_MAXCAPTURES = 32;
 
 // (sizeof(size_t) < sizeof(int) ? MAX_SIZET : (size_t)(INT_MAX))
-const MAXSIZE = Number.MAX_SAFE_INTEGER;
+const MAXSIZE = 2147483647;
 
 
 /* translate a relative string position: negative means back from end */
@@ -667,6 +667,9 @@ const str_rep = function(L) {
     let s = lauxlib.luaL_checkstring(L, 1);
     let n = lauxlib.luaL_checkinteger(L, 2);
     let sep = lauxlib.luaL_optstring(L, 3, "");
+
+    if (s.length + sep.length < s.length || s.length + sep.length > MAXSIZE / n)  /* may overflow? */
+        return lauxlib.luaL_error(L, "resulting string too large");
 
     lapi.lua_pushstring(L, n > 0 ? (s + sep).repeat(n - 1) + s : "");
     return 1;
