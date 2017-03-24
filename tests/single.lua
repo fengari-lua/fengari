@@ -150,3 +150,4 @@ end
 
 x = '"ílo"\n\\'
 assert(string.format('%q%s', x, x) == '"\\"ílo\\"\\\n\\\\""ílo"\n\\')
+assert(string.format('%q', "\0") == [["\0"]])

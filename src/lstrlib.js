@@ -204,9 +204,9 @@ const addquoted = function(b, s) {
         } else if (iscntrl(s[0])) {
             let buff = [];
             if (!isdigit(s[1]))
-                buff = lua.to_luastring(sprintf("\\%d", s[0]).split('').map(e => e.charCodeAt(0)));
+                buff = lua.to_luastring(sprintf("\\%d", s[0]));
             else
-                buff = lua.to_luastring(sprintf("\\%03d", s[0]).split('').map(e => e.charCodeAt(0)));
+                buff = lua.to_luastring(sprintf("\\%03d", s[0]));
             concat(b, buff);
         } else
             b.push(s[0]);
