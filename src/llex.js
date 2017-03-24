@@ -480,11 +480,13 @@ const read_string = function(ls, del, seminfo) {
         }
     }
     save_and_next(ls);  /* skip delimiter */
+
     seminfo.ts = new TValue(
         CT.LUA_TLNGSTR,
-        lua.to_luastring(
-            ls.buff.buffer.slice(1, ls.buff.buffer.length-1).join('')
-        )
+        ls.buff.buffer
+            .slice(1, ls.buff.n-1)
+            .map(e => typeof e === "string" ? lua.to_luastring(e) : [e])
+            .reduce((acc, e) => acc = acc.concat(e), [])  /* Hex value must not be converted */
     );
 };
 
