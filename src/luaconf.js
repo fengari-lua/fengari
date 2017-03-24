@@ -17,7 +17,7 @@ const LUAI_MAXSTACK = 1000000;
 const LUA_IDSIZE = 60;
 
 const lua_numbertointeger = function(n) {
-    return n;
+    return n >= Number.MIN_SAFE_INTEGER && n < -Number.MIN_SAFE_INTEGER ? n : 0;
 };
 
 const LUA_INTEGER_FRMLEN = "";

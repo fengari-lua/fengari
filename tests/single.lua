@@ -131,3 +131,10 @@ assert(tostring(-1203) == "-1203")
 assert(tostring(1203.125) == "1203.125")
 assert(tostring(-0.5) == "-0.5")
 assert(tostring(-32767) == "-32767")
+if math.tointeger(2147483647) then   -- no overflow? (32 bits)
+  assert(tostring(-2147483647) == "-2147483647")
+end
+if math.tointeger(4611686018427387904) then   -- no overflow? (64 bits)
+  assert(tostring(4611686018427387904) == "4611686018427387904")
+  assert(tostring(-4611686018427387904) == "-4611686018427387904")
+end

@@ -342,7 +342,8 @@ const l_str2dloc = function(s, mode) {
 };
 
 const l_str2d = function(s) {
-    let pidx = /[.xXnN]/g.exec(s).index;
+    let pidx = /[.xXnN]/g.exec(s);
+    pidx = pidx ? pidx.index : null;
     let pmode = pidx ? s[pidx] : null;
     let mode = pmode ? pmode.toLowerCase() : 0;
     if (mode === 'n')  /* reject 'inf' and 'nan' */

@@ -652,11 +652,7 @@ const lua_stringtonumber = function(L, s) {
 
 // TODO: pisnum
 const lua_tointegerx = function(L, idx) {
-    let o = index2addr(L, idx);
-    let res = lvm.tointeger(o);
-    if (res === false)
-        res = 0;  /* call to 'tointeger' may change 'n' even if it fails */
-    return res;
+    return lvm.tointeger(index2addr(L, idx));
 };
 
 const f_call = function(L, ud) {

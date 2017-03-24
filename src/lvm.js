@@ -6,6 +6,7 @@ const assert         = require('assert');
 const BytecodeParser = require('./lundump.js');
 const OC             = require('./lopcodes.js');
 const lua            = require('./lua.js');
+const luaconf        = require('./luaconf.js');
 const CT             = lua.constant_types;
 const LUA_MULTRET    = lua.LUA_MULTRET;
 const lobject        = require('./lobject.js');
@@ -843,7 +844,7 @@ const forlimit = function(obj, step) {
 const luaV_tointeger = function(obj, mode) {
     if (obj.ttisfloat()) {
         let n = obj.value;
-        let f = n;
+        let f = Math.floor(n);
 
         if (n !== f) { /* not an integral value? */
             if (mode === 0)
@@ -852,7 +853,8 @@ const luaV_tointeger = function(obj, mode) {
                 f += 1;  /* convert floor to ceil (remember: n !== f) */
         }
 
-        return f;
+        let res = luaconf.lua_numbertointeger(f);
+        return res !== 0 ? res : (n === 0 ? 0 : false);
     } else if (obj.ttisinteger()) {
         return obj.value;
     } else if (obj.ttisstring()) {
