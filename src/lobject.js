@@ -127,6 +127,7 @@ class TValue {
         while (1) {
             // For UTF8 byte structure, see http://en.wikipedia.org/wiki/UTF-8#Description and https://www.ietf.org/rfc/rfc2279.txt and https://tools.ietf.org/html/rfc3629
             u0 = value[idx++];
+            if (u0 === 0) { str += "\0"; continue; } // Lua string embed '\0'
             if (!u0) return str;
             if (!(u0 & 0x80)) { str += String.fromCharCode(u0); continue; }
             u1 = value[idx++] & 63;
