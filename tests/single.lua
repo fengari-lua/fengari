@@ -156,3 +156,12 @@ x = "\0\1\0023\5\0009"
 assert(load(string.format('return %q', x))() == x)
 assert(string.format("\0%c\0%c%x\0", string.byte("\xe4"), string.byte("b"), 140) ==
               "\0\xe4\0b8c\0")
+assert(string.format('') == "")
+assert(string.format("%c",34)..string.format("%c",48)..string.format("%c",90)..string.format("%c",100) ==
+       string.format("%c%c%c%c", 34, 48, 90, 100))
+assert(string.format("%s\0 is not \0%s", 'not be', 'be') == 'not be\0 is not \0be')
+assert(string.format("%%%d %010d", 10, 23) == "%10 0000000023")
+assert(tonumber(string.format("%f", 10.3)) == 10.3)
+x = string.format('"%-50s"', 'a')
+assert(#x == 52)
+assert(string.sub(x, 1, 4) == '"a  ')

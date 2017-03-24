@@ -366,7 +366,7 @@ const str_format = function(L) {
                             concat(b, s);  /* keep entire string */
                             lapi.lua_pop(L, 1);  /* remove result from 'luaL_tolstring' */
                         } else {  /* format the string into 'buff' */
-                            concat(b, s);
+                            concat(b, lua.to_luastring(sprintf(String.fromCharCode(...form), str.jsstring())));
                             lapi.lua_pop(L, 1);  /* remove result from 'luaL_tolstring' */
                         }
                     }
