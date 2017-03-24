@@ -314,9 +314,9 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value / op2.value));
+                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, Math.floor(op1.value / op2.value));
                 } else if (numberop1 !== false && numberop2 !== false) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMFLT, (op1.value / op2.value));
+                    L.stack[ra] = new TValue(CT.LUA_TNUMFLT, Math.floor(op1.value / op2.value));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_IDIV);
                     base = ci.u.l.base;
@@ -918,8 +918,39 @@ const LTintfloat = function(l, r) {
     return l < r ? 1 : 0;
 };
 
+/*
+** Compare two strings 'ls' x 'rs', returning an integer smaller-equal-
+** -larger than zero if 'ls' is smaller-equal-larger than 'rs'.
+** The code is a little tricky because it allows '\0' in the strings.
+*/
 const l_strcmp = function(ls, rs) {
-    // TODO: lvm.c:248 static int l_strcmp (const TString *ls, const TString *rs)
+    let l = ls.value;
+    let jl = ls.jsstring();
+    let ll = l.length;
+    let r = rs.value;
+    let lr = r.length;
+    let jr = rs.jsstring();
+    for (;;) {
+        let temp = jl === jr; // TODO: strcoll ?
+        if (!temp)  /* not equal? */
+            return jl < jr ? -1 : 1;  /* done */
+        else {  /* strings are equal up to a '\0' */
+            let len = jl.length;  /* index of first '\0' in both strings */
+            if (len === lr)  /* 'rs' is finished? */
+                return len === ll ? 0 : 1;  /* check 'ls' */
+            else if (len === ll)  /* 'ls' is finished? */
+                return -1;  /* 'ls' is smaller than 'rs' ('rs' is not finished) */
+            /* both strings longer than 'len'; go on comparing after the '\0' */
+            len++;
+            l = l.slice(len);
+            ll -= len;
+            r = r.slice(len);
+            lr -= len;
+            jl = new TValue(null, l).jsstring();
+            jr = new TValue(null, r).jsstring();
+        }
+    }
+
     ls = ls.jsstring();
     rs = rs.jsstring();
     return ls === rs ? 0 : (ls < rs ? -1 : 1);
