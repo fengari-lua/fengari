@@ -33,13 +33,15 @@ const posrelat = function(pos, len) {
 
 const str_sub = function(L) {
     let s = lauxlib.luaL_checkstring(L, 1);
+    let ts = L.stack[lapi.index2addr_(L, 1)];
+    s = ts.value;
     let l = s.length;
     let start = posrelat(lauxlib.luaL_checkinteger(L, 2), l);
     let end = posrelat(lauxlib.luaL_optinteger(L, 3, -1), l);
     if (start < 1) start = 1;
     if (end > l) end = l;
     if (start <= end)
-        lapi.lua_pushstring(L, s.slice(start - 1, (start - 1) + (end - start + 1)));
+        lapi.lua_pushstring(L, ts.jsstring(start - 1, (start - 1) + (end - start + 1)));
     else lapi.lua_pushliteral(L, "");
     return 1;
 };
