@@ -165,3 +165,8 @@ assert(tonumber(string.format("%f", 10.3)) == 10.3)
 x = string.format('"%-50s"', 'a')
 assert(#x == 52)
 assert(string.sub(x, 1, 4) == '"a  ')
+
+assert(string.format("-%.20s.20s", string.rep("%", 2000)) ==
+                     "-"..string.rep("%", 20)..".20s")
+assert(string.format('"-%20s.20s"', string.rep("%", 2000)) ==
+       string.format("%q", "-"..string.rep("%", 2000)..".20s"))

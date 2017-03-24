@@ -361,7 +361,7 @@ const str_format = function(L) {
                     } else {
                         let zero = s.indexOf(0);
                         lauxlib.luaL_argcheck(L, zero < 0 || zero === s.length - 1, arg, "string contains zeros");
-                        if (form.indexOf('.') < 0 && s.length >= 100) {
+                        if (form.indexOf('.'.charCodeAt(0)) < 0 && s.length >= 100) {
                             /* no precision and string is too long to be formatted */
                             concat(b, s);  /* keep entire string */
                             lapi.lua_pop(L, 1);  /* remove result from 'luaL_tolstring' */
