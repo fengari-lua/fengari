@@ -668,7 +668,7 @@ const str_rep = function(L) {
     let n = lauxlib.luaL_checkinteger(L, 2);
     let sep = lauxlib.luaL_optstring(L, 3, "");
 
-    lapi.lua_pushstring(L, (s + sep).repeat(n - 1) + s);
+    lapi.lua_pushstring(L, n > 0 ? (s + sep).repeat(n - 1) + s : "");
     return 1;
 };
 
