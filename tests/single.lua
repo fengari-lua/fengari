@@ -138,3 +138,15 @@ if math.tointeger(4611686018427387904) then   -- no overflow? (64 bits)
   assert(tostring(4611686018427387904) == "4611686018427387904")
   assert(tostring(-4611686018427387904) == "-4611686018427387904")
 end
+
+if tostring(0.0) == "0.0" then   -- "standard" coercion float->string
+  assert('' .. 12 == '12' and 12.0 .. '' == '12.0')
+  assert(tostring(-1203 + 0.0) == "-1203.0")
+else   -- compatible coercion
+  assert(tostring(0.0) == "0")
+  assert('' .. 12 == '12' and 12.0 .. '' == '12')
+  assert(tostring(-1203 + 0.0) == "-1203")
+end
+
+x = '"ílo"\n\\'
+assert(string.format('%q%s', x, x) == '"\\"ílo\\"\\\n\\\\""ílo"\n\\')
