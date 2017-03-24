@@ -20,6 +20,10 @@ const TS        = lua.thread_status;
 const TValue    = lobject.TValue;
 const CClosure  = lobject.CClosure;
 
+const isvalid = function(o) {
+    return o !== lobject.luaO_nilobject;
+};
+
 const lua_version = function(L) {
     if (L === null) return lua.LUA_VERSION_NUM;
     else return L.l_G.version;
@@ -37,7 +41,7 @@ const index2addr = function(L, idx) {
     if (idx > 0) {
         let o = ci.funcOff + idx;
         assert(idx <= ci.top - (ci.funcOff + 1), "unacceptable index");
-        if (o >= L.top) return ldo.nil;
+        if (o >= L.top) return lobject.luaO_nilobject;
         else return L.stack[o];
     } else if (idx > lua.LUA_REGISTRYINDEX) {
         assert(idx !== 0 && -idx <= L.top, "invalid index");
@@ -48,9 +52,9 @@ const index2addr = function(L, idx) {
         idx = lua.LUA_REGISTRYINDEX - idx;
         assert(idx <= MAXUPVAL + 1, "upvalue index too large");
         if (ci.func.ttislcf()) /* light C function? */
-            return ldo.nil; /* it has no upvalues */
+            return lobject.luaO_nilobject; /* it has no upvalues */
         else {
-            return idx <= ci.func.nupvalues ? ci.func.upvalue[idx - 1] : ldo.nil;
+            return idx <= ci.func.nupvalues ? ci.func.upvalue[idx - 1] : lobject.luaO_nilobject;
         }
     }
 };
@@ -129,7 +133,7 @@ const lua_settop = function(L, idx) {
     let func = L.ci.funcOff;
     if (idx >= 0) {
         while (L.top < func + 1 + idx)
-            L.stack[L.top++] = ldo.nil;
+            L.stack[L.top++] = new TValue(CT.LUA_TNIL, null);
         L.top = func + 1 + idx;
     } else {
         assert(-(idx + 1) <= L.top - (func + 1), "invalid new top");
@@ -158,7 +162,7 @@ const lua_rotate = function(L, idx, n) {
     let p = index2addr(L, idx);
     let pIdx = index2addr_(L, idx);
 
-    assert(/*!p.ttisnil() && */idx > lua.LUA_REGISTRYINDEX, "index not in the stack");
+    assert(p !== lobject.luaO_nilobject && idx > lua.LUA_REGISTRYINDEX, "index not in the stack");
     assert((n >= 0 ? n : -n) <= (L.top - idx), "invalid 'n'");
 
     let m = n >= 0 ? L.top - 1 - n : pIdx - n - 1;  /* end of prefix */
@@ -193,7 +197,7 @@ const lua_replace = function(L, idx) {
 */
 
 const lua_pushnil = function(L) {
-    L.stack[L.top++] = ldo.nil;
+    L.stack[L.top++] = new TValue(CT.LUA_TNIL, null);
 
     assert(L.top <= L.ci.top, "stack overflow");
 };
@@ -228,7 +232,7 @@ const lua_pushlstring = function(L, s, len) { // TODO: embedded \0
 
 const lua_pushstring = function (L, s) {
     if (typeof s !== "string")
-        L.stack[L.top] = ldo.nil;
+        L.stack[L.top] = new TValue(CT.LUA_TNIL, null);
     else {
         let ts = L.l_G.intern(lua.to_luastring(s));
         L.stack[L.top] = ts;
@@ -631,7 +635,7 @@ const lua_compare = function(L, index1, index2, op) {
 const lua_compare_ = function(L, o1, o2, op) {
     let i = 0;
 
-    if (!o1.ttisnil() && !o2.ttisnil()) {
+    if (isvalid(o1) && isvalid(o2)) {
         switch (op) {
             case lua.LUA_OPEQ: i = lvm.luaV_equalobj(L, o1, o2); break;
             case lua.LUA_OPLT: i = lvm.luaV_lessthan(L, o1, o2); break;
@@ -661,7 +665,7 @@ const f_call = function(L, ud) {
 
 const lua_type = function(L, idx) {
     let o = index2addr(L, idx);
-    return o.ttnov(); // TODO: isvalid ? luaO_nilobject !== nil tvalue ?
+    return isvalid(o) ?  o.ttnov() : CT.LUA_TNONE;
 };
 
 const lua_typename = function(L, t) {
@@ -706,7 +710,7 @@ const lua_isuserdata = function(L, idx) {
 const lua_rawequal = function(L, index1, index2) {
     let o1 = index2addr(L, index1);
     let o2 = index2addr(L, index2);
-    return lvm.luaV_equalobj(null, o1, o2); // TODO: isvalid ?
+    return isvalid(o1) && isvalid(o2) ? lvm.luaV_equalobj(null, o1, o2) : 0; // TODO: isvalid ?
 };
 
 /*

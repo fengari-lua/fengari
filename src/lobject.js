@@ -127,6 +127,9 @@ class TValue {
 
 }
 
+const luaO_nilobject = new TValue(CT.LUA_TNIL, null);
+module.exports.luaO_nilobject = luaO_nilobject;
+
 const jsstring = function(value, from, to) {
     let u0, u1, u2, u3, u4, u5;
     let idx = 0;
@@ -169,8 +172,6 @@ const jsstring = function(value, from, to) {
     return str;
 };
 
-const nil   = new TValue(CT.LUA_TNIL, null);
-
 class Table extends TValue {
 
     constructor(array, hash) {
@@ -210,14 +211,14 @@ class Table extends TValue {
     __index(table, key) {
         key = Table.keyValue(key);
 
-        let v = nil;
+        let v = luaO_nilobject;
         if (typeof key === 'number' && key > 0) {
             v = table.value.get(key - 1); // Lua array starts at 1
         } else {
             v = table.value.get(key);
         }
 
-        return v ? v : nil;
+        return v ? v : luaO_nilobject;
     }
 
     __len(table) {

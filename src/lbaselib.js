@@ -341,21 +341,6 @@ if (typeof require === "function") {
     } catch (e) {}
 
     if (fs) {
-        const load_aux = function(L, status, envidx) {
-            if (status === TS.LUA_OK) {
-                if (envidx !== 0) {  /* 'env' parameter? */
-                    lapi.lua_pushvalue(L, envidx);  /* environment for loaded function */
-                    if (!lapi.lua_setupvalue(L, -2, 1))  /* set it as 1st upvalue */
-                        lapi.lua_pop(L, 1);  /* remove 'env' if not used by previous call */
-                }
-                return 1;
-            } else {  /* error (message is on top of the stack) */
-                lapi.lua_pushnil(L);
-                lapi.lua_insert(L, -2);  /* put before error message */
-                return 2;  /* return nil plus error message */
-            }
-        };
-
         const luaB_loadfile = function(L) {
             let fname = lauxlib.luaL_optstring(L, 1, null);
             let mode = lauxlib.luaL_optstring(L, 2, null);

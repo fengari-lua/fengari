@@ -20,8 +20,6 @@ const TS             = lua.thread_status;
 const LUA_MULTRET    = lua.LUA_MULTRET;
 const TValue         = lobject.TValue;
 
-const nil            = new TValue(CT.LUA_TNIL, null);
-
 const seterrorobj = function(L, errcode, oldtop) {
     switch (errcode) {
         case TS.LUA_ERRMEM: {
@@ -94,7 +92,7 @@ const luaD_precall = function(L, off, nresults) {
                 base = adjust_varargs(L, p, n);
             } else {
                 for (; n < p.numparams; n++)
-                    L.stack[L.top++] = nil; // complete missing arguments
+                    L.stack[L.top++] = new TValue(CT.LUA_TNIL, null); // complete missing arguments
                 base = off + 1;
             }
 
@@ -143,7 +141,7 @@ const moveresults = function(L, firstResult, res, nres, wanted) {
             break;
         case 1: {
             if (nres === 0)
-                L.stack[firstResult] = nil;
+                L.stack[firstResult] = lobject.luaO_nilobject;
             L.stack[res] = L.stack[firstResult];
             break;
         }
@@ -163,7 +161,7 @@ const moveresults = function(L, firstResult, res, nres, wanted) {
                 for (i = 0; i < nres; i++)
                     L.stack[res + i] = L.stack[firstResult + i];
                 for (; i < wanted; i++)
-                    L.stack[res + i] = nil;
+                    L.stack[res + i] = new TValue(CT.LUA_TNIL, null);
             }
             break;
         }
@@ -182,11 +180,11 @@ const adjust_varargs = function(L, p, actual) {
     let i;
     for (i = 0; i < nfixargs && i < actual; i++) {
         L.stack[L.top++] = L.stack[fixed + i];
-        L.stack[fixed + i] = nil;
+        L.stack[fixed + i] = new TValue(CT.LUA_TNIL, null);
     }
 
     for (; i < nfixargs; i++)
-        L.stack[L.top++] = nil;
+        L.stack[L.top++] = new TValue(CT.LUA_TNIL, null);
 
     return base;
 };
@@ -579,6 +577,5 @@ module.exports.lua_resume           = lua_resume;
 module.exports.lua_yield            = lua_yield;
 module.exports.lua_yieldk           = lua_yieldk;
 module.exports.moveresults          = moveresults;
-module.exports.nil                  = nil;
 module.exports.stackerror           = stackerror;
 module.exports.tryfuncTM            = tryfuncTM;

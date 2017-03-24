@@ -154,7 +154,7 @@ const luaV_execute = function(L) {
             }
             case "OP_LOADNIL": {
                 for (let j = 0; j <= i.B; j++)
-                    L.stack[ra + j] = ldo.nil;
+                    L.stack[ra + j] = new TValue(CT.LUA_TNIL, null);
                 break;
             }
             case "OP_GETUPVAL": {
@@ -694,7 +694,7 @@ const luaV_execute = function(L) {
                     L.stack[ra + j] = L.stack[base - n + j];
 
                 for (; j < b; j++) /* complete required results with nil */
-                    L.stack[ra + j] = ldo.nil;
+                    L.stack[ra + j] = new TValue(CT.LUA_TNIL, null);
                 break;
             }
             case "OP_EXTRAARG": {
@@ -1068,7 +1068,7 @@ const luaV_finishget = function(L, t, key, val, slot, recur) {
         assert(slot.ttisnil());
         tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_INDEX); // TODO: fasttm
         if (tm.ttisnil()) {
-            L.stack[val] = ldo.nil;
+            L.stack[val] = new TValue(CT.LUA_TNIL, null);
             return;
         }
     }

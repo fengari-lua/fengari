@@ -78,7 +78,7 @@ const funcinfo = function(ar, cl) {
 
 const collectvalidlines = function(L, f) {
     if (f === null || f.c.type === CT.LUA_TCCL) {
-        L.stack[L.top++] = ldo.nil;
+        L.stack[L.top++] = new TValue(CT.LUA_TNIL, null);
         assert(L.top <= L.ci.top, "stack overflow");
     } else {
         let lineinfo = f.l.p.lineinfo;

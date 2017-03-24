@@ -68,7 +68,7 @@ class global_State {
     constructor(L) {
         this.mainthread = L;
         this.strt = new Map();
-        this.l_registry = ldo.nil;
+        this.l_registry = new lobject.TValue(CT.LUA_TNIL, null);
         this.panic = null;
         this.version = null;
         this.twups = [];
@@ -98,7 +98,7 @@ const stack_init = function(L1, L) {
     ci.callstatus = 0;
     ci.func = L1.stack[L1.top];
     ci.funcOff = L1.top;
-    L1.stack[L1.top++] = ldo.nil;
+    L1.stack[L1.top++] = new lobject.TValue(CT.LUA_TNIL, null);
     ci.top = L1.top + lua.LUA_MINSTACK;
     L1.ci = ci;
 };

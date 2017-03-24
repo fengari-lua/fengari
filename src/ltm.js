@@ -179,7 +179,7 @@ const luaT_gettmbyobj = function(L, o, event) {
             mt = L.l_G.mt[o.ttnov()];
     }
 
-    return mt ? mt.__index(mt, event) : ldo.nil;
+    return mt ? mt.__index(mt, event) : lobject.luaO_nilobject;
 };
 
 module.exports.TMS              = TMS;
