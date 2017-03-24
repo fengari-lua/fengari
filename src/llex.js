@@ -356,7 +356,14 @@ const read_long_string = function(ls, seminfo, sep) {
     }
 
     if (seminfo)
-        seminfo.ts = new TValue(CT.LUA_TLNGSTR, lua.to_luastring(ls.buff.buffer.slice(2 + sep).join('')));
+        seminfo.ts = new TValue(
+            CT.LUA_TLNGSTR,
+            lua.to_luastring(
+                ls.buff.buffer
+                    .slice(2 + sep, 2 + sep - 2 * (2 + sep))
+                    .join('')
+            )
+        );
 };
 
 const esccheck = function(ls, c, msg) {
