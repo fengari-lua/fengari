@@ -437,7 +437,7 @@ if (typeof require === "function") {
                 lf.pos += bytes;
             }
             if (bytes > 0)
-                return lf.binary ? toDataView(lf.buff) : new lobject.TValue(0, lf.buff).jsstring(); // TODO: Here reading utf8 only
+                return lf.binary ? toDataView(lf.buff) : new lobject.TValue(0, lf.buff).jsstring(0, bytes); // TODO: Here reading utf8 only
             else return null;
         };
 
