@@ -53,13 +53,14 @@ const str_len = function(L) {
 
 const str_char = function(L) {
     let n = lapi.lua_gettop(L);  /* number of arguments */
-    let p = "";
+    let p = [];
     for (let i = 1; i <= n; i++) {
         let c = lauxlib.luaL_checkinteger(L, i);
         lauxlib.luaL_argcheck(L, c >= 0 && c <= 255, "value out of range"); // Strings are 8-bit clean
-        p += String.fromCharCode(c);
+        p.push(c);
     }
-    lapi.lua_pushstring(L, p);
+    lapi.lua_pushstring(L, "");
+    L.stack[L.top - 1].value = p; // Since value are already capped, avoid conversion
     return 1;
 };
 
