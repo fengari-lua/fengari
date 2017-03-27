@@ -67,7 +67,7 @@ class global_State {
 
     constructor(L) {
         this.mainthread = L;
-        this.strt = new Map();
+        // this.strt = new Map();
         this.l_registry = ldo.nil;
         this.panic = null;
         this.version = null;
@@ -79,11 +79,11 @@ class global_State {
         // TODO: when weak value maps are available
         // let key = stringArray.map(e => `${e}|`).join('');
 
-        // if (!this.strt.has(key)) 
+        // if (!this.strt.has(key))
         //     this.strt.set(key, new lobject.TValue(CT.LUA_TLNGSTR, stringArray));
 
         // return this.strt.get(key);
-        
+
         return new lobject.TValue(CT.LUA_TLNGSTR, stringArray);
     }
 
