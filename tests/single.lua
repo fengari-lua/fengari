@@ -170,3 +170,20 @@ assert(string.format("-%.20s.20s", string.rep("%", 2000)) ==
                      "-"..string.rep("%", 20)..".20s")
 assert(string.format('"-%20s.20s"', string.rep("%", 2000)) ==
        string.format("%q", "-"..string.rep("%", 2000)..".20s"))
+
+do
+  local function checkQ (v)
+    local s = string.format("%q", v)
+    local nv = load("return " .. s)()
+    assert(v == nv and math.type(v) == math.type(nv))
+  end
+  -- checkQ("\0\0\1\255\u{234}")
+  -- checkQ(math.maxinteger)
+  -- checkQ(math.mininteger)
+  -- checkQ(math.pi)
+  checkQ(0.1)
+  -- checkQ(true)
+  -- checkQ(nil)
+  -- checkQ(false)
+  -- checkerror("no literal", string.format, "%q", {})
+end

@@ -81,9 +81,9 @@ const str_dump = function(L) {
     return 1;
 };
 
-const SIZELENMOD = luaconf.LUA_NUMBER_FRMLEN.length;
+const SIZELENMOD = luaconf.LUA_NUMBER_FRMLEN.length + 1;
 
-const L_NBFD = 16; // TODO: arbitrary
+const L_NBFD = 1;
 
 // See: http://croquetweak.blogspot.fr/2014/08/deconstructing-floats-frexp-and-ldexp.html
 const frexp = function(value) {
@@ -117,7 +117,8 @@ const adddigit = function(buff, n, x) {
     return x - d;  /* return what is left */
 };
 
-const num2straux = function(buff, x) {
+const num2straux = function(x) {
+    let buff = [];
     /* if 'inf' or 'NaN', format it like '%g' */
     if (x === Infinity || isNaN(x))
         return sprintf(luaconf.LUA_NUMBER_FMT, x).split('').map(e => e.charCodeAt(0));
@@ -148,14 +149,14 @@ const num2straux = function(buff, x) {
     }
 };
 
-const lua_number2strx = function(L, buff, fmt, x) {
-    let n = num2straux(buff, x);
-    if (fmt[SIZELENMOD] === 'A'.charCodeAt(0)) {
-        for (let i = 0; i < n; i++)
+const lua_number2strx = function(L, fmt, x) {
+    let buff = num2straux(x);
+    if (fmt.charAt(SIZELENMOD) === 'A') {
+        for (let i = 0; i < buff.length; i++)
             buff[i] = String.fromCharCode(buff[i]).toUpperCase().charCodeAt(0);
-    } else if (fmt[SIZELENMOD] !== 'a'.charCodeAt(0))
+    } else if (fmt.charAt(SIZELENMOD) !== 'a')
         lauxlib.luaL_error(L, "modifiers for format '%a'/'%A' not implemented");
-    return n;
+    return buff;
 };
 
 /*
@@ -236,7 +237,7 @@ const addliteral = function(L, b, arg) {
         case CT.LUA_TNUMBER: {
             if (!lapi.lua_isinteger(L, arg)) {  /* float? */
                 let n = lapi.lua_tonumber(L, arg);  /* write as hexa ('%a') */
-                concat(b, lua.to_luastring(lapi.lua_number2strx(L, lobject.jsstring(b), `%${luaconf.LUA_INTEGER_FRMLEN}a`, n)));
+                concat(b, lua_number2strx(L, `%${luaconf.LUA_INTEGER_FRMLEN}a`, n));
                 checkdp(b);  /* ensure it uses a dot */
             } else {  /* integers */
                 let n = lapi.lua_tointeger(L, arg);
@@ -334,7 +335,7 @@ const str_format = function(L) {
                 case 'a': case 'A': {
                     strfrmt = strfrmt.slice(1);
                     form = addlenmod(form, luaconf.LUA_INTEGER_FRMLEN.split('').map(e => e.charCodeAt(0)));
-                    concat(b, lua.to_luastring(lua_number2strx(L, lobject.jsstring(b), form, lauxlib.luaL_checknumber(L, arg))));
+                    concat(b, lua_number2strx(L, form, lauxlib.luaL_checknumber(L, arg)));
                     break;
                 }
                 case 'e': case 'E': case 'f':
