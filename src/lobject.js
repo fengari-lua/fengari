@@ -5,6 +5,7 @@ const assert = require('assert');
 
 const ljstype = require('./ljstype.js');
 const lua     = require('./lua.js');
+const luaconf = require('./luaconf.js');
 const CT      = lua.constant_types;
 const UpVal   = require('./lfunc.js').UpVal;
 
@@ -341,9 +342,93 @@ const luaO_utf8desc = function(buff, x) {
     return n;
 };
 
+/* maximum number of significant digits to read (to avoid overflows
+   even with single floats) */
+const MAXSIGDIG = 30;
+
+// See: http://croquetweak.blogspot.fr/2014/08/deconstructing-floats-frexp-and-ldexp.html
+const frexp = function(value) {
+    if (value === 0) return [value, 0];
+    var data = new DataView(new ArrayBuffer(8));
+    data.setFloat64(0, value);
+    var bits = (data.getUint32(0) >>> 20) & 0x7FF;
+    if (bits === 0) { // denormal
+        data.setFloat64(0, value * Math.pow(2, 64));  // exp + 64
+        bits = ((data.getUint32(0) >>> 20) & 0x7FF) - 64;
+    }
+    var exponent = bits - 1022;
+    var mantissa = ldexp(value, -exponent);
+    return [mantissa, exponent];
+};
+
+const ldexp = function(mantissa, exponent) {
+    var steps = Math.min(3, Math.ceil(Math.abs(exponent) / 1023));
+    var result = mantissa;
+    for (var i = 0; i < steps; i++)
+        result *= Math.pow(2, Math.floor((exponent + i) / steps));
+    return result;
+};
+
+
+/*
+** convert an hexadecimal numeric string to a number, following
+** C99 specification for 'strtod'
+*/
+const lua_strx2number = function(s) {
+    let dot = luaconf.lua_getlocaledecpoint();
+    let r = 0.0;  /* result (accumulator) */
+    let sigdig = 0;  /* number of significant digits */
+    let nosigdig = 0;  /* number of non-significant digits */
+    let e = 0;  /* exponent correction */
+    let neg;  /* 1 if number is negative */
+    let hasdot = false;  /* true after seen a dot */
+
+    while (ljstype.lisspace(s.charAt(0))) s = s.slice(1);  /* skip initial spaces */
+
+    neg = s.charAt(0) === '-';  /* check signal */
+    s = neg || s.charAt(0) === '+' ? s.slice(1) : s;  /* skip sign if one */
+    if (!(s.charAt(0) === '0' && (s.charAt(1) === 'x' || s.charAt(1) === 'X')))  /* check '0x' */
+        return 0.0;  /* invalid format (no '0x') */
+
+    for (s = s.slice(2); ; s = s.slice(1)) {  /* skip '0x' and read numeral */
+        if (s.charAt(0) === dot) {
+            if (hasdot) break;  /* second dot? stop loop */
+            else hasdot = true;
+        } else if (ljstype.lisxdigit(s.charAt(0))) {
+            if (sigdig === 0 && s.charAt(0) === '0')  /* non-significant digit (zero)? */
+                nosigdig++;
+            else if (++sigdig <= MAXSIGDIG)  /* can read it without overflow? */
+                r = (r * 16) + luaO_hexavalue(s);
+            else e++; /* too many digits; ignore, but still count for exponent */
+            if (hasdot) e--;  /* decimal digit? correct exponent */
+        } else break;  /* neither a dot nor a digit */
+    }
+
+    if (nosigdig + sigdig === 0)  /* no digits? */
+        return 0.0;  /* invalid format */
+    e *= 4;  /* each digit multiplies/divides value by 2^4 */
+    if (s.charAt(0) === 'p' || s.charAt(0) === 'P') {  /* exponent part? */
+        let exp1 = 0;  /* exponent value */
+        let neg1;  /* exponent signal */
+        s = s.slice(1);  /* skip 'p' */
+        neg1 = s.charAt(0) === '-';  /* check signal */
+        s = neg1 || s.charAt(0) === '+' ? s.slice(1) : s;  /* skip sign if one */
+        if (!ljstype.lisdigit(s.charAt(0)))
+            return 0.0;  /* invalid; must have at least one digit */
+        while (ljstype.lisdigit(s.charAt(0))) {  /* read exponent */
+            exp1 = exp1 * 10 + s.charCodeAt(0) - '0'.charCodeAt(0);
+            s = s.slice(1);
+        }
+        if (neg1) exp1 = -exp1;
+        e += exp1;
+    }
+    if (neg) r = -r;
+    return s.trim().search(/s/) < 0 ? ldexp(r, e) : null;  /* Only valid if nothing left is s*/
+};
+
 const l_str2dloc = function(s, mode) {
-    let flt = mode === 'x' ? parseInt(s, '16') : parseFloat(s);
-    return !isNaN(flt) && /^\d+(\.\d+)?\0?$/.test(s) ? flt : null;  /* OK if no trailing characters */
+    let flt = mode === 'x' ? lua_strx2number(s) : parseFloat(s);
+    return !isNaN(flt) ? flt : null;  /* OK if no trailing characters */
 };
 
 const l_str2d = function(s) {
@@ -470,8 +555,10 @@ module.exports.LocVar         = LocVar;
 module.exports.TValue         = TValue;
 module.exports.Table          = Table;
 module.exports.UTF8BUFFSZ     = UTF8BUFFSZ;
+module.exports.frexp          = frexp;
 module.exports.intarith       = intarith;
 module.exports.jsstring       = jsstring;
+module.exports.ldexp          = ldexp;
 module.exports.luaO_chunkid   = luaO_chunkid;
 module.exports.luaO_hexavalue = luaO_hexavalue;
 module.exports.luaO_int2fb    = luaO_int2fb;

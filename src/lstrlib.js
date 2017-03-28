@@ -85,29 +85,6 @@ const SIZELENMOD = luaconf.LUA_NUMBER_FRMLEN.length + 1;
 
 const L_NBFD = 1;
 
-// See: http://croquetweak.blogspot.fr/2014/08/deconstructing-floats-frexp-and-ldexp.html
-const frexp = function(value) {
-    if (value === 0) return [value, 0];
-    var data = new DataView(new ArrayBuffer(8));
-    data.setFloat64(0, value);
-    var bits = (data.getUint32(0) >>> 20) & 0x7FF;
-    if (bits === 0) { // denormal
-        data.setFloat64(0, value * Math.pow(2, 64));  // exp + 64
-        bits = ((data.getUint32(0) >>> 20) & 0x7FF) - 64;
-    }
-    var exponent = bits - 1022;
-    var mantissa = ldexp(value, -exponent);
-    return [mantissa, exponent];
-};
-
-const ldexp = function(mantissa, exponent) {
-    var steps = Math.min(3, Math.ceil(Math.abs(exponent) / 1023));
-    var result = mantissa;
-    for (var i = 0; i < steps; i++)
-        result *= Math.pow(2, Math.floor((exponent + i) / steps));
-    return result;
-};
-
 /*
 ** Add integer part of 'x' to buffer and return new 'x'
 */
@@ -126,7 +103,7 @@ const num2straux = function(x) {
         /* create "0" or "-0" followed by exponent */
         return sprintf(luaconf.LUA_NUMBER_FMT + "x0p+0", x).split('').map(e => e.charCodeAt(0));
     } else {
-        let fe = frexp(x);  /* 'x' fraction and exponent */
+        let fe = lobject.frexp(x);  /* 'x' fraction and exponent */
         let m = fe[0];
         let e = fe[1];
         let n = 0;  /* character count */
@@ -241,8 +218,7 @@ const addliteral = function(L, b, arg) {
                 checkdp(b);  /* ensure it uses a dot */
             } else {  /* integers */
                 let n = lapi.lua_tointeger(L, arg);
-                let format = (n === Number.MIN_SAFE_INTEGER) ? `0x%${luaconf.LUA_INTEGER_FRMLEN}x` : luaconf.LUA_INTEGER_FMT;
-                concat(b, lua.to_luastring(sprintf(format, n)));
+                concat(b, lua.to_luastring(sprintf("%d", n)));
             }
             break;
         }
