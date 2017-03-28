@@ -152,7 +152,7 @@ const save = function(ls, c) {
         if (b.buffer.length >= Number.MAX_SAFE_INTEGER/2)
             lexerror(ls, "lexical element too long", 0);
     }
-    b.buffer[b.n++] = c;
+    b.buffer[b.n++] = c < 0 ? 255 + c + 1 : c;
 };
 
 const luaX_token2str = function(ls, token) {
@@ -407,9 +407,9 @@ const readutf8desc = function(ls) {
 };
 
 const utf8esc = function(ls) {
-    let buff = new Array(lobject.UTF8BUFFSZ);
-    let n = lobject.luaO_utf8esc(buff, readutf8desc(ls));
-    for (; n > 0; n--)  /* add 'buff' to string */
+    let u = lobject.luaO_utf8esc(readutf8desc(ls));
+    let buff = u.buff;
+    for (let n = u.n; n > 0; n--)  /* add 'buff' to string */
         save(ls, buff[lobject.UTF8BUFFSZ - n]);
 };
 
@@ -450,12 +450,12 @@ const read_string = function(ls, del, seminfo) {
                     case 't': c = '\t'; will = 'read_save'; break;
                     case 'v': c = '\v'; will = 'read_save'; break;
                     case 'x': c = readhexaesc(ls); will = 'read_save'; break;
-                    case 'u': utf8esc(ls); will = 'read_save'; break;
+                    case 'u': utf8esc(ls); will = 'no_save'; break;
                     case '\n': case '\r':
                         inclinenumber(ls); c = '\n'; will = 'only_save'; break;
                     case '\\': case '\"': case '\'':
                         c = ls.current; will = 'read_save'; break;
-                    case -1: will = 'read_save'; break;  /* will raise an error next loop */
+                    case -1: will = 'no_save'; break;  /* will raise an error next loop */
                     case 'z': {  /* zap following span of spaces */
                         ls.buff.n -= 1;  /* remove '\\' */
                         next(ls);  /* skip the 'z' */

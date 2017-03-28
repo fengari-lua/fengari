@@ -499,6 +499,27 @@ const luaO_str2num = function(s) {
     }
 };
 
+const luaO_utf8esc = function(x) {
+    let buff = [];
+    let n = 1;  /* number of bytes put in buffer (backwards) */
+    assert(x <= 0x10ffff);
+    if (x < 0x80)  /* ascii? */
+        buff[UTF8BUFFSZ - 1] = x;
+    else {  /* need continuation bytes */
+        let mfb = 0x3f;  /* maximum that fits in first byte */
+        do {  /* add continuation bytes */
+            buff[UTF8BUFFSZ - (n++)] = 0x80 | (x & 0x3f);
+            x >>= 6;  /* remove added bits */
+            mfb >>= 1;  /* now there is one less bit available in first byte */
+        } while (x > mfb);  /* still needs continuation byte? */
+        buff[UTF8BUFFSZ - n] = (~mfb << 1) | x;  /* add first byte */
+    }
+    return {
+        buff: buff,
+        n: n
+    };
+};
+
 /*
 ** converts an integer to a "floating point byte", represented as
 ** (eeeeexxx), where the real value is (1xxx) * 2^(eeeee - 1) if
@@ -564,4 +585,5 @@ module.exports.luaO_hexavalue = luaO_hexavalue;
 module.exports.luaO_int2fb    = luaO_int2fb;
 module.exports.luaO_str2num   = luaO_str2num;
 module.exports.luaO_utf8desc  = luaO_utf8desc;
+module.exports.luaO_utf8esc   = luaO_utf8esc;
 module.exports.numarith       = numarith;
