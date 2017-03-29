@@ -81,7 +81,7 @@ class MBuffer {
         this.reader = reader ? reader : null;
 
         if (!this.reader) {
-            this.buffer = typeof data === "string" ? data.split('') : (data ? data : []);
+            this.buffer = typeof data === "string" ? lua.to_luastring(data) : (data ? data : []);
             this.n = this.buffer instanceof DataView ? this.buffer.byteLength : this.buffer.length;
             this.off = 0;
         }
@@ -97,7 +97,7 @@ class MBuffer {
     fill() {
         if (this.reader) {
             this.buffer = this.reader(this.L, this.data);
-            this.buffer = typeof this.buffer === "string" ? this.buffer.split('') : this.buffer;
+            this.buffer = typeof this.buffer === "string" ? lua.to_luastring(this.buffer) : this.buffer;
             if (this.buffer === null)
                 return -1;
             this.n = this.buffer instanceof DataView ? this.buffer.byteLength - 1 : this.buffer.length - 1;
@@ -150,25 +150,25 @@ const save = function(ls, c) {
     let b = ls.buff;
     if (b.n + 1 > b.buffer.length) {
         if (b.buffer.length >= Number.MAX_SAFE_INTEGER/2)
-            lexerror(ls, "lexical element too long", 0);
+            lexerror(ls, lua.to_luastring("lexical element too long"), 0);
     }
     b.buffer[b.n++] = c < 0 ? 255 + c + 1 : c;
 };
 
 const luaX_token2str = function(ls, token) {
     if (typeof token === "string" || token < FIRST_RESERVED) {  /* single-byte symbols? */
-        return `'${typeof token === "string" ? token : String.fromCharCode(token)}'`;
+        return lua.to_luastring(`'${typeof token === "string" ? token : lobject.jsstring(token)}'`);
     } else {
         let s = luaX_tokens[token - FIRST_RESERVED];
         if (token < R.TK_EOS)  /* fixed format (symbols and reserved words)? */
-            return `'${s}'`;
+            return lua.to_luastring(`'${s}'`);
         else  /* names, strings, and numerals */
-            return s;
+            return lua.to_luastring(s);
     }
 };
 
 const currIsNewline = function(ls) {
-    return ls.current === '\n' || ls.current === '\r';
+    return ls.current === '\n'.charCodeAt(0) || ls.current === '\r'.charCodeAt(0);
 };
 
 const next = function(ls) {
@@ -191,7 +191,7 @@ const inclinenumber = function(ls) {
     if (currIsNewline(ls) && ls.current !== old)
         next(ls);  /* skip '\n\r' or '\r\n' */
     if (++ls.linenumber >= Number.MAX_SAFE_INTEGER)
-        lexerror(ls, "chunk has too many lines", 0);
+        lexerror(ls, lua.to_luastring("chunk has too many lines"), 0);
 };
 
 const luaX_setinput = function(L, ls, z, source, firstchar) {
@@ -222,7 +222,7 @@ const luaX_setinput = function(L, ls, z, source, firstchar) {
 };
 
 const check_next1 = function(ls, c) {
-    if (ls.current === c) {
+    if (ls.current === c.charCodeAt(0)) {
         next(ls);
         return true;
     }
@@ -235,7 +235,7 @@ const check_next1 = function(ls, c) {
 ** saves it
 */
 const check_next2 = function(ls, set) {
-    if (ls.current === set.charAt(0) || ls.current === set.charAt(1)) {
+    if (ls.current === set.charAt(0).charCodeAt(0) || ls.current === set.charAt(1).charCodeAt(0)) {
         save_and_next(ls);
         return true;
     }
@@ -261,11 +261,11 @@ const read_numeral = function(ls, seminfo) {
         else break;
     }
 
-    save(ls, '\0');
+    save(ls, 0);
 
     let obj = lobject.luaO_str2num(ls.buff.buffer);
     if (obj === false)  /* format error? */
-        lexerror(ls, "malformed number", R.TK_FLT);
+        lexerror(ls, lua.to_luastring("malformed number"), R.TK_FLT);
     if (obj.ttisinteger()) {
         seminfo.i = obj.value;
         return R.TK_INT;
@@ -280,8 +280,8 @@ const txtToken = function(ls, token) {
     switch (token) {
         case R.TK_NAME: case R.TK_STRING:
         case R.TK_FLT: case R.TK_INT:
-            save(ls, '\0');
-            return `'${ls.buff.buffer.join('')}'`;
+            save(ls, 0);
+            return lua.to_luastring(`'${lobject.jsstring(ls.buff.buffer)}'`);
         default:
             return luaX_token2str(ls, token);
     }
@@ -290,12 +290,12 @@ const txtToken = function(ls, token) {
 const lexerror = function(ls, msg, token) {
     msg = ldebug.luaG_addinfo(ls.L, msg, ls.source, ls.linenumber);
     if (token)
-        lapi.lua_pushstring(ls.L, `${msg instanceof TValue ? msg.value : msg} near ${txtToken(ls, token)}`);
+        lapi.lua_pushstring(ls.L, lua.to_luastring(`${msg instanceof TValue ? msg.jsstring() : msg} near ${lobject.jsstring(txtToken(ls, token))}`));
     ldo.luaD_throw(ls.L, TS.LUA_ERRSYNTAX);
 };
 
 const luaX_syntaxerror = function(ls, msg) {
-    msg = msg instanceof TValue ? msg.value : msg;
+    msg = msg instanceof TValue ? msg.value : lua.to_luastring(msg);
     lexerror(ls, msg, ls.t.token);
 };
 
@@ -307,9 +307,9 @@ const luaX_syntaxerror = function(ls, msg) {
 const skip_sep = function(ls) {
     let count = 0;
     let s = ls.current;
-    assert(s === '[' || s === ']');
+    assert(s === '['.charCodeAt(0) || s === ']'.charCodeAt(0));
     save_and_next(ls);
-    while (ls.current === '=') {
+    while (ls.current === '='.charCodeAt(0)) {
         save_and_next(ls);
         count++;
     }
@@ -329,18 +329,18 @@ const read_long_string = function(ls, seminfo, sep) {
             case -1: {  /* error */
                 let what = seminfo ? "string" : "comment";
                 let msg = `unfinished long ${what} (starting at line ${line})`;
-                lexerror(ls, msg, R.TK_EOS);
+                lexerror(ls, lua.to_luastring(msg), R.TK_EOS);
                 break;
             }
-            case ']': {
+            case ']'.charCodeAt(0): {
                 if (skip_sep(ls) === sep) {
                     save_and_next(ls);  /* skip 2nd ']' */
                     skip = true;
                 }
                 break;
             }
-            case '\n': case '\r': {
-                save(ls, '\n');
+            case '\n'.charCodeAt(0): case '\r'.charCodeAt(0): {
+                save(ls, '\n'.charCodeAt(0));
                 inclinenumber(ls);
                 if (!seminfo) {
                     ls.buff.n = 0;
@@ -358,11 +358,7 @@ const read_long_string = function(ls, seminfo, sep) {
     if (seminfo)
         seminfo.ts = new TValue(
             CT.LUA_TLNGSTR,
-            lua.to_luastring(
-                ls.buff.buffer
-                    .slice(2 + sep, 2 + sep - 2 * (2 + sep))
-                    .join('')
-            )
+            ls.buff.buffer.slice(2 + sep, 2 + sep - 2 * (2 + sep))
         );
 };
 
@@ -376,7 +372,7 @@ const esccheck = function(ls, c, msg) {
 
 const gethexa = function(ls) {
     save_and_next(ls);
-    esccheck(ls, ljstype.lisxdigit(ls.current), "hexadecimal digit expected");
+    esccheck(ls, ljstype.lisxdigit(ls.current), lua.to_luastring("hexadecimal digit expected"));
     return lobject.luaO_hexavalue(ls.current);
 };
 
@@ -390,17 +386,17 @@ const readhexaesc = function(ls) {
 const readutf8desc = function(ls) {
     let i = 4;  /* chars to be removed: '\', 'u', '{', and first digit */
     save_and_next(ls);  /* skip 'u' */
-    esccheck(ls, ls.current === '{', "missing '{'");
+    esccheck(ls, ls.current === '{'.charCodeAt(0), lua.to_luastring("missing '{'"));
     let r = gethexa(ls);  /* must have at least one digit */
 
     save_and_next(ls);
     while (ljstype.lisxdigit(ls.current)) {
         i++;
         r = (r << 4) + lobject.luaO_hexavalue(ls.current);
-        esccheck(ls, r <= 0x10FFFF, "UTF-8 value too large");
+        esccheck(ls, r <= 0x10FFFF, lua.to_luastring("UTF-8 value too large"));
         save_and_next(ls);
     }
-    esccheck(ls, ls.current === '}', "missing '}'");
+    esccheck(ls, ls.current === '}'.charCodeAt(0), lua.to_luastring("missing '}'"));
     next(ls);  /* skip '}' */
     ls.buff.n -= i;  /* remove saved chars from buffer */
     return r;
@@ -420,7 +416,7 @@ const readdecesc = function(ls) {
         r = 10 * r + parseInt(ls.current);
         save_and_next(ls);
     }
-    esccheck(ls, r <= 255, "decimal escape too large");
+    esccheck(ls, r <= 255, lua.to_luastring("decimal escape too large"));
     ls.buff.n -= i;  /* remove read digits from buffer */
     return r;
 };
@@ -431,29 +427,29 @@ const read_string = function(ls, del, seminfo) {
     while (ls.current !== del) {
         switch (ls.current) {
             case -1:
-                lexerror(ls, "unfinished string", R.TK_EOS);
+                lexerror(ls, lua.to_luastring("unfinished string"), R.TK_EOS);
                 break;
-            case '\n':
-            case '\r':
-                lexerror(ls, "unfinished string", R.TK_STRING);
+            case '\n'.charCodeAt(0):
+            case '\r'.charCodeAt(0):
+                lexerror(ls, lua.to_luastring("unfinished string"), R.TK_STRING);
                 break;
-            case '\\': {  /* escape sequences */
+            case '\\'.charCodeAt(0): {  /* escape sequences */
                 save_and_next(ls);  /* keep '\\' for error messages */
                 let will;
                 let c;
                 switch(ls.current) {
-                    case 'a': c = '\a'; will = 'read_save'; break;
-                    case 'b': c = '\b'; will = 'read_save'; break;
-                    case 'f': c = '\f'; will = 'read_save'; break;
-                    case 'n': c = '\n'; will = 'read_save'; break;
-                    case 'r': c = '\r'; will = 'read_save'; break;
-                    case 't': c = '\t'; will = 'read_save'; break;
-                    case 'v': c = '\v'; will = 'read_save'; break;
+                    case 'a': c = '\a'.charCodeAt(0); will = 'read_save'; break;
+                    case 'b': c = '\b'.charCodeAt(0); will = 'read_save'; break;
+                    case 'f': c = '\f'.charCodeAt(0); will = 'read_save'; break;
+                    case 'n': c = '\n'.charCodeAt(0); will = 'read_save'; break;
+                    case 'r': c = '\r'.charCodeAt(0); will = 'read_save'; break;
+                    case 't': c = '\t'.charCodeAt(0); will = 'read_save'; break;
+                    case 'v': c = '\v'.charCodeAt(0); will = 'read_save'; break;
                     case 'x': c = readhexaesc(ls); will = 'read_save'; break;
                     case 'u': utf8esc(ls); will = 'no_save'; break;
-                    case '\n': case '\r':
+                    case '\n'.charCodeAt(0): case '\r'.charCodeAt(0):
                         inclinenumber(ls); c = '\n'; will = 'only_save'; break;
-                    case '\\': case '\"': case '\'':
+                    case '\\'.charCodeAt(0): case '\"'.charCodeAt(0): case '\''.charCodeAt(0):
                         c = ls.current; will = 'read_save'; break;
                     case -1: will = 'no_save'; break;  /* will raise an error next loop */
                     case 'z': {  /* zap following span of spaces */
@@ -466,7 +462,7 @@ const read_string = function(ls, del, seminfo) {
                         will = 'no_save'; break;
                     }
                     default: {
-                        esccheck(ls, ljstype.lisdigit(ls.current), "invalid escape sequence");
+                        esccheck(ls, ljstype.lisdigit(ls.current), lua.to_luastring("invalid escape sequence"));
                         c = readdecesc(ls);  /* digital escape '\ddd' */
                         will = 'only_save'; break;
                     }
@@ -490,10 +486,7 @@ const read_string = function(ls, del, seminfo) {
 
     seminfo.ts = new TValue(
         CT.LUA_TLNGSTR,
-        ls.buff.buffer
-            .slice(1, ls.buff.n-1)
-            .map(e => typeof e === "string" ? lua.to_luastring(e) : [e])
-            .reduce((acc, e) => acc = acc.concat(e), [])  /* Hex value must not be converted */
+        ls.buff.buffer.slice(1, ls.buff.n-1)
     );
 };
 
@@ -507,20 +500,20 @@ const llex = function(ls, seminfo) {
 
     for (;;) {
         switch (ls.current) {
-            case '\n': case '\r': {  /* line breaks */
+            case '\n'.charCodeAt(0): case '\r'.charCodeAt(0): {  /* line breaks */
                 inclinenumber(ls);
                 break;
             }
-            case ' ': case '\f': case '\t': case '\v': {  /* spaces */
+            case ' '.charCodeAt(0): case '\f'.charCodeAt(0): case '\t'.charCodeAt(0): case '\v'.charCodeAt(0): {  /* spaces */
                 next(ls);
                 break;
             }
-            case '-': {  /* '-' or '--' (comment) */
+            case '-'.charCodeAt(0): {  /* '-' or '--' (comment) */
                 next(ls);
-                if (ls.current !== '-') return '-';
+                if (ls.current !== '-'.charCodeAt(0)) return '-';
                 /* else is a comment */
                 next(ls);
-                if (ls.current === '[') {  /* long comment? */
+                if (ls.current === '['.charCodeAt(0)) {  /* long comment? */
                     let sep = skip_sep(ls);
                     ls.buff.n = 0;  /* 'skip_sep' may dirty the buffer */
                     ls.buff.buffer = [];
@@ -537,52 +530,52 @@ const llex = function(ls, seminfo) {
                     next(ls);  /* skip until end of line (or end of file) */
                 break;
             }
-            case '[': {  /* long string or simply '[' */
+            case '['.charCodeAt(0): {  /* long string or simply '[' */
                 let sep = skip_sep(ls);
                 if (sep >= 0) {
                     read_long_string(ls, seminfo, sep);
                     return R.TK_STRING;
                 } else if (sep !== -1)  /* '[=...' missing second bracket */
-                    lexerror(ls, "invalid long string delimiter", R.TK_STRING);
+                    lexerror(ls, lua.to_luastring("invalid long string delimiter"), R.TK_STRING);
                 return '[';
             }
-            case '=': {
+            case '='.charCodeAt(0): {
                 next(ls);
                 if (check_next1(ls, '=')) return R.TK_EQ;
                 else return '=';
             }
-            case '<': {
+            case '<'.charCodeAt(0): {
                 next(ls);
                 if (check_next1(ls, '=')) return R.TK_LE;
                 else if (check_next1(ls, '<')) return R.TK_SHL;
                 else return '<';
             }
-            case '>': {
+            case '>'.charCodeAt(0): {
                 next(ls);
                 if (check_next1(ls, '=')) return R.TK_GE;
                 else if (check_next1(ls, '>')) return R.TK_SHR;
                 else return '>';
             }
-            case '/': {
+            case '/'.charCodeAt(0): {
                 next(ls);
                 if (check_next1(ls, '/')) return R.TK_IDIV;
                 else return '/';
             }
-            case '~': {
+            case '~'.charCodeAt(0): {
                 next(ls);
                 if (check_next1(ls, '=')) return R.TK_NE;
                 else return '~';
             }
-            case ':': {
+            case ':'.charCodeAt(0): {
                 next(ls);
                 if (check_next1(ls, ':')) return R.TK_DBCOLON;
                 else return ':';
             }
-            case '"': case '\'': {  /* short literal strings */
+            case '"'.charCodeAt(0): case '\''.charCodeAt(0): {  /* short literal strings */
                 read_string(ls, ls.current, seminfo);
                 return R.TK_STRING;
             }
-            case '.': {  /* '.', '..', '...', or number */
+            case '.'.charCodeAt(0): {  /* '.', '..', '...', or number */
                 save_and_next(ls);
                 if (check_next1(ls, '.')) {
                     if (check_next1(ls, '.'))

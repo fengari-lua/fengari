@@ -278,49 +278,49 @@ class LocVar {
     }
 }
 
-const RETS = "...";
-const PRE  = "[string \"";
-const POS  = "\"]";
+const RETS = lua.to_luastring("...");
+const PRE  = lua.to_luastring("[string \"");
+const POS  = lua.to_luastring("\"]");
 
 const luaO_chunkid = function(source, bufflen) {
-    source = source instanceof TValue ? source.jsstring() : source;
+    source = source instanceof TValue ? source.value : source;
     bufflen = bufflen instanceof TValue ? bufflen.value : bufflen;
     let l = source.length;
-    let out = "";
-    if (source.charAt(0) === '=') {  /* 'literal' source */
+    let out = [];
+    if (source[0] === '='.charCodeAt(0)) {  /* 'literal' source */
         if (l < bufflen)  /* small enough? */
-            out = `${source.slice(1)}`;
+            out = source.slice(1);
         else {  /* truncate it */
-            out += `${source.slice(1, bufflen)}`;
+            out = out.concat(source.slice(1, bufflen));
         }
     } else if (source.charAt(0) === '@') {  /* file name */
         if (l <= bufflen)  /* small enough? */
-            out = `${source.slice(1)}`;
+            out = source.slice(1);
         else {  /* add '...' before rest of name */
             bufflen -= RETS.length;
-            out = `${RETS}${source.slice(1, l - bufflen)}`;
+            out = RETS.concat(source.slice(1, l - bufflen));
         }
     } else {  /* string; format as [string "source"] */
         let nli = source.indexOf('\n');  /* find first new line (if any) */
         let nl = nli ? source.slice(nli) : null;
-        out = `${PRE}`;  /* add prefix */
+        out = PRE;  /* add prefix */
         bufflen -= PRE.length + RETS.length + POS.length + 1;  /* save space for prefix+suffix+'\0' */
         if (l < bufflen && nl === null) {  /* small one-line source? */
-            out += `${source}`;  /* keep it */
+            out = out.conat(source);  /* keep it */
         } else {
             if (nl !== null) l = nl.length - source.length;  /* stop at first newline */
             if (l > bufflen) l = bufflen;
-            out += `${source}${RETS}`;
+            out = out.concat(source).concat(RETS);
         }
-        out += POS;
+        out = out.concat(POS);
     }
 
     return out;
 };
 
 const luaO_hexavalue = function(c) {
-    if (ljstype.lisdigit(c)) return c.charCodeAt(0) - '0'.charCodeAt(0);
-    else return (c.toLowerCase().charCodeAt(0) - 'a'.charCodeAt(0)) + 10;
+    if (ljstype.lisdigit(c)) return c - '0'.charCodeAt(0);
+    else return (String.fromCharCode(c).toLowerCase().charCodeAt(0) - 'a'.charCodeAt(0)) + 10;
 };
 
 const UTF8BUFFSZ = 8;
@@ -329,15 +329,15 @@ const luaO_utf8desc = function(buff, x) {
     let n = 1;  /* number of bytes put in buffer (backwards) */
     assert(x <= 0x10FFFF);
     if (x < 0x80)  /* ascii? */
-        buff[UTF8BUFFSZ - 1] = String.fromCharCode(x);
+        buff[UTF8BUFFSZ - 1] = x;
     else {  /* need continuation bytes */
         let mfb = 0x3f;  /* maximum that fits in first byte */
         do {
-            buff[UTF8BUFFSZ - (n++)] = String.fromCharCode(0x80 | (x & 0x3f));
+            buff[UTF8BUFFSZ - (n++)] = 0x80 | (x & 0x3f);
             x >>= 6;  /* remove added bits */
             mfb >>= 1;  /* now there is one less bit available in first byte */
         } while (x > mfb);  /* still needs continuation byte? */
-        buff[UTF8BUFFSZ - n] = String.fromCharCode((~mfb << 1) | x);  /* add first byte */
+        buff[UTF8BUFFSZ - n] = (~mfb << 1) | x;  /* add first byte */
     }
     return n;
 };
@@ -383,19 +383,19 @@ const lua_strx2number = function(s) {
     let neg;  /* 1 if number is negative */
     let hasdot = false;  /* true after seen a dot */
 
-    while (ljstype.lisspace(s.charAt(0))) s = s.slice(1);  /* skip initial spaces */
+    while (ljstype.lisspace(s)) s = s.slice(1);  /* skip initial spaces */
 
-    neg = s.charAt(0) === '-';  /* check signal */
-    s = neg || s.charAt(0) === '+' ? s.slice(1) : s;  /* skip sign if one */
-    if (!(s.charAt(0) === '0' && (s.charAt(1) === 'x' || s.charAt(1) === 'X')))  /* check '0x' */
+    neg = s[0] === '-'.charCodeAt(0);  /* check signal */
+    s = neg || s[0] === '+'.charCodeAt(0) ? s.slice(1) : s;  /* skip sign if one */
+    if (!(s[0] === '0' && (s[1] === 'x'.charCodeAt(0) || s[1] === 'X'.charCodeAt(0))))  /* check '0x' */
         return 0.0;  /* invalid format (no '0x') */
 
     for (s = s.slice(2); ; s = s.slice(1)) {  /* skip '0x' and read numeral */
-        if (s.charAt(0) === dot) {
+        if (s[0] === dot) {
             if (hasdot) break;  /* second dot? stop loop */
             else hasdot = true;
-        } else if (ljstype.lisxdigit(s.charAt(0))) {
-            if (sigdig === 0 && s.charAt(0) === '0')  /* non-significant digit (zero)? */
+        } else if (ljstype.lisxdigit(s[0])) {
+            if (sigdig === 0 && s[0] === '0'.charCodeAt(0))  /* non-significant digit (zero)? */
                 nosigdig++;
             else if (++sigdig <= MAXSIGDIG)  /* can read it without overflow? */
                 r = (r * 16) + luaO_hexavalue(s);
@@ -407,35 +407,35 @@ const lua_strx2number = function(s) {
     if (nosigdig + sigdig === 0)  /* no digits? */
         return 0.0;  /* invalid format */
     e *= 4;  /* each digit multiplies/divides value by 2^4 */
-    if (s.charAt(0) === 'p' || s.charAt(0) === 'P') {  /* exponent part? */
+    if (s[0] === 'p'.charCodeAt(0) || s[0] === 'P'.charCodeAt(0)) {  /* exponent part? */
         let exp1 = 0;  /* exponent value */
         let neg1;  /* exponent signal */
         s = s.slice(1);  /* skip 'p' */
-        neg1 = s.charAt(0) === '-';  /* check signal */
-        s = neg1 || s.charAt(0) === '+' ? s.slice(1) : s;  /* skip sign if one */
-        if (!ljstype.lisdigit(s.charAt(0)))
+        neg1 = s[0] === '-'.charCodeAt(0);  /* check signal */
+        s = neg1 || s[0] === '+'.charCodeAt(0) ? s.slice(1) : s;  /* skip sign if one */
+        if (!ljstype.lisdigit(s[0]))
             return 0.0;  /* invalid; must have at least one digit */
-        while (ljstype.lisdigit(s.charAt(0))) {  /* read exponent */
-            exp1 = exp1 * 10 + s.charCodeAt(0) - '0'.charCodeAt(0);
+        while (ljstype.lisdigit(s[0])) {  /* read exponent */
+            exp1 = exp1 * 10 + s - '0'.charCodeAt(0);
             s = s.slice(1);
         }
         if (neg1) exp1 = -exp1;
         e += exp1;
     }
     if (neg) r = -r;
-    return s.trim().search(/s/) < 0 ? ldexp(r, e) : null;  /* Only valid if nothing left is s*/
+    return jsstring(s).trim().search(/s/) < 0 ? ldexp(r, e) : null;  /* Only valid if nothing left is s*/
 };
 
 const l_str2dloc = function(s, mode) {
-    let flt = mode === 'x' ? lua_strx2number(s) : parseFloat(s);
+    let flt = mode === 'x' ? lua_strx2number(s) : parseFloat(jsstring(s));
     return !isNaN(flt) ? flt : null;  /* OK if no trailing characters */
 };
 
 const l_str2d = function(s) {
-    let pidx = /[.xXnN]/g.exec(s);
+    let pidx = /[.xXnN]/g.exec(String.fromCharCode(...s));
     pidx = pidx ? pidx.index : null;
     let pmode = pidx ? s[pidx] : null;
-    let mode = pmode ? pmode.toLowerCase() : 0;
+    let mode = pmode ? String.fromCharCode(pmode).toLowerCase() : 0;
     if (mode === 'n')  /* reject 'inf' and 'nan' */
         return null;
     let end = l_str2dloc(s, mode);  /* try to convert */
@@ -454,12 +454,12 @@ const l_str2int = function(s) {
     let neg;
 
     while (ljstype.lisspace(s[0])) s = s.slice(1);  /* skip initial spaces */
-    neg = s[0] === '-';
+    neg = s[0] === '-'.charCodeAt(0);
 
-    if (neg || s[0] === '+')
+    if (neg || s[0] === '+'.charCodeAt(0))
         s = s.slice(1);
 
-    if (s[0] === '0' && (s[1] === 'x' || s[1] === 'X')) {  /* hex? */
+    if (s[0] === '0'.charCodeAt(0) && (s[1] === 'x'.charCodeAt(0) || s[1] === 'X'.charCodeAt(0))) {  /* hex? */
         s = s.slice(2);  /* skip '0x' */
 
         for (; ljstype.lisxdigit(s[0]); s = s.slice(1)) {
@@ -468,7 +468,7 @@ const l_str2int = function(s) {
         }
     } else {  /* decimal */
         for (; ljstype.lisdigit(s[0]); s = s.slice(1)) {
-            let d = parseInt(s[0]);
+            let d = s[0] - '0'.charCodeAt(0);
             if (a >= MAXBY10 && (a > MAXBY10 || d > MAXLASTD + neg))  /* overflow? */
                 return null;  /* do not accept it (as integer) */
             a = a * 10 + d;
@@ -478,7 +478,7 @@ const l_str2int = function(s) {
 
     while (ljstype.lisspace(s[0])) s = s.slice(1);  /* skip trailing spaces */
 
-    if (empty || s[0] !== "\0") return null;  /* something wrong in the numeral */
+    if (empty || s[0] !== 0) return null;  /* something wrong in the numeral */
     else {
         return neg ? -a : a;
     }
@@ -490,7 +490,7 @@ const luaO_str2num = function(s) {
     if (s2i !== null) {   /* try as an integer */
         return new TValue(CT.LUA_TNUMINT, s2i);
     } else {   /* else try as a float */
-        s2i = l_str2d(s.join(''));
+        s2i = l_str2d(s);
 
         if (s2i !== null) {
             return new TValue(CT.LUA_TNUMFLT, s2i);

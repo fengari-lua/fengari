@@ -8,12 +8,13 @@ const lauxlib = require('./lauxlib.js');
 const lstate  = require('./lstate.js');
 const ldo     = require('./ldo.js');
 const ldebug  = require('./ldebug.js');
+const lobject = require('./lobject.js');
 const CT      = lua.constant_types;
 const TS      = lua.thread_status;
 
 const getco = function(L) {
     let co = lapi.lua_tothread(L, 1);
-    lauxlib.luaL_argcheck(L, co, 1, "thread expected");
+    lauxlib.luaL_argcheck(L, co, 1, lua.to_luastring("thread expected"));
     return co;
 };
 

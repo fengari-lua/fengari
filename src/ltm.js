@@ -15,57 +15,30 @@ const CT      = lua.constant_types;
 
 
 const TMS = {
-    TM_INDEX:    "__index",
-    TM_NEWINDEX: "__newindex",
-    TM_GC:       "__gc",
-    TM_MODE:     "__mode",
-    TM_LEN:      "__len",
-    TM_EQ:       "__eq",  /* last tag method with fast access */
-    TM_ADD:      "__add",
-    TM_SUB:      "__sub",
-    TM_MUL:      "__mul",
-    TM_MOD:      "__mod",
-    TM_POW:      "__pow",
-    TM_DIV:      "__div",
-    TM_IDIV:     "__idiv",
-    TM_BAND:     "__band",
-    TM_BOR:      "__bor",
-    TM_BXOR:     "__bxor",
-    TM_SHL:      "__shl",
-    TM_SHR:      "__shr",
-    TM_UNM:      "__unm",
-    TM_BNOT:     "__bnot",
-    TM_LT:       "__lt",
-    TM_LE:       "__le",
-    TM_CONCAT:   "__concat",
-    TM_CALL:     "__call"
-};
-
-const TMS8 = {
-    TM_INDEX:    lua.to_luastring(TMS.TM_INDEX),
-    TM_NEWINDEX: lua.to_luastring(TMS.TM_NEWINDEX),
-    TM_GC:       lua.to_luastring(TMS.TM_GC),
-    TM_MODE:     lua.to_luastring(TMS.TM_MODE),
-    TM_LEN:      lua.to_luastring(TMS.TM_LEN),
-    TM_EQ:       lua.to_luastring(TMS.TM_EQ),  /* last tag method with fast access */
-    TM_ADD:      lua.to_luastring(TMS.TM_ADD),
-    TM_SUB:      lua.to_luastring(TMS.TM_SUB),
-    TM_MUL:      lua.to_luastring(TMS.TM_MUL),
-    TM_MOD:      lua.to_luastring(TMS.TM_MOD),
-    TM_POW:      lua.to_luastring(TMS.TM_POW),
-    TM_DIV:      lua.to_luastring(TMS.TM_DIV),
-    TM_IDIV:     lua.to_luastring(TMS.TM_IDIV),
-    TM_BAND:     lua.to_luastring(TMS.TM_BAND),
-    TM_BOR:      lua.to_luastring(TMS.TM_BOR),
-    TM_BXOR:     lua.to_luastring(TMS.TM_BXOR),
-    TM_SHL:      lua.to_luastring(TMS.TM_SHL),
-    TM_SHR:      lua.to_luastring(TMS.TM_SHR),
-    TM_UNM:      lua.to_luastring(TMS.TM_UNM),
-    TM_BNOT:     lua.to_luastring(TMS.TM_BNOT),
-    TM_LT:       lua.to_luastring(TMS.TM_LT),
-    TM_LE:       lua.to_luastring(TMS.TM_LE),
-    TM_CONCAT:   lua.to_luastring(TMS.TM_CONCAT),
-    TM_CALL:     lua.to_luastring(TMS.TM_CALL)
+    TM_INDEX:    lua.to_luastring("__index"),
+    TM_NEWINDEX: lua.to_luastring("__newindex"),
+    TM_GC:       lua.to_luastring("__gc"),
+    TM_MODE:     lua.to_luastring("__mode"),
+    TM_LEN:      lua.to_luastring("__len"),
+    TM_EQ:       lua.to_luastring("__eq"),  /* last tag method with fast access */
+    TM_ADD:      lua.to_luastring("__add"),
+    TM_SUB:      lua.to_luastring("__sub"),
+    TM_MUL:      lua.to_luastring("__mul"),
+    TM_MOD:      lua.to_luastring("__mod"),
+    TM_POW:      lua.to_luastring("__pow"),
+    TM_DIV:      lua.to_luastring("__div"),
+    TM_IDIV:     lua.to_luastring("__idiv"),
+    TM_BAND:     lua.to_luastring("__band"),
+    TM_BOR:      lua.to_luastring("__bor"),
+    TM_BXOR:     lua.to_luastring("__bxor"),
+    TM_SHL:      lua.to_luastring("__shl"),
+    TM_SHR:      lua.to_luastring("__shr"),
+    TM_UNM:      lua.to_luastring("__unm"),
+    TM_BNOT:     lua.to_luastring("__bnot"),
+    TM_LT:       lua.to_luastring("__lt"),
+    TM_LE:       lua.to_luastring("__le"),
+    TM_CONCAT:   lua.to_luastring("__concat"),
+    TM_CALL:     lua.to_luastring("__call")
 };
 
 const luaT_typenames_ = [
@@ -88,10 +61,8 @@ const ttypename = function(t) {
 
 const luaT_init = function(L) {
     L.l_G.tmname = [];
-    for (let event in TMS) {
-        let name = lua.to_luastring(TMS[event]);
-        L.l_G.tmname.push(L.l_G.intern(name)); // Strings are already interned by JS
-    }
+    for (let event in TMS)
+        L.l_G.tmname.push(L.l_G.intern(TMS[event]));
 };
 
 /*
@@ -99,9 +70,8 @@ const luaT_init = function(L) {
 ** with metatable, use their '__name' metafield, if present.
 */
 const luaT_objtypename = function(L, o) {
-    if ((o.ttistable() && o.metatable !== null)
-        || (o.ttisfulluserdata() && o.metatable !== null)) {
-        let name = o.__index(o, '__name');
+    if ((o.ttistable() && o.metatable !== null) || (o.ttisfulluserdata() && o.metatable !== null)) {
+        let name = o.__index(o, lua.to_luastring('__name'));
         if (name.ttisstring())
             return name.jsstring();
     }
@@ -153,10 +123,10 @@ const luaT_trybinTM = function(L, p1, p2, res, event) {
                 if (n1 !== false && n2 !== false)
                     ldebug.luaG_tointerror(L, p1, p2);
                 else
-                    ldebug.luaG_opinterror(L, p1, p2, "perform bitwise operation on");
+                    ldebug.luaG_opinterror(L, p1, p2, lua.to_luastring("perform bitwise operation on"));
             }
             default:
-                ldebug.luaG_opinterror(L, p1, p2, "perform arithmetic on");
+                ldebug.luaG_opinterror(L, p1, p2, lua.to_luastring("perform arithmetic on"));
         }
     }
 };

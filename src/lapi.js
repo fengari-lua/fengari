@@ -218,11 +218,11 @@ const lua_pushinteger = function(L, n) {
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
-const lua_pushlstring = function(L, s, len) { // TODO: embedded \0
-    assert(typeof s === "string");
+const lua_pushlstring = function(L, s, len) {
+    assert(Array.isArray(s), "lua_pushlstring expects array of byte");
     assert(typeof len === "number");
 
-    let ts = len === 0 ? L.l_G.intern(lua.to_luastring("")) : L.l_G.intern(lua.to_luastring(s.substr(0, len)));
+    let ts = len === 0 ? L.l_G.intern(lua.to_luastring("")) : new TValue(CT.LUA_TLNGSTR, s.slice(0, len));
     L.stack[L.top++] = ts;
 
     assert(L.top <= L.ci.top, "stack overflow");
@@ -231,7 +231,24 @@ const lua_pushlstring = function(L, s, len) { // TODO: embedded \0
 };
 
 const lua_pushstring = function (L, s) {
-    if (typeof s !== "string")
+    assert(Array.isArray(s), "lua_pushstring expects array of byte");
+
+    if (s === undefined || s === null)
+        L.stack[L.top] = new TValue(CT.LUA_TNIL, null);
+    else {
+        L.stack[L.top] = new TValue(CT.LUA_TLNGSTR, s);
+    }
+
+    L.top++;
+    assert(L.top <= L.ci.top, "stack overflow");
+
+    return s;
+};
+
+const lua_pushliteral = function (L, s) {
+    assert(typeof s === "string", "lua_pushliteral expects a JS string");
+
+    if (s === undefined || s === null)
         L.stack[L.top] = new TValue(CT.LUA_TNIL, null);
     else {
         let ts = L.l_G.intern(lua.to_luastring(s));
@@ -243,8 +260,6 @@ const lua_pushstring = function (L, s) {
 
     return s;
 };
-
-const lua_pushliteral = lua_pushstring;
 
 const lua_pushcclosure = function(L, fn, n) {
     assert(typeof fn === "function");
@@ -315,7 +330,9 @@ const lua_pushglobaltable = function(L) {
 ** t[k] = value at the top of the stack (where 'k' is a string)
 */
 const auxsetstr = function(L, t, k) {
-    let str = L.l_G.intern(lua.to_luastring(k));
+    assert(Array.isArray(k), "key must be an array of bytes");
+
+    let str = L.l_G.intern(k);
 
     assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
 
@@ -392,7 +409,9 @@ const lua_rawset = function(L, idx) {
 */
 
 const auxgetstr = function(L, t, k) {
-    let str = L.l_G.intern(lua.to_luastring(k));
+    assert(Array.isArray(k), "key must be an array of bytes");
+
+    let str = L.l_G.intern(k);
     let slot = t.__index(t, k);
     if (t.ttistable() && !slot.ttisnil()) {
         L.stack[L.top++] = slot;
@@ -553,10 +572,21 @@ const lua_tolstring = function(L, idx) {
     if ((!o.ttisstring() && !o.ttisnumber()))
         return null;
 
-    return o.ttisstring() ? o.jsstring() : `${o.value}`;
+    return o.ttisstring() ? o.value : lua.to_luastring(`${o.value}`);
 };
 
 const lua_tostring =  lua_tolstring;
+
+const lua_toljsstring = function(L, idx) {
+    let o = index2addr(L, idx);
+
+    if ((!o.ttisstring() && !o.ttisnumber()))
+        return null;
+
+    return o.ttisstring() ? o.jsstring() : `${o.value}`;
+};
+
+const lua_tojsstring =  lua_toljsstring;
 
 // Convert a string on the stack to a dataview, because lua_tostring will perform utf-8 to utf-16 conversion
 const lua_todataview = function(L, idx) {

@@ -37,13 +37,13 @@ const math_random = function(L) {
             up = lauxlib.luaL_checkinteger(L, 2);
             break;
         }
-        default: return lauxlib.luaL_error(L, "wrong number of arguments");
+        default: return lauxlib.luaL_error(L, lua.to_luastring("wrong number of arguments"));
     }
 
     /* random integer in the interval [low, up] */
-    lauxlib.luaL_argcheck(L, low <= up, 1, "interval is empty");
+    lauxlib.luaL_argcheck(L, low <= up, 1, lua.to_luastring("interval is empty"));
     lauxlib.luaL_argcheck(L, low >= 0 || up <= Number.MAX_SAFE_INTEGER + low, 1,
-            "interval too large");
+            lua.to_luastring("interval too large"));
 
     r *= (up - low) + 1;
     lapi.lua_pushinteger(L, r + low);
@@ -173,7 +173,7 @@ const math_rad = function(L) {
 const math_min = function(L) {
     let n = lapi.lua_gettop(L);  /* number of arguments */
     let imin = 1;  /* index of current minimum value */
-    lauxlib.luaL_argcheck(L, n >= 1, 1, "value expected");
+    lauxlib.luaL_argcheck(L, n >= 1, 1, lua.to_luastring("value expected"));
     for (let i = 2; i <= n; i++){
         if (lapi.lua_compare(L, i, imin, lua.LUA_OPLT))
             imin = i;
@@ -185,7 +185,7 @@ const math_min = function(L) {
 const math_max = function(L) {
     let n = lapi.lua_gettop(L);  /* number of arguments */
     let imax = 1;  /* index of current minimum value */
-    lauxlib.luaL_argcheck(L, n >= 1, 1, "value expected");
+    lauxlib.luaL_argcheck(L, n >= 1, 1, lua.to_luastring("value expected"));
     for (let i = 2; i <= n; i++){
         if (lapi.lua_compare(L, imax, i, lua.LUA_OPLT))
             imax = i;
@@ -211,7 +211,7 @@ const math_fmod = function(L) {
     if (lapi.lua_isinteger(L, 1) && lapi.lua_isinteger(L, 2)) {
         let d = lapi.lua_tointeger(L, 2);
         if (Math.abs(d) + 1 <= 1) {
-            lauxlib.luaL_argcheck(L, d !== 0, 2, "zero");
+            lauxlib.luaL_argcheck(L, d !== 0, 2, lua.to_luastring("zero"));
             lapi.lua_pushinteger(L, 0);
         } else
             lapi.lua_pushinteger(L, lapi.lua_tointeger(L, 1) % d);
@@ -265,13 +265,13 @@ const mathlib = {
 const luaopen_math = function(L) {
     lauxlib.luaL_newlib(L, mathlib);
     lapi.lua_pushnumber(L, Math.PI);
-    lapi.lua_setfield(L, -2, "pi");
+    lapi.lua_setfield(L, -2, lua.to_luastring("pi"));
     lapi.lua_pushnumber(L, Number.MAX_VALUE);
-    lapi.lua_setfield(L, -2, "huge");
+    lapi.lua_setfield(L, -2, lua.to_luastring("huge"));
     lapi.lua_pushinteger(L, Number.MAX_SAFE_INTEGER);
-    lapi.lua_setfield(L, -2, "maxinteger");
+    lapi.lua_setfield(L, -2, lua.to_luastring("maxinteger"));
     lapi.lua_pushinteger(L, Number.MIN_SAFE_INTEGER);
-    lapi.lua_setfield(L, -2, "mininteger");
+    lapi.lua_setfield(L, -2, lua.to_luastring("mininteger"));
     return 1;
 };
 

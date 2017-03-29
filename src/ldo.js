@@ -448,9 +448,9 @@ const lua_yieldk = function(L, nresults, ctx, k) {
 
     if (L.nny > 0) {
         if (L !== L.l_G.mainthread)
-            ldebug.luaG_runerror(L, "attempt to yield across a JS-call boundary");
+            ldebug.luaG_runerror(L, lua.to_luastring("attempt to yield across a JS-call boundary"));
         else
-            ldebug.luaG_runerror(L, "attempt to yield from outside a coroutine");
+            ldebug.luaG_runerror(L, lua.to_luastring("attempt to yield from outside a coroutine"));
     }
 
     L.status = TS.LUA_YIELD;
@@ -519,8 +519,8 @@ class SParser {
 }
 
 const checkmode = function(L, mode, x) {
-    if (mode && mode.indexOf(x.charAt(0)) === -1) {
-        lapi.lua_pushstring(L, `attempt to load a ${x} chunk (mode is '${mode}')`);
+    if (mode && mode.indexOf(x.charCodeAt(0)) === -1) {
+        lapi.lua_pushstring(L, lua.to_luastring(`attempt to load a ${lobject.jsstring(x)} chunk (mode is '${mode}')`));
         luaD_throw(L, TS.LUA_ERRSYNTAX);
     }
 };
