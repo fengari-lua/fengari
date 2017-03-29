@@ -431,7 +431,7 @@ const varinfo = function(L, o) {
             kind = getobjname(ci.func.p, ci.pcOff, stkid - ci.u.l.base);
     }
 
-    return lua.to_luastring(kind ? ` (${lobject.jsstring(kind.funcname)} '${lobject.jsstring(kind.name)}')` : ``);
+    return lua.to_luastring(kind ? ` (${lobject.jsstring(kind.funcname)} '${kind.name.jsstring()}')` : ``);
 };
 
 const luaG_typeerror = function(L, o, op) {
@@ -457,7 +457,7 @@ const luaG_opinterror = function(L, p1, p2, msg) {
 const luaG_ordererror = function(L, p1, p2) {
     let t1 = ltm.luaT_objtypename(L, p1);
     let t2 = ltm.luaT_objtypename(L, p2);
-    if (t1 === t2)
+    if (t1.join() === t2.join())
         luaG_runerror(L, lua.to_luastring(`attempt to compare two ${lobject.jsstring(t1)} values`));
     else
         luaG_runerror(L, lua.to_luastring(`attempt to compare ${lobject.jsstring(t1)} with ${lobject.jsstring(t2)}`));

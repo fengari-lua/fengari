@@ -58,50 +58,37 @@ const utf8_decode = function(s, val) {
 ** range [i,j], or nil + current position if 's' is not well formed in
 ** that interval
 */
-// const utflen = function(L) {
-//     let n = 0;
-//     let s = lauxlib.luaL_checkstring(L, 1);
-//     s = L.stack[lapi.index2addr_(L, 1)].value;
-//     let len = s.length;
-//     let posi = u_posrelat(lauxlib.luaL_optinteger(L, 2, 1), len);
-//     let posj = u_posrelat(lauxlib.luaL_optinteger(L, 3, -1), len);
-//
-//     lauxlib.luaL_argcheck(L, 1 <= posi && --posi <= len, 2, "initial position out of string");
-//     lauxlib.luaL_argcheck(L, --posj < len, 3, "final position out of string");
-//
-//     while (posi <= posj) {
-//         let dec = utf8_decode(s[posi]);
-//         let s1 = dec ? dec.string : null;
-//         if (s1 === null) {
-//             /* conversion error? */
-//             lapi.lua_pushnil(L);  /* return nil ... */
-//             lapi.lua_pushinteger(L, posi + 1);  /* ... and current position */
-//             return 2;
-//         }
-//         posi = dec.pos;
-//         n++;
-//     }
-//     lapi.lua_pushinteger(L, n);
-//     return 1;
-// };
-
-// Shorter JSesque solution but doesn't take invalid UTF-8 sequence (but how can we get one ?)
 const utflen = function(L) {
+    let n = 0;
     let s = lauxlib.luaL_checkstring(L, 1);
-    let posi = u_posrelat(lauxlib.luaL_optinteger(L, 2, 1), s.length);
-    let posj = u_posrelat(lauxlib.luaL_optinteger(L, 3, -1), s.length);
+    s = L.stack[lapi.index2addr_(L, 1)].value;
+    let len = s.length;
+    let posi = u_posrelat(lauxlib.luaL_optinteger(L, 2, 1), len);
+    let posj = u_posrelat(lauxlib.luaL_optinteger(L, 3, -1), len);
 
-    lauxlib.luaL_argcheck(L, 1 <= posi && --posi <= s.length, 2, lua.to_luastring("initial position out of string"));
-    lauxlib.luaL_argcheck(L, --posj < s.length, 3, lua.to_luastring("final position out of string"));
+    lauxlib.luaL_argcheck(L, 1 <= posi && --posi <= len, 2, "initial position out of string");
+    lauxlib.luaL_argcheck(L, --posj < len, 3, "final position out of string");
 
-    lapi.lua_pushinteger(L, s.slice(posi, posj + 1).length);
+    while (posi <= posj) {
+        let dec = utf8_decode(s.slice(posi));
+        let s1 = dec ? dec.string : null;
+        if (s1 === null) {
+            /* conversion error? */
+            lapi.lua_pushnil(L);  /* return nil ... */
+            lapi.lua_pushinteger(L, posi + 1);  /* ... and current position */
+            return 2;
+        }
+        posi = s.length - s1.length;
+        n++;
+    }
+    lapi.lua_pushinteger(L, n);
     return 1;
 };
 
 const pushutfchar = function(L, arg) {
     let code = lauxlib.luaL_checkinteger(L, arg);
     lauxlib.luaL_argcheck(L, 0 <= code && code <= MAXUNICODE, arg, lua.to_luastring("value out of range"));
-    lapi.lua_pushstring(L, `${String.fromCharCode(code)}`);
+    lapi.lua_pushstring(L, lua.to_luastring(String.fromCharCode(code)));
 };
 
 /*
@@ -248,8 +235,8 @@ const UTF8PATT = "[\0-\x7F\xC2-\xF4][\x80-\xBF]*";
 
 const luaopen_utf8 = function(L) {
     lauxlib.luaL_newlib(L, funcs);
-    lapi.lua_pushstring(L, UTF8PATT);
-    lapi.lua_setfield(L, -2, "charpattern");
+    lapi.lua_pushstring(L, lua.to_luastring(UTF8PATT));
+    lapi.lua_setfield(L, -2, lua.to_luastring("charpattern"));
     return 1;
 };
 

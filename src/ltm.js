@@ -53,7 +53,7 @@ const luaT_typenames_ = [
     "userdata",
     "thread",
     "proto" /* this last case is used for tests only */
-];
+].map(e => lua.to_luastring(e));
 
 const ttypename = function(t) {
     return luaT_typenames_[t + 1];

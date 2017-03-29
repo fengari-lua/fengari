@@ -1231,7 +1231,7 @@ const luaK_setlist = function(fs, base, nelems, tostore) {
         codeextraarg(fs, c);
     }
     else
-        llex.luaX_syntaxerror(fs.ls, "constructor too long");
+        llex.luaX_syntaxerror(fs.ls, lua.to_luastring("constructor too long"));
     fs.freereg = base + 1;  /* free registers with list values */
 };
 

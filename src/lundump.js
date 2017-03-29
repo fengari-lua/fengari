@@ -5,10 +5,8 @@ const fs             = require('fs');
 const assert         = require('assert');
 
 const lua            = require('./lua.js');
-const LClosure       = require('./lobject.js').LClosure;
-const TValue         = require('./lobject.js').TValue;
+const lobject        = require('./lobject.js');
 const Proto          = require('./lfunc.js').Proto;
-const constant_types = require('./lua.js').constant_types;
 const OpCodes        = require('./lopcodes.js');
 
 const LUAI_MAXSHORTLEN = 40;
@@ -167,20 +165,20 @@ class BytecodeParser {
             let t = this.readByte();
 
             switch (t) {
-            case constant_types.LUA_TNIL:
-                f.k.push(new TValue(constant_types.LUA_TNIL, null));
+            case lua.CT.LUA_TNIL:
+                f.k.push(new lobject.TValue(lua.CT.LUA_TNIL, null));
                 break;
-            case constant_types.LUA_TBOOLEAN:
-                f.k.push(new TValue(constant_types.LUA_TBOOLEAN, this.readByte()));
+            case lua.CT.LUA_TBOOLEAN:
+                f.k.push(new lobject.TValue(lua.CT.LUA_TBOOLEAN, this.readByte()));
                 break;
-            case constant_types.LUA_TNUMFLT:
-                f.k.push(new TValue(constant_types.LUA_TNUMFLT, this.readNumber()));
+            case lua.CT.LUA_TNUMFLT:
+                f.k.push(new lobject.TValue(lua.CT.LUA_TNUMFLT, this.readNumber()));
                 break;
-            case constant_types.LUA_TNUMINT:
-                f.k.push(new TValue(constant_types.LUA_TNUMINT, this.readInteger()));
+            case lua.CT.LUA_TNUMINT:
+                f.k.push(new lobject.TValue(lua.CT.LUA_TNUMINT, this.readInteger()));
                 break;
-            case constant_types.LUA_TSHRSTR:
-            case constant_types.LUA_TLNGSTR:
+            case lua.CT.LUA_TSHRSTR:
+            case lua.CT.LUA_TLNGSTR:
                 f.k.push(this.L.l_G.intern(this.read8bitString()));
                 break;
             default:
@@ -206,7 +204,7 @@ class BytecodeParser {
         n = this.readInt();
         for (let i = 0; i < n; i++) {
             f.locvars[i] = {
-                varname: this.readString(),
+                varname: new lobject.TValue(lua.CT.LUA_TLNGSTR, lua.to_luastring(this.readString())),
                 startpc: this.readInt(),
                 endpc:   this.readInt()
             };
@@ -264,7 +262,7 @@ class BytecodeParser {
     luaU_undump() {
         this.checkHeader();
 
-        let cl = new LClosure(this.L, this.readByte());
+        let cl = new lobject.LClosure(this.L, this.readByte());
 
         this.L.stack[this.L.top] = cl;
         this.L.top++;

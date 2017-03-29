@@ -1372,7 +1372,7 @@ const createmetatable = function(L) {
     lapi.lua_setmetatable(L, -2);  /* set table as metatable for strings */
     lapi.lua_pop(L, 1);  /* pop dummy string */
     lapi.lua_pushvalue(L, -2);  /* get string library */
-    lapi.lua_setfield(L, -2, "__index");  /* metatable.__index = string */
+    lapi.lua_setfield(L, -2, lua.to_luastring("__index"));  /* metatable.__index = string */
     lapi.lua_pop(L, 1);  /* pop metatable */  
 };
 

@@ -2,6 +2,7 @@
 
 const assert = require('assert');
 
+const lua      = require('./lua.js');
 const lapi     = require('./lapi.js');
 const lauxlib  = require('./lauxlib.js');
 const lbaselib = require('./lbaselib.js');
@@ -24,7 +25,7 @@ const loadedlibs = {
 const luaL_openlibs = function(L) {
     /* "require" functions from 'loadedlibs' and set results to global table */
     for (let lib in loadedlibs) {
-        lauxlib.luaL_requiref(L, lib, loadedlibs[lib], 1);
+        lauxlib.luaL_requiref(L, lua.to_luastring(lib), loadedlibs[lib], 1);
         lapi.lua_pop(L, 1); /* remove lib */
     }
 };

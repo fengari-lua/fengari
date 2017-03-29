@@ -135,6 +135,8 @@ class lua_Debug {
 }
 
 const to_luastring = function(str, maxBytesToWrite) {
+    assert(typeof str === "string", "to_luastring expect a js string");
+
     maxBytesToWrite = maxBytesToWrite !== undefined ? maxBytesToWrite : Number.MAX_SAFE_INTEGER;
     let outU8Array = [];
 

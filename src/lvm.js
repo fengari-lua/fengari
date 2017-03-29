@@ -592,19 +592,19 @@ const luaV_execute = function(L) {
                     let nstep = tonumber(pstep);
 
                     if (nlimit === false)
-                        ldebug.luaG_runerror(L, "'for' limit must be a number");
+                        ldebug.luaG_runerror(L, lua.to_luastring("'for' limit must be a number"));
 
                     plimit.type = CT.LUA_TNUMFLT;
                     plimit.value = nlimit;
 
                     if (nstep === false)
-                        ldebug.luaG_runerror(L, "'for' step must be a number");
+                        ldebug.luaG_runerror(L, lua.to_luastring("'for' step must be a number"));
 
                     pstep.type = CT.LUA_TNUMFLT;
                     pstep.value = nstep;
 
                     if (ninit === false)
-                        ldebug.luaG_runerror(L, "'for' initial value must be a number");
+                        ldebug.luaG_runerror(L, lua.to_luastring("'for' initial value must be a number"));
 
                     init.type = CT.LUA_TNUMFLT;
                     init.value = ninit - nstep;
@@ -977,7 +977,7 @@ const luaV_objlen = function(L, ra, rb) {
         default: {
             tm = ltm.luaT_gettmbyobj(L, rb, ltm.TMS.TM_LEN);
             if (tm.ttisnil())
-                ldebug.luaG_typeerror(L, rb, "get length of");
+                ldebug.luaG_typeerror(L, rb, lua.to_luastring("get length of"));
             break;
         }
     }
@@ -1042,7 +1042,7 @@ const gettable = function(L, table, key, ra, recur) {
     recur = recur ? recur : 0;
 
     if (recur >= MAXTAGRECUR)
-        ldebug.luaG_runerror(L, "'__index' chain too long; possible loop");
+        ldebug.luaG_runerror(L, lua.to_luastring("'__index' chain too long; possible loop"));
 
     if (table.ttistable()) {
         let element = table.__index(table, key);
@@ -1063,7 +1063,7 @@ const luaV_finishget = function(L, t, key, val, slot, recur) {
         assert(!t.ttistable());
         tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_INDEX);
         if (tm.ttisnil())
-            ldebug.luaG_typeerror(L, t, 'index');
+            ldebug.luaG_typeerror(L, t, lua.to_luastring('index'));
     } else { /* 't' is a table */
         assert(slot.ttisnil());
         tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_INDEX); // TODO: fasttm
@@ -1085,7 +1085,7 @@ const settable = function(L, table, key, v, recur) {
     recur = recur ? recur : 0;
 
     if (recur >= MAXTAGRECUR)
-        ldebug.luaG_runerror(L, "'__newindex' chain too long; possible loop");
+        ldebug.luaG_runerror(L, lua.to_luastring("'__newindex' chain too long; possible loop"));
 
     if (table.ttistable()) {
         let element = table.__index(table, key);
@@ -1112,7 +1112,7 @@ const luaV_finishset = function(L, t, key, val, slot, recur) {
     } else { /* not a table; check metamethod */
         tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_NEWINDEX);
         if (tm.ttisnil())
-            ldebug.luaG_typeerror(L, t, 'index');
+            ldebug.luaG_typeerror(L, t, lua.to_luastring('index'));
     }
 
     if (tm.ttisfunction()) {

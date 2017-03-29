@@ -26,7 +26,7 @@ test('LOADK, RETURN', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "hello world",
         "Program output is correct"
     );
@@ -50,7 +50,7 @@ test('MOVE', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "hello world",
         "Program output is correct"
     );
@@ -328,7 +328,7 @@ test('TESTSET (and)', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "hello",
         "Program output is correct"
     );
@@ -353,7 +353,7 @@ test('TESTSET (or)', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "hello",
         "Program output is correct"
     );
@@ -382,7 +382,7 @@ test('TEST (true)', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "hello",
         "Program output is correct"
     );
@@ -411,7 +411,7 @@ test('TEST (false)', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "goodbye",
         "Program output is correct"
     );
@@ -532,7 +532,7 @@ test('SETUPVAL, GETUPVAL', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "world",
         "Program output is correct"
     );
@@ -594,7 +594,7 @@ test('SELF', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "hello",
         "Program output is correct"
     );
@@ -794,7 +794,7 @@ test('CONCAT', function (t) {
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "hello 2 you",
         "Program output is correct"
     );

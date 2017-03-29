@@ -163,7 +163,7 @@ const pack = function(L) {
     for (let i = n; i >= 1; i--)  /* assign elements */
         lapi.lua_seti(L, 1, i);
     lapi.lua_pushinteger(L, n);
-    lapi.lua_setfield(L, 1, "n");  /* t.n = number of elements */
+    lapi.lua_setfield(L, 1, ["n".charCodeAt(0)]);  /* t.n = number of elements */
     return 1;  /* return table */
 };
 

@@ -28,9 +28,9 @@ test('luaL_newstate, lua_pushnil, luaL_typename', function (t) {
 
     }, "JS Lua program ran without error");
 
-    t.strictEqual(
+    t.deepEqual(
         lauxlib.luaL_typename(L, -1),
-        "nil",
+        "nil".split('').map(e => e.charCodeAt(0)),
         "Correct element(s) on the stack"
     );
 });
@@ -49,9 +49,9 @@ test('lua_pushnumber', function (t) {
 
     }, "JS Lua program ran without error");
 
-    t.strictEqual(
+    t.deepEqual(
         lauxlib.luaL_typename(L, -1),
-        "number",
+        "number".split('').map(e => e.charCodeAt(0)),
         "Correct element(s) on the stack"
     );
 
@@ -76,9 +76,9 @@ test('lua_pushinteger', function (t) {
 
     }, "JS Lua program ran without error");
 
-    t.strictEqual(
+    t.deepEqual(
         lauxlib.luaL_typename(L, -1),
-        "number",
+        "number".split('').map(e => e.charCodeAt(0)),
         "Correct element(s) on the stack"
     );
 
@@ -90,7 +90,7 @@ test('lua_pushinteger', function (t) {
 });
 
 
-test('lua_pushstring', function (t) {
+test('lua_pushliteral', function (t) {
     let L;
     
     t.plan(3);
@@ -99,18 +99,18 @@ test('lua_pushstring', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lapi.lua_pushstring(L, "hello");
+        lapi.lua_pushliteral(L, "hello");
 
     }, "JS Lua program ran without error");
 
-    t.strictEqual(
+    t.deepEqual(
         lauxlib.luaL_typename(L, -1),
-        "string",
+        "string".split('').map(e => e.charCodeAt(0)),
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "hello",
         "top is correct"
     );
@@ -130,9 +130,9 @@ test('lua_pushboolean', function (t) {
 
     }, "JS Lua program ran without error");
 
-    t.strictEqual(
+    t.deepEqual(
         lauxlib.luaL_typename(L, -1),
-        "boolean",
+        "boolean".split('').map(e => e.charCodeAt(0)),
         "Correct element(s) on the stack"
     );
 
@@ -153,32 +153,32 @@ test('lua_pushvalue', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lapi.lua_pushstring(L, "hello");
+        lapi.lua_pushliteral(L, "hello");
 
         lapi.lua_pushvalue(L, -1);
 
     }, "JS Lua program ran without error");
 
-    t.strictEqual(
+    t.deepEqual(
         lauxlib.luaL_typename(L, -1),
-        "string",
+        "string".split('').map(e => e.charCodeAt(0)),
         "Correct element(s) on the stack"
     );
 
-    t.strictEqual(
+    t.deepEqual(
         lauxlib.luaL_typename(L, -2),
-        "string",
+        "string".split('').map(e => e.charCodeAt(0)),
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "hello",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tostring(L, -2),
+        lapi.lua_tojsstring(L, -2),
         "hello",
         "Correct element(s) on the stack"
     );
@@ -198,14 +198,14 @@ test('lua_pushjsclosure', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lapi.lua_pushstring(L, "a value associated to the C closure");
+        lapi.lua_pushliteral(L, "a value associated to the C closure");
         lapi.lua_pushjsclosure(L, fn, 1);
 
     }, "JS Lua program ran without error");
 
-    t.strictEqual(
+    t.deepEqual(
         lauxlib.luaL_typename(L, -1),
-        "function",
+        "function".split('').map(e => e.charCodeAt(0)),
         "Correct element(s) on the stack"
     );
 });
@@ -228,9 +228,9 @@ test('lua_pushjsfunction', function (t) {
 
     }, "JS Lua program ran without error");
 
-    t.strictEqual(
+    t.deepEqual(
         lauxlib.luaL_typename(L, -1),
-        "function",
+        "function".split('').map(e => e.charCodeAt(0)),
         "Correct element(s) on the stack"
     );
 });
@@ -244,7 +244,7 @@ test('lua_call (calling a light JS function)', function (t) {
     t.doesNotThrow(function () {
 
         let fn = function(L) {
-            lapi.lua_pushstring(L, "hello");
+            lapi.lua_pushliteral(L, "hello");
             return 1;
         };
 
@@ -257,7 +257,7 @@ test('lua_call (calling a light JS function)', function (t) {
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "hello",
         "top is correct"
     );
@@ -278,7 +278,7 @@ test('lua_call (calling a JS closure)', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lapi.lua_pushstring(L, "upvalue hello !");
+        lapi.lua_pushliteral(L, "upvalue hello !");
         lapi.lua_pushjsclosure(L, fn, 1);
 
         lapi.lua_call(L, 0, 1);
@@ -286,7 +286,7 @@ test('lua_call (calling a JS closure)', function (t) {
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "upvalue hello !",
         "top is correct"
     );
@@ -301,7 +301,7 @@ test('lua_pcall (calling a light JS function)', function (t) {
     t.doesNotThrow(function () {
 
         let fn = function(L) {
-            lapi.lua_pushstring(L, "hello");
+            lapi.lua_pushliteral(L, "hello");
             return 1;
         };
 
@@ -314,7 +314,7 @@ test('lua_pcall (calling a light JS function)', function (t) {
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "hello",
         "top is correct"
     );
@@ -353,15 +353,15 @@ test('lua_pop', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lapi.lua_pushstring(L, "hello");
-        lapi.lua_pushstring(L, "world");
+        lapi.lua_pushliteral(L, "hello");
+        lapi.lua_pushliteral(L, "world");
 
         lapi.lua_pop(L, 1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "hello",
         "Correct element(s) on the stack"
     );
@@ -382,14 +382,14 @@ test('lua_load and lua_call it', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lapi.lua_load(L, null, bc, "test-lua_load", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-lua_load"), lua.to_luastring("binary"));
 
         lapi.lua_call(L, 0, 1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "JS > Lua > JS \o/",
         "Correct element(s) on the stack"
     );
@@ -409,17 +409,17 @@ test('lua script reads js upvalues', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lapi.lua_load(L, null, bc, "test-lua_load", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-lua_load"), lua.to_luastring("binary"));
 
-        lapi.lua_pushstring(L, "hello");
-        lapi.lua_setglobal(L, "js");
+        lapi.lua_pushliteral(L, "hello");
+        lapi.lua_setglobal(L, lua.to_luastring("js"));
 
         lapi.lua_call(L, 0, 1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "hello world",
         "Correct element(s) on the stack"
     );
@@ -474,18 +474,18 @@ test('lua_settable, lua_gettable', function (t) {
 
         lapi.lua_newtable(L);
 
-        lapi.lua_pushstring(L, "key");
-        lapi.lua_pushstring(L, "value");
+        lapi.lua_pushliteral(L, "key");
+        lapi.lua_pushliteral(L, "value");
 
         lapi.lua_settable(L, -3);
 
-        lapi.lua_pushstring(L, "key");
+        lapi.lua_pushliteral(L, "key");
         lapi.lua_gettable(L, -2);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "value",
         "Correct element(s) on the stack"
     );

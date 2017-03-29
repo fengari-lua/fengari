@@ -519,8 +519,8 @@ class SParser {
 }
 
 const checkmode = function(L, mode, x) {
-    if (mode && mode.indexOf(x.charCodeAt(0)) === -1) {
-        lapi.lua_pushstring(L, lua.to_luastring(`attempt to load a ${lobject.jsstring(x)} chunk (mode is '${mode}')`));
+    if (mode && mode.indexOf(x[0]) === -1) {
+        lapi.lua_pushstring(L, lua.to_luastring(`attempt to load a ${lobject.jsstring(x)} chunk (mode is '${lobject.jsstring(mode)}')`));
         luaD_throw(L, TS.LUA_ERRSYNTAX);
     }
 };
@@ -528,11 +528,11 @@ const checkmode = function(L, mode, x) {
 const f_parser = function(L, p) {
     let cl;
     let c = p.z.getc();  /* read first character */
-    if (String.fromCharCode(c) === lua.LUA_SIGNATURE.charAt(0)) {
-        checkmode(L, p.mode, "binary");
+    if (c === lua.LUA_SIGNATURE.charCodeAt(0)) {
+        checkmode(L, p.mode, lua.to_luastring("binary"));
         cl = new BytecodeParser(L, p.z.buffer).luaU_undump();
     } else {
-        checkmode(L, p.mode, "text");
+        checkmode(L, p.mode, lua.to_luastring("text"));
         cl = lparser.luaY_parser(L, p.z, p.buff, p.dyd, p.name, c);
     }
 

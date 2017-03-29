@@ -11,7 +11,7 @@ const TS      = lua.thread_status;
 
 const luaB_print = function(L) {
     let n = lapi.lua_gettop(L); /* number of arguments */
-    let str = "";
+    let str = [];
 
     lapi.lua_getglobal(L, lua.to_luastring("tostring"));
     for (let i = 1; i <= n; i++) {
@@ -201,7 +201,7 @@ const luaB_assert = function(L) {
 
 const luaB_select = function(L) {
     let n = lapi.lua_gettop(L);
-    if (lapi.lua_type(L, 1) === CT.LUA_TSTRING && lapi.lua_tostring(L, 1) === "#") {
+    if (lapi.lua_type(L, 1) === CT.LUA_TSTRING && lapi.lua_tostring(L, 1)[0] === "#".charCodeAt(0)) {
         lapi.lua_pushinteger(L, n - 1);
         return 1;
     } else {

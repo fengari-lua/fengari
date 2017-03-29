@@ -42,14 +42,14 @@ test('table.concat', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, "test-table.concat", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-table.concat"), lua.to_luastring("binary"));
 
         lapi.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "3,4,5",
         "Correct element(s) on the stack"
     );
@@ -71,7 +71,7 @@ test('table.pack', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, "test-table.pack", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-table.pack"), lua.to_luastring("binary"));
 
         lapi.lua_call(L, 0, -1);
 
@@ -102,7 +102,7 @@ test('table.unpack', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, "test-table.unpack", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-table.unpack"), lua.to_luastring("binary"));
 
         lapi.lua_call(L, 0, -1);
 
@@ -146,7 +146,7 @@ test('table.insert', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, "test-table.insert", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-table.insert"), lua.to_luastring("binary"));
 
         lapi.lua_call(L, 0, -1);
 
@@ -180,7 +180,7 @@ test('table.remove', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, "test-table.remove", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-table.remove"), lua.to_luastring("binary"));
 
         lapi.lua_call(L, 0, -1);
 
@@ -213,7 +213,7 @@ test('table.move', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, "test-table.move", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-table.move"), lua.to_luastring("binary"));
 
         lapi.lua_call(L, 0, -1);
 
@@ -246,7 +246,7 @@ test('table.sort (<)', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, "test-table.sort", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-table.sort"), lua.to_luastring("binary"));
 
         lapi.lua_call(L, 0, -1);
 
@@ -279,7 +279,7 @@ test('table.sort with cmp function', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, "test-table.sort", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-table.sort"), lua.to_luastring("binary"));
 
         lapi.lua_call(L, 0, -1);
 

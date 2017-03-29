@@ -40,7 +40,7 @@ test('coroutine.create, coroutine.yield, coroutine.resume', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, "test-coroutine", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-coroutine"), lua.to_luastring("binary"));
 
         lapi.lua_call(L, 0, -1);
 
@@ -83,20 +83,20 @@ test('coroutine.status', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, "test-coroutine.status", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-coroutine.status"), lua.to_luastring("binary"));
 
         lapi.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -2),
+        lapi.lua_tojsstring(L, -2),
         "suspended",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "dead",
         "Correct element(s) on the stack"
     );
@@ -124,7 +124,7 @@ test('coroutine.isyieldable', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, "test-coroutine.isyieldable", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-coroutine.isyieldable"), lua.to_luastring("binary"));
 
         lapi.lua_call(L, 0, -1);
 
@@ -165,7 +165,7 @@ test('coroutine.running', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, "test-coroutine.running", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-coroutine.running"), lua.to_luastring("binary"));
 
         lapi.lua_call(L, 0, -1);
 
@@ -206,7 +206,7 @@ test('coroutine.wrap', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, "test-coroutine.wrap", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-coroutine.wrap"), lua.to_luastring("binary"));
 
         lapi.lua_call(L, 0, -1);
 

@@ -678,7 +678,7 @@ const lua_compare_ = function(L, o1, o2, op) {
 };
 
 const lua_stringtonumber = function(L, s) {
-    let number = parseFloat(s);
+    let number = parseFloat(lobject.jsstring(s));
     L.stack[L.top++] = new TValue(number % 1 !== 0 ? CT.LUA_TNUMFLT : CT.LUA_TNUMINT, number);
     assert(L.top <= L.ci.top, "stack overflow");
     return s.length;
@@ -980,6 +980,8 @@ module.exports.lua_toboolean         = lua_toboolean;
 module.exports.lua_todataview        = lua_todataview;
 module.exports.lua_tointeger         = lua_tointeger;
 module.exports.lua_tointegerx        = lua_tointegerx;
+module.exports.lua_tojsstring        = lua_tojsstring;
+module.exports.lua_toljsstring       = lua_toljsstring;
 module.exports.lua_tolstring         = lua_tolstring;
 module.exports.lua_tonumber          = lua_tonumber;
 module.exports.lua_topointer         = lua_topointer;

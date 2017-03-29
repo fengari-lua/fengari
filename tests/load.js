@@ -39,7 +39,7 @@ test('luaL_loadstring', function (t) {
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "hello world",
         "Correct element(s) on the stack"
     );
@@ -72,7 +72,7 @@ test('load', function (t) {
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "js running lua running lua",
         "Correct element(s) on the stack"
     );
@@ -107,7 +107,7 @@ test('luaL_loadbuffer', function (t) {
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "hello world",
         "Correct element(s) on the stack"
     );
@@ -140,7 +140,7 @@ test('loadfile', function (t) {
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "hello world",
         "Correct element(s) on the stack"
     );
@@ -173,7 +173,7 @@ test('loadfile (binary)', function (t) {
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "hello world",
         "Correct element(s) on the stack"
     );
@@ -205,7 +205,7 @@ test('dofile', function (t) {
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "hello world",
         "Correct element(s) on the stack"
     );

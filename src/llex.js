@@ -15,6 +15,12 @@ const TS       = lua.thread_status;
 
 const FIRST_RESERVED = 257;
 
+// To avoid charCodeAt everywhere
+const char = [];
+for (let i = 0; i < 127; i++)
+    char[String.fromCharCode(i)] = i;
+module.exports.char = char;
+
 const RESERVED = {
     /* terminal symbols denoted by reserved words */
     TK_AND:      FIRST_RESERVED,
@@ -157,7 +163,7 @@ const save = function(ls, c) {
 
 const luaX_token2str = function(ls, token) {
     if (typeof token === "string" || token < FIRST_RESERVED) {  /* single-byte symbols? */
-        return lua.to_luastring(`'${typeof token === "string" ? token : lobject.jsstring(token)}'`);
+        return lua.to_luastring(`'${typeof token === "string" ? token : lobject.jsstring([token])}'`);
     } else {
         let s = luaX_tokens[token - FIRST_RESERVED];
         if (token < R.TK_EOS)  /* fixed format (symbols and reserved words)? */
@@ -168,7 +174,7 @@ const luaX_token2str = function(ls, token) {
 };
 
 const currIsNewline = function(ls) {
-    return ls.current === '\n'.charCodeAt(0) || ls.current === '\r'.charCodeAt(0);
+    return ls.current === char['\n'] || ls.current === char['\r'];
 };
 
 const next = function(ls) {
@@ -235,7 +241,7 @@ const check_next1 = function(ls, c) {
 ** saves it
 */
 const check_next2 = function(ls, set) {
-    if (ls.current === set.charAt(0).charCodeAt(0) || ls.current === set.charAt(1).charCodeAt(0)) {
+    if (ls.current === set[0].charCodeAt(0) || ls.current === set[1].charCodeAt(0)) {
         save_and_next(ls);
         return true;
     }
@@ -248,7 +254,7 @@ const read_numeral = function(ls, seminfo) {
     let first = ls.current;
     assert(ljstype.lisdigit(ls.current));
     save_and_next(ls);
-    if (first === '0' && check_next2(ls, "xX"))  /* hexadecimal? */
+    if (first === char['0'] && check_next2(ls, "xX"))  /* hexadecimal? */
         expo = "Pp";
 
     for (;;) {
@@ -256,7 +262,7 @@ const read_numeral = function(ls, seminfo) {
             check_next2(ls, "-+");  /* optional exponent sign */
         if (ljstype.lisxdigit(ls.current))
             save_and_next(ls);
-        else if (ls.current === '.')
+        else if (ls.current === char['.'])
             save_and_next(ls);
         else break;
     }
@@ -295,7 +301,6 @@ const lexerror = function(ls, msg, token) {
 };
 
 const luaX_syntaxerror = function(ls, msg) {
-    msg = msg instanceof TValue ? msg.value : lua.to_luastring(msg);
     lexerror(ls, msg, ls.t.token);
 };
 
@@ -307,9 +312,9 @@ const luaX_syntaxerror = function(ls, msg) {
 const skip_sep = function(ls) {
     let count = 0;
     let s = ls.current;
-    assert(s === '['.charCodeAt(0) || s === ']'.charCodeAt(0));
+    assert(s === char['['] || s === char[']']);
     save_and_next(ls);
-    while (ls.current === '='.charCodeAt(0)) {
+    while (ls.current === char['=']) {
         save_and_next(ls);
         count++;
     }
@@ -332,15 +337,15 @@ const read_long_string = function(ls, seminfo, sep) {
                 lexerror(ls, lua.to_luastring(msg), R.TK_EOS);
                 break;
             }
-            case ']'.charCodeAt(0): {
+            case char[']']: {
                 if (skip_sep(ls) === sep) {
                     save_and_next(ls);  /* skip 2nd ']' */
                     skip = true;
                 }
                 break;
             }
-            case '\n'.charCodeAt(0): case '\r'.charCodeAt(0): {
-                save(ls, '\n'.charCodeAt(0));
+            case char['\n']: case char['\r']: {
+                save(ls, char['\n']);
                 inclinenumber(ls);
                 if (!seminfo) {
                     ls.buff.n = 0;
@@ -386,7 +391,7 @@ const readhexaesc = function(ls) {
 const readutf8desc = function(ls) {
     let i = 4;  /* chars to be removed: '\', 'u', '{', and first digit */
     save_and_next(ls);  /* skip 'u' */
-    esccheck(ls, ls.current === '{'.charCodeAt(0), lua.to_luastring("missing '{'"));
+    esccheck(ls, ls.current === char['{'], lua.to_luastring("missing '{'"));
     let r = gethexa(ls);  /* must have at least one digit */
 
     save_and_next(ls);
@@ -396,7 +401,7 @@ const readutf8desc = function(ls) {
         esccheck(ls, r <= 0x10FFFF, lua.to_luastring("UTF-8 value too large"));
         save_and_next(ls);
     }
-    esccheck(ls, ls.current === '}'.charCodeAt(0), lua.to_luastring("missing '}'"));
+    esccheck(ls, ls.current === char['}'], lua.to_luastring("missing '}'"));
     next(ls);  /* skip '}' */
     ls.buff.n -= i;  /* remove saved chars from buffer */
     return r;
@@ -429,30 +434,30 @@ const read_string = function(ls, del, seminfo) {
             case -1:
                 lexerror(ls, lua.to_luastring("unfinished string"), R.TK_EOS);
                 break;
-            case '\n'.charCodeAt(0):
-            case '\r'.charCodeAt(0):
+            case char['\n']:
+            case char['\r']:
                 lexerror(ls, lua.to_luastring("unfinished string"), R.TK_STRING);
                 break;
-            case '\\'.charCodeAt(0): {  /* escape sequences */
+            case char['\\']: {  /* escape sequences */
                 save_and_next(ls);  /* keep '\\' for error messages */
                 let will;
                 let c;
                 switch(ls.current) {
-                    case 'a': c = '\a'.charCodeAt(0); will = 'read_save'; break;
-                    case 'b': c = '\b'.charCodeAt(0); will = 'read_save'; break;
-                    case 'f': c = '\f'.charCodeAt(0); will = 'read_save'; break;
-                    case 'n': c = '\n'.charCodeAt(0); will = 'read_save'; break;
-                    case 'r': c = '\r'.charCodeAt(0); will = 'read_save'; break;
-                    case 't': c = '\t'.charCodeAt(0); will = 'read_save'; break;
-                    case 'v': c = '\v'.charCodeAt(0); will = 'read_save'; break;
-                    case 'x': c = readhexaesc(ls); will = 'read_save'; break;
-                    case 'u': utf8esc(ls); will = 'no_save'; break;
-                    case '\n'.charCodeAt(0): case '\r'.charCodeAt(0):
-                        inclinenumber(ls); c = '\n'; will = 'only_save'; break;
-                    case '\\'.charCodeAt(0): case '\"'.charCodeAt(0): case '\''.charCodeAt(0):
+                    case char['a']: c = char['\a']; will = 'read_save'; break;
+                    case char['b']: c = char['\b']; will = 'read_save'; break;
+                    case char['f']: c = char['\f']; will = 'read_save'; break;
+                    case char['n']: c = char['\n']; will = 'read_save'; break;
+                    case char['r']: c = char['\r']; will = 'read_save'; break;
+                    case char['t']: c = char['\t']; will = 'read_save'; break;
+                    case char['v']: c = char['\v']; will = 'read_save'; break;
+                    case char['x']: c = readhexaesc(ls); will = 'read_save'; break;
+                    case char['u']: utf8esc(ls); will = 'no_save'; break;
+                    case char['\n']: case char['\r']:
+                        inclinenumber(ls); c = char['\n']; will = 'only_save'; break;
+                    case char['\\']: case char['\"']: case char['\'']:
                         c = ls.current; will = 'read_save'; break;
                     case -1: will = 'no_save'; break;  /* will raise an error next loop */
-                    case 'z': {  /* zap following span of spaces */
+                    case char['z']: {  /* zap following span of spaces */
                         ls.buff.n -= 1;  /* remove '\\' */
                         next(ls);  /* skip the 'z' */
                         while (ljstype.lisspace(ls.current)) {
@@ -500,20 +505,20 @@ const llex = function(ls, seminfo) {
 
     for (;;) {
         switch (ls.current) {
-            case '\n'.charCodeAt(0): case '\r'.charCodeAt(0): {  /* line breaks */
+            case char['\n']: case char['\r']: {  /* line breaks */
                 inclinenumber(ls);
                 break;
             }
-            case ' '.charCodeAt(0): case '\f'.charCodeAt(0): case '\t'.charCodeAt(0): case '\v'.charCodeAt(0): {  /* spaces */
+            case char[' ']: case char['\f']: case char['\t']: case char['\v']: {  /* spaces */
                 next(ls);
                 break;
             }
-            case '-'.charCodeAt(0): {  /* '-' or '--' (comment) */
+            case char['-']: {  /* '-' or '--' (comment) */
                 next(ls);
-                if (ls.current !== '-'.charCodeAt(0)) return '-';
+                if (ls.current !== char['-']) return char['-'];
                 /* else is a comment */
                 next(ls);
-                if (ls.current === '['.charCodeAt(0)) {  /* long comment? */
+                if (ls.current === char['[']) {  /* long comment? */
                     let sep = skip_sep(ls);
                     ls.buff.n = 0;  /* 'skip_sep' may dirty the buffer */
                     ls.buff.buffer = [];
@@ -530,63 +535,63 @@ const llex = function(ls, seminfo) {
                     next(ls);  /* skip until end of line (or end of file) */
                 break;
             }
-            case '['.charCodeAt(0): {  /* long string or simply '[' */
+            case char['[']: {  /* long string or simply '[' */
                 let sep = skip_sep(ls);
                 if (sep >= 0) {
                     read_long_string(ls, seminfo, sep);
                     return R.TK_STRING;
                 } else if (sep !== -1)  /* '[=...' missing second bracket */
                     lexerror(ls, lua.to_luastring("invalid long string delimiter"), R.TK_STRING);
-                return '[';
+                return char['['];
             }
-            case '='.charCodeAt(0): {
+            case char['=']: {
                 next(ls);
                 if (check_next1(ls, '=')) return R.TK_EQ;
-                else return '=';
+                else return char['='];
             }
-            case '<'.charCodeAt(0): {
+            case char['<']: {
                 next(ls);
                 if (check_next1(ls, '=')) return R.TK_LE;
                 else if (check_next1(ls, '<')) return R.TK_SHL;
-                else return '<';
+                else return char['<'];
             }
-            case '>'.charCodeAt(0): {
+            case char['>']: {
                 next(ls);
                 if (check_next1(ls, '=')) return R.TK_GE;
                 else if (check_next1(ls, '>')) return R.TK_SHR;
-                else return '>';
+                else return char['>'];
             }
-            case '/'.charCodeAt(0): {
+            case char['/']: {
                 next(ls);
                 if (check_next1(ls, '/')) return R.TK_IDIV;
-                else return '/';
+                else return char['/'];
             }
-            case '~'.charCodeAt(0): {
+            case char['~']: {
                 next(ls);
                 if (check_next1(ls, '=')) return R.TK_NE;
-                else return '~';
+                else return char['~'];
             }
-            case ':'.charCodeAt(0): {
+            case char[':']: {
                 next(ls);
                 if (check_next1(ls, ':')) return R.TK_DBCOLON;
-                else return ':';
+                else return char[':'];
             }
-            case '"'.charCodeAt(0): case '\''.charCodeAt(0): {  /* short literal strings */
+            case char['"']: case char['\'']: {  /* short literal strings */
                 read_string(ls, ls.current, seminfo);
                 return R.TK_STRING;
             }
-            case '.'.charCodeAt(0): {  /* '.', '..', '...', or number */
+            case char['.']: {  /* '.', '..', '...', or number */
                 save_and_next(ls);
                 if (check_next1(ls, '.')) {
                     if (check_next1(ls, '.'))
                         return R.TK_DOTS;   /* '...' */
                     else return R.TK_CONCAT;   /* '..' */
                 }
-                else if (!ljstype.lisdigit(ls.current)) return '.';
+                else if (!ljstype.lisdigit(ls.current)) return char['.'];
                 else return read_numeral(ls, seminfo);
             }
-            case '0': case '1': case '2': case '3': case '4':
-            case '5': case '6': case '7': case '8': case '9': {
+            case char['0']: case char['1']: case char['2']: case char['3']: case char['4']:
+            case char['5']: case char['6']: case char['7']: case char['8']: case char['9']: {
                 return read_numeral(ls, seminfo);
             }
             case -1: {
@@ -598,7 +603,7 @@ const llex = function(ls, seminfo) {
                         save_and_next(ls);
                     } while (ljstype.lislalnum(ls.current));
 
-                    let ts = new TValue(CT.LUA_TLNGSTR, lua.to_luastring(ls.buff.buffer.join('')));
+                    let ts = new TValue(CT.LUA_TLNGSTR, ls.buff.buffer);
                     seminfo.ts = ts;
                     let kidx = luaX_tokens.slice(0, 22).indexOf(ts.jsstring());
                     if (kidx >= 0)  /* reserved word? */

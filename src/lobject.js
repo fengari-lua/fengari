@@ -132,6 +132,8 @@ const luaO_nilobject = new TValue(CT.LUA_TNIL, null);
 module.exports.luaO_nilobject = luaO_nilobject;
 
 const jsstring = function(value, from, to) {
+    assert(Array.isArray(value), "jsstring expect a array of bytes");
+
     let u0, u1, u2, u3, u4, u5;
     let idx = 0;
     value = value.slice(from ? from : 0, to);
@@ -194,6 +196,8 @@ class Table extends TValue {
             }
         } else if (typeof key === "string") { // To avoid
             key = lua.to_luastring(key).map(e => `${e}|`).join('');
+        } else if (Array.isArray(key)) {
+            key = key.map(e => `${e}|`).join('');
         }
 
         return key;
@@ -293,7 +297,7 @@ const luaO_chunkid = function(source, bufflen) {
         else {  /* truncate it */
             out = out.concat(source.slice(1, bufflen));
         }
-    } else if (source.charAt(0) === '@') {  /* file name */
+    } else if (source[0] === '@'.charCodeAt(0)) {  /* file name */
         if (l <= bufflen)  /* small enough? */
             out = source.slice(1);
         else {  /* add '...' before rest of name */

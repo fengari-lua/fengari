@@ -107,7 +107,7 @@ test('utf8.char', function (t) {
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "( ͡° ͜ʖ ͡° )",
         "Correct element(s) on the stack"
     );
@@ -176,7 +176,7 @@ test('utf8.codes', function (t) {
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tostring(L, -1),
+        lapi.lua_tojsstring(L, -1),
         "[1,40] [2,32] [3,865] [5,176] [7,32] [8,860] [10,662] [12,32] [13,865] [15,176] [17,32] [18,41] ",
         "Correct element(s) on the stack"
     );

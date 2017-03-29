@@ -30,7 +30,7 @@ test('luaG_typeerror', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, "test-typeerror", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-typeerror"), lua.to_luastring("binary"));
 
         lapi.lua_pcall(L, 0, -1, 0);
 
@@ -38,7 +38,7 @@ test('luaG_typeerror', function (t) {
 
 
     t.ok(
-        lapi.lua_tostring(L, -1).endsWith("attempt to get length of a boolean value (local 'a')"),
+        lapi.lua_tojsstring(L, -1).endsWith("attempt to get length of a boolean value (local 'a')"),
         "Correct error was thrown"
     );
 });
@@ -60,14 +60,14 @@ test('luaG_typeerror', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, "test-typeerror", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-typeerror"), lua.to_luastring("binary"));
 
         lapi.lua_pcall(L, 0, -1, 0);
 
     }, "JS Lua program ran without error");
 
     t.ok(
-        lapi.lua_tostring(L, -1).endsWith("attempt to index a boolean value (local 'a')"),
+        lapi.lua_tojsstring(L, -1).endsWith("attempt to index a boolean value (local 'a')"),
         "Correct error was thrown"
     );
 });
@@ -89,14 +89,14 @@ test('luaG_typeerror', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, "test-typeerror", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-typeerror"), lua.to_luastring("binary"));
 
         lapi.lua_pcall(L, 0, -1, 0);
 
     }, "JS Lua program ran without error");
 
     t.ok(
-        lapi.lua_tostring(L, -1).endsWith("attempt to index a boolean value (local 'a')"),
+        lapi.lua_tojsstring(L, -1).endsWith("attempt to index a boolean value (local 'a')"),
         "Correct error was thrown"
     );
 });
@@ -118,14 +118,14 @@ test('luaG_typeerror', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, "test-typeerror", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-typeerror"), lua.to_luastring("binary"));
 
         lapi.lua_pcall(L, 0, -1, 0);
 
     }, "JS Lua program ran without error");
 
     t.ok(
-        lapi.lua_tostring(L, -1).endsWith("attempt to index a boolean value (local 'a')"),
+        lapi.lua_tojsstring(L, -1).endsWith("attempt to index a boolean value (local 'a')"),
         "Correct error was thrown"
     );
 });
@@ -146,14 +146,14 @@ test('luaG_concaterror', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, "test-typeerror", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-typeerror"), lua.to_luastring("binary"));
 
         lapi.lua_pcall(L, 0, -1, 0);
 
     }, "JS Lua program ran without error");
 
     t.ok(
-        lapi.lua_tostring(L, -1).endsWith("attempt to concatenate a table value"),
+        lapi.lua_tojsstring(L, -1).endsWith("attempt to concatenate a table value"),
         "Correct error was thrown"
     );
 });
@@ -174,14 +174,14 @@ test('luaG_opinterror', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, "test-typeerror", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-typeerror"), lua.to_luastring("binary"));
 
         lapi.lua_pcall(L, 0, -1, 0);
 
     }, "JS Lua program ran without error");
 
     t.ok(
-        lapi.lua_tostring(L, -1).endsWith("attempt to perform arithmetic on a string value"),
+        lapi.lua_tojsstring(L, -1).endsWith("attempt to perform arithmetic on a string value"),
         "Correct error was thrown"
     );
 });
@@ -202,14 +202,14 @@ test('luaG_tointerror', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, "test-typeerror", "binary");
+        lapi.lua_load(L, null, bc, lua.to_luastring("test-typeerror"), lua.to_luastring("binary"));
 
         lapi.lua_pcall(L, 0, -1, 0);
 
     }, "JS Lua program ran without error");
 
     t.ok(
-        lapi.lua_tostring(L, -1).endsWith("number has no integer representation"),
+        lapi.lua_tojsstring(L, -1).endsWith("number has no integer representation"),
         "Correct error was thrown"
     );
 });

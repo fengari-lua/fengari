@@ -55,7 +55,7 @@ const findfield = function(L, objidx, level) {
 const pushglobalfuncname = function(L, ar) {
     let top = lapi.lua_gettop(L);
     ldebug.lua_getinfo(L, 'f', ar);  /* push function */
-    lapi.lua_getfield(L, lua.LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
+    lapi.lua_getfield(L, lua.LUA_REGISTRYINDEX, lua.to_luastring(LUA_LOADED_TABLE));
     if (findfield(L, top + 1, 2)) {
         let name = lapi.lua_tostring(L, -1);
         if (name.jsstring().startsWith("_G.")) {
@@ -333,7 +333,7 @@ const luaL_tolstring = function(L, idx) {
 ** Leaves resulting module on the top.
 */
 const luaL_requiref = function(L, modname, openf, glb) {
-    luaL_getsubtable(L, lua.LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
+    luaL_getsubtable(L, lua.LUA_REGISTRYINDEX, lua.to_luastring(LUA_LOADED_TABLE));
     lapi.lua_getfield(L, -1, modname); /* LOADED[modname] */
     if (!lapi.lua_toboolean(L, -1)) {  /* package not already loaded? */
         lapi.lua_pop(L, 1);  /* remove field */
@@ -441,7 +441,7 @@ if (typeof require === "function") {
                 lf.pos += bytes;
             }
             if (bytes > 0)
-                return lf.binary ? toDataView(lf.buff) : lf.buff;
+                return lf.binary ? toDataView(lf.buff) : lf.buff.slice(0, bytes);
             else return null;
         };
 
@@ -502,15 +502,16 @@ if (typeof require === "function") {
         };
 
         const luaL_loadfilex = function(L, filename, mode) {
+            let jsfilename = lobject.jsstring(filename);
             let lf = new LoadF();
             let fnameindex = lapi.lua_gettop(L) + 1;  /* index of filename on the stack */
             if (filename === null) {
                 lapi.lua_pushliteral(L, "=stdin");
                 lf.f = process.stdin.fd;
             } else {
-                lapi.lua_pushliteral(L, `@${filename}`);
+                lapi.lua_pushliteral(L, `@${jsfilename}`);
                 try {
-                    lf.f = fs.openSync(filename, "r");
+                    lf.f = fs.openSync(jsfilename, "r");
                 } catch (e) {
                     return errfile(L, lua.to_luastring("open"), fnameindex, e);
                 }
