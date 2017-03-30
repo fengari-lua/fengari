@@ -17,8 +17,7 @@ const TValue   = lobject.TValue;
 const Table    = lobject.Table;
 const UnOpr    = lcode.UnOpr;
 const UpVal    = lfunc.UpVal;
-
-const char     = llex.char;
+const char     = lua.char;
 
 const MAXVARS = 200;
 

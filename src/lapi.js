@@ -748,8 +748,10 @@ const lua_rawequal = function(L, index1, index2) {
 */
 
 const lua_load = function(L, reader, data, chunckname, mode) {
+    assert(Array.isArray(chunckname), "lua_load expect an array of byte as chunckname");
+    assert(mode ? Array.isArray(mode) : true, "lua_load expect an array of byte as mode");
     let z = new llex.MBuffer(L, data, reader);
-    if (!chunckname) chunckname = "?";
+    if (!chunckname) chunckname = [lua.char["?"]];
     let status = ldo.luaD_protectedparser(L, z, chunckname, mode);
     if (status === TS.LUA_OK) {  /* no errors? */
         let f = L.stack[L.top - 1]; /* get newly created function */

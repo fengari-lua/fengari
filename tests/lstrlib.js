@@ -26,7 +26,7 @@ test('string.len', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -64,7 +64,7 @@ test('string.char', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -95,7 +95,7 @@ test('string.upper, string.lower', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -132,7 +132,7 @@ test('string.rep', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -163,7 +163,7 @@ test('string.reverse', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -194,7 +194,7 @@ test('string.byte', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -237,7 +237,7 @@ test('string.format', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -268,7 +268,7 @@ test('string.format', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -299,7 +299,7 @@ test('string.format', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -340,7 +340,7 @@ test('string.sub', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -439,7 +439,7 @@ test('string.dump', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode.trim());
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode.trim()));
 
     }, "Lua program loaded without error");
 
@@ -479,7 +479,7 @@ test('string.pack/unpack/packsize', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -515,7 +515,7 @@ test('string.find without pattern', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -552,7 +552,7 @@ test('string.match', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -589,7 +589,7 @@ test('string.find', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -645,7 +645,7 @@ test('string.gmatch', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -694,7 +694,7 @@ test('string.gsub', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -731,7 +731,7 @@ test('string.gsub (number)', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -768,7 +768,7 @@ test('string.gsub (pattern)', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -807,7 +807,7 @@ test('string.gsub (function)', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -846,7 +846,7 @@ test('string.gsub (table)', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 

@@ -205,7 +205,7 @@ const kname = function(p, pc, c) {
         }
         /* else no reasonable name found */
     }
-    r.name = "?";
+    r.name = [lua.char["?"]];
     return r;  /* no reasonable name found */
 };
 
@@ -342,7 +342,7 @@ const funcnamefromcode = function(L, ci) {
     let i = p.code[pc];  /* calling instruction */
 
     if (ci.callstatus & lstate.CIST_HOOKED) {
-        r.name = "?";
+        r.name = [lua.char["?"]];
         r.funcname = lua.to_luastring("hook");
         return r;
     }
@@ -388,7 +388,7 @@ const funcnamefromcode = function(L, ci) {
             return null;  /* cannot find a reasonable name */
     }
 
-    r.name = L.l_G.tmname[tm].jsstring();
+    r.name = L.l_G.tmname[tm];
     r.funcname = lua.to_luastring("metamethod");
     return r;
 };

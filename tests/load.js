@@ -28,7 +28,7 @@ test('luaL_loadstring', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -61,7 +61,7 @@ test('load', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -96,7 +96,7 @@ test('luaL_loadbuffer', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadbuffer(L, bc, null, "test");
+        lauxlib.luaL_loadbuffer(L, bc, null, lua.to_luastring("test"));
 
     }, "Lua program loaded without error");
 
@@ -129,7 +129,7 @@ test('loadfile', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -162,7 +162,7 @@ test('loadfile (binary)', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -194,7 +194,7 @@ test('dofile', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 

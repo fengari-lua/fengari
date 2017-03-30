@@ -3,6 +3,7 @@
 const test    = require('tape');
 const tests   = require("./tests.js");
 
+const lua     = require("../src/lua.js");
 const lapi    = require("../src/lapi.js");
 const lauxlib = require("../src/lauxlib.js");
 const linit   = require('../src/linit.js');
@@ -20,7 +21,7 @@ test('utf8.offset', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -52,7 +53,7 @@ test('utf8.codepoint', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -96,7 +97,7 @@ test('utf8.char', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -128,7 +129,7 @@ test('utf8.len', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -165,7 +166,7 @@ test('utf8.codes', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 

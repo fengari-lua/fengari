@@ -8,6 +8,7 @@ const lua     = require('./lua.js');
 const luaconf = require('./luaconf.js');
 const CT      = lua.constant_types;
 const UpVal   = require('./lfunc.js').UpVal;
+const char    = lua.char;
 
 let tvalueCount = 0;
 
@@ -291,13 +292,13 @@ const luaO_chunkid = function(source, bufflen) {
     bufflen = bufflen instanceof TValue ? bufflen.value : bufflen;
     let l = source.length;
     let out = [];
-    if (source[0] === '='.charCodeAt(0)) {  /* 'literal' source */
+    if (source[0] === char['=']) {  /* 'literal' source */
         if (l < bufflen)  /* small enough? */
             out = source.slice(1);
         else {  /* truncate it */
             out = out.concat(source.slice(1, bufflen));
         }
-    } else if (source[0] === '@'.charCodeAt(0)) {  /* file name */
+    } else if (source[0] === char['@']) {  /* file name */
         if (l <= bufflen)  /* small enough? */
             out = source.slice(1);
         else {  /* add '...' before rest of name */
@@ -323,8 +324,8 @@ const luaO_chunkid = function(source, bufflen) {
 };
 
 const luaO_hexavalue = function(c) {
-    if (ljstype.lisdigit(c)) return c - '0'.charCodeAt(0);
-    else return (String.fromCharCode(c).toLowerCase().charCodeAt(0) - 'a'.charCodeAt(0)) + 10;
+    if (ljstype.lisdigit(c)) return c - char['0'];
+    else return (String.fromCharCode(c).toLowerCase().charCodeAt(0) - char['a']) + 10;
 };
 
 const UTF8BUFFSZ = 8;
@@ -379,7 +380,7 @@ const ldexp = function(mantissa, exponent) {
 ** C99 specification for 'strtod'
 */
 const lua_strx2number = function(s) {
-    let dot = luaconf.lua_getlocaledecpoint();
+    let dot = char[luaconf.lua_getlocaledecpoint()];
     let r = 0.0;  /* result (accumulator) */
     let sigdig = 0;  /* number of significant digits */
     let nosigdig = 0;  /* number of non-significant digits */
@@ -387,11 +388,11 @@ const lua_strx2number = function(s) {
     let neg;  /* 1 if number is negative */
     let hasdot = false;  /* true after seen a dot */
 
-    while (ljstype.lisspace(s)) s = s.slice(1);  /* skip initial spaces */
+    while (ljstype.lisspace(s[0])) s = s.slice(1);  /* skip initial spaces */
 
-    neg = s[0] === '-'.charCodeAt(0);  /* check signal */
-    s = neg || s[0] === '+'.charCodeAt(0) ? s.slice(1) : s;  /* skip sign if one */
-    if (!(s[0] === '0' && (s[1] === 'x'.charCodeAt(0) || s[1] === 'X'.charCodeAt(0))))  /* check '0x' */
+    neg = s[0] === char['-'];  /* check signal */
+    s = neg || s[0] === char['+'] ? s.slice(1) : s;  /* skip sign if one */
+    if (!(s[0] === char['0'] && (s[1] === char['x'] || s[1] === char['X'])))  /* check '0x' */
         return 0.0;  /* invalid format (no '0x') */
 
     for (s = s.slice(2); ; s = s.slice(1)) {  /* skip '0x' and read numeral */
@@ -399,10 +400,10 @@ const lua_strx2number = function(s) {
             if (hasdot) break;  /* second dot? stop loop */
             else hasdot = true;
         } else if (ljstype.lisxdigit(s[0])) {
-            if (sigdig === 0 && s[0] === '0'.charCodeAt(0))  /* non-significant digit (zero)? */
+            if (sigdig === 0 && s[0] === char['0'])  /* non-significant digit (zero)? */
                 nosigdig++;
             else if (++sigdig <= MAXSIGDIG)  /* can read it without overflow? */
-                r = (r * 16) + luaO_hexavalue(s);
+                r = (r * 16) + luaO_hexavalue(s[0]);
             else e++; /* too many digits; ignore, but still count for exponent */
             if (hasdot) e--;  /* decimal digit? correct exponent */
         } else break;  /* neither a dot nor a digit */
@@ -411,16 +412,16 @@ const lua_strx2number = function(s) {
     if (nosigdig + sigdig === 0)  /* no digits? */
         return 0.0;  /* invalid format */
     e *= 4;  /* each digit multiplies/divides value by 2^4 */
-    if (s[0] === 'p'.charCodeAt(0) || s[0] === 'P'.charCodeAt(0)) {  /* exponent part? */
+    if (s[0] === char['p'] || s[0] === char['P']) {  /* exponent part? */
         let exp1 = 0;  /* exponent value */
         let neg1;  /* exponent signal */
         s = s.slice(1);  /* skip 'p' */
-        neg1 = s[0] === '-'.charCodeAt(0);  /* check signal */
-        s = neg1 || s[0] === '+'.charCodeAt(0) ? s.slice(1) : s;  /* skip sign if one */
+        neg1 = s[0] === char['-'];  /* check signal */
+        s = neg1 || s[0] === char['+'] ? s.slice(1) : s;  /* skip sign if one */
         if (!ljstype.lisdigit(s[0]))
             return 0.0;  /* invalid; must have at least one digit */
         while (ljstype.lisdigit(s[0])) {  /* read exponent */
-            exp1 = exp1 * 10 + s - '0'.charCodeAt(0);
+            exp1 = exp1 * 10 + s[0] - char['0'];
             s = s.slice(1);
         }
         if (neg1) exp1 = -exp1;
@@ -458,12 +459,12 @@ const l_str2int = function(s) {
     let neg;
 
     while (ljstype.lisspace(s[0])) s = s.slice(1);  /* skip initial spaces */
-    neg = s[0] === '-'.charCodeAt(0);
+    neg = s[0] === char['-'];
 
-    if (neg || s[0] === '+'.charCodeAt(0))
+    if (neg || s[0] === char['+'])
         s = s.slice(1);
 
-    if (s[0] === '0'.charCodeAt(0) && (s[1] === 'x'.charCodeAt(0) || s[1] === 'X'.charCodeAt(0))) {  /* hex? */
+    if (s[0] === char['0'] && (s[1] === char['x'] || s[1] === char['X'])) {  /* hex? */
         s = s.slice(2);  /* skip '0x' */
 
         for (; ljstype.lisxdigit(s[0]); s = s.slice(1)) {
@@ -472,7 +473,7 @@ const l_str2int = function(s) {
         }
     } else {  /* decimal */
         for (; ljstype.lisdigit(s[0]); s = s.slice(1)) {
-            let d = s[0] - '0'.charCodeAt(0);
+            let d = s[0] - char['0'];
             if (a >= MAXBY10 && (a > MAXBY10 || d > MAXLASTD + neg))  /* overflow? */
                 return null;  /* do not accept it (as integer) */
             a = a * 10 + d;

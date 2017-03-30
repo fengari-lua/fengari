@@ -9,9 +9,10 @@ const lobject = require('./lobject.js');
 const lua     = require('./lua.js');
 const luaconf = require('./luaconf.js');
 const CT      = lua.constant_types;
+const char    = lua.char;
 
 const sL_ESC  = '%';
-const L_ESC   = sL_ESC.charCodeAt(0);
+const L_ESC   = char[sL_ESC];
 
 /*
 ** maximum number of captures that a pattern can do during
@@ -41,7 +42,7 @@ const str_sub = function(L) {
     if (start < 1) start = 1;
     if (end > l) end = l;
     if (start <= end)
-        lapi.lua_pushstring(L, ts.jsstring(start - 1, (start - 1) + (end - start + 1)));
+        lapi.lua_pushstring(L, ts.value.slice(start - 1, (start - 1) + (end - start + 1)));
     else lapi.lua_pushliteral(L, "");
     return 1;
 };
@@ -59,8 +60,7 @@ const str_char = function(L) {
         lauxlib.luaL_argcheck(L, c >= 0 && c <= 255, "value out of range"); // Strings are 8-bit clean
         p.push(c);
     }
-    lapi.lua_pushstring(L, "");
-    L.stack[L.top - 1].value = p; // Since value are already capped, avoid conversion
+    lapi.lua_pushstring(L, p);
     return 1;
 };
 
@@ -77,7 +77,7 @@ const str_dump = function(L) {
     lapi.lua_settop(L, 1);
     if (lapi.lua_dump(L, writer, b, strip) !== 0)
         return lauxlib.luaL_error(L, "unable to dump given function");
-    L.stack[L.top++] = new lobject.TValue(CT.LUA_TLNGSTR, b); // We don't want lua > js > lua string conversion here
+    lapi.lua_pushstring(L, b);
     return 1;
 };
 
@@ -90,7 +90,7 @@ const L_NBFD = 1;
 */
 const adddigit = function(buff, n, x) {
     let d = Math.floor(x);  /* get integer part from 'x' */
-    buff[n] = d < 10 ? d + '0'.charCodeAt(0) : d - 10 + 'a'.charCodeAt(0);  /* add to buffer */
+    buff[n] = d < 10 ? d + char['0'] : d - 10 + char['a'];  /* add to buffer */
     return x - d;  /* return what is left */
 };
 
@@ -108,11 +108,11 @@ const num2straux = function(x) {
         let e = fe[1];
         let n = 0;  /* character count */
         if (m < 0) {  /* is number negative? */
-            buff[n++] = '-'.charCodeAt(0);  /* add signal */
+            buff[n++] = char['-'];  /* add signal */
             m = -m;  /* make it positive */
         }
-        buff[n++] = '0'.charCodeAt(0);
-        buff[n++] = 'x'.charCodeAt(0);  /* add "0x" */
+        buff[n++] = char['0'];
+        buff[n++] = char['x'];  /* add "0x" */
         m = adddigit(buff, n++, m * (1 << L_NBFD));  /* add first digit */
         e -= L_NBFD;  /* this digit goes before the radix point */
         if (m > 0) {  /* more digits? */
@@ -128,11 +128,11 @@ const num2straux = function(x) {
 
 const lua_number2strx = function(L, fmt, x) {
     let buff = num2straux(x);
-    if (fmt.charAt(SIZELENMOD) === 'A') {
+    if (fmt[SIZELENMOD] === char['A']) {
         for (let i = 0; i < buff.length; i++)
-            buff[i] = String.fromCharCode(buff[i]).toUpperCase().charCodeAt(0);
-    } else if (fmt.charAt(SIZELENMOD) !== 'a')
-        lauxlib.luaL_error(L, "modifiers for format '%a'/'%A' not implemented");
+            buff[i] = char[String.fromCharCode(buff[i]).toUpperCase()];
+    } else if (fmt[SIZELENMOD] !== char['a'])
+        lauxlib.luaL_error(L, lua.to_luastring("modifiers for format '%a'/'%A' not implemented"));
     return buff;
 };
 
@@ -147,24 +147,24 @@ const MAX_ITEM   = 120;// TODO: + l_mathlim(MAX_10_EXP);
 
 
 /* valid flags in a format specification */
-const FLAGS      = ["-", "+", " ", "#", "0"].map(e => e.charCodeAt(0));
+const FLAGS      = [char["-"], char["+"], char[" "], char["#"], char["0"]];
 
 /*
 ** maximum size of each format specification (such as "%-099.99d")
 */
 const MAX_FORMAT = 32;
 
-// TODO: locale ?
-const isalpha = e => /^[a-zA-Z]$/.test(e.charAt(0));
-const isdigit = e => "0".charCodeAt(0) <= e && e <= "9".charCodeAt(0);
+// TODO: locale ? and do it better
+const isalpha = e => (char['a'] <= e && e <= char['z']) || (e >= char['A'] && e <= char['Z']);
+const isdigit = e => char['0'] <= e && e <= char['9'];
 const iscntrl = e => (0x00 <= e && e <= 0x1f) || e === 0x7f;
-const isgraph = e => e.charCodeAt(0) > 32 && e.charCodeAt(0) < 127; // TODO: Will only work for ASCII
-const islower = e => /^(?![A-Z]).*$/.test(e.charAt(0));
-const isupper = e => /^(?![a-z]).*$/.test(e.charAt(0));
-const isalnum = e => /^[a-zA-Z0-9]$/.test(e.charAt(0));
+const isgraph = e => e > 32 && e < 127; // TODO: Will only work for ASCII
+const islower = e => /^(?![A-Z]).*$/.test(String.fromCharCode(e));
+const isupper = e => /^(?![a-z]).*$/.test(String.fromCharCode(e));
+const isalnum = e => /^[a-zA-Z0-9]$/.test(String.fromCharCode(e));
 const ispunct = e => isgraph(e) && !isalnum(e);
-const isspace = e => /^\s$/.test(e.charAt(0));
-const isxdigit = e => /^[0-9A-Fa-f]$/.test(e.charAt(0));
+const isspace = e => /^\s$/.test(String.fromCharCode(e));
+const isxdigit = e => /^[0-9A-Fa-f]$/.test(String.fromCharCode(e));
 
 // Concat 2 arrays by modifying the first one
 const concat = function (a1, a2) {
@@ -173,11 +173,11 @@ const concat = function (a1, a2) {
 };
 
 const addquoted = function(b, s) {
-    b.push('"'.charCodeAt(0));
+    b.push(char['"']);
     let len = s.length;
     while (len--) {
-        if (s[0] === '"'.charCodeAt(0) || s[0] === '\\'.charCodeAt(0) || s[0] === '\n'.charCodeAt(0)) {
-            b.push('\\'.charCodeAt(0));
+        if (s[0] === char['"'] || s[0] === char['\\'] || s[0] === char['\n']) {
+            b.push(char['\\']);
             b.push(s[0]);
         } else if (iscntrl(s[0])) {
             let buff = [];
@@ -190,15 +190,15 @@ const addquoted = function(b, s) {
             b.push(s[0]);
         s = s.slice(1);
     }
-    b.push('"'.charCodeAt(0));
+    b.push(char['"']);
 };
 
 /*
 ** Ensures the 'buff' string uses a dot as the radix character.
 */
 const checkdp = function(buff) {
-    if (buff.indexOf('.'.charCodeAt(0)) < 0) {  /* no dot? */
-        let point = luaconf.lua_getlocaledecpoint().charCodeAt(0);  /* try locale point */
+    if (buff.indexOf(char['.']) < 0) {  /* no dot? */
+        let point = char[luaconf.lua_getlocaledecpoint()];  /* try locale point */
         let ppoint = buff.indexOf(point);
         if (ppoint) buff[ppoint] = '.';  /* change it to a dot */
     }
@@ -207,14 +207,14 @@ const checkdp = function(buff) {
 const addliteral = function(L, b, arg) {
     switch(lapi.lua_type(L, arg)) {
         case CT.LUA_TSTRING: {
-            let s = L.stack[lapi.index2addr_(L, arg)].value;
+            let s = lapi.lua_tostring(L, arg);
             addquoted(b, s, s.length);
             break;
         }
         case CT.LUA_TNUMBER: {
             if (!lapi.lua_isinteger(L, arg)) {  /* float? */
                 let n = lapi.lua_tonumber(L, arg);  /* write as hexa ('%a') */
-                concat(b, lua_number2strx(L, `%${luaconf.LUA_INTEGER_FRMLEN}a`, n));
+                concat(b, lua_number2strx(L, lua.to_luastring(`%${luaconf.LUA_INTEGER_FRMLEN}a`), n));
                 checkdp(b);  /* ensure it uses a dot */
             } else {  /* integers */
                 let n = lapi.lua_tointeger(L, arg);
@@ -223,13 +223,11 @@ const addliteral = function(L, b, arg) {
             break;
         }
         case CT.LUA_TNIL: case CT.LUA_TBOOLEAN: {
-            lauxlib.luaL_tolstring(L, arg);
-            concat(b, lapi.index2addr(L, -1).value);
-            lapi.lua_remove(L, -1);
+            concat(b, lauxlib.luaL_tolstring(L, arg));
             break;
         }
         default: {
-            lauxlib.luaL_argerror(L, arg, "value has no literal form");
+            lauxlib.luaL_argerror(L, arg, lua.to_luastring("value has no literal form"));
         }
     }
 };
@@ -238,17 +236,17 @@ const scanformat = function(L, strfrmt, form) {
     let p = strfrmt;
     while (p[0] !== 0 && FLAGS.indexOf(p[0]) >= 0) p = p.slice(1);  /* skip flags */
     if (strfrmt.length - p.length >= FLAGS.length)
-        lauxlib.luaL_error(L, "invalid format (repeated flags)");
+        lauxlib.luaL_error(L, lua.to_luastring("invalid format (repeated flags)"));
     if (isdigit(p[0])) p = p.slice(1);  /* skip width */
     if (isdigit(p[0])) p = p.slice(1);  /* (2 digits at most) */
-    if (p[0] === '.'.charCodeAt(0)) {
+    if (p[0] === char['.']) {
         p = p.slice(1);
         if (isdigit(p[0])) p = p.slice(1);  /* skip precision */
         if (isdigit(p[0])) p = p.slice(1);  /* (2 digits at most) */
     }
     if (isdigit(p[0]))
-        lauxlib.luaL_error(L, "invalid format (width or precision too long)");
-    form[0] = "%".charCodeAt(0);
+        lauxlib.luaL_error(L, lua.to_luastring("invalid format (width or precision too long)"));
+    form[0] = char["%"];
     for (let i = 0; i < strfrmt.length - p.length + 1; i++)
         form[i + 1] = strfrmt[i];
     // form[strfrmt.length - p.length + 2] = 0;
@@ -276,7 +274,6 @@ const str_format = function(L) {
     let top = lapi.lua_gettop(L);
     let arg = 1;
     let strfrmt = lauxlib.luaL_checkstring(L, arg);
-    strfrmt = L.stack[lapi.index2addr_(L, 1)].value;
     let b = [];
 
     while (strfrmt.length > 0) {
@@ -289,7 +286,7 @@ const str_format = function(L) {
         } else { /* format item */
             let form = [];  /* to store the format ('%...') */
             if (++arg > top)
-                lauxlib.luaL_argerror(L, arg, "no value");
+                lauxlib.luaL_argerror(L, arg, lua.to_luastring("no value"));
             let f = scanformat(L, strfrmt, form);
             strfrmt = f.p;
             form = f.form;
@@ -329,34 +326,33 @@ const str_format = function(L) {
                 }
                 case 's': {
                     strfrmt = strfrmt.slice(1);
-                    lauxlib.luaL_tolstring(L, arg); // Convert parameter to string
-                    let str = lapi.index2addr(L, -1);
-                    let s = str.value;
-                    if (form[2] === '\0') {  /* no modifiers? */
+                    let s = lauxlib.luaL_tolstring(L, arg);
+                    if (form[2] === char['\0']) {  /* no modifiers? */
                         concat(b, s);  /* keep entire string */
                         lapi.lua_pop(L, 1);  /* remove result from 'luaL_tolstring' */
                     } else {
                         let zero = s.indexOf(0);
-                        lauxlib.luaL_argcheck(L, zero < 0 || zero === s.length - 1, arg, "string contains zeros");
-                        if (form.indexOf('.'.charCodeAt(0)) < 0 && s.length >= 100) {
+                        lauxlib.luaL_argcheck(L, zero < 0 || zero === s.length - 1, arg, lua.to_luastring("string contains zeros"));
+                        if (form.indexOf(char['.']) < 0 && s.length >= 100) {
                             /* no precision and string is too long to be formatted */
                             concat(b, s);  /* keep entire string */
                             lapi.lua_pop(L, 1);  /* remove result from 'luaL_tolstring' */
                         } else {  /* format the string into 'buff' */
-                            concat(b, lua.to_luastring(sprintf(String.fromCharCode(...form), str.jsstring())));
+                            // TODO: will failt if s is not valid UTF-8
+                            concat(b, lua.to_luastring(sprintf(String.fromCharCode(...form), lobject.jsstring(s))));
                             lapi.lua_pop(L, 1);  /* remove result from 'luaL_tolstring' */
                         }
                     }
                     break;
                 }
                 default: {  /* also treat cases 'pnLlh' */
-                    return lauxlib.luaL_error(L, `invalid option '%${strfrmt[0]}'`);
+                    return lauxlib.luaL_error(L, lua.to_luastring(`invalid option '%${String.fromCharCode(strfrmt[0])}'`));
                 }
             }
         }
     }
 
-    L.stack[L.top++] = new lobject.TValue(CT.LUA_TLNGSTR, b);
+    lapi.lua_pushstring(L, b);
     return 1;
 };
 
@@ -403,7 +399,7 @@ const KOption = {
 };
 
 const digit = function(c) {
-    return '0'.charCodeAt(0) <= c.charCodeAt(0) && c.charCodeAt(0) <= '9'.charCodeAt(0);
+    return char['0'] <= c && c <= char['9'];
 };
 
 const getnum = function(fmt, df) {
@@ -412,7 +408,7 @@ const getnum = function(fmt, df) {
     else {
         let a = 0;
         do {
-            a = a * 10 + (fmt.s[0].charCodeAt(0) - '0'.charCodeAt(0));
+            a = a * 10 + (fmt.s[0] - char['0']);
             fmt.s = fmt.s.slice(1);
         } while (digit(fmt.s[0]) && a <= (MAXSIZE - 9)/10);
         return a;
@@ -426,7 +422,7 @@ const getnum = function(fmt, df) {
 const getnumlimit = function(h, fmt, df) {
     let sz = getnum(fmt, df);
     if (sz > MAXINTSIZE || sz <= 0)
-        lauxlib.luaL_error(h.L, `integral size (${sz}) out of limits [1,${MAXINTSIZE}]`);
+        lauxlib.luaL_error(h.L, lua.to_luastring(`integral size (${sz}) out of limits [1,${MAXINTSIZE}]`));
     return sz;
 };
 
@@ -443,37 +439,37 @@ const getoption = function(h, fmt) {
     fmt.s = fmt.s.slice(1);
     r.size = 0;  /* default */
     switch (r.opt) {
-        case 'b': r.size = 1; r.opt = KOption.Kint;   return r; // sizeof(char): 1
-        case 'B': r.size = 1; r.opt = KOption.Kuint;  return r;
-        case 'h': r.size = 2; r.opt = KOption.Kint;   return r; // sizeof(short): 2
-        case 'H': r.size = 2; r.opt = KOption.Kuint;  return r;
-        case 'l': r.size = 8; r.opt = KOption.Kint;   return r; // sizeof(long): 8
-        case 'L': r.size = 8; r.opt = KOption.Kuint;  return r;
-        case 'j': r.size = 8; r.opt = KOption.Kint;   return r; // sizeof(lua_Integer): 8
-        case 'J': r.size = 8; r.opt = KOption.Kuint;  return r;
-        case 'T': r.size = 8; r.opt = KOption.Kuint;  return r; // sizeof(size_t): 8
-        case 'f': r.size = 4; r.opt = KOption.Kfloat; return r; // sizeof(float): 4
-        case 'd': r.size = 8; r.opt = KOption.Kfloat; return r; // sizeof(double): 8
-        case 'n': r.size = 8; r.opt = KOption.Kfloat; return r; // sizeof(lua_Number): 8
-        case 'i': r.size = getnumlimit(h, fmt, 4); r.opt = KOption.Kint;    return r; // sizeof(int): 4
-        case 'I': r.size = getnumlimit(h, fmt, 4); r.opt = KOption.Kuint;   return r;
-        case 's': r.size = getnumlimit(h, fmt, 8); r.opt = KOption.Kstring; return r;
-        case 'c': {
+        case char['b']: r.size = 1; r.opt = KOption.Kint;   return r; // sizeof(char): 1
+        case char['B']: r.size = 1; r.opt = KOption.Kuint;  return r;
+        case char['h']: r.size = 2; r.opt = KOption.Kint;   return r; // sizeof(short): 2
+        case char['H']: r.size = 2; r.opt = KOption.Kuint;  return r;
+        case char['l']: r.size = 8; r.opt = KOption.Kint;   return r; // sizeof(long): 8
+        case char['L']: r.size = 8; r.opt = KOption.Kuint;  return r;
+        case char['j']: r.size = 8; r.opt = KOption.Kint;   return r; // sizeof(lua_Integer): 8
+        case char['J']: r.size = 8; r.opt = KOption.Kuint;  return r;
+        case char['T']: r.size = 8; r.opt = KOption.Kuint;  return r; // sizeof(size_t): 8
+        case char['f']: r.size = 4; r.opt = KOption.Kfloat; return r; // sizeof(float): 4
+        case char['d']: r.size = 8; r.opt = KOption.Kfloat; return r; // sizeof(double): 8
+        case char['n']: r.size = 8; r.opt = KOption.Kfloat; return r; // sizeof(lua_Number): 8
+        case char['i']: r.size = getnumlimit(h, fmt, 4); r.opt = KOption.Kint;    return r; // sizeof(int): 4
+        case char['I']: r.size = getnumlimit(h, fmt, 4); r.opt = KOption.Kuint;   return r;
+        case char['s']: r.size = getnumlimit(h, fmt, 8); r.opt = KOption.Kstring; return r;
+        case char['c']: {
             r.size = getnum(fmt, -1);
             if (r.size === -1)
-                lauxlib.luaL_error(h.L, "missing size for format option 'c'");
+                lauxlib.luaL_error(h.L, lua.to_luastring("missing size for format option 'c'"));
             r.opt = KOption.Kchar;
             return r;
         }
-        case 'z':             r.opt = KOption.Kzstr;      return r;
-        case 'x': r.size = 1; r.opt = KOption.Kpadding;   return r;
-        case 'X':             r.opt = KOption.Kpaddalign; return r;
-        case ' ': break;
-        case '<': h.islittle = true; break;
-        case '>': h.islittle = false; break;
-        case '=': h.islittle = true; break;
-        case '!': h.maxalign = getnumlimit(h, fmt, MAXALIGN); break;
-        default: lauxlib.luaL_error(h.L, `invalid format option '${r.opt}'`);
+        case char['z']:             r.opt = KOption.Kzstr;      return r;
+        case char['x']: r.size = 1; r.opt = KOption.Kpadding;   return r;
+        case char['X']:             r.opt = KOption.Kpaddalign; return r;
+        case char[' ']: break;
+        case char['<']: h.islittle = true; break;
+        case char['>']: h.islittle = false; break;
+        case char['=']: h.islittle = true; break;
+        case char['!']: h.maxalign = getnumlimit(h, fmt, MAXALIGN); break;
+        default: lauxlib.luaL_error(h.L, lua.to_luastring(`invalid format option '${String.fromCharCode(r.opt)}'`));
     }
 
     r.opt = KOption.Knop;
@@ -502,13 +498,13 @@ const getdetails = function(h, totalsize, fmt) {
     let align = r.size;  /* usually, alignment follows size */
     if (r.opt === KOption.Kpaddalign) {  /* 'X' gets alignment from following option */
         if (fmt.s[0] === 0)
-            lauxlib.luaL_argerror(h.L, 1, "invalid next option for option 'X'");
+            lauxlib.luaL_argerror(h.L, 1, lua.to_luastring("invalid next option for option 'X'"));
         else {
             let o = getoption(h, fmt);
             align = o.size;
             o = o.opt;
             if (o === KOption.Kchar || align === 0)
-                lauxlib.luaL_argerror(h.L, 1, "invalid next option for option 'X'");
+                lauxlib.luaL_argerror(h.L, 1, lua.to_luastring("invalid next option for option 'X'"));
         }
     }
     if (align <= 1 || r.opt === KOption.Kchar)  /* need no alignment? */
@@ -517,7 +513,7 @@ const getdetails = function(h, totalsize, fmt) {
         if (align > h.maxalign)  /* enforce maximum alignment */
             align = h.maxalign;
         if ((align & (align -1)) !== 0)  /* is 'align' not a power of 2? */
-            lauxlib.luaL_argerror(h.L, 1, "format asks for alignment not power of 2");
+            lauxlib.luaL_argerror(h.L, 1, lua.to_luastring("format asks for alignment not power of 2"));
         r.ntoalign = (align - (totalsize & (align - 1))) & (align - 1);
     }
     return r;
@@ -555,8 +551,8 @@ const packnum = function(b, n, islittle, size) {
 const str_pack = function(L) {
     let b = [];
     let h = new Header(L);
-    let fmt = lauxlib.luaL_checkstring(L, 1).split('');  /* format string */
-    fmt.push('\0'); // Add \0 to avoid overflow
+    let fmt = lauxlib.luaL_checkstring(L, 1);  /* format string */
+    fmt.push(0); // Add \0 to avoid overflow
     fmt = {
         s: fmt,
         off: 0
@@ -578,7 +574,7 @@ const str_pack = function(L) {
                 let n = lauxlib.luaL_checkinteger(L, arg);
                 if (size < SZINT) {  /* need overflow check? */
                     let lim = 1 << (size * 8) - 1;
-                    lauxlib.luaL_argcheck(L, -lim <= n && n < lim, arg, "integer overflow");
+                    lauxlib.luaL_argcheck(L, -lim <= n && n < lim, arg, lua.to_luastring("integer overflow"));
                 }
                 packint(b, n, h.islittle, size, n < 0);
                 break;
@@ -586,7 +582,7 @@ const str_pack = function(L) {
             case KOption.Kuint: {  /* unsigned integers */
                 let n = lauxlib.luaL_checkinteger(L, arg);
                 if (size < SZINT)
-                    lauxlib.luaL_argcheck(L, n < (1 << (size * NB)), arg, "unsigned overflow");
+                    lauxlib.luaL_argcheck(L, n < (1 << (size * NB)), arg, lua.to_luastring("unsigned overflow"));
                 packint(b, n, h.islittle, size, false);
                 break;
             }
@@ -597,30 +593,27 @@ const str_pack = function(L) {
             }
             case KOption.Kchar: {  /* fixed-size string */
                 let s = lauxlib.luaL_checkstring(L, arg);
-                s = L.stack[lapi.index2addr_(L, arg)];
-                let len = s.value.length;
-                lauxlib.luaL_argcheck(L, len <= size, arg, "string long than given size");
-                b.push(...s.value);  /* add string */
+                let len = s.length;
+                lauxlib.luaL_argcheck(L, len <= size, arg, lua.to_luastring("string long than given size"));
+                b.push(...s);  /* add string */
                 while (len++ < size)  /* pad extra space */
                     b.push(LUAL_PACKPADBYTE);
                 break;
             }
             case KOption.Kstring: {  /* strings with length count */
                 let s = lauxlib.luaL_checkstring(L, arg);
-                s = L.stack[lapi.index2addr_(L, arg)].value;
-                let len = s.value.length;
-                lauxlib.luaL_argcheck(L, size >= NB || len < (1 << size * NB), arg, "string length does not fit in given size");
+                let len = s.length;
+                lauxlib.luaL_argcheck(L, size >= NB || len < (1 << size * NB), arg, lua.to_luastring("string length does not fit in given size"));
                 packint(b, len, h.islittle, size, 0);  /* pack length */
-                b.push(...s.value);
+                b.push(...s);
                 totalsize += len;
                 break;
             }
             case KOption.Kzstr: {  /* zero-terminated string */
                 let s = lauxlib.luaL_checkstring(L, arg);
-                s = L.stack[lapi.index2addr_(L, arg)].value;
-                let len = s.value.length;
-                lauxlib.luaL_argcheck(L, s.value.length === String.fromCharCode(...s.value).length, arg, "strings contains zeros");
-                b.push(...s.value);
+                let len = s.length;
+                lauxlib.luaL_argcheck(L, s.length === String.fromCharCode(...s).length, arg, lua.to_luastring("strings contains zeros"));
+                b.push(...s);
                 b.push(0);  /* add zero at the end */
                 totalsize += len + 1;
                 break;
@@ -631,40 +624,46 @@ const str_pack = function(L) {
                 break;
         }
     }
-    L.stack[L.top++] = new lobject.TValue(CT.LUA_TLNGSTR, b); // We don't want lua > js > lua string conversion here
+    lapi.lua_pushstring(L, b);
     return 1;
 };
 
 const str_reverse = function(L) {
-    lapi.lua_pushstring(L, lauxlib.luaL_checkstring(L, 1).split("").reverse().join(""));
+    lapi.lua_pushstring(L, lauxlib.luaL_checkstring(L, 1).reverse());
     return 1;
 };
 
 const str_lower = function(L) {
-    lapi.lua_pushstring(L, lauxlib.luaL_checkstring(L, 1).toLowerCase());
+    // TODO: will fail on invalid UTF-8
+    lapi.lua_pushstring(L, lua.to_luastring(lobject.jsstring(lauxlib.luaL_checkstring(L, 1)).toLowerCase()));
     return 1;
 };
 
 const str_upper = function(L) {
-    lapi.lua_pushstring(L, lauxlib.luaL_checkstring(L, 1).toUpperCase());
+    // TODO: will fail on invalid UTF-8
+    lapi.lua_pushstring(L, lua.to_luastring(lobject.jsstring(lauxlib.luaL_checkstring(L, 1)).toUpperCase()));
     return 1;
 };
 
 const str_rep = function(L) {
     let s = lauxlib.luaL_checkstring(L, 1);
     let n = lauxlib.luaL_checkinteger(L, 2);
-    let sep = lauxlib.luaL_optstring(L, 3, "");
+    let sep = lauxlib.luaL_optstring(L, 3, []);
 
     if (s.length + sep.length < s.length || s.length + sep.length > MAXSIZE / n)  /* may overflow? */
-        return lauxlib.luaL_error(L, "resulting string too large");
+        return lauxlib.luaL_error(L, lua.to_luastring("resulting string too large"));
 
-    lapi.lua_pushstring(L, n > 0 ? (s + sep).repeat(n - 1) + s : "");
+    let r = [];
+    for (let i = 0; i < n - 1; i++)
+        r = r.concat(s.concat(sep));
+    r = r.concat(s);
+
+    lapi.lua_pushstring(L, n > 0 ? r : []);
     return 1;
 };
 
 const str_byte = function(L) {
     let s = lauxlib.luaL_checkstring(L, 1);
-    s = L.stack[lapi.index2addr_(L, 1)].value;
     let l = s.length;
     let posi = posrelat(lauxlib.luaL_optinteger(L, 2, 1), l);
     let pose = posrelat(lauxlib.luaL_optinteger(L, 3, posi), l);
@@ -673,10 +672,10 @@ const str_byte = function(L) {
     if (pose > l) pose = l;
     if (posi > pose) return 0;  /* empty interval; return no values */
     if (pose - posi >= Number.MAX_SAFE_INTEGER)  /* arithmetic overflow? */
-        return lauxlib.luaL_error(L, "string slice too long");
+        return lauxlib.luaL_error(L, lua.to_luastring("string slice too long"));
 
     let n = (pose - posi) + 1;
-    lauxlib.luaL_checkstack(L, n, "string slice too long");
+    lauxlib.luaL_checkstack(L, n, lua.to_luastring("string slice too long"));
     for (let i = 0; i < n; i++)
         lapi.lua_pushinteger(L, s[posi + i - 1]);
     return n;
@@ -684,8 +683,8 @@ const str_byte = function(L) {
 
 const str_packsize = function(L) {
     let h = new Header(L);
-    let fmt = lauxlib.luaL_checkstring(L, 1).split('');
-    fmt.push('\0'); // Add \0 to avoid overflow
+    let fmt = lauxlib.luaL_checkstring(L, 1);
+    fmt.push(0); // Add \0 to avoid overflow
     fmt = {
         s: fmt,
         off: 0
@@ -697,12 +696,12 @@ const str_packsize = function(L) {
         let size = details.size;
         let ntoalign = details.ntoalign;
         size += ntoalign;  /* total space used by option */
-        lauxlib.luaL_argcheck(L, totalsize <= MAXSIZE - size - 1, "format result too large");
+        lauxlib.luaL_argcheck(L, totalsize <= MAXSIZE - size - 1, lua.to_luastring("format result too large"));
         totalsize += size;
         switch (opt) {
             case KOption.Kstring:  /* strings with length count */
             case KOption.Kzstr:    /* zero-terminated string */
-                lauxlib.luaL_argerror(L, 1, "variable-length format");
+                lauxlib.luaL_argerror(L, 1, lua.to_luastring("variable-length format"));
             default:  break;
         }
     }
@@ -734,7 +733,7 @@ const unpackint = function(L, str, islittle, size, issigned) {
         let mask = issigned || res >= 0 ? 0 : MC;
         for (let i = limit; i < size; i++) {
             if (str[islittle ? i : size - 1 - i] !== mask)
-                lauxlib.luaL_error(L, `${size}-byte integer does not fit into Lua Integer`);
+                lauxlib.luaL_error(L, lua.to_luastring(`${size}-byte integer does not fit into Lua Integer`));
         }
     }
     return res;
@@ -751,28 +750,27 @@ const unpacknum = function(L, b, islittle, size) {
 
 const str_unpack = function(L) {
     let h = new Header(L);
-    let fmt = lauxlib.luaL_checkstring(L, 1).split('');
-    fmt.push('\0'); // Add \0 to avoid overflow
+    let fmt = lauxlib.luaL_checkstring(L, 1);
+    fmt.push(0); // Add \0 to avoid overflow
     fmt = {
         s: fmt,
         off: 0
     };
     let data = lauxlib.luaL_checkstring(L, 2);
-    data = L.stack[lapi.index2addr_(L, 2)].value;
     let ld = data.length;
     let pos = posrelat(lauxlib.luaL_optinteger(L, 3, 1), ld) - 1;
     let n = 0;  /* number of results */
-    lauxlib.luaL_argcheck(L, pos <= ld, 3, "initial position out of string");
+    lauxlib.luaL_argcheck(L, pos <= ld, 3, lua.to_luastring("initial position out of string"));
     while (fmt.s.length - 1 > 0) {
         let details = getdetails(h, pos, fmt);
         let opt = details.opt;
         let size = details.size;
         let ntoalign = details.ntoalign;
         if (/*ntoalign + size > ~pos ||*/ pos + ntoalign + size > ld)
-            lauxlib.luaL_argerror(L, 2, "data string too short");
+            lauxlib.luaL_argerror(L, 2, lua.to_luastring("data string too short"));
         pos += ntoalign;  /* skip alignment */
         /* stack space for item + next position */
-        lauxlib.luaL_checkstack(L, 2, "too many results");
+        lauxlib.luaL_checkstack(L, 2, lua.to_luastring("too many results"));
         n++;
         switch (opt) {
             case KOption.Kint:
@@ -787,22 +785,19 @@ const str_unpack = function(L) {
                 break;
             }
             case KOption.Kchar: {
-                // lapi.lua_pushstring(L, data.slice(pos, pos + size));
-                L.stack[L.top++] = new lobject.TValue(CT.LUA_TLNGSTR, data.slice(pos, pos + size));
+                lapi.lua_pushstring(L, data.slice(pos, pos + size));
                 break;
             }
             case KOption.Kstring: {
                 let len = unpackint(L, data.slice(pos), h.islittle, size, 0);
-                lauxlib.luaL_argcheck(L, pos + len + size <= ld, 2, "data string too short");
-                // lapi.lua_pushstring(L, data.slice(pos + size, pos + size + len));
-                L.stack[L.top++] = new lobject.TValue(CT.LUA_TLNGSTR, data.slice(pos + size, pos + size + len));
+                lauxlib.luaL_argcheck(L, pos + len + size <= ld, 2, lua.to_luastring("data string too short"));
+                lapi.lua_pushstring(L, data.slice(pos + size, pos + size + len));
                 pos += len;  /* skip string */
                 break;
             }
             case KOption.Kzstr: {
                 let len = data.slice(pos).indexOf(0);
-                // lapi.lua_pushstring(L, data.slice(pos, pos + len));
-                L.stack[L.top++] = new lobject.TValue(CT.LUA_TLNGSTR, data.slice(pos, pos + len));
+                lapi.lua_pushstring(L, data.slice(pos, pos + len));
                 pos += len + 1;  /* skip string plus final '\0' */
                 break;
             }
@@ -819,7 +814,7 @@ const str_unpack = function(L) {
 const CAP_UNFINISHED = -1;
 const CAP_POSITION   = -2;
 const MAXCCALLS      = 200;
-const SPECIALS       = ["^", "$", "*", "+", "?", ".", "(", "[", "%", "-"];
+const SPECIALS       = [char["^"], char["$"], char["*"], char["+"], char["?"], char["."], char["("], char["["], char["%"], char["-"]];
 
 class MatchState {
     constructor(L) {
@@ -836,9 +831,9 @@ class MatchState {
 }
 
 const check_capture = function(ms, l) {
-    l = String.fromCharCode(l - '1'.charCodeAt(0));
+    l = l - char['1'];
     if (l < 0 || l >= ms.level || ms.capture[l].len === CAP_UNFINISHED)
-        return lauxlib.luaL_error(ms.L, `invalid capture index %${l + 1}`);
+        return lauxlib.luaL_error(ms.L, lua.to_luastring(`invalid capture index %${l + 1}`));
     return l;
 };
 
@@ -846,24 +841,24 @@ const capture_to_close = function(ms) {
     let level = ms.level;
     for (level--; level >= 0; level--)
         if (ms.capture[level].len === CAP_UNFINISHED) return level;
-    return lauxlib.luaL_error(ms.L, "invalid pattern capture");
+    return lauxlib.luaL_error(ms.L, lua.to_luastring("invalid pattern capture"));
 };
 
 const classend = function(ms, p) {
-    switch(ms.p.charAt(p++)) {
-        case sL_ESC: {
+    switch(ms.p[p++]) {
+        case L_ESC: {
             if (p === ms.p_end)
-                lauxlib.luaL_error(ms.L, "malformed pattern (ends with '%')");
+                lauxlib.luaL_error(ms.L, lua.to_luastring("malformed pattern (ends with '%')"));
             return p + 1;
         }
-        case '[': {
-            if (ms.p.charAt(p) === '^') p++;
+        case char['[']: {
+            if (ms.p[p] === char['^']) p++;
             do {  /* look for a ']' */
                 if (p === ms.p_end)
-                    lauxlib.luaL_error(ms.L, "malformed pattern (missing ']')");
-                if (ms.p.charAt(p++) === L_ESC && p < ms.p_end)
+                    lauxlib.luaL_error(ms.L, lua.to_luastring("malformed pattern (missing ']')"));
+                if (ms.p[p++] === L_ESC && p < ms.p_end)
                     p++;  /* skip escapes (e.g. '%]') */
-            } while (ms.p.charAt(p) !== ']');
+            } while (ms.p[p] !== char[']']);
             return p + 1;
         }
         default: {
@@ -874,18 +869,18 @@ const classend = function(ms, p) {
 
 const match_class = function(c, cl) {
     let res;
-    switch (cl.toLowerCase()) {
-        case 'a' : res = isalpha(c); break;
-        case 'c' : res = iscntrl(c); break;
-        case 'd' : res = isdigit(c.charCodeAt(0)); break;
-        case 'g' : res = isgraph(c); break;
-        case 'l' : res = islower(c); break;
-        case 'p' : res = ispunct(c); break;
-        case 's' : res = isspace(c); break;
-        case 'u' : res = isupper(c); break;
-        case 'w' : res = isalnum(c); break;
-        case 'x' : res = isxdigit(c); break;
-        case 'z' : res = (c.charCodeAt(0) === 0); break;  /* deprecated option */
+    switch (String.fromCharCode(cl).toLowerCase().charCodeAt(0)) {
+        case char['a'] : res = isalpha(c); break;
+        case char['c'] : res = iscntrl(c); break;
+        case char['d'] : res = isdigit(c); break;
+        case char['g'] : res = isgraph(c); break;
+        case char['l'] : res = islower(c); break;
+        case char['p'] : res = ispunct(c); break;
+        case char['s'] : res = isspace(c); break;
+        case char['u'] : res = isupper(c); break;
+        case char['w'] : res = isalnum(c); break;
+        case char['x'] : res = isxdigit(c); break;
+        case char['z'] : res = (c === 0); break;  /* deprecated option */
         default: return (cl === c);
     }
     return (islower(cl) ? res : !res);
@@ -893,20 +888,20 @@ const match_class = function(c, cl) {
 
 const matchbracketclass = function(ms, c, p, ec) {
     let sig = true;
-    if (ms.p.charAt(p + 1) === '^') {
+    if (ms.p[p + 1] === char['^']) {
         sig = false;
         p++;  /* skip the '^' */
     }
     while (++p < ec) {
-        if (ms.p.charAt(p) === L_ESC) {
+        if (ms.p[p] === L_ESC) {
             p++;
-            if (match_class(c, ms.p.charAt(p)))
+            if (match_class(c, ms.p[p]))
                 return sig;
-        } else if (ms.p.charAt(p + 1) === '-' && p + 2 < ec) {
+        } else if (ms.p[p + 1] === char['-'] && p + 2 < ec) {
             p += 2;
-            if (ms.p.charAt(p - 2) <= c.charCodeAt(0) && c.charCodeAt(0) <= ms.p.charAt(p))
+            if (ms.p[p - 2] <= c && c <= ms.p[p])
                 return sig;
-        } else if (ms.p.charAt(p) === c) return sig;
+        } else if (ms.p[p] === c) return sig;
     }
     return !sig;
 };
@@ -915,27 +910,27 @@ const singlematch = function(ms, s, p, ep) {
     if (s >= ms.src_end)
         return false;
     else {
-        let c = ms.src.charAt(s);
-        switch (ms.p.charAt(p)) {
-            case '.': return true;  /* matches any char */
-            case sL_ESC: return match_class(c, ms.p.charAt(p + 1));
-            case '[': return matchbracketclass(ms, c, p, ep - 1);
-            default: return ms.p.charAt(p) === c;
+        let c = ms.src[s];
+        switch (ms.p[p]) {
+            case char['.']: return true;  /* matches any char */
+            case L_ESC: return match_class(c, ms.p[p + 1]);
+            case char['[']: return matchbracketclass(ms, c, p, ep - 1);
+            default: return ms.p[p] === c;
         }
     }
 };
 
 const matchbalance = function(ms, s, p) {
     if (p >= ms.p_end - 1)
-        lauxlib.luaL_error(ms.L, "malformed pattern (missing arguments to '%b'");
-    if (ms.src.charAt(s) !== ms.p.charAt(p))
+        lauxlib.luaL_error(ms.L, lua.to_luastring("malformed pattern (missing arguments to '%b'"));
+    if (ms.src[s] !== ms.p[p])
         return null;
     else {
-        let b = ms.p.charAt(p);
-        let e = ms.p.charAt(p + 1);
+        let b = ms.p[p];
+        let e = ms.p[p + 1];
         let cont = 1;
         while (++s < ms.src_end) {
-            if (ms.src.charAt(s) === e) {
+            if (ms.src[s] === e) {
                 if (--cont === 0) return s + 1;
             }
             else if (s === b) cont++;
@@ -970,7 +965,7 @@ const min_expand = function(ms, s, p, ep) {
 
 const start_capture = function(ms, s, p, what) {
     let level = ms.level;
-    if (level >= LUA_MAXCAPTURES) lauxlib.luaL_error(ms.L, "too many captures");
+    if (level >= LUA_MAXCAPTURES) lauxlib.luaL_error(ms.L, lua.to_luastring("too many captures"));
     ms.capture[level] = ms.capture[level] ? ms.capture[level] : {};
     ms.capture[level].init = s;
     ms.capture[level].len = what;
@@ -1003,24 +998,24 @@ const match = function(ms, s, p) {
     let gotoinit = true;
 
     if (ms.matchdepth-- === 0)
-        lauxlib.luaL_error(ms.L, "pattern too complex");
+        lauxlib.luaL_error(ms.L, lua.to_luastring("pattern too complex"));
 
     while (gotoinit || gotodefault) {
         gotoinit = false;
         if (p !== ms.p_end) {  /* end of pattern? */
-            switch (gotodefault ? 'x' : ms.p.charAt(p)) {
-                case '(': {  /* start capture */
-                    if (ms.p.charAt(p + 1) === ')')  /* position capture? */
+            switch (gotodefault ? char['x'] : ms.p[p]) {
+                case char['(']: {  /* start capture */
+                    if (ms.p[p + 1] === char[')'])  /* position capture? */
                         s = start_capture(ms, s, p + 2, CAP_POSITION);
                     else
                         s = start_capture(ms, s, p + 1, CAP_UNFINISHED);
                     break;
                 }
-                case ')': {  /* end capture */
+                case char[')']: {  /* end capture */
                     s = end_capture(ms, s, p + 1);
                     break;
                 }
-                case '$': {
+                case char['$']: {
                     if (p + 1 !== ms.p_end) {  /* is the '$' the last char in pattern? */
                         gotodefault = true;  /* no; go to default */
                         break;
@@ -1028,9 +1023,9 @@ const match = function(ms, s, p) {
                     s = ms.src.slice(s).length === 0 ? s : null;  /* check end of string */
                     break;
                 }
-                case sL_ESC: {  /* escaped sequences not in the format class[*+?-]? */
-                    switch (ms.p.charAt(p + 1)) {
-                        case 'b': {  /* balanced string? */
+                case L_ESC: {  /* escaped sequences not in the format class[*+?-]? */
+                    switch (ms.p[p + 1]) {
+                        case char['b']: {  /* balanced string? */
                             s = matchbalance(ms, s, p + 2);
                             if (s !== null) {
                                 p = p.slice(4);
@@ -1038,22 +1033,22 @@ const match = function(ms, s, p) {
                             }
                             break;
                         }
-                        case 'f': {
+                        case char['f']: {
                             p += 2;
-                            if (ms.p.charAt(p) !== '[')
-                                lauxlib.luaL_error(ms.L, `missing '[' after '%f' in pattern`);
+                            if (ms.p[p] !== '[')
+                                lauxlib.luaL_error(ms.L, lua.to_luastring(`missing '[' after '%f' in pattern`));
                             let ep = classend(ms, p);  /* points to what is next */
-                            let previous = s === ms.src_init ? '\0' : ms.s.charAt(s - 1);
-                            if (!matchbracketclass(ms, previous, p, ep - 1) && matchbracketclass(ms, ms.src.charAt(s), p, ep - 1)) {
+                            let previous = s === ms.src_init ? 0 : ms.s[s-1];
+                            if (!matchbracketclass(ms, previous, p, ep - 1) && matchbracketclass(ms, ms.src[s], p, ep - 1)) {
                                 p = ep; gotoinit = true; break;
                             }
                             s = null;  /* match failed */
                             break;
                         }
-                        case '0': case '1': case '2': case '3':
-                        case '4': case '5': case '6': case '7':
-                        case '8': case '9': {  /* capture results (%0-%9)? */
-                            s = match_capture(ms, s, ms.p.charAt(p + 1));
+                        case char['0']: case char['1']: case char['2']: case char['3']:
+                        case char['4']: case char['5']: case char['6']: case char['7']:
+                        case char['8']: case char['9']: {  /* capture results (%0-%9)? */
+                            s = match_capture(ms, s, ms.p[p + 1]);
                             if (s !== null) {
                                 p += 2; gotoinit = true;
                             }
@@ -1068,13 +1063,13 @@ const match = function(ms, s, p) {
                     let ep = classend(ms, p);  /* points to optional suffix */
                     /* does not match at least once? */
                     if (!singlematch(ms, s, p, ep)) {
-                        if (ms.p.charAt(ep) === '*' || ms.p.charAt(ep) === '?' || ms.p.charAt(ep) === '-') {  /* accept empty? */
+                        if (ms.p[ep] === char['*'] || ms.p[ep] === char['?'] || ms.p[ep] === char['-']) {  /* accept empty? */
                             p = ep + 1; gotoinit = true; break;
                         } else  /* '+' or no suffix */
                             s = null;  /* fail */
                     } else {  /* matched once */
-                        switch (ms.p.charAt(ep)) {  /* handle optional suffix */
-                            case '?': {  /* optional */
+                        switch (ms.p[ep]) {  /* handle optional suffix */
+                            case char['?']: {  /* optional */
                                 let res;
                                 if ((res = match(ms, s + 1, ep + 1)) !== null)
                                     s = res;
@@ -1083,12 +1078,12 @@ const match = function(ms, s, p) {
                                 }
                                 break;
                             }
-                            case '+':  /* 1 or more repetitions */
+                            case char['+']:  /* 1 or more repetitions */
                                 s++;  /* 1 match already done */
-                            case '*':  /* 0 or more repetitions */
+                            case char['*']:  /* 0 or more repetitions */
                                 s = max_expand(ms, s, p, ep);
                                 break;
-                            case '-':  /* 0 or more repetitions (minimum) */
+                            case char['-']:  /* 0 or more repetitions (minimum) */
                                 s = min_expand(ms, s, p, ep);
                                 break;
                             default:  /* no suffix */
@@ -1109,10 +1104,10 @@ const push_onecapture = function(ms, i, s, e) {
         if (i === 0)
             lapi.lua_pushlstring(ms.L, ms.src.slice(s), e - s);  /* add whole match */
         else
-            lauxlib.luaL_error(ms.L, `invalid capture index %${i + 1}`);
+            lauxlib.luaL_error(ms.L, lua.to_luastring(`invalid capture index %${i + 1}`));
     } else {
         let l = ms.capture[i].len;
-        if (l === CAP_UNFINISHED) lauxlib.luaL_error(ms.L, "unfinished capture");
+        if (l === CAP_UNFINISHED) lauxlib.luaL_error(ms.L, lua.to_luastring("unfinished capture"));
         if (l === CAP_POSITION)
             lapi.lua_pushinteger(ms.L, ms.src_init + 1);
         else
@@ -1122,7 +1117,7 @@ const push_onecapture = function(ms, i, s, e) {
 
 const push_captures = function(ms, s, e) {
     let nlevels = ms.level === 0 && ms.src.slice(s) ? 1 : ms.level;
-    lauxlib.luaL_checkstack(ms.L, nlevels, "too many catpures");
+    lauxlib.luaL_checkstack(ms.L, nlevels, lua.to_luastring("too many catpures"));
     for (let i = 0; i < nlevels; i++)
         push_onecapture(ms, i, s, e);
     return nlevels;  /* number of strings pushed */
@@ -1162,6 +1157,20 @@ const reprepstate = function(ms) {
     assert(ms.matchdepth === MAXCCALLS);
 };
 
+const find_subarray = function(arr, subarr, from_index) {
+    var i = from_index >>> 0,
+        sl = subarr.length,
+        l = arr.length + 1 - sl;
+
+    loop: for (; i < l; i++) {
+        for (let j = 0; j < sl; j++)
+            if (arr[i+j] !== subarr[j])
+                continue loop;
+        return i;
+    }
+    return -1;
+};
+
 const str_find_aux = function(L, find) {
     let s = lauxlib.luaL_checkstring(L, 1);
     let p = lauxlib.luaL_checkstring(L, 2);
@@ -1176,7 +1185,7 @@ const str_find_aux = function(L, find) {
     /* explicit request or no special characters? */
     if (find && (lapi.lua_toboolean(L, 4) || nospecials(p, lp))) {
         /* do a plain search */
-        let f = s.slice(init - 1).indexOf(p);
+        let f = find_subarray(s.slice(init - 1), p, 0);
         if (f > -1) {
             lapi.lua_pushinteger(L, init + f);
             lapi.lua_pushinteger(L, init + f + lp - 1);
@@ -1185,7 +1194,7 @@ const str_find_aux = function(L, find) {
     } else {
         let ms = new MatchState(L);
         let s1 = init - 1;
-        let anchor = s.charAt(0) === '^';
+        let anchor = s[0] === char['^'];
         if (anchor) {
             p = p.slice(1); lp--;  /* skip anchor character */
         }
@@ -1260,18 +1269,18 @@ const add_s = function(ms, b, s, e) {
     let news = lapi.lua_tostring(L, 3);
     let l = news.length;
     for (let i = 0; i < l; i++) {
-        if (news.charAt(i) !== sL_ESC)
-            lauxlib.luaL_addchar(b, news.charAt(i));
+        if (news[i] !== L_ESC)
+            lauxlib.luaL_addchar(b, news[i]);
         else {
             i++;  /* skip ESC */
-            if (!isdigit(news.charCodeAt(i))) {
-                if (news.charAt(i) !== sL_ESC)
-                    lauxlib.luaL_error(L, `invalid use of '${sL_ESC}' in replacement string`);
-                lauxlib.luaL_addchar(b, news.charAt(i));
-            } else if (news.charAt(i) === '0')
+            if (!isdigit(news[i])) {
+                if (news[i] !== L_ESC)
+                    lauxlib.luaL_error(L, lua.to_luastring(`invalid use of '${sL_ESC}' in replacement string`));
+                lauxlib.luaL_addchar(b, news[i]);
+            } else if (news[i] === char['0'])
                 lauxlib.luaL_addlstring(b, ms.src.slice(s), e - s);
             else {
-                push_onecapture(ms, news.charCodeAt(i) - '1'.charCodeAt(0), s, e);
+                push_onecapture(ms, news[i] - char['1'], s, e);
                 lauxlib.luaL_tolstring(L, -1);
                 lapi.lua_remove(L, -2);  /* remove original value */
                 lauxlib.luaL_addvalue(b);  /* add capture to accumulated result */
@@ -1303,7 +1312,7 @@ const add_value = function(ms, b, s, e, tr) {
         lapi.lua_pop(L, 1);
         lapi.lua_pushlstring(L, s, e - s);  /* keep original text */
     } else if (!lapi.lua_isstring(L, -1))
-        lauxlib.luaL_error(L, `invalid replacement value (a ${lauxlib.luaL_typename(L, -1)})`);
+        lauxlib.luaL_error(L, lua.to_luastring(`invalid replacement value (a ${lobject.jsstring(lauxlib.luaL_typename(L, -1))})`));
         lauxlib.luaL_addvalue(b);  /* add result to accumulator */
 };
 
@@ -1315,12 +1324,12 @@ const str_gsub = function(L) {
     let lastmatch = null;  /* end of last match */
     let tr = lapi.lua_type(L, 3);  /* replacement type */
     let max_s = lauxlib.luaL_optinteger(L, 4, srcl + 1);  /* max replacements */
-    let anchor = p.charAt(0) === '^';
+    let anchor = p[0] === char['^'];
     let n = 0;  /* replacement count */
     let ms = new MatchState(L);
     let b = new lauxlib.luaL_Buffer(L);
     lauxlib.luaL_argcheck(L, tr === CT.LUA_TNUMBER || tr === CT.LUA_TSTRING || tr === CT.LUA_TFUNCTION || tr === CT.LUA_TTABLE, 3,
-        "string/function/table expected");
+        lua.to_luastring("string/function/table expected"));
     lauxlib.luaL_buffinit(L, b);
     if (anchor) {
         p = p.slice(1); lp--;  /* skip anchor character */
@@ -1335,7 +1344,7 @@ const str_gsub = function(L) {
             add_value(ms, b, src, e, tr);  /* add replacement to buffer */
             src = lastmatch = e;
         } else if (src < ms.src_end)  /* otherwise, skip one character */
-            lauxlib.luaL_addchar(b, ms.src.charAt(src++));
+            lauxlib.luaL_addchar(b, ms.src[src++]);
         else break;  /* end of subject */
         if (anchor) break;
     }

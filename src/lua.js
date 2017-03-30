@@ -4,6 +4,12 @@
 const assert  = require('assert');
 const luaconf = require('./luaconf.js');
 
+// To avoid charCodeAt everywhere
+const char = [];
+for (let i = 0; i < 127; i++)
+    char[String.fromCharCode(i)] = i;
+module.exports.char = char;
+
 /* mark for precompiled code ('<esc>Lua') */
 const LUA_SIGNATURE           = "\x1bLua";
 

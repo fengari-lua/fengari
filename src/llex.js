@@ -12,14 +12,9 @@ const lua      = require('./lua.js');
 const TValue   = lobject.TValue;
 const CT       = lua.constant_types;
 const TS       = lua.thread_status;
+const char     = lua.char;
 
 const FIRST_RESERVED = 257;
-
-// To avoid charCodeAt everywhere
-const char = [];
-for (let i = 0; i < 127; i++)
-    char[String.fromCharCode(i)] = i;
-module.exports.char = char;
 
 const RESERVED = {
     /* terminal symbols denoted by reserved words */
@@ -87,7 +82,8 @@ class MBuffer {
         this.reader = reader ? reader : null;
 
         if (!this.reader) {
-            this.buffer = typeof data === "string" ? lua.to_luastring(data) : (data ? data : []);
+            assert(typeof data !== "string", "Should only load binary of array of bytes");
+            this.buffer = data ? data : [];
             this.n = this.buffer instanceof DataView ? this.buffer.byteLength : this.buffer.length;
             this.off = 0;
         }
@@ -103,7 +99,7 @@ class MBuffer {
     fill() {
         if (this.reader) {
             this.buffer = this.reader(this.L, this.data);
-            this.buffer = typeof this.buffer === "string" ? lua.to_luastring(this.buffer) : this.buffer;
+            assert(typeof this.buffer !== "string", "Should only load binary of array of bytes");
             if (this.buffer === null)
                 return -1;
             this.n = this.buffer instanceof DataView ? this.buffer.byteLength - 1 : this.buffer.length - 1;
@@ -418,7 +414,7 @@ const readdecesc = function(ls) {
     let r = 0;  /* result accumulator */
     let i;
     for (i = 0; i < 3 && ljstype.lisdigit(ls.current); i++) {  /* read up to 3 digits */
-        r = 10 * r + parseInt(ls.current);
+        r = 10 * r + ls.current - char['0'];
         save_and_next(ls);
     }
     esccheck(ls, r <= 255, lua.to_luastring("decimal escape too large"));

@@ -20,7 +20,7 @@ test('string.lua', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, luaCode);
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 

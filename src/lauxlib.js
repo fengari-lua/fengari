@@ -89,7 +89,7 @@ const luaL_argerror = function(L, arg, extramsg) {
     }
 
     if (ar.name === null)
-        ar.name = pushglobalfuncname(L, ar) ? lapi.lua_tostring(L, -1) : "?";
+        ar.name = pushglobalfuncname(L, ar) ? lapi.lua_tostring(L, -1) : [lua.char["?"]];
 
     return luaL_error(L, lua.to_luastring(`bad argument #${arg} to '${lobject.jsstring(ar.name)}' (${lobject.jsstring(extramsg)})`));
 };
