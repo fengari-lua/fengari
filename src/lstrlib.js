@@ -24,6 +24,11 @@ const LUA_MAXCAPTURES = 32;
 // (sizeof(size_t) < sizeof(int) ? MAX_SIZET : (size_t)(INT_MAX))
 const MAXSIZE = 2147483647;
 
+/* Give natural (i.e. strings end at the first \0) length of a string represented by an array of bytes */
+const strlen = function(s) {
+    let len = s.indexOf(0);
+    return len > -1 ? len : s.length;
+};
 
 /* translate a relative string position: negative means back from end */
 const posrelat = function(pos, len) {
@@ -327,12 +332,11 @@ const str_format = function(L) {
                 case 's': {
                     strfrmt = strfrmt.slice(1);
                     let s = lauxlib.luaL_tolstring(L, arg);
-                    if (form[2] === char['\0']) {  /* no modifiers? */
+                    if (form.length <= 2 || form[2] === 0) {  /* no modifiers? */
                         concat(b, s);  /* keep entire string */
                         lapi.lua_pop(L, 1);  /* remove result from 'luaL_tolstring' */
                     } else {
-                        let zero = s.indexOf(0);
-                        lauxlib.luaL_argcheck(L, zero < 0 || zero === s.length - 1, arg, lua.to_luastring("string contains zeros"));
+                        lauxlib.luaL_argcheck(L, s.length === strlen(s), arg, lua.to_luastring("string contains zeros"));
                         if (form.indexOf(char['.']) < 0 && s.length >= 100) {
                             /* no precision and string is too long to be formatted */
                             concat(b, s);  /* keep entire string */

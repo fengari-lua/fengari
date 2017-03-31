@@ -187,3 +187,6 @@ do
   checkQ(false)
   checkerror("no literal", string.format, "%q", {})
 end
+
+assert(string.format("\0%s\0", "\0\0\1") == "\0\0\0\1\0")
+checkerror("contains zeros", string.format, "%10s", "\0")
