@@ -1128,11 +1128,11 @@ const assignment = function(ls, lh, nvars) {
 
 const cond = function(ls) {
     /* cond -> exp */
-    let v = expdesc();
+    let v = new expdesc();
     expr(ls, v);  /* read condition */
     if (v.k === expkind.VNIL) v.k = expkind.VFALSE;  /* 'falses' are all equal here */
     lcode.luaK_goiftrue(ls.fs, v);
-    return v;
+    return v.f;
 };
 
 const gotostat = function(ls, pc) {
@@ -1341,15 +1341,17 @@ const test_then_block = function(ls, escapelist) {
     if (ls.t.token === R.TK_ELSE || ls.t.token === R.TK_ELSEIF)  /* followed by 'else'/'elseif'? */
         escapelist = lcode.luaK_concat(fs, escapelist, lcode.luaK_jump(fs));  /* must jump over it */
     lcode.luaK_patchtohere(fs, jf);
+
+    return escapelist
 };
 
 const ifstat = function(ls, line) {
     /* ifstat -> IF cond THEN block {ELSEIF cond THEN block} [ELSE block] END */
     let fs = ls.fs;
     let escapelist = lcode.NO_JUMP;  /* exit list for finished parts */
-    test_then_block(ls, escapelist);  /* IF cond THEN block */
+    escapelist = test_then_block(ls, escapelist);  /* IF cond THEN block */
     while (ls.t.token === R.TK_ELSEIF)
-        test_then_block(ls, escapelist);  /* ELSEIF cond THEN block */
+        escapelist = test_then_block(ls, escapelist);  /* ELSEIF cond THEN block */
     if (testnext(ls, R.TK_ELSE))
         block(ls);  /* 'else' part */
     check_match(ls, R.TK_END, R.TK_IF, line);
