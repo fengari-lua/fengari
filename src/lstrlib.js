@@ -1,7 +1,7 @@
 "use strict";
 
 const assert  = require('assert');
-const sprintf = require('sprintf');
+const sprintf = require('sprintf-js').sprintf;
 
 const lapi    = require('./lapi.js');
 const lauxlib = require('./lauxlib.js');

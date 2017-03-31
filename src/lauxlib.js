@@ -292,15 +292,15 @@ const luaL_len = function(L, idx) {
     lapi.lua_len(L, idx);
     let l = lapi.lua_tointegerx(L, -1);
     if (l === false)
-        luaL_error(L, "object length is not an integer");
+        luaL_error(L, lua.to_luastring("object length is not an integer"));
     lapi.lua_pop(L, 1);  /* remove object */
     return l;
 };
 
 const luaL_tolstring = function(L, idx) {
-    if (luaL_callmeta(L, idx, "__tostring")) {
+    if (luaL_callmeta(L, idx, lua.to_luastring("__tostring"))) {
         if (!lapi.lua_isstring(L, -1))
-            luaL_error(L, "'__tostring' must return a string");
+            luaL_error(L, lua.to_luastring("'__tostring' must return a string"));
     } else {
         switch(lapi.lua_type(L, idx)) {
             case CT.LUA_TNUMBER:

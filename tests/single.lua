@@ -190,3 +190,22 @@ end
 
 assert(string.format("\0%s\0", "\0\0\1") == "\0\0\0\1\0")
 checkerror("contains zeros", string.format, "%10s", "\0")
+
+-- format x tostring
+assert(string.format("%s %s", nil, true) == "nil true")
+assert(string.format("%s %.4s", false, true) == "false true")
+assert(string.format("%.3s %.3s", false, true) == "fal tru")
+local m = setmetatable({}, {__tostring = function () return "hello" end,
+                            __name = "hi"})
+assert(string.format("%s %.10s", m, m) == "hello hello")
+getmetatable(m).__tostring = nil   -- will use '__name' from now on
+assert(string.format("%.4s", m) == "hi: ")
+
+getmetatable(m).__tostring = function () return {} end
+checkerror("'__tostring' must return a string", tostring, m)
+
+assert(string.format("%x", 0.0) == "0")
+assert(string.format("%02x", 0.0) == "00")
+assert(string.format("%08X", 0xFFFFFFFF) == "FFFFFFFF")
+assert(string.format("%+08d", 31501) == "+0031501")
+assert(string.format("%+08d", -30927) == "-0030927")
