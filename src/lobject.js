@@ -556,8 +556,8 @@ const intarith = function(L, op, v1, v2) {
         case lua.LUA_OPBXOR: return (v1 ^ v2);
         case lua.LUA_OPSHL:  return (v1 << v2);
         case lua.LUA_OPSHR:  return (v1 >> v2);
-        case lua.LUA_OPUNM:  return (-v1);
-        case lua.LUA_OPBNOT: return (~v1);
+        case lua.LUA_OPUNM:  return (0 - v1);
+        case lua.LUA_OPBNOT: return (~0 ^ v1);
     }
 };
 

@@ -301,7 +301,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (numberop1 !== false && numberop2 !== false) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMFLT, k[i.B].value / op2.value);
+                    L.stack[ra] = new TValue(CT.LUA_TNUMFLT, numberop1 / numberop2);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_DIV);
                     base = ci.u.l.base;

@@ -271,17 +271,17 @@ do print("testing 'format %a %A'")
   assert(string.find(string.format("%A", 0.0), "^0X0%.?0?P%+?0$"))
   assert(string.find(string.format("%a", -0.0), "^%-0x0%.?0?p%+?0$"))
 
-  -- if not _port then   -- test inf, -inf, NaN, and -0.0
-  --   assert(string.find(string.format("%a", 1/0), "^inf"))
-  --   assert(string.find(string.format("%A", -1/0), "^%-INF"))
-  --   assert(string.find(string.format("%a", 0/0), "^%-?nan"))
-  --   assert(string.find(string.format("%a", -0.0), "^%-0x0"))
-  -- end
+  if not _port then   -- test inf, -inf, NaN, and -0.0
+    assert(string.find(string.format("%a", 1/0), "^inf"))
+    assert(string.find(string.format("%A", -1/0), "^%-INF"))
+    assert(string.find(string.format("%a", 0/0), "^%-?nan"))
+    assert(string.find(string.format("%a", -0.0), "^%-0x0"))
+  end
   
-  -- if not pcall(string.format, "%.3a", 0) then
-  --   (Message or print)("\n >>> modifiers for format '%a' not available <<<\n")
-  -- else
-  --   assert(string.find(string.format("%+.2A", 12), "^%+0X%x%.%x0P%+?%d$"))
-  --   assert(string.find(string.format("%.4A", -12), "^%-0X%x%.%x000P%+?%d$"))
-  -- end
+  if not pcall(string.format, "%.3a", 0) then
+    (Message or print)("\n >>> modifiers for format '%a' not available <<<\n")
+  else
+    assert(string.find(string.format("%+.2A", 12), "^%+0X%x%.%x0P%+?%d$"))
+    assert(string.find(string.format("%.4A", -12), "^%-0X%x%.%x000P%+?%d$"))
+  end
 end

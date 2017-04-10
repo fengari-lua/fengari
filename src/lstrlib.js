@@ -102,8 +102,12 @@ const adddigit = function(buff, n, x) {
 const num2straux = function(x) {
     let buff = [];
     /* if 'inf' or 'NaN', format it like '%g' */
-    if (x === Infinity || isNaN(x))
-        return sprintf(luaconf.LUA_NUMBER_FMT, x).split('').map(e => e.charCodeAt(0));
+    if (Object.is(x, Infinity))
+        return lua.to_luastring('inf');
+    else if (Object.is(x, -Infinity))
+        return lua.to_luastring('-inf');
+    else if (Number.isNaN(x))
+        return lua.to_luastring('nan');
     else if (x === 0) {  /* can be -0... */
         /* create "0" or "-0" followed by exponent */
         let zero = sprintf(luaconf.LUA_NUMBER_FMT + "x0p+0", x).split('').map(e => e.charCodeAt(0));
