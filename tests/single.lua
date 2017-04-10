@@ -1,4 +1,4 @@
--- $Id: strings.lua,v 1.86 2016/11/07 13:11:28 roberto Exp roberto $
+ -- $Id: strings.lua,v 1.86 2016/11/07 13:11:28 roberto Exp roberto $
 -- See Copyright Notice in file all.lua
 
 print('testing strings and string library')
@@ -209,3 +209,80 @@ assert(string.format("%02x", 0.0) == "00")
 assert(string.format("%08X", 0xFFFFFFFF) == "FFFFFFFF")
 assert(string.format("%+08d", 31501) == "+0031501")
 assert(string.format("%+08d", -30927) == "-0030927")
+
+
+-- TODO: when figured out number limit stuff
+
+-- do    -- longest number that can be formatted
+--   local i = 1
+--   local j = 10000
+--   while i + 1 < j do   -- binary search for maximum finite float
+--     local m = (i + j) // 2
+--     if 10^m < math.huge then i = m else j = m end
+--   end
+--   assert(10^i < math.huge and 10^j == math.huge)
+--   local s = string.format('%.99f', -(10^i))
+--   assert(string.len(s) >= i + 101)
+--   assert(tonumber(s) == -(10^i))
+-- end
+
+
+-- -- testing large numbers for format
+-- do   -- assume at least 32 bits
+--   local max, min = 0x7fffffff, -0x80000000    -- "large" for 32 bits
+--   assert(string.sub(string.format("%8x", -1), -8) == "ffffffff")
+--   assert(string.format("%x", max) == "7fffffff")
+--   assert(string.sub(string.format("%x", min), -8) == "80000000")
+--   assert(string.format("%d", max) ==  "2147483647")
+--   assert(string.format("%d", min) == "-2147483648")
+--   assert(string.format("%u", 0xffffffff) == "4294967295")
+--   assert(string.format("%o", 0xABCD) == "125715")
+
+--   max, min = 0x7fffffffffffffff, -0x8000000000000000
+--   if max > 2.0^53 then  -- only for 64 bits
+--     assert(string.format("%x", (2^52 | 0) - 1) == "fffffffffffff")
+--     assert(string.format("0x%8X", 0x8f000003) == "0x8F000003")
+--     assert(string.format("%d", 2^53) == "9007199254740992")
+--     assert(string.format("%i", -2^53) == "-9007199254740992")
+--     assert(string.format("%x", max) == "7fffffffffffffff")
+--     assert(string.format("%x", min) == "8000000000000000")
+--     assert(string.format("%d", max) ==  "9223372036854775807")
+--     assert(string.format("%d", min) == "-9223372036854775808")
+--     assert(string.format("%u", ~(-1 << 64)) == "18446744073709551615")
+--     assert(tostring(1234567890123) == '1234567890123')
+--   end
+-- end
+
+do print("testing 'format %a %A'")
+  local function matchhexa (n)
+    local s = string.format("%a", n)
+    -- result matches ISO C requirements
+    assert(string.find(s, "^%-?0x[1-9a-f]%.?[0-9a-f]*p[-+]?%d+$"))
+    assert(tonumber(s) == n)  -- and has full precision
+    s = string.format("%A", n)
+    assert(string.find(s, "^%-?0X[1-9A-F]%.?[0-9A-F]*P[-+]?%d+$"))
+    assert(tonumber(s) == n)
+  end
+  for _, n in ipairs{0.1, -0.1, 1/3, -1/3, 1e30, -1e30,
+                     -45/247, 1, -1, 2, -2, 3e-20, -3e-20} do
+    matchhexa(n)
+  end
+
+  assert(string.find(string.format("%A", 0.0), "^0X0%.?0?P%+?0$"))
+  -- print(string.format("%a", -0.0))
+  -- assert(string.find(string.format("%a", -0.0), "^%-0x0%.?0?p%+?0$"))
+
+  -- if not _port then   -- test inf, -inf, NaN, and -0.0
+  --   assert(string.find(string.format("%a", 1/0), "^inf"))
+  --   assert(string.find(string.format("%A", -1/0), "^%-INF"))
+  --   assert(string.find(string.format("%a", 0/0), "^%-?nan"))
+  --   assert(string.find(string.format("%a", -0.0), "^%-0x0"))
+  -- end
+  
+  -- if not pcall(string.format, "%.3a", 0) then
+  --   (Message or print)("\n >>> modifiers for format '%a' not available <<<\n")
+  -- else
+  --   assert(string.find(string.format("%+.2A", 12), "^%+0X%x%.%x0P%+?%d$"))
+  --   assert(string.find(string.format("%.4A", -12), "^%-0X%x%.%x000P%+?%d$"))
+  -- end
+end
