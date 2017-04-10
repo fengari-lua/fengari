@@ -678,8 +678,7 @@ const lua_compare_ = function(L, o1, o2, op) {
 };
 
 const lua_stringtonumber = function(L, s) {
-    let number = parseFloat(lobject.jsstring(s));
-    L.stack[L.top++] = new TValue(number % 1 !== 0 ? CT.LUA_TNUMFLT : CT.LUA_TNUMINT, number);
+    L.stack[L.top++] = lobject.luaO_str2num(s);
     assert(L.top <= L.ci.top, "stack overflow");
     return s.length;
 };
