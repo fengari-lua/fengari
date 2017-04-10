@@ -106,7 +106,10 @@ const num2straux = function(x) {
         return sprintf(luaconf.LUA_NUMBER_FMT, x).split('').map(e => e.charCodeAt(0));
     else if (x === 0) {  /* can be -0... */
         /* create "0" or "-0" followed by exponent */
-        return sprintf(luaconf.LUA_NUMBER_FMT + "x0p+0", x).split('').map(e => e.charCodeAt(0));
+        let zero = sprintf(luaconf.LUA_NUMBER_FMT + "x0p+0", x).split('').map(e => e.charCodeAt(0));
+        if (Object.is(x, -0))
+            return [char['-']].concat(zero);
+        return zero;
     } else {
         let fe = lobject.frexp(x);  /* 'x' fraction and exponent */
         let m = fe[0];

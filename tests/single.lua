@@ -1,4 +1,4 @@
- -- $Id: strings.lua,v 1.86 2016/11/07 13:11:28 roberto Exp roberto $
+-- $Id: strings.lua,v 1.86 2016/11/07 13:11:28 roberto Exp roberto $
 -- See Copyright Notice in file all.lua
 
 print('testing strings and string library')
@@ -269,8 +269,7 @@ do print("testing 'format %a %A'")
   end
 
   assert(string.find(string.format("%A", 0.0), "^0X0%.?0?P%+?0$"))
-  -- print(string.format("%a", -0.0))
-  -- assert(string.find(string.format("%a", -0.0), "^%-0x0%.?0?p%+?0$"))
+  assert(string.find(string.format("%a", -0.0), "^%-0x0%.?0?p%+?0$"))
 
   -- if not _port then   -- test inf, -inf, NaN, and -0.0
   --   assert(string.find(string.format("%a", 1/0), "^inf"))
