@@ -1198,7 +1198,7 @@ const str_find_aux = function(L, find) {
     } else {
         let ms = new MatchState(L);
         let s1 = init - 1;
-        let anchor = s[0] === char['^'];
+        let anchor = p[0] === char['^'];
         if (anchor) {
             p = p.slice(1); lp--;  /* skip anchor character */
         }
