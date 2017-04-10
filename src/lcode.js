@@ -17,9 +17,9 @@ const TValue   = lobject.TValue;
 
 const luaO_arith = function(L, op, p1, p2, res) {
     switch (op) {
-        case lvm.LUA_OPBAND: case lvm.LUA_OPBOR: case lvm.LUA_OPBXOR:
-        case lvm.LUA_OPSHL: case lvm.LUA_OPSHR:
-        case lvm.LUA_OPBNOT: {  /* operate only on integers */
+        case lua.LUA_OPBAND: case lua.LUA_OPBOR: case lua.LUA_OPBXOR:
+        case lua.LUA_OPSHL: case lua.LUA_OPSHR:
+        case lua.LUA_OPBNOT: {  /* operate only on integers */
             let i1 = lvm.tointeger(p1);
             let i2 = lvm.tointeger(p2);
             if (i1 !== false && i2 !== false) {
@@ -29,7 +29,7 @@ const luaO_arith = function(L, op, p1, p2, res) {
             }
             else break;  /* go to the end */
         }
-        case lvm.LUA_OPDIV: case lvm.LUA_OPPOW: {  /* operate only on floats */
+        case lua.LUA_OPDIV: case lua.LUA_OPPOW: {  /* operate only on floats */
             let n1 = lvm.tonumber(p1);
             let n2 = lvm.tonumber(p2);
             if (n1 !== false && n2 !== false) {
