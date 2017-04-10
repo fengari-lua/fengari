@@ -751,11 +751,11 @@ const luaV_lessequal = function(L, l, r) {
 
 const luaV_equalobj = function(L, t1, t2) {
     if (t1.ttype() !== t2.ttype()) { /* not the same variant? */
-        if (t1.ttnov() !== t2.ttnov() || t1.ttnov() !== CT.LUA_NUMBER)
+        if (t1.ttnov() !== t2.ttnov() || t1.ttnov() !== CT.LUA_TNUMBER)
             return 0; /* only numbers can be equal with different variants */
         else { /* two numbers with different variants */
             /* compare them as integers */
-            return Math.floor(t1.value) === Math.floor(t2.value); // TODO: tointeger
+            return Math.floor(t1.value) === Math.floor(t2.value) ? 1 : 0; // TODO: tointeger
         }
     }
 
