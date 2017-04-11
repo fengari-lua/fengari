@@ -40,7 +40,7 @@ module.exports[LUA_MATHLIBNAME] = require("./lmathlib.js").luaopen_math;
 
 const LUA_DBLIBNAME = "debug";
 module.exports.LUA_DBLIBNAME = LUA_DBLIBNAME;
-module.exports[LUA_DBLIBNAME] = require("./ldebug.js").luaopen_debug;
+module.exports[LUA_DBLIBNAME] = require("./ldblib.js").luaopen_debug;
 
 const LUA_LOADLIBNAME = "package";
 module.exports.LUA_LOADLIBNAME = LUA_LOADLIBNAME;

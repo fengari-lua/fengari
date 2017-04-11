@@ -11,6 +11,7 @@ const lmathlib = require('./lmathlib.js');
 const lstrlib  = require('./lstrlib.js');
 const ltablib  = require('./ltablib.js');
 const lutf8lib = require('./lutf8lib.js');
+const ldblib   = require('./ldblib.js');
 const lualib   = require('./lualib.js');
 
 const loadedlibs = {
@@ -19,6 +20,7 @@ const loadedlibs = {
     [lualib.LUA_STRLIBNAME]:  lstrlib.luaopen_string,
     [lualib.LUA_TABLIBNAME]:  ltablib.luaopen_table,
     [lualib.LUA_UTF8LIBNAME]: lutf8lib.luaopen_utf8,
+    [lualib.LUA_DBLIBNAME]:   ldblib.luaopen_debug,
     "_G":                     lbaselib.luaopen_base
 };
 

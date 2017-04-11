@@ -26,7 +26,9 @@ const luaB_print = function(L) {
         lapi.lua_pop(L, 1);
     }
 
-    console.log(lobject.jsstring(str));
+    // Don't use console.log if Node
+    if (process.stdout) process.stdout.write(lobject.jsstring(str) + "\n");
+    else console.log(lobject.jsstring(str));
     return 0;
 };
 
