@@ -51,7 +51,6 @@
     - [ ] lua_setlocal
     - [ ] lua_setuservalue
     - [ ] lua_tocfunction
-    - [ ] lua_upvalueid
     - [ ] lua_upvaluejoin
 - [ ] Auxiliary library
     - [x] ...
@@ -87,6 +86,22 @@
     - [ ] os
     - [ ] io
     - [ ] Debug
+        - [x] debug.debug
+        - [x] debug.getlocal
+        - [ ] debug.gethook
+        - [ ] debug.getinfo
+        - [ ] debug.getmetatable
+        - [ ] debug.getregistry
+        - [ ] debug.getupvalue
+        - [ ] debug.getuservalue
+        - [ ] debug.sethook
+        - [ ] debug.setlocal
+        - [ ] debug.setmetatable
+        - [ ] debug.setupvalue
+        - [ ] debug.setuservalue
+        - [ ] debug.traceback
+        - [ ] debug.upvalueid
+        - [ ] debug.upvaluejoin
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
 - [ ] DOM API binding
 

@@ -463,7 +463,7 @@ const lua_newuserdata = function(L, size) {
     return L.stack[L.top - 1].value;
 };
 
-const aux_upvalue = function(fi, n) {
+const aux_upvalue = function(L, fi, n) {
     switch(fi.ttype()) {
         case CT.LUAT_TCCL: {  /* C closure */
             let f = fi.value;
@@ -480,17 +480,26 @@ const aux_upvalue = function(fi, n) {
             let name = p.upvalues[n-1].name;
             return {
                 name: name ? name : "(*no name)",
-                val: f.upvals[n-1].val()
+                val: f.upvals[n-1].val(L)
             };
         }
         default: return null;  /* not a closure */
     }
 };
 
+const lua_getupvalue = function(L, funcindex, n) {
+    let up = aux_upvalue(L, index2addr(L, funcindex), n);
+    let name = up.name;
+    let val = up.val;
+    if (name)
+        L.stack[L.top++] = new TValue(name.type, name.value);
+    return name;
+};
+
 const lua_setupvalue = function(L, funcindex, n) {
     let fi = index2addr(L, funcindex);
     assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
-    let aux = aux_upvalue(fi, n);
+    let aux = aux_upvalue(L, fi, n);
     let name = aux.name;
     let val = aux.val;
     if (name) {
@@ -899,6 +908,35 @@ const lua_len = function(L, idx) {
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
+const getupvalref = function(L, fidx, n, pf) {
+    let fi = index2addr(L, fidx);
+    assert(fi.ttisLclosure(), "Lua function expected");
+    let f = fi.value;
+    assert(1 <= n && n <= f.p.upvalues.length, "invalid upvalue index");
+    return {
+        closure: f,
+        upval: f.upvals[n - 1]
+    };
+};
+
+const lua_upvalueid = function(L, fidx, n) {
+    let fi = index2addr(L, fidx);
+    switch (fi.ttype()) {
+        case CT.LUA_TLCL: {  /* lua closure */
+            return getupvalref(L, fidx, n, null).upval;
+        }
+        case CT.LUA_TCCL: {  /* C closure */
+            let f = fi.value;
+            assert(1 <= n && n <= f.nupvalues, "invalid upvalue index");
+            return f.upvalue[n - 1];
+        }
+        default: {
+            assert(false, "closure expected");
+            return null;
+        }
+    }
+};
+
 // This functions are only there for compatibility purposes
 const lua_gc = function () {};
 
@@ -934,6 +972,7 @@ module.exports.lua_geti              = lua_geti;
 module.exports.lua_getmetatable      = lua_getmetatable;
 module.exports.lua_gettable          = lua_gettable;
 module.exports.lua_gettop            = lua_gettop;
+module.exports.lua_getupvalue        = lua_getupvalue;
 module.exports.lua_insert            = lua_insert;
 module.exports.lua_isfunction        = lua_isfunction;
 module.exports.lua_isinteger         = lua_isinteger;
@@ -1001,5 +1040,6 @@ module.exports.lua_tothread          = lua_tothread;
 module.exports.lua_touserdata        = lua_touserdata;
 module.exports.lua_type              = lua_type;
 module.exports.lua_typename          = lua_typename;
+module.exports.lua_upvalueid         = lua_upvalueid;
 module.exports.lua_version           = lua_version;
 module.exports.lua_xmove             = lua_xmove;

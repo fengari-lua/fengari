@@ -53,3 +53,39 @@ test('debug.getlocal', function (t) {
     );
 
 });
+
+test('debug.upvalueid', function (t) {
+    let luaCode = `
+        local upvalue = "upvalue"
+
+        local l = function()
+            return upvalue
+        end
+
+        return debug.upvalueid(l, 1)
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.ok(
+        lapi.lua_touserdata(L, -1),
+        "Correct element(s) on the stack"
+    );
+
+});

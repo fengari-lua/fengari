@@ -66,8 +66,27 @@ const db_getlocal = function(L) {
     }
 };
 
+/*
+** Check whether a given upvalue from a given closure exists and
+** returns its index
+*/
+const checkupval = function(L, argf, argnup) {
+    let nup = lauxlib.luaL_checkinteger(L, argnup);  /* upvalue index */
+    lauxlib.luaL_checktype(L, argf, lua.CT.LUA_TFUNCTION);  /* closure */
+    lauxlib.luaL_argcheck(L, (lapi.lua_getupvalue(L, argf, nup) !== null), argnup, lua.to_luastring("invalid upvalue index"));
+    return nup;
+};
+
+
+const db_upvalueid = function(L) {
+   let n = checkupval(L, 1, 2);
+   lapi.lua_pushlightuserdata(L, lapi.lua_upvalueid(L, 1, n));
+   return 1;
+};
+
 const dblib = {
-    "getlocal": db_getlocal
+    "getlocal": db_getlocal,
+    "upvalueid": db_upvalueid
 };
 
 // Only with Node
