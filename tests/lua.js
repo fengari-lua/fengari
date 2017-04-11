@@ -7,12 +7,12 @@ const lauxlib  = require("../src/lauxlib.js");
 const lua      = require('../src/lua.js');
 const linit    = require('../src/linit.js');
 
-test('string.lua', function (t) {
+test('strings.lua', function (t) {
     let luaCode = `
-        return dofile("tests/single.lua")
+        return dofile("tests/lua-tests/strings.lua")
     `, L;
     
-    t.plan(1);
+    t.plan(2);
 
     t.doesNotThrow(function () {
 
@@ -24,10 +24,10 @@ test('string.lua', function (t) {
 
     }, "Lua program loaded without error");
 
-    // t.doesNotThrow(function () {
+    t.doesNotThrow(function () {
 
         lapi.lua_call(L, 0, -1);
 
-    // }, "Lua program ran without error");
+    }, "Lua program ran without error");
 
 });
