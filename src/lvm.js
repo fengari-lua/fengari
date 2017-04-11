@@ -137,12 +137,14 @@ const luaV_execute = function(L) {
                 break;
             }
             case OCi.OP_LOADK: {
-                L.stack[ra] = k[i.Bx];
+                let konst = k[i.Bx];
+                L.stack[ra] = new TValue(konst.type, konst.value);
                 break;
             }
             case OCi.OP_LOADKX: {
                 assert(ci.u.l.savedpc[ci.pcOff].opcode === OCi.OP_EXTRAARG);
-                L.stack[ra] = k[ci.u.l.savedpc[ci.pcOff++].Ax];
+                let konst = k[ci.u.l.savedpc[ci.pcOff++].Ax];
+                L.stack[ra] = new TValue(konst.type, konst.value);
                 break;
             }
             case OCi.OP_LOADBOOL: {
