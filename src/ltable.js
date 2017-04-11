@@ -14,7 +14,9 @@ const TValue  = lobject.TValue;
 Table.prototype.ordered_intindexes = function() {
     return [...this.value.keys()]
         .filter(e => typeof e === 'number' && e % 1 === 0)  // Only integer indexes
-        .sort();
+        .sort(function (a, b) {
+            return a > b ? 1 : -1;
+        });
 };
 
 Table.prototype.ordered_indexes = function() {
