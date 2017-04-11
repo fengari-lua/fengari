@@ -736,6 +736,14 @@ const lua_isuserdata = function(L, idx) {
     return o.ttisfulluserdata(o) || o.ttislightuserdata();
 };
 
+const lua_isthread = function(L, idx) {
+    return lua_type(L, idx) === CT.LUA_TTHREAD;
+};
+
+const lua_isfunction = function(L, idx) {
+    return lua_type(L, idx) === CT.LUA_TFUNCTION;
+};
+
 const lua_rawequal = function(L, index1, index2) {
     let o1 = index2addr(L, index1);
     let o2 = index2addr(L, index2);
@@ -927,6 +935,7 @@ module.exports.lua_getmetatable      = lua_getmetatable;
 module.exports.lua_gettable          = lua_gettable;
 module.exports.lua_gettop            = lua_gettop;
 module.exports.lua_insert            = lua_insert;
+module.exports.lua_isfunction        = lua_isfunction;
 module.exports.lua_isinteger         = lua_isinteger;
 module.exports.lua_isnil             = lua_isnil;
 module.exports.lua_isnone            = lua_isnone;
@@ -934,6 +943,7 @@ module.exports.lua_isnoneornil       = lua_isnoneornil;
 module.exports.lua_isnumber          = lua_isnumber;
 module.exports.lua_isstring          = lua_isstring;
 module.exports.lua_istable           = lua_istable;
+module.exports.lua_isthread          = lua_isthread;
 module.exports.lua_isuserdata        = lua_isuserdata;
 module.exports.lua_len               = lua_len;
 module.exports.lua_load              = lua_load;

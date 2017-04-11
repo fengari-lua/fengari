@@ -59,6 +59,63 @@ const upvalname = function(p, uv) {
     return s;
 };
 
+const findvararg = function(ci, n, pos) {
+    let nparams = ci.func.p.numparams;
+    if (n >= ci.u.l.base - ci.funcOff - nparams)
+        return null;  /* no such vararg */
+    else {
+        return {
+            pos: ci.funcOff + nparams + n,
+            name: lua.to_luastring("(*vararg)")  /* generic name for any vararg */
+        };
+    }
+};
+
+const findlocal = function(L, ci, n) {
+    let base, name = null;
+
+    if (ci.callstatus & lstate.CIST_LUA) {
+        if (n < 0)  /* access to vararg values? */
+            return findvararg(ci, -n);
+        else {
+            base = ci.u.l.base;
+            name = lfunc.luaF_getlocalname(ci.func.p, n, ci.pcOff);
+        }
+    } else
+        base = ci.funcOff + 1;
+
+    if (name === null) {  /* no 'standard' name? */
+        let limit = ci === L.ci ? L.top : ci.next.func;
+        if (limit - base >= n && n > 0)  /* is 'n' inside 'ci' stack? */
+            name = lua.to_luastring("(*temporary)");  /* generic name for any valid slot */
+        else
+            return null;  /* no name */
+    }
+    return {
+        pos: base + (n - 1),
+        name: name
+    };
+};
+
+const lua_getlocal = function(L, ar, n) {
+    let name;
+    swapextra(L);
+    if (ar === null) {  /* information about non-active function? */
+        if (!L.stack[L.top - 1].ttisLclosure())  /* not a Lua function? */
+            name = null;
+        else  /* consider live variables at function start (parameters) */
+            name = lfunc.luaF_getlocalname(L.stack[L.top - 1].value.p, n, 0);
+    } else {  /* active function; get information through 'ar' */
+        let local = findlocal(L, ar.i_ci, n);
+        name = local.name;
+        let pos = L.stack[local.pos];
+        if (name)
+            L.stack[L.top++] = new TValue(pos.type, pos.value);
+    }
+    swapextra(L);
+    return name;
+};
+
 const funcinfo = function(ar, cl) {
     if (cl === null || cl.type === CT.LUA_TCCL) {
         ar.source = lua.to_luastring("=[JS]");
@@ -503,13 +560,14 @@ const luaG_tointerror = function(L, p1, p2) {
     luaG_runerror(L, lua.to_luastring(`number${lobject.jsstring(varinfo(L, p2))} has no integer representation`));
 };
 
-module.exports.lua_getstack     = lua_getstack;
-module.exports.lua_getinfo      = lua_getinfo;
-module.exports.luaG_errormsg    = luaG_errormsg;
 module.exports.luaG_addinfo     = luaG_addinfo;
-module.exports.luaG_runerror    = luaG_runerror;
-module.exports.luaG_typeerror   = luaG_typeerror;
 module.exports.luaG_concaterror = luaG_concaterror;
+module.exports.luaG_errormsg    = luaG_errormsg;
 module.exports.luaG_opinterror  = luaG_opinterror;
 module.exports.luaG_ordererror  = luaG_ordererror;
+module.exports.luaG_runerror    = luaG_runerror;
 module.exports.luaG_tointerror  = luaG_tointerror;
+module.exports.luaG_typeerror   = luaG_typeerror;
+module.exports.lua_getinfo      = lua_getinfo;
+module.exports.lua_getlocal     = lua_getlocal;
+module.exports.lua_getstack     = lua_getstack;
