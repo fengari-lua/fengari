@@ -18,6 +18,11 @@ const checkstack = function(L, L1, n) {
         lauxlib.luaL_error(L, "stack overflow");
 };
 
+const db_getregistry = function(L) {
+    lapi.lua_pushvalue(L, lua.LUA_REGISTRYINDEX);
+    return 1;
+};
+
 /*
 ** Auxiliary function used by several library functions: check for
 ** an optional thread as function's first argument and set 'arg' with
@@ -189,10 +194,11 @@ const db_traceback = function(L) {
 };
 
 const dblib = {
-    "getinfo":   db_getinfo,
-    "getlocal":  db_getlocal,
-    "traceback": db_traceback,
-    "upvalueid": db_upvalueid
+    "getinfo":     db_getinfo,
+    "getlocal":    db_getlocal,
+    "getregistry": db_getregistry,
+    "traceback":   db_traceback,
+    "upvalueid":   db_upvalueid
 };
 
 // Only with Node

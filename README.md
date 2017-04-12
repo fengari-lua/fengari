@@ -86,12 +86,12 @@
     - [ ] io
     - [ ] Debug
         - [x] debug.debug
+        - [x] debug.getinfo
         - [x] debug.getlocal
+        - [x] debug.getregistry
         - [x] debug.traceback
         - [ ] debug.gethook
-        - [ ] debug.getinfo
         - [ ] debug.getmetatable
-        - [ ] debug.getregistry
         - [ ] debug.getupvalue
         - [ ] debug.getuservalue
         - [ ] debug.sethook
