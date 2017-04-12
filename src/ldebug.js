@@ -179,13 +179,13 @@ const auxgetinfo = function(L, what, ar, f, ci) {
                 break;
             }
             case 'u': {
-                ar.nups = f === null ? 0 : f.c.nupvalues;
-                if (f === null || f.c.type === CT.LUA_TCCL) {
+                ar.nups = f === null ? 0 : f.nupvalues;
+                if (f === null || f.type === CT.LUA_TCCL) {
                     ar.isvararg = true;
                     ar.nparams = 0;
                 } else {
-                    ar.isvararg = f.l.p.is_vararg;
-                    ar.nparams = f.l.p.numparams;
+                    ar.isvararg = f.p.is_vararg;
+                    ar.nparams = f.p.numparams;
                 }
                 break;
             }

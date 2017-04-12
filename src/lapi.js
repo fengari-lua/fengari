@@ -230,7 +230,7 @@ const lua_pushlstring = function(L, s, len) {
 };
 
 const lua_pushstring = function (L, s) {
-    assert(Array.isArray(s), "lua_pushstring expects array of byte");
+    assert(Array.isArray(s) || s === undefined || s === null, "lua_pushstring expects array of byte");
 
     if (s === undefined || s === null)
         L.stack[L.top] = new TValue(CT.LUA_TNIL, null);
@@ -245,7 +245,7 @@ const lua_pushstring = function (L, s) {
 };
 
 const lua_pushliteral = function (L, s) {
-    assert(typeof s === "string", "lua_pushliteral expects a JS string");
+    assert(typeof s === "string" || s === undefined || s === null, "lua_pushliteral expects a JS string");
 
     if (s === undefined || s === null)
         L.stack[L.top] = new TValue(CT.LUA_TNIL, null);

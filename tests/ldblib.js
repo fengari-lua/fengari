@@ -206,3 +206,87 @@ test('debug.traceback (with a upvalue)', function (t) {
     );
 
 });
+
+test('debug.getinfo', function (t) {
+    let luaCode = `
+        local alocal = function(p1, p2) end
+        global = function() return alocal end
+
+        local d1 = debug.getinfo(alocal)
+        local d2 = debug.getinfo(global)
+
+        print(d1.short_src, d1.nups, d1.what, d1.nparams,
+              d2.short_src, d2.nups, d2.what, d2.nparams)
+
+        return d1.short_src, d1.nups, d1.what, d1.nparams,
+               d2.short_src, d2.nups, d2.what, d2.nparams
+    `, L;
+    
+    t.plan(10);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        luaCode = lua.to_luastring(luaCode);
+        lauxlib.luaL_loadbuffer(L, luaCode, luaCode.length, lua.to_luastring("getinfo-test"));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tojsstring(L, -8),
+        `[string "getinfo-test"]`,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -7),
+        0,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tojsstring(L, -6),
+        `Lua`,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -5),
+        2,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tojsstring(L, -4),
+        `[string "getinfo-test"]`,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -3),
+        1,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tojsstring(L, -2),
+        `Lua`,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -1),
+        0,
+        "Correct element(s) on the stack"
+    );
+
+});

@@ -3,6 +3,7 @@
 const assert  = require('assert');
 
 const lua     = require('./lua.js');
+const char    = lua.char;
 const lapi    = require('./lapi.js');
 const lauxlib = require('./lauxlib.js');
 const ldebug  = require('./ldebug.js');
@@ -35,6 +36,95 @@ const getthread = function(L) {
             thread: L
         };  /* function will operate over current thread */
     }
+};
+
+/*
+** Variations of 'lua_settable', used by 'db_getinfo' to put results
+** from 'lua_getinfo' into result table. Key is always a string;
+** value can be a string, an int, or a boolean.
+*/
+const settabss = function(L, k, v) {
+    lapi.lua_pushstring(L, v);
+    lapi.lua_setfield(L, -2, k);
+};
+
+const settabsi = function(L, k, v) {
+    lapi.lua_pushinteger(L, v);
+    lapi.lua_setfield(L, -2, k);
+};
+
+const settabsb = function(L, k, v) {
+    lapi.lua_pushboolean(L, v);
+    lapi.lua_setfield(L, -2, k);
+};
+
+
+/*
+** In function 'db_getinfo', the call to 'lua_getinfo' may push
+** results on the stack; later it creates the result table to put
+** these objects. Function 'treatstackoption' puts the result from
+** 'lua_getinfo' on top of the result table so that it can call
+** 'lua_setfield'.
+*/
+const treatstackoption = function(L, L1, fname) {
+    if (L == L1)
+        lapi.lua_rotate(L, -2, 1);  /* exchange object and table */
+    else
+        lapi.lua_xmove(L1, L, 1);  /* move object to the "main" stack */
+    lapi.lua_setfield(L, -2, fname);  /* put object into table */
+};
+
+/*
+** Calls 'lua_getinfo' and collects all results in a new table.
+** L1 needs stack space for an optional input (function) plus
+** two optional outputs (function and line table) from function
+** 'lua_getinfo'.
+*/
+const db_getinfo = function(L) {
+    let ar = new lua.lua_Debug();
+    let thread = getthread(L);
+    let arg = thread.arg;
+    let L1 = thread.thread;
+    let options = lauxlib.luaL_optstring(L, arg + 2, lua.to_luastring("flnStu"));
+    checkstack(L, L1, 3);
+    if (lapi.lua_isfunction(L, arg + 1)) {  /* info about a function? */
+        options = [char['>']].concat(options);  /* add '>' to 'options' */
+        lapi.lua_pushvalue(L, arg + 1);  /* move function to 'L1' stack */
+        lapi.lua_xmove(L, L1, 1);
+    } else {  /* stack level */
+        if (!ldebug.lua_getstack(L1, lauxlib.luaL_checkinteger(L, arg + 1), ar)) {
+            lapi.lua_pushnil(L);  /* level out of range */
+            return 1;
+        }
+    }
+
+    if (!ldebug.lua_getinfo(L1, options, ar))
+        lauxlib.luaL_argerror(L, arg + 2, lua.to_luastring("invalid option"));
+    lapi.lua_newtable(L);  /* table to collect results */
+    if (options.indexOf(char['S']) > -1) {
+        settabss(L, lua.to_luastring("source"), ar.source.value);
+        settabss(L, lua.to_luastring("short_src"), ar.short_src);
+        settabss(L, lua.to_luastring("linedefined"), lua.to_luastring(`${ar.linedefined}`));
+        settabss(L, lua.to_luastring("lastlinedefined"), lua.to_luastring(`${ar.lastlinedefined}`));
+        settabss(L, lua.to_luastring("what"), ar.what);
+    }
+    if (options.indexOf(char['l']) > -1)
+        settabsi(L, lua.to_luastring("currentline"), ar.currentline);
+    if (options.indexOf(char['u']) > -1)
+        settabsi(L, lua.to_luastring("nups"), ar.nups);
+        settabsi(L, lua.to_luastring("nparams"), ar.nparams);
+        settabsb(L, lua.to_luastring("isvararg"), ar.isvararg);
+    if (options.indexOf(char['n']) > - 1) {
+        settabss(L, lua.to_luastring("name"), ar.name ? ar.name.value : null);
+        settabss(L, lua.to_luastring("namewhat"), ar.namewhat ? ar.namewhat : null);
+    }
+    if (options.indexOf(char['t']) > - 1)
+        settabsb(L, lua.to_luastring("istailcall"), ar.istailcall);
+    if (options.indexOf(char['L']) > - 1)
+        treatstackoption(L, L1, lua.to_luastring("activelines"));
+    if (options.indexOf(char['f']) > - 1)
+        treatstackoption(L, L1, lua.to_luastring("func"));
+    return 1;  /* return table */
 };
 
 const db_getlocal = function(L) {
@@ -99,6 +189,7 @@ const db_traceback = function(L) {
 };
 
 const dblib = {
+    "getinfo":   db_getinfo,
     "getlocal":  db_getlocal,
     "traceback": db_traceback,
     "upvalueid": db_upvalueid
