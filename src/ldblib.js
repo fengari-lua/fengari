@@ -84,8 +84,23 @@ const db_upvalueid = function(L) {
    return 1;
 };
 
+const db_traceback = function(L) {
+    let thread = getthread(L);
+    let L1 = thread.thread;
+    let arg = thread.arg;
+    let msg = lapi.lua_tostring(L, arg + 1);
+    if (msg === null && !lapi.lua_isnoneornil(L, arg + 1))  /* non-string 'msg'? */
+        lapi.lua_pushvalue(L, arg + 1);  /* return it untouched */
+    else {
+        let level = lauxlib.luaL_optinteger(L, arg + 2, L === L1 ? 1 : 0);
+        lauxlib.luaL_traceback(L, L1, msg, level);
+    }
+    return 1;
+};
+
 const dblib = {
-    "getlocal": db_getlocal,
+    "getlocal":  db_getlocal,
+    "traceback": db_traceback,
     "upvalueid": db_upvalueid
 };
 

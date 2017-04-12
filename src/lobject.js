@@ -306,12 +306,12 @@ const luaO_chunkid = function(source, bufflen) {
             out = RETS.concat(source.slice(1, l - bufflen));
         }
     } else {  /* string; format as [string "source"] */
-        let nli = source.indexOf('\n');  /* find first new line (if any) */
-        let nl = nli ? source.slice(nli) : null;
+        let nli = source.indexOf(char['\n']);  /* find first new line (if any) */
+        let nl = nli > -1 ? source.slice(nli) : null;
         out = PRE;  /* add prefix */
         bufflen -= PRE.length + RETS.length + POS.length + 1;  /* save space for prefix+suffix+'\0' */
         if (l < bufflen && nl === null) {  /* small one-line source? */
-            out = out.conat(source);  /* keep it */
+            out = out.concat(source);  /* keep it */
         } else {
             if (nl !== null) l = nl.length - source.length;  /* stop at first newline */
             if (l > bufflen) l = bufflen;

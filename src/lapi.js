@@ -173,9 +173,8 @@ const lua_rotate = function(L, idx, n) {
 };
 
 const lua_copy = function(L, fromidx, toidx) {
-    let fr = index2addr_(L, fromidx);
-    let to = index2addr_(L, toidx);
-    L.stack[to] = fr;
+    let from = index2addr(L, fromidx);
+    L.stack[index2addr_(L, toidx)] = new TValue(from.type, from.value);
 };
 
 const lua_remove = function(L, idx) {

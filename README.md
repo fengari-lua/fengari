@@ -73,7 +73,6 @@
     - [ ] luaL_ref
     - [ ] luaL_setmetatable
     - [ ] luaL_testudata
-    - [ ] luaL_traceback
     - [ ] luaL_unref
 - [ ] Standard library
     - [x] Base lib
@@ -88,6 +87,7 @@
     - [ ] Debug
         - [x] debug.debug
         - [x] debug.getlocal
+        - [x] debug.traceback
         - [ ] debug.gethook
         - [ ] debug.getinfo
         - [ ] debug.getmetatable
@@ -99,7 +99,6 @@
         - [ ] debug.setmetatable
         - [ ] debug.setupvalue
         - [ ] debug.setuservalue
-        - [ ] debug.traceback
         - [ ] debug.upvalueid
         - [ ] debug.upvaluejoin
 - [ ] Run [Lua test suite](https://github.com/lua/tests)

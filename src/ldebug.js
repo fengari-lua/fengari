@@ -194,10 +194,13 @@ const auxgetinfo = function(L, what, ar, f, ci) {
                 break;
             }
             case 'n': {
-                ar.namewhat = getfuncname(L, ci, ar.name);
-                if (ar.namewhat === null) {
-                    ar.namewhat = [];
+                let r = getfuncname(L, ci);
+                if (r === null) {
+                    ar.namewhat = null;
                     ar.name = null;
+                } else {
+                    ar.namewhat = r.funcname;
+                    ar.name = r.name;
                 }
                 break;
             }
@@ -395,7 +398,7 @@ const funcnamefromcode = function(L, ci) {
 
     let tm = 0;  /* (initial value avoids warnings) */
     let p = ci.func.p;  /* calling function */
-    let pc = ci.pcOff;  /* calling instruction index */
+    let pc = ci.pcOff - 1;  /* calling instruction index */
     let i = p.code[pc];  /* calling instruction */
 
     if (ci.callstatus & lstate.CIST_HOOKED) {
