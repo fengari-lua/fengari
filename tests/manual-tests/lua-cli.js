@@ -42,10 +42,20 @@ for (;;) {
         lauxlib.lua_writestringerror(`${lapi.lua_tojsstring(L, -1)}\n`);
         continue;
     }
-    if (lapi.lua_pcall(L, 0, 0, 0) !== lua.thread_status.LUA_OK) {
+    if (lapi.lua_pcall(L, 0, lua.LUA_MULTRET, 0) !== lua.thread_status.LUA_OK) {
         lauxlib.lua_writestringerror(`${lapi.lua_tojsstring(L, -1)}\n`);
         lapi.lua_settop(L, 0);
         continue;
+    }
+    let n = lapi.lua_gettop(L);
+    if (n > 0) {  /* any result to be printed? */
+        lapi.lua_getglobal(L, lua.to_luastring("print"));
+        lapi.lua_insert(L, 1);
+        if (lapi.lua_pcall(L, n, 0, 0) != lua.thread_status.LUA_OK) {
+            lauxlib.lua_writestringerror(`error calling 'print' (${lapi.lua_tojsstring(L, -1)})\n`);
+            lapi.lua_settop(L, 0);
+            continue;
+        }
     }
     lapi.lua_settop(L, 0);  /* remove eventual returns */
 }
