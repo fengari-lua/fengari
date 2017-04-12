@@ -88,15 +88,15 @@
         - [x] debug.debug
         - [x] debug.getinfo
         - [x] debug.getlocal
+        - [x] debug.getmetatable
         - [x] debug.getregistry
+        - [x] debug.setmetatable
         - [x] debug.traceback
         - [ ] debug.gethook
-        - [ ] debug.getmetatable
         - [ ] debug.getupvalue
         - [ ] debug.getuservalue
         - [ ] debug.sethook
         - [ ] debug.setlocal
-        - [ ] debug.setmetatable
         - [ ] debug.setupvalue
         - [ ] debug.setuservalue
         - [ ] debug.upvalueid

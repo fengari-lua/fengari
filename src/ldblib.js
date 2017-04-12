@@ -23,6 +23,22 @@ const db_getregistry = function(L) {
     return 1;
 };
 
+const db_getmetatable = function(L) {
+    lauxlib.luaL_checkany(L, 1);
+    if (!lapi.lua_getmetatable(L, 1)) {
+        lapi.lua_pushnil(L);  /* no metatable */
+    }
+    return 1;
+};
+
+const db_setmetatable = function(L) {
+    const t = lapi.lua_type(L, 2);
+    lauxlib.luaL_argcheck(L, t == lua.CT.LUA_TNIL || t == lua.CT.LUA_TTABLE, 2, lua.to_luastring("nil or table expected"));
+    lapi.lua_settop(L, 2);
+    lapi.lua_setmetatable(L, 1);
+    return 1;  /* return 1st argument */
+};
+
 /*
 ** Auxiliary function used by several library functions: check for
 ** an optional thread as function's first argument and set 'arg' with
@@ -194,11 +210,13 @@ const db_traceback = function(L) {
 };
 
 const dblib = {
-    "getinfo":     db_getinfo,
-    "getlocal":    db_getlocal,
-    "getregistry": db_getregistry,
-    "traceback":   db_traceback,
-    "upvalueid":   db_upvalueid
+    "getinfo":      db_getinfo,
+    "getlocal":     db_getlocal,
+    "getmetatable": db_getmetatable,
+    "getregistry":  db_getregistry,
+    "setmetatable": db_setmetatable,
+    "traceback":    db_traceback,
+    "upvalueid":    db_upvalueid
 };
 
 // Only with Node
