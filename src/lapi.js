@@ -346,7 +346,7 @@ const auxsetstr = function(L, t, k) {
 };
 
 const lua_setglobal = function(L, name) {
-    auxsetstr(L, L.l_G.l_registry.value.get(lua.LUA_RIDX_GLOBALS - 1), name);
+    auxsetstr(L, L.l_G.l_registry.value.get(lua.LUA_RIDX_GLOBALS), name);
 };
 
 const lua_setmetatable = function(L, objindex) {
@@ -562,7 +562,7 @@ const lua_geti = function(L, idx, n) {
 };
 
 const lua_getglobal = function(L, name) {
-    return auxgetstr(L, L.l_G.l_registry.value.get(lua.LUA_RIDX_GLOBALS - 1), name);
+    return auxgetstr(L, L.l_G.l_registry.value.get(lua.LUA_RIDX_GLOBALS), name);
 };
 
 /*
@@ -773,7 +773,7 @@ const lua_load = function(L, reader, data, chunckname, mode) {
         if (f.nupvalues >= 1) {  /* does it have an upvalue? */
             /* get global table from registry */
             let reg = L.l_G.l_registry;
-            let gt = reg.value.get(lua.LUA_RIDX_GLOBALS - 1);
+            let gt = reg.value.get(lua.LUA_RIDX_GLOBALS);
             /* set global table as 1st upvalue of 'f' (may be LUA_ENV) */
             f.upvals[0].u.value = gt;
         }

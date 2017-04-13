@@ -207,22 +207,13 @@ class Table extends TValue {
     __newindex(table, key, value) {
         key = Table.keyValue(key);
 
-        if (typeof key === 'number' && key > 0) {
-            table.value.set(key - 1, value); // Lua array starts at 1
-        } else {
-            table.value.set(key, value);
-        }
+        table.value.set(key, value);
     }
 
     __index(table, key) {
         key = Table.keyValue(key);
 
-        let v = luaO_nilobject;
-        if (typeof key === 'number' && key > 0) {
-            v = table.value.get(key - 1); // Lua array starts at 1
-        } else {
-            v = table.value.get(key);
-        }
+        let v = table.value.get(key);
 
         return v ? v : luaO_nilobject;
     }

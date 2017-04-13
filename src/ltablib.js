@@ -192,7 +192,7 @@ const auxsort = function(L) {
                 else if (typeof b[0] !== 'number') return -1;
                 return lapi.lua_compare_(L, a[1], b[1], lua.LUA_OPLT) === 1 ? -1 : 1;  /* a < b */
             })
-            .forEach((e, i) => typeof e[0] === 'number' ? t.value.set(i, e[1]) : true);
+            .forEach((e, i) => typeof e[0] === 'number' ? t.value.set(i + 1, e[1]) : true);
     } else {
         [...t.value.entries()]
             .sort(function (a, b) {
@@ -207,7 +207,7 @@ const auxsort = function(L) {
                 lapi.lua_pop(L, 1);  /* pop result */
                 return res ? -1 : 1;
             })
-            .forEach((e, i) => typeof e[0] === 'number' ? t.value.set(i, e[1]) : true);
+            .forEach((e, i) => typeof e[0] === 'number' ? t.value.set(i + 1, e[1]) : true);
     }
 };
 

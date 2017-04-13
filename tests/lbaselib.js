@@ -15,7 +15,6 @@ const lua        = require('../src/lua.js');
 const linit      = require('../src/linit.js');
 const CT         = lua.constant_types;
 
-
 test('print', function (t) {
     let luaCode = `
         print("hello", "world", 123)
