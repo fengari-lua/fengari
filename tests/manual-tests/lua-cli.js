@@ -16,6 +16,24 @@ const L = lauxlib.luaL_newstate();
 
 linit.luaL_openlibs(L);
 
+let init = process.env["LUA_INIT"+lua.LUA_VERSUFFIX] || process.env["LUA_INIT"];
+if (init) {
+    let status;
+    if (init[0] === "@") {
+        status = lauxlib.luaL_loadfile(L, lua.to_luastring(init.substring(1)));
+    } else {
+        status = lauxlib.luaL_loadstring(L, lua.to_luastring(init));
+    }
+    if (status === lua.thread_status.LUA_OK) {
+        status = lapi.lua_pcall(L, 0, 0, 0);
+    }
+    if (status !== lua.thread_status.LUA_OK) {
+        lauxlib.lua_writestringerror(`${lapi.lua_tojsstring(L, -1)}\n`);
+        lapi.lua_pop(L, 1);
+        return process.exit(1);
+    }
+}
+
 console.log(lua.FENGARI_COPYRIGHT);
 
 for (;;) {
