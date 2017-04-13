@@ -40,6 +40,7 @@ for (;;) {
     }
     if (status !== lua.thread_status.LUA_OK) {
         lauxlib.lua_writestringerror(`${lapi.lua_tojsstring(L, -1)}\n`);
+        lapi.lua_settop(L, 0);
         continue;
     }
     if (lapi.lua_pcall(L, 0, lua.LUA_MULTRET, 0) !== lua.thread_status.LUA_OK) {
