@@ -14,7 +14,17 @@ const _PROMPT2 = lua.to_luastring("_PROMPT2");
 
 const L = lauxlib.luaL_newstate();
 
+let script = 2; // Where to start args from
+
 linit.luaL_openlibs(L);
+
+/* create 'arg' table */
+lapi.lua_createtable(L, process.argv.length - (script + 1), script + 1);
+for (let i = 0; i < process.argv.length; i++) {
+    lapi.lua_pushliteral(L, process.argv[i]);
+    lapi.lua_seti(L, -2, i - script); /* TODO: rawseti */
+}
+lapi.lua_setglobal(L, lua.to_luastring("arg"));
 
 let init = process.env["LUA_INIT"+lua.LUA_VERSUFFIX] || process.env["LUA_INIT"];
 if (init) {
