@@ -38,6 +38,15 @@ for (;;) {
             status = lua.thread_status.LUA_OK;
         }
     }
+    while (status === lua.thread_status.LUA_ERRSYNTAX && lapi.lua_tojsstring(L, -1).endsWith("<eof>")) {
+        /* continuation */
+        lapi.lua_pop(L, 1);
+        input += "\n" + readlineSync.prompt({
+            prompt: '>> '
+        });
+        let buffer = lua.to_luastring(input);
+        status = lauxlib.luaL_loadbuffer(L, buffer, buffer.length, stdin);
+    }
     if (status !== lua.thread_status.LUA_OK) {
         lauxlib.lua_writestringerror(`${lapi.lua_tojsstring(L, -1)}\n`);
         lapi.lua_settop(L, 0);
