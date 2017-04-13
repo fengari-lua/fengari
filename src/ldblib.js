@@ -178,6 +178,29 @@ const db_getlocal = function(L) {
 };
 
 /*
+** get (if 'get' is true) or set an upvalue from a closure
+*/
+const auxupvalue = function(L, get) {
+    let n = lauxlib.luaL_checkinteger(L, 2);  /* upvalue index */
+    lauxlib.luaL_checktype(L, 1, lua.CT.LUA_TFUNCTION);  /* closure */
+    let name = get ? lapi.lua_getupvalue(L, 1, n) : lapi.lua_setupvalue(L, 1, n);
+    if (name === null) return 0;
+    lapi.lua_pushstring(L, name);
+    lapi.lua_insert(L, -(get+1));  /* no-op if get is false */
+    return get + 1;
+};
+
+
+const db_getupvalue = function(L) {
+    return auxupvalue(L, 1);
+};
+
+const db_setupvalue = function(L) {
+    lauxlib.luaL_checkany(L, 3);
+    return auxupvalue(L, 0);
+};
+
+/*
 ** Check whether a given upvalue from a given closure exists and
 ** returns its index
 */
@@ -214,7 +237,9 @@ const dblib = {
     "getlocal":     db_getlocal,
     "getmetatable": db_getmetatable,
     "getregistry":  db_getregistry,
+    "getupvalue":   db_getupvalue,
     "setmetatable": db_setmetatable,
+    "setupvalue":   db_setupvalue,
     "traceback":    db_traceback,
     "upvalueid":    db_upvalueid
 };

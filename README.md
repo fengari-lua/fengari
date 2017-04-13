@@ -90,14 +90,14 @@
         - [x] debug.getlocal
         - [x] debug.getmetatable
         - [x] debug.getregistry
+        - [x] debug.getupvalue
         - [x] debug.setmetatable
+        - [x] debug.setupvalue
         - [x] debug.traceback
         - [ ] debug.gethook
-        - [ ] debug.getupvalue
         - [ ] debug.getuservalue
         - [ ] debug.sethook
         - [ ] debug.setlocal
-        - [ ] debug.setupvalue
         - [ ] debug.setuservalue
         - [ ] debug.upvalueid
         - [ ] debug.upvaluejoin
