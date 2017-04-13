@@ -8,11 +8,9 @@ const linit        = require('../../src/linit.js');
 const fs           = require('fs');
 const readlineSync = require('readline-sync');
 
-readlineSync.setDefaultOptions({
-    prompt: '> '
-});
-
 const stdin = lua.to_luastring("=stdin");
+const _PROMPT = lua.to_luastring("_PROMPT");
+const _PROMPT2 = lua.to_luastring("_PROMPT2");
 
 const L = lauxlib.luaL_newstate();
 
@@ -21,7 +19,11 @@ linit.luaL_openlibs(L);
 console.log(lua.FENGARI_COPYRIGHT);
 
 for (;;) {
-    let input = readlineSync.prompt();
+    lapi.lua_getglobal(L, _PROMPT);
+    let input = readlineSync.prompt({
+        prompt: lapi.lua_tojsstring(L, -1) || '> '
+    });
+    lapi.lua_pop(L, 1);
 
     if (input.length === 0)
         continue;
@@ -41,9 +43,11 @@ for (;;) {
     while (status === lua.thread_status.LUA_ERRSYNTAX && lapi.lua_tojsstring(L, -1).endsWith("<eof>")) {
         /* continuation */
         lapi.lua_pop(L, 1);
+        lapi.lua_getglobal(L, _PROMPT2);
         input += "\n" + readlineSync.prompt({
-            prompt: '>> '
+            prompt: lapi.lua_tojsstring(L, -1) || '>> '
         });
+        lapi.lua_pop(L, 1);
         let buffer = lua.to_luastring(input);
         status = lauxlib.luaL_loadbuffer(L, buffer, buffer.length, stdin);
     }
