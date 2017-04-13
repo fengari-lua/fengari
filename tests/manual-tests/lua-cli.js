@@ -12,6 +12,35 @@ const stdin = lua.to_luastring("=stdin");
 const _PROMPT = lua.to_luastring("_PROMPT");
 const _PROMPT2 = lua.to_luastring("_PROMPT2");
 
+const report = function(L, status) {
+    if (status !== lua.thread_status.LUA_OK) {
+        lauxlib.lua_writestringerror(`${lapi.lua_tojsstring(L, -1)}\n`);
+        lapi.lua_pop(L, 1);
+    }
+    return status;
+};
+
+const docall = function(L, narg, nres) {
+    let status = lapi.lua_pcall(L, narg, nres, 0);
+    return status;
+};
+
+const dochunk = function(L, status) {
+    if (status === lua.thread_status.LUA_OK) {
+        status = docall(L, 0, 0);
+    }
+    return report(L, status);
+};
+
+const dofile = function(L, name) {
+    return dochunk(L, lauxlib.luaL_loadfile(L, lua.to_luastring(name)));
+};
+
+const dostring = function(L, s, name) {
+    let buffer = lua.to_luastring(s);
+    return dochunk(L, lauxlib.luaL_loadbuffer(L, buffer, buffer.length, lua.to_luastring(name)));
+};
+
 const L = lauxlib.luaL_newstate();
 
 let script = 2; // Where to start args from
@@ -26,21 +55,23 @@ for (let i = 0; i < process.argv.length; i++) {
 }
 lapi.lua_setglobal(L, lua.to_luastring("arg"));
 
-let init = process.env["LUA_INIT"+lua.LUA_VERSUFFIX] || process.env["LUA_INIT"];
-if (init) {
-    let status;
-    if (init[0] === "@") {
-        status = lauxlib.luaL_loadfile(L, lua.to_luastring(init.substring(1)));
-    } else {
-        status = lauxlib.luaL_loadstring(L, lua.to_luastring(init));
+{
+    let name = "LUA_INIT"+lua.LUA_VERSUFFIX;
+    let init = process.env[name];
+    if (!init) {
+        name = "LUA_INIT";
+        init = process.env[name];
     }
-    if (status === lua.thread_status.LUA_OK) {
-        status = lapi.lua_pcall(L, 0, 0, 0);
-    }
-    if (status !== lua.thread_status.LUA_OK) {
-        lauxlib.lua_writestringerror(`${lapi.lua_tojsstring(L, -1)}\n`);
-        lapi.lua_pop(L, 1);
-        return process.exit(1);
+    if (init) {
+        let status;
+        if (init[0] === '@') {
+            status = dofile(L, init.substring(1));
+        } else {
+            status = dostring(L, init, name);
+        }
+        if (status !== lua.thread_status.LUA_OK) {
+            return process.exit(1);
+        }
     }
 }
 
@@ -79,25 +110,20 @@ for (;;) {
         let buffer = lua.to_luastring(input);
         status = lauxlib.luaL_loadbuffer(L, buffer, buffer.length, stdin);
     }
-    if (status !== lua.thread_status.LUA_OK) {
-        lauxlib.lua_writestringerror(`${lapi.lua_tojsstring(L, -1)}\n`);
-        lapi.lua_settop(L, 0);
-        continue;
+    if (status === lua.thread_status.LUA_OK) {
+        status = docall(L, 0, lua.LUA_MULTRET);
     }
-    if (lapi.lua_pcall(L, 0, lua.LUA_MULTRET, 0) !== lua.thread_status.LUA_OK) {
-        lauxlib.lua_writestringerror(`${lapi.lua_tojsstring(L, -1)}\n`);
-        lapi.lua_settop(L, 0);
-        continue;
-    }
-    let n = lapi.lua_gettop(L);
-    if (n > 0) {  /* any result to be printed? */
-        lapi.lua_getglobal(L, lua.to_luastring("print"));
-        lapi.lua_insert(L, 1);
-        if (lapi.lua_pcall(L, n, 0, 0) != lua.thread_status.LUA_OK) {
-            lauxlib.lua_writestringerror(`error calling 'print' (${lapi.lua_tojsstring(L, -1)})\n`);
-            lapi.lua_settop(L, 0);
-            continue;
+    if (status === lua.thread_status.LUA_OK) {
+        let n = lapi.lua_gettop(L);
+        if (n > 0) {  /* any result to be printed? */
+            lapi.lua_getglobal(L, lua.to_luastring("print"));
+            lapi.lua_insert(L, 1);
+            if (lapi.lua_pcall(L, n, 0, 0) != lua.thread_status.LUA_OK) {
+                lauxlib.lua_writestringerror(`error calling 'print' (${lapi.lua_tojsstring(L, -1)})\n`);
+            }
         }
+    } else {
+        report(L, status);
     }
     lapi.lua_settop(L, 0);  /* remove eventual returns */
 }
