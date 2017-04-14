@@ -34,7 +34,6 @@
     - [ ] lua_getstack
     - [ ] lua_getupvalue
     - [ ] lua_isboolean
-    - [ ] lua_iscfunction
     - [ ] lua_islightuserdata
     - [ ] lua_isuserdata
     - [ ] lua_pcallk
@@ -48,7 +47,6 @@
     - [ ] lua_setallocf
     - [ ] lua_sethook
     - [ ] lua_tocfunction
-    - [ ] lua_upvaluejoin
 - [ ] Auxiliary library
     - [x] ...
     - [ ] luaL_addsize
@@ -94,10 +92,10 @@
         - [x] debug.setupvalue
         - [x] debug.setuservalue
         - [x] debug.traceback
+        - [x] debug.upvalueid
+        - [x] debug.upvaluejoin
         - [ ] debug.gethook
         - [ ] debug.sethook
-        - [ ] debug.upvalueid
-        - [ ] debug.upvaluejoin
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
 - [ ] DOM API binding
 

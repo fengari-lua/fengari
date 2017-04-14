@@ -719,6 +719,11 @@ const lua_typename = function(L, t) {
     return ltm.ttypename(t);
 };
 
+const lua_iscfunction = function(L, idx) {
+    let o = index2addr(L, idx);
+    return o.ttislcf(o) || o.ttisCclosure();
+};
+
 const lua_isnil = function(L, n) {
     return lua_type(L, n) === CT.LUA_TNIL;
 };
@@ -933,7 +938,8 @@ const getupvalref = function(L, fidx, n, pf) {
     assert(1 <= n && n <= f.p.upvalues.length, "invalid upvalue index");
     return {
         closure: f,
-        upval: f.upvals[n - 1]
+        upval: f.upvals[n - 1],
+        upvalOff: n - 1
     };
 };
 
@@ -953,6 +959,17 @@ const lua_upvalueid = function(L, fidx, n) {
             return null;
         }
     }
+};
+
+const lua_upvaluejoin = function(L, fidx1, n1, fidx2, n2) {
+    let ref1 = getupvalref(L, fidx1, n1);
+    let ref2 = getupvalref(L, fidx2, n2);
+    let up1 = ref1.upvalOff;
+    let up2 = ref2.upval;
+    let f1 = ref1.closure;
+
+    f1.upvals[up1] = up2;
+    up2.u.open.touched = true; // TODO: useful
 };
 
 // This functions are only there for compatibility purposes
@@ -993,6 +1010,7 @@ module.exports.lua_gettop            = lua_gettop;
 module.exports.lua_getupvalue        = lua_getupvalue;
 module.exports.lua_getuservalue      = lua_getuservalue;
 module.exports.lua_insert            = lua_insert;
+module.exports.lua_iscfunction       = lua_iscfunction;
 module.exports.lua_isfunction        = lua_isfunction;
 module.exports.lua_isinteger         = lua_isinteger;
 module.exports.lua_isnil             = lua_isnil;
@@ -1061,5 +1079,6 @@ module.exports.lua_touserdata        = lua_touserdata;
 module.exports.lua_type              = lua_type;
 module.exports.lua_typename          = lua_typename;
 module.exports.lua_upvalueid         = lua_upvalueid;
+module.exports.lua_upvaluejoin       = lua_upvaluejoin;
 module.exports.lua_version           = lua_version;
 module.exports.lua_xmove             = lua_xmove;

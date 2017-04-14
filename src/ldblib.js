@@ -248,11 +248,19 @@ const checkupval = function(L, argf, argnup) {
     return nup;
 };
 
-
 const db_upvalueid = function(L) {
    let n = checkupval(L, 1, 2);
    lapi.lua_pushlightuserdata(L, lapi.lua_upvalueid(L, 1, n));
    return 1;
+};
+
+const db_upvaluejoin = function(L) {
+    let n1 = checkupval(L, 1, 2);
+    let n2 = checkupval(L, 3, 4);
+    lauxlib.luaL_argcheck(L, !lapi.lua_iscfunction(L, 1), 1, lua.to_luastring("Lua function expected"));
+    lauxlib.luaL_argcheck(L, !lapi.lua_iscfunction(L, 3), 3, lua.to_luastring("Lua function expected"));
+    lapi.lua_upvaluejoin(L, 1, n1, 3, n2);
+    return 0;
 };
 
 const db_traceback = function(L) {
@@ -281,7 +289,8 @@ const dblib = {
     "setupvalue":   db_setupvalue,
     "setuservalue": db_setuservalue,
     "traceback":    db_traceback,
-    "upvalueid":    db_upvalueid
+    "upvalueid":    db_upvalueid,
+    "upvaluejoin":  db_upvaluejoin
 };
 
 // Only with Node

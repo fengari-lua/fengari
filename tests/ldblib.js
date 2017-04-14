@@ -157,6 +157,51 @@ test('debug.upvalueid', function (t) {
 });
 
 
+test('debug.upvaluejoin', function (t) {
+    let luaCode = `
+        local upvalue1 = "upvalue1"
+        local upvalue2 = "upvalue2"
+
+        local l1 = function()
+            return upvalue1
+        end
+
+        local l2 = function()
+            return upvalue2
+        end
+
+        debug.upvaluejoin(l1, 1, l2, 1)
+
+        return l1()
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tojsstring(L, -1),
+        "upvalue2",
+        "Correct element(s) on the stack"
+    );
+
+});
+
+
 test('debug.traceback (with a global)', function (t) {
     let luaCode = `
         local trace
