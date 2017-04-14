@@ -436,7 +436,7 @@ const l_str2d = function(s) {
         return null;
     let end = l_str2dloc(s, mode);  /* try to convert */
     if (end === null) {   /* failed? may be a different locale */
-        throw new Error("Locale not available to handle number"); // TODO
+        // throw new Error("Locale not available to handle number"); // TODO
     }
     return end;
 };

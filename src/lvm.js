@@ -775,9 +775,10 @@ const luaV_equalobj = function(L, t1, t2) {
     switch(t1.ttype()) {
         case CT.LUA_TNIL:
             return 1;
+        case CT.LUA_TBOOLEAN:
+            return t1.value == t2.value ? 1 : 0; // Might be 1 or true
         case CT.LUA_TNUMINT:
         case CT.LUA_TNUMFLT:
-        case CT.LUA_TBOOLEAN:
         case CT.LUA_TLCF:
             return t1.value === t2.value ? 1 : 0;
         case CT.LUA_TSHRSTR:
