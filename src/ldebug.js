@@ -51,6 +51,20 @@ const lua_sethook = function(L, func, mask, count) {
     L.hookmask = mask;
 };
 
+const lua_gethook = function(L) {
+    return L.hook;
+};
+
+
+const lua_gethookmask = function(L) {
+    return L.hookmask;
+};
+
+
+const lua_gethookcount = function(L) {
+    return L.basehookcount;
+};
+
 const lua_getstack = function(L, level, ar) {
     let ci;
     let status;
@@ -633,6 +647,9 @@ module.exports.luaG_runerror    = luaG_runerror;
 module.exports.luaG_tointerror  = luaG_tointerror;
 module.exports.luaG_traceexec   = luaG_traceexec;
 module.exports.luaG_typeerror   = luaG_typeerror;
+module.exports.lua_gethook      = lua_gethook;
+module.exports.lua_gethookcount = lua_gethookcount;
+module.exports.lua_gethookmask  = lua_gethookmask;
 module.exports.lua_getinfo      = lua_getinfo;
 module.exports.lua_getlocal     = lua_getlocal;
 module.exports.lua_getstack     = lua_getstack;

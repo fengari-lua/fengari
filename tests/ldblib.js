@@ -51,6 +51,62 @@ test('debug.sethook', function (t) {
 });
 
 
+test('debug.gethook', function (t) {
+    let luaCode = `
+        local result = ""
+
+        debug.sethook(function (event)
+            result = result .. event .. " "
+        end, "crl", 1)
+
+        local l = function() end
+
+        l()
+        l()
+        l()
+
+        return debug.gethook()
+    `, L;
+    
+    t.plan(5);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.deepEqual(
+        lapi.lua_typename(L, lapi.lua_type(L, -3)),
+        lua.to_luastring("function"),
+        "Correct element(s) on the stack"
+    );
+
+    t.deepEqual(
+        lapi.lua_tojsstring(L, -2),
+        "crl",
+        "Correct element(s) on the stack"
+    );
+
+    t.deepEqual(
+        lapi.lua_tointeger(L, -1),
+        1,
+        "Correct element(s) on the stack"
+    );
+
+});
+
+
 test('debug.getlocal', function (t) {
     let luaCode = `
         local alocal = "alocal"

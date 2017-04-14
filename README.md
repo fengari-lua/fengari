@@ -5,40 +5,33 @@
 </p>
 
 # fengari
-🐺 φεγγάρι - A Lua VM written in JS ES6 targeting the browser
+🐺 φεγγάρι - The Lua VM written in JS ES6 targeting the browser
 
 ## So far
 
 - [x] Lexing/Parsing
 - [x] Parse bytecode
 - [x] Opcodes
-- [ ] Basic types representation:
-    - [x] nil
-    - [x] boolean
-    - [x] table
-        - [ ] weak table
-    - [x] function
-    - [x] string (8-bit clean)
-    - [x] number (32-bit)
-    - [x] userdata
+- [x] Basic types representation:
 - [x] Tag Methods
+- [ ] Standard library
+    - [x] Base lib
+    - [x] Coroutine
+    - [x] Debug
+    - [x] Math
+    - [x] String
+    - [x] Table
+    - [x] utf8
+    - [ ] Package
+    - [ ] os
+    - [ ] io
 - [ ] C API
     - [x] ...
     - [ ] lua_arith
     - [ ] lua_close
-    - [ ] lua_gethook
-    - [ ] lua_gethookcount
-    - [ ] lua_gethookmask
-    - [ ] lua_geti
-    - [ ] lua_getinfo
-    - [ ] lua_getstack
-    - [ ] lua_getupvalue
     - [ ] lua_isboolean
     - [ ] lua_islightuserdata
-    - [ ] lua_isuserdata
-    - [ ] lua_pcallk
     - [ ] lua_pushfstring
-    - [ ] lua_pushlightuserdata
     - [ ] lua_pushvfstring
     - [ ] lua_rawseti
     - [ ] lua_register
@@ -59,41 +52,43 @@
     - [ ] luaL_newlibtable
     - [ ] luaL_newmetatable
     - [ ] luaL_optnumber
-    - [ ] luaL_optstring
     - [ ] luaL_prepbuffer
     - [ ] luaL_pushresultsize
     - [ ] luaL_ref
     - [ ] luaL_setmetatable
     - [ ] luaL_testudata
     - [ ] luaL_unref
-- [ ] Standard library
-    - [x] Base lib
-    - [x] Coroutine
-    - [x] Table
-    - [x] Math
-    - [x] utf8
-    - [x] String
-    - [ ] Package
-    - [ ] os
-    - [ ] io
-    - [ ] Debug
-        - [x] debug.debug
-        - [x] debug.getinfo
-        - [x] debug.getlocal
-        - [x] debug.getmetatable
-        - [x] debug.getregistry
-        - [x] debug.getupvalue
-        - [x] debug.getuservalue
-        - [x] debug.sethook
-        - [x] debug.setlocal
-        - [x] debug.setmetatable
-        - [x] debug.setupvalue
-        - [x] debug.setuservalue
-        - [x] debug.traceback
-        - [x] debug.upvalueid
-        - [x] debug.upvaluejoin
-        - [ ] debug.gethook
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
+    - [x] strings.lua
+    - [ ] all.lua
+    - [ ] big.lua
+    - [ ] checktable.lua
+    - [ ] constructs.lua
+    - [ ] errors.lua
+    - [ ] gc.lua
+    - [ ] literals.lua
+    - [ ] math.lua
+    - [ ] sort.lua
+    - [ ] utf8.lua
+    - [ ] api.lua
+    - [ ] bitwise.lua
+    - [ ] closure.lua
+    - [ ] coroutine.lua
+    - [ ] events.lua
+    - [ ] goto.lua
+    - [ ] locals.lua
+    - [ ] nextvar.lua
+    - [ ] vararg.lua
+    - [ ] attrib.lua
+    - [ ] calls.lua
+    - [ ] code.lua
+    - [ ] db.lua
+    - [ ] files.lua
+    - [ ] heavy.lua
+    - [ ] main.lua
+    - [ ] pm.lua
+    - [ ] tpack.lua
+    - [ ] verybig.lua
 - [ ] DOM API binding
 
 ## References

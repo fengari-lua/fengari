@@ -308,7 +308,6 @@ const unmakemask = function(mask, smask) {
     if (mask & lua.LUA_MASKCALL) smask[i++] = char["c"];
     if (mask & lua.LUA_MASKRET) smask[i++] = char["r"];
     if (mask & lua.LUA_MASKLINE) smask[i++] = char["l"];
-    smask[i] = 0;
     return smask;
 };
 
@@ -344,6 +343,29 @@ const db_sethook = function(L) {
     return 0;
 };
 
+const db_gethook = function(L) {
+    let thread = getthread(L);
+    let L1 = thread.thread;
+    let arg = thread.arg;
+    let buff = [];
+    let mask = ldebug.lua_gethookmask(L1);
+    let hook = ldebug.lua_gethook(L1);
+    if (hook === null)  /* no hook? */
+        lapi.lua_pushnil(L);
+    else if (hook !== hookf)  /* external hook? */
+        lapi.lua_pushliteral(L, "external hook");
+    else {  /* hook table must exist */
+        lapi.lua_rawgetp(L, lua.LUA_REGISTRYINDEX, HOOKKEY);
+        checkstack(L, L1, 1);
+        lapi.lua_pushthread(L1); lapi.lua_xmove(L1, L, 1);
+        lapi.lua_rawget(L, -2);   /* 1st result = hooktable[L1] */
+        lapi.lua_remove(L, -2);  /* remove hook table */
+    }
+    lapi.lua_pushstring(L, unmakemask(mask, buff));  /* 2nd result = mask */
+    lapi.lua_pushinteger(L, ldebug.lua_gethookcount(L1));  /* 3rd result = count */
+    return 3;
+};
+
 const db_traceback = function(L) {
     let thread = getthread(L);
     let L1 = thread.thread;
@@ -359,6 +381,7 @@ const db_traceback = function(L) {
 };
 
 const dblib = {
+    "gethook":      db_gethook,
     "getinfo":      db_getinfo,
     "getlocal":     db_getlocal,
     "getmetatable": db_getmetatable,
