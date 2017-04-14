@@ -33,7 +33,6 @@
     - [ ] lua_getinfo
     - [ ] lua_getstack
     - [ ] lua_getupvalue
-    - [ ] lua_getuservalue
     - [ ] lua_isboolean
     - [ ] lua_iscfunction
     - [ ] lua_islightuserdata
@@ -48,8 +47,6 @@
     - [ ] lua_register
     - [ ] lua_setallocf
     - [ ] lua_sethook
-    - [ ] lua_setlocal
-    - [ ] lua_setuservalue
     - [ ] lua_tocfunction
     - [ ] lua_upvaluejoin
 - [ ] Auxiliary library
@@ -91,14 +88,14 @@
         - [x] debug.getmetatable
         - [x] debug.getregistry
         - [x] debug.getupvalue
+        - [x] debug.getuservalue
+        - [x] debug.setlocal
         - [x] debug.setmetatable
         - [x] debug.setupvalue
+        - [x] debug.setuservalue
         - [x] debug.traceback
         - [ ] debug.gethook
-        - [ ] debug.getuservalue
         - [ ] debug.sethook
-        - [ ] debug.setlocal
-        - [ ] debug.setuservalue
         - [ ] debug.upvalueid
         - [ ] debug.upvaluejoin
 - [ ] Run [Lua test suite](https://github.com/lua/tests)

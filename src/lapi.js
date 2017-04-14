@@ -537,6 +537,15 @@ const lua_getmetatable = function(L, objindex) {
     return res;
 };
 
+const lua_getuservalue = function(L, idx) {
+    let o = index2addr(L, idx);
+    assert(L, o.ttisfulluserdata(), "full userdata expected");
+    L.stack[L.top].type = o.type;
+    L.stack[L.top++].value = o.value;
+    assert(L.top <= L.ci.top, "stack overflow");
+    return L.stack[L.top - 1].ttnov();
+};
+
 const lua_gettable = function(L, idx) {
     let t = index2addr(L, idx);
     lvm.gettable(L, t, L.stack[L.top - 1], L.top - 1);
@@ -793,6 +802,16 @@ const lua_status = function(L) {
     return L.status;
 };
 
+const lua_setuservalue = function(L, idx) {
+    assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    let o = index2addr(L, idx);
+    assert(L, o.ttisfulluserdata(), "full userdata expected");
+    L.stack[L.top - 1].type = o.type;
+    L.stack[L.top - 1].value = o.value;
+    L.top--;
+};
+
+
 const lua_callk = function(L, nargs, nresults, ctx, k) {
     assert(k === null || !(L.ci.callstatus & lstate.CIST_LUA), "cannot use continuations inside hooks");
     assert(nargs + 1 < L.top - L.ci.funcOff, "not enough elements in the stack");
@@ -972,6 +991,7 @@ module.exports.lua_getmetatable      = lua_getmetatable;
 module.exports.lua_gettable          = lua_gettable;
 module.exports.lua_gettop            = lua_gettop;
 module.exports.lua_getupvalue        = lua_getupvalue;
+module.exports.lua_getuservalue      = lua_getuservalue;
 module.exports.lua_insert            = lua_insert;
 module.exports.lua_isfunction        = lua_isfunction;
 module.exports.lua_isinteger         = lua_isinteger;
@@ -1023,6 +1043,7 @@ module.exports.lua_setmetatable      = lua_setmetatable;
 module.exports.lua_settable          = lua_settable;
 module.exports.lua_settop            = lua_settop;
 module.exports.lua_setupvalue        = lua_setupvalue;
+module.exports.lua_setuservalue      = lua_setuservalue;
 module.exports.lua_status            = lua_status;
 module.exports.lua_stringtonumber    = lua_stringtonumber;
 module.exports.lua_toboolean         = lua_toboolean;

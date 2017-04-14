@@ -39,6 +39,23 @@ const db_setmetatable = function(L) {
     return 1;  /* return 1st argument */
 };
 
+const db_getuservalue = function(L) {
+    if (lapi.lua_type(L, 1) !== lua.CT.LUA_TUSERDATA)
+        lapi.lua_pushnil(L);
+    else
+        lapi.lua_getuservalue(L, 1);
+    return 1;
+};
+
+
+const db_setuservalue = function(L) {
+   lauxlib.luaL_checktype(L, 1, lua.CT.LUA_TUSERDATA);
+   lauxlib.luaL_checkany(L, 2);
+   lapi.lua_settop(L, 2);
+   lapi.lua_setuservalue(L, 1);
+   return 1;
+};
+
 /*
 ** Auxiliary function used by several library functions: check for
 ** an optional thread as function's first argument and set 'arg' with
@@ -177,6 +194,26 @@ const db_getlocal = function(L) {
     }
 };
 
+const db_setlocal = function(L) {
+    let thread = getthread(L);
+    let L1 = thread.thread;
+    let arg = thread.arg;
+    let ar = new lua.lua_Debug();
+    let level = lauxlib.luaL_checkinteger(L, arg + 1);
+    let nvar = lauxlib.luaL_checkinteger(L, arg + 2);
+    if (!ldebug.lua_getstack(L1, level, ar))  /* out of range? */
+        return lauxlib.luaL_argerror(L, arg + 1, "level out of range");
+    lauxlib.luaL_checkany(L, arg + 3);
+    lapi.lua_settop(L, arg + 3);
+    checkstack(L, L1, 1);
+    lapi.lua_xmove(L, L1, 1);
+    let name = ldebug.lua_setlocal(L1, ar, nvar);
+    if (name === null)
+        lapi.lua_pop(L1, 1);  /* pop value (if not popped by 'lua_setlocal') */
+    lapi.lua_pushstring(L, name.value);
+    return 1;
+};
+
 /*
 ** get (if 'get' is true) or set an upvalue from a closure
 */
@@ -238,8 +275,11 @@ const dblib = {
     "getmetatable": db_getmetatable,
     "getregistry":  db_getregistry,
     "getupvalue":   db_getupvalue,
+    "getuservalue": db_getuservalue,
+    "setlocal":     db_setlocal,
     "setmetatable": db_setmetatable,
     "setupvalue":   db_setupvalue,
+    "setuservalue": db_setuservalue,
     "traceback":    db_traceback,
     "upvalueid":    db_upvalueid
 };

@@ -116,6 +116,20 @@ const lua_getlocal = function(L, ar, n) {
     return name;
 };
 
+const lua_setlocal = function(L, ar, n) {
+  swapextra(L);
+  let local = findlocal(L, ar.i_ci, n);
+  let name = local.name;
+  let pos = local.pos;
+  if (name) {
+      L.stack[pos].type = L.stack[L.top - 1].type;
+      L.stack[pos].value = L.stack[L.top - 1].value;
+      L.top--;  /* pop value */
+  }
+  swapextra(L);
+  return name;
+};
+
 const funcinfo = function(ar, cl) {
     if (cl === null || cl.type === CT.LUA_TCCL) {
         ar.source = lua.to_luastring("=[JS]");
@@ -574,3 +588,4 @@ module.exports.luaG_typeerror   = luaG_typeerror;
 module.exports.lua_getinfo      = lua_getinfo;
 module.exports.lua_getlocal     = lua_getlocal;
 module.exports.lua_getstack     = lua_getstack;
+module.exports.lua_setlocal     = lua_setlocal;

@@ -54,6 +54,72 @@ test('debug.getlocal', function (t) {
 
 });
 
+test('debug.setlocal', function (t) {
+    let luaCode = `
+        local alocal = "alocal"
+        local another = "another"
+
+        local l = function()
+            local infunction = "infunction"
+            local anotherin = "anotherin"
+
+            debug.setlocal(2, 1, 1)
+            debug.setlocal(2, 2, 2)
+            debug.setlocal(1, 1, 3)
+            debug.setlocal(1, 2, 4)
+
+            return infunction, anotherin
+        end
+
+        local a, b = l()
+
+        return alocal, another, a, b
+    `, L;
+    
+    t.plan(6);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -4),
+        1,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -3),
+        2,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -2),
+        3,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -1),
+        4,
+        "Correct element(s) on the stack"
+    );
+
+});
+
 test('debug.upvalueid', function (t) {
     let luaCode = `
         local upvalue = "upvalue"
