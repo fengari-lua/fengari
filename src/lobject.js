@@ -474,7 +474,7 @@ const l_str2int = function(s) {
 
     while (ljstype.lisspace(s[0])) s = s.slice(1);  /* skip trailing spaces */
 
-    if (empty || s[0] !== 0) return null;  /* something wrong in the numeral */
+    if (empty || (s.length > 0 && s[0] !== 0)) return null;  /* something wrong in the numeral */
     else {
         return neg ? -a : a;
     }
