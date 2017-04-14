@@ -263,6 +263,87 @@ const db_upvaluejoin = function(L) {
     return 0;
 };
 
+/*
+** The hook table at registry[HOOKKEY] maps threads to their current
+** hook function. (We only need the unique address of 'HOOKKEY'.)
+*/
+const HOOKKEY = lua.to_luastring("__hooks__");
+
+const hooknames = ["call", "return", "line", "count", "tail call"].map(e => lua.to_luastring(e));
+
+/*
+** Call hook function registered at hook table for the current
+** thread (if there is one)
+*/
+const hookf = function(L, ar) {
+    lapi.lua_rawgetp(L, lua.LUA_REGISTRYINDEX, HOOKKEY);
+    lapi.lua_pushthread(L);
+    if (lapi.lua_rawget(L, -2) === lua.CT.LUA_TFUNCTION) {  /* is there a hook function? */
+        lapi.lua_pushstring(L, hooknames[ar.event]);  /* push event name */
+        if (ar.currentline >= 0)
+            lapi.lua_pushinteger(L, ar.currentline);  /* push current line */
+        else lapi.lua_pushnil(L);
+        assert(ldebug.lua_getinfo(L, [char["l"], char["S"]], ar));
+        lapi.lua_call(L, 2, 0);  /* call hook function */
+    }
+};
+
+/*
+** Convert a string mask (for 'sethook') into a bit mask
+*/
+const makemask = function(smask, count) {
+    let mask = 0;
+    if (smask.indexOf(char["c"]) > -1) mask |= lua.LUA_MASKCALL;
+    if (smask.indexOf(char["r"]) > -1) mask |= lua.LUA_MASKRET;
+    if (smask.indexOf(char["l"]) > -1) mask |= lua.LUA_MASKLINE;
+    if (count > 0) mask |= lua.LUA_MASKCOUNT;
+    return mask;
+};
+
+/*
+** Convert a bit mask (for 'gethook') into a string mask
+*/
+const unmakemask = function(mask, smask) {
+    let i = 0;
+    if (mask & lua.LUA_MASKCALL) smask[i++] = char["c"];
+    if (mask & lua.LUA_MASKRET) smask[i++] = char["r"];
+    if (mask & lua.LUA_MASKLINE) smask[i++] = char["l"];
+    smask[i] = 0;
+    return smask;
+};
+
+const db_sethook = function(L) {
+    let mask, count, func;
+    let thread = getthread(L);
+    let L1 = thread.thread;
+    let arg = thread.arg;
+    if (lapi.lua_isnoneornil(L, arg+1)) {  /* no hook? */
+        lapi.lua_settop(L, arg+1);
+        func = null; mask = 0; count = 0;  /* turn off hooks */
+    }
+    else {
+        const smask = lauxlib.luaL_checkstring(L, arg + 2);
+        lauxlib.luaL_checktype(L, arg+1, lua.CT.LUA_TFUNCTION);
+        count = lauxlib.luaL_optinteger(L, arg + 3, 0);
+        func = hookf; mask = makemask(smask, count);
+    }
+    if (lapi.lua_rawgetp(L, lua.LUA_REGISTRYINDEX, HOOKKEY) === lua.CT.LUA_TNIL) {
+        lapi.lua_createtable(L, 0, 2);  /* create a hook table */
+        lapi.lua_pushvalue(L, -1);
+        lapi.lua_rawsetp(L, lua.LUA_REGISTRYINDEX, HOOKKEY);  /* set it in position */
+        lapi.lua_pushstring(L, [char["k"]]);
+        lapi.lua_setfield(L, -2, lua.to_luastring("__mode"));  /** hooktable.__mode = "k" */
+        lapi.lua_pushvalue(L, -1);
+        lapi.lua_setmetatable(L, -2);  /* setmetatable(hooktable) = hooktable */
+    }
+    checkstack(L, L1, 1);
+    lapi.lua_pushthread(L1); lapi.lua_xmove(L1, L, 1);  /* key (thread) */
+    lapi.lua_pushvalue(L, arg + 1);  /* value (hook function) */
+    lapi.lua_rawset(L, -3);  /* hooktable[L1] = new Lua hook */
+    ldebug.lua_sethook(L1, func, mask, count);
+    return 0;
+};
+
 const db_traceback = function(L) {
     let thread = getthread(L);
     let L1 = thread.thread;
@@ -284,6 +365,7 @@ const dblib = {
     "getregistry":  db_getregistry,
     "getupvalue":   db_getupvalue,
     "getuservalue": db_getuservalue,
+    "sethook":      db_sethook,
     "setlocal":     db_setlocal,
     "setmetatable": db_setmetatable,
     "setupvalue":   db_setupvalue,

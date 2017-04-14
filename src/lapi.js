@@ -403,6 +403,15 @@ const lua_rawset = function(L, idx) {
     L.top -= 2;
 };
 
+const lua_rawsetp = function(L, idx, p) {
+    assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    let o = index2addr(L, idx);
+    assert(L, o.ttistable(), "table expected");
+    let k = p;
+    o.__newindex(o, k, L.stack[L.top - 1]);
+    L.top--;
+};
+
 /*
 ** get functions (Lua -> stack)
 */
@@ -433,6 +442,15 @@ const lua_rawgeti = function(L, idx, n) {
 
     assert(L.top <= L.ci.top, "stack overflow");
 
+    return L.stack[L.top - 1].ttnov();
+};
+
+const lua_rawgetp = function(L, idx, p) {
+    let t = index2addr(L, idx);
+    assert(t.ttistable(), "table expected");
+    let k = p;
+    L.stack[L.top++] = t.__index(t, k);
+    assert(L.top <= L.ci.top, "stack overflow");
     return L.stack[L.top - 1].ttnov();
 };
 
@@ -875,7 +893,7 @@ const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
         ci.extra = c.funcOff;
         ci.u.c.old_errfunc = L.errfunc;
         L.errfunc = func;
-        // TODO: setoah(ci->callstatus, L->allowhook);
+        ci.callstatus &= ~lstate.CIST_OAH | L.allowhook;
         ci.callstatus |= lstate.CIST_YPCALL;  /* function can do error recovery */
         ldo.luaD_call(L, c.funcOff, nresults);  /* do the call */
         ci.callstatus &= ~lstate.CIST_YPCALL;
@@ -1049,8 +1067,10 @@ module.exports.lua_pushvalue         = lua_pushvalue;
 module.exports.lua_rawequal          = lua_rawequal;
 module.exports.lua_rawget            = lua_rawget;
 module.exports.lua_rawgeti           = lua_rawgeti;
+module.exports.lua_rawgetp           = lua_rawgetp;
 module.exports.lua_rawlen            = lua_rawlen;
 module.exports.lua_rawset            = lua_rawset;
+module.exports.lua_rawsetp           = lua_rawsetp;
 module.exports.lua_remove            = lua_remove;
 module.exports.lua_replace           = lua_replace;
 module.exports.lua_rotate            = lua_rotate;

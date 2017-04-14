@@ -38,6 +38,19 @@ const swapextra = function(L) {
     }
 };
 
+const lua_sethook = function(L, func, mask, count) {
+    if (func === null || mask === 0) {  /* turn off hooks? */
+        mask = 0;
+        func = null;
+    }
+    if (L.ci.callstatus & lstate.CIST_LUA)
+        L.oldpc = L.ci.pcOff;
+    L.hook = func;
+    L.basehookcount = count;
+    L.hookcount = L.basehookcount;
+    L.hookmask = mask;
+};
+
 const lua_getstack = function(L, level, ar) {
     let ci;
     let status;
@@ -577,6 +590,40 @@ const luaG_tointerror = function(L, p1, p2) {
     luaG_runerror(L, lua.to_luastring(`number${lobject.jsstring(varinfo(L, p2))} has no integer representation`));
 };
 
+const luaG_traceexec = function(L) {
+    let ci = L.ci;
+    let mask = L.hookmask;
+    let counthook = (--L.hookcount === 0 && (mask & lua.LUA_MASKCOUNT));
+    if (counthook)
+        L.hookcount = L.basehookcount;  /* reset count */
+    else if (!(mask & lua.LUA_MASKLINE))
+        return;  /* no line hook and count != 0; nothing to be done */
+    if (ci.callstatus & lstate.CIST_HOOKYIELD) {  /* called hook last time? */
+        ci.callstatus &= ~lstate.CIST_HOOKYIELD;  /* erase mark */
+        return;  /* do not call hook again (VM yielded, so it did not move) */
+    }
+    if (counthook)
+        ldo.luaD_hook(L, lua.LUA_HOOKCOUNT, -1);  /* call count hook */
+    if (mask & lua.LUA_MASKLINE) {
+        let p = ci.func.p;
+        let npc = ci.pcOff; // pcRel(ci.u.l.savedpc, p);
+        let newline = p.lineinfo ? p.lineinfo[npc] : -1;
+        if (npc === 0 ||  /* call linehook when enter a new function, */
+            ci.pcOff <= L.oldpc ||  /* when jump back (loop), or when */
+            newline !== p.lineinfo ? p.lineinfo[L.oldpc] : -1)  /* enter a new line */
+            ldo.luaD_hook(L, lua.LUA_HOOKLINE, newline);  /* call line hook */
+    }
+    L.oldpc = ci.pcOff;
+    if (L.status === TS.LUA_YIELD) {  /* did hook yield? */
+        if (counthook)
+            L.hookcount = 1;  /* undo decrement to zero */
+        ci.u.l.savedpc--;  /* undo increment (resume will increment it again) */
+        ci.callstatus |= lstate.CIST_HOOKYIELD;  /* mark that it yielded */
+        ci.func = L.top - 1;  /* protect stack below results */
+        ldo.luaD_throw(L, TS.LUA_YIELD);
+    }
+};
+
 module.exports.luaG_addinfo     = luaG_addinfo;
 module.exports.luaG_concaterror = luaG_concaterror;
 module.exports.luaG_errormsg    = luaG_errormsg;
@@ -584,8 +631,10 @@ module.exports.luaG_opinterror  = luaG_opinterror;
 module.exports.luaG_ordererror  = luaG_ordererror;
 module.exports.luaG_runerror    = luaG_runerror;
 module.exports.luaG_tointerror  = luaG_tointerror;
+module.exports.luaG_traceexec   = luaG_traceexec;
 module.exports.luaG_typeerror   = luaG_typeerror;
 module.exports.lua_getinfo      = lua_getinfo;
 module.exports.lua_getlocal     = lua_getlocal;
 module.exports.lua_getstack     = lua_getstack;
+module.exports.lua_sethook      = lua_sethook;
 module.exports.lua_setlocal     = lua_setlocal;

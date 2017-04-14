@@ -7,6 +7,50 @@ const lauxlib  = require("../src/lauxlib.js");
 const lua      = require('../src/lua.js');
 const linit    = require('../src/linit.js');
 
+test('debug.sethook', function (t) {
+    let luaCode = `
+        result = ""
+
+        debug.sethook(function (event)
+            result = result .. event .. " "
+        end, "crl", 1)
+
+        local l = function() end
+
+        l()
+        l()
+        l()
+
+        return result
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tojsstring(L, -1),
+        "return count line count line count line count return count line count line count return count line count line count return count line count line ",
+        "Correct element(s) on the stack"
+    );
+
+});
+
+
 test('debug.getlocal', function (t) {
     let luaCode = `
         local alocal = "alocal"

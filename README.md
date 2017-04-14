@@ -40,12 +40,9 @@
     - [ ] lua_pushfstring
     - [ ] lua_pushlightuserdata
     - [ ] lua_pushvfstring
-    - [ ] lua_rawgetp
     - [ ] lua_rawseti
-    - [ ] lua_rawsetp
     - [ ] lua_register
     - [ ] lua_setallocf
-    - [ ] lua_sethook
     - [ ] lua_tocfunction
 - [ ] Auxiliary library
     - [x] ...
@@ -87,6 +84,7 @@
         - [x] debug.getregistry
         - [x] debug.getupvalue
         - [x] debug.getuservalue
+        - [x] debug.sethook
         - [x] debug.setlocal
         - [x] debug.setmetatable
         - [x] debug.setupvalue
@@ -95,7 +93,6 @@
         - [x] debug.upvalueid
         - [x] debug.upvaluejoin
         - [ ] debug.gethook
-        - [ ] debug.sethook
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
 - [ ] DOM API binding
 

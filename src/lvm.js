@@ -123,8 +123,15 @@ const luaV_execute = function(L) {
             base = ci.u.l.base;
 
             i = ci.u.l.savedpc[ci.pcOff++];
+
+            if (L.hookmask & (lua.LUA_MASKLINE | lua.LUA_MASKCOUNT)) {
+                ldebug.luaG_traceexec(L);
+                base = ci.u.l.base;
+            }
+
+
             ra = RA(L, base, i);
-            opcode = i.opcode
+            opcode = i.opcode;
         }
 
         if (i.breakpoint) // TODO: remove, used until lapi
