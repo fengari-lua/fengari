@@ -45,7 +45,6 @@ class UpVal {
     setval(L, ra) {
         if (this.v !== null) {
             this.L.stack[this.v] = L.stack[ra];
-            this.v = ra;
         } else this.u.value = L.stack[ra];
     }
 
