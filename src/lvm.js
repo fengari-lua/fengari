@@ -799,7 +799,7 @@ const luaV_equalobj = function(L, t1, t2) {
         case CT.LUA_TLIGHTUSERDATA:
         case CT.LUA_TUSERDATA:
         case CT.LUA_TTABLE:
-            if (t1 === t2) return 1;
+            if (t1.value === t2.value) return 1;
             else if (L === null) return 0;
 
             // TODO: fasttm ?

@@ -60,10 +60,10 @@
     - [ ] luaL_unref
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
     - [x] strings.lua
+    - [x] constructs.lua (`_soft`)
     - [ ] all.lua
     - [ ] big.lua
     - [ ] checktable.lua
-    - [ ] constructs.lua
     - [ ] errors.lua
     - [ ] gc.lua
     - [ ] literals.lua
