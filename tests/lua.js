@@ -10,6 +10,8 @@ const linit    = require('../src/linit.js');
 
 test('constructs.lua', function (t) {
     let luaCode = `
+        _soft = true
+        require = function(lib) return _G[lib] end  -- NYI
         return dofile("tests/lua-tests/constructs.lua")
     `, L;
     
