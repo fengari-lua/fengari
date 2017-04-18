@@ -11,16 +11,16 @@ const Table   = lobject.Table;
 const TValue  = lobject.TValue;
 
 
-Table.prototype.ordered_intindexes = function() {
-    return [...this.value.keys()]
+const ordered_intindexes = function(table) {
+    return [...table.value.keys()]
         .filter(e => typeof e === 'number' && e % 1 === 0 && e > 0)  // Only integer indexes
         .sort(function (a, b) {
             return a > b ? 1 : -1;
         });
 };
 
-Table.prototype.ordered_indexes = function() {
-    return [...this.value.keys()]
+const ordered_indexes = function(table) {
+    return [...table.value.keys()]
         .sort(function(a, b) {
             if (typeof a !== "number" || a <= 0) return 1;
             if (typeof b !== "number" || b <= 0) return -1;
@@ -32,8 +32,8 @@ Table.prototype.ordered_indexes = function() {
 ** Try to find a boundary in table 't'. A 'boundary' is an integer index
 ** such that t[i] is non-nil and t[i+1] is nil (and 0 if t[1] is nil).
 */
-Table.prototype.luaH_getn = function() {
-    let indexes = this.ordered_intindexes();
+const luaH_getn = function(table) {
+    let indexes = ordered_intindexes(table);
     let len = indexes.length;
 
     // If first index != 1, length is 0
@@ -42,8 +42,8 @@ Table.prototype.luaH_getn = function() {
     for (let i = 0; i < len; i++) {
         let key = indexes[i];
 
-        if (!this.__index(this, key).ttisnil() // t[key] is non-nil
-            && (indexes[i + 1] - key > 1 || this.__index(this, indexes[i + 1]).ttisnil())) { // gap with next key or next value is nil
+        if (!table.__index(table, key).ttisnil() // t[key] is non-nil
+            && (indexes[i + 1] - key > 1 || table.__index(table, indexes[i + 1]).ttisnil())) { // gap with next key or next value is nil
             return indexes[i];
         }
     }
@@ -51,10 +51,10 @@ Table.prototype.luaH_getn = function() {
     return 0;
 };
 
-Table.prototype.luaH_next = function(L, keyI) {
+const luaH_next = function(L, table, keyI) {
     let keyO = L.stack[keyI];
     let key = Table.keyValue(keyO);
-    let indexes = this.ordered_indexes();
+    let indexes = ordered_indexes(table);
 
     if (indexes.length === 0) return 0;
 
@@ -72,9 +72,12 @@ Table.prototype.luaH_next = function(L, keyI) {
         else
             L.stack[keyI] = indexes[i + 1];
 
-        L.stack[keyI + 1] = this.value.get(indexes[i + 1]);
+        L.stack[keyI + 1] = table.value.get(indexes[i + 1]);
         return 1;
     }
 
     return 0;
 };
+
+module.exports.luaH_next = luaH_next;
+module.exports.luaH_getn = luaH_getn;

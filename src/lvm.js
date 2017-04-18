@@ -978,7 +978,7 @@ const luaV_objlen = function(L, ra, rb) {
         case CT.LUA_TTABLE: {
             tm = ltm.luaT_gettmbyobj(L, rb, ltm.TMS.TM_LEN);
             if (!tm.ttisnil()) break;
-            L.stack[ra] = new TValue(CT.LUA_TNUMINT, rb.luaH_getn());
+            L.stack[ra] = new TValue(CT.LUA_TNUMINT, ltable.luaH_getn(rb));
             return;
         }
         case CT.LUA_TSHRSTR:

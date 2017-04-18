@@ -314,7 +314,7 @@ const luaB_load = function(L) {
 };
 
 const base_funcs = {
-    "collectgarbage": function () {},
+    "collectgarbage": function () { return 0; },
     "assert":         luaB_assert,
     "error":          luaB_error,
     "getmetatable":   luaB_getmetatable,

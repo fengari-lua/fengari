@@ -218,10 +218,6 @@ class Table extends TValue {
         return v ? v : luaO_nilobject;
     }
 
-    __len(table) {
-        return this.luaH_getn();
-    }
-
 }
 
 class LClosure extends TValue {

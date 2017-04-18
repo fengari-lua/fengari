@@ -14,6 +14,7 @@ const lua       = require('./lua.js');
 const luaconf   = require('./luaconf.js');
 const lundump   = require('./lundump.js');
 const lvm       = require('./lvm.js');
+const ltable    = require('./ltable.js');
 const MAXUPVAL  = lfunc.MAXUPVAL;
 const CT        = lua.constant_types;
 const TS        = lua.thread_status;
@@ -509,8 +510,8 @@ const lua_getupvalue = function(L, funcindex, n) {
     let name = up.name;
     let val = up.val;
     if (name)
-        L.stack[L.top++] = new TValue(name.type, name.value);
-    return name;
+        L.stack[L.top++] = new TValue(val.type, val.value);
+    return name.value;
 };
 
 const lua_setupvalue = function(L, funcindex, n) {
@@ -525,7 +526,7 @@ const lua_setupvalue = function(L, funcindex, n) {
         val.type = L.stack[L.top].type;
         val.value = L.stack[L.top].value;
     }
-    return name;
+    return name.value;
 };
 
 const lua_newtable = function(L) {
@@ -645,7 +646,7 @@ const lua_rawlen = function(L, idx) {
         case CT.LUA_TUSERDATA:
             return o.len;
         case CT.LUA_TTABLE:
-            return o.luaH_getn();
+            return ltable.luaH_getn(o);
         default:
             return 0;
     }
@@ -923,7 +924,7 @@ const lua_error = function(L) {
 const lua_next = function(L, idx) {
     let t = index2addr(L, idx);
     assert(t.ttistable(), "table expected");
-    let more = t.luaH_next(L, L.top - 1);
+    let more = ltable.luaH_next(L, t, L.top - 1);
     if (more) {
         L.top++;
         assert(L.top <= L.ci.top, "stack overflow");
