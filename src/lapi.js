@@ -808,7 +808,7 @@ const lua_load = function(L, reader, data, chunckname, mode) {
             let reg = L.l_G.l_registry;
             let gt = reg.value.get(lua.LUA_RIDX_GLOBALS);
             /* set global table as 1st upvalue of 'f' (may be LUA_ENV) */
-            f.upvals[0].u.value = gt;
+            f.upvals[0].u.value = new TValue(gt.type, gt.value);
         }
     }
     return status;
