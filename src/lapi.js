@@ -336,8 +336,8 @@ const auxsetstr = function(L, t, k) {
 
     assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
 
-    if (t.ttistable() && !t.__index(t, k).ttisnil()) {
-        t.__newindex(t, k, L.stack[L.top - 1]);
+    if (t.ttistable() && !lobject.table_index(t, k).ttisnil()) {
+        lobject.table_newindex(t, k, L.stack[L.top - 1]);
         L.top--; /* pop value */
     } else {
         L.stack[L.top++] = str;
@@ -400,7 +400,7 @@ const lua_rawset = function(L, idx) {
     assert(2 < L.top - L.ci.funcOff, "not enough elements in the stack");
     let o = index2addr(L, idx);
     assert(o.ttistable(), "table expected");
-    o.__newindex(o, L.stack[L.top - 2], L.stack[L.top - 1]);
+    lobject.table_newindex(o, L.stack[L.top - 2], L.stack[L.top - 1]);
     L.top -= 2;
 };
 
@@ -409,7 +409,7 @@ const lua_rawsetp = function(L, idx, p) {
     let o = index2addr(L, idx);
     assert(L, o.ttistable(), "table expected");
     let k = p;
-    o.__newindex(o, k, L.stack[L.top - 1]);
+    lobject.table_newindex(o, k, L.stack[L.top - 1]);
     L.top--;
 };
 
@@ -421,7 +421,7 @@ const auxgetstr = function(L, t, k) {
     assert(Array.isArray(k), "key must be an array of bytes");
 
     let str = L.l_G.intern(k);
-    let slot = t.__index(t, k);
+    let slot = lobject.table_index(t, k);
     if (t.ttistable() && !slot.ttisnil()) {
         L.stack[L.top++] = slot;
         assert(L.top <= L.ci.top, "stack overflow");
@@ -439,7 +439,7 @@ const lua_rawgeti = function(L, idx, n) {
 
     assert(t.ttistable(), "table expected");
 
-    L.stack[L.top++] = t.__index(t, n);
+    L.stack[L.top++] = lobject.table_index(t, n);
 
     assert(L.top <= L.ci.top, "stack overflow");
 
@@ -450,7 +450,7 @@ const lua_rawgetp = function(L, idx, p) {
     let t = index2addr(L, idx);
     assert(t.ttistable(), "table expected");
     let k = p;
-    L.stack[L.top++] = t.__index(t, k);
+    L.stack[L.top++] = lobject.table_index(t, k);
     assert(L.top <= L.ci.top, "stack overflow");
     return L.stack[L.top - 1].ttnov();
 };
@@ -460,14 +460,14 @@ const lua_rawget = function(L, idx) {
 
     assert(t.ttistable(t), "table expected");
 
-    L.stack[L.top - 1] = t.__index(t, L.stack[L.top - 1]);
+    L.stack[L.top - 1] = lobject.table_index(t, L.stack[L.top - 1]);
 
     return L.stack[L.top - 1].ttnov();
 };
 
 // narray and nrec are mostly useless for this implementation
 const lua_createtable = function(L, narray, nrec) {
-    let t = new lobject.Table();
+    let t = new lobject.TValue(CT.LUA_TTABLE, new Map());
     L.stack[L.top++] = t;
 
     assert(L.top <= L.ci.top, "stack overflow");
@@ -577,7 +577,7 @@ const lua_getfield = function(L, idx, k) {
 
 const lua_geti = function(L, idx, n) {
     let t = index2addr(L, idx);
-    let slot = t.__index(t, n);
+    let slot = lobject.table_index(t, n);
     if (!slot.ttisnil()) {
         L.stack[L.top++] = slot;
         assert(L.top <= L.ci.top, "stack overflow");

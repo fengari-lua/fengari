@@ -81,7 +81,7 @@ const str_dump = function(L) {
     lauxlib.luaL_checktype(L, 1, CT.LUA_TFUNCTION);
     lapi.lua_settop(L, 1);
     if (lapi.lua_dump(L, writer, b, strip) !== 0)
-        return lauxlib.luaL_error(L, "unable to dump given function");
+        return lauxlib.luaL_error(L, lua.to_luastring("unable to dump given function"));
     lapi.lua_pushstring(L, b);
     return 1;
 };
@@ -1392,7 +1392,7 @@ const createmetatable = function(L) {
     lapi.lua_setmetatable(L, -2);  /* set table as metatable for strings */
     lapi.lua_pop(L, 1);  /* pop dummy string */
     lapi.lua_pushvalue(L, -2);  /* get string library */
-    lapi.lua_setfield(L, -2, lua.to_luastring("__index", true));  /* metatable.__index = string */
+    lapi.lua_setfield(L, -2, lua.to_luastring("__index", true));  /* lobject.table_index = string */
     lapi.lua_pop(L, 1);  /* pop metatable */  
 };
 

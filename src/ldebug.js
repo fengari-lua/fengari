@@ -14,7 +14,6 @@ const ltm     = require('./ltm.js');
 const lfunc   = require('./lfunc.js');
 const lapi    = require('./lapi.js');
 const TValue  = lobject.TValue;
-const Table   = lobject.Table;
 const CT      = lua.constant_types;
 const TS      = lua.thread_status;
 
@@ -181,12 +180,12 @@ const collectvalidlines = function(L, f) {
         assert(L.top <= L.ci.top, "stack overflow");
     } else {
         let lineinfo = f.l.p.lineinfo;
-        let t = new Table();
+        let t = new TValue(CT.LUA_TTABLE, new Map());
         L.stack[L.top++] = t;
         assert(L.top <= L.ci.top, "stack overflow");
         let v = new TValue(true, CT.LUA_TBOOLEAN);
         for (let i = 0; i < f.l.p.length; i++)
-            t.__newindex(t, lineinfo[i], v);
+            lobject.table_newindex(t, lineinfo[i], v);
     }
 };
 

@@ -483,7 +483,7 @@ const freeexps = function(fs, e1, e2) {
 */
 const addk = function(fs, key, v) {
     let f = fs.f;
-    let idx = fs.ls.h.__index(fs.ls.h, key);  /* index scanner table */
+    let idx = lobject.table_index(fs.ls.h, key);  /* index scanner table */
     if (idx && !idx.ttisnil()) {  /* is there an index there? */
         /* correct value? (warning: must distinguish floats from integers!) */
         if (idx.value < fs.nk && f.k[idx.value].ttype() === v.ttype() && f.k[idx.value].value === v.value)
@@ -491,7 +491,7 @@ const addk = function(fs, key, v) {
     }
     /* constant not found; create a new entry */
     let k = fs.nk;
-    fs.ls.h.__newindex(fs.ls.h, key, new TValue(CT.LUA_TNUMINT, k));
+    lobject.table_newindex(fs.ls.h, key, new TValue(CT.LUA_TNUMINT, k));
     f.k[k] = v;
     fs.nk++;
     return k;

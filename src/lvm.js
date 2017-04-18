@@ -11,7 +11,6 @@ const CT             = lua.constant_types;
 const LUA_MULTRET    = lua.LUA_MULTRET;
 const lobject        = require('./lobject.js');
 const TValue         = lobject.TValue;
-const Table          = lobject.Table;
 const LClosure       = lobject.LClosure;
 const lfunc          = require('./lfunc.js');
 const UpVal          = lfunc.UpVal;
@@ -212,7 +211,7 @@ const luaV_execute = function(L) {
                 break;
             }
             case OCi.OP_NEWTABLE: {
-                L.stack[ra] = new Table();
+                L.stack[ra] = new TValue(CT.LUA_TTABLE, new Map());
                 break;
             }
             case OCi.OP_SELF: {
@@ -660,7 +659,7 @@ const luaV_execute = function(L) {
                 let last = ((c - 1) * OC.LFIELDS_PER_FLUSH) + n;
 
                 for (; n > 0; n--) {
-                    table.__newindex(table, last--, L.stack[ra + n]);
+                    lobject.table_newindex(table, last--, L.stack[ra + n]);
                 }
 
                 L.top = ci.top; /* correct top (in case of previous open call) */
@@ -1056,7 +1055,7 @@ const gettable = function(L, table, key, ra, recur) {
         ldebug.luaG_runerror(L, lua.to_luastring("'__index' chain too long; possible loop", true));
 
     if (table.ttistable()) {
-        let element = table.__index(table, key);
+        let element = lobject.table_index(table, key);
 
         if (!element.ttisnil()) {
             L.stack[ra] = element;
@@ -1099,10 +1098,10 @@ const settable = function(L, table, key, v, recur) {
         ldebug.luaG_runerror(L, lua.to_luastring("'__newindex' chain too long; possible loop", true));
 
     if (table.ttistable()) {
-        let element = table.__index(table, key);
+        let element = lobject.table_index(table, key);
 
         if (!element.ttisnil()) {
-            table.__newindex(table, key, v);
+            lobject.table_newindex(table, key, v);
         } else {
             luaV_finishset(L, table, key, v, element, recur);
         }
@@ -1117,7 +1116,7 @@ const luaV_finishset = function(L, t, key, val, slot, recur) {
         assert(slot.ttisnil());
         tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_NEWINDEX); // TODO: fasttm
         if (tm.ttisnil()) {
-            t.__newindex(t, key, val);
+            lobject.table_newindex(t, key, val);
             return;
         }
     } else { /* not a table; check metamethod */

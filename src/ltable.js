@@ -7,7 +7,6 @@ const lobject = require('./lobject.js');
 const lua     = require('./lua.js');
 const CT      = lua.constant_types;
 const nil     = require('./ldo.js').nil;
-const Table   = lobject.Table;
 const TValue  = lobject.TValue;
 
 
@@ -42,8 +41,8 @@ const luaH_getn = function(table) {
     for (let i = 0; i < len; i++) {
         let key = indexes[i];
 
-        if (!table.__index(table, key).ttisnil() // t[key] is non-nil
-            && (indexes[i + 1] - key > 1 || table.__index(table, indexes[i + 1]).ttisnil())) { // gap with next key or next value is nil
+        if (!lobject.table_index(table, key).ttisnil() // t[key] is non-nil
+            && (indexes[i + 1] - key > 1 || lobject.table_index(table, indexes[i + 1]).ttisnil())) { // gap with next key or next value is nil
             return indexes[i];
         }
     }
@@ -53,7 +52,7 @@ const luaH_getn = function(table) {
 
 const luaH_next = function(L, table, keyI) {
     let keyO = L.stack[keyI];
-    let key = Table.keyValue(keyO);
+    let key = lobject.table_keyValue(keyO);
     let indexes = ordered_indexes(table);
 
     if (indexes.length === 0) return 0;

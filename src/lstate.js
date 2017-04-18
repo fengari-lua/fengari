@@ -107,10 +107,10 @@ const stack_init = function(L1, L) {
 ** Create registry table and its predefined values
 */
 const init_registry = function(L, g) {
-    let registry = new lobject.Table();
+    let registry = new lobject.TValue(CT.LUA_TTABLE, new Map());
     g.l_registry = registry;
     registry.value.set(lua.LUA_RIDX_MAINTHREAD, L);
-    registry.value.set(lua.LUA_RIDX_GLOBALS, new lobject.Table());
+    registry.value.set(lua.LUA_RIDX_GLOBALS, new lobject.TValue(CT.LUA_TTABLE, new Map()));
 };
 
 /*

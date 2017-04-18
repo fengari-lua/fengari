@@ -5,7 +5,6 @@ const assert  = require('assert');
 
 const lobject = require('./lobject.js');
 const TValue  = lobject.TValue;
-const Table   = lobject.Table;
 const ldo     = require('./ldo.js');
 const lstate  = require('./lstate.js');
 const lua     = require('./lua.js');
@@ -71,7 +70,7 @@ const luaT_init = function(L) {
 */
 const luaT_objtypename = function(L, o) {
     if ((o.ttistable() && o.metatable !== null) || (o.ttisfulluserdata() && o.metatable !== null)) {
-        let name = o.__index(o, lua.to_luastring('__name', true));
+        let name = lobject.table_index(o, lua.to_luastring('__name', true));
         if (name.ttisstring())
             return name.jsstring();
     }
@@ -149,7 +148,7 @@ const luaT_gettmbyobj = function(L, o, event) {
             mt = L.l_G.mt[o.ttnov()];
     }
 
-    return mt ? mt.__index(mt, event) : lobject.luaO_nilobject;
+    return mt ? lobject.table_index(mt, event) : lobject.luaO_nilobject;
 };
 
 module.exports.TMS              = TMS;

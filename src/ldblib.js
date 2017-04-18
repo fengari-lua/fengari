@@ -15,7 +15,7 @@ const ldebug  = require('./ldebug.js');
 */
 const checkstack = function(L, L1, n) {
     if (L !== L1 && !lapi.lua_checkstack(L1, n))
-        lauxlib.luaL_error(L, "stack overflow");
+        lauxlib.luaL_error(L, lua.to_luastring("stack overflow", true));
 };
 
 const db_getregistry = function(L) {

@@ -33,14 +33,14 @@ const getfield = function(L, key, d, delta) {
     let res = lapi.lua_tointegerx(L, -1);
     if (res !== false) {  /* field is not an integer? */
         if (t != lua.CT.LUA_TNIL)  /* some other value? */
-            return lauxlib.luaL_error(L, `field '${key}' is not an integer`);
+            return lauxlib.luaL_error(L, lua.to_luastring(`field '${key}' is not an integer`), true);
         else if (d < 0)  /* absent field; no default? */
-            return lauxlib.luaL_error(L, `field '${key}' missing in date table`);
+            return lauxlib.luaL_error(L, lua.to_luastring(`field '${key}' missing in date table`), true);
         res = d;
     }
     else {
         if (!(-L_MAXDATEFIELD <= res && res <= L_MAXDATEFIELD))
-            return lauxlib.luaL_error(L, `field '${key}' is out-of-bound`);
+            return lauxlib.luaL_error(L, lua.to_luastring(`field '${key}' is out-of-bound`), true);
         res -= delta;
     }
     lapi.lua_pop(L, 1);

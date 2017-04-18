@@ -10,7 +10,6 @@ const lua        = require("../src/lua.js");
 const lapi       = require("../src/lapi.js");
 const lauxlib    = require("../src/lauxlib.js");
 const linit      = require('../src/linit.js');
-const Table      = require("../src/lobject.js").Table;
 
 // Roughly the same tests as test/lvm.js to cover all opcodes
 
@@ -203,7 +202,7 @@ test('NEWTABLE', function (t) {
     }, "Lua program ran without error");
 
     t.ok(
-        L.stack[lapi.index2addr_(L, -1)] instanceof Table,
+        L.stack[lapi.index2addr_(L, -1)].ttistable(),
         "Program output is correct"
     );
 });

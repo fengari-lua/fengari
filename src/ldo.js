@@ -227,7 +227,7 @@ const adjust_varargs = function(L, p, actual) {
 const tryfuncTM = function(L, off, func) {
     let tm = ltm.luaT_gettmbyobj(L, func, ltm.TMS.TM_CALL);
     if (!tm.ttisfunction(tm))
-        ldebug.luaG_typeerror(L, func, "call");
+        ldebug.luaG_typeerror(L, func, lua.to_luastring("call", true));
     /* Open a hole inside the stack at 'func' */
     for (let p = L.top; p > off; p--)
         L.stack[p] = L.stack[p-1];

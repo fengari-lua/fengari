@@ -6,7 +6,6 @@ const beautify       = require('js-beautify').js_beautify;
 const lua_State      = require("../src/lstate.js").lua_State;
 const VM             = require("../src/lvm.js");
 const lapi           = require("../src/lapi.js");
-const Table          = require("../src/lobject.js").Table;
 
 const getState       = require("./tests.js").getState;
 
@@ -120,7 +119,7 @@ test('NEWTABLE', function (t) {
     }, "Program executed without errors");
 
     t.ok(
-        L.stack[L.top - 1] instanceof Table,
+        L.stack[L.top - 1].ttistable(),
         "Program output is correct"
     );
 });

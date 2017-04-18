@@ -176,49 +176,39 @@ const jsstring = function(value, from, to) {
     return str;
 };
 
-class Table extends TValue {
-
-    constructor(array, hash) {
-        super(CT.LUA_TTABLE, new Map(hash));
-
-        this.metatable = null;
-    }
-
-    static keyValue(key) {
-        // Those lua values are used by value, others by reference
-        if (key instanceof TValue) {
-            if ([CT.LUA_TNIL,
-                CT.LUA_TBOOLEAN,
-                CT.LUA_TSTRING,
-                CT.LUA_TNUMINT].indexOf(key.type) > -1) {
-                key = key.value;
-            } else if ([CT.LUA_TSHRSTR, CT.LUA_TLNGSTR].indexOf(key.type) > -1) {
-                key = key.value.map(e => `${e}|`).join('');
-            }
-        } else if (typeof key === "string") { // To avoid
-            key = lua.to_luastring(key).map(e => `${e}|`).join('');
-        } else if (Array.isArray(key)) {
-            key = key.map(e => `${e}|`).join('');
+const table_keyValue = function(key) {
+    // Those lua values are used by value, others by reference
+    if (key instanceof TValue) {
+        if ([CT.LUA_TNIL,
+            CT.LUA_TBOOLEAN,
+            CT.LUA_TSTRING,
+            CT.LUA_TNUMINT].indexOf(key.type) > -1) {
+            key = key.value;
+        } else if ([CT.LUA_TSHRSTR, CT.LUA_TLNGSTR].indexOf(key.type) > -1) {
+            key = key.value.map(e => `${e}|`).join('');
         }
-
-        return key;
+    } else if (typeof key === "string") { // To avoid
+        key = lua.to_luastring(key).map(e => `${e}|`).join('');
+    } else if (Array.isArray(key)) {
+        key = key.map(e => `${e}|`).join('');
     }
 
-    __newindex(table, key, value) {
-        key = Table.keyValue(key);
+    return key;
+};
 
-        table.value.set(key, value);
-    }
+const table_newindex = function(table, key, value) {
+    key = table_keyValue(key);
 
-    __index(table, key) {
-        key = Table.keyValue(key);
+    table.value.set(key, value);
+};
 
-        let v = table.value.get(key);
+const table_index = function(table, key) {
+    key = table_keyValue(key);
 
-        return v ? v : luaO_nilobject;
-    }
+    let v = table.value.get(key);
 
-}
+    return v ? v : luaO_nilobject;
+};
 
 class LClosure extends TValue {
 
@@ -233,7 +223,7 @@ class LClosure extends TValue {
         _ENV.v = null;
         _ENV.u.open.next = null;
         _ENV.u.open.touched = true;
-        _ENV.u.value = new Table();
+        _ENV.u.value = new TValue(CT.LUA_TTABLE, new Map());
 
         this.upvals = [
             _ENV
@@ -566,7 +556,6 @@ module.exports.CClosure       = CClosure;
 module.exports.LClosure       = LClosure;
 module.exports.LocVar         = LocVar;
 module.exports.TValue         = TValue;
-module.exports.Table          = Table;
 module.exports.UTF8BUFFSZ     = UTF8BUFFSZ;
 module.exports.frexp          = frexp;
 module.exports.intarith       = intarith;
@@ -579,3 +568,6 @@ module.exports.luaO_str2num   = luaO_str2num;
 module.exports.luaO_utf8desc  = luaO_utf8desc;
 module.exports.luaO_utf8esc   = luaO_utf8esc;
 module.exports.numarith       = numarith;
+module.exports.table_index    = table_index;
+module.exports.table_keyValue = table_keyValue;
+module.exports.table_newindex = table_newindex;

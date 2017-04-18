@@ -14,7 +14,6 @@ const OpCodesI = lopcode.OpCodesI;
 const Proto    = lfunc.Proto;
 const R        = llex.RESERVED;
 const TValue   = lobject.TValue;
-const Table    = lobject.Table;
 const UnOpr    = lcode.UnOpr;
 const UpVal    = lfunc.UpVal;
 const char     = lua.char;
@@ -1342,7 +1341,7 @@ const test_then_block = function(ls, escapelist) {
         escapelist = lcode.luaK_concat(fs, escapelist, lcode.luaK_jump(fs));  /* must jump over it */
     lcode.luaK_patchtohere(fs, jf);
 
-    return escapelist
+    return escapelist;
 };
 
 const ifstat = function(ls, line) {
@@ -1547,7 +1546,7 @@ const luaY_parser = function(L, z, buff, dyd, name, firstchar) {
     let funcstate = new FuncState();
     let cl = lfunc.luaF_newLclosure(L, 1);  /* create main closure */
     L.stack[L.top++] = cl;
-    lexstate.h = new Table();  /* create table for scanner */
+    lexstate.h = new TValue(lua.CT.LUA_TTABLE, new Map());  /* create table for scanner */
     L.stack[L.top++] = lexstate.h;
     funcstate.f = cl.p = new Proto(L);
     funcstate.f.source = new TValue(lua.CT.LUA_TLNGSTR, name);
