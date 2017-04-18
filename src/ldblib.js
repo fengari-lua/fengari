@@ -153,7 +153,7 @@ const db_getinfo = function(L) {
         settabsi(L, lua.to_luastring("nparams"), ar.nparams);
         settabsb(L, lua.to_luastring("isvararg"), ar.isvararg);
     if (options.indexOf(char['n']) > - 1) {
-        settabss(L, lua.to_luastring("name"), ar.name ? ar.name.value : null);
+        settabss(L, lua.to_luastring("name"), ar.name ? ar.name : null);
         settabss(L, lua.to_luastring("namewhat"), ar.namewhat ? ar.namewhat : null);
     }
     if (options.indexOf(char['t']) > - 1)

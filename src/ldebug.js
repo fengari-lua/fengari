@@ -79,10 +79,11 @@ const lua_getstack = function(L, level, ar) {
     return status;
 };
 
+// TODO: returns TValue or String array ?
 const upvalname = function(p, uv) {
     assert(uv < p.upvalues.length);
     let s = p.upvalues[uv].name;
-    if (s === null) return "?".charCodeAt(0);
+    if (s === null) return ["?".charCodeAt(0)];
     return s;
 };
 
@@ -301,8 +302,8 @@ const kname = function(p, pc, c) {
         /* else no reasonable name found */
     } else {  /* 'c' is a register */
         let what = getobjname(p, pc, c); /* search for 'c' */
-        if (what && what.name[0] === 'c'.charCodeAt(0)) {
-            return what;
+        if (what && what.funcname[0] === 'c'.charCodeAt(0)) {  /* found a constant name? */
+            return what;  /* 'name' already filled */
         }
         /* else no reasonable name found */
     }
@@ -393,8 +394,9 @@ const getobjname = function(p, lastpc, reg) {
                 let k = i.C;  /* key index */
                 let t = i.B;  /* table index */
                 let vn = op === 'OP_GETTABLE' ? lfunc.luaF_getlocalname(p, t + 1, pc) : upvalname(p, t);
-                r.name = kname(p, pc, k);
-                r.funcname = vn && vn === lua.to_luastring("_ENV") ? lua.to_luastring("global") : lua.to_luastring("field");
+                vn = vn ? vn.jsstring() : null;
+                r.name = kname(p, pc, k).name;
+                r.funcname = vn && vn === "_ENV" ? lua.to_luastring("global") : lua.to_luastring("field");
                 return r;
             }
             case 'OP_GETUPVAL': {
@@ -414,7 +416,7 @@ const getobjname = function(p, lastpc, reg) {
             }
             case 'OP_SELF': {
                 let k = i.C;
-                r.name = kname(p, pc, k);
+                r.name = kname(p, pc, k).name;
                 r.funcname = lua.to_luastring("method");
                 return r;
             }
