@@ -140,8 +140,15 @@ class lua_Debug {
 
 }
 
-const to_luastring = function(str, maxBytesToWrite) {
+const to_luastring_cache = {};
+
+const to_luastring = function(str, cache, maxBytesToWrite) {
     assert(typeof str === "string", "to_luastring expect a js string");
+
+    if (cache) {
+        let cached = to_luastring_cache[str];
+        if (Array.isArray(cached)) return cached;
+    }
 
     maxBytesToWrite = maxBytesToWrite !== undefined ? maxBytesToWrite : Number.MAX_SAFE_INTEGER;
     let outU8Array = [];
@@ -195,6 +202,8 @@ const to_luastring = function(str, maxBytesToWrite) {
     }
     // Null-terminate the pointer to the buffer.
     // outU8Array[outIdx] = 0;
+
+    if (cache) to_luastring_cache[str] = outU8Array;
     return outU8Array;
 };
 

@@ -87,7 +87,7 @@ const utflen = function(L) {
 
 const pushutfchar = function(L, arg) {
     let code = lauxlib.luaL_checkinteger(L, arg);
-    lauxlib.luaL_argcheck(L, 0 <= code && code <= MAXUNICODE, arg, lua.to_luastring("value out of range"));
+    lauxlib.luaL_argcheck(L, 0 <= code && code <= MAXUNICODE, arg, lua.to_luastring("value out of range", true));
     lapi.lua_pushstring(L, lua.to_luastring(String.fromCharCode(code)));
 };
 
@@ -121,14 +121,14 @@ const byteoffset = function(L) {
     let posi = n >= 0 ? 1 : s.length + 1;
     posi = u_posrelat(lauxlib.luaL_optinteger(L, 3, posi), s.length);
 
-    lauxlib.luaL_argcheck(L, 1 <= posi && --posi <= s.length, 3, lua.to_luastring("position ot ouf range"));
+    lauxlib.luaL_argcheck(L, 1 <= posi && --posi <= s.length, 3, lua.to_luastring("position ot ouf range", true));
 
     if (n === 0) {
         /* find beginning of current byte sequence */
         while (posi > 0 && iscont(s[posi])) posi--;
     } else {
         if (iscont(s[posi]))
-            lauxlib.luaL_error(L, lua.to_luastring("initial position is a continuation byte"));
+            lauxlib.luaL_error(L, lua.to_luastring("initial position is a continuation byte", true));
 
         if (n < 0) {
             while (n < 0 && posi > 0) {  /* move back */
@@ -166,19 +166,19 @@ const codepoint = function(L) {
     let posi = u_posrelat(lauxlib.luaL_optinteger(L, 2, 1), s.length);
     let pose = u_posrelat(lauxlib.luaL_optinteger(L, 3, posi), s.length);
 
-    lauxlib.luaL_argcheck(L, posi >= 1, 2, lua.to_luastring("out of range"));
-    lauxlib.luaL_argcheck(L, pose <= s.length, 3, lua.to_luastring("out of range"));
+    lauxlib.luaL_argcheck(L, posi >= 1, 2, lua.to_luastring("out of range", true));
+    lauxlib.luaL_argcheck(L, pose <= s.length, 3, lua.to_luastring("out of range", true));
 
     if (posi > pose) return 0;  /* empty interval; return no values */
     if (pose - posi >= Number.MAX_SAFE_INTEGER)
-        return lauxlib.luaL_error(L, lua.to_luastring("string slice too long"));
+        return lauxlib.luaL_error(L, lua.to_luastring("string slice too long", true));
     let n = (pose - posi) + 1;
-    lauxlib.luaL_checkstack(L, n, lua.to_luastring("string slice too long"));
+    lauxlib.luaL_checkstack(L, n, lua.to_luastring("string slice too long", true));
     n = 0;
     for (s = s.slice(posi - 1); n < pose - posi;) {
         let dec = utf8_decode(s);
         if (dec === null)
-            return lauxlib.luaL_error(L, lua.to_luastring("invalid UTF-8 code"));
+            return lauxlib.luaL_error(L, lua.to_luastring("invalid UTF-8 code", true));
         s = dec.string;
         let code = dec.code;
         lapi.lua_pushinteger(L, code);
@@ -207,7 +207,7 @@ const iter_aux = function(L) {
         let code = dec ? dec.code : null;
         let next = dec ? dec.string : null;
         if (next === null || iscont(next[0]))
-            return lauxlib.luaL_error(L, lua.to_luastring("invalid UTF-8 code"));
+            return lauxlib.luaL_error(L, lua.to_luastring("invalid UTF-8 code", true));
         lapi.lua_pushinteger(L, n + 1);
         lapi.lua_pushinteger(L, code);
         return 2;
@@ -236,7 +236,7 @@ const UTF8PATT = "[\0-\x7F\xC2-\xF4][\x80-\xBF]*";
 const luaopen_utf8 = function(L) {
     lauxlib.luaL_newlib(L, funcs);
     lapi.lua_pushstring(L, lua.to_luastring(UTF8PATT));
-    lapi.lua_setfield(L, -2, lua.to_luastring("charpattern"));
+    lapi.lua_setfield(L, -2, lua.to_luastring("charpattern", true));
     return 1;
 };
 

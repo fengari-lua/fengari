@@ -183,7 +183,7 @@ const fixjump = function(fs, pc, dest) {
     let offset = dest - (pc + 1);
     assert(dest !== NO_JUMP);
     if (Math.abs(offset) > lopcode.MAXARG_sBx)
-        llex.luaX_syntaxerror(fs.ls, lua.to_luastring("control structure too long"));
+        llex.luaX_syntaxerror(fs.ls, lua.to_luastring("control structure too long", true));
     lopcode.SETARG_sBx(jmp, offset);
 };
 
@@ -424,7 +424,7 @@ const luaK_checkstack = function(fs, n) {
     let newstack = fs.freereg + n;
     if (newstack > fs.f.maxstacksize) {
         if (newstack >= MAXREGS)
-            llex.luaX_syntaxerror(fs.ls, lua.to_luastring("function or expression needs to many registers"));
+            llex.luaX_syntaxerror(fs.ls, lua.to_luastring("function or expression needs to many registers", true));
         fs.f.maxstacksize = newstack;
     }
 };
@@ -1230,7 +1230,7 @@ const luaK_setlist = function(fs, base, nelems, tostore) {
         codeextraarg(fs, c);
     }
     else
-        llex.luaX_syntaxerror(fs.ls, lua.to_luastring("constructor too long"));
+        llex.luaX_syntaxerror(fs.ls, lua.to_luastring("constructor too long", true));
     fs.freereg = base + 1;  /* free registers with list values */
 };
 

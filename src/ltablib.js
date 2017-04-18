@@ -36,9 +36,9 @@ const checktab = function(L, arg, what) {
     if (lapi.lua_type(L, arg) !== CT.LUA_TTABLE) {  /* is it not a table? */
         let n = 1;
         if (lapi.lua_getmetatable(L, arg) &&  /* must have metatable */
-            (!(what & TAB_R) || checkfield(L, lua.to_luastring("__index"), ++n)) &&
-            (!(what & TAB_W) || checkfield(L, lua.to_luastring("__newindex"), ++n)) &&
-            (!(what & TAB_L) || checkfield(L, lua.to_luastring("__len"), ++n))) {
+            (!(what & TAB_R) || checkfield(L, lua.to_luastring("__index", true), ++n)) &&
+            (!(what & TAB_W) || checkfield(L, lua.to_luastring("__newindex", true), ++n)) &&
+            (!(what & TAB_L) || checkfield(L, lua.to_luastring("__len", true), ++n))) {
             lapi.lua_pop(L, n);  /* pop metatable and tested metamethods */
         }
         else
@@ -68,7 +68,7 @@ const tinsert = function(L) {
             break;
         case 3: {
             pos = lauxlib.luaL_checkinteger(L, 2);  /* 2nd argument is the position */
-            lauxlib.luaL_argcheck(L, 1 <= pos && pos <= e, 2, lua.to_luastring("position out of bounds"));
+            lauxlib.luaL_argcheck(L, 1 <= pos && pos <= e, 2, lua.to_luastring("position out of bounds", true));
             for (let i = e; i > pos; i--) {  /* move up elements */
                 lapi.lua_geti(L, 1, i - 1);
                 lapi.lua_seti(L, 1, i);  /* t[i] = t[i - 1] */
@@ -76,7 +76,7 @@ const tinsert = function(L) {
             break;
         }
         default: {
-            return lauxlib.luaL_error(L, lua.to_luastring("wrong number of arguments to 'insert'"));
+            return lauxlib.luaL_error(L, lua.to_luastring("wrong number of arguments to 'insert'", true));
         }
     }
 
@@ -88,7 +88,7 @@ const tremove = function(L) {
     let size = aux_getn(L, 1, TAB_RW);
     let pos = lauxlib.luaL_optinteger(L, 2, size);
     if (pos !== size)  /* validate 'pos' if given */
-        lauxlib.luaL_argcheck(L, 1 <= pos && pos <= size + 1, 1, lua.to_luastring("position out of bounds"));
+        lauxlib.luaL_argcheck(L, 1 <= pos && pos <= size + 1, 1, lua.to_luastring("position out of bounds", true));
     lapi.lua_geti(L, 1, pos);  /* result = t[pos] */
     for (; pos < size; pos++) {
         lapi.lua_geti(L, 1, pos + 1);
@@ -113,9 +113,9 @@ const tmove = function(L) {
     checktab(L, 1, TAB_R);
     checktab(L, tt, TAB_W);
     if (e >= f) {  /* otherwise, nothing to move */
-        lauxlib.luaL_argcheck(L, f > 0 || e < llimit.LUA_MAXINTEGER + f, 3, lua.to_luastring("too many elements to move"));
+        lauxlib.luaL_argcheck(L, f > 0 || e < llimit.LUA_MAXINTEGER + f, 3, lua.to_luastring("too many elements to move", true));
         let n = e - f + 1;  /* number of elements to move */
-        lauxlib.luaL_argcheck(L, t <= llimit.LUA_MAXINTEGER - n + 1, 4, lua.to_luastring("destination wrap around"));
+        lauxlib.luaL_argcheck(L, t <= llimit.LUA_MAXINTEGER - n + 1, 4, lua.to_luastring("destination wrap around", true));
 
         if (t > e || t <= f || (tt !== 1 && lapi.lua_compare(L, 1, tt, lua.LUA_OPEQ) !== 1)) {
             for (let i = 0; i < n; i++) {
@@ -173,7 +173,7 @@ const unpack = function(L) {
     if (i > e) return 0;  /* empty range */
     let n = e - i;  /* number of elements minus 1 (avoid overflows) */
     if (n >= Number.MAX_SAFE_INTEGER || !lapi.lua_checkstack(L, ++n))
-        return lauxlib.luaL_error(L, lua.to_luastring("too many results to unpack"));
+        return lauxlib.luaL_error(L, lua.to_luastring("too many results to unpack", true));
     for (; i < e; i++)  /* push arg[i..e - 1] (to avoid overflows) */
         lapi.lua_geti(L, 1, i);
     lapi.lua_geti(L, 1, e);  /* push last element */
@@ -214,7 +214,7 @@ const auxsort = function(L) {
 const sort = function(L) {
     let n = aux_getn(L, 1, TAB_RW);
     if (n > 1) {  /* non-trivial interval? */
-        lauxlib.luaL_argcheck(L, n < Number.MAX_SAFE_INTEGER, 1, lua.to_luastring("array too big"));
+        lauxlib.luaL_argcheck(L, n < Number.MAX_SAFE_INTEGER, 1, lua.to_luastring("array too big", true));
         if (!lapi.lua_isnoneornil(L, 2))  /* is there a 2nd argument? */
             lauxlib.luaL_checktype(L, 2, CT.LUA_TFUNCTION);  /* must be a function */
         lapi.lua_settop(L, 2);  /* make sure there are two arguments */

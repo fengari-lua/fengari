@@ -33,7 +33,7 @@ const db_getmetatable = function(L) {
 
 const db_setmetatable = function(L) {
     const t = lapi.lua_type(L, 2);
-    lauxlib.luaL_argcheck(L, t == lua.CT.LUA_TNIL || t == lua.CT.LUA_TTABLE, 2, lua.to_luastring("nil or table expected"));
+    lauxlib.luaL_argcheck(L, t == lua.CT.LUA_TNIL || t == lua.CT.LUA_TTABLE, 2, lua.to_luastring("nil or table expected", true));
     lapi.lua_settop(L, 2);
     lapi.lua_setmetatable(L, 1);
     return 1;  /* return 1st argument */
@@ -123,7 +123,7 @@ const db_getinfo = function(L) {
     let thread = getthread(L);
     let arg = thread.arg;
     let L1 = thread.thread;
-    let options = lauxlib.luaL_optstring(L, arg + 2, lua.to_luastring("flnStu"));
+    let options = lauxlib.luaL_optstring(L, arg + 2, lua.to_luastring("flnStu", true));
     checkstack(L, L1, 3);
     if (lapi.lua_isfunction(L, arg + 1)) {  /* info about a function? */
         options = [char['>']].concat(options);  /* add '>' to 'options' */
@@ -137,31 +137,31 @@ const db_getinfo = function(L) {
     }
 
     if (!ldebug.lua_getinfo(L1, options, ar))
-        lauxlib.luaL_argerror(L, arg + 2, lua.to_luastring("invalid option"));
+        lauxlib.luaL_argerror(L, arg + 2, lua.to_luastring("invalid option", true));
     lapi.lua_newtable(L);  /* table to collect results */
     if (options.indexOf(char['S']) > -1) {
-        settabss(L, lua.to_luastring("source"), ar.source.value);
-        settabss(L, lua.to_luastring("short_src"), ar.short_src);
-        settabss(L, lua.to_luastring("linedefined"), lua.to_luastring(`${ar.linedefined}`));
-        settabss(L, lua.to_luastring("lastlinedefined"), lua.to_luastring(`${ar.lastlinedefined}`));
-        settabss(L, lua.to_luastring("what"), ar.what);
+        settabss(L, lua.to_luastring("source", true), ar.source.value);
+        settabss(L, lua.to_luastring("short_src", true), ar.short_src);
+        settabss(L, lua.to_luastring("linedefined", true), lua.to_luastring(`${ar.linedefined}`));
+        settabss(L, lua.to_luastring("lastlinedefined", true), lua.to_luastring(`${ar.lastlinedefined}`));
+        settabss(L, lua.to_luastring("what", true), ar.what);
     }
     if (options.indexOf(char['l']) > -1)
-        settabsi(L, lua.to_luastring("currentline"), ar.currentline);
+        settabsi(L, lua.to_luastring("currentline", true), ar.currentline);
     if (options.indexOf(char['u']) > -1)
-        settabsi(L, lua.to_luastring("nups"), ar.nups);
-        settabsi(L, lua.to_luastring("nparams"), ar.nparams);
-        settabsb(L, lua.to_luastring("isvararg"), ar.isvararg);
+        settabsi(L, lua.to_luastring("nups", true), ar.nups);
+        settabsi(L, lua.to_luastring("nparams", true), ar.nparams);
+        settabsb(L, lua.to_luastring("isvararg", true), ar.isvararg);
     if (options.indexOf(char['n']) > - 1) {
-        settabss(L, lua.to_luastring("name"), ar.name ? ar.name : null);
-        settabss(L, lua.to_luastring("namewhat"), ar.namewhat ? ar.namewhat : null);
+        settabss(L, lua.to_luastring("name", true), ar.name ? ar.name : null);
+        settabss(L, lua.to_luastring("namewhat", true), ar.namewhat ? ar.namewhat : null);
     }
     if (options.indexOf(char['t']) > - 1)
-        settabsb(L, lua.to_luastring("istailcall"), ar.istailcall);
+        settabsb(L, lua.to_luastring("istailcall", true), ar.istailcall);
     if (options.indexOf(char['L']) > - 1)
-        treatstackoption(L, L1, lua.to_luastring("activelines"));
+        treatstackoption(L, L1, lua.to_luastring("activelines", true));
     if (options.indexOf(char['f']) > - 1)
-        treatstackoption(L, L1, lua.to_luastring("func"));
+        treatstackoption(L, L1, lua.to_luastring("func", true));
     return 1;  /* return table */
 };
 
@@ -178,7 +178,7 @@ const db_getlocal = function(L) {
     } else {  /* stack-level argument */
         let level = lauxlib.luaL_checkinteger(L, arg + 1);
         if (!ldebug.lua_getstack(L1, level, ar))  /* out of range? */
-            return lauxlib.luaL_argerror(L, arg+1, lapi.to_luastring("level out of range"));
+            return lauxlib.luaL_argerror(L, arg+1, lapi.to_luastring("level out of range", true));
         checkstack(L, L1, 1);
         let name = ldebug.lua_getlocal(L1, ar, nvar);
         if (name) {
@@ -244,7 +244,7 @@ const db_setupvalue = function(L) {
 const checkupval = function(L, argf, argnup) {
     let nup = lauxlib.luaL_checkinteger(L, argnup);  /* upvalue index */
     lauxlib.luaL_checktype(L, argf, lua.CT.LUA_TFUNCTION);  /* closure */
-    lauxlib.luaL_argcheck(L, (lapi.lua_getupvalue(L, argf, nup) !== null), argnup, lua.to_luastring("invalid upvalue index"));
+    lauxlib.luaL_argcheck(L, (lapi.lua_getupvalue(L, argf, nup) !== null), argnup, lua.to_luastring("invalid upvalue index", true));
     return nup;
 };
 
@@ -257,8 +257,8 @@ const db_upvalueid = function(L) {
 const db_upvaluejoin = function(L) {
     let n1 = checkupval(L, 1, 2);
     let n2 = checkupval(L, 3, 4);
-    lauxlib.luaL_argcheck(L, !lapi.lua_iscfunction(L, 1), 1, lua.to_luastring("Lua function expected"));
-    lauxlib.luaL_argcheck(L, !lapi.lua_iscfunction(L, 3), 3, lua.to_luastring("Lua function expected"));
+    lauxlib.luaL_argcheck(L, !lapi.lua_iscfunction(L, 1), 1, lua.to_luastring("Lua function expected", true));
+    lauxlib.luaL_argcheck(L, !lapi.lua_iscfunction(L, 3), 3, lua.to_luastring("Lua function expected", true));
     lapi.lua_upvaluejoin(L, 1, n1, 3, n2);
     return 0;
 };
@@ -267,7 +267,7 @@ const db_upvaluejoin = function(L) {
 ** The hook table at registry[HOOKKEY] maps threads to their current
 ** hook function. (We only need the unique address of 'HOOKKEY'.)
 */
-const HOOKKEY = lua.to_luastring("__hooks__");
+const HOOKKEY = lua.to_luastring("__hooks__", true);
 
 const hooknames = ["call", "return", "line", "count", "tail call"].map(e => lua.to_luastring(e));
 
@@ -331,7 +331,7 @@ const db_sethook = function(L) {
         lapi.lua_pushvalue(L, -1);
         lapi.lua_rawsetp(L, lua.LUA_REGISTRYINDEX, HOOKKEY);  /* set it in position */
         lapi.lua_pushstring(L, [char["k"]]);
-        lapi.lua_setfield(L, -2, lua.to_luastring("__mode"));  /** hooktable.__mode = "k" */
+        lapi.lua_setfield(L, -2, lua.to_luastring("__mode", true));  /** hooktable.__mode = "k" */
         lapi.lua_pushvalue(L, -1);
         lapi.lua_setmetatable(L, -2);  /* setmetatable(hooktable) = hooktable */
     }
@@ -423,7 +423,7 @@ if (typeof require === "function") {
                     continue;
 
                 let buffer = lua.to_luastring(input);
-                if (lauxlib.luaL_loadbuffer(L, buffer, buffer.length, lua.to_luastring("=(debug command)"))
+                if (lauxlib.luaL_loadbuffer(L, buffer, buffer.length, lua.to_luastring("=(debug command)", true))
                     || lapi.lua_pcall(L, 0, 0, 0)) {
                     lauxlib.lua_writestringerror(`${lapi.lua_tojsstring(L, -1)}\n`);
                 }

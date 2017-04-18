@@ -23,11 +23,11 @@ const TValue         = lobject.TValue;
 const seterrorobj = function(L, errcode, oldtop) {
     switch (errcode) {
         case TS.LUA_ERRMEM: {
-            L.stack[oldtop] = L.l_G.intern(lua.to_luastring("not enough memory"));
+            L.stack[oldtop] = L.l_G.intern(lua.to_luastring("not enough memory", true));
             break;
         }
         case TS.LUA_ERRERR: {
-            L.stack[oldtop] = L.l_G.intern(lua.to_luastring("error in error handling"));
+            L.stack[oldtop] = L.l_G.intern(lua.to_luastring("error in error handling", true));
             break;
         }
         default: {
@@ -483,9 +483,9 @@ const lua_yieldk = function(L, nresults, ctx, k) {
 
     if (L.nny > 0) {
         if (L !== L.l_G.mainthread)
-            ldebug.luaG_runerror(L, lua.to_luastring("attempt to yield across a JS-call boundary"));
+            ldebug.luaG_runerror(L, lua.to_luastring("attempt to yield across a JS-call boundary", true));
         else
-            ldebug.luaG_runerror(L, lua.to_luastring("attempt to yield from outside a coroutine"));
+            ldebug.luaG_runerror(L, lua.to_luastring("attempt to yield from outside a coroutine", true));
     }
 
     L.status = TS.LUA_YIELD;
@@ -564,10 +564,10 @@ const f_parser = function(L, p) {
     let cl;
     let c = p.z.getc();  /* read first character */
     if (c === lua.LUA_SIGNATURE.charCodeAt(0)) {
-        checkmode(L, p.mode, lua.to_luastring("binary"));
+        checkmode(L, p.mode, lua.to_luastring("binary", true));
         cl = new BytecodeParser(L, p.z.buffer).luaU_undump();
     } else {
-        checkmode(L, p.mode, lua.to_luastring("text"));
+        checkmode(L, p.mode, lua.to_luastring("text", true));
         cl = lparser.luaY_parser(L, p.z, p.buff, p.dyd, p.name, c);
     }
 

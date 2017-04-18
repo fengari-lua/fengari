@@ -14,7 +14,7 @@ const TS      = lua.thread_status;
 
 const getco = function(L) {
     let co = lapi.lua_tothread(L, 1);
-    lauxlib.luaL_argcheck(L, co, 1, lua.to_luastring("thread expected"));
+    lauxlib.luaL_argcheck(L, co, 1, lua.to_luastring("thread expected", true));
     return co;
 };
 

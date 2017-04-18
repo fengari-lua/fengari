@@ -274,7 +274,7 @@ class LocVar {
     }
 }
 
-const RETS = lua.to_luastring("...");
+const RETS = lua.to_luastring("...", true);
 const PRE  = lua.to_luastring("[string \"");
 const POS  = lua.to_luastring("\"]");
 
