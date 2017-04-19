@@ -567,13 +567,13 @@ if (typeof require === "function") {
         };
 
         const luaL_loadfilex = function(L, filename, mode) {
-            let jsfilename = lobject.jsstring(filename);
             let lf = new LoadF();
             let fnameindex = lapi.lua_gettop(L) + 1;  /* index of filename on the stack */
             if (filename === null) {
                 lapi.lua_pushliteral(L, "=stdin");
                 lf.f = process.stdin.fd;
             } else {
+                let jsfilename = lobject.jsstring(filename);
                 lapi.lua_pushliteral(L, `@${jsfilename}`);
                 try {
                     lf.f = fs.openSync(jsfilename, "r");
