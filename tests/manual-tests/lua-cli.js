@@ -42,11 +42,11 @@ const dostring = function(L, s, name) {
 };
 
 const dolibrary = function(L, name) {
-    lapi.lua_getglobal(L, "require");
+    lapi.lua_getglobal(L, lua.to_luastring("require"));
     lapi.lua_pushliteral(L, name);
     let status = docall(L, 1, 1);  /* call 'require(name)' */
     if (status === lua.thread_status.LUA_OK)
-        lapi.lua_setglobal(L, name);  /* global[name] = require return */
+        lapi.lua_setglobal(L, lua.to_luastring(name));  /* global[name] = require return */
     return report(L, status);
 };
 
@@ -79,55 +79,58 @@ let has_i = false;
 let has_v = false;
 let has_e = false;
 
-for (let i = 2; i<process.argv.length; i++) {
-    script = i;
-    if (process.argv[i][0] != "-") {
-        break;
-    }
-    switch(process.argv[i][1]) {
-    case '-':
-        if (process.argv[i][2]) {
-            print_usage(process.argv[script]);
-            return process.exit(1);
+(function() {
+    let i;
+    for (i = 2; i<process.argv.length; i++) {
+        script = i;
+        if (process.argv[i][0] != "-") {
+            return;
         }
-        script = i + 1;
-        /* falls through */
-    case void 0: /* script name is '-' */
-        i = process.argv.length;
-        break;
-    case 'E':
-        has_E = true;
-        break;
-    case 'i':
-        has_i = true;
-        /* (-i implies -v) */
-        /* falls through */
-    case 'v':
-        if (process.argv[i].length > 2) {
-            /* invalid option */
-            print_usage(process.argv[script]);
-            return process.exit(1);
-        }
-        has_v = true;
-        break;
-    case 'e':
-        has_e = true;
-        /* falls through */
-    case 'l':  /* both options need an argument */
-        if (process.argv[i].length < 2) {  /* no concatenated argument? */
-            i++;  /* try next 'process.argv' */
-            if (process.argv.length <= i || process.argv[i][0] === '-') {
-                /* no next argument or it is another option */
+        switch(process.argv[i][1]) {
+        case '-':
+            if (process.argv[i][2]) {
                 print_usage(process.argv[script]);
                 return process.exit(1);
             }
+            script = i + 1;
+            return;
+        case void 0: /* script name is '-' */
+            return;
+        case 'E':
+            has_E = true;
+            break;
+        case 'i':
+            has_i = true;
+            /* (-i implies -v) */
+            /* falls through */
+        case 'v':
+            if (process.argv[i].length > 2) {
+                /* invalid option */
+                print_usage(process.argv[script]);
+                return process.exit(1);
+            }
+            has_v = true;
+            break;
+        case 'e':
+            has_e = true;
+            /* falls through */
+        case 'l':  /* both options need an argument */
+            if (process.argv[i].length < 3) {  /* no concatenated argument? */
+                i++;  /* try next 'process.argv' */
+                if (process.argv.length <= i || process.argv[i][0] === '-') {
+                    /* no next argument or it is another option */
+                    print_usage(process.argv[script]);
+                    return process.exit(1);
+                }
+            }
+            break;
+        default:  /* invalid option */
+            print_usage(process.argv[script]);
+            return process.exit(1);
         }
-        break;
-    default:  /* invalid option */
-        print_usage(process.argv[script]);
-        return process.exit(1);
     }
-}
+    script = i;
+})();
 
 if (has_v)
     console.log(lua.FENGARI_COPYRIGHT);
@@ -205,8 +208,10 @@ const handle_script = function(L, argv) {
     let fname = argv[0];
     let status;
     if (fname === "-" && argv[-1] !== "--")
-        fname = void 0;  /* stdin */
-    status = lauxlib.luaL_loadfile(L, lua.to_luastring(fname));
+        fname = null;  /* stdin */
+    else
+        fname = lua.to_luastring(fname);
+    status = lauxlib.luaL_loadfile(L, fname);
     if (status === lua.thread_status.LUA_OK) {
         let n = pushargs(L); /* push arguments to script */
         status = docall(L, n, lua.LUA_MULTRET);
