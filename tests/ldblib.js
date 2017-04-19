@@ -7,6 +7,106 @@ const lauxlib  = require("../src/lauxlib.js");
 const lua      = require('../src/lua.js');
 const linit    = require('../src/linit.js');
 
+test('debug.sethook', function (t) {
+    let luaCode = `
+        local result = ""
+
+        debug.sethook(function (event)
+            result = result .. event .. " "
+        end, "crl", 1)
+
+        local l = function() end
+
+        l()
+        l()
+        l()
+
+        return result
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tojsstring(L, -1),
+        "return count line count line count line count return count line count line count return count line count line count return count line return ",
+        "Correct element(s) on the stack"
+    );
+
+});
+
+
+test('debug.gethook', function (t) {
+    let luaCode = `
+        local result = ""
+
+        debug.sethook(function (event)
+            result = result .. event .. " "
+        end, "crl", 1)
+
+        local l = function() end
+
+        l()
+        l()
+        l()
+
+        return debug.gethook()
+    `, L;
+    
+    t.plan(5);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.deepEqual(
+        lapi.lua_typename(L, lapi.lua_type(L, -3)),
+        lua.to_luastring("function"),
+        "Correct element(s) on the stack"
+    );
+
+    t.deepEqual(
+        lapi.lua_tojsstring(L, -2),
+        "crl",
+        "Correct element(s) on the stack"
+    );
+
+    t.deepEqual(
+        lapi.lua_tointeger(L, -1),
+        1,
+        "Correct element(s) on the stack"
+    );
+
+});
+
+
 test('debug.getlocal', function (t) {
     let luaCode = `
         local alocal = "alocal"
@@ -54,6 +154,72 @@ test('debug.getlocal', function (t) {
 
 });
 
+test('debug.setlocal', function (t) {
+    let luaCode = `
+        local alocal = "alocal"
+        local another = "another"
+
+        local l = function()
+            local infunction = "infunction"
+            local anotherin = "anotherin"
+
+            debug.setlocal(2, 1, 1)
+            debug.setlocal(2, 2, 2)
+            debug.setlocal(1, 1, 3)
+            debug.setlocal(1, 2, 4)
+
+            return infunction, anotherin
+        end
+
+        local a, b = l()
+
+        return alocal, another, a, b
+    `, L;
+    
+    t.plan(6);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -4),
+        1,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -3),
+        2,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -2),
+        3,
+        "Correct element(s) on the stack"
+    );
+
+    t.strictEqual(
+        lapi.lua_tointeger(L, -1),
+        4,
+        "Correct element(s) on the stack"
+    );
+
+});
+
 test('debug.upvalueid', function (t) {
     let luaCode = `
         local upvalue = "upvalue"
@@ -85,6 +251,51 @@ test('debug.upvalueid', function (t) {
 
     t.ok(
         lapi.lua_touserdata(L, -1),
+        "Correct element(s) on the stack"
+    );
+
+});
+
+
+test('debug.upvaluejoin', function (t) {
+    let luaCode = `
+        local upvalue1 = "upvalue1"
+        local upvalue2 = "upvalue2"
+
+        local l1 = function()
+            return upvalue1
+        end
+
+        local l2 = function()
+            return upvalue2
+        end
+
+        debug.upvaluejoin(l1, 1, l2, 1)
+
+        return l1()
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        linit.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lapi.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lapi.lua_tojsstring(L, -1),
+        "upvalue2",
         "Correct element(s) on the stack"
     );
 

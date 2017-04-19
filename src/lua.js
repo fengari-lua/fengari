@@ -140,8 +140,15 @@ class lua_Debug {
 
 }
 
-const to_luastring = function(str, maxBytesToWrite) {
+const to_luastring_cache = {};
+
+const to_luastring = function(str, cache, maxBytesToWrite) {
     assert(typeof str === "string", "to_luastring expect a js string");
+
+    if (cache) {
+        let cached = to_luastring_cache[str];
+        if (Array.isArray(cached)) return cached;
+    }
 
     maxBytesToWrite = maxBytesToWrite !== undefined ? maxBytesToWrite : Number.MAX_SAFE_INTEGER;
     let outU8Array = [];
@@ -195,8 +202,28 @@ const to_luastring = function(str, maxBytesToWrite) {
     }
     // Null-terminate the pointer to the buffer.
     // outU8Array[outIdx] = 0;
+
+    if (cache) to_luastring_cache[str] = outU8Array;
     return outU8Array;
 };
+
+/*
+** Event codes
+*/
+const LUA_HOOKCALL     = 0;
+const LUA_HOOKRET      = 1;
+const LUA_HOOKLINE     = 2;
+const LUA_HOOKCOUNT    = 3;
+const LUA_HOOKTAILCALL = 4;
+
+
+/*
+** Event masks
+*/
+const LUA_MASKCALL  = (1 << LUA_HOOKCALL);
+const LUA_MASKRET   = (1 << LUA_HOOKRET);
+const LUA_MASKLINE  = (1 << LUA_HOOKLINE);
+const LUA_MASKCOUNT = (1 << LUA_HOOKCOUNT);
 
 module.exports.CT                      = CT;
 module.exports.FENGARI_AUTHORS         = FENGARI_AUTHORS;
@@ -209,8 +236,17 @@ module.exports.FENGARI_VERSION_NUM     = FENGARI_VERSION_NUM;
 module.exports.FENGARI_VERSION_RELEASE = FENGARI_VERSION_RELEASE;
 module.exports.LUA_AUTHORS             = LUA_AUTHORS;
 module.exports.LUA_COPYRIGHT           = LUA_COPYRIGHT;
+module.exports.LUA_HOOKCALL            = LUA_HOOKCALL;
+module.exports.LUA_HOOKCOUNT           = LUA_HOOKCOUNT;
+module.exports.LUA_HOOKLINE            = LUA_HOOKLINE;
+module.exports.LUA_HOOKRET             = LUA_HOOKRET;
+module.exports.LUA_HOOKTAILCALL        = LUA_HOOKTAILCALL;
 module.exports.LUA_INITVARVERSION      = LUA_INITVARVERSION;
 module.exports.LUA_INIT_VAR            = LUA_INIT_VAR;
+module.exports.LUA_MASKCALL            = LUA_MASKCALL;
+module.exports.LUA_MASKCOUNT           = LUA_MASKCOUNT;
+module.exports.LUA_MASKLINE            = LUA_MASKLINE;
+module.exports.LUA_MASKRET             = LUA_MASKRET;
 module.exports.LUA_MINSTACK            = LUA_MINSTACK;
 module.exports.LUA_MULTRET             = -1;
 module.exports.LUA_NUMTAGS             = LUA_NUMTAGS;

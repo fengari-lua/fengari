@@ -15,30 +15,30 @@ const CT      = lua.constant_types;
 
 
 const TMS = {
-    TM_INDEX:    lua.to_luastring("__index"),
-    TM_NEWINDEX: lua.to_luastring("__newindex"),
-    TM_GC:       lua.to_luastring("__gc"),
-    TM_MODE:     lua.to_luastring("__mode"),
-    TM_LEN:      lua.to_luastring("__len"),
-    TM_EQ:       lua.to_luastring("__eq"),  /* last tag method with fast access */
-    TM_ADD:      lua.to_luastring("__add"),
-    TM_SUB:      lua.to_luastring("__sub"),
-    TM_MUL:      lua.to_luastring("__mul"),
-    TM_MOD:      lua.to_luastring("__mod"),
-    TM_POW:      lua.to_luastring("__pow"),
-    TM_DIV:      lua.to_luastring("__div"),
-    TM_IDIV:     lua.to_luastring("__idiv"),
-    TM_BAND:     lua.to_luastring("__band"),
-    TM_BOR:      lua.to_luastring("__bor"),
-    TM_BXOR:     lua.to_luastring("__bxor"),
-    TM_SHL:      lua.to_luastring("__shl"),
-    TM_SHR:      lua.to_luastring("__shr"),
-    TM_UNM:      lua.to_luastring("__unm"),
-    TM_BNOT:     lua.to_luastring("__bnot"),
-    TM_LT:       lua.to_luastring("__lt"),
-    TM_LE:       lua.to_luastring("__le"),
-    TM_CONCAT:   lua.to_luastring("__concat"),
-    TM_CALL:     lua.to_luastring("__call")
+    TM_INDEX:    lua.to_luastring("__index", true),
+    TM_NEWINDEX: lua.to_luastring("__newindex", true),
+    TM_GC:       lua.to_luastring("__gc", true),
+    TM_MODE:     lua.to_luastring("__mode", true),
+    TM_LEN:      lua.to_luastring("__len", true),
+    TM_EQ:       lua.to_luastring("__eq", true),  /* last tag method with fast access */
+    TM_ADD:      lua.to_luastring("__add", true),
+    TM_SUB:      lua.to_luastring("__sub", true),
+    TM_MUL:      lua.to_luastring("__mul", true),
+    TM_MOD:      lua.to_luastring("__mod", true),
+    TM_POW:      lua.to_luastring("__pow", true),
+    TM_DIV:      lua.to_luastring("__div", true),
+    TM_IDIV:     lua.to_luastring("__idiv", true),
+    TM_BAND:     lua.to_luastring("__band", true),
+    TM_BOR:      lua.to_luastring("__bor", true),
+    TM_BXOR:     lua.to_luastring("__bxor", true),
+    TM_SHL:      lua.to_luastring("__shl", true),
+    TM_SHR:      lua.to_luastring("__shr", true),
+    TM_UNM:      lua.to_luastring("__unm", true),
+    TM_BNOT:     lua.to_luastring("__bnot", true),
+    TM_LT:       lua.to_luastring("__lt", true),
+    TM_LE:       lua.to_luastring("__le", true),
+    TM_CONCAT:   lua.to_luastring("__concat", true),
+    TM_CALL:     lua.to_luastring("__call", true)
 };
 
 const luaT_typenames_ = [
@@ -71,7 +71,7 @@ const luaT_init = function(L) {
 */
 const luaT_objtypename = function(L, o) {
     if ((o.ttistable() && o.metatable !== null) || (o.ttisfulluserdata() && o.metatable !== null)) {
-        let name = o.__index(o, lua.to_luastring('__name'));
+        let name = o.__index(o, lua.to_luastring('__name', true));
         if (name.ttisstring())
             return name.jsstring();
     }
@@ -123,10 +123,10 @@ const luaT_trybinTM = function(L, p1, p2, res, event) {
                 if (n1 !== false && n2 !== false)
                     ldebug.luaG_tointerror(L, p1, p2);
                 else
-                    ldebug.luaG_opinterror(L, p1, p2, lua.to_luastring("perform bitwise operation on"));
+                    ldebug.luaG_opinterror(L, p1, p2, lua.to_luastring("perform bitwise operation on", true));
             }
             default:
-                ldebug.luaG_opinterror(L, p1, p2, lua.to_luastring("perform arithmetic on"));
+                ldebug.luaG_opinterror(L, p1, p2, lua.to_luastring("perform arithmetic on", true));
         }
     }
 };

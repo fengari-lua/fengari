@@ -21,7 +21,7 @@ const inttable2array = function(t) {
 
     t.forEach(function (v, k) {
         if (typeof k === 'number')
-            a[k] = v;
+            a[k - 1] = v;
     });
 
     return a.map(e => e.value);

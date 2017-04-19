@@ -23,11 +23,11 @@ const TValue         = lobject.TValue;
 const seterrorobj = function(L, errcode, oldtop) {
     switch (errcode) {
         case TS.LUA_ERRMEM: {
-            L.stack[oldtop] = L.l_G.intern(lua.to_luastring("not enough memory"));
+            L.stack[oldtop] = L.l_G.intern(lua.to_luastring("not enough memory", true));
             break;
         }
         case TS.LUA_ERRERR: {
-            L.stack[oldtop] = L.l_G.intern(lua.to_luastring("error in error handling"));
+            L.stack[oldtop] = L.l_G.intern(lua.to_luastring("error in error handling", true));
             break;
         }
         default: {
@@ -73,7 +73,8 @@ const luaD_precall = function(L, off, nresults) {
             ci.funcOff = off;
             ci.top = L.top + lua.LUA_MINSTACK;
             ci.callstatus = 0;
-            // TODO: hook
+            if (L.hookmask & lua.LUA_MASKCALL)
+                luaD_hook(L, lua.LUA_HOOKCALL, -1);
             let n = f(L); /* do the actual call */
 
             assert(n < L.top - L.ci.funcOff, "not enough elements in the stack");
@@ -129,6 +130,13 @@ const luaD_precall = function(L, off, nresults) {
 
 const luaD_poscall = function(L, ci, firstResult, nres) {
     let wanted = ci.nresults;
+
+    if (L.hookmask & (lua.LUA_MASKRET | lua.LUA_MASKLINE)) {
+        if (L.hookmask & lua.LUA_MASKRET)
+            luaD_hook(L, lua.LUA_HOOKRET, -1);
+        L.oldpc = ci.previous.pcOff;  /* 'oldpc' for caller function */
+    }
+
     let res = ci.funcOff;
     L.ci = ci.previous;
     L.ciOff--;
@@ -169,6 +177,33 @@ const moveresults = function(L, firstResult, res, nres, wanted) {
 
     L.top = res + wanted; /* top points after the last result */
     return true;
+};
+
+/*
+** Call a hook for the given event. Make sure there is a hook to be
+** called. (Both 'L->hook' and 'L->hookmask', which triggers this
+** function, can be changed asynchronously by signals.)
+*/
+const luaD_hook = function(L, event, line) {
+    let hook = L.hook;
+    if (hook && L.allowhook) {  /* make sure there is a hook */
+        let ci = L.ci;
+        let top = L.top;
+        let ci_top = ci.top;
+        let ar = new lua.lua_Debug();
+        ar.event = event;
+        ar.currentline = line;
+        ar.i_ci = ci;
+        ci.top = L.top + lua.LUA_MINSTACK;
+        L.allowhook = 0;  /* cannot call hooks inside a hook */
+        ci.callstatus |= lstate.CIST_HOOKED;
+        hook(L, ar);
+        assert(!L.allowhook);
+        L.allowhook = 1;
+        ci.top = ci_top;
+        L.top = top;
+        ci.callstatus &= ~lstate.CIST_HOOKED;
+    }
 };
 
 const adjust_varargs = function(L, p, actual) {
@@ -448,9 +483,9 @@ const lua_yieldk = function(L, nresults, ctx, k) {
 
     if (L.nny > 0) {
         if (L !== L.l_G.mainthread)
-            ldebug.luaG_runerror(L, lua.to_luastring("attempt to yield across a JS-call boundary"));
+            ldebug.luaG_runerror(L, lua.to_luastring("attempt to yield across a JS-call boundary", true));
         else
-            ldebug.luaG_runerror(L, lua.to_luastring("attempt to yield from outside a coroutine"));
+            ldebug.luaG_runerror(L, lua.to_luastring("attempt to yield from outside a coroutine", true));
     }
 
     L.status = TS.LUA_YIELD;
@@ -529,10 +564,10 @@ const f_parser = function(L, p) {
     let cl;
     let c = p.z.getc();  /* read first character */
     if (c === lua.LUA_SIGNATURE.charCodeAt(0)) {
-        checkmode(L, p.mode, lua.to_luastring("binary"));
+        checkmode(L, p.mode, lua.to_luastring("binary", true));
         cl = new BytecodeParser(L, p.z.buffer).luaU_undump();
     } else {
-        checkmode(L, p.mode, lua.to_luastring("text"));
+        checkmode(L, p.mode, lua.to_luastring("text", true));
         cl = lparser.luaY_parser(L, p.z, p.buff, p.dyd, p.name, c);
     }
 
@@ -566,6 +601,7 @@ module.exports.SParser              = SParser;
 module.exports.adjust_varargs       = adjust_varargs;
 module.exports.luaD_call            = luaD_call;
 module.exports.luaD_callnoyield     = luaD_callnoyield;
+module.exports.luaD_hook            = luaD_hook;
 module.exports.luaD_pcall           = luaD_pcall;
 module.exports.luaD_poscall         = luaD_poscall;
 module.exports.luaD_precall         = luaD_precall;

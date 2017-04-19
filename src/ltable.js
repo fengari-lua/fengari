@@ -13,7 +13,7 @@ const TValue  = lobject.TValue;
 
 Table.prototype.ordered_intindexes = function() {
     return [...this.value.keys()]
-        .filter(e => typeof e === 'number' && e % 1 === 0)  // Only integer indexes
+        .filter(e => typeof e === 'number' && e % 1 === 0 && e > 0)  // Only integer indexes
         .sort(function (a, b) {
             return a > b ? 1 : -1;
         });
@@ -22,8 +22,8 @@ Table.prototype.ordered_intindexes = function() {
 Table.prototype.ordered_indexes = function() {
     return [...this.value.keys()]
         .sort(function(a, b) {
-            if (typeof a !== "number") return 1;
-            if (typeof b !== "number") return -1;
+            if (typeof a !== "number" || a <= 0) return 1;
+            if (typeof b !== "number" || b <= 0) return -1;
             return a > b ? 1 : -1;
         });
 };
@@ -33,16 +33,18 @@ Table.prototype.ordered_indexes = function() {
 ** such that t[i] is non-nil and t[i+1] is nil (and 0 if t[1] is nil).
 */
 Table.prototype.luaH_getn = function() {
-    // TODO: is this costly ?
     let indexes = this.ordered_intindexes();
     let len = indexes.length;
+
+    // If first index != 1, length is 0
+    if (indexes[0] !== 1) return 0;
 
     for (let i = 0; i < len; i++) {
         let key = indexes[i];
 
-        if (!this.__index(this, key).ttisnil() // t[i] is non-nil
-            && (i === len - 1 || this.__index(this, indexes[i + 1]).ttisnil())) { // t[i+1] is nil or is the last integer indexed element
-            return indexes[i] + 1;
+        if (!this.__index(this, key).ttisnil() // t[key] is non-nil
+            && (indexes[i + 1] - key > 1 || this.__index(this, indexes[i + 1]).ttisnil())) { // gap with next key or next value is nil
+            return indexes[i];
         }
     }
 

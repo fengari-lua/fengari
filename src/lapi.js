@@ -221,7 +221,7 @@ const lua_pushlstring = function(L, s, len) {
     assert(Array.isArray(s), "lua_pushlstring expects array of byte");
     assert(typeof len === "number");
 
-    let ts = len === 0 ? L.l_G.intern(lua.to_luastring("")) : new TValue(CT.LUA_TLNGSTR, s.slice(0, len));
+    let ts = len === 0 ? L.l_G.intern(lua.to_luastring("", true)) : new TValue(CT.LUA_TLNGSTR, s.slice(0, len));
     L.stack[L.top++] = ts;
 
     assert(L.top <= L.ci.top, "stack overflow");
@@ -346,7 +346,7 @@ const auxsetstr = function(L, t, k) {
 };
 
 const lua_setglobal = function(L, name) {
-    auxsetstr(L, L.l_G.l_registry.value.get(lua.LUA_RIDX_GLOBALS - 1), name);
+    auxsetstr(L, L.l_G.l_registry.value.get(lua.LUA_RIDX_GLOBALS), name);
 };
 
 const lua_setmetatable = function(L, objindex) {
@@ -403,6 +403,15 @@ const lua_rawset = function(L, idx) {
     L.top -= 2;
 };
 
+const lua_rawsetp = function(L, idx, p) {
+    assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    let o = index2addr(L, idx);
+    assert(L, o.ttistable(), "table expected");
+    let k = p;
+    o.__newindex(o, k, L.stack[L.top - 1]);
+    L.top--;
+};
+
 /*
 ** get functions (Lua -> stack)
 */
@@ -433,6 +442,15 @@ const lua_rawgeti = function(L, idx, n) {
 
     assert(L.top <= L.ci.top, "stack overflow");
 
+    return L.stack[L.top - 1].ttnov();
+};
+
+const lua_rawgetp = function(L, idx, p) {
+    let t = index2addr(L, idx);
+    assert(t.ttistable(), "table expected");
+    let k = p;
+    L.stack[L.top++] = t.__index(t, k);
+    assert(L.top <= L.ci.top, "stack overflow");
     return L.stack[L.top - 1].ttnov();
 };
 
@@ -537,6 +555,15 @@ const lua_getmetatable = function(L, objindex) {
     return res;
 };
 
+const lua_getuservalue = function(L, idx) {
+    let o = index2addr(L, idx);
+    assert(L, o.ttisfulluserdata(), "full userdata expected");
+    L.stack[L.top].type = o.type;
+    L.stack[L.top++].value = o.value;
+    assert(L.top <= L.ci.top, "stack overflow");
+    return L.stack[L.top - 1].ttnov();
+};
+
 const lua_gettable = function(L, idx) {
     let t = index2addr(L, idx);
     lvm.gettable(L, t, L.stack[L.top - 1], L.top - 1);
@@ -562,7 +589,7 @@ const lua_geti = function(L, idx, n) {
 };
 
 const lua_getglobal = function(L, name) {
-    return auxgetstr(L, L.l_G.l_registry.value.get(lua.LUA_RIDX_GLOBALS - 1), name);
+    return auxgetstr(L, L.l_G.l_registry.value.get(lua.LUA_RIDX_GLOBALS), name);
 };
 
 /*
@@ -710,6 +737,11 @@ const lua_typename = function(L, t) {
     return ltm.ttypename(t);
 };
 
+const lua_iscfunction = function(L, idx) {
+    let o = index2addr(L, idx);
+    return o.ttislcf(o) || o.ttisCclosure();
+};
+
 const lua_isnil = function(L, n) {
     return lua_type(L, n) === CT.LUA_TNIL;
 };
@@ -773,7 +805,7 @@ const lua_load = function(L, reader, data, chunckname, mode) {
         if (f.nupvalues >= 1) {  /* does it have an upvalue? */
             /* get global table from registry */
             let reg = L.l_G.l_registry;
-            let gt = reg.value.get(lua.LUA_RIDX_GLOBALS - 1);
+            let gt = reg.value.get(lua.LUA_RIDX_GLOBALS);
             /* set global table as 1st upvalue of 'f' (may be LUA_ENV) */
             f.upvals[0].u.value = gt;
         }
@@ -792,6 +824,16 @@ const lua_dump = function(L, writer, data, strip) {
 const lua_status = function(L) {
     return L.status;
 };
+
+const lua_setuservalue = function(L, idx) {
+    assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    let o = index2addr(L, idx);
+    assert(L, o.ttisfulluserdata(), "full userdata expected");
+    L.stack[L.top - 1].type = o.type;
+    L.stack[L.top - 1].value = o.value;
+    L.top--;
+};
+
 
 const lua_callk = function(L, nargs, nresults, ctx, k) {
     assert(k === null || !(L.ci.callstatus & lstate.CIST_LUA), "cannot use continuations inside hooks");
@@ -851,7 +893,7 @@ const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
         ci.extra = c.funcOff;
         ci.u.c.old_errfunc = L.errfunc;
         L.errfunc = func;
-        // TODO: setoah(ci->callstatus, L->allowhook);
+        ci.callstatus &= ~lstate.CIST_OAH | L.allowhook;
         ci.callstatus |= lstate.CIST_YPCALL;  /* function can do error recovery */
         ldo.luaD_call(L, c.funcOff, nresults);  /* do the call */
         ci.callstatus &= ~lstate.CIST_YPCALL;
@@ -896,7 +938,7 @@ const lua_concat = function(L, n) {
     if (n >= 2)
         lvm.luaV_concat(L, n);
     else if (n === 0) {
-        L.stack[L.top++] = L.l_G.intern(lua.to_luastring(""));
+        L.stack[L.top++] = L.l_G.intern(lua.to_luastring("", true));
         assert(L.top <= L.ci.top, "stack overflow");
     }
 };
@@ -914,7 +956,8 @@ const getupvalref = function(L, fidx, n, pf) {
     assert(1 <= n && n <= f.p.upvalues.length, "invalid upvalue index");
     return {
         closure: f,
-        upval: f.upvals[n - 1]
+        upval: f.upvals[n - 1],
+        upvalOff: n - 1
     };
 };
 
@@ -934,6 +977,17 @@ const lua_upvalueid = function(L, fidx, n) {
             return null;
         }
     }
+};
+
+const lua_upvaluejoin = function(L, fidx1, n1, fidx2, n2) {
+    let ref1 = getupvalref(L, fidx1, n1);
+    let ref2 = getupvalref(L, fidx2, n2);
+    let up1 = ref1.upvalOff;
+    let up2 = ref2.upval;
+    let f1 = ref1.closure;
+
+    f1.upvals[up1] = up2;
+    up2.u.open.touched = true; // TODO: useful
 };
 
 // This functions are only there for compatibility purposes
@@ -972,7 +1026,9 @@ module.exports.lua_getmetatable      = lua_getmetatable;
 module.exports.lua_gettable          = lua_gettable;
 module.exports.lua_gettop            = lua_gettop;
 module.exports.lua_getupvalue        = lua_getupvalue;
+module.exports.lua_getuservalue      = lua_getuservalue;
 module.exports.lua_insert            = lua_insert;
+module.exports.lua_iscfunction       = lua_iscfunction;
 module.exports.lua_isfunction        = lua_isfunction;
 module.exports.lua_isinteger         = lua_isinteger;
 module.exports.lua_isnil             = lua_isnil;
@@ -1011,8 +1067,10 @@ module.exports.lua_pushvalue         = lua_pushvalue;
 module.exports.lua_rawequal          = lua_rawequal;
 module.exports.lua_rawget            = lua_rawget;
 module.exports.lua_rawgeti           = lua_rawgeti;
+module.exports.lua_rawgetp           = lua_rawgetp;
 module.exports.lua_rawlen            = lua_rawlen;
 module.exports.lua_rawset            = lua_rawset;
+module.exports.lua_rawsetp           = lua_rawsetp;
 module.exports.lua_remove            = lua_remove;
 module.exports.lua_replace           = lua_replace;
 module.exports.lua_rotate            = lua_rotate;
@@ -1023,6 +1081,7 @@ module.exports.lua_setmetatable      = lua_setmetatable;
 module.exports.lua_settable          = lua_settable;
 module.exports.lua_settop            = lua_settop;
 module.exports.lua_setupvalue        = lua_setupvalue;
+module.exports.lua_setuservalue      = lua_setuservalue;
 module.exports.lua_status            = lua_status;
 module.exports.lua_stringtonumber    = lua_stringtonumber;
 module.exports.lua_toboolean         = lua_toboolean;
@@ -1040,5 +1099,6 @@ module.exports.lua_touserdata        = lua_touserdata;
 module.exports.lua_type              = lua_type;
 module.exports.lua_typename          = lua_typename;
 module.exports.lua_upvalueid         = lua_upvalueid;
+module.exports.lua_upvaluejoin       = lua_upvaluejoin;
 module.exports.lua_version           = lua_version;
 module.exports.lua_xmove             = lua_xmove;

@@ -59,7 +59,7 @@ const findfield = function(L, objidx, level) {
 const pushglobalfuncname = function(L, ar) {
     let top = lapi.lua_gettop(L);
     ldebug.lua_getinfo(L, [char['f']], ar);  /* push function */
-    lapi.lua_getfield(L, lua.LUA_REGISTRYINDEX, lua.to_luastring(LUA_LOADED_TABLE));
+    lapi.lua_getfield(L, lua.LUA_REGISTRYINDEX, lua.to_luastring(LUA_LOADED_TABLE, true));
     if (findfield(L, top + 1, 2)) {
         let name = lapi.lua_tostring(L, -1);
         if (lobject.jsstring(name).startsWith("_G.")) {  /* name start with '_G.'? */
@@ -79,7 +79,7 @@ const sv = s => s ? s : [];
 
 const pushfuncname = function(L, ar) {
     if (pushglobalfuncname(L, ar)) {  /* try first a global name */
-        lapi.lua_pushstring(L, lua.to_luastring("function '").concat(lapi.lua_tostring(L, -1)).concat([char["'"]]));
+        lapi.lua_pushstring(L, lua.to_luastring("function '", true).concat(lapi.lua_tostring(L, -1)).concat([char["'"]]));
         lapi.lua_remove(L, -2);  /* remove name */
     }
     else if (ar.namewhat)  /* is there a name from code? */
@@ -87,7 +87,7 @@ const pushfuncname = function(L, ar) {
     else if (ar.what && ar.what[0] === char['m'])  /* main? */
         lapi.lua_pushliteral(L, "main chunk");
     else if (ar.what && ar.what[0] != char['C'])  /* for Lua functions, use <file:line> */
-        lapi.lua_pushstring(L, lua.to_luastring("function <").concat(...sv(ar.short_src), char[':'], ...lua.to_luastring(`${ar.linedefined}>`)));
+        lapi.lua_pushstring(L, lua.to_luastring("function <", true).concat(...sv(ar.short_src), char[':'], ...lua.to_luastring(`${ar.linedefined}>`)));
     else  /* nothing left... */
         lapi.lua_pushliteral(L, "?");
 };
@@ -121,7 +121,7 @@ const luaL_traceback = function(L, L1, msg, level) {
             lapi.lua_pushliteral(L, "\n\t...");  /* add a '...' */
             level = last - LEVELS2 + 1;  /* and skip to last ones */
         } else {
-            ldebug.lua_getinfo(L1, lua.to_luastring("Slnt"), ar);
+            ldebug.lua_getinfo(L1, lua.to_luastring("Slnt", true), ar);
             lapi.lua_pushstring(L, [char['\n'], char['\t'], char['.'], char['.'], char['.']].concat(ar.short_src));
             if (ar.currentline > 0)
                 lapi.lua_pushliteral(L, `${ar.currentline}:`);
@@ -147,7 +147,7 @@ const luaL_argerror = function(L, arg, extramsg) {
 
     ldebug.lua_getinfo(L, 'n', ar);
 
-    if (ar.namewhat === lua.to_luastring('method')) {
+    if (ar.namewhat === lua.to_luastring('method', true)) {
         arg--;  /* do not count 'self' */
         if (arg === 0)  /* error is in the self argument itself? */
             return luaL_error(L, lua.to_luastring(`calling '${lobject.jsstring(ar.name)}' on  bad self (${lobject.jsstring(extramsg)})`));
@@ -161,10 +161,10 @@ const luaL_argerror = function(L, arg, extramsg) {
 
 const typeerror = function(L, arg, tname) {
     let typearg;
-    if (luaL_getmetafield(L, arg, lua.to_luastring("__name")) === CT.LUA_TSTRING)
+    if (luaL_getmetafield(L, arg, lua.to_luastring("__name", true)) === CT.LUA_TSTRING)
         typearg = lapi.lua_tostring(L, -1);
     else if (lapi.lua_type(L, arg) === CT.LUA_TLIGHTUSERDATA)
-        typearg = lua.to_luastring("light userdata");
+        typearg = lua.to_luastring("light userdata", true);
     else
         typearg = luaL_typename(L, arg);
 
@@ -175,7 +175,7 @@ const typeerror = function(L, arg, tname) {
 const luaL_where = function(L, level) {
     let ar = new lua.lua_Debug();
     if (ldebug.lua_getstack(L, level, ar)) {
-        ldebug.lua_getinfo(L, lua.to_luastring("Sl"), ar);
+        ldebug.lua_getinfo(L, lua.to_luastring("Sl", true), ar);
         if (ar.currentline > 0) {
             lapi.lua_pushstring(L, lua.to_luastring(`${lobject.jsstring(ar.short_src)}:${ar.currentline}:`));
             return;
@@ -220,7 +220,7 @@ const luaL_argcheck = function(L, cond, arg, extramsg) {
 
 const luaL_checkany = function(L, arg) {
     if (lapi.lua_type(L, arg) === CT.LUA_TNONE)
-        luaL_argerror(L, arg, lua.to_luastring("value expected"));
+        luaL_argerror(L, arg, lua.to_luastring("value expected", true));
 };
 
 const luaL_checktype = function(L, arg, t) {
@@ -248,7 +248,7 @@ const luaL_optstring = luaL_optlstring;
 
 const interror = function(L, arg) {
     if (lapi.lua_isnumber(L, arg))
-        luaL_argerror(L, arg, lua.to_luastring("number has no integer representation"));
+        luaL_argerror(L, arg, lua.to_luastring("number has no integer representation", true));
     else
         tag_error(L, arg, CT.LUA_TNUMBER);
 };
@@ -357,15 +357,15 @@ const luaL_len = function(L, idx) {
     lapi.lua_len(L, idx);
     let l = lapi.lua_tointegerx(L, -1);
     if (l === false)
-        luaL_error(L, lua.to_luastring("object length is not an integer"));
+        luaL_error(L, lua.to_luastring("object length is not an integer", true));
     lapi.lua_pop(L, 1);  /* remove object */
     return l;
 };
 
 const luaL_tolstring = function(L, idx) {
-    if (luaL_callmeta(L, idx, lua.to_luastring("__tostring"))) {
+    if (luaL_callmeta(L, idx, lua.to_luastring("__tostring", true))) {
         if (!lapi.lua_isstring(L, -1))
-            luaL_error(L, lua.to_luastring("'__tostring' must return a string"));
+            luaL_error(L, lua.to_luastring("'__tostring' must return a string", true));
     } else {
         switch(lapi.lua_type(L, idx)) {
             case CT.LUA_TNUMBER:
@@ -379,7 +379,7 @@ const luaL_tolstring = function(L, idx) {
                 lapi.lua_pushstring(L, lua.to_luastring(`nil`));
                 break;
             default:
-                let tt = luaL_getmetafield(L, idx, lua.to_luastring("__name"));
+                let tt = luaL_getmetafield(L, idx, lua.to_luastring("__name", true));
                 let kind = tt === CT.LUA_TSTRING ? lapi.lua_tostring(L, -1) : luaL_typename(L, idx);
                 lapi.lua_pushstring(L, lua.to_luastring(`${lobject.jsstring(kind)}: 0x${lapi.index2addr(L, -1).id.toString(16)}`));
                 if (tt !== CT.LUA_TNIL)
@@ -438,7 +438,7 @@ const luaL_getsubtable = function(L, idx, fname) {
 ** Returns with only the table at the stack.
 */
 const luaL_setfuncs = function(L, l, nup) {
-    luaL_checkstack(L, nup, lua.to_luastring("too many upvalues"));
+    luaL_checkstack(L, nup, lua.to_luastring("too many upvalues", true));
     for (let lib in l) {  /* fill the table with given functions */
         for (let i = 0; i < nup; i++)  /* copy upvalues to the top */
             lapi.lua_pushvalue(L, -nup);
@@ -460,7 +460,7 @@ const luaL_checkstack = function(L, space, msg) {
         if (msg)
             luaL_error(L, lua.to_luastring(`stack overflow (${lobject.jsstring(msg)})`));
         else
-            luaL_error(L, lua.to_luastring('stack overflow'));
+            luaL_error(L, lua.to_luastring('stack overflow', true));
     }
 };
 

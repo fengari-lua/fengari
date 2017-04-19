@@ -742,7 +742,7 @@ test('SETTABLE, GETTABLE', function (t) {
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_topointer(L, -1).get(0).jsstring(),
+        lapi.lua_topointer(L, -1).get(1).jsstring(),
         "hello",
         "Program output is correct"
     );
@@ -835,7 +835,7 @@ test('SETTABUP, GETTABUP', function (t) {
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_topointer(L, -1).get(0).jsstring(),
+        lapi.lua_topointer(L, -1).get(1).jsstring(),
         "hello",
         "Program output is correct"
     );

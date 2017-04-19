@@ -207,22 +207,13 @@ class Table extends TValue {
     __newindex(table, key, value) {
         key = Table.keyValue(key);
 
-        if (typeof key === 'number' && key > 0) {
-            table.value.set(key - 1, value); // Lua array starts at 1
-        } else {
-            table.value.set(key, value);
-        }
+        table.value.set(key, value);
     }
 
     __index(table, key) {
         key = Table.keyValue(key);
 
-        let v = luaO_nilobject;
-        if (typeof key === 'number' && key > 0) {
-            v = table.value.get(key - 1); // Lua array starts at 1
-        } else {
-            v = table.value.get(key);
-        }
+        let v = table.value.get(key);
 
         return v ? v : luaO_nilobject;
     }
@@ -283,7 +274,7 @@ class LocVar {
     }
 }
 
-const RETS = lua.to_luastring("...");
+const RETS = lua.to_luastring("...", true);
 const PRE  = lua.to_luastring("[string \"");
 const POS  = lua.to_luastring("\"]");
 
@@ -445,7 +436,7 @@ const l_str2d = function(s) {
         return null;
     let end = l_str2dloc(s, mode);  /* try to convert */
     if (end === null) {   /* failed? may be a different locale */
-        throw new Error("Locale not available to handle number"); // TODO
+        // throw new Error("Locale not available to handle number"); // TODO
     }
     return end;
 };
@@ -483,7 +474,7 @@ const l_str2int = function(s) {
 
     while (ljstype.lisspace(s[0])) s = s.slice(1);  /* skip trailing spaces */
 
-    if (empty || s[0] !== 0) return null;  /* something wrong in the numeral */
+    if (empty || (s.length > 0 && s[0] !== 0)) return null;  /* something wrong in the numeral */
     else {
         return neg ? -a : a;
     }
@@ -549,7 +540,7 @@ const intarith = function(L, op, v1, v2) {
         case lua.LUA_OPADD:  return (v1 + v2);
         case lua.LUA_OPSUB:  return (v1 - v2);
         case lua.LUA_OPMUL:  return (v1 * v2);
-        case lua.LUA_OPMOD:  return (v1 % v2);
+        case lua.LUA_OPMOD:  return (v1 - Math.floor(v1 / v2) * v2); // % semantic on negative numbers is different in js
         case lua.LUA_OPIDIV: return (v1 / v2);
         case lua.LUA_OPBAND: return (v1 & v2);
         case lua.LUA_OPBOR:  return (v1 | v2);

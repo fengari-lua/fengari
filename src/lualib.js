@@ -20,7 +20,7 @@ module.exports.LUA_IOLIBNAME = LUA_IOLIBNAME;
 
 const LUA_OSLIBNAME = "os";
 module.exports.LUA_OSLIBNAME = LUA_OSLIBNAME;
-// module.exports[LUA_OSLIBNAME] = require("./loslib.js").luaopen_os;
+module.exports[LUA_OSLIBNAME] = require("./loslib.js").luaopen_os;
 
 const LUA_STRLIBNAME = "string";
 module.exports.LUA_STRLIBNAME = LUA_STRLIBNAME;

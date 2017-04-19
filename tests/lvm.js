@@ -496,7 +496,7 @@ test('SETTABLE, GETTABLE', function (t) {
     console.log(L.stack[L.top - 1]);
 
     t.deepEqual(
-        L.stack[L.top - 1].value.get(0).jsstring(),
+        L.stack[L.top - 1].value.get(1).jsstring(),
         "hello",
         "Program output is correct"
     );
@@ -559,7 +559,7 @@ test('SETTABUP, GETTABUP', function (t) {
     }, "Program executed without errors");
 
     t.deepEqual(
-        L.stack[L.top - 1].value.get(0).jsstring(),
+        L.stack[L.top - 1].value.get(1).jsstring(),
         "hello", // "hello"
         "Program output is correct"
     );
