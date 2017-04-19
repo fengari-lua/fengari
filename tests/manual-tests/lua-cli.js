@@ -208,8 +208,10 @@ const handle_script = function(L, argv) {
     let fname = argv[0];
     let status;
     if (fname === "-" && argv[-1] !== "--")
-        fname = void 0;  /* stdin */
-    status = lauxlib.luaL_loadfile(L, lua.to_luastring(fname));
+        fname = null;  /* stdin */
+    else
+        fname = lua.to_luastring(fname);
+    status = lauxlib.luaL_loadfile(L, fname);
     if (status === lua.thread_status.LUA_OK) {
         let n = pushargs(L); /* push arguments to script */
         status = docall(L, n, lua.LUA_MULTRET);
