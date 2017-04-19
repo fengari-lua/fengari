@@ -513,7 +513,7 @@ if (typeof require === "function") {
         const errfile = function(L, what, fnameindex, error) {
             let serr = error.message;
             let filename = lapi.lua_tostring(L, fnameindex).slice(1);
-            lapi.lua_pushstring(L, lua.to_luastring(`cannot ${lobject.jsstring(what)} ${lobject.jsstring(filename)}: ${lobject.jsstring(serr)}`));
+            lapi.lua_pushstring(L, lua.to_luastring(`cannot ${what} ${lobject.jsstring(filename)}: ${serr}`));
             lapi.lua_remove(L, fnameindex);
             return lua.thread_status.LUA_ERRFILE;
         };
@@ -578,7 +578,7 @@ if (typeof require === "function") {
                 try {
                     lf.f = fs.openSync(jsfilename, "r");
                 } catch (e) {
-                    return errfile(L, lua.to_luastring("open"), fnameindex, e);
+                    return errfile(L, "open", fnameindex, e);
                 }
             }
 
@@ -597,7 +597,7 @@ if (typeof require === "function") {
                 return status;
             } catch (err) {
                 lapi.lua_settop(L, fnameindex);  /* ignore results from 'lua_load' */
-                return errfile(L, lua.to_luastring("read"), fnameindex);
+                return errfile(L, "read", fnameindex, err);
             }
         };
 
