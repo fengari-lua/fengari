@@ -533,7 +533,7 @@ const varinfo = function(L, o) {
             kind = getobjname(ci.func.p, ci.pcOff, stkid - ci.u.l.base);
     }
 
-    return lua.to_luastring(kind ? ` (${lobject.jsstring(kind.funcname)} '${kind.name.jsstring()}')` : ``);
+    return lua.to_luastring(kind ? ` (${lobject.jsstring(kind.funcname)} '${lobject.jsstring(kind.name.value ? kind.name.value : kind.name)}')` : ``);
 };
 
 const luaG_typeerror = function(L, o, op) {
