@@ -43,9 +43,10 @@ class UpVal {
     }
 
     setval(L, ra) {
+        let o = L.stack[ra];
         if (this.v !== null) {
-            this.L.stack[this.v] = L.stack[ra];
-        } else this.u.value = L.stack[ra];
+            this.L.stack[this.v] = new lobject.TValue(o.type, o.value);
+        } else this.u.value = new lobject.TValue(o.type, o.value);
     }
 
     isopen() {

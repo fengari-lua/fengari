@@ -507,26 +507,33 @@ const aux_upvalue = function(L, fi, n) {
 
 const lua_getupvalue = function(L, funcindex, n) {
     let up = aux_upvalue(L, index2addr(L, funcindex), n);
-    let name = up.name;
-    let val = up.val;
-    if (name)
+    if (up) {
+        let name = up.name;
+        let val = up.val;
+
         L.stack[L.top++] = new TValue(val.type, val.value);
-    return name.value;
+
+        return name.value;
+    }
+    return null;
 };
 
 const lua_setupvalue = function(L, funcindex, n) {
     let fi = index2addr(L, funcindex);
     assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     let aux = aux_upvalue(L, fi, n);
-    let name = aux.name;
-    let val = aux.val;
-    if (name) {
+    if (aux) {
+        let name = aux.name;
+        let val = aux.val;
+
         L.top--;
         // TODO: what if it's not a pure TValue (closure, table)
         val.type = L.stack[L.top].type;
         val.value = L.stack[L.top].value;
+
+        return name.value;
     }
-    return name.value;
+    return null;
 };
 
 const lua_newtable = function(L) {
