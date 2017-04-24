@@ -3,6 +3,7 @@
 
 const assert  = require('assert');
 const luaconf = require('./luaconf.js');
+const llimit  = require('./llimit.js');
 
 // To avoid charCodeAt everywhere
 const char = [];
@@ -150,7 +151,7 @@ const to_luastring = function(str, cache, maxBytesToWrite) {
         if (Array.isArray(cached)) return cached;
     }
 
-    maxBytesToWrite = maxBytesToWrite !== undefined ? maxBytesToWrite : Number.MAX_SAFE_INTEGER;
+    maxBytesToWrite = maxBytesToWrite !== undefined ? maxBytesToWrite : llimit.MAX_INT;
     let outU8Array = [];
 
     if (!(maxBytesToWrite > 0)) // Parameter maxBytesToWrite is not optional. Negative values, 0, null, undefined and false each don't write out any bytes.

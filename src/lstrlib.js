@@ -8,6 +8,7 @@ const lauxlib = require('./lauxlib.js');
 const lobject = require('./lobject.js');
 const lua     = require('./lua.js');
 const luaconf = require('./luaconf.js');
+const llimit  = require('./llimit.js');
 const CT      = lua.constant_types;
 const char    = lua.char;
 
@@ -682,7 +683,7 @@ const str_byte = function(L) {
     if (posi < 1) posi = 1;
     if (pose > l) pose = l;
     if (posi > pose) return 0;  /* empty interval; return no values */
-    if (pose - posi >= Number.MAX_SAFE_INTEGER)  /* arithmetic overflow? */
+    if (pose - posi >= llimit.MAX_INT)  /* arithmetic overflow? */
         return lauxlib.luaL_error(L, lua.to_luastring("string slice too long", true));
 
     let n = (pose - posi) + 1;

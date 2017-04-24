@@ -7,6 +7,7 @@ const char    = lua.char;
 const lapi    = require('./lapi.js');
 const lauxlib = require('./lauxlib.js');
 const ldebug  = require('./ldebug.js');
+const llimit  = require('./llimit.js');
 
 const setfield = function(L, key, value) {
     lapi.lua_pushinteger(L, value);
@@ -26,7 +27,7 @@ const setallfields = function(L, time) {
     // setboolfield(L, "isdst", time.get);
 };
 
-const L_MAXDATEFIELD = (Number.MAX_SAFE_INTEGER / 2);
+const L_MAXDATEFIELD = (llimit.MAX_INT / 2);
 
 const getfield = function(L, key, d, delta) {
     let t = lapi.lua_getfield(L, -1, lua.to_luastring(key));  /* get field and its type */

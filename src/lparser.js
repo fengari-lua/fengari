@@ -638,7 +638,7 @@ const recfield = function(ls, cc) {
     let val = new expdesc();
 
     if (ls.t.token === R.TK_NAME) {
-        checklimit(fs, cc.nh, Number.MAX_SAFE_INTEGER, lua.to_luastring("items in a constructor", true));
+        checklimit(fs, cc.nh, llimit.MAX_INT, lua.to_luastring("items in a constructor", true));
         checkname(ls, key);
     } else  /* ls->t.token === '[' */
         yindex(ls, key);
@@ -676,7 +676,7 @@ const lastlistfield = function(fs, cc) {
 const listfield = function(ls, cc) {
     /* listfield -> exp */
     expr(ls, cc.v);
-    checklimit(ls.fs, cc.na, Number.MAX_SAFE_INTEGER, lua.to_luastring("items in a constructor", true));
+    checklimit(ls.fs, cc.na, llimit.MAX_INT, lua.to_luastring("items in a constructor", true));
     cc.na++;
     cc.tostore++;
 };

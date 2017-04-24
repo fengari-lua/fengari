@@ -172,7 +172,7 @@ const unpack = function(L) {
     let e = lauxlib.luaL_opt(L, lauxlib.luaL_checkinteger, 3, lauxlib.luaL_len(L, 1));
     if (i > e) return 0;  /* empty range */
     let n = e - i;  /* number of elements minus 1 (avoid overflows) */
-    if (n >= Number.MAX_SAFE_INTEGER || !lapi.lua_checkstack(L, ++n))
+    if (n >= llimit.MAX_INT || !lapi.lua_checkstack(L, ++n))
         return lauxlib.luaL_error(L, lua.to_luastring("too many results to unpack", true));
     for (; i < e; i++)  /* push arg[i..e - 1] (to avoid overflows) */
         lapi.lua_geti(L, 1, i);
@@ -214,7 +214,7 @@ const auxsort = function(L) {
 const sort = function(L) {
     let n = aux_getn(L, 1, TAB_RW);
     if (n > 1) {  /* non-trivial interval? */
-        lauxlib.luaL_argcheck(L, n < Number.MAX_SAFE_INTEGER, 1, lua.to_luastring("array too big", true));
+        lauxlib.luaL_argcheck(L, n < llimit.MAX_INT, 1, lua.to_luastring("array too big", true));
         if (!lapi.lua_isnoneornil(L, 2))  /* is there a 2nd argument? */
             lauxlib.luaL_checktype(L, 2, CT.LUA_TFUNCTION);  /* must be a function */
         lapi.lua_settop(L, 2);  /* make sure there are two arguments */

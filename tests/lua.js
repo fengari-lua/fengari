@@ -15,7 +15,7 @@ test('locals.lua', function (t) {
         return dofile("tests/lua-tests/locals.lua")
     `, L;
     
-    t.plan(1);
+    t.plan(2);
 
     t.doesNotThrow(function () {
 
@@ -27,11 +27,11 @@ test('locals.lua', function (t) {
 
     }, "Lua program loaded without error");
 
-    // t.doesNotThrow(function () {
+    t.doesNotThrow(function () {
 
         lapi.lua_call(L, 0, -1);
 
-    // }, "Lua program ran without error");
+    }, "Lua program ran without error");
 
 });
 

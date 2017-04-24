@@ -42,7 +42,7 @@ const math_random = function(L) {
 
     /* random integer in the interval [low, up] */
     lauxlib.luaL_argcheck(L, low <= up, 1, lua.to_luastring("interval is empty", true));
-    lauxlib.luaL_argcheck(L, low >= 0 || up <= Number.MAX_SAFE_INTEGER + low, 1,
+    lauxlib.luaL_argcheck(L, low >= 0 || up <= llimit.MAX_INT + low, 1,
             lua.to_luastring("interval too large", true));
 
     r *= (up - low) + 1;
@@ -268,9 +268,9 @@ const luaopen_math = function(L) {
     lapi.lua_setfield(L, -2, lua.to_luastring("pi", true));
     lapi.lua_pushnumber(L, Number.MAX_VALUE);
     lapi.lua_setfield(L, -2, lua.to_luastring("huge", true));
-    lapi.lua_pushinteger(L, Number.MAX_SAFE_INTEGER);
+    lapi.lua_pushinteger(L, llimit.MAX_INT);
     lapi.lua_setfield(L, -2, lua.to_luastring("maxinteger", true));
-    lapi.lua_pushinteger(L, Number.MIN_SAFE_INTEGER);
+    lapi.lua_pushinteger(L, llimit.MIN_INT);
     lapi.lua_setfield(L, -2, lua.to_luastring("mininteger", true));
     return 1;
 };

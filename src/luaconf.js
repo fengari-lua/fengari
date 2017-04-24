@@ -1,6 +1,8 @@
 /*jshint esversion: 6 */
 "use strict";
 
+const llimit = require('./llimit.js');
+
 /*
 @@ LUAI_MAXSTACK limits the size of the Lua stack.
 ** CHANGE it if you need a different limit. This limit is arbitrary;
@@ -17,7 +19,7 @@ const LUAI_MAXSTACK = 1000000;
 const LUA_IDSIZE = 60;
 
 const lua_numbertointeger = function(n) {
-    return n >= Number.MIN_SAFE_INTEGER && n < -Number.MIN_SAFE_INTEGER ? n : 0;
+    return n >= llimit.MIN_INT && n < -llimit.MIN_INT ? n : 0;
 };
 
 const LUA_INTEGER_FRMLEN = "";

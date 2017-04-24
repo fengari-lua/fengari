@@ -6,6 +6,7 @@ const assert = require('assert');
 const ljstype = require('./ljstype.js');
 const lua     = require('./lua.js');
 const luaconf = require('./luaconf.js');
+const llimit  = require('./llimit.js');
 const CT      = lua.constant_types;
 const UpVal   = require('./lfunc.js').UpVal;
 const char    = lua.char;
@@ -427,8 +428,8 @@ const l_str2d = function(s) {
     return end;
 };
 
-const MAXBY10  = Number.MAX_SAFE_INTEGER / 10;
-const MAXLASTD = Number.MAX_SAFE_INTEGER % 10;
+const MAXBY10  = llimit.MAX_INT / 10;
+const MAXLASTD = llimit.MAX_INT % 10;
 
 const l_str2int = function(s) {
     let a = 0;

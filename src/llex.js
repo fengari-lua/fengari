@@ -9,6 +9,7 @@ const ldo      = require('./ldo.js');
 const ljstype  = require('./ljstype');
 const lobject  = require('./lobject');
 const lua      = require('./lua.js');
+const llimit   = require('./llimit.js');
 const TValue   = lobject.TValue;
 const CT       = lua.constant_types;
 const TS       = lua.thread_status;
@@ -151,7 +152,7 @@ class LexState {
 const save = function(ls, c) {
     let b = ls.buff;
     if (b.n + 1 > b.buffer.length) {
-        if (b.buffer.length >= Number.MAX_SAFE_INTEGER/2)
+        if (b.buffer.length >= llimit.MAX_INT/2)
             lexerror(ls, lua.to_luastring("lexical element too long", true), 0);
     }
     b.buffer[b.n++] = c < 0 ? 255 + c + 1 : c;
@@ -192,7 +193,7 @@ const inclinenumber = function(ls) {
     next(ls);  /* skip '\n' or '\r' */
     if (currIsNewline(ls) && ls.current !== old)
         next(ls);  /* skip '\n\r' or '\r\n' */
-    if (++ls.linenumber >= Number.MAX_SAFE_INTEGER)
+    if (++ls.linenumber >= llimit.MAX_INT)
         lexerror(ls, lua.to_luastring("chunk has too many lines", true), 0);
 };
 
