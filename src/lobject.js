@@ -524,11 +524,11 @@ const luaO_int2fb = function(x) {
 
 const intarith = function(L, op, v1, v2) {
     switch (op) {
-        case lua.LUA_OPADD:  return (v1 + v2);
-        case lua.LUA_OPSUB:  return (v1 - v2);
-        case lua.LUA_OPMUL:  return (v1 * v2);
-        case lua.LUA_OPMOD:  return (v1 - Math.floor(v1 / v2) * v2); // % semantic on negative numbers is different in js
-        case lua.LUA_OPIDIV: return (v1 / v2);
+        case lua.LUA_OPADD:  return (v1 + v2)|0;
+        case lua.LUA_OPSUB:  return (v1 - v2)|0;
+        case lua.LUA_OPMUL:  return (v1 * v2)|0;
+        case lua.LUA_OPMOD:  return (v1 - Math.floor(v1 / v2) * v2)|0; // % semantic on negative numbers is different in js
+        case lua.LUA_OPIDIV: return (v1 / v2)|0;
         case lua.LUA_OPBAND: return (v1 & v2);
         case lua.LUA_OPBOR:  return (v1 | v2);
         case lua.LUA_OPBXOR: return (v1 ^ v2);

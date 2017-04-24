@@ -232,7 +232,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value + op2.value));
+                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value + op2.value)|0);
                 } else if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, numberop1 + numberop2);
                 } else {
@@ -248,7 +248,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value - op2.value));
+                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value - op2.value)|0);
                 } else if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, numberop1 - numberop2);
                 } else {
@@ -264,7 +264,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value * op2.value));
+                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value * op2.value)|0);
                 } else if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, numberop1 * numberop2);
                 } else {
@@ -280,7 +280,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value - Math.floor(op1.value / op2.value) * op2.value));
+                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value - Math.floor(op1.value / op2.value) * op2.value)|0);
                 } else if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, (numberop1 - Math.floor(numberop1 / numberop2) * numberop2));
                 } else {
@@ -324,7 +324,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, Math.floor(op1.value / op2.value));
+                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, Math.floor(op1.value / op2.value)|0);
                 } else if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new TValue(CT.LUA_TNUMFLT, Math.floor(numberop1 / numberop2));
                 } else {
