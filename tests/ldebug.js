@@ -24,7 +24,7 @@ test('luaG_typeerror', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -54,7 +54,7 @@ test('luaG_typeerror', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -83,7 +83,7 @@ test('luaG_typeerror', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -112,7 +112,7 @@ test('luaG_typeerror', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -140,7 +140,7 @@ test('luaG_concaterror', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -168,7 +168,7 @@ test('luaG_opinterror', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -196,7 +196,7 @@ test('luaG_tointerror', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 

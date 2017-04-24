@@ -36,7 +36,7 @@ test('table.concat', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -65,7 +65,7 @@ test('table.pack', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -96,7 +96,7 @@ test('table.unpack', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -140,7 +140,7 @@ test('table.insert', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -174,7 +174,7 @@ test('table.remove', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -207,7 +207,7 @@ test('table.move', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -240,7 +240,7 @@ test('table.sort (<)', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -273,7 +273,7 @@ test('table.sort with cmp function', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 

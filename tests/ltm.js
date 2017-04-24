@@ -26,7 +26,7 @@ test('__index, __newindex: with actual table', function (t) {
     t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -60,7 +60,7 @@ test('__newindex: with non table', function (t) {
     t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -95,7 +95,7 @@ test('__index function in metatable', function (t) {
     t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -139,7 +139,7 @@ test('__newindex function in metatable', function (t) {
     t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -181,7 +181,7 @@ test('__index table in metatable', function (t) {
     t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -226,7 +226,7 @@ test('__newindex table in metatable', function (t) {
     t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -282,7 +282,7 @@ test('__index table with own metatable', function (t) {
     t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -337,7 +337,7 @@ test('__newindex table with own metatable', function (t) {
     t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -440,7 +440,7 @@ test('binary __xxx functions in metatable', function (t) {
     t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -494,7 +494,7 @@ test('__eq', function (t) {
     t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -534,7 +534,7 @@ test('__lt', function (t) {
     t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -574,7 +574,7 @@ test('__le', function (t) {
     t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -614,7 +614,7 @@ test('__le that uses __lt', function (t) {
     t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -658,7 +658,7 @@ test('__unm, __bnot', function (t) {
     t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -705,7 +705,7 @@ test('__len', function (t) {
     t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -746,7 +746,7 @@ test('__concat', function (t) {
     t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -787,7 +787,7 @@ test('__call', function (t) {
     t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 

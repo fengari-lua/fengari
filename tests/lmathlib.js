@@ -27,7 +27,7 @@ test('math.abs, math.sin, math.cos, math.tan, math.asin, math.acos, math.atan', 
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -92,7 +92,7 @@ test('math.ceil, math.floor', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -128,7 +128,7 @@ test('math.deg, math.rad', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -164,7 +164,7 @@ test('math.log', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -206,7 +206,7 @@ test('math.exp', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -236,7 +236,7 @@ test('math.min, math.max', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -272,7 +272,7 @@ test('math.random', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -306,7 +306,7 @@ test('math.sqrt', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -336,7 +336,7 @@ test('math.tointeger', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -366,7 +366,7 @@ test('math.type', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -408,7 +408,7 @@ test('math.ult', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -438,7 +438,7 @@ test('math.fmod', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -468,7 +468,7 @@ test('math.modf', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 

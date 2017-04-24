@@ -378,7 +378,7 @@ test('lua_load and lua_call it', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -405,7 +405,7 @@ test('lua script reads js upvalues', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 

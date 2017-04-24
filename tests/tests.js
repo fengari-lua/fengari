@@ -15,23 +15,15 @@ const toByteCode = function (luaCode) {
     fs.writeSync(luaFile.fd, luaCode);
 
     child_process.execSync(`luac -o ${luaFile.name}.bc ${luaFile.name}`);
-    child_process.execSync(`luac -l ${luaFile.name} > ${luaFile.name}.bc.txt`);
-
-    bclist = fs.readFileSync(`${luaFile.name}.bc.txt`, 'utf8');
 
     let b = fs.readFileSync(`${luaFile.name}.bc`);
     let dv = new DataView(b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength));
 
-    return {
-        dataView: dv,
-        bclist: bclist
-    };
+    return dv;
 };
 
 const getState = function(luaCode) {
-    var bc = toByteCode(luaCode),
-        dv = bc.dataView,
-        bcl = bc.bclist;
+    var dv = toByteCode(luaCode);
 
     let L = lauxlib.luaL_newstate();
 

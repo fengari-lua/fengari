@@ -34,7 +34,7 @@ test('coroutine.create, coroutine.yield, coroutine.resume', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -77,7 +77,7 @@ test('coroutine.status', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -118,7 +118,7 @@ test('coroutine.isyieldable', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -159,7 +159,7 @@ test('coroutine.running', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
@@ -200,7 +200,7 @@ test('coroutine.wrap', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode).dataView;
+        let bc = toByteCode(luaCode);
 
         L = lauxlib.luaL_newstate();
 
