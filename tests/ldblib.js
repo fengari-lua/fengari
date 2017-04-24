@@ -44,7 +44,7 @@ test('debug.sethook', function (t) {
 
     t.strictEqual(
         lapi.lua_tojsstring(L, -1),
-        "return count line count line count line count return count line count line count return count line count line count return count line return ",
+        "return count line count line count line count return count line count line count return count line count line count return count line ",
         "Correct element(s) on the stack"
     );
 

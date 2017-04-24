@@ -59,8 +59,9 @@
     - [ ] luaL_testudata
     - [ ] luaL_unref
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
-    - [x] strings.lua
     - [x] constructs.lua (`_soft`)
+    - [x] locals.lua (`_soft`)
+    - [x] strings.lua
     - [ ] all.lua
     - [ ] big.lua
     - [ ] checktable.lua
@@ -76,7 +77,6 @@
     - [ ] coroutine.lua
     - [ ] events.lua
     - [ ] goto.lua
-    - [ ] locals.lua
     - [ ] nextvar.lua
     - [ ] vararg.lua
     - [ ] attrib.lua

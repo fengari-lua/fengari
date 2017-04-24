@@ -50,7 +50,7 @@ class lua_State extends lobject.TValue {
         this.ci = null;
         this.ciOff = null;
         this.stack = [];
-        this.openupval = [];
+        this.openupval = null;
         this.status = TS.LUA_OK;
         this.next = null;
         this.twups = [this];
@@ -138,7 +138,7 @@ const preinit_thread = function(L, g) {
     L.basehookcount = 0;
     L.allowhook = 1;
     L.hookcount = L.basehookcount;
-    L.openupval = [];
+    L.openupval = null;
     L.nny = 1;
     L.status = TS.LUA_OK;
     L.errfunc = 0;

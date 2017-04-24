@@ -81,7 +81,7 @@ const findupval = function(L, level) {
     uv.u.open.next = pp;
     uv.u.open.touched = true;
 
-    pp = uv;
+    L.openupval = uv;
 
     uv.v = level;
 
@@ -96,7 +96,7 @@ const luaF_close = function(L, level) {
         assert(uv.isopen());
         L.openupval = uv.u.open.next; /* remove from 'open' list */
         if (uv.refcount > 0) {
-            uv.value = L.stack[uv.v];
+            uv.u.value = L.stack[uv.v];
             uv.v = null;
         }
     }
