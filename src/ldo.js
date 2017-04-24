@@ -565,7 +565,7 @@ const f_parser = function(L, p) {
     let c = p.z.getc();  /* read first character */
     if (c === lua.LUA_SIGNATURE.charCodeAt(0)) {
         checkmode(L, p.mode, lua.to_luastring("binary", true));
-        cl = new BytecodeParser(L, p.z.buffer).luaU_undump();
+        cl = new BytecodeParser(L, p.z.buffer, p.name).luaU_undump();
     } else {
         checkmode(L, p.mode, lua.to_luastring("text", true));
         cl = lparser.luaY_parser(L, p.z, p.buff, p.dyd, p.name, c);

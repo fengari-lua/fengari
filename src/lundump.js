@@ -13,16 +13,17 @@ const LUAI_MAXSHORTLEN = 40;
 
 class BytecodeParser {
 
-    constructor(L, dataView) {
+    constructor(L, dataView, name) {
         this.L = L;
         this.intSize = 4;
         this.size_tSize = 8;
         this.instructionSize = 4;
-        this.integerSize = 8;
+        this.integerSize = 4;
         this.numberSize = 8;
 
         this.dataView = dataView;
         this.offset = 0;
+        this.name = name;
     }
 
     peekByte() {
@@ -36,7 +37,7 @@ class BytecodeParser {
     }
 
     peekInteger() {
-        return this.dataView.getInt32(this.offset, true); // TODO: 64b ?
+        return this.dataView.getInt32(this.offset, true);
     }
 
     readInteger() {
@@ -251,12 +252,30 @@ class BytecodeParser {
         this.integerSize     = this.readByte();
         this.numberSize      = this.readByte();
 
+        this.checksize(this.intSize, 4, "int");
+        this.checksize(this.size_tSize, 8, "size_t");
+        this.checksize(this.instructionSize, 4, "instruction");
+        this.checksize(this.integerSize, 4, "integer");
+        this.checksize(this.numberSize, 8, "number");
+
         if (this.readInteger() !== 0x5678)
             throw new Error("endianness mismatch");
 
         if (this.readNumber() !== 370.5)
             throw new Error("float format mismatch");
 
+    }
+
+    error(why) {
+        const lapi = require('./lapi.js');
+        const ldo  = require('./ldo.js');
+        lapi.lua_pushstring(this.L, lua.to_luastring(`${this.name}: ${why} precompiled chunk`, true));
+        ldo.luaD_throw(this.L, lua.thread_status.LUA_ERRSYNTAX);
+    }
+
+    checksize(byte, size, tname) {
+        if (byte !== size)
+            this.error(`${tname} size mismatch in`);
     }
 
     luaU_undump() {
