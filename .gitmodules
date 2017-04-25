@@ -1,3 +1,0 @@
-[submodule "tests/lua-tests"]
-	path = tests/lua-tests
-	url = https://github.com/giann/lua-tests.git
