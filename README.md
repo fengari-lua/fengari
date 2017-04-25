@@ -60,7 +60,7 @@
     - [ ] luaL_unref
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
     - [x] constructs.lua (`_soft`)
-    - [x] locals.lua (`_soft`)
+    - [x] locals.lua
     - [x] strings.lua
     - [ ] all.lua
     - [ ] big.lua
