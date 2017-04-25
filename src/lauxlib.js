@@ -7,6 +7,8 @@ const lobject = require('./lobject.js');
 
 const LUA_LOADED_TABLE = "_LOADED";
 
+const LUA_FILEHANDLE = lua.to_luastring("FILE*", true);
+
 
 class luaL_Buffer {
     constructor(L) {
@@ -675,6 +677,7 @@ const lua_writestringerror = function(s) {
 };
 
 module.exports.LUA_LOADED_TABLE     = LUA_LOADED_TABLE;
+module.exports.LUA_FILEHANDLE       = LUA_FILEHANDLE;
 module.exports.luaL_Buffer          = luaL_Buffer;
 module.exports.luaL_addchar         = luaL_addchar;
 module.exports.luaL_addlstring      = luaL_addlstring;
