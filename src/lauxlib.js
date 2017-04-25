@@ -193,6 +193,50 @@ const luaL_error = function(L, fmt, ...args) {
     return lua.lua_error(L);
 };
 
+
+const luaL_getmetatable = function(L, n) {
+    return lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, n);
+};
+
+const luaL_newmetatable = function(L, tname) {
+    if (luaL_getmetatable(L, tname) !== lua.LUA_TNIL)  /* name already in use? */
+        return 0;  /* leave previous value on top, but return 0 */
+    lua.lua_pop(L, 1);
+    lua.lua_createtable(L, 0, 2);  /* create metatable */
+    lua.lua_pushstring(L, tname);
+    lua.lua_setfield(L, -2, lua.to_luastring("__name"));  /* metatable.__name = tname */
+    lua.lua_pushvalue(L, -1);
+    lua.lua_setfield(L, lua.LUA_REGISTRYINDEX, tname);  /* registry.name = metatable */
+    return 1;
+
+};
+
+const luaL_setmetatable = function(L, tname) {
+    luaL_getmetatable(L, tname);
+    lua.lua_setmetatable(L, -2);
+};
+
+const luaL_testudata = function(L, ud, tname) {
+    let p = lua.lua_touserdata(L, ud);
+    if (p !== null) {  /* value is a userdata? */
+        if (lua.lua_getmetatable(L, ud)) {  /* does it have a metatable? */
+            luaL_getmetatable(L, tname);  /* get correct metatable */
+            if (!lua.lua_rawequal(L, -1, -2))  /* not the same? */
+                p = null;  /* value is a userdata with wrong metatable */
+            lua.lua_pop(L, 2);  /* remove both metatables */
+            return p;
+        }
+    }
+    return null;  /* value is not a userdata with a metatable */
+};
+
+const luaL_checkudata = function(L, ud, tname) {
+    let p = luaL_testudata(L, ud, tname);
+    if (p === null) typeerror(L, ud, tname);
+    return p;
+};
+
+
 const tag_error = function(L, arg, tag) {
     typeerror(L, arg, lua.lua_typename(L, tag));
 };
@@ -648,14 +692,17 @@ module.exports.luaL_checknumber     = luaL_checknumber;
 module.exports.luaL_checkstack      = luaL_checkstack;
 module.exports.luaL_checkstring     = luaL_checkstring;
 module.exports.luaL_checktype       = luaL_checktype;
+module.exports.luaL_checkudata      = luaL_checkudata;
 module.exports.luaL_error           = luaL_error;
 module.exports.luaL_getmetafield    = luaL_getmetafield;
+module.exports.luaL_getmetatable    = luaL_getmetatable;
 module.exports.luaL_getsubtable     = luaL_getsubtable;
 module.exports.luaL_len             = luaL_len;
 module.exports.luaL_loadbuffer      = luaL_loadbuffer;
 module.exports.luaL_loadbufferx     = luaL_loadbufferx;
 module.exports.luaL_loadstring      = luaL_loadstring;
 module.exports.luaL_newlib          = luaL_newlib;
+module.exports.luaL_newmetatable    = luaL_newmetatable;
 module.exports.luaL_newstate        = luaL_newstate;
 module.exports.luaL_opt             = luaL_opt;
 module.exports.luaL_optinteger      = luaL_optinteger;
@@ -665,6 +712,8 @@ module.exports.luaL_prepbuffsize    = luaL_prepbuffsize;
 module.exports.luaL_pushresult      = luaL_pushresult;
 module.exports.luaL_requiref        = luaL_requiref;
 module.exports.luaL_setfuncs        = luaL_setfuncs;
+module.exports.luaL_setmetatable    = luaL_setmetatable;
+module.exports.luaL_testudata       = luaL_testudata;
 module.exports.luaL_tolstring       = luaL_tolstring;
 module.exports.luaL_traceback       = luaL_traceback;
 module.exports.luaL_typename        = luaL_typename;
