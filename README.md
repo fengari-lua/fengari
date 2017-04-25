@@ -45,7 +45,6 @@
     - [ ] luaL_dofile
     - [ ] luaL_dostring
     - [ ] luaL_execresult
-    - [ ] luaL_fileresult
     - [ ] luaL_gsub
     - [ ] luaL_newlibtable
     - [ ] luaL_optnumber

@@ -195,6 +195,23 @@ const luaL_error = function(L, fmt, ...args) {
     return lua.lua_error(L);
 };
 
+/* Unlike normal lua, we pass in an error object */
+const luaL_fileresult = function(L, stat, fname, e) {
+    if (stat) {
+        lua.lua_pushboolean(L, 1);
+        return 1;
+    }
+    else {
+        lua.lua_pushnil(L);
+        if (fname)
+            lua.lua_pushstring(L, lua.to_luastring(`${lobject.jsstring(fname)}: ${e.message}`));
+        else
+            lua.lua_pushstring(L, lua.to_luastring(e.message));
+        lua.lua_pushinteger(L, -e.errno);
+        return 3;
+    }
+};
+
 
 const luaL_getmetatable = function(L, n) {
     return lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, n);
@@ -697,6 +714,7 @@ module.exports.luaL_checkstring     = luaL_checkstring;
 module.exports.luaL_checktype       = luaL_checktype;
 module.exports.luaL_checkudata      = luaL_checkudata;
 module.exports.luaL_error           = luaL_error;
+module.exports.luaL_fileresult      = luaL_fileresult;
 module.exports.luaL_getmetafield    = luaL_getmetafield;
 module.exports.luaL_getmetatable    = luaL_getmetatable;
 module.exports.luaL_getsubtable     = luaL_getsubtable;
