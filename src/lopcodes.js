@@ -212,6 +212,8 @@ const MAXARG_C   = ((1 << SIZE_C) - 1);
 /* this bit 1 means constant (0 means register) */
 const BITRK      = (1 << (SIZE_B - 1));
 
+const MAXINDEXRK = (BITRK - 1);
+
 /*
 ** invalid register that fits in 8 bits
 */
@@ -333,6 +335,7 @@ module.exports.MAXARG_B            = MAXARG_B;
 module.exports.MAXARG_Bx           = MAXARG_Bx;
 module.exports.MAXARG_C            = MAXARG_C;
 module.exports.MAXARG_sBx          = MAXARG_sBx;
+module.exports.MAXINDEXRK          = MAXINDEXRK;
 module.exports.NO_REG              = NO_REG;
 module.exports.OpArgK              = OpArgK;
 module.exports.OpArgN              = OpArgN;

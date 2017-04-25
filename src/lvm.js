@@ -136,7 +136,6 @@ const luaV_execute = function(L) {
         if (i.breakpoint) // TODO: remove, used until lapi
             return;
 
-        // console.log(`> ${opcode}`);
         switch (opcode) {
             case OCi.OP_MOVE: {
                 L.stack[ra] = L.stack[RB(L, base, i)];
