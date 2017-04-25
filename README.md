@@ -25,6 +25,28 @@
     - [ ] Package
     - [ ] os
     - [ ] io
+        - [ ] `io.stdin`
+        - [ ] `io.stdout`
+        - [ ] `io.stderr`
+        - [ ] `io.flush()`
+        - [ ] `io.input()`
+        - [ ] `io.lines()`
+        - [ ] `io.open()`
+        - [ ] `io.output()`
+        - [ ] `io.popen()`
+        - [ ] `io.read()`
+        - [ ] `io.tmpfile()`
+        - [ ] `io.type()`
+        - [ ] `io.write()`
+        - [ ] `io.close()`
+        - [ ] `file:flush()`
+        - [ ] `file:lines()`
+        - [ ] `file:read()`
+        - [ ] `file:read()`
+        - [ ] `file:setvbuf()`
+        - [ ] `file:write()`
+        - [ ] `file:__gc()`
+        - [ ] `file:__tostring()`
 - [ ] C API
     - [x] ...
     - [ ] lua_arith

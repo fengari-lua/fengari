@@ -16,7 +16,7 @@ module.exports[LUA_TABLIBNAME] = require("./ltablib.js").luaopen_table;
 
 const LUA_IOLIBNAME = "io";
 module.exports.LUA_IOLIBNAME = LUA_IOLIBNAME;
-// module.exports[LUA_IOLIBNAME] = require("./liolib.js").luaopen_io;
+module.exports[LUA_IOLIBNAME] = require("./liolib.js").luaopen_io;
 
 const LUA_OSLIBNAME = "os";
 module.exports.LUA_OSLIBNAME = LUA_OSLIBNAME;
