@@ -4,7 +4,6 @@ const assert  = require('assert');
 const sprintf = require('sprintf-js').sprintf;
 
 const lauxlib = require('./lauxlib.js');
-const lobject = require('./lobject.js');
 const lua     = require('./lua.js');
 const luaconf = require('./luaconf.js');
 const llimit  = require('./llimit.js');
@@ -1388,7 +1387,7 @@ const createmetatable = function(L) {
     lua.lua_setmetatable(L, -2);  /* set table as metatable for strings */
     lua.lua_pop(L, 1);  /* pop dummy string */
     lua.lua_pushvalue(L, -2);  /* get string library */
-    lua.lua_setfield(L, -2, lua.to_luastring("__index", true));  /* lobject.table_index = string */
+    lua.lua_setfield(L, -2, lua.to_luastring("__index", true));  /* metatable.__index = string */
     lua.lua_pop(L, 1);  /* pop metatable */
 };
 
