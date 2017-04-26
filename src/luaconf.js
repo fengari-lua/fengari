@@ -32,6 +32,31 @@ const lua_getlocaledecpoint = function() {
     return (1.1).toLocaleString().substring(1, 2);
 };
 
+// See: http://croquetweak.blogspot.fr/2014/08/deconstructing-floats-frexp-and-ldexp.html
+const frexp = function(value) {
+    if (value === 0) return [value, 0];
+    var data = new DataView(new ArrayBuffer(8));
+    data.setFloat64(0, value);
+    var bits = (data.getUint32(0) >>> 20) & 0x7FF;
+    if (bits === 0) { // denormal
+        data.setFloat64(0, value * Math.pow(2, 64));  // exp + 64
+        bits = ((data.getUint32(0) >>> 20) & 0x7FF) - 64;
+    }
+    var exponent = bits - 1022;
+    var mantissa = ldexp(value, -exponent);
+    return [mantissa, exponent];
+};
+
+const ldexp = function(mantissa, exponent) {
+    var steps = Math.min(3, Math.ceil(Math.abs(exponent) / 1023));
+    var result = mantissa;
+    for (var i = 0; i < steps; i++)
+        result *= Math.pow(2, Math.floor((exponent + i) / steps));
+    return result;
+};
+
+module.exports.frexp                 = frexp;
+module.exports.ldexp                 = ldexp;
 module.exports.LUAI_MAXSTACK         = LUAI_MAXSTACK;
 module.exports.LUA_IDSIZE            = LUA_IDSIZE;
 module.exports.LUA_INTEGER_FMT       = LUA_INTEGER_FMT;

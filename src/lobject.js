@@ -277,30 +277,6 @@ const luaO_utf8desc = function(buff, x) {
    even with single floats) */
 const MAXSIGDIG = 30;
 
-// See: http://croquetweak.blogspot.fr/2014/08/deconstructing-floats-frexp-and-ldexp.html
-const frexp = function(value) {
-    if (value === 0) return [value, 0];
-    var data = new DataView(new ArrayBuffer(8));
-    data.setFloat64(0, value);
-    var bits = (data.getUint32(0) >>> 20) & 0x7FF;
-    if (bits === 0) { // denormal
-        data.setFloat64(0, value * Math.pow(2, 64));  // exp + 64
-        bits = ((data.getUint32(0) >>> 20) & 0x7FF) - 64;
-    }
-    var exponent = bits - 1022;
-    var mantissa = ldexp(value, -exponent);
-    return [mantissa, exponent];
-};
-
-const ldexp = function(mantissa, exponent) {
-    var steps = Math.min(3, Math.ceil(Math.abs(exponent) / 1023));
-    var result = mantissa;
-    for (var i = 0; i < steps; i++)
-        result *= Math.pow(2, Math.floor((exponent + i) / steps));
-    return result;
-};
-
-
 /*
 ** convert an hexadecimal numeric string to a number, following
 ** C99 specification for 'strtod'
@@ -354,7 +330,7 @@ const lua_strx2number = function(s) {
         e += exp1;
     }
     if (neg) r = -r;
-    return defs.to_jsstring(s).trim().search(/s/) < 0 ? ldexp(r, e) : null;  /* Only valid if nothing left is s*/
+    return defs.to_jsstring(s).trim().search(/s/) < 0 ? luaconf.ldexp(r, e) : null;  /* Only valid if nothing left is s*/
 };
 
 const l_str2dloc = function(s, mode) {
@@ -506,9 +482,7 @@ module.exports.LClosure       = LClosure;
 module.exports.LocVar         = LocVar;
 module.exports.TValue         = TValue;
 module.exports.UTF8BUFFSZ     = UTF8BUFFSZ;
-module.exports.frexp          = frexp;
 module.exports.intarith       = intarith;
-module.exports.ldexp          = ldexp;
 module.exports.luaO_chunkid   = luaO_chunkid;
 module.exports.luaO_hexavalue = luaO_hexavalue;
 module.exports.luaO_int2fb    = luaO_int2fb;

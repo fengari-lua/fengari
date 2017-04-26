@@ -111,7 +111,7 @@ const num2straux = function(x) {
             return ['-'.charCodeAt(0)].concat(zero);
         return zero;
     } else {
-        let fe = lobject.frexp(x);  /* 'x' fraction and exponent */
+        let fe = luaconf.frexp(x);  /* 'x' fraction and exponent */
         let m = fe[0];
         let e = fe[1];
         let n = 0;  /* character count */
