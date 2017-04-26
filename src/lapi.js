@@ -483,7 +483,7 @@ const lua_newuserdata = function(L, size) {
 
     assert(L.top <= L.ci.top, "stack overflow");
 
-    return L.stack[L.top - 1].value;
+    return box;
 };
 
 const aux_upvalue = function(L, fi, n) {
