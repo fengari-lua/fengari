@@ -25,9 +25,9 @@
     - [x] os (~~`os.setlocale()`~~)
     - [ ] Package
     - [ ] io
-        - [ ] `io.stdin`
-        - [ ] `io.stdout`
-        - [ ] `io.stderr`
+        - [x] `io.stdin`
+        - [x] `io.stdout`
+        - [x] `io.stderr`
         - [ ] `io.flush()`
         - [ ] `io.input()`
         - [ ] `io.lines()`
