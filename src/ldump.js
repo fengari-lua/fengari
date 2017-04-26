@@ -1,10 +1,6 @@
 "use strict";
 
-const assert  = require('assert');
-
 const defs    = require('./defs.js');
-const lstate  = require('./lstate.js');
-const lobject = require('./lobject.js');
 const CT      = defs.constant_types;
 
 const LUAC_DATA    = "\x19\x93\r\n\x1a\n";

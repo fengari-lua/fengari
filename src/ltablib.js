@@ -1,11 +1,8 @@
 "use strict";
 
-const assert  = require('assert');
-
 const lua     = require('./lua.js');
 const lapi    = require('./lapi.js');
 const lauxlib = require('./lauxlib.js');
-const lstate  = require('./lstate.js');
 const llimit  = require('./llimit.js');
 const lobject = require('./lobject.js');
 

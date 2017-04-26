@@ -1,11 +1,9 @@
 "use strict";
 
-const assert     = require('assert');
 const seedrandom = require('seedrandom');
 
 const lua        = require('./lua.js');
 const lauxlib    = require('./lauxlib.js');
-const lstate     = require('./lstate.js');
 const llimit     = require('./llimit.js');
 const luaconf    = require('./luaconf.js');
 

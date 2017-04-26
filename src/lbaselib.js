@@ -1,7 +1,5 @@
 "use strict";
 
-const assert  = require('assert');
-
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
 const lobject = require('./lobject.js');

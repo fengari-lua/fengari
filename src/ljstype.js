@@ -1,7 +1,5 @@
 "use strict";
 
-const assert = require('assert');
-
 const lisdigit = function(c) {
     return /^\d$/.test(String.fromCharCode(c));
 };

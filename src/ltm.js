@@ -5,7 +5,6 @@ const assert  = require('assert');
 
 const defs    = require('./defs.js');
 const lobject = require('./lobject.js');
-const TValue  = lobject.TValue;
 const ldo     = require('./ldo.js');
 const lstate  = require('./lstate.js');
 const ldebug  = require('./ldebug.js');

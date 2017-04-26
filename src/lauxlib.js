@@ -1,8 +1,6 @@
 /*jshint esversion: 6 */
 "use strict";
 
-const assert = require('assert');
-
 const lapi    = require('./lapi.js');
 const lua     = require('./lua.js');
 const lobject = require('./lobject.js');

@@ -3,24 +3,21 @@
 
 const assert         = require('assert');
 
-const defs           = require('./defs.js');
-const BytecodeParser = require('./lundump.js');
-const OC             = require('./lopcodes.js');
-const luaconf        = require('./luaconf.js');
-const lobject        = require('./lobject.js');
-const TValue         = lobject.TValue;
-const LClosure       = lobject.LClosure;
-const lfunc          = require('./lfunc.js');
-const UpVal          = lfunc.UpVal;
-const lstate         = require('./lstate.js');
-const CallInfo       = lstate.CallInfo;
-const llimit         = require('./llimit.js');
-const ldo            = require('./ldo.js');
-const ltm            = require('./ltm.js');
-const ltable         = require('./ltable.js');
-const ldebug         = require('./ldebug.js');
-const CT             = defs.constant_types;
-const LUA_MULTRET    = defs.LUA_MULTRET;
+const defs        = require('./defs.js');
+const OC          = require('./lopcodes.js');
+const luaconf     = require('./luaconf.js');
+const lobject     = require('./lobject.js');
+const TValue      = lobject.TValue;
+const LClosure    = lobject.LClosure;
+const lfunc       = require('./lfunc.js');
+const lstate      = require('./lstate.js');
+const llimit      = require('./llimit.js');
+const ldo         = require('./ldo.js');
+const ltm         = require('./ltm.js');
+const ltable      = require('./ltable.js');
+const ldebug      = require('./ldebug.js');
+const CT          = defs.constant_types;
+const LUA_MULTRET = defs.LUA_MULTRET;
 
 /*
 ** finish execution of an opcode interrupted by an yield

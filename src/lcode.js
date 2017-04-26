@@ -4,7 +4,6 @@ const assert   = require('assert');
 
 const defs     = require('./defs.js');
 const llex     = require('./llex.js');
-const llimit   = require('./llimit.js');
 const lobject  = require('./lobject.js');
 const lopcode  = require('./lopcodes.js');
 const lparser  = require('./lparser.js');

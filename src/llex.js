@@ -4,7 +4,6 @@ const assert   = require('assert');
 
 const defs     = require('./defs.js');
 const lapi     = require('./lapi.js');
-const lauxlib  = require('./lauxlib.js');
 const ldebug   = require('./ldebug.js');
 const ldo      = require('./ldo.js');
 const ljstype  = require('./ljstype');

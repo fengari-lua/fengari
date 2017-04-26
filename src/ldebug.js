@@ -12,7 +12,6 @@ const OC      = require('./lopcodes.js');
 const lvm     = require('./lvm.js');
 const ltm     = require('./ltm.js');
 const lfunc   = require('./lfunc.js');
-const lapi    = require('./lapi.js');
 const TValue  = lobject.TValue;
 const CT      = defs.constant_types;
 const TS      = defs.thread_status;

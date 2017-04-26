@@ -12,7 +12,6 @@ const lobject   = require('./lobject.js');
 const lstate    = require('./lstate.js');
 const ltm       = require('./ltm.js');
 const luaconf   = require('./luaconf.js');
-const lundump   = require('./lundump.js');
 const lvm       = require('./lvm.js');
 const ltable    = require('./ltable.js');
 const MAXUPVAL  = lfunc.MAXUPVAL;
