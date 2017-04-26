@@ -1,5 +1,7 @@
 "use strict";
 
+const fs      = require('fs');
+
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
 
@@ -33,7 +35,37 @@ const newprefile = function(L) {
     return p;
 };
 
+const getiofile = function(L, findex) {
+    lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, findex);
+    let p = lua.lua_touserdata(L, -1);
+    if (isclosed(p))
+        lauxlib.luaL_error(L, lua.to_luastring(`standard ${lua.to_jsstring(findex.slice(IOPREF_LEN))} file is closed`));
+    return p.f;
+};
+
+const g_write = function(L, f, arg) {
+    let nargs = lua.lua_gettop(L) - arg;
+    let status = true;
+    let err;
+    for (; nargs--; arg++) {
+        let s = lauxlib.luaL_checklstring(L, arg);
+        try {
+            status = status && (fs.writeSync(f.fd, Uint8Array.from(s)) === s.length);
+        } catch (e) {
+            status = false;
+            err = e;
+        }
+    }
+    if (status) return 1;  /* file handle already on stack top */
+    else return lauxlib.luaL_fileresult(L, status, null, err);
+};
+
+const io_write = function(L) {
+    return g_write(L, getiofile(L, IO_OUTPUT), 1);
+};
+
 const iolib = {
+    "write": io_write
 };
 
 const flib = {

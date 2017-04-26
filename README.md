@@ -37,7 +37,7 @@
         - [ ] `io.read()`
         - [ ] `io.tmpfile()`
         - [ ] `io.type()`
-        - [ ] `io.write()`
+        - [x] `io.write()`
         - [ ] `io.close()`
         - [ ] `file:flush()`
         - [ ] `file:lines()`
