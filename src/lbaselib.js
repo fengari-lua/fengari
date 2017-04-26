@@ -6,7 +6,6 @@ const lua     = require('./lua.js');
 const lapi    = require('./lapi.js');
 const lauxlib = require('./lauxlib.js');
 const lobject = require('./lobject.js');
-const TS      = lua.thread_status;
 
 const luaB_print = function(L) {
     let n = lapi.lua_gettop(L); /* number of arguments */
@@ -222,7 +221,7 @@ const luaB_select = function(L) {
 ** ignored).
 */
 const finishpcall = function(L, status, extra) {
-    if (status !== TS.LUA_OK && status !== TS.LUA_YIELD) {  /* error? */
+    if (status !== lua.LUA_OK && status !== lua.LUA_YIELD) {  /* error? */
         lapi.lua_pushboolean(L, 0);  /* first result (false) */
         lapi.lua_pushvalue(L, -2);  /* error message */
         return 2;  /* return false, msg */
@@ -255,7 +254,7 @@ const luaB_xpcall = function(L) {
 
 // TODO: does it overwrite the upvalue of the previous closure ?
 const load_aux = function(L, status, envidx) {
-    if (status === TS.LUA_OK) {
+    if (status === lua.LUA_OK) {
         if (envidx !== 0) {  /* 'env' parameter? */
             lapi.lua_pushvalue(L, envidx);  /* environment for loaded function */
             if (!lapi.lua_setupvalue(L, -2, 1))  /* set it as 1st upvalue */
@@ -359,7 +358,7 @@ if (typeof require === "function") {
         const luaB_dofile = function(L) {
             let fname = lauxlib.luaL_optstring(L, 1, null);
             lapi.lua_settop(L, 1);
-            if (lauxlib.luaL_loadfile(L, fname) !== TS.LUA_OK)
+            if (lauxlib.luaL_loadfile(L, fname) !== lua.LUA_OK)
                 return lapi.lua_error(L);
             lapi.lua_callk(L, 0, lua.LUA_MULTRET, 0, dofilecont);
             return dofilecont(L, 0, 0);

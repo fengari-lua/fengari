@@ -514,7 +514,7 @@ if (typeof require === "function") {
             let filename = lapi.lua_tostring(L, fnameindex).slice(1);
             lapi.lua_pushstring(L, lua.to_luastring(`cannot ${what} ${lobject.jsstring(filename)}: ${serr}`));
             lapi.lua_remove(L, fnameindex);
-            return lua.thread_status.LUA_ERRFILE;
+            return lua.LUA_ERRFILE;
         };
 
         const getc = function(lf) {

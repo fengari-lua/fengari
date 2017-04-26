@@ -9,7 +9,6 @@ const lstate  = require('./lstate.js');
 const ldo     = require('./ldo.js');
 const ldebug  = require('./ldebug.js');
 const lobject = require('./lobject.js');
-const TS      = lua.thread_status;
 
 const getco = function(L) {
     let co = lapi.lua_tothread(L, 1);
@@ -23,14 +22,14 @@ const auxresume = function(L, co, narg) {
         return -1;  /* error flag */
     }
 
-    if (lapi.lua_status(co) === TS.LUA_OK && lapi.lua_gettop(co) === 0) {
+    if (lapi.lua_status(co) === lua.LUA_OK && lapi.lua_gettop(co) === 0) {
         lapi.lua_pushliteral(L, "cannot resume dead coroutine");
         return -1;  /* error flag */
     }
 
     lapi.lua_xmove(L, co, narg);
     let status = ldo.lua_resume(co, L, narg);
-    if (status === TS.LUA_OK || status === TS.LUA_YIELD) {
+    if (status === lua.LUA_OK || status === lua.LUA_YIELD) {
         let nres = lapi.lua_gettop(co);
         if (!lapi.lua_checkstack(L, nres + 1)) {
             lapi.lua_pop(co, nres);  /* remove results anyway */
@@ -99,10 +98,10 @@ const luaB_costatus = function(L) {
     if (L === co) lapi.lua_pushliteral(L, "running");
     else {
         switch (lapi.lua_status(co)) {
-            case TS.LUA_YIELD:
+            case lua.LUA_YIELD:
                 lapi.lua_pushliteral(L, "suspended");
                 break;
-            case TS.LUA_OK: {
+            case lua.LUA_OK: {
                 let ar = new lua.lua_Debug();
                 if (ldebug.lua_getstack(co, 0, ar) > 0)  /* does it have frames? */
                     lapi.lua_pushliteral(L, "normal");  /* it is running */

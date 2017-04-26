@@ -10,7 +10,6 @@ const ldo     = require('./ldo.js');
 const ldebug  = require('./ldebug.js');
 const llimit  = require('./llimit.js');
 const lobject = require('./lobject.js');
-const TS      = lua.thread_status;
 
 
 /*

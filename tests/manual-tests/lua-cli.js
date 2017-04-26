@@ -13,7 +13,7 @@ const _PROMPT = lua.to_luastring("_PROMPT");
 const _PROMPT2 = lua.to_luastring("_PROMPT2");
 
 const report = function(L, status) {
-    if (status !== lua.thread_status.LUA_OK) {
+    if (status !== lua.LUA_OK) {
         lauxlib.lua_writestringerror(`${lapi.lua_tojsstring(L, -1)}\n`);
         lapi.lua_pop(L, 1);
     }
@@ -26,7 +26,7 @@ const docall = function(L, narg, nres) {
 };
 
 const dochunk = function(L, status) {
-    if (status === lua.thread_status.LUA_OK) {
+    if (status === lua.LUA_OK) {
         status = docall(L, 0, 0);
     }
     return report(L, status);
@@ -45,7 +45,7 @@ const dolibrary = function(L, name) {
     lapi.lua_getglobal(L, lua.to_luastring("require"));
     lapi.lua_pushliteral(L, name);
     let status = docall(L, 1, 1);  /* call 'require(name)' */
-    if (status === lua.thread_status.LUA_OK)
+    if (status === lua.LUA_OK)
         lapi.lua_setglobal(L, lua.to_luastring(name));  /* global[name] = require return */
     return report(L, status);
 };
@@ -167,7 +167,7 @@ if (!has_E) {
         } else {
             status = dostring(L, init, name);
         }
-        if (status !== lua.thread_status.LUA_OK) {
+        if (status !== lua.LUA_OK) {
             return process.exit(1);
         }
     }
@@ -186,7 +186,7 @@ for (let i = 1; i < script; i++) {
         } else {
             status = dolibrary(L, extra);
         }
-        if (status !== lua.thread_status.LUA_OK) {
+        if (status !== lua.LUA_OK) {
             return process.exit(1);
         }
     }
@@ -212,7 +212,7 @@ const handle_script = function(L, argv) {
     else
         fname = lua.to_luastring(fname);
     status = lauxlib.luaL_loadfile(L, fname);
-    if (status === lua.thread_status.LUA_OK) {
+    if (status === lua.LUA_OK) {
         let n = pushargs(L); /* push arguments to script */
         status = docall(L, n, lua.LUA_MULTRET);
     }
@@ -235,14 +235,14 @@ const doREPL = function(L) {
             let buffer = lua.to_luastring("return " + input);
             status = lauxlib.luaL_loadbuffer(L, buffer, buffer.length, stdin);
         }
-        if (status !== lua.thread_status.LUA_OK) {
+        if (status !== lua.LUA_OK) {
             lapi.lua_pop(L, 1);
             let buffer = lua.to_luastring(input);
-            if (lauxlib.luaL_loadbuffer(L, buffer, buffer.length, stdin) === lua.thread_status.LUA_OK) {
-                status = lua.thread_status.LUA_OK;
+            if (lauxlib.luaL_loadbuffer(L, buffer, buffer.length, stdin) === lua.LUA_OK) {
+                status = lua.LUA_OK;
             }
         }
-        while (status === lua.thread_status.LUA_ERRSYNTAX && lapi.lua_tojsstring(L, -1).endsWith("<eof>")) {
+        while (status === lua.LUA_ERRSYNTAX && lapi.lua_tojsstring(L, -1).endsWith("<eof>")) {
             /* continuation */
             lapi.lua_pop(L, 1);
             lapi.lua_getglobal(L, _PROMPT2);
@@ -253,15 +253,15 @@ const doREPL = function(L) {
             let buffer = lua.to_luastring(input);
             status = lauxlib.luaL_loadbuffer(L, buffer, buffer.length, stdin);
         }
-        if (status === lua.thread_status.LUA_OK) {
+        if (status === lua.LUA_OK) {
             status = docall(L, 0, lua.LUA_MULTRET);
         }
-        if (status === lua.thread_status.LUA_OK) {
+        if (status === lua.LUA_OK) {
             let n = lapi.lua_gettop(L);
             if (n > 0) {  /* any result to be printed? */
                 lapi.lua_getglobal(L, lua.to_luastring("print"));
                 lapi.lua_insert(L, 1);
-                if (lapi.lua_pcall(L, n, 0, 0) != lua.thread_status.LUA_OK) {
+                if (lapi.lua_pcall(L, n, 0, 0) != lua.LUA_OK) {
                     lauxlib.lua_writestringerror(`error calling 'print' (${lapi.lua_tojsstring(L, -1)})\n`);
                 }
             }
@@ -273,7 +273,7 @@ const doREPL = function(L) {
 };
 
 if (script < process.argv.length &&  /* execute main script (if there is one) */
-    handle_script(L, process.argv.slice(script)) !== lua.thread_status.LUA_OK) {
+    handle_script(L, process.argv.slice(script)) !== lua.LUA_OK) {
     /* success */
 } else if (has_i) {
     doREPL(L);
