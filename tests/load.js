@@ -5,7 +5,6 @@ const test       = require('tape');
 const tests      = require("./tests.js");
 const toByteCode = tests.toByteCode;
 
-const VM         = require("../src/lvm.js");
 const lauxlib    = require("../src/lauxlib.js");
 const lua        = require('../src/lua.js');
 

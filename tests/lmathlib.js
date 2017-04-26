@@ -1,16 +1,12 @@
 "use strict";
 
 const test       = require('tape');
-const beautify   = require('js-beautify').js_beautify;
 
 const tests      = require("./tests.js");
-const getState   = tests.getState;
 const toByteCode = tests.toByteCode;
 
-const VM         = require("../src/lvm.js");
 const lauxlib    = require("../src/lauxlib.js");
 const lua        = require('../src/lua.js');
-const lstate     = require('../src/lstate.js');
 
 
 test('math.abs, math.sin, math.cos, math.tan, math.asin, math.acos, math.atan', function (t) {

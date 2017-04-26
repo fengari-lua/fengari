@@ -9,7 +9,6 @@ const ldo                  = require('./ldo.js');
 const lapi                 = require('./lapi.js');
 const luaT_init            = require('./ltm.js').luaT_init;
 const CT                   = defs.constant_types;
-const LUA_MULTRET          = defs.LUA_MULTRET;
 const TS                   = defs.thread_status;
 const LUA_NUMTAGS          = defs.LUA_NUMTAGS;
 

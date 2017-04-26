@@ -1,10 +1,7 @@
 "use strict";
 
 const test           = require('tape');
-const beautify       = require('js-beautify').js_beautify;
 
-const lua_State      = require("../src/lstate.js").lua_State;
-const VM             = require("../src/lvm.js");
 const lua            = require("../src/lua.js");
 
 const getState       = require("./tests.js").getState;

@@ -11,7 +11,6 @@ require('./lstate.js'); /* XXX: if this isn't here then things break on require(
 const ltm      = require('./ltm.js');
 const lvm      = require('./lvm.js');
 const CT       = defs.CT;
-const OpCodes  = lopcode.OpCodes;
 const OpCodesI = lopcode.OpCodesI;
 const TValue   = lobject.TValue;
 

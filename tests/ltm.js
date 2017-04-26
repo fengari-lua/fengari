@@ -1,15 +1,11 @@
 "use strict";
 
 const test       = require('tape');
-const beautify   = require('js-beautify').js_beautify;
 
 const lua        = require("../src/lua.js");
-const VM         = require("../src/lvm.js");
 const lauxlib    = require("../src/lauxlib.js");
-const OC         = require('../src/lopcodes.js');
 
 const tests      = require("./tests.js");
-const getState   = tests.getState;
 const toByteCode = tests.toByteCode;
 
 

@@ -1,7 +1,6 @@
 "use strict";
 
 const test    = require('tape');
-const tests   = require("./tests.js");
 
 const lua     = require("../src/lua.js");
 const lauxlib = require("../src/lauxlib.js");

@@ -6,11 +6,9 @@ const tmp            = require('tmp');
 
 const BytecodeParser = require("../src/lundump.js");
 const lauxlib        = require("../src/lauxlib.js");
-const VM             = require("../src/lvm.js");
 
 const toByteCode = function (luaCode) {
-    var luaFile = tmp.fileSync(),
-        bclist;
+    var luaFile = tmp.fileSync();
 
     fs.writeSync(luaFile.fd, luaCode);
 
