@@ -297,7 +297,11 @@ const luaD_rawrunprotected = function(L, f, ud) {
     try {
         f(L, ud);
     } catch (e) {
-        if (lj.status === 0) lj.status = -1;
+        if (lj.status === 0) {
+            lj.status = -1;
+            /* error was not thrown via luaD_throw; push error object as light user data */
+            lapi.lua_pushlightuserdata(L, e);
+        }
     }
 
     L.errorJmp = lj.previous;
