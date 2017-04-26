@@ -463,7 +463,7 @@ const l_str2int = function(s) {
 
     if (empty || (s.length > 0 && s[0] !== 0)) return null;  /* something wrong in the numeral */
     else {
-        return neg ? -a : a;
+        return (neg ? -a : a)|0;
     }
 };
 
@@ -534,7 +534,7 @@ const intarith = function(L, op, v1, v2) {
         case defs.LUA_OPBXOR: return (v1 ^ v2);
         case defs.LUA_OPSHL:  return (v1 << v2);
         case defs.LUA_OPSHR:  return (v1 >> v2);
-        case defs.LUA_OPUNM:  return (0 - v1);
+        case defs.LUA_OPUNM:  return (0 - v1)|0;
         case defs.LUA_OPBNOT: return (~0 ^ v1);
     }
 };
