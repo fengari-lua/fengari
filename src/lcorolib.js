@@ -4,7 +4,6 @@ const assert  = require('assert');
 
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
-const ldo     = require('./ldo.js');
 const lobject = require('./lobject.js');
 
 const getco = function(L) {
@@ -25,7 +24,7 @@ const auxresume = function(L, co, narg) {
     }
 
     lua.lua_xmove(L, co, narg);
-    let status = ldo.lua_resume(co, L, narg);
+    let status = lua.lua_resume(co, L, narg);
     if (status === lua.LUA_OK || status === lua.LUA_YIELD) {
         let nres = lua.lua_gettop(co);
         if (!lua.lua_checkstack(L, nres + 1)) {
@@ -87,7 +86,7 @@ const luaB_cowrap = function(L) {
 };
 
 const luaB_yield = function(L) {
-    return ldo.lua_yield(L, lua.lua_gettop(L));
+    return lua.lua_yield(L, lua.lua_gettop(L));
 };
 
 const luaB_costatus = function(L) {
@@ -118,7 +117,7 @@ const luaB_costatus = function(L) {
 };
 
 const luaB_yieldable = function(L) {
-    lua.lua_pushboolean(L, ldo.lua_isyieldable(L));
+    lua.lua_pushboolean(L, lua.lua_isyieldable(L));
     return 1;
 };
 

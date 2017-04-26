@@ -6,7 +6,6 @@ const tests      = require("./tests.js");
 const toByteCode = tests.toByteCode;
 
 const VM         = require("../src/lvm.js");
-const ldo        = require("../src/ldo.js");
 const lauxlib    = require("../src/lauxlib.js");
 const lua        = require('../src/lua.js');
 const linit      = require('../src/linit.js');
