@@ -1,5 +1,6 @@
 "use strict";
 
+const assert  = require('assert');
 const fs      = require('fs');
 
 const lua     = require('./lua.js');
@@ -25,6 +26,14 @@ const f_tostring = function(L) {
     else
         lua.lua_pushstring(L, lua.to_luastring(`file (${p.f.toString()})`));
     return 1;
+};
+
+const tofile = function(L) {
+    let p = tolstream(L);
+    if (isclosed(p))
+        lauxlib.luaL_error(L, "attempt to use a closed file");
+    assert(p.f);
+    return p.f;
 };
 
 const newprefile = function(L) {
@@ -64,11 +73,18 @@ const io_write = function(L) {
     return g_write(L, getiofile(L, IO_OUTPUT), 1);
 };
 
+const f_write = function(L) {
+    let f = tofile(L);
+    lua.lua_pushvalue(L, 1); /* push file at the stack top (to be returned) */
+    return g_write(L, f, 2);
+};
+
 const iolib = {
     "write": io_write
 };
 
 const flib = {
+    "write": f_write,
     "__tostring": f_tostring
 };
 

@@ -44,7 +44,7 @@
         - [ ] `file:read()`
         - [ ] `file:read()`
         - [ ] `file:setvbuf()`
-        - [ ] `file:write()`
+        - [x] `file:write()`
         - [ ] `file:__gc()`
         - [x] `file:__tostring()`
 - [ ] C API
