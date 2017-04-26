@@ -69,6 +69,5 @@ module.exports.LUA_VERSION_RELEASE     = defs.LUA_VERSION_RELEASE;
 module.exports.LUA_VERSUFFIX           = defs.LUA_VERSUFFIX;
 module.exports.lua_Debug               = defs.lua_Debug;
 module.exports.lua_upvalueindex        = defs.lua_upvalueindex;
-module.exports.print_version           = defs.print_version;
 module.exports.thread_status           = defs.thread_status;
 module.exports.to_luastring            = defs.to_luastring;

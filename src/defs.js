@@ -115,10 +115,6 @@ const LUA_RIDX_MAINTHREAD = 1;
 const LUA_RIDX_GLOBALS    = 2;
 const LUA_RIDX_LAST       = LUA_RIDX_GLOBALS;
 
-const print_version = function() {
-    console.log(FENGARI_COPYRIGHT);
-};
-
 class lua_Debug {
 
     constructor() {
@@ -283,6 +279,5 @@ module.exports.LUA_VERSUFFIX           = LUA_VERSUFFIX;
 module.exports.constant_types          = constant_types;
 module.exports.lua_Debug               = lua_Debug;
 module.exports.lua_upvalueindex        = lua_upvalueindex;
-module.exports.print_version           = print_version;
 module.exports.thread_status           = thread_status;
 module.exports.to_luastring            = to_luastring;
