@@ -9,7 +9,6 @@ const toByteCode = tests.toByteCode;
 
 const VM         = require("../src/lvm.js");
 const ldo        = require("../src/ldo.js");
-const lapi       = require("../src/lapi.js");
 const lauxlib    = require("../src/lauxlib.js");
 const lua        = require('../src/lua.js');
 const linit      = require('../src/linit.js');
@@ -29,9 +28,9 @@ test('print', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-print"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-print"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 });
@@ -63,20 +62,20 @@ test('setmetatable, getmetatable', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-setmetatable-getmetatable"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-setmetatable-getmetatable"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -2),
+        lua.lua_tojsstring(L, -2),
         "hello",
         "Correct element(s) on the stack"
     );
 
     t.ok(
-        lapi.lua_istable(L, -1),
+        lua.lua_istable(L, -1),
         "Correct element(s) on the stack"
     );
 });
@@ -108,19 +107,19 @@ test('rawequal', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-rawequal"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-rawequal"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.notOk(
-        lapi.lua_toboolean(L, -2),
+        lua.lua_toboolean(L, -2),
         "Correct element(s) on the stack"
     );
 
     t.ok(
-        lapi.lua_toboolean(L, -1),
+        lua.lua_toboolean(L, -1),
         "Correct element(s) on the stack"
     );
 });
@@ -154,32 +153,32 @@ test('rawset, rawget', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-rawequal"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-rawequal"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -4),
+        lua.lua_tojsstring(L, -4),
         "hello",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -3),
+        lua.lua_tojsstring(L, -3),
         "hello",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -2),
+        lua.lua_tojsstring(L, -2),
         "bye",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "bye",
         "Correct element(s) on the stack"
     );
@@ -201,38 +200,38 @@ test('type', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-type"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-type"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -5),
+        lua.lua_tojsstring(L, -5),
         "number",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -4),
+        lua.lua_tojsstring(L, -4),
         "boolean",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -3),
+        lua.lua_tojsstring(L, -3),
         "string",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -2),
+        lua.lua_tojsstring(L, -2),
         "table",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "nil",
         "Correct element(s) on the stack"
     );
@@ -254,9 +253,9 @@ test('error', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-error"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-error"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 });
@@ -277,14 +276,14 @@ test('error, protected', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-error"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-error"), lua.to_luastring("binary"));
 
-        lapi.lua_pcall(L, 0, -1, 0);
+        lua.lua_pcall(L, 0, -1, 0);
 
     }, "JS Lua program ran without error");
 
     t.ok(
-        lapi.lua_tojsstring(L, -1).endsWith("you fucked up"),
+        lua.lua_tojsstring(L, -1).endsWith("you fucked up"),
         "Error is on the stack"
     );
 });
@@ -309,14 +308,14 @@ test('pcall', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-pcall"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-pcall"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.ok(
-        lapi.lua_tojsstring(L, -1).endsWith("you fucked up"),
+        lua.lua_tojsstring(L, -1).endsWith("you fucked up"),
         "Error is on the stack"
     );
 });
@@ -345,21 +344,21 @@ test('xpcall', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-pcall"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-pcall"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
-    console.log(lapi.lua_tojsstring(L, -1));
+    console.log(lua.lua_tojsstring(L, -1));
 
     t.ok(
-        lapi.lua_tojsstring(L, -1).startsWith("Something's wrong:"),
+        lua.lua_tojsstring(L, -1).startsWith("Something's wrong:"),
         "msgh was called and modified the error"
     );
 
     t.ok(
-        lapi.lua_tojsstring(L, -1).endsWith("you fucked up"),
+        lua.lua_tojsstring(L, -1).endsWith("you fucked up"),
         "msgh was called and modified the error"
     );
 });
@@ -387,14 +386,14 @@ test('ipairs', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-ipairs"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-ipairs"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         15,
         "Correct element(s) on the stack"
     );
@@ -416,26 +415,26 @@ test('select', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-select"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-select"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.deepEqual(
-        [...lapi.lua_topointer(L, -3).entries()].map(e => e[1].value),
+        [...lua.lua_topointer(L, -3).entries()].map(e => e[1].value),
         [3],
         "Correct element(s) on the stack"
     );
 
     t.deepEqual(
-        [...lapi.lua_topointer(L, -2).entries()].map(e => e[1].value).sort(),
+        [...lua.lua_topointer(L, -2).entries()].map(e => e[1].value).sort(),
         [2, 3],
         "Correct element(s) on the stack"
     );
 
     t.deepEqual(
-        [...lapi.lua_topointer(L, -1).entries()].map(e => e[1].value).sort(),
+        [...lua.lua_topointer(L, -1).entries()].map(e => e[1].value).sort(),
         [2, 3],
         "Correct element(s) on the stack"
     );
@@ -457,32 +456,32 @@ test('tonumber', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-tonumber"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-tonumber"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -4),
+        lua.lua_tonumber(L, -4),
         123,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -3),
+        lua.lua_tonumber(L, -3),
         12.3,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -2),
+        lua.lua_tonumber(L, -2),
         395,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -1),
+        lua.lua_tonumber(L, -1),
         2,
         "Correct element(s) on the stack"
     );
@@ -504,14 +503,14 @@ test('assert', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-assert"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-assert"), lua.to_luastring("binary"));
 
-        lapi.lua_pcall(L, 0, -1, 0);
+        lua.lua_pcall(L, 0, -1, 0);
 
     }, "JS Lua program ran without error");
 
     t.ok(
-        lapi.lua_tojsstring(L, -1).endsWith("this doesn't makes sense"),
+        lua.lua_tojsstring(L, -1).endsWith("this doesn't makes sense"),
         "Error is on the stack"
     );
 });
@@ -532,20 +531,20 @@ test('rawlen', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-rawlen"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-rawlen"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -2),
+        lua.lua_tonumber(L, -2),
         3,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -1),
+        lua.lua_tonumber(L, -1),
         5,
         "Correct element(s) on the stack"
     );
@@ -579,14 +578,14 @@ test('next', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-next"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-next"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -1),
+        lua.lua_tonumber(L, -1),
         10,
         "Correct element(s) on the stack"
     );
@@ -620,14 +619,14 @@ test('pairs', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-pairs"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-pairs"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -1),
+        lua.lua_tonumber(L, -1),
         10,
         "Correct element(s) on the stack"
     );
@@ -670,14 +669,14 @@ test('pairs with __pairs', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-pairs"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-pairs"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -1),
+        lua.lua_tonumber(L, -1),
         26,
         "Correct element(s) on the stack"
     );

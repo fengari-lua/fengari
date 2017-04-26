@@ -2,7 +2,6 @@
 
 const test     = require('tape');
 
-const lapi     = require("../src/lapi.js");
 const lauxlib  = require("../src/lauxlib.js");
 const lua      = require('../src/lua.js');
 const linit    = require('../src/linit.js');
@@ -38,12 +37,12 @@ test('debug.sethook', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "return count line count line count line count return count line count line count return count line count line count return count line ",
         "Correct element(s) on the stack"
     );
@@ -82,24 +81,24 @@ test('debug.gethook', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.deepEqual(
-        lapi.lua_typename(L, lapi.lua_type(L, -3)),
+        lua.lua_typename(L, lua.lua_type(L, -3)),
         lua.to_luastring("function"),
         "Correct element(s) on the stack"
     );
 
     t.deepEqual(
-        lapi.lua_tojsstring(L, -2),
+        lua.lua_tojsstring(L, -2),
         "crl",
         "Correct element(s) on the stack"
     );
 
     t.deepEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         1,
         "Correct element(s) on the stack"
     );
@@ -142,12 +141,12 @@ test('debug.getlocal', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "alocal alocalanother anotherinfunction infunctionanotherin anotherin",
         "Correct element(s) on the stack"
     );
@@ -190,30 +189,30 @@ test('debug.setlocal', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -4),
+        lua.lua_tointeger(L, -4),
         1,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -3),
+        lua.lua_tointeger(L, -3),
         2,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -2),
+        lua.lua_tointeger(L, -2),
         3,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         4,
         "Correct element(s) on the stack"
     );
@@ -245,12 +244,12 @@ test('debug.upvalueid', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.ok(
-        lapi.lua_touserdata(L, -1),
+        lua.lua_touserdata(L, -1),
         "Correct element(s) on the stack"
     );
 
@@ -289,12 +288,12 @@ test('debug.upvaluejoin', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "upvalue2",
         "Correct element(s) on the stack"
     );
@@ -335,12 +334,12 @@ test('debug.traceback (with a global)', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
 `stack traceback:
 \t...[string "traceback-test"]9: in function 'rec'
 \t...[string "traceback-test"]7: in function 'rec'
@@ -394,12 +393,12 @@ test('debug.traceback (with a upvalue)', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
 `stack traceback:
 \t...[string "traceback-test"]10: in upvalue 'rec'
 \t...[string "traceback-test"]8: in upvalue 'rec'
@@ -448,54 +447,54 @@ test('debug.getinfo', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -8),
+        lua.lua_tojsstring(L, -8),
         `[string "getinfo-test"]`,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -7),
+        lua.lua_tointeger(L, -7),
         0,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -6),
+        lua.lua_tojsstring(L, -6),
         `Lua`,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -5),
+        lua.lua_tointeger(L, -5),
         2,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -4),
+        lua.lua_tojsstring(L, -4),
         `[string "getinfo-test"]`,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -3),
+        lua.lua_tointeger(L, -3),
         1,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -2),
+        lua.lua_tojsstring(L, -2),
         `Lua`,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         0,
         "Correct element(s) on the stack"
     );

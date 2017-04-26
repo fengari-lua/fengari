@@ -5,7 +5,6 @@ const beautify   = require('js-beautify').js_beautify;
 
 const lua        = require("../src/lua.js");
 const VM         = require("../src/lvm.js");
-const lapi       = require("../src/lapi.js");
 const linit      = require("../src/linit.js");
 const lauxlib    = require("../src/lauxlib.js");
 const OC         = require('../src/lopcodes.js');
@@ -32,17 +31,17 @@ test('__index, __newindex: with actual table', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
-        lapi.lua_call(L, 0, -1);
+        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.ok(
-        lapi.lua_isnil(L, -1),
+        lua.lua_isnil(L, -1),
         "Program output is correct"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -2),
+        lua.lua_tointeger(L, -2),
         1,
         "Program output is correct"
     );
@@ -66,11 +65,11 @@ test('__newindex: with non table', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
 
     t.throws(function () {
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed with expected error");
 });
 
@@ -101,16 +100,16 @@ test('__index function in metatable', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
 
 
     t.doesNotThrow(function () {
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "__index",
         "Program output is correct"
     );
@@ -145,15 +144,15 @@ test('__newindex function in metatable', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.ok(
-        lapi.lua_isnil(L, -1),
+        lua.lua_isnil(L, -1),
         "Program output is correct"
     );
 });
@@ -187,15 +186,15 @@ test('__index table in metatable', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello",
         "Program output is correct"
     );
@@ -232,21 +231,21 @@ test('__newindex table in metatable', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "world",
         "Program output is correct"
     );
 
     t.ok(
-        lapi.lua_isnil(L, -2),
+        lua.lua_isnil(L, -2),
         "Program output is correct"
     );
 });
@@ -288,15 +287,15 @@ test('__index table with own metatable', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello",
         "Program output is correct"
     );
@@ -343,21 +342,21 @@ test('__newindex table with own metatable', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello",
         "Program output is correct"
     );
 
     t.ok(
-        lapi.lua_isnil(L, -2),
+        lua.lua_isnil(L, -2),
         "Program output is correct"
     );
 });
@@ -446,11 +445,11 @@ test('binary __xxx functions in metatable', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.deepEqual(
@@ -500,15 +499,15 @@ test('__eq', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.ok(
-        lapi.lua_toboolean(L, -1),
+        lua.lua_toboolean(L, -1),
         "Program output is correct"
     );
 });
@@ -540,15 +539,15 @@ test('__lt', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.ok(
-        lapi.lua_toboolean(L, -1),
+        lua.lua_toboolean(L, -1),
         "Program output is correct"
     );
 });
@@ -580,15 +579,15 @@ test('__le', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.ok(
-        lapi.lua_toboolean(L, -1),
+        lua.lua_toboolean(L, -1),
         "Program output is correct"
     );
 });
@@ -620,15 +619,15 @@ test('__le that uses __lt', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.ok(
-        lapi.lua_toboolean(L, -1),
+        lua.lua_toboolean(L, -1),
         "Program output is correct"
     );
 });
@@ -664,21 +663,21 @@ test('__unm, __bnot', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "world",
         "Program output is correct"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -2),
+        lua.lua_tojsstring(L, -2),
         "hello",
         "Program output is correct"
     );
@@ -711,15 +710,15 @@ test('__len', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello",
         "Program output is correct"
     );
@@ -752,15 +751,15 @@ test('__concat', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello",
         "Program output is correct"
     );
@@ -793,11 +792,11 @@ test('__call', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.deepEqual(

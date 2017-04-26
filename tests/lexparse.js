@@ -32,19 +32,19 @@ test('LOADK, RETURN', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello world",
         "Correct element(s) on the stack"
     );
@@ -72,19 +72,19 @@ test('MOVE', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello world",
         "Correct element(s) on the stack"
     );
@@ -112,14 +112,14 @@ test('Binary op', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
@@ -152,14 +152,14 @@ test('Unary op, LOADBOOL', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
@@ -190,14 +190,14 @@ test('NEWTABLE', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
@@ -232,19 +232,19 @@ test('CALL', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         3,
         "Program output is correct"
     );
@@ -278,14 +278,14 @@ test('Multiple return', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
@@ -319,19 +319,19 @@ test('TAILCALL', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         3,
         "Program output is correct"
     );
@@ -360,14 +360,14 @@ test('VARARG', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
@@ -399,19 +399,19 @@ test('LE, JMP', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_toboolean(L, -1),
+        lua.lua_toboolean(L, -1),
         true,
         "Program output is correct"
     );
@@ -438,19 +438,19 @@ test('LT', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_toboolean(L, -1),
+        lua.lua_toboolean(L, -1),
         false,
         "Program output is correct"
     );
@@ -477,19 +477,19 @@ test('EQ', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_toboolean(L, -1),
+        lua.lua_toboolean(L, -1),
         true,
         "Program output is correct"
     );
@@ -517,19 +517,19 @@ test('TESTSET (and)', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello",
         "Program output is correct"
     );
@@ -557,19 +557,19 @@ test('TESTSET (or)', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello",
         "Program output is correct"
     );
@@ -601,19 +601,19 @@ test('TEST (false)', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "goodbye",
         "Program output is correct"
     );
@@ -644,19 +644,19 @@ test('FORPREP, FORLOOP (int)', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         55,
         "Program output is correct"
     );
@@ -687,19 +687,19 @@ test('FORPREP, FORLOOP (float)', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -1),
+        lua.lua_tonumber(L, -1),
         60.5,
         "Program output is correct"
     );
@@ -729,25 +729,25 @@ test('SETTABLE, GETTABLE', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_topointer(L, -1).get(1).jsstring(),
+        lua.lua_topointer(L, -1).get(1).jsstring(),
         "hello",
         "Program output is correct"
     );
 
     t.strictEqual(
-        lapi.lua_topointer(L, -1).get('116|119|111|').jsstring(),
+        lua.lua_topointer(L, -1).get('116|119|111|').jsstring(),
         "world",
         "Program output is correct"
     );
@@ -780,19 +780,19 @@ test('SETUPVAL, GETUPVAL', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "world",
         "Program output is correct"
     );
@@ -822,25 +822,25 @@ test('SETTABUP, GETTABUP', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_topointer(L, -1).get(1).jsstring(),
+        lua.lua_topointer(L, -1).get(1).jsstring(),
         "hello",
         "Program output is correct"
     );
 
     t.strictEqual(
-        lapi.lua_topointer(L, -1).get('116|119|111|').jsstring(),
+        lua.lua_topointer(L, -1).get('116|119|111|').jsstring(),
         "world",
         "Program output is correct"
     );
@@ -872,19 +872,19 @@ test('SELF', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello",
         "Program output is correct"
     );
@@ -911,19 +911,19 @@ test('SETLIST', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.deepEqual(
-        [...lapi.lua_topointer(L, -1).entries()].map(e => e[1].value).sort(),
+        [...lua.lua_topointer(L, -1).entries()].map(e => e[1].value).sort(),
         [1, 2, 3, 4, 5, 6, 7, 8, 9],
         "Program output is correct"
     );
@@ -954,19 +954,19 @@ test('Variable SETLIST', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.deepEqual(
-        [...lapi.lua_topointer(L, -1).entries()].map(e => e[1].value).sort(),
+        [...lua.lua_topointer(L, -1).entries()].map(e => e[1].value).sort(),
         [1, 2, 3, 4, 5, 6, 7, 8, 9],
         "Program output is correct"
     );
@@ -992,19 +992,19 @@ test('Long SETLIST', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.deepEqual(
-        [...lapi.lua_topointer(L, -1).entries()].map(e => e[1].value).reverse(),
+        [...lua.lua_topointer(L, -1).entries()].map(e => e[1].value).reverse(),
         [1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5],
         "Program output is correct"
     );
@@ -1047,19 +1047,19 @@ test('TFORCALL, TFORLOOP', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -1),
+        lua.lua_tonumber(L, -1),
         6,
         "Program output is correct"
     );
@@ -1088,31 +1088,31 @@ test('LEN', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -1),
+        lua.lua_tonumber(L, -1),
         5,
         "Program output is correct"
     );
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -2),
+        lua.lua_tonumber(L, -2),
         3,
         "Program output is correct"
     );
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -3),
+        lua.lua_tonumber(L, -3),
         0,
         "Program output is correct"
     );
@@ -1137,19 +1137,19 @@ test('CONCAT', function (t) {
             luaCode = null;
             return code ? lua.to_luastring(code) : null;
         };
-        
-        lapi.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+
+        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello 2 you",
         "Program output is correct"
     );

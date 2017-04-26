@@ -7,7 +7,6 @@ const tests      = require("./tests.js");
 const toByteCode = tests.toByteCode;
 
 const lua        = require("../src/lua.js");
-const lapi       = require("../src/lapi.js");
 const lauxlib    = require("../src/lauxlib.js");
 const linit      = require('../src/linit.js');
 
@@ -32,18 +31,18 @@ test('string.len', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -2),
+        lua.lua_tointeger(L, -2),
         5,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         5,
         "Correct element(s) on the stack"
     );
@@ -70,12 +69,12 @@ test('string.char', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello",
         "Correct element(s) on the stack"
     );
@@ -101,18 +100,18 @@ test('string.upper, string.lower', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -2),
+        lua.lua_tojsstring(L, -2),
         "HELLO",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello",
         "Correct element(s) on the stack"
     );
@@ -138,12 +137,12 @@ test('string.rep', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello, hello, hello",
         "Correct element(s) on the stack"
     );
@@ -169,12 +168,12 @@ test('string.reverse', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello",
         "Correct element(s) on the stack"
     );
@@ -200,24 +199,24 @@ test('string.byte', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -3),
+        lua.lua_tointeger(L, -3),
         101,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -2),
+        lua.lua_tointeger(L, -2),
         108,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         108,
         "Correct element(s) on the stack"
     );
@@ -243,12 +242,12 @@ test('string.format', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "%10 0000000023",
         "Correct element(s) on the stack"
     );
@@ -274,12 +273,12 @@ test('string.format', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "FFFFFFF",
         "Correct element(s) on the stack"
     );
@@ -305,12 +304,12 @@ test('string.format', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         '"a string with \\"quotes\\" and \\\n new line"',
         "Correct element(s) on the stack"
     );
@@ -346,72 +345,72 @@ test('string.sub', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -11),
+        lua.lua_tojsstring(L, -11),
         "234",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -10),
+        lua.lua_tojsstring(L, -10),
         "789",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -9),
+        lua.lua_tojsstring(L, -9),
          "",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -8),
+        lua.lua_tojsstring(L, -8),
         "7",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -7),
+        lua.lua_tojsstring(L, -7),
          "",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -6),
+        lua.lua_tojsstring(L, -6),
         "123456789",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -5),
+        lua.lua_tojsstring(L, -5),
         "123456789",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -4),
+        lua.lua_tojsstring(L, -4),
          "",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -3),
+        lua.lua_tojsstring(L, -3),
         "9",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -2),
+        lua.lua_tojsstring(L, -2),
         "6789",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "456",
         "Correct element(s) on the stack"
     );
@@ -445,18 +444,18 @@ test('string.dump', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
-        let dv = lapi.lua_todataview(L, -1);
+        let dv = lua.lua_todataview(L, -1);
 
-        lapi.lua_load(L, null, dv, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, dv, lua.to_luastring("test"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello1212.5",
         "Correct element(s) on the stack"
     );
@@ -485,18 +484,18 @@ test('string.pack/unpack/packsize', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -2),
+        lua.lua_tointeger(L, -2),
         16,
         "Correct element(s) on the stack"
     );
 
     t.ok(
-        lapi.lua_toboolean(L, -1),
+        lua.lua_toboolean(L, -1),
         "Correct element(s) on the stack"
     );
 });
@@ -521,18 +520,18 @@ test('string.find without pattern', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -2),
+        lua.lua_tointeger(L, -2),
         6,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         9,
         "Correct element(s) on the stack"
     );
@@ -558,18 +557,18 @@ test('string.match', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -2),
+        lua.lua_tojsstring(L, -2),
         "foo",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "123",
         "Correct element(s) on the stack"
     );
@@ -595,30 +594,30 @@ test('string.find', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -4),
+        lua.lua_tointeger(L, -4),
         1,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -3),
+        lua.lua_tointeger(L, -3),
         8,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -2),
+        lua.lua_tojsstring(L, -2),
         "foo",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "123",
         "Correct element(s) on the stack"
     );
@@ -651,30 +650,30 @@ test('string.gmatch', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -4),
+        lua.lua_tojsstring(L, -4),
         "hello",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -3),
+        lua.lua_tojsstring(L, -3),
         "world",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -2),
+        lua.lua_tojsstring(L, -2),
         "from",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "Lua",
         "Correct element(s) on the stack"
     );
@@ -700,18 +699,18 @@ test('string.gsub', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -2),
+        lua.lua_tojsstring(L, -2),
         "hello hello world world",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         2,
         "Correct element(s) on the stack"
     );
@@ -737,18 +736,18 @@ test('string.gsub (number)', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -2),
+        lua.lua_tojsstring(L, -2),
         "hello hello world",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         1,
         "Correct element(s) on the stack"
     );
@@ -774,18 +773,18 @@ test('string.gsub (pattern)', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -2),
+        lua.lua_tojsstring(L, -2),
         "world hello Lua from",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         2,
         "Correct element(s) on the stack"
     );
@@ -813,18 +812,18 @@ test('string.gsub (function)', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -2),
+        lua.lua_tojsstring(L, -2),
         "4+5 = 9",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         1,
         "Correct element(s) on the stack"
     );
@@ -852,18 +851,18 @@ test('string.gsub (table)', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -2),
+        lua.lua_tojsstring(L, -2),
         "lua-5.3.tar.gz",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         2,
         "Correct element(s) on the stack"
     );

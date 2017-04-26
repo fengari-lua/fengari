@@ -46,25 +46,25 @@ const str_sub = function(L) {
     if (start < 1) start = 1;
     if (end > l) end = l;
     if (start <= end)
-        lapi.lua_pushstring(L, ts.value.slice(start - 1, (start - 1) + (end - start + 1)));
-    else lapi.lua_pushliteral(L, "");
+        lua.lua_pushstring(L, ts.value.slice(start - 1, (start - 1) + (end - start + 1)));
+    else lua.lua_pushliteral(L, "");
     return 1;
 };
 
 const str_len = function(L) {
-    lapi.lua_pushinteger(L, lauxlib.luaL_checkstring(L, 1).length);
+    lua.lua_pushinteger(L, lauxlib.luaL_checkstring(L, 1).length);
     return 1;
 };
 
 const str_char = function(L) {
-    let n = lapi.lua_gettop(L);  /* number of arguments */
+    let n = lua.lua_gettop(L);  /* number of arguments */
     let p = [];
     for (let i = 1; i <= n; i++) {
         let c = lauxlib.luaL_checkinteger(L, i);
         lauxlib.luaL_argcheck(L, c >= 0 && c <= 255, "value out of range"); // Strings are 8-bit clean
         p.push(c);
     }
-    lapi.lua_pushstring(L, p);
+    lua.lua_pushstring(L, p);
     return 1;
 };
 
@@ -76,12 +76,12 @@ const writer = function(L, b, size, B) {
 
 const str_dump = function(L) {
     let b = [];
-    let strip = lapi.lua_toboolean(L, 2);
+    let strip = lua.lua_toboolean(L, 2);
     lauxlib.luaL_checktype(L, 1, lua.LUA_TFUNCTION);
-    lapi.lua_settop(L, 1);
-    if (lapi.lua_dump(L, writer, b, strip) !== 0)
+    lua.lua_settop(L, 1);
+    if (lua.lua_dump(L, writer, b, strip) !== 0)
         return lauxlib.luaL_error(L, lua.to_luastring("unable to dump given function"));
-    lapi.lua_pushstring(L, b);
+    lua.lua_pushstring(L, b);
     return 1;
 };
 
@@ -216,19 +216,19 @@ const checkdp = function(buff) {
 };
 
 const addliteral = function(L, b, arg) {
-    switch(lapi.lua_type(L, arg)) {
+    switch(lua.lua_type(L, arg)) {
         case lua.LUA_TSTRING: {
-            let s = lapi.lua_tostring(L, arg);
+            let s = lua.lua_tostring(L, arg);
             addquoted(b, s, s.length);
             break;
         }
         case lua.LUA_TNUMBER: {
-            if (!lapi.lua_isinteger(L, arg)) {  /* float? */
-                let n = lapi.lua_tonumber(L, arg);  /* write as hexa ('%a') */
+            if (!lua.lua_isinteger(L, arg)) {  /* float? */
+                let n = lua.lua_tonumber(L, arg);  /* write as hexa ('%a') */
                 concat(b, lua_number2strx(L, lua.to_luastring(`%${luaconf.LUA_INTEGER_FRMLEN}a`), n));
                 checkdp(b);  /* ensure it uses a dot */
             } else {  /* integers */
-                let n = lapi.lua_tointeger(L, arg);
+                let n = lua.lua_tointeger(L, arg);
                 concat(b, lua.to_luastring(sprintf("%d", n)));
             }
             break;
@@ -282,7 +282,7 @@ const addlenmod = function(form, lenmod) {
 };
 
 const str_format = function(L) {
-    let top = lapi.lua_gettop(L);
+    let top = lua.lua_gettop(L);
     let arg = 1;
     let strfrmt = lauxlib.luaL_checkstring(L, arg);
     let b = [];
@@ -340,17 +340,17 @@ const str_format = function(L) {
                     let s = lauxlib.luaL_tolstring(L, arg);
                     if (form.length <= 2 || form[2] === 0) {  /* no modifiers? */
                         concat(b, s);  /* keep entire string */
-                        lapi.lua_pop(L, 1);  /* remove result from 'luaL_tolstring' */
+                        lua.lua_pop(L, 1);  /* remove result from 'luaL_tolstring' */
                     } else {
                         lauxlib.luaL_argcheck(L, s.length === strlen(s), arg, lua.to_luastring("string contains zeros", true));
                         if (form.indexOf('.'.charCodeAt(0)) < 0 && s.length >= 100) {
                             /* no precision and string is too long to be formatted */
                             concat(b, s);  /* keep entire string */
-                            lapi.lua_pop(L, 1);  /* remove result from 'luaL_tolstring' */
+                            lua.lua_pop(L, 1);  /* remove result from 'luaL_tolstring' */
                         } else {  /* format the string into 'buff' */
                             // TODO: will failt if s is not valid UTF-8
                             concat(b, lua.to_luastring(sprintf(String.fromCharCode(...form), lobject.jsstring(s))));
-                            lapi.lua_pop(L, 1);  /* remove result from 'luaL_tolstring' */
+                            lua.lua_pop(L, 1);  /* remove result from 'luaL_tolstring' */
                         }
                     }
                     break;
@@ -362,7 +362,7 @@ const str_format = function(L) {
         }
     }
 
-    lapi.lua_pushstring(L, b);
+    lua.lua_pushstring(L, b);
     return 1;
 };
 
@@ -569,7 +569,7 @@ const str_pack = function(L) {
     };
     let arg = 1;  /* current argument to pack */
     let totalsize = 0;  /* accumulate total size of result */
-    lapi.lua_pushnil(L);  /* mark to separate arguments from string buffer */
+    lua.lua_pushnil(L);  /* mark to separate arguments from string buffer */
     while (fmt.s.length - 1 > 0) {
         let details = getdetails(h, totalsize, fmt);
         let opt = details.opt;
@@ -634,24 +634,24 @@ const str_pack = function(L) {
                 break;
         }
     }
-    lapi.lua_pushstring(L, b);
+    lua.lua_pushstring(L, b);
     return 1;
 };
 
 const str_reverse = function(L) {
-    lapi.lua_pushstring(L, lauxlib.luaL_checkstring(L, 1).reverse());
+    lua.lua_pushstring(L, lauxlib.luaL_checkstring(L, 1).reverse());
     return 1;
 };
 
 const str_lower = function(L) {
     // TODO: will fail on invalid UTF-8
-    lapi.lua_pushstring(L, lua.to_luastring(lobject.jsstring(lauxlib.luaL_checkstring(L, 1)).toLowerCase()));
+    lua.lua_pushstring(L, lua.to_luastring(lobject.jsstring(lauxlib.luaL_checkstring(L, 1)).toLowerCase()));
     return 1;
 };
 
 const str_upper = function(L) {
     // TODO: will fail on invalid UTF-8
-    lapi.lua_pushstring(L, lua.to_luastring(lobject.jsstring(lauxlib.luaL_checkstring(L, 1)).toUpperCase()));
+    lua.lua_pushstring(L, lua.to_luastring(lobject.jsstring(lauxlib.luaL_checkstring(L, 1)).toUpperCase()));
     return 1;
 };
 
@@ -668,7 +668,7 @@ const str_rep = function(L) {
         r = r.concat(s.concat(sep));
     r = r.concat(s);
 
-    lapi.lua_pushstring(L, n > 0 ? r : []);
+    lua.lua_pushstring(L, n > 0 ? r : []);
     return 1;
 };
 
@@ -687,7 +687,7 @@ const str_byte = function(L) {
     let n = (pose - posi) + 1;
     lauxlib.luaL_checkstack(L, n, lua.to_luastring("string slice too long", true));
     for (let i = 0; i < n; i++)
-        lapi.lua_pushinteger(L, s[posi + i - 1]);
+        lua.lua_pushinteger(L, s[posi + i - 1]);
     return n;
 };
 
@@ -715,7 +715,7 @@ const str_packsize = function(L) {
             default:  break;
         }
     }
-    lapi.lua_pushinteger(L, totalsize);
+    lua.lua_pushinteger(L, totalsize);
     return 1;
 };
 
@@ -786,28 +786,28 @@ const str_unpack = function(L) {
             case KOption.Kint:
             case KOption.Kuint: {
                 let res = unpackint(L, data.slice(pos), h.islittle, size, opt === KOption.Kint);
-                lapi.lua_pushinteger(L, res);
+                lua.lua_pushinteger(L, res);
                 break;
             }
             case KOption.Kfloat: {
                 let res = unpacknum(L, data.slice(pos), h.islittle, size);
-                lapi.lua_pushnumber(L, res);
+                lua.lua_pushnumber(L, res);
                 break;
             }
             case KOption.Kchar: {
-                lapi.lua_pushstring(L, data.slice(pos, pos + size));
+                lua.lua_pushstring(L, data.slice(pos, pos + size));
                 break;
             }
             case KOption.Kstring: {
                 let len = unpackint(L, data.slice(pos), h.islittle, size, 0);
                 lauxlib.luaL_argcheck(L, pos + len + size <= ld, 2, lua.to_luastring("data string too short", true));
-                lapi.lua_pushstring(L, data.slice(pos + size, pos + size + len));
+                lua.lua_pushstring(L, data.slice(pos + size, pos + size + len));
                 pos += len;  /* skip string */
                 break;
             }
             case KOption.Kzstr: {
                 let len = data.slice(pos).indexOf(0);
-                lapi.lua_pushstring(L, data.slice(pos, pos + len));
+                lua.lua_pushstring(L, data.slice(pos, pos + len));
                 pos += len + 1;  /* skip string plus final '\0' */
                 break;
             }
@@ -817,7 +817,7 @@ const str_unpack = function(L) {
         }
         pos += size;
     }
-    lapi.lua_pushinteger(L, pos + 1);  /* next position */
+    lua.lua_pushinteger(L, pos + 1);  /* next position */
     return n + 1;
 };
 
@@ -1112,16 +1112,16 @@ const match = function(ms, s, p) {
 const push_onecapture = function(ms, i, s, e) {
     if (i >= ms.level) {
         if (i === 0)
-            lapi.lua_pushlstring(ms.L, ms.src.slice(s), e - s);  /* add whole match */
+            lua.lua_pushlstring(ms.L, ms.src.slice(s), e - s);  /* add whole match */
         else
             lauxlib.luaL_error(ms.L, lua.to_luastring(`invalid capture index %${i + 1}`));
     } else {
         let l = ms.capture[i].len;
         if (l === CAP_UNFINISHED) lauxlib.luaL_error(ms.L, lua.to_luastring("unfinished capture", true));
         if (l === CAP_POSITION)
-            lapi.lua_pushinteger(ms.L, ms.src_init + 1);
+            lua.lua_pushinteger(ms.L, ms.src_init + 1);
         else
-            lapi.lua_pushlstring(ms.L, ms.src.slice(ms.capture[i].init), l);
+            lua.lua_pushlstring(ms.L, ms.src.slice(ms.capture[i].init), l);
     }
 };
 
@@ -1189,16 +1189,16 @@ const str_find_aux = function(L, find) {
     let init = posrelat(lauxlib.luaL_optinteger(L, 3, 1), ls);
     if (init < 1) init = 1;
     else if (init > ls + 1) {  /* start after string's end? */
-        lapi.lua_pushnil(L);  /* cannot find anything */
+        lua.lua_pushnil(L);  /* cannot find anything */
         return 1;
     }
     /* explicit request or no special characters? */
-    if (find && (lapi.lua_toboolean(L, 4) || nospecials(p, lp))) {
+    if (find && (lua.lua_toboolean(L, 4) || nospecials(p, lp))) {
         /* do a plain search */
         let f = find_subarray(s.slice(init - 1), p, 0);
         if (f > -1) {
-            lapi.lua_pushinteger(L, init + f);
-            lapi.lua_pushinteger(L, init + f + lp - 1);
+            lua.lua_pushinteger(L, init + f);
+            lua.lua_pushinteger(L, init + f + lp - 1);
             return 2;
         }
     } else {
@@ -1214,15 +1214,15 @@ const str_find_aux = function(L, find) {
             reprepstate(ms);
             if ((res = match(ms, s1, 0)) !== null) {
                 if (find) {
-                    lapi.lua_pushinteger(L, s1 + 1);  /* start */
-                    lapi.lua_pushinteger(L, res);   /* end */
+                    lua.lua_pushinteger(L, s1 + 1);  /* start */
+                    lua.lua_pushinteger(L, res);   /* end */
                     return push_captures(ms, null, 0) + 2;
                 } else
                     return push_captures(ms, s1, res);
             }
         } while (s1++ < ms.src_end && !anchor);
     }
-    lapi.lua_pushnil(L);  /* not found */
+    lua.lua_pushnil(L);  /* not found */
     return 1;
 };
 
@@ -1245,7 +1245,7 @@ class GMatchState {
 }
 
 const gmatch_aux = function(L) {
-    let gm = lapi.lua_touserdata(L, lua.lua_upvalueindex(3));
+    let gm = lua.lua_touserdata(L, lua.lua_upvalueindex(3));
     gm.ms.L = L;
     for (let src = gm.src; src < gm.ms.src_end; src++) {
         reprepstate(gm.ms);
@@ -1263,20 +1263,20 @@ const str_gmatch = function(L) {
     let p = lauxlib.luaL_checkstring(L, 2);
     let ls = s.length;
     let lp = p.length;
-    lapi.lua_settop(L, 2);  /* keep them on closure to avoid being collected */
+    lua.lua_settop(L, 2);  /* keep them on closure to avoid being collected */
     let gm = new GMatchState();
-    lapi.lua_pushobject(L, gm);
+    lua.lua_pushobject(L, gm);
     prepstate(gm.ms, L, s, ls, p, lp);
     gm.src = 0;
     gm.p = 0;
     gm.lastmatch = null;
-    lapi.lua_pushcclosure(L, gmatch_aux, 3);
+    lua.lua_pushcclosure(L, gmatch_aux, 3);
     return 1;
 };
 
 const add_s = function(ms, b, s, e) {
     let L = ms.L;
-    let news = lapi.lua_tostring(L, 3);
+    let news = lua.lua_tostring(L, 3);
     let l = news.length;
     for (let i = 0; i < l; i++) {
         if (news[i] !== L_ESC)
@@ -1292,7 +1292,7 @@ const add_s = function(ms, b, s, e) {
             else {
                 push_onecapture(ms, news[i] - '1'.charCodeAt(0), s, e);
                 lauxlib.luaL_tolstring(L, -1);
-                lapi.lua_remove(L, -2);  /* remove original value */
+                lua.lua_remove(L, -2);  /* remove original value */
                 lauxlib.luaL_addvalue(b);  /* add capture to accumulated result */
             }
         }
@@ -1303,14 +1303,14 @@ const add_value = function(ms, b, s, e, tr) {
     let L = ms.L;
     switch (tr) {
         case lua.LUA_TFUNCTION: {
-            lapi.lua_pushvalue(L, 3);
+            lua.lua_pushvalue(L, 3);
             let n = push_captures(ms, s, e);
-            lapi.lua_call(L, n, 1);
+            lua.lua_call(L, n, 1);
             break;
         }
         case lua.LUA_TTABLE: {
             push_onecapture(ms, 0, s, e);
-            lapi.lua_gettable(L, 3);
+            lua.lua_gettable(L, 3);
             break;
         }
         default: {  /* LUA_TNUMBER or LUA_TSTRING */
@@ -1318,10 +1318,10 @@ const add_value = function(ms, b, s, e, tr) {
             return;
         }
     }
-    if (!lapi.lua_toboolean(L, -1)) {  /* nil or false? */
-        lapi.lua_pop(L, 1);
-        lapi.lua_pushlstring(L, s, e - s);  /* keep original text */
-    } else if (!lapi.lua_isstring(L, -1))
+    if (!lua.lua_toboolean(L, -1)) {  /* nil or false? */
+        lua.lua_pop(L, 1);
+        lua.lua_pushlstring(L, s, e - s);  /* keep original text */
+    } else if (!lua.lua_isstring(L, -1))
         lauxlib.luaL_error(L, lua.to_luastring(`invalid replacement value (a ${lobject.jsstring(lauxlib.luaL_typename(L, -1))})`));
         lauxlib.luaL_addvalue(b);  /* add result to accumulator */
 };
@@ -1332,7 +1332,7 @@ const str_gsub = function(L) {
     let p = lauxlib.luaL_checkstring(L, 2);  /* pattern */
     let lp = p.length;
     let lastmatch = null;  /* end of last match */
-    let tr = lapi.lua_type(L, 3);  /* replacement type */
+    let tr = lua.lua_type(L, 3);  /* replacement type */
     let max_s = lauxlib.luaL_optinteger(L, 4, srcl + 1);  /* max replacements */
     let anchor = p[0] === '^'.charCodeAt(0);
     let n = 0;  /* replacement count */
@@ -1360,7 +1360,7 @@ const str_gsub = function(L) {
     }
     lauxlib.luaL_addlstring(b, ms.src.slice(src), ms.src_end - src);
     lauxlib.luaL_pushresult(b);
-    lapi.lua_pushinteger(L, n);  /* number of substitutions */
+    lua.lua_pushinteger(L, n);  /* number of substitutions */
     return 2;
 };
 
@@ -1385,14 +1385,14 @@ const strlib = {
 };
 
 const createmetatable = function(L) {
-    lapi.lua_createtable(L, 0, 1);  /* table to be metatable for strings */
-    lapi.lua_pushliteral(L, "");  /* dummy string */
-    lapi.lua_pushvalue(L, -2);  /* copy table */
-    lapi.lua_setmetatable(L, -2);  /* set table as metatable for strings */
-    lapi.lua_pop(L, 1);  /* pop dummy string */
-    lapi.lua_pushvalue(L, -2);  /* get string library */
-    lapi.lua_setfield(L, -2, lua.to_luastring("__index", true));  /* lobject.table_index = string */
-    lapi.lua_pop(L, 1);  /* pop metatable */
+    lua.lua_createtable(L, 0, 1);  /* table to be metatable for strings */
+    lua.lua_pushliteral(L, "");  /* dummy string */
+    lua.lua_pushvalue(L, -2);  /* copy table */
+    lua.lua_setmetatable(L, -2);  /* set table as metatable for strings */
+    lua.lua_pop(L, 1);  /* pop dummy string */
+    lua.lua_pushvalue(L, -2);  /* get string library */
+    lua.lua_setfield(L, -2, lua.to_luastring("__index", true));  /* lobject.table_index = string */
+    lua.lua_pop(L, 1);  /* pop metatable */
 };
 
 const luaopen_string = function(L) {

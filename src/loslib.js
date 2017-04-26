@@ -3,14 +3,13 @@
 const assert  = require('assert');
 
 const lua     = require('./lua.js');
-const lapi    = require('./lapi.js');
 const lauxlib = require('./lauxlib.js');
 const ldebug  = require('./ldebug.js');
 const llimit  = require('./llimit.js');
 
 const setfield = function(L, key, value) {
-    lapi.lua_pushinteger(L, value);
-    lapi.lua_setfield(L, -2, key);
+    lua.lua_pushinteger(L, value);
+    lua.lua_setfield(L, -2, key);
 };
 
 const setallfields = function(L, time) {
@@ -29,8 +28,8 @@ const setallfields = function(L, time) {
 const L_MAXDATEFIELD = (llimit.MAX_INT / 2);
 
 const getfield = function(L, key, d, delta) {
-    let t = lapi.lua_getfield(L, -1, lua.to_luastring(key));  /* get field and its type */
-    let res = lapi.lua_tointegerx(L, -1);
+    let t = lua.lua_getfield(L, -1, lua.to_luastring(key));  /* get field and its type */
+    let res = lua.lua_tointegerx(L, -1);
     if (res !== false) {  /* field is not an integer? */
         if (t != lua.LUA_TNIL)  /* some other value? */
             return lauxlib.luaL_error(L, lua.to_luastring(`field '${key}' is not an integer`), true);
@@ -43,15 +42,15 @@ const getfield = function(L, key, d, delta) {
             return lauxlib.luaL_error(L, lua.to_luastring(`field '${key}' is out-of-bound`), true);
         res -= delta;
     }
-    lapi.lua_pop(L, 1);
+    lua.lua_pop(L, 1);
     return res;
 };
 
 const os_time = function(L) {
     let t = new Date();
-    if (!lapi.lua_isnoneornil(L, 1))  /* called with arg */{
+    if (!lua.lua_isnoneornil(L, 1))  /* called with arg */{
         lauxlib.luaL_checktype(L, 1, lua.LUA_TTABLE);  /* make sure table is at the top */
-        lapi.lua_settop(L, 1);
+        lua.lua_settop(L, 1);
         t.setSeconds(getfield(L, "sec", 0, 0));
         t.setSeconds(getfield(L, "min", 0, 0));
         t.setSeconds(getfield(L, "hour", 12, 0));
@@ -61,7 +60,7 @@ const os_time = function(L) {
         setallfields(L, t);
     }
 
-    lapi.lua_pushinteger(L, Math.floor(t / 1000));
+    lua.lua_pushinteger(L, Math.floor(t / 1000));
     return 1;
 };
 

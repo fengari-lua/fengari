@@ -5,7 +5,7 @@ const beautify       = require('js-beautify').js_beautify;
 
 const lua_State      = require("../src/lstate.js").lua_State;
 const VM             = require("../src/lvm.js");
-const lapi           = require("../src/lapi.js");
+const lua            = require("../src/lua.js");
 
 const getState       = require("./tests.js").getState;
 
@@ -21,11 +21,11 @@ test('LOADK, RETURN', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello world",
         "Program output is correct"
     );
@@ -45,11 +45,11 @@ test('MOVE', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello world",
         "Program output is correct"
     );
@@ -68,7 +68,7 @@ test('Binary op', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.deepEqual(
@@ -92,7 +92,7 @@ test('Unary op, LOADBOOL', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.deepEqual(
@@ -115,7 +115,7 @@ test('NEWTABLE', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.ok(
@@ -142,11 +142,11 @@ test('CALL', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         3,
         "Program output is correct"
     );
@@ -174,7 +174,7 @@ test('Multiple return', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.deepEqual(
@@ -200,11 +200,11 @@ test('TAILCALL', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         3,
         "Program output is correct"
     );
@@ -226,7 +226,7 @@ test('VARARG', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.deepEqual(
@@ -250,11 +250,11 @@ test('LE, JMP', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_toboolean(L, -1),
+        lua.lua_toboolean(L, -1),
         true,
         "Program output is correct"
     );
@@ -274,11 +274,11 @@ test('LT', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_toboolean(L, -1),
+        lua.lua_toboolean(L, -1),
         false,
         "Program output is correct"
     );
@@ -298,11 +298,11 @@ test('EQ', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_toboolean(L, -1),
+        lua.lua_toboolean(L, -1),
         true,
         "Program output is correct"
     );
@@ -323,11 +323,11 @@ test('TESTSET (and)', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello",
         "Program output is correct"
     );
@@ -348,11 +348,11 @@ test('TESTSET (or)', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello",
         "Program output is correct"
     );
@@ -377,11 +377,11 @@ test('TEST (true)', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello",
         "Program output is correct"
     );
@@ -406,11 +406,11 @@ test('TEST (false)', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "goodbye",
         "Program output is correct"
     );
@@ -434,11 +434,11 @@ test('FORPREP, FORLOOP (int)', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         55,
         "Program output is correct"
     );
@@ -462,11 +462,11 @@ test('FORPREP, FORLOOP (float)', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -1),
+        lua.lua_tonumber(L, -1),
         60.5,
         "Program output is correct"
     );
@@ -489,7 +489,7 @@ test('SETTABLE, GETTABLE', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     console.log(L.stack[L.top - 1]);
@@ -527,11 +527,11 @@ test('SETUPVAL, GETUPVAL', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "world",
         "Program output is correct"
     );
@@ -554,7 +554,7 @@ test('SETTABUP, GETTABUP', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.deepEqual(
@@ -589,11 +589,11 @@ test('SELF', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello",
         "Program output is correct"
     );
@@ -613,7 +613,7 @@ test('SETLIST', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.deepEqual(
@@ -641,7 +641,7 @@ test('Variable SETLIST', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.deepEqual(
@@ -665,7 +665,7 @@ test('Long SETLIST', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.deepEqual(
@@ -689,7 +689,7 @@ test('Long SETLIST', function (t) {
 //
 //     // t.doesNotThrow(function () {
 //         L = getState(luaCode);
-//         lapi.lua_call(L, 0, -1);
+//         lua.lua_call(L, 0, -1);
 //     // }, "Program executed without errors");
 //
 //     t.deepEqual(
@@ -729,11 +729,11 @@ test('TFORCALL, TFORLOOP', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         6,
         "Program output is correct"
     );
@@ -755,23 +755,23 @@ test('LEN', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         5,
         "Program output is correct"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -2),
+        lua.lua_tointeger(L, -2),
         3,
         "Program output is correct"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -3),
+        lua.lua_tointeger(L, -3),
         0,
         "Program output is correct"
     );
@@ -789,11 +789,11 @@ test('CONCAT', function (t) {
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello 2 you",
         "Program output is correct"
     );

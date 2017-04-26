@@ -75,28 +75,28 @@ const utflen = function(L) {
         let s1 = dec ? dec.string : null;
         if (s1 === null) {
             /* conversion error? */
-            lapi.lua_pushnil(L);  /* return nil ... */
-            lapi.lua_pushinteger(L, posi + 1);  /* ... and current position */
+            lua.lua_pushnil(L);  /* return nil ... */
+            lua.lua_pushinteger(L, posi + 1);  /* ... and current position */
             return 2;
         }
         posi = s.length - s1.length;
         n++;
     }
-    lapi.lua_pushinteger(L, n);
+    lua.lua_pushinteger(L, n);
     return 1;
 };
 
 const pushutfchar = function(L, arg) {
     let code = lauxlib.luaL_checkinteger(L, arg);
     lauxlib.luaL_argcheck(L, 0 <= code && code <= MAXUNICODE, arg, lua.to_luastring("value out of range", true));
-    lapi.lua_pushstring(L, lua.to_luastring(String.fromCharCode(code)));
+    lua.lua_pushstring(L, lua.to_luastring(String.fromCharCode(code)));
 };
 
 /*
 ** utfchar(n1, n2, ...)  -> char(n1)..char(n2)...
 */
 const utfchar = function(L) {
-    let n = lapi.lua_gettop(L);  /* number of arguments */
+    let n = lua.lua_gettop(L);  /* number of arguments */
     if (n === 1)  /* optimize common case of single char */
         pushutfchar(L, 1);
     else {
@@ -150,9 +150,9 @@ const byteoffset = function(L) {
     }
 
     if (n === 0)  /* did it find given character? */
-        lapi.lua_pushinteger(L, posi + 1);
+        lua.lua_pushinteger(L, posi + 1);
     else  /* no such character */
-        lapi.lua_pushnil(L);
+        lua.lua_pushnil(L);
 
     return 1;
 };
@@ -182,7 +182,7 @@ const codepoint = function(L) {
             return lauxlib.luaL_error(L, lua.to_luastring("invalid UTF-8 code", true));
         s = dec.string;
         let code = dec.code;
-        lapi.lua_pushinteger(L, code);
+        lua.lua_pushinteger(L, code);
         n++;
     }
     return n;
@@ -192,7 +192,7 @@ const iter_aux = function(L) {
     let s = lauxlib.luaL_checkstring(L, 1);
     s = L.stack[lapi.index2addr_(L, 1)].value;
     let len = s.length;
-    let n = lapi.lua_tointeger(L, 2) - 1;
+    let n = lua.lua_tointeger(L, 2) - 1;
 
     if (n < 0)  /* first iteration? */
         n = 0;  /* start from here */
@@ -209,17 +209,17 @@ const iter_aux = function(L) {
         let next = dec ? dec.string : null;
         if (next === null || iscont(next[0]))
             return lauxlib.luaL_error(L, lua.to_luastring("invalid UTF-8 code", true));
-        lapi.lua_pushinteger(L, n + 1);
-        lapi.lua_pushinteger(L, code);
+        lua.lua_pushinteger(L, n + 1);
+        lua.lua_pushinteger(L, code);
         return 2;
     }
 };
 
 const iter_codes = function(L) {
     lauxlib.luaL_checkstring(L, 1);
-    lapi.lua_pushcfunction(L, iter_aux);
-    lapi.lua_pushvalue(L, 1);
-    lapi.lua_pushinteger(L, 0);
+    lua.lua_pushcfunction(L, iter_aux);
+    lua.lua_pushvalue(L, 1);
+    lua.lua_pushinteger(L, 0);
     return 3;
 };
 
@@ -236,8 +236,8 @@ const UTF8PATT = "[\0-\x7F\xC2-\xF4][\x80-\xBF]*";
 
 const luaopen_utf8 = function(L) {
     lauxlib.luaL_newlib(L, funcs);
-    lapi.lua_pushstring(L, lua.to_luastring(UTF8PATT));
-    lapi.lua_setfield(L, -2, lua.to_luastring("charpattern", true));
+    lua.lua_pushstring(L, lua.to_luastring(UTF8PATT));
+    lua.lua_setfield(L, -2, lua.to_luastring("charpattern", true));
     return 1;
 };
 

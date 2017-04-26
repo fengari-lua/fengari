@@ -9,7 +9,6 @@ const toByteCode = tests.toByteCode;
 
 const VM         = require("../src/lvm.js");
 const ldo        = require("../src/ldo.js");
-const lapi       = require("../src/lapi.js");
 const lauxlib    = require("../src/lauxlib.js");
 const lua        = require('../src/lua.js');
 const linit      = require('../src/linit.js');
@@ -41,14 +40,14 @@ test('table.concat', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-table.concat"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-table.concat"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "3,4,5",
         "Correct element(s) on the stack"
     );
@@ -70,14 +69,14 @@ test('table.pack', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-table.pack"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-table.pack"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.deepEqual(
-        [...lapi.lua_topointer(L, -1).entries()]
+        [...lua.lua_topointer(L, -1).entries()]
             .filter(e => typeof e[0] === 'number') // Filter out the 'n' field
             .map(e => e[1].value).reverse(),
         [1, 2, 3],
@@ -101,26 +100,26 @@ test('table.unpack', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-table.unpack"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-table.unpack"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -3),
+        lua.lua_tointeger(L, -3),
         2,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -2),
+        lua.lua_tointeger(L, -2),
         3,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         4,
         "Correct element(s) on the stack"
     );
@@ -145,14 +144,14 @@ test('table.insert', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-table.insert"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-table.insert"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.deepEqual(
-        [...lapi.lua_topointer(L, -1).entries()]
+        [...lua.lua_topointer(L, -1).entries()]
             .filter(e => typeof e[0] === 'number')
             .map(e => e[1].value).sort(),
         [1, 2, 3, 4, 5],
@@ -179,14 +178,14 @@ test('table.remove', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-table.remove"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-table.remove"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.deepEqual(
-        [...lapi.lua_topointer(L, -1).entries()]
+        [...lua.lua_topointer(L, -1).entries()]
             .filter(e => typeof e[0] === 'number')
             .map(e => e[1].value).sort(),
         [1, 2, 3, 4, null, null],
@@ -212,14 +211,14 @@ test('table.move', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-table.move"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-table.move"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.deepEqual(
-        [...lapi.lua_topointer(L, -1).entries()]
+        [...lua.lua_topointer(L, -1).entries()]
             .filter(e => typeof e[0] === 'number')
             .map(e => e[1].value).sort(),
         [1, 2, 3, 4, 5, 6],
@@ -245,14 +244,14 @@ test('table.sort (<)', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-table.sort"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-table.sort"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.deepEqual(
-        inttable2array(lapi.lua_topointer(L, -1)),
+        inttable2array(lua.lua_topointer(L, -1)),
         [1, 2, 3, 4, 5],
         "Correct element(s) on the stack"
     );
@@ -278,14 +277,14 @@ test('table.sort with cmp function', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-table.sort"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-table.sort"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.deepEqual(
-        inttable2array(lapi.lua_topointer(L, -1)),
+        inttable2array(lua.lua_topointer(L, -1)),
         [5, 4, 3, 2, 1],
         "Correct element(s) on the stack"
     );

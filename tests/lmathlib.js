@@ -9,7 +9,6 @@ const toByteCode = tests.toByteCode;
 
 const VM         = require("../src/lvm.js");
 const ldo        = require("../src/ldo.js");
-const lapi       = require("../src/lapi.js");
 const lauxlib    = require("../src/lauxlib.js");
 const lua        = require('../src/lua.js');
 const linit      = require('../src/linit.js');
@@ -32,50 +31,50 @@ test('math.abs, math.sin, math.cos, math.tan, math.asin, math.acos, math.atan', 
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -7),
+        lua.lua_tointeger(L, -7),
         10,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -6),
+        lua.lua_tonumber(L, -6),
         10.5,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -5),
+        lua.lua_tonumber(L, -5),
         -0.8390715290764524,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -4),
+        lua.lua_tonumber(L, -4),
         0.6483608274590866,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -3),
+        lua.lua_tonumber(L, -3),
         1.5707963267948966,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -2),
+        lua.lua_tonumber(L, -2),
         1.0471975511965979,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -1),
+        lua.lua_tonumber(L, -1),
         1.4711276743037347,
         "Correct element(s) on the stack"
     );
@@ -97,20 +96,20 @@ test('math.ceil, math.floor', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -2),
+        lua.lua_tointeger(L, -2),
         11,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         10,
         "Correct element(s) on the stack"
     );
@@ -133,20 +132,20 @@ test('math.deg, math.rad', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -2),
+        lua.lua_tonumber(L, -2),
         572.9577951308232,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -1),
+        lua.lua_tonumber(L, -1),
         0.17453292519943295,
         "Correct element(s) on the stack"
     );
@@ -169,26 +168,26 @@ test('math.log', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -3),
+        lua.lua_tonumber(L, -3),
         2.302585092994046,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -2),
+        lua.lua_tonumber(L, -2),
         3.321928094887362,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -1),
+        lua.lua_tonumber(L, -1),
         1,
         "Correct element(s) on the stack"
     );
@@ -211,14 +210,14 @@ test('math.exp', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -1),
+        lua.lua_tonumber(L, -1),
         22026.465794806718,
         "Correct element(s) on the stack"
     );
@@ -241,20 +240,20 @@ test('math.min, math.max', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -2),
+        lua.lua_tonumber(L, -2),
         23,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -1),
+        lua.lua_tonumber(L, -1),
         5,
         "Correct element(s) on the stack"
     );
@@ -277,19 +276,19 @@ test('math.random', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.ok(
-        0 <= lapi.lua_tonumber(L, -2) <= 1,
+        0 <= lua.lua_tonumber(L, -2) <= 1,
         "Correct element(s) on the stack"
     );
 
     t.ok(
-        10 <= lapi.lua_tonumber(L, -1) <= 15,
+        10 <= lua.lua_tonumber(L, -1) <= 15,
         "Correct element(s) on the stack"
     );
 
@@ -311,14 +310,14 @@ test('math.sqrt', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -1),
+        lua.lua_tonumber(L, -1),
         3.1622776601683795,
         "Correct element(s) on the stack"
     );
@@ -341,14 +340,14 @@ test('math.tointeger', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -1),
+        lua.lua_tonumber(L, -1),
         10,
         "Correct element(s) on the stack"
     );
@@ -371,26 +370,26 @@ test('math.type', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -3),
+        lua.lua_tojsstring(L, -3),
         "integer",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -2),
+        lua.lua_tojsstring(L, -2),
         "float",
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         null,
         "Correct element(s) on the stack"
     );
@@ -413,14 +412,14 @@ test('math.ult', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_toboolean(L, -1),
+        lua.lua_toboolean(L, -1),
         true,
         "Correct element(s) on the stack"
     );
@@ -443,14 +442,14 @@ test('math.fmod', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -1),
+        lua.lua_tonumber(L, -1),
         2,
         "Correct element(s) on the stack"
     );
@@ -473,20 +472,20 @@ test('math.modf', function (t) {
 
         linit.luaL_openlibs(L);
 
-        lapi.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -2),
+        lua.lua_tonumber(L, -2),
         3,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tonumber(L, -1),
+        lua.lua_tonumber(L, -1),
         0.3999999999999999,
         "Correct element(s) on the stack"
     );

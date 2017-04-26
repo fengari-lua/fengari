@@ -7,7 +7,6 @@ const toByteCode = tests.toByteCode;
 
 const VM         = require("../src/lvm.js");
 const ldo        = require("../src/ldo.js");
-const lapi       = require("../src/lapi.js");
 const lauxlib    = require("../src/lauxlib.js");
 const lua        = require('../src/lua.js');
 const linit      = require('../src/linit.js');
@@ -33,12 +32,12 @@ test('luaL_loadstring', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello world",
         "Correct element(s) on the stack"
     );
@@ -66,12 +65,12 @@ test('load', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "js running lua running lua",
         "Correct element(s) on the stack"
     );
@@ -101,12 +100,12 @@ test('luaL_loadbuffer', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello world",
         "Correct element(s) on the stack"
     );
@@ -134,12 +133,12 @@ test('loadfile', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello world",
         "Correct element(s) on the stack"
     );
@@ -167,12 +166,12 @@ test('loadfile (binary)', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello world",
         "Correct element(s) on the stack"
     );
@@ -199,12 +198,12 @@ test('dofile', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "hello world",
         "Correct element(s) on the stack"
     );

@@ -4,7 +4,6 @@ const test    = require('tape');
 const tests   = require("./tests.js");
 
 const lua     = require("../src/lua.js");
-const lapi    = require("../src/lapi.js");
 const lauxlib = require("../src/lauxlib.js");
 const linit   = require('../src/linit.js');
 
@@ -27,12 +26,12 @@ test('utf8.offset', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         7,
         "Correct element(s) on the stack"
     );
@@ -59,24 +58,24 @@ test('utf8.codepoint', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -3),
+        lua.lua_tointeger(L, -3),
         176,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -2),
+        lua.lua_tointeger(L, -2),
         32,
         "Correct element(s) on the stack"
     );
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         860,
         "Correct element(s) on the stack"
     );
@@ -103,12 +102,12 @@ test('utf8.char', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "( ͡° ͜ʖ ͡° )",
         "Correct element(s) on the stack"
     );
@@ -135,12 +134,12 @@ test('utf8.len', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tointeger(L, -1),
+        lua.lua_tointeger(L, -1),
         12,
         "Correct element(s) on the stack"
     );
@@ -172,12 +171,12 @@ test('utf8.codes', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lapi.lua_tojsstring(L, -1),
+        lua.lua_tojsstring(L, -1),
         "[1,40] [2,32] [3,865] [5,176] [7,32] [8,860] [10,662] [12,32] [13,865] [15,176] [17,32] [18,41] ",
         "Correct element(s) on the stack"
     );
