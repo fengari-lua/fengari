@@ -3,7 +3,6 @@
 
 const assert = require('assert');
 
-const lstate  = require('./lstate.js');
 const lapi    = require('./lapi.js');
 const lua     = require('./lua.js');
 const ldebug  = require('./ldebug.js');
@@ -202,7 +201,7 @@ const tag_error = function(L, arg, tag) {
 };
 
 const luaL_newstate = function() {
-    let L = lstate.lua_newstate();
+    let L = lua.lua_newstate();
     if (L) lua.lua_atpanic(L, panic);
     return L;
 };

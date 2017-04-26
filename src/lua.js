@@ -1,8 +1,9 @@
 /*jshint esversion: 6 */
 "use strict";
 
-const defs = require("./defs.js");
-const lapi = require("./lapi.js");
+const defs   = require("./defs.js");
+const lapi   = require("./lapi.js");
+const lstate = require("./lstate.js");
 
 module.exports.FENGARI_AUTHORS         = defs.FENGARI_AUTHORS;
 module.exports.FENGARI_COPYRIGHT       = defs.FENGARI_COPYRIGHT;
@@ -115,6 +116,8 @@ module.exports.lua_isuserdata          = lapi.lua_isuserdata;
 module.exports.lua_len                 = lapi.lua_len;
 module.exports.lua_load                = lapi.lua_load;
 module.exports.lua_newtable            = lapi.lua_newtable;
+module.exports.lua_newstate            = lstate.lua_newstate;
+module.exports.lua_newthread           = lstate.lua_newthread;
 module.exports.lua_newuserdata         = lapi.lua_newuserdata;
 module.exports.lua_next                = lapi.lua_next;
 module.exports.lua_pcall               = lapi.lua_pcall;

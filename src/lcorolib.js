@@ -4,7 +4,6 @@ const assert  = require('assert');
 
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
-const lstate  = require('./lstate.js');
 const ldo     = require('./ldo.js');
 const ldebug  = require('./ldebug.js');
 const lobject = require('./lobject.js');
@@ -76,7 +75,7 @@ const luaB_auxwrap = function(L) {
 
 const luaB_cocreate = function(L) {
     lauxlib.luaL_checktype(L, 1, lua.LUA_TFUNCTION);
-    let NL = lstate.lua_newthread(L);
+    let NL = lua.lua_newthread(L);
     lua.lua_pushvalue(L, 1);  /* move function to top */
     lua.lua_xmove(L, NL, 1);  /* move function from L to NL */
     return 1;
