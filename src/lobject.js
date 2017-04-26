@@ -3,13 +3,13 @@
 
 const assert = require('assert');
 
+const defs    = require('./defs.js');
 const ljstype = require('./ljstype.js');
-const lua     = require('./lua.js');
 const luaconf = require('./luaconf.js');
 const llimit  = require('./llimit.js');
-const CT      = lua.constant_types;
+const CT      = defs.constant_types;
 const UpVal   = require('./lfunc.js').UpVal;
-const char    = lua.char;
+const char    = defs.char;
 
 let tvalueCount = 0;
 
@@ -35,31 +35,31 @@ class TValue {
     checktag(t) {
         return this.type === t;
     }
-    
+
     checktype(t) {
         return this.ttnov() === t;
     }
-    
+
     ttisnumber() {
         return this.checktype(CT.LUA_TNUMBER);
     }
-    
+
     ttisfloat() {
         return this.checktag(CT.LUA_TNUMFLT);
     }
-    
+
     ttisinteger() {
         return this.checktag(CT.LUA_TNUMINT);
     }
-    
+
     ttisnil() {
         return this.checktag(CT.LUA_TNIL);
     }
-    
+
     ttisboolean() {
         return this.checktag(CT.LUA_TBOOLEAN);
     }
-    
+
     ttislightuserdata() {
         return this.checktag(CT.LUA_TLIGHTUSERDATA);
     }
@@ -71,51 +71,51 @@ class TValue {
     ttisptr() {
         return this.checktag(CT.LUA_TLIGHTUSERDATA_PTR);
     }
-    
+
     ttisstring() {
         return this.checktype(CT.LUA_TSTRING);
     }
-    
+
     ttisshrstring() {
         return this.checktag(CT.LUA_TSHRSTR);
     }
-    
+
     ttislngstring() {
         return this.checktag(CT.LUA_TLNGSTR);
     }
-    
+
     ttistable() {
         return this.checktag(CT.LUA_TTABLE);
     }
-    
+
     ttisfunction() {
         return this.checktype(CT.LUA_TFUNCTION);
     }
-    
+
     ttisclosure() {
         return (this.type & 0x1F) === CT.LUA_TFUNCTION;
     }
-    
+
     ttisCclosure() {
         return this.checktag(CT.LUA_TCCL);
     }
-    
+
     ttisLclosure() {
         return this.checktag(CT.LUA_TLCL);
     }
-    
+
     ttislcf() {
         return this.checktag(CT.LUA_TLCF);
     }
-    
+
     ttisfulluserdata() {
         return this.checktag(CT.LUA_TUSERDATA);
     }
-    
+
     ttisthread() {
         return this.checktag(CT.LUA_TTHREAD);
     }
-    
+
     ttisdeadkey() {
         return this.checktag(CT.LUA_TDEADKEY);
     }
@@ -189,7 +189,7 @@ const table_keyValue = function(key) {
             key = key.value.map(e => `${e}|`).join('');
         }
     } else if (typeof key === "string") { // To avoid
-        key = lua.to_luastring(key).map(e => `${e}|`).join('');
+        key = defs.to_luastring(key).map(e => `${e}|`).join('');
     } else if (Array.isArray(key)) {
         key = key.map(e => `${e}|`).join('');
     }
@@ -261,9 +261,9 @@ class LocVar {
     }
 }
 
-const RETS = lua.to_luastring("...", true);
-const PRE  = lua.to_luastring("[string \"");
-const POS  = lua.to_luastring("\"]");
+const RETS = defs.to_luastring("...", true);
+const PRE  = defs.to_luastring("[string \"");
+const POS  = defs.to_luastring("\"]");
 
 const luaO_chunkid = function(source, bufflen) {
     source = source instanceof TValue ? source.value : source;
@@ -524,32 +524,32 @@ const luaO_int2fb = function(x) {
 
 const intarith = function(L, op, v1, v2) {
     switch (op) {
-        case lua.LUA_OPADD:  return (v1 + v2)|0;
-        case lua.LUA_OPSUB:  return (v1 - v2)|0;
-        case lua.LUA_OPMUL:  return (v1 * v2)|0;
-        case lua.LUA_OPMOD:  return (v1 - Math.floor(v1 / v2) * v2)|0; // % semantic on negative numbers is different in js
-        case lua.LUA_OPIDIV: return (v1 / v2)|0;
-        case lua.LUA_OPBAND: return (v1 & v2);
-        case lua.LUA_OPBOR:  return (v1 | v2);
-        case lua.LUA_OPBXOR: return (v1 ^ v2);
-        case lua.LUA_OPSHL:  return (v1 << v2);
-        case lua.LUA_OPSHR:  return (v1 >> v2);
-        case lua.LUA_OPUNM:  return (0 - v1);
-        case lua.LUA_OPBNOT: return (~0 ^ v1);
+        case defs.LUA_OPADD:  return (v1 + v2)|0;
+        case defs.LUA_OPSUB:  return (v1 - v2)|0;
+        case defs.LUA_OPMUL:  return (v1 * v2)|0;
+        case defs.LUA_OPMOD:  return (v1 - Math.floor(v1 / v2) * v2)|0; // % semantic on negative numbers is different in js
+        case defs.LUA_OPIDIV: return (v1 / v2)|0;
+        case defs.LUA_OPBAND: return (v1 & v2);
+        case defs.LUA_OPBOR:  return (v1 | v2);
+        case defs.LUA_OPBXOR: return (v1 ^ v2);
+        case defs.LUA_OPSHL:  return (v1 << v2);
+        case defs.LUA_OPSHR:  return (v1 >> v2);
+        case defs.LUA_OPUNM:  return (0 - v1);
+        case defs.LUA_OPBNOT: return (~0 ^ v1);
     }
 };
 
 
 const numarith = function(L, op, v1, v2) {
     switch (op) {
-        case lua.LUA_OPADD:  return v1 + v2;
-        case lua.LUA_OPSUB:  return v1 - v2;
-        case lua.LUA_OPMUL:  return v1 * v2;
-        case lua.LUA_OPDIV:  return v1 / v2;
-        case lua.LUA_OPPOW:  return Math.pow(v1, v2);
-        case lua.LUA_OPIDIV: return (v1 / v2);
-        case lua.LUA_OPUNM:  return -v1;
-        case lua.LUA_OPMOD:  return v1 % v2;
+        case defs.LUA_OPADD:  return v1 + v2;
+        case defs.LUA_OPSUB:  return v1 - v2;
+        case defs.LUA_OPMUL:  return v1 * v2;
+        case defs.LUA_OPDIV:  return v1 / v2;
+        case defs.LUA_OPPOW:  return Math.pow(v1, v2);
+        case defs.LUA_OPIDIV: return (v1 / v2);
+        case defs.LUA_OPUNM:  return -v1;
+        case defs.LUA_OPMOD:  return v1 % v2;
     }
 };
 

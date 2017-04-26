@@ -369,7 +369,7 @@ if (typeof require === "function") {
         base_funcs.loadfile = luaB_loadfile;
         base_funcs.dofile   = luaB_dofile;
     }
-    
+
 }
 
 const luaopen_base = function(L) {

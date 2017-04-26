@@ -3,41 +3,41 @@
 
 const assert  = require('assert');
 
+const defs    = require('./defs.js');
 const lobject = require('./lobject.js');
 const TValue  = lobject.TValue;
 const ldo     = require('./ldo.js');
 const lstate  = require('./lstate.js');
-const lua     = require('./lua.js');
 const ldebug  = require('./ldebug.js');
 const lvm     = require('./lvm.js');
-const CT      = lua.constant_types;
+const CT      = defs.constant_types;
 
 
 const TMS = {
-    TM_INDEX:    lua.to_luastring("__index", true),
-    TM_NEWINDEX: lua.to_luastring("__newindex", true),
-    TM_GC:       lua.to_luastring("__gc", true),
-    TM_MODE:     lua.to_luastring("__mode", true),
-    TM_LEN:      lua.to_luastring("__len", true),
-    TM_EQ:       lua.to_luastring("__eq", true),  /* last tag method with fast access */
-    TM_ADD:      lua.to_luastring("__add", true),
-    TM_SUB:      lua.to_luastring("__sub", true),
-    TM_MUL:      lua.to_luastring("__mul", true),
-    TM_MOD:      lua.to_luastring("__mod", true),
-    TM_POW:      lua.to_luastring("__pow", true),
-    TM_DIV:      lua.to_luastring("__div", true),
-    TM_IDIV:     lua.to_luastring("__idiv", true),
-    TM_BAND:     lua.to_luastring("__band", true),
-    TM_BOR:      lua.to_luastring("__bor", true),
-    TM_BXOR:     lua.to_luastring("__bxor", true),
-    TM_SHL:      lua.to_luastring("__shl", true),
-    TM_SHR:      lua.to_luastring("__shr", true),
-    TM_UNM:      lua.to_luastring("__unm", true),
-    TM_BNOT:     lua.to_luastring("__bnot", true),
-    TM_LT:       lua.to_luastring("__lt", true),
-    TM_LE:       lua.to_luastring("__le", true),
-    TM_CONCAT:   lua.to_luastring("__concat", true),
-    TM_CALL:     lua.to_luastring("__call", true)
+    TM_INDEX:    defs.to_luastring("__index", true),
+    TM_NEWINDEX: defs.to_luastring("__newindex", true),
+    TM_GC:       defs.to_luastring("__gc", true),
+    TM_MODE:     defs.to_luastring("__mode", true),
+    TM_LEN:      defs.to_luastring("__len", true),
+    TM_EQ:       defs.to_luastring("__eq", true),  /* last tag method with fast access */
+    TM_ADD:      defs.to_luastring("__add", true),
+    TM_SUB:      defs.to_luastring("__sub", true),
+    TM_MUL:      defs.to_luastring("__mul", true),
+    TM_MOD:      defs.to_luastring("__mod", true),
+    TM_POW:      defs.to_luastring("__pow", true),
+    TM_DIV:      defs.to_luastring("__div", true),
+    TM_IDIV:     defs.to_luastring("__idiv", true),
+    TM_BAND:     defs.to_luastring("__band", true),
+    TM_BOR:      defs.to_luastring("__bor", true),
+    TM_BXOR:     defs.to_luastring("__bxor", true),
+    TM_SHL:      defs.to_luastring("__shl", true),
+    TM_SHR:      defs.to_luastring("__shr", true),
+    TM_UNM:      defs.to_luastring("__unm", true),
+    TM_BNOT:     defs.to_luastring("__bnot", true),
+    TM_LT:       defs.to_luastring("__lt", true),
+    TM_LE:       defs.to_luastring("__le", true),
+    TM_CONCAT:   defs.to_luastring("__concat", true),
+    TM_CALL:     defs.to_luastring("__call", true)
 };
 
 const luaT_typenames_ = [
@@ -52,7 +52,7 @@ const luaT_typenames_ = [
     "userdata",
     "thread",
     "proto" /* this last case is used for tests only */
-].map(e => lua.to_luastring(e));
+].map(e => defs.to_luastring(e));
 
 const ttypename = function(t) {
     return luaT_typenames_[t + 1];
@@ -70,7 +70,7 @@ const luaT_init = function(L) {
 */
 const luaT_objtypename = function(L, o) {
     if ((o.ttistable() && o.metatable !== null) || (o.ttisfulluserdata() && o.metatable !== null)) {
-        let name = lobject.table_index(o, lua.to_luastring('__name', true));
+        let name = lobject.table_index(o, defs.to_luastring('__name', true));
         if (name.ttisstring())
             return name.jsstring();
     }
@@ -122,10 +122,10 @@ const luaT_trybinTM = function(L, p1, p2, res, event) {
                 if (n1 !== false && n2 !== false)
                     ldebug.luaG_tointerror(L, p1, p2);
                 else
-                    ldebug.luaG_opinterror(L, p1, p2, lua.to_luastring("perform bitwise operation on", true));
+                    ldebug.luaG_opinterror(L, p1, p2, defs.to_luastring("perform bitwise operation on", true));
             }
             default:
-                ldebug.luaG_opinterror(L, p1, p2, lua.to_luastring("perform arithmetic on", true));
+                ldebug.luaG_opinterror(L, p1, p2, defs.to_luastring("perform arithmetic on", true));
         }
     }
 };

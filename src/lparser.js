@@ -2,13 +2,13 @@
 
 const assert = require('assert');
 
+const defs     = require('./defs.js');
 const lcode    = require('./lcode.js');
 const lfunc    = require('./lfunc.js');
 const llex     = require('./llex.js');
 const llimit   = require('./llimit.js');
 const lobject  = require('./lobject.js');
 const lopcode  = require('./lopcodes.js');
-const lua      = require('./lua.js');
 const BinOpr   = lcode.BinOpr;
 const OpCodesI = lopcode.OpCodesI;
 const Proto    = lfunc.Proto;
@@ -16,7 +16,7 @@ const R        = llex.RESERVED;
 const TValue   = lobject.TValue;
 const UnOpr    = lcode.UnOpr;
 const UpVal    = lfunc.UpVal;
-const char     = lua.char;
+const char     = defs.char;
 
 const MAXVARS = 200;
 
@@ -159,7 +159,7 @@ const semerror = function(ls, msg) {
 };
 
 const error_expected = function(ls, token) {
-    llex.luaX_syntaxerror(ls, lua.to_luastring(`${lobject.jsstring(llex.luaX_token2str(ls, token))} expected`));
+    llex.luaX_syntaxerror(ls, defs.to_luastring(`${lobject.jsstring(llex.luaX_token2str(ls, token))} expected`));
 };
 
 const errorlimit = function(fs, limit, what) {
@@ -167,7 +167,7 @@ const errorlimit = function(fs, limit, what) {
     let line = fs.f.linedefined;
     let where = (line === 0) ? "main function" : `function at line ${line}`;
     let msg = `too many ${what} (limit is ${limit}) in ${where}`;
-    llex.luaX_syntaxerror(fs.ls, lua.to_luastring(msg));
+    llex.luaX_syntaxerror(fs.ls, defs.to_luastring(msg));
 };
 
 const checklimit = function(fs, v, l, what) {
@@ -204,7 +204,7 @@ const check_match = function(ls, what, who, where) {
             error_expected(ls, what);
         else
             llex.luaX_syntaxerror(ls,
-                lua.to_luastring(`${lobject.jsstring(llex.luaX_token2str(ls, what))} expected (to close ${lobject.jsstring(llex.luaX_token2str(ls, who))} at line ${where}`));
+                defs.to_luastring(`${lobject.jsstring(llex.luaX_token2str(ls, what))} expected (to close ${lobject.jsstring(llex.luaX_token2str(ls, who))} at line ${where}`));
     }
 };
 
@@ -241,14 +241,14 @@ const new_localvar = function(ls, name) {
     let fs = ls.fs;
     let dyd = ls.dyd;
     let reg = registerlocalvar(ls, name);
-    checklimit(fs, dyd.actvar.n + 1 - fs.firstlocal, MAXVARS, lua.to_luastring("local variables", true));
+    checklimit(fs, dyd.actvar.n + 1 - fs.firstlocal, MAXVARS, defs.to_luastring("local variables", true));
     dyd.actvar.arr[dyd.actvar.n] = new Vardesc();
     dyd.actvar.arr[dyd.actvar.n].idx = reg;
     dyd.actvar.n++;
 };
 
 const new_localvarliteral = function(ls, name) {
-    new_localvar(ls, new TValue(lua.CT.LUA_TLNGSTR, name));
+    new_localvar(ls, new TValue(defs.CT.LUA_TLNGSTR, name));
 };
 
 const getlocvar = function(fs, i) {
@@ -281,7 +281,7 @@ const searchupvalue = function(fs, name) {
 
 const newupvalue = function(fs, name, v) {
     let f = fs.f;
-    checklimit(fs, fs.nups + 1, lfunc.MAXUPVAL, lua.to_luastring("upvalues", true));
+    checklimit(fs, fs.nups + 1, lfunc.MAXUPVAL, defs.to_luastring("upvalues", true));
     f.upvalues[fs.nups] = new UpVal(fs.ls.L);
     f.upvalues[fs.nups].instack = v.k === expkind.VLOCAL;
     f.upvalues[fs.nups].idx = v.u.info;
@@ -372,7 +372,7 @@ const adjust_assign = function(ls, nvars, nexps, e) {
 const enterlevel = function(ls) {
     let L = ls.L;
     ++L.nCcalls;
-    checklimit(ls.fs, L.nCcalls, llimit.LUAI_MAXCCALLS, lua.to_luastring("JS levels", true));
+    checklimit(ls.fs, L.nCcalls, llimit.LUAI_MAXCCALLS, defs.to_luastring("JS levels", true));
 };
 
 const leavelevel = function(ls) {
@@ -386,7 +386,7 @@ const closegoto = function(ls, g, label) {
     assert(gt.name.value.join() === label.name.value.join());
     if (gt.nactvar < label.nactvar) {
         let vname = getlocvar(fs, gt.nactvar).varname;
-        semerror(ls, lua.to_luastring(`<goto ${gt.name.jsstring()}> at line ${gt.line} jumps into the scope of local '${vname.jsstring()}'`));
+        semerror(ls, defs.to_luastring(`<goto ${gt.name.jsstring()}> at line ${gt.line} jumps into the scope of local '${vname.jsstring()}'`));
     }
     lcode.luaK_patchlist(fs, gt.pc, label.pc);
     /* remove goto from pending list */
@@ -479,7 +479,7 @@ const enterblock = function(fs, bl, isloop) {
 ** create a label named 'break' to resolve break statements
 */
 const breaklabel = function(ls) {
-    let n = new TValue(lua.CT.LUA_TLNGSTR, lua.to_luastring("break", true));
+    let n = new TValue(defs.CT.LUA_TLNGSTR, defs.to_luastring("break", true));
     let l = newlabelentry(ls, ls.dyd.label, n, 0, ls.fs.pc);
     findgotos(ls, ls.dyd.label.arr[l]);
 };
@@ -492,7 +492,7 @@ const undefgoto = function(ls, gt) {
     const msg = llex.isreserved(gt.name.value)
                 ? `<${gt.name.jsstring()}> at line ${gt.line} not inside a loop`
                 : `no visible label '${gt.name.jsstring()}' for <goto> at line ${gt.line}`;
-    semerror(ls, lua.to_luastring(msg));
+    semerror(ls, defs.to_luastring(msg));
 };
 
 /*
@@ -638,7 +638,7 @@ const recfield = function(ls, cc) {
     let val = new expdesc();
 
     if (ls.t.token === R.TK_NAME) {
-        checklimit(fs, cc.nh, llimit.MAX_INT, lua.to_luastring("items in a constructor", true));
+        checklimit(fs, cc.nh, llimit.MAX_INT, defs.to_luastring("items in a constructor", true));
         checkname(ls, key);
     } else  /* ls->t.token === '[' */
         yindex(ls, key);
@@ -664,7 +664,7 @@ const lastlistfield = function(fs, cc) {
     if (cc.tostore === 0) return;
     if (hasmultret(cc.v.k)) {
         lcode.luaK_setmultret(fs, cc.v);
-        lcode.luaK_setlist(fs, cc.t.u.info, cc.na, lua.LUA_MULTRET);
+        lcode.luaK_setlist(fs, cc.t.u.info, cc.na, defs.LUA_MULTRET);
         cc.na--;  /* do not count last expression (unknown number of elements) */
     } else {
         if (cc.v.k !== expkind.VVOID)
@@ -676,7 +676,7 @@ const lastlistfield = function(fs, cc) {
 const listfield = function(ls, cc) {
     /* listfield -> exp */
     expr(ls, cc.v);
-    checklimit(ls.fs, cc.na, llimit.MAX_INT, lua.to_luastring("items in a constructor", true));
+    checklimit(ls.fs, cc.na, llimit.MAX_INT, defs.to_luastring("items in a constructor", true));
     cc.na++;
     cc.tostore++;
 };
@@ -748,7 +748,7 @@ const parlist = function(ls) {
                     f.is_vararg = 1;  /* declared vararg */
                     break;
                 }
-                default: llex.luaX_syntaxerror(ls, lua.to_luastring("<name> or '...' expected", true));
+                default: llex.luaX_syntaxerror(ls, defs.to_luastring("<name> or '...' expected", true));
             }
         } while(!f.is_vararg && testnext(ls, char[',']));
     }
@@ -766,7 +766,7 @@ const body = function(ls, e, ismethod, line) {
     open_func(ls, new_fs, bl);
     checknext(ls, char['(']);
     if (ismethod) {
-        new_localvarliteral(ls, lua.to_luastring("self", true));  /* create 'self' parameter */
+        new_localvarliteral(ls, defs.to_luastring("self", true));  /* create 'self' parameter */
         adjustlocalvars(ls, 1);
     }
     parlist(ls);
@@ -815,14 +815,14 @@ const funcargs = function(ls, f, line) {
             break;
         }
         default: {
-            llex.luaX_syntaxerror(ls, lua.to_luastring("function arguments expected", true));
+            llex.luaX_syntaxerror(ls, defs.to_luastring("function arguments expected", true));
         }
     }
     assert(f.k === expkind.VNONRELOC);
     let nparams;
     let base = f.u.info;  /* base register for call */
     if (hasmultret(args.k))
-        nparams = lua.LUA_MULTRET;  /* open call */
+        nparams = defs.LUA_MULTRET;  /* open call */
     else {
         if (args.k !== expkind.VVOID)
             lcode.luaK_exp2nextreg(fs, args);  /* close last argument */
@@ -855,7 +855,7 @@ const primaryexp = function(ls, v) {
             return;
         }
         default: {
-            llex.luaX_syntaxerror(ls, lua.to_luastring("unexpected symbol", true));
+            llex.luaX_syntaxerror(ls, defs.to_luastring("unexpected symbol", true));
         }
     }
 };
@@ -929,7 +929,7 @@ const simpleexp = function(ls, v) {
         }
         case R.TK_DOTS: {  /* vararg */
             let fs = ls.fs;
-            check_condition(ls, fs.f.is_vararg, lua.to_luastring("cannot use '...' outside a vararg function", true));
+            check_condition(ls, fs.f.is_vararg, defs.to_luastring("cannot use '...' outside a vararg function", true));
             init_exp(v, expkind.VVARARG, lcode.luaK_codeABC(fs, OpCodesI.OP_VARARG, 0, 1, 0));
             break;
         }
@@ -1101,14 +1101,14 @@ const check_conflict = function(ls, lh, v) {
 
 const assignment = function(ls, lh, nvars) {
     let e = new expdesc();
-    check_condition(ls, vkisvar(lh.v.k), lua.to_luastring("syntax error", true));
+    check_condition(ls, vkisvar(lh.v.k), defs.to_luastring("syntax error", true));
     if (testnext(ls, char[','])) {  /* assignment -> ',' suffixedexp assignment */
         let nv = new LHS_assign();
         nv.prev = lh;
         suffixedexp(ls, nv.v);
         if (nv.v.k !== expkind.VINDEXED)
             check_conflict(ls, lh, nv.v);
-        checklimit(ls.fs, nvars + ls.L.nCcalls, llimit.LUAI_MAXCCALLS, lua.to_luastring("JS levels", true));
+        checklimit(ls.fs, nvars + ls.L.nCcalls, llimit.LUAI_MAXCCALLS, defs.to_luastring("JS levels", true));
         assignment(ls, nv, nvars + 1);
     } else {  /* assignment -> '=' explist */
         checknext(ls, char['=']);
@@ -1141,7 +1141,7 @@ const gotostat = function(ls, pc) {
         label = str_checkname(ls);
     else {
         llex.luaX_next(ls);  /* skip break */
-        label = new TValue(lua.CT.LUA_TLNGSTR, lua.to_luastring("break", true));
+        label = new TValue(defs.CT.LUA_TLNGSTR, defs.to_luastring("break", true));
     }
     let g = newlabelentry(ls, ls.dyd.gt, label, line, pc);
     findlabel(ls, g);  /* close it if label already defined */
@@ -1151,7 +1151,7 @@ const gotostat = function(ls, pc) {
 const checkrepeated = function(fs, ll, label) {
     for (let i = fs.bl.firstlabel; i < ll.n; i++) {
         if (label.value.join() === ll.arr[i].name.value.join()) {
-            semerror(fs.ls, lua.to_luastring(`label '${label.jsstring()}' already defined on line ${ll.arr[i].line}`));
+            semerror(fs.ls, defs.to_luastring(`label '${label.jsstring()}' already defined on line ${ll.arr[i].line}`));
         }
     }
 };
@@ -1252,9 +1252,9 @@ const fornum = function(ls, varname, line) {
     /* fornum -> NAME = exp1,exp1[,exp1] forbody */
     let fs = ls.fs;
     let base = fs.freereg;
-    new_localvarliteral(ls, lua.to_luastring("(for index)", true));
-    new_localvarliteral(ls, lua.to_luastring("(for limit)", true));
-    new_localvarliteral(ls, lua.to_luastring("(for step)", true));
+    new_localvarliteral(ls, defs.to_luastring("(for index)", true));
+    new_localvarliteral(ls, defs.to_luastring("(for limit)", true));
+    new_localvarliteral(ls, defs.to_luastring("(for step)", true));
     new_localvar(ls, varname);
     checknext(ls, char['=']);
     exp1(ls);  /* initial value */
@@ -1276,9 +1276,9 @@ const forlist = function(ls, indexname) {
     let nvars = 4;  /* gen, state, control, plus at least one declared var */
     let base = fs.freereg;
     /* create control variables */
-    new_localvarliteral(ls, lua.to_luastring("(for generator)", true));
-    new_localvarliteral(ls, lua.to_luastring("(for state)", true));
-    new_localvarliteral(ls, lua.to_luastring("(for control)", true));
+    new_localvarliteral(ls, defs.to_luastring("(for generator)", true));
+    new_localvarliteral(ls, defs.to_luastring("(for state)", true));
+    new_localvarliteral(ls, defs.to_luastring("(for control)", true));
     /* create declared variables */
     new_localvar(ls, indexname);
     while (testnext(ls, char[','])) {
@@ -1302,7 +1302,7 @@ const forstat = function(ls, line) {
     switch (ls.t.token) {
         case char['=']: fornum(ls, varname, line); break;
         case char[',']: case R.TK_IN: forlist(ls, varname); break;
-        default: llex.luaX_syntaxerror(ls, lua.to_luastring("'=' or 'in' expected", true));
+        default: llex.luaX_syntaxerror(ls, defs.to_luastring("'=' or 'in' expected", true));
     }
     check_match(ls, R.TK_END, R.TK_FOR, line);
     leaveblock(fs);  /* loop scope ('break' jumps to this point) */
@@ -1420,7 +1420,7 @@ const exprstat= function(ls) {
         assignment(ls, v, 1);
     }
     else {  /* stat -> func */
-        check_condition(ls, v.v.k === expkind.VCALL, lua.to_luastring("syntax error", true));
+        check_condition(ls, v.v.k === expkind.VCALL, defs.to_luastring("syntax error", true));
         lopcode.SETARG_C(lcode.getinstruction(fs, v.v), 1);  /* call statement uses no results */
     }
 };
@@ -1441,7 +1441,7 @@ const retstat = function(ls) {
                 assert(lcode.getinstruction(fs, e).A === fs.nactvar);
             }
             first = fs.nactvar;
-            nret = lua.LUA_MULTRET;  /* return all values */
+            nret = defs.LUA_MULTRET;  /* return all values */
         } else {
             if (nret === 1)  /* only one single value? */
                 first = lcode.luaK_exp2anyreg(fs, e);
@@ -1546,10 +1546,10 @@ const luaY_parser = function(L, z, buff, dyd, name, firstchar) {
     let funcstate = new FuncState();
     let cl = lfunc.luaF_newLclosure(L, 1);  /* create main closure */
     L.stack[L.top++] = cl;
-    lexstate.h = new TValue(lua.CT.LUA_TTABLE, new Map());  /* create table for scanner */
+    lexstate.h = new TValue(defs.CT.LUA_TTABLE, new Map());  /* create table for scanner */
     L.stack[L.top++] = lexstate.h;
     funcstate.f = cl.p = new Proto(L);
-    funcstate.f.source = new TValue(lua.CT.LUA_TLNGSTR, name);
+    funcstate.f.source = new TValue(defs.CT.LUA_TLNGSTR, name);
     lexstate.buff = buff;
     lexstate.dyd = dyd;
     dyd.actvar.n = dyd.gt.n = dyd.label.n = 0;

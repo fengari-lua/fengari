@@ -2,15 +2,15 @@
 
 const assert  = require('assert');
 
-const lua     = require('./lua.js');
+const defs    = require('./defs.js');
 const lstate  = require('./lstate.js');
 const lobject = require('./lobject.js');
-const CT      = lua.constant_types;
+const CT      = defs.constant_types;
 
 const LUAC_DATA    = "\x19\x93\r\n\x1a\n";
 const LUAC_INT     = 0x5678;
 const LUAC_NUM     = 370.5;
-const LUAC_VERSION = Number.parseInt(lua.LUA_VERSION_MAJOR) * 16 + Number.parseInt(lua.LUA_VERSION_MINOR);
+const LUAC_VERSION = Number.parseInt(defs.LUA_VERSION_MAJOR) * 16 + Number.parseInt(defs.LUA_VERSION_MINOR);
 const LUAC_FORMAT  = 0;   /* this is the official format */
 
 class DumpState {
@@ -29,7 +29,7 @@ const DumpBlock = function(b, size, D) {
 };
 
 const DumpLiteral = function(s, D) {
-    s = lua.to_luastring(s);
+    s = defs.to_luastring(s);
     DumpBlock(s, s.length, D);
 };
 
@@ -168,7 +168,7 @@ const DumpFunction = function(f, psource, D) {
 };
 
 const DumpHeader = function(D) {
-  DumpLiteral(lua.LUA_SIGNATURE, D);
+  DumpLiteral(defs.LUA_SIGNATURE, D);
   DumpByte(LUAC_VERSION, D);
   DumpByte(LUAC_FORMAT, D);
   let cdata = LUAC_DATA.split('').map(e => e.charCodeAt(0));

@@ -3,17 +3,17 @@
 
 const assert               = require('assert');
 
-const lua                  = require('./lua.js');
+const defs                 = require('./defs.js');
 const lobject              = require('./lobject.js');
 const ldo                  = require('./ldo.js');
 const lapi                 = require('./lapi.js');
 const luaT_init            = require('./ltm.js').luaT_init;
-const CT                   = lua.constant_types;
-const LUA_MULTRET          = lua.LUA_MULTRET;
-const TS                   = lua.thread_status;
-const LUA_NUMTAGS          = lua.LUA_NUMTAGS;
+const CT                   = defs.constant_types;
+const LUA_MULTRET          = defs.LUA_MULTRET;
+const TS                   = defs.thread_status;
+const LUA_NUMTAGS          = defs.LUA_NUMTAGS;
 
-const BASIC_STACK_SIZE = 2 * lua.LUA_MINSTACK;
+const BASIC_STACK_SIZE = 2 * defs.LUA_MINSTACK;
 
 class CallInfo {
 
@@ -79,11 +79,11 @@ class global_State {
         // TODO: when weak value maps are available
         // let key = stringArray.map(e => `${e}|`).join('');
 
-        // if (!this.strt.has(key)) 
+        // if (!this.strt.has(key))
         //     this.strt.set(key, new lobject.TValue(CT.LUA_TLNGSTR, stringArray));
 
         // return this.strt.get(key);
-        
+
         return new lobject.TValue(CT.LUA_TLNGSTR, stringArray);
     }
 
@@ -99,7 +99,7 @@ const stack_init = function(L1, L) {
     ci.func = L1.stack[L1.top];
     ci.funcOff = L1.top;
     L1.stack[L1.top++] = new lobject.TValue(CT.LUA_TNIL, null);
-    ci.top = L1.top + lua.LUA_MINSTACK;
+    ci.top = L1.top + defs.LUA_MINSTACK;
     L1.ci = ci;
 };
 
@@ -109,8 +109,8 @@ const stack_init = function(L1, L) {
 const init_registry = function(L, g) {
     let registry = new lobject.TValue(CT.LUA_TTABLE, new Map());
     g.l_registry = registry;
-    registry.value.set(lua.LUA_RIDX_MAINTHREAD, L);
-    registry.value.set(lua.LUA_RIDX_GLOBALS, new lobject.TValue(CT.LUA_TTABLE, new Map()));
+    registry.value.set(defs.LUA_RIDX_MAINTHREAD, L);
+    registry.value.set(defs.LUA_RIDX_GLOBALS, new lobject.TValue(CT.LUA_TTABLE, new Map()));
 };
 
 /*

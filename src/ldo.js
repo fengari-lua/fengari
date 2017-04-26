@@ -3,6 +3,7 @@
 
 const assert         = require('assert');
 
+const defs           = require('./defs.js');
 const BytecodeParser = require('./lundump.js');
 const lapi           = require('./lapi.js');
 const ldebug         = require('./ldebug.js');
@@ -13,21 +14,20 @@ const lobject        = require('./lobject.js');
 const lparser        = require('./lparser.js');
 const lstate         = require('./lstate.js');
 const ltm            = require('./ltm.js');
-const lua            = require('./lua.js');
 const lvm            = require('./lvm.js');
-const CT             = lua.constant_types;
-const TS             = lua.thread_status;
-const LUA_MULTRET    = lua.LUA_MULTRET;
+const CT             = defs.constant_types;
+const TS             = defs.thread_status;
+const LUA_MULTRET    = defs.LUA_MULTRET;
 const TValue         = lobject.TValue;
 
 const seterrorobj = function(L, errcode, oldtop) {
     switch (errcode) {
         case TS.LUA_ERRMEM: {
-            L.stack[oldtop] = L.l_G.intern(lua.to_luastring("not enough memory", true));
+            L.stack[oldtop] = L.l_G.intern(defs.to_luastring("not enough memory", true));
             break;
         }
         case TS.LUA_ERRERR: {
-            L.stack[oldtop] = L.l_G.intern(lua.to_luastring("error in error handling", true));
+            L.stack[oldtop] = L.l_G.intern(defs.to_luastring("error in error handling", true));
             break;
         }
         default: {
@@ -71,14 +71,14 @@ const luaD_precall = function(L, off, nresults) {
             ci.nresults = nresults;
             ci.func = func;
             ci.funcOff = off;
-            ci.top = L.top + lua.LUA_MINSTACK;
+            ci.top = L.top + defs.LUA_MINSTACK;
             ci.callstatus = 0;
-            if (L.hookmask & lua.LUA_MASKCALL)
-                luaD_hook(L, lua.LUA_HOOKCALL, -1);
+            if (L.hookmask & defs.LUA_MASKCALL)
+                luaD_hook(L, defs.LUA_HOOKCALL, -1);
             let n = f(L); /* do the actual call */
 
             assert(n < L.top - L.ci.funcOff, "not enough elements in the stack");
-            
+
             luaD_poscall(L, ci, L.top - n, n);
 
             return true;
@@ -131,9 +131,9 @@ const luaD_precall = function(L, off, nresults) {
 const luaD_poscall = function(L, ci, firstResult, nres) {
     let wanted = ci.nresults;
 
-    if (L.hookmask & (lua.LUA_MASKRET | lua.LUA_MASKLINE)) {
-        if (L.hookmask & lua.LUA_MASKRET)
-            luaD_hook(L, lua.LUA_HOOKRET, -1);
+    if (L.hookmask & (defs.LUA_MASKRET | defs.LUA_MASKLINE)) {
+        if (L.hookmask & defs.LUA_MASKRET)
+            luaD_hook(L, defs.LUA_HOOKRET, -1);
         L.oldpc = ci.previous.pcOff;  /* 'oldpc' for caller function */
     }
 
@@ -190,11 +190,11 @@ const luaD_hook = function(L, event, line) {
         let ci = L.ci;
         let top = L.top;
         let ci_top = ci.top;
-        let ar = new lua.lua_Debug();
+        let ar = new defs.lua_Debug();
         ar.event = event;
         ar.currentline = line;
         ar.i_ci = ci;
-        ci.top = L.top + lua.LUA_MINSTACK;
+        ci.top = L.top + defs.LUA_MINSTACK;
         L.allowhook = 0;  /* cannot call hooks inside a hook */
         ci.callstatus |= lstate.CIST_HOOKED;
         hook(L, ar);
@@ -227,12 +227,12 @@ const adjust_varargs = function(L, p, actual) {
 const tryfuncTM = function(L, off, func) {
     let tm = ltm.luaT_gettmbyobj(L, func, ltm.TMS.TM_CALL);
     if (!tm.ttisfunction(tm))
-        ldebug.luaG_typeerror(L, func, lua.to_luastring("call", true));
+        ldebug.luaG_typeerror(L, func, defs.to_luastring("call", true));
     /* Open a hole inside the stack at 'func' */
     for (let p = L.top; p > off; p--)
         L.stack[p] = L.stack[p-1];
     L.top++; /* slot ensured by caller */
-    L.stack[off] = tm; /* tag method is the new function to be called */       
+    L.stack[off] = tm; /* tag method is the new function to be called */
 };
 
 /*
@@ -392,7 +392,7 @@ const recover = function(L, status) {
 */
 const resume_error = function(L, msg, narg) {
     L.top -= narg;  /* remove args from the stack */
-    L.stack[L.top++] = L.l_G.intern(lua.to_luastring(msg));  /* push error message */
+    L.stack[L.top++] = L.l_G.intern(defs.to_luastring(msg));  /* push error message */
     assert(L.top <= L.ci.top, "stack overflow");
     return TS.LUA_ERRRUN;
 };
@@ -408,7 +408,7 @@ const resume = function(L, n) {
     let firstArg = L.top - n;  /* first argument */
     let ci = L.ci;
     if (L.status === TS.LUA_OK) {  /* starting a coroutine? */
-        if (!luaD_precall(L, firstArg - 1, lua.LUA_MULTRET))  /* Lua function? */
+        if (!luaD_precall(L, firstArg - 1, defs.LUA_MULTRET))  /* Lua function? */
             lvm.luaV_execute(L);  /* call it */
     } else {  /* resuming from previous yield */
         assert(L.status === TS.LUA_YIELD);
@@ -483,9 +483,9 @@ const lua_yieldk = function(L, nresults, ctx, k) {
 
     if (L.nny > 0) {
         if (L !== L.l_G.mainthread)
-            ldebug.luaG_runerror(L, lua.to_luastring("attempt to yield across a JS-call boundary", true));
+            ldebug.luaG_runerror(L, defs.to_luastring("attempt to yield across a JS-call boundary", true));
         else
-            ldebug.luaG_runerror(L, lua.to_luastring("attempt to yield from outside a coroutine", true));
+            ldebug.luaG_runerror(L, defs.to_luastring("attempt to yield from outside a coroutine", true));
     }
 
     L.status = TS.LUA_YIELD;
@@ -555,7 +555,7 @@ class SParser {
 
 const checkmode = function(L, mode, x) {
     if (mode && mode.indexOf(x[0]) === -1) {
-        lapi.lua_pushstring(L, lua.to_luastring(`attempt to load a ${lobject.jsstring(x)} chunk (mode is '${lobject.jsstring(mode)}')`));
+        lapi.lua_pushstring(L, defs.to_luastring(`attempt to load a ${lobject.jsstring(x)} chunk (mode is '${lobject.jsstring(mode)}')`));
         luaD_throw(L, TS.LUA_ERRSYNTAX);
     }
 };
@@ -563,11 +563,11 @@ const checkmode = function(L, mode, x) {
 const f_parser = function(L, p) {
     let cl;
     let c = p.z.getc();  /* read first character */
-    if (c === lua.LUA_SIGNATURE.charCodeAt(0)) {
-        checkmode(L, p.mode, lua.to_luastring("binary", true));
+    if (c === defs.LUA_SIGNATURE.charCodeAt(0)) {
+        checkmode(L, p.mode, defs.to_luastring("binary", true));
         cl = new BytecodeParser(L, p.z.buffer, p.name).luaU_undump();
     } else {
-        checkmode(L, p.mode, lua.to_luastring("text", true));
+        checkmode(L, p.mode, defs.to_luastring("text", true));
         cl = lparser.luaY_parser(L, p.z, p.buff, p.dyd, p.name, c);
     }
 

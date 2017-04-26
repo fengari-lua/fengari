@@ -3,10 +3,10 @@
 
 const assert  = require('assert');
 
+const defs    = require('./defs.js');
 const lobject = require('./lobject.js');
-const lua     = require('./lua.js');
-const CT      = lua.constant_types;
 const nil     = require('./ldo.js').nil;
+const CT      = defs.constant_types;
 const TValue  = lobject.TValue;
 
 

@@ -4,7 +4,7 @@
 const fs             = require('fs');
 const assert         = require('assert');
 
-const lua            = require('./lua.js');
+const defs           = require('./defs.js');
 const lobject        = require('./lobject.js');
 const Proto          = require('./lfunc.js').Proto;
 const OpCodes        = require('./lopcodes.js');
@@ -161,25 +161,25 @@ class BytecodeParser {
 
     readConstants(f) {
         let n = this.readInt();
-        
+
         for (let i = 0; i < n; i++) {
             let t = this.readByte();
 
             switch (t) {
-            case lua.CT.LUA_TNIL:
-                f.k.push(new lobject.TValue(lua.CT.LUA_TNIL, null));
+            case defs.CT.LUA_TNIL:
+                f.k.push(new lobject.TValue(defs.CT.LUA_TNIL, null));
                 break;
-            case lua.CT.LUA_TBOOLEAN:
-                f.k.push(new lobject.TValue(lua.CT.LUA_TBOOLEAN, this.readByte()));
+            case defs.CT.LUA_TBOOLEAN:
+                f.k.push(new lobject.TValue(defs.CT.LUA_TBOOLEAN, this.readByte()));
                 break;
-            case lua.CT.LUA_TNUMFLT:
-                f.k.push(new lobject.TValue(lua.CT.LUA_TNUMFLT, this.readNumber()));
+            case defs.CT.LUA_TNUMFLT:
+                f.k.push(new lobject.TValue(defs.CT.LUA_TNUMFLT, this.readNumber()));
                 break;
-            case lua.CT.LUA_TNUMINT:
-                f.k.push(new lobject.TValue(lua.CT.LUA_TNUMINT, this.readInteger()));
+            case defs.CT.LUA_TNUMINT:
+                f.k.push(new lobject.TValue(defs.CT.LUA_TNUMINT, this.readInteger()));
                 break;
-            case lua.CT.LUA_TSHRSTR:
-            case lua.CT.LUA_TLNGSTR:
+            case defs.CT.LUA_TSHRSTR:
+            case defs.CT.LUA_TLNGSTR:
                 f.k.push(this.L.l_G.intern(this.read8bitString()));
                 break;
             default:
@@ -205,7 +205,7 @@ class BytecodeParser {
         n = this.readInt();
         for (let i = 0; i < n; i++) {
             f.locvars[i] = {
-                varname: new lobject.TValue(lua.CT.LUA_TLNGSTR, lua.to_luastring(this.readString())),
+                varname: new lobject.TValue(defs.CT.LUA_TLNGSTR, defs.to_luastring(this.readString())),
                 startpc: this.readInt(),
                 endpc:   this.readInt()
             };
@@ -234,7 +234,7 @@ class BytecodeParser {
     }
 
     checkHeader() {
-        if (this.readString(4) !== lua.LUA_SIGNATURE)
+        if (this.readString(4) !== defs.LUA_SIGNATURE)
             throw new Error("bad LUA_SIGNATURE, expected '<esc>Lua'");
 
         if (this.readByte() !== 0x53)
@@ -269,8 +269,8 @@ class BytecodeParser {
     error(why) {
         const lapi = require('./lapi.js');
         const ldo  = require('./ldo.js');
-        lapi.lua_pushstring(this.L, lua.to_luastring(`${this.name}: ${why} precompiled chunk`, true));
-        ldo.luaD_throw(this.L, lua.thread_status.LUA_ERRSYNTAX);
+        lapi.lua_pushstring(this.L, defs.to_luastring(`${this.name}: ${why} precompiled chunk`, true));
+        ldo.luaD_throw(this.L, defs.thread_status.LUA_ERRSYNTAX);
     }
 
     checksize(byte, size, tname) {

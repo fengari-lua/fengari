@@ -2,6 +2,7 @@
 
 const assert    = require('assert');
 
+const defs      = require('./defs.js');
 const ldebug    = require('./ldebug.js');
 const ldo       = require('./ldo.js');
 const ldump     = require('./ldump.js');
@@ -10,14 +11,13 @@ const llex      = require('./llex.js');
 const lobject   = require('./lobject.js');
 const lstate    = require('./lstate.js');
 const ltm       = require('./ltm.js');
-const lua       = require('./lua.js');
 const luaconf   = require('./luaconf.js');
 const lundump   = require('./lundump.js');
 const lvm       = require('./lvm.js');
 const ltable    = require('./ltable.js');
 const MAXUPVAL  = lfunc.MAXUPVAL;
-const CT        = lua.constant_types;
-const TS        = lua.thread_status;
+const CT        = defs.constant_types;
+const TS        = defs.thread_status;
 const TValue    = lobject.TValue;
 const CClosure  = lobject.CClosure;
 
@@ -26,7 +26,7 @@ const isvalid = function(o) {
 };
 
 const lua_version = function(L) {
-    if (L === null) return lua.LUA_VERSION_NUM;
+    if (L === null) return defs.LUA_VERSION_NUM;
     else return L.l_G.version;
 };
 
@@ -44,13 +44,13 @@ const index2addr = function(L, idx) {
         assert(idx <= ci.top - (ci.funcOff + 1), "unacceptable index");
         if (o >= L.top) return lobject.luaO_nilobject;
         else return L.stack[o];
-    } else if (idx > lua.LUA_REGISTRYINDEX) {
+    } else if (idx > defs.LUA_REGISTRYINDEX) {
         assert(idx !== 0 && -idx <= L.top, "invalid index");
         return L.stack[L.top + idx];
-    } else if (idx === lua.LUA_REGISTRYINDEX) {
+    } else if (idx === defs.LUA_REGISTRYINDEX) {
         return L.l_G.l_registry;
     } else { /* upvalues */
-        idx = lua.LUA_REGISTRYINDEX - idx;
+        idx = defs.LUA_REGISTRYINDEX - idx;
         assert(idx <= MAXUPVAL + 1, "upvalue index too large");
         if (ci.func.ttislcf()) /* light C function? */
             return lobject.luaO_nilobject; /* it has no upvalues */
@@ -68,13 +68,13 @@ const index2addr_ = function(L, idx) {
         assert(idx <= ci.top - (ci.funcOff + 1), "unacceptable index");
         if (o >= L.top) return null;
         else return o;
-    } else if (idx > lua.LUA_REGISTRYINDEX) {
+    } else if (idx > defs.LUA_REGISTRYINDEX) {
         assert(idx !== 0 && -idx <= L.top, "invalid index");
         return L.top + idx;
-    } else if (idx === lua.LUA_REGISTRYINDEX) {
+    } else if (idx === defs.LUA_REGISTRYINDEX) {
         return null;
     } else { /* upvalues */
-        idx = lua.LUA_REGISTRYINDEX - idx;
+        idx = defs.LUA_REGISTRYINDEX - idx;
         assert(idx <= MAXUPVAL + 1, "upvalue index too large");
         if (ci.func.ttislcf()) /* light C function? */
             return null; /* it has no upvalues */
@@ -109,7 +109,7 @@ const lua_xmove = function(from, to, n) {
 ** convert an acceptable stack index into an absolute index
 */
 const lua_absindex = function(L, idx) {
-    return (idx > 0 || idx <= lua.LUA_REGISTRYINDEX)
+    return (idx > 0 || idx <= defs.LUA_REGISTRYINDEX)
          ? idx
          : (L.top - L.ci.funcOff) + idx;
 };
@@ -163,7 +163,7 @@ const lua_rotate = function(L, idx, n) {
     let p = index2addr(L, idx);
     let pIdx = index2addr_(L, idx);
 
-    assert(p !== lobject.luaO_nilobject && idx > lua.LUA_REGISTRYINDEX, "index not in the stack");
+    assert(p !== lobject.luaO_nilobject && idx > defs.LUA_REGISTRYINDEX, "index not in the stack");
     assert((n >= 0 ? n : -n) <= (L.top - idx), "invalid 'n'");
 
     let m = n >= 0 ? L.top - 1 - n : pIdx - n - 1;  /* end of prefix */
@@ -222,7 +222,7 @@ const lua_pushlstring = function(L, s, len) {
     assert(Array.isArray(s), "lua_pushlstring expects array of byte");
     assert(typeof len === "number");
 
-    let ts = len === 0 ? L.l_G.intern(lua.to_luastring("", true)) : new TValue(CT.LUA_TLNGSTR, s.slice(0, len));
+    let ts = len === 0 ? L.l_G.intern(defs.to_luastring("", true)) : new TValue(CT.LUA_TLNGSTR, s.slice(0, len));
     L.stack[L.top++] = ts;
 
     assert(L.top <= L.ci.top, "stack overflow");
@@ -251,7 +251,7 @@ const lua_pushliteral = function (L, s) {
     if (s === undefined || s === null)
         L.stack[L.top] = new TValue(CT.LUA_TNIL, null);
     else {
-        let ts = L.l_G.intern(lua.to_luastring(s));
+        let ts = L.l_G.intern(defs.to_luastring(s));
         L.stack[L.top] = ts;
     }
 
@@ -319,7 +319,7 @@ const lua_pushthread = function(L) {
 };
 
 const lua_pushglobaltable = function(L) {
-    lua_rawgeti(L, lua.LUA_REGISTRYINDEX, lua.LUA_RIDX_GLOBALS);
+    lua_rawgeti(L, defs.LUA_REGISTRYINDEX, defs.LUA_RIDX_GLOBALS);
 };
 
 /*
@@ -347,7 +347,7 @@ const auxsetstr = function(L, t, k) {
 };
 
 const lua_setglobal = function(L, name) {
-    auxsetstr(L, L.l_G.l_registry.value.get(lua.LUA_RIDX_GLOBALS), name);
+    auxsetstr(L, L.l_G.l_registry.value.get(defs.LUA_RIDX_GLOBALS), name);
 };
 
 const lua_setmetatable = function(L, objindex) {
@@ -597,7 +597,7 @@ const lua_geti = function(L, idx, n) {
 };
 
 const lua_getglobal = function(L, name) {
-    return auxgetstr(L, L.l_G.l_registry.value.get(lua.LUA_RIDX_GLOBALS), name);
+    return auxgetstr(L, L.l_G.l_registry.value.get(defs.LUA_RIDX_GLOBALS), name);
 };
 
 /*
@@ -615,7 +615,7 @@ const lua_tolstring = function(L, idx) {
     if ((!o.ttisstring() && !o.ttisnumber()))
         return null;
 
-    return o.ttisstring() ? o.value : lua.to_luastring(`${o.value}`);
+    return o.ttisstring() ? o.value : defs.to_luastring(`${o.value}`);
 };
 
 const lua_tostring =  lua_tolstring;
@@ -710,9 +710,9 @@ const lua_compare_ = function(L, o1, o2, op) {
 
     if (isvalid(o1) && isvalid(o2)) {
         switch (op) {
-            case lua.LUA_OPEQ: i = lvm.luaV_equalobj(L, o1, o2); break;
-            case lua.LUA_OPLT: i = lvm.luaV_lessthan(L, o1, o2); break;
-            case lua.LUA_OPLE: i = lvm.luaV_lessequal(L, o1, o2); break;
+            case defs.LUA_OPEQ: i = lvm.luaV_equalobj(L, o1, o2); break;
+            case defs.LUA_OPLT: i = lvm.luaV_lessthan(L, o1, o2); break;
+            case defs.LUA_OPLE: i = lvm.luaV_lessequal(L, o1, o2); break;
             default: assert(false, "invalid option");
         }
     }
@@ -805,14 +805,14 @@ const lua_load = function(L, reader, data, chunckname, mode) {
     assert(Array.isArray(chunckname), "lua_load expect an array of byte as chunckname");
     assert(mode ? Array.isArray(mode) : true, "lua_load expect an array of byte as mode");
     let z = new llex.MBuffer(L, data, reader);
-    if (!chunckname) chunckname = [lua.char["?"]];
+    if (!chunckname) chunckname = [defs.char["?"]];
     let status = ldo.luaD_protectedparser(L, z, chunckname, mode);
     if (status === TS.LUA_OK) {  /* no errors? */
         let f = L.stack[L.top - 1]; /* get newly created function */
         if (f.nupvalues >= 1) {  /* does it have an upvalue? */
             /* get global table from registry */
             let reg = L.l_G.l_registry;
-            let gt = reg.value.get(lua.LUA_RIDX_GLOBALS);
+            let gt = reg.value.get(defs.LUA_RIDX_GLOBALS);
             /* set global table as 1st upvalue of 'f' (may be LUA_ENV) */
             f.upvals[0].u.value = new TValue(gt.type, gt.value);
         }
@@ -846,7 +846,7 @@ const lua_callk = function(L, nargs, nresults, ctx, k) {
     assert(k === null || !(L.ci.callstatus & lstate.CIST_LUA), "cannot use continuations inside hooks");
     assert(nargs + 1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     assert(L.status === TS.LUA_OK, "cannot do calls on non-normal thread");
-    assert(nargs === lua.LUA_MULTRET || (L.ci.top - L.top >= nargs - nresults, "results from function overflow current stack size"));
+    assert(nargs === defs.LUA_MULTRET || (L.ci.top - L.top >= nargs - nresults, "results from function overflow current stack size"));
 
     let func = L.top - (nargs + 1);
     if (k !== null && L.nny === 0) { /* need to prepare continuation? */
@@ -857,7 +857,7 @@ const lua_callk = function(L, nargs, nresults, ctx, k) {
         ldo.luaD_callnoyield(L, func, nresults);
     }
 
-    if (nresults === lua.LUA_MULTRET && L.ci.top < L.top)
+    if (nresults === defs.LUA_MULTRET && L.ci.top < L.top)
         L.ci.top = L.top;
 };
 
@@ -868,7 +868,7 @@ const lua_call = function(L, n, r) {
 const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
     assert(nargs + 1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     assert(L.status === TS.LUA_OK, "cannot do calls on non-normal thread");
-    assert(nargs === lua.LUA_MULTRET || (L.ci.top - L.top >= nargs - nresults, "results from function overflow current stack size"));
+    assert(nargs === defs.LUA_MULTRET || (L.ci.top - L.top >= nargs - nresults, "results from function overflow current stack size"));
 
     let c = {
         func: null,
@@ -908,7 +908,7 @@ const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
         status = TS.LUA_OK;
     }
 
-    if (nresults === lua.LUA_MULTRET && L.ci.top < L.top)
+    if (nresults === defs.LUA_MULTRET && L.ci.top < L.top)
         L.ci.top = L.top;
 
     return status;
@@ -945,7 +945,7 @@ const lua_concat = function(L, n) {
     if (n >= 2)
         lvm.luaV_concat(L, n);
     else if (n === 0) {
-        L.stack[L.top++] = L.l_G.intern(lua.to_luastring("", true));
+        L.stack[L.top++] = L.l_G.intern(defs.to_luastring("", true));
         assert(L.top <= L.ci.top, "stack overflow");
     }
 };

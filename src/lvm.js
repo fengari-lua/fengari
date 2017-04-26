@@ -3,12 +3,10 @@
 
 const assert         = require('assert');
 
+const defs           = require('./defs.js');
 const BytecodeParser = require('./lundump.js');
 const OC             = require('./lopcodes.js');
-const lua            = require('./lua.js');
 const luaconf        = require('./luaconf.js');
-const CT             = lua.constant_types;
-const LUA_MULTRET    = lua.LUA_MULTRET;
 const lobject        = require('./lobject.js');
 const TValue         = lobject.TValue;
 const LClosure       = lobject.LClosure;
@@ -21,6 +19,8 @@ const ldo            = require('./ldo.js');
 const ltm            = require('./ltm.js');
 const ltable         = require('./ltable.js');
 const ldebug         = require('./ldebug.js');
+const CT             = defs.constant_types;
+const LUA_MULTRET    = defs.LUA_MULTRET;
 
 /*
 ** finish execution of an opcode interrupted by an yield
@@ -108,7 +108,7 @@ const luaV_execute = function(L) {
     let specialCase = null; // To enable jump to specific opcode without reading current op/ra
     let opcode, k, base, i, ra;
     var cl;
-    
+
     ci.callstatus |= lstate.CIST_FRESH;
     newframe:
     for (;;) {
@@ -123,7 +123,7 @@ const luaV_execute = function(L) {
 
             i = ci.u.l.savedpc[ci.pcOff++];
 
-            if (L.hookmask & (lua.LUA_MASKLINE | lua.LUA_MASKCOUNT)) {
+            if (L.hookmask & (defs.LUA_MASKLINE | defs.LUA_MASKCOUNT)) {
                 ldebug.luaG_traceexec(L);
                 base = ci.u.l.base;
             }
@@ -553,7 +553,7 @@ const luaV_execute = function(L) {
 
                 if (ci.callstatus & lstate.CIST_FRESH)
                     return; /* external invocation: return */
-                
+
                 ci = L.ci;
                 if (b) L.top = ci.top;
 
@@ -600,19 +600,19 @@ const luaV_execute = function(L) {
                     let nstep = tonumber(pstep);
 
                     if (nlimit === false)
-                        ldebug.luaG_runerror(L, lua.to_luastring("'for' limit must be a number", true));
+                        ldebug.luaG_runerror(L, defs.to_luastring("'for' limit must be a number", true));
 
                     plimit.type = CT.LUA_TNUMFLT;
                     plimit.value = nlimit;
 
                     if (nstep === false)
-                        ldebug.luaG_runerror(L, lua.to_luastring("'for' step must be a number", true));
+                        ldebug.luaG_runerror(L, defs.to_luastring("'for' step must be a number", true));
 
                     pstep.type = CT.LUA_TNUMFLT;
                     pstep.value = nstep;
 
                     if (ninit === false)
-                        ldebug.luaG_runerror(L, lua.to_luastring("'for' initial value must be a number", true));
+                        ldebug.luaG_runerror(L, defs.to_luastring("'for' initial value must be a number", true));
 
                     init.type = CT.LUA_TNUMFLT;
                     init.value = ninit - nstep;
@@ -986,7 +986,7 @@ const luaV_objlen = function(L, ra, rb) {
         default: {
             tm = ltm.luaT_gettmbyobj(L, rb, ltm.TMS.TM_LEN);
             if (tm.ttisnil())
-                ldebug.luaG_typeerror(L, rb, lua.to_luastring("get length of", true));
+                ldebug.luaG_typeerror(L, rb, defs.to_luastring("get length of", true));
             break;
         }
     }
@@ -1000,7 +1000,7 @@ const tostring = function(L, i) {
     if (o.ttisstring()) return true;
 
     if (o.ttisnumber() && !isNaN(o.value)) {
-        L.stack[i] = L.l_G.intern(lua.to_luastring(`${o.value}`));
+        L.stack[i] = L.l_G.intern(defs.to_luastring(`${o.value}`));
         return true;
     }
 
@@ -1051,7 +1051,7 @@ const gettable = function(L, table, key, ra, recur) {
     recur = recur ? recur : 0;
 
     if (recur >= MAXTAGRECUR)
-        ldebug.luaG_runerror(L, lua.to_luastring("'__index' chain too long; possible loop", true));
+        ldebug.luaG_runerror(L, defs.to_luastring("'__index' chain too long; possible loop", true));
 
     if (table.ttistable()) {
         let element = lobject.table_index(table, key);
@@ -1072,7 +1072,7 @@ const luaV_finishget = function(L, t, key, val, slot, recur) {
         assert(!t.ttistable());
         tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_INDEX);
         if (tm.ttisnil())
-            ldebug.luaG_typeerror(L, t, lua.to_luastring('index', true));
+            ldebug.luaG_typeerror(L, t, defs.to_luastring('index', true));
     } else { /* 't' is a table */
         assert(slot.ttisnil());
         tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_INDEX); // TODO: fasttm
@@ -1094,7 +1094,7 @@ const settable = function(L, table, key, v, recur) {
     recur = recur ? recur : 0;
 
     if (recur >= MAXTAGRECUR)
-        ldebug.luaG_runerror(L, lua.to_luastring("'__newindex' chain too long; possible loop", true));
+        ldebug.luaG_runerror(L, defs.to_luastring("'__newindex' chain too long; possible loop", true));
 
     if (table.ttistable()) {
         let element = lobject.table_index(table, key);
@@ -1121,7 +1121,7 @@ const luaV_finishset = function(L, t, key, val, slot, recur) {
     } else { /* not a table; check metamethod */
         tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_NEWINDEX);
         if (tm.ttisnil())
-            ldebug.luaG_typeerror(L, t, lua.to_luastring('index', true));
+            ldebug.luaG_typeerror(L, t, defs.to_luastring('index', true));
     }
 
     if (tm.ttisfunction()) {
