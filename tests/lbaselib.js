@@ -10,7 +10,6 @@ const toByteCode = tests.toByteCode;
 const VM         = require("../src/lvm.js");
 const lauxlib    = require("../src/lauxlib.js");
 const lua        = require('../src/lua.js');
-const linit      = require('../src/linit.js');
 
 test('print', function (t) {
     let luaCode = `
@@ -25,7 +24,7 @@ test('print', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-print"), lua.to_luastring("binary"));
 
@@ -59,7 +58,7 @@ test('setmetatable, getmetatable', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-setmetatable-getmetatable"), lua.to_luastring("binary"));
 
@@ -104,7 +103,7 @@ test('rawequal', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-rawequal"), lua.to_luastring("binary"));
 
@@ -150,7 +149,7 @@ test('rawset, rawget', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-rawequal"), lua.to_luastring("binary"));
 
@@ -197,7 +196,7 @@ test('type', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-type"), lua.to_luastring("binary"));
 
@@ -250,7 +249,7 @@ test('error', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-error"), lua.to_luastring("binary"));
 
@@ -273,7 +272,7 @@ test('error, protected', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-error"), lua.to_luastring("binary"));
 
@@ -305,7 +304,7 @@ test('pcall', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-pcall"), lua.to_luastring("binary"));
 
@@ -341,7 +340,7 @@ test('xpcall', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-pcall"), lua.to_luastring("binary"));
 
@@ -383,7 +382,7 @@ test('ipairs', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-ipairs"), lua.to_luastring("binary"));
 
@@ -412,7 +411,7 @@ test('select', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-select"), lua.to_luastring("binary"));
 
@@ -453,7 +452,7 @@ test('tonumber', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-tonumber"), lua.to_luastring("binary"));
 
@@ -500,7 +499,7 @@ test('assert', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-assert"), lua.to_luastring("binary"));
 
@@ -528,7 +527,7 @@ test('rawlen', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-rawlen"), lua.to_luastring("binary"));
 
@@ -575,7 +574,7 @@ test('next', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-next"), lua.to_luastring("binary"));
 
@@ -616,7 +615,7 @@ test('pairs', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-pairs"), lua.to_luastring("binary"));
 
@@ -666,7 +665,7 @@ test('pairs with __pairs', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-pairs"), lua.to_luastring("binary"));
 

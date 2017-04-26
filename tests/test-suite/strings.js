@@ -5,7 +5,6 @@ const test     = require('tape');
 const lapi     = require("../../src/lapi.js");
 const lauxlib  = require("../../src/lauxlib.js");
 const lua      = require('../../src/lua.js');
-const linit    = require('../../src/linit.js');
 
 
 const checkerror = `
@@ -44,7 +43,7 @@ test('[test-suite] strings: string comparisons', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
 
@@ -86,7 +85,7 @@ test('[test-suite] strings: string.sub', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
 
@@ -124,7 +123,7 @@ test('[test-suite] strings: string.find', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
 
@@ -156,7 +155,7 @@ test('[test-suite] strings: string.len and #', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
 
@@ -213,7 +212,7 @@ test('[test-suite] strings: string.byte/string.char', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
 
@@ -250,7 +249,7 @@ test('[test-suite] strings: repetitions with separator', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
 
@@ -302,7 +301,7 @@ test('[test-suite] strings: tostring', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
 
@@ -349,7 +348,7 @@ test('[test-suite] strings: string.format', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
 
@@ -390,7 +389,7 @@ test('[test-suite] strings: %q', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
 
@@ -417,7 +416,7 @@ test('[test-suite] strings: embedded zeros error', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
 
@@ -460,7 +459,7 @@ test('[test-suite] strings: format x tostring', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
 
@@ -497,7 +496,7 @@ test('[test-suite] strings: longest number that can be formatted', function (t) 
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
 
@@ -546,7 +545,7 @@ test('[test-suite] strings: large numbers for format', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
 
@@ -603,7 +602,7 @@ test("[test-suite] strings: 'format %a %A'", function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
 
@@ -643,7 +642,7 @@ test("[test-suite] strings: errors in format", function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
 
@@ -694,7 +693,7 @@ test("[test-suite] strings: table.concat", function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
 
@@ -751,7 +750,7 @@ if (false) {
 
             L = lauxlib.luaL_newstate();
 
-            linit.luaL_openlibs(L);
+            lauxlib.luaL_openlibs(L);
 
             lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
 
@@ -783,7 +782,7 @@ test("[test-suite] strings: bug in Lua 5.3.2: 'gmatch' iterator does not work ac
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
 

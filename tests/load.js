@@ -8,7 +8,6 @@ const toByteCode = tests.toByteCode;
 const VM         = require("../src/lvm.js");
 const lauxlib    = require("../src/lauxlib.js");
 const lua        = require('../src/lua.js');
-const linit      = require('../src/linit.js');
 
 
 test('luaL_loadstring', function (t) {
@@ -23,7 +22,7 @@ test('luaL_loadstring', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -56,7 +55,7 @@ test('load', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -91,7 +90,7 @@ test('luaL_loadbuffer', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadbuffer(L, bc, null, lua.to_luastring("test"));
 
@@ -124,7 +123,7 @@ test('loadfile', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -157,7 +156,7 @@ test('loadfile (binary)', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -189,7 +188,7 @@ test('dofile', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 

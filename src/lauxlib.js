@@ -4,6 +4,7 @@
 const lapi    = require('./lapi.js');
 const lua     = require('./lua.js');
 const lobject = require('./lobject.js');
+const linit   = require('./linit.js');
 
 const LUA_LOADED_TABLE = "_LOADED";
 
@@ -725,6 +726,7 @@ module.exports.luaL_loadstring      = luaL_loadstring;
 module.exports.luaL_newlib          = luaL_newlib;
 module.exports.luaL_newmetatable    = luaL_newmetatable;
 module.exports.luaL_newstate        = luaL_newstate;
+module.exports.luaL_openlibs        = linit.luaL_openlibs;
 module.exports.luaL_opt             = luaL_opt;
 module.exports.luaL_optinteger      = luaL_optinteger;
 module.exports.luaL_optlstring      = luaL_optlstring;

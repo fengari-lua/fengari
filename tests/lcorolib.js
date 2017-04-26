@@ -10,7 +10,6 @@ const toByteCode = tests.toByteCode;
 const VM         = require("../src/lvm.js");
 const lauxlib    = require("../src/lauxlib.js");
 const lua        = require('../src/lua.js');
-const linit      = require('../src/linit.js');
 const lstate     = require('../src/lstate.js');
 
 
@@ -35,7 +34,7 @@ test('coroutine.create, coroutine.yield, coroutine.resume', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-coroutine"), lua.to_luastring("binary"));
 
@@ -78,7 +77,7 @@ test('coroutine.status', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-coroutine.status"), lua.to_luastring("binary"));
 
@@ -119,7 +118,7 @@ test('coroutine.isyieldable', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-coroutine.isyieldable"), lua.to_luastring("binary"));
 
@@ -160,7 +159,7 @@ test('coroutine.running', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-coroutine.running"), lua.to_luastring("binary"));
 
@@ -201,7 +200,7 @@ test('coroutine.wrap', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-coroutine.wrap"), lua.to_luastring("binary"));
 

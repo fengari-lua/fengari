@@ -9,7 +9,6 @@ const toByteCode = tests.toByteCode;
 const lua        = require("../src/lua.js");
 const lapi       = require("../src/lapi.js");
 const lauxlib    = require("../src/lauxlib.js");
-const linit      = require('../src/linit.js');
 
 // Roughly the same tests as test/lvm.js to cover all opcodes
 
@@ -25,7 +24,7 @@ test('LOADK, RETURN', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -65,7 +64,7 @@ test('MOVE', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -105,7 +104,7 @@ test('Binary op', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -145,7 +144,7 @@ test('Unary op, LOADBOOL', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -183,7 +182,7 @@ test('NEWTABLE', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -225,7 +224,7 @@ test('CALL', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -271,7 +270,7 @@ test('Multiple return', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -312,7 +311,7 @@ test('TAILCALL', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -353,7 +352,7 @@ test('VARARG', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -392,7 +391,7 @@ test('LE, JMP', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -431,7 +430,7 @@ test('LT', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -470,7 +469,7 @@ test('EQ', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -510,7 +509,7 @@ test('TESTSET (and)', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -550,7 +549,7 @@ test('TESTSET (or)', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -594,7 +593,7 @@ test('TEST (false)', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -637,7 +636,7 @@ test('FORPREP, FORLOOP (int)', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -680,7 +679,7 @@ test('FORPREP, FORLOOP (float)', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -722,7 +721,7 @@ test('SETTABLE, GETTABLE', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -773,7 +772,7 @@ test('SETUPVAL, GETUPVAL', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -815,7 +814,7 @@ test('SETTABUP, GETTABUP', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -865,7 +864,7 @@ test('SELF', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -904,7 +903,7 @@ test('SETLIST', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -947,7 +946,7 @@ test('Variable SETLIST', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -985,7 +984,7 @@ test('Long SETLIST', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -1040,7 +1039,7 @@ test('TFORCALL, TFORLOOP', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -1081,7 +1080,7 @@ test('LEN', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
@@ -1130,7 +1129,7 @@ test('CONCAT', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;

@@ -5,7 +5,6 @@ const test     = require('tape');
 const lapi     = require("../src/lapi.js");
 const lauxlib  = require("../src/lauxlib.js");
 const lua      = require('../src/lua.js');
-const linit    = require('../src/linit.js');
 
 // TODO: remove
 
@@ -23,7 +22,7 @@ if (false) {
 
             L = lauxlib.luaL_newstate();
 
-            linit.luaL_openlibs(L);
+            lauxlib.luaL_openlibs(L);
 
             lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -51,7 +50,7 @@ if (false) {
 
             L = lauxlib.luaL_newstate();
 
-            linit.luaL_openlibs(L);
+            lauxlib.luaL_openlibs(L);
 
             lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -77,7 +76,7 @@ if (false) {
 
             L = lauxlib.luaL_newstate();
 
-            linit.luaL_openlibs(L);
+            lauxlib.luaL_openlibs(L);
 
             lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 

@@ -10,7 +10,6 @@ const toByteCode = tests.toByteCode;
 const VM         = require("../src/lvm.js");
 const lauxlib    = require("../src/lauxlib.js");
 const lua        = require('../src/lua.js');
-const linit      = require('../src/linit.js');
 const lstate     = require('../src/lstate.js');
 
 const inttable2array = function(t) {
@@ -37,7 +36,7 @@ test('table.concat', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-table.concat"), lua.to_luastring("binary"));
 
@@ -66,7 +65,7 @@ test('table.pack', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-table.pack"), lua.to_luastring("binary"));
 
@@ -97,7 +96,7 @@ test('table.unpack', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-table.unpack"), lua.to_luastring("binary"));
 
@@ -141,7 +140,7 @@ test('table.insert', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-table.insert"), lua.to_luastring("binary"));
 
@@ -175,7 +174,7 @@ test('table.remove', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-table.remove"), lua.to_luastring("binary"));
 
@@ -208,7 +207,7 @@ test('table.move', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-table.move"), lua.to_luastring("binary"));
 
@@ -241,7 +240,7 @@ test('table.sort (<)', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-table.sort"), lua.to_luastring("binary"));
 
@@ -274,7 +273,7 @@ test('table.sort with cmp function', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-table.sort"), lua.to_luastring("binary"));
 

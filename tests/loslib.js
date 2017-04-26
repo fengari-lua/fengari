@@ -4,7 +4,6 @@ const test     = require('tape');
 
 const lauxlib  = require("../src/lauxlib.js");
 const lua      = require('../src/lua.js');
-const linit    = require('../src/linit.js');
 
 test('os.time', function (t) {
     let luaCode = `
@@ -17,7 +16,7 @@ test('os.time', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 

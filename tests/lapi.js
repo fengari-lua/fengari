@@ -10,7 +10,6 @@ const toByteCode = tests.toByteCode;
 const VM         = require("../src/lvm.js");
 const lauxlib    = require("../src/lauxlib.js");
 const lua        = require('../src/lua.js');
-const linit      = require('../src/linit.js');
 
 test('luaL_newstate, lua_pushnil, luaL_typename', function (t) {
     let L;

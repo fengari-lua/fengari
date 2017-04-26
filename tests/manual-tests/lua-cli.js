@@ -3,7 +3,6 @@
 
 const lua          = require('../../src/lua.js');
 const lauxlib      = require('../../src/lauxlib.js');
-const linit        = require('../../src/linit.js');
 const fs           = require('fs');
 const readlineSync = require('readline-sync');
 
@@ -141,7 +140,7 @@ if (has_E) {
 }
 
 /* open standard libraries */
-linit.luaL_openlibs(L);
+lauxlib.luaL_openlibs(L);
 
 /* create table 'arg' */
 lua.lua_createtable(L, process.argv.length - (script + 1), script + 1);

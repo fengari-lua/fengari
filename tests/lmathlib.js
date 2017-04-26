@@ -10,7 +10,6 @@ const toByteCode = tests.toByteCode;
 const VM         = require("../src/lvm.js");
 const lauxlib    = require("../src/lauxlib.js");
 const lua        = require('../src/lua.js');
-const linit      = require('../src/linit.js');
 const lstate     = require('../src/lstate.js');
 
 
@@ -28,7 +27,7 @@ test('math.abs, math.sin, math.cos, math.tan, math.asin, math.acos, math.atan', 
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
@@ -93,7 +92,7 @@ test('math.ceil, math.floor', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
@@ -129,7 +128,7 @@ test('math.deg, math.rad', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
@@ -165,7 +164,7 @@ test('math.log', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
@@ -207,7 +206,7 @@ test('math.exp', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
@@ -237,7 +236,7 @@ test('math.min, math.max', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
@@ -273,7 +272,7 @@ test('math.random', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
@@ -307,7 +306,7 @@ test('math.sqrt', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
@@ -337,7 +336,7 @@ test('math.tointeger', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
@@ -367,7 +366,7 @@ test('math.type', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
@@ -409,7 +408,7 @@ test('math.ult', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
@@ -439,7 +438,7 @@ test('math.fmod', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
@@ -469,7 +468,7 @@ test('math.modf', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        linit.luaL_openlibs(L);
+        lauxlib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
 
