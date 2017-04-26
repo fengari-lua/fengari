@@ -362,20 +362,27 @@ const luaL_tolstring = function(L, idx) {
             luaL_error(L, lua.to_luastring("'__tostring' must return a string", true));
     } else {
         switch(lua.lua_type(L, idx)) {
-            case lua.LUA_TNUMBER:
+            case lua.LUA_TNUMBER: {
                 if (lua.lua_isinteger(L, idx))
                     lua.lua_pushstring(L, lua.to_luastring(lua.lua_tointeger(L, idx).toString()));
                 else {
                     let n = lua.lua_tonumber(L, idx);
                     let a = Math.abs(n);
                     let s;
-                    if (a > 100000000000000 || a < 0.0001)
+                    if (Object.is(n, Infinity))
+                        s = 'inf';
+                    else if (Object.is(n, -Infinity))
+                        s = '-inf';
+                    else if (Number.isNaN(n))
+                        s = 'nan';
+                    else if (a >= 100000000000000 || a < 0.0001)
                         s = n.toExponential();
                     else
                         s = n.toPrecision(16).replace(/(\.[0-9][1-9]*)0+$/, "$1");
                     lua.lua_pushstring(L, lua.to_luastring(s));
                 }
                 break;
+            }
             case lua.LUA_TSTRING:
                 lua.lua_pushvalue(L, idx);
                 break;

@@ -259,7 +259,7 @@ const luaopen_math = function(L) {
     lauxlib.luaL_newlib(L, mathlib);
     lua.lua_pushnumber(L, Math.PI);
     lua.lua_setfield(L, -2, lua.to_luastring("pi", true));
-    lua.lua_pushnumber(L, Number.MAX_VALUE);
+    lua.lua_pushnumber(L, Infinity);
     lua.lua_setfield(L, -2, lua.to_luastring("huge", true));
     lua.lua_pushinteger(L, llimit.MAX_INT);
     lua.lua_setfield(L, -2, lua.to_luastring("maxinteger", true));
