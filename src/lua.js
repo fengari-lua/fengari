@@ -144,7 +144,6 @@ module.exports.lua_pushliteral         = lapi.lua_pushliteral;
 module.exports.lua_pushlstring         = lapi.lua_pushlstring;
 module.exports.lua_pushnil             = lapi.lua_pushnil;
 module.exports.lua_pushnumber          = lapi.lua_pushnumber;
-module.exports.lua_pushobject          = lapi.lua_pushobject;
 module.exports.lua_pushstring          = lapi.lua_pushstring;
 module.exports.lua_pushthread          = lapi.lua_pushthread;
 module.exports.lua_pushtvalue          = lapi.lua_pushtvalue;

@@ -1262,7 +1262,7 @@ const str_gmatch = function(L) {
     let lp = p.length;
     lua.lua_settop(L, 2);  /* keep them on closure to avoid being collected */
     let gm = new GMatchState();
-    lua.lua_pushobject(L, gm);
+    lua.lua_pushlightuserdata(L, gm);
     prepstate(gm.ms, L, s, ls, p, lp);
     gm.src = 0;
     gm.p = 0;

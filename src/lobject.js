@@ -64,14 +64,6 @@ class TValue {
         return this.checktag(CT.LUA_TLIGHTUSERDATA);
     }
 
-    ttisobject() {
-        return this.checktag(CT.LUA_TLIGHTUSERDATA_OBJ);
-    }
-
-    ttisptr() {
-        return this.checktag(CT.LUA_TLIGHTUSERDATA_PTR);
-    }
-
     ttisstring() {
         return this.checktype(CT.LUA_TSTRING);
     }

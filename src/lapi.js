@@ -299,13 +299,7 @@ const lua_pushboolean = function(L, b) {
 };
 
 const lua_pushlightuserdata = function(L, p) {
-    L.stack[L.top++] = new TValue(CT.LUA_TLIGHTUSERDATA_PTR, p);
-
-    assert(L.top <= L.ci.top, "stack overflow");
-};
-
-const lua_pushobject = function(L, p) {
-    L.stack[L.top++] = new TValue(CT.LUA_TLIGHTUSERDATA_OBJ, p);
+    L.stack[L.top++] = new TValue(CT.LUA_TLIGHTUSERDATA, p);
 
     assert(L.top <= L.ci.top, "stack overflow");
 };
@@ -1071,7 +1065,6 @@ module.exports.lua_pushliteral       = lua_pushliteral;
 module.exports.lua_pushlstring       = lua_pushlstring;
 module.exports.lua_pushnil           = lua_pushnil;
 module.exports.lua_pushnumber        = lua_pushnumber;
-module.exports.lua_pushobject        = lua_pushobject;
 module.exports.lua_pushstring        = lua_pushstring;
 module.exports.lua_pushthread        = lua_pushthread;
 module.exports.lua_pushtvalue        = lua_pushtvalue;
