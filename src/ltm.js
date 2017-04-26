@@ -141,7 +141,7 @@ const luaT_gettmbyobj = function(L, o, event) {
     let mt;
     switch(o.ttnov()) {
         case CT.LUA_TTABLE:
-        case CT.LUA_TTUSERDATA:
+        case CT.LUA_TUSERDATA:
             mt = o.metatable;
             break;
         default:
