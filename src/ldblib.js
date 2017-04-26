@@ -3,7 +3,6 @@
 const assert  = require('assert');
 
 const lua     = require('./lua.js');
-const char    = lua.char;
 const lapi    = require('./lapi.js');
 const lauxlib = require('./lauxlib.js');
 const ldebug  = require('./ldebug.js');
@@ -126,7 +125,7 @@ const db_getinfo = function(L) {
     let options = lauxlib.luaL_optstring(L, arg + 2, lua.to_luastring("flnStu", true));
     checkstack(L, L1, 3);
     if (lapi.lua_isfunction(L, arg + 1)) {  /* info about a function? */
-        options = [char['>']].concat(options);  /* add '>' to 'options' */
+        options = ['>'.charCodeAt(0)].concat(options);  /* add '>' to 'options' */
         lapi.lua_pushvalue(L, arg + 1);  /* move function to 'L1' stack */
         lapi.lua_xmove(L, L1, 1);
     } else {  /* stack level */
@@ -139,28 +138,28 @@ const db_getinfo = function(L) {
     if (!ldebug.lua_getinfo(L1, options, ar))
         lauxlib.luaL_argerror(L, arg + 2, lua.to_luastring("invalid option", true));
     lapi.lua_newtable(L);  /* table to collect results */
-    if (options.indexOf(char['S']) > -1) {
+    if (options.indexOf('S'.charCodeAt(0)) > -1) {
         settabss(L, lua.to_luastring("source", true), ar.source.value);
         settabss(L, lua.to_luastring("short_src", true), ar.short_src);
         settabss(L, lua.to_luastring("linedefined", true), lua.to_luastring(`${ar.linedefined}`));
         settabss(L, lua.to_luastring("lastlinedefined", true), lua.to_luastring(`${ar.lastlinedefined}`));
         settabss(L, lua.to_luastring("what", true), ar.what);
     }
-    if (options.indexOf(char['l']) > -1)
+    if (options.indexOf('l'.charCodeAt(0)) > -1)
         settabsi(L, lua.to_luastring("currentline", true), ar.currentline);
-    if (options.indexOf(char['u']) > -1)
+    if (options.indexOf('u'.charCodeAt(0)) > -1)
         settabsi(L, lua.to_luastring("nups", true), ar.nups);
         settabsi(L, lua.to_luastring("nparams", true), ar.nparams);
         settabsb(L, lua.to_luastring("isvararg", true), ar.isvararg);
-    if (options.indexOf(char['n']) > - 1) {
+    if (options.indexOf('n'.charCodeAt(0)) > - 1) {
         settabss(L, lua.to_luastring("name", true), ar.name ? ar.name : null);
         settabss(L, lua.to_luastring("namewhat", true), ar.namewhat ? ar.namewhat : null);
     }
-    if (options.indexOf(char['t']) > - 1)
+    if (options.indexOf('t'.charCodeAt(0)) > - 1)
         settabsb(L, lua.to_luastring("istailcall", true), ar.istailcall);
-    if (options.indexOf(char['L']) > - 1)
+    if (options.indexOf('L'.charCodeAt(0)) > - 1)
         treatstackoption(L, L1, lua.to_luastring("activelines", true));
-    if (options.indexOf(char['f']) > - 1)
+    if (options.indexOf('f'.charCodeAt(0)) > - 1)
         treatstackoption(L, L1, lua.to_luastring("func", true));
     return 1;  /* return table */
 };
@@ -283,7 +282,7 @@ const hookf = function(L, ar) {
         if (ar.currentline >= 0)
             lapi.lua_pushinteger(L, ar.currentline);  /* push current line */
         else lapi.lua_pushnil(L);
-        assert(ldebug.lua_getinfo(L, [char["l"], char["S"]], ar));
+        assert(ldebug.lua_getinfo(L, ["l".charCodeAt(0), "S".charCodeAt(0)], ar));
         lapi.lua_call(L, 2, 0);  /* call hook function */
     }
 };
@@ -293,9 +292,9 @@ const hookf = function(L, ar) {
 */
 const makemask = function(smask, count) {
     let mask = 0;
-    if (smask.indexOf(char["c"]) > -1) mask |= lua.LUA_MASKCALL;
-    if (smask.indexOf(char["r"]) > -1) mask |= lua.LUA_MASKRET;
-    if (smask.indexOf(char["l"]) > -1) mask |= lua.LUA_MASKLINE;
+    if (smask.indexOf("c".charCodeAt(0)) > -1) mask |= lua.LUA_MASKCALL;
+    if (smask.indexOf("r".charCodeAt(0)) > -1) mask |= lua.LUA_MASKRET;
+    if (smask.indexOf("l".charCodeAt(0)) > -1) mask |= lua.LUA_MASKLINE;
     if (count > 0) mask |= lua.LUA_MASKCOUNT;
     return mask;
 };
@@ -305,9 +304,9 @@ const makemask = function(smask, count) {
 */
 const unmakemask = function(mask, smask) {
     let i = 0;
-    if (mask & lua.LUA_MASKCALL) smask[i++] = char["c"];
-    if (mask & lua.LUA_MASKRET) smask[i++] = char["r"];
-    if (mask & lua.LUA_MASKLINE) smask[i++] = char["l"];
+    if (mask & lua.LUA_MASKCALL) smask[i++] = "c".charCodeAt(0);
+    if (mask & lua.LUA_MASKRET) smask[i++] = "r".charCodeAt(0);
+    if (mask & lua.LUA_MASKLINE) smask[i++] = "l".charCodeAt(0);
     return smask;
 };
 
@@ -330,7 +329,7 @@ const db_sethook = function(L) {
         lapi.lua_createtable(L, 0, 2);  /* create a hook table */
         lapi.lua_pushvalue(L, -1);
         lapi.lua_rawsetp(L, lua.LUA_REGISTRYINDEX, HOOKKEY);  /* set it in position */
-        lapi.lua_pushstring(L, [char["k"]]);
+        lapi.lua_pushstring(L, ["k".charCodeAt(0)]);
         lapi.lua_setfield(L, -2, lua.to_luastring("__mode", true));  /** hooktable.__mode = "k" */
         lapi.lua_pushvalue(L, -1);
         lapi.lua_setmetatable(L, -2);  /* setmetatable(hooktable) = hooktable */

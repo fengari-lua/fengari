@@ -3,7 +3,6 @@
 
 const defs = require("./defs.js");
 
-module.exports.char                    = defs.char;
 module.exports.FENGARI_AUTHORS         = defs.FENGARI_AUTHORS;
 module.exports.FENGARI_COPYRIGHT       = defs.FENGARI_COPYRIGHT;
 module.exports.FENGARI_RELEASE         = defs.FENGARI_RELEASE;

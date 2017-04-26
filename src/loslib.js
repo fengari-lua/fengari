@@ -3,7 +3,6 @@
 const assert  = require('assert');
 
 const lua     = require('./lua.js');
-const char    = lua.char;
 const lapi    = require('./lapi.js');
 const lauxlib = require('./lauxlib.js');
 const ldebug  = require('./ldebug.js');

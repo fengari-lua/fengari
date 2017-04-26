@@ -6,7 +6,6 @@ const assert = require('assert');
 const lstate  = require('./lstate.js');
 const lapi    = require('./lapi.js');
 const lua     = require('./lua.js');
-const char    = lua.char;
 const ldebug  = require('./ldebug.js');
 const lobject = require('./lobject.js');
 
@@ -57,7 +56,7 @@ const findfield = function(L, objidx, level) {
 */
 const pushglobalfuncname = function(L, ar) {
     let top = lapi.lua_gettop(L);
-    ldebug.lua_getinfo(L, [char['f']], ar);  /* push function */
+    ldebug.lua_getinfo(L, ['f'.charCodeAt(0)], ar);  /* push function */
     lapi.lua_getfield(L, lua.LUA_REGISTRYINDEX, lua.to_luastring(LUA_LOADED_TABLE, true));
     if (findfield(L, top + 1, 2)) {
         let name = lapi.lua_tostring(L, -1);
@@ -78,15 +77,15 @@ const sv = s => s ? s : [];
 
 const pushfuncname = function(L, ar) {
     if (pushglobalfuncname(L, ar)) {  /* try first a global name */
-        lapi.lua_pushstring(L, lua.to_luastring("function '", true).concat(lapi.lua_tostring(L, -1)).concat([char["'"]]));
+        lapi.lua_pushstring(L, lua.to_luastring("function '", true).concat(lapi.lua_tostring(L, -1)).concat(["'".charCodeAt(0)]));
         lapi.lua_remove(L, -2);  /* remove name */
     }
     else if (ar.namewhat)  /* is there a name from code? */
-        lapi.lua_pushstring(L, sv(ar.namewhat).concat(char[" "], char["'"], ...sv(ar.name.value), char["'"]));  /* use it */
-    else if (ar.what && ar.what[0] === char['m'])  /* main? */
+        lapi.lua_pushstring(L, sv(ar.namewhat).concat(" ".charCodeAt(0), "'".charCodeAt(0), ...sv(ar.name.value), "'".charCodeAt(0)));  /* use it */
+    else if (ar.what && ar.what[0] === 'm'.charCodeAt(0))  /* main? */
         lapi.lua_pushliteral(L, "main chunk");
-    else if (ar.what && ar.what[0] != char['C'])  /* for Lua functions, use <file:line> */
-        lapi.lua_pushstring(L, lua.to_luastring("function <", true).concat(...sv(ar.short_src), char[':'], ...lua.to_luastring(`${ar.linedefined}>`)));
+    else if (ar.what && ar.what[0] != 'C'.charCodeAt(0))  /* for Lua functions, use <file:line> */
+        lapi.lua_pushstring(L, lua.to_luastring("function <", true).concat(...sv(ar.short_src), ':'.charCodeAt(0), ...lua.to_luastring(`${ar.linedefined}>`)));
     else  /* nothing left... */
         lapi.lua_pushliteral(L, "?");
 };
@@ -112,7 +111,7 @@ const luaL_traceback = function(L, L1, msg, level) {
     let last = lastlevel(L1);
     let n1 = last - level > LEVELS1 + LEVELS2 ? LEVELS1 : -1;
     if (msg)
-        lapi.lua_pushstring(L, msg.concat(char['\n']));
+        lapi.lua_pushstring(L, msg.concat('\n'.charCodeAt(0)));
     luaL_checkstack(L, 10, null);
     lapi.lua_pushliteral(L, "stack traceback:");
     while (ldebug.lua_getstack(L1, level++, ar)) {
@@ -121,7 +120,7 @@ const luaL_traceback = function(L, L1, msg, level) {
             level = last - LEVELS2 + 1;  /* and skip to last ones */
         } else {
             ldebug.lua_getinfo(L1, lua.to_luastring("Slnt", true), ar);
-            lapi.lua_pushstring(L, [char['\n'], char['\t'], char['.'], char['.'], char['.']].concat(ar.short_src));
+            lapi.lua_pushstring(L, ['\n'.charCodeAt(0), '\t'.charCodeAt(0), '.'.charCodeAt(0), '.'.charCodeAt(0), '.'.charCodeAt(0)].concat(ar.short_src));
             if (ar.currentline > 0)
                 lapi.lua_pushliteral(L, `${ar.currentline}:`);
             lapi.lua_pushliteral(L, " in ");
@@ -153,7 +152,7 @@ const luaL_argerror = function(L, arg, extramsg) {
     }
 
     if (ar.name === null)
-        ar.name = pushglobalfuncname(L, ar) ? lapi.lua_tostring(L, -1) : [lua.char["?"]];
+        ar.name = pushglobalfuncname(L, ar) ? lapi.lua_tostring(L, -1) : ["?".charCodeAt(0)];
 
     return luaL_error(L, lua.to_luastring(`bad argument #${arg} to '${lobject.jsstring(ar.name)}' (${lobject.jsstring(extramsg)})`));
 };
