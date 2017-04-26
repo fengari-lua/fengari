@@ -3,6 +3,7 @@
 
 const defs   = require("./defs.js");
 const lapi   = require("./lapi.js");
+const ldebug = require("./ldebug.js");
 const lstate = require("./lstate.js");
 
 module.exports.FENGARI_AUTHORS         = defs.FENGARI_AUTHORS;
@@ -95,8 +96,14 @@ module.exports.lua_getallocf           = lapi.lua_getallocf;
 module.exports.lua_getextraspace       = lapi.lua_getextraspace;
 module.exports.lua_getfield            = lapi.lua_getfield;
 module.exports.lua_getglobal           = lapi.lua_getglobal;
+module.exports.lua_gethook             = ldebug.lua_gethook;
+module.exports.lua_gethookcount        = ldebug.lua_gethookcount;
+module.exports.lua_gethookmask         = ldebug.lua_gethookmask;
 module.exports.lua_geti                = lapi.lua_geti;
+module.exports.lua_getinfo             = ldebug.lua_getinfo;
+module.exports.lua_getlocal            = ldebug.lua_getlocal;
 module.exports.lua_getmetatable        = lapi.lua_getmetatable;
+module.exports.lua_getstack            = ldebug.lua_getstack;
 module.exports.lua_gettable            = lapi.lua_gettable;
 module.exports.lua_gettop              = lapi.lua_gettop;
 module.exports.lua_getupvalue          = lapi.lua_getupvalue;
@@ -152,7 +159,9 @@ module.exports.lua_replace             = lapi.lua_replace;
 module.exports.lua_rotate              = lapi.lua_rotate;
 module.exports.lua_setfield            = lapi.lua_setfield;
 module.exports.lua_setglobal           = lapi.lua_setglobal;
+module.exports.lua_sethook             = ldebug.lua_sethook;
 module.exports.lua_seti                = lapi.lua_seti;
+module.exports.lua_setlocal            = ldebug.lua_setlocal;
 module.exports.lua_setmetatable        = lapi.lua_setmetatable;
 module.exports.lua_settable            = lapi.lua_settable;
 module.exports.lua_settop              = lapi.lua_settop;

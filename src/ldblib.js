@@ -4,7 +4,6 @@ const assert  = require('assert');
 
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
-const ldebug  = require('./ldebug.js');
 
 /*
 ** If L1 != L, L1 can be in any state, and therefore there are no
@@ -128,13 +127,13 @@ const db_getinfo = function(L) {
         lua.lua_pushvalue(L, arg + 1);  /* move function to 'L1' stack */
         lua.lua_xmove(L, L1, 1);
     } else {  /* stack level */
-        if (!ldebug.lua_getstack(L1, lauxlib.luaL_checkinteger(L, arg + 1), ar)) {
+        if (!lua.lua_getstack(L1, lauxlib.luaL_checkinteger(L, arg + 1), ar)) {
             lua.lua_pushnil(L);  /* level out of range */
             return 1;
         }
     }
 
-    if (!ldebug.lua_getinfo(L1, options, ar))
+    if (!lua.lua_getinfo(L1, options, ar))
         lauxlib.luaL_argerror(L, arg + 2, lua.to_luastring("invalid option", true));
     lua.lua_newtable(L);  /* table to collect results */
     if (options.indexOf('S'.charCodeAt(0)) > -1) {
@@ -171,14 +170,14 @@ const db_getlocal = function(L) {
     let nvar = lauxlib.luaL_checkinteger(L, arg + 2);  /* local-variable index */
     if (lua.lua_isfunction(L, arg + 1)) {
         lua.lua_pushvalue(L, arg + 1);  /* push function */
-        lua.lua_pushstring(L, ldebug.lua_getlocal(L, null, nvar));  /* push local name */
+        lua.lua_pushstring(L, lua.lua_getlocal(L, null, nvar));  /* push local name */
         return 1;  /* return only name (there is no value) */
     } else {  /* stack-level argument */
         let level = lauxlib.luaL_checkinteger(L, arg + 1);
-        if (!ldebug.lua_getstack(L1, level, ar))  /* out of range? */
+        if (!lua.lua_getstack(L1, level, ar))  /* out of range? */
             return lauxlib.luaL_argerror(L, arg+1, lua.to_luastring("level out of range", true));
         checkstack(L, L1, 1);
-        let name = ldebug.lua_getlocal(L1, ar, nvar);
+        let name = lua.lua_getlocal(L1, ar, nvar);
         if (name) {
             lua.lua_xmove(L1, L, 1);  /* move local value */
             lua.lua_pushstring(L, name.value);  /* push name */
@@ -199,13 +198,13 @@ const db_setlocal = function(L) {
     let ar = new lua.lua_Debug();
     let level = lauxlib.luaL_checkinteger(L, arg + 1);
     let nvar = lauxlib.luaL_checkinteger(L, arg + 2);
-    if (!ldebug.lua_getstack(L1, level, ar))  /* out of range? */
+    if (!lua.lua_getstack(L1, level, ar))  /* out of range? */
         return lauxlib.luaL_argerror(L, arg + 1, "level out of range");
     lauxlib.luaL_checkany(L, arg + 3);
     lua.lua_settop(L, arg + 3);
     checkstack(L, L1, 1);
     lua.lua_xmove(L, L1, 1);
-    let name = ldebug.lua_setlocal(L1, ar, nvar);
+    let name = lua.lua_setlocal(L1, ar, nvar);
     if (name === null)
         lua.lua_pop(L1, 1);  /* pop value (if not popped by 'lua_setlocal') */
     lua.lua_pushstring(L, name.value);
@@ -281,7 +280,7 @@ const hookf = function(L, ar) {
         if (ar.currentline >= 0)
             lua.lua_pushinteger(L, ar.currentline);  /* push current line */
         else lua.lua_pushnil(L);
-        assert(ldebug.lua_getinfo(L, ["l".charCodeAt(0), "S".charCodeAt(0)], ar));
+        assert(lua.lua_getinfo(L, ["l".charCodeAt(0), "S".charCodeAt(0)], ar));
         lua.lua_call(L, 2, 0);  /* call hook function */
     }
 };
@@ -337,7 +336,7 @@ const db_sethook = function(L) {
     lua.lua_pushthread(L1); lua.lua_xmove(L1, L, 1);  /* key (thread) */
     lua.lua_pushvalue(L, arg + 1);  /* value (hook function) */
     lua.lua_rawset(L, -3);  /* hooktable[L1] = new Lua hook */
-    ldebug.lua_sethook(L1, func, mask, count);
+    lua.lua_sethook(L1, func, mask, count);
     return 0;
 };
 
@@ -346,8 +345,8 @@ const db_gethook = function(L) {
     let L1 = thread.thread;
     let arg = thread.arg;
     let buff = [];
-    let mask = ldebug.lua_gethookmask(L1);
-    let hook = ldebug.lua_gethook(L1);
+    let mask = lua.lua_gethookmask(L1);
+    let hook = lua.lua_gethook(L1);
     if (hook === null)  /* no hook? */
         lua.lua_pushnil(L);
     else if (hook !== hookf)  /* external hook? */
@@ -360,7 +359,7 @@ const db_gethook = function(L) {
         lua.lua_remove(L, -2);  /* remove hook table */
     }
     lua.lua_pushstring(L, unmakemask(mask, buff));  /* 2nd result = mask */
-    lua.lua_pushinteger(L, ldebug.lua_gethookcount(L1));  /* 3rd result = count */
+    lua.lua_pushinteger(L, lua.lua_gethookcount(L1));  /* 3rd result = count */
     return 3;
 };
 

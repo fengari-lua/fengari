@@ -4,7 +4,6 @@ const assert  = require('assert');
 
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
-const ldebug  = require('./ldebug.js');
 const llimit  = require('./llimit.js');
 
 const setfield = function(L, key, value) {

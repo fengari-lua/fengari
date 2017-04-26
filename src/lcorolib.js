@@ -5,7 +5,6 @@ const assert  = require('assert');
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
 const ldo     = require('./ldo.js');
-const ldebug  = require('./ldebug.js');
 const lobject = require('./lobject.js');
 
 const getco = function(L) {
@@ -101,7 +100,7 @@ const luaB_costatus = function(L) {
                 break;
             case lua.LUA_OK: {
                 let ar = new lua.lua_Debug();
-                if (ldebug.lua_getstack(co, 0, ar) > 0)  /* does it have frames? */
+                if (lua.lua_getstack(co, 0, ar) > 0)  /* does it have frames? */
                     lua.lua_pushliteral(L, "normal");  /* it is running */
                 else if (lua.lua_gettop(co) === 0)
                     lua.lua_pushliteral(L, "dead");

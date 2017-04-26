@@ -5,7 +5,6 @@ const assert = require('assert');
 
 const lapi    = require('./lapi.js');
 const lua     = require('./lua.js');
-const ldebug  = require('./ldebug.js');
 const lobject = require('./lobject.js');
 
 const LUA_LOADED_TABLE = "_LOADED";
@@ -55,7 +54,7 @@ const findfield = function(L, objidx, level) {
 */
 const pushglobalfuncname = function(L, ar) {
     let top = lua.lua_gettop(L);
-    ldebug.lua_getinfo(L, ['f'.charCodeAt(0)], ar);  /* push function */
+    lua.lua_getinfo(L, ['f'.charCodeAt(0)], ar);  /* push function */
     lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, lua.to_luastring(LUA_LOADED_TABLE, true));
     if (findfield(L, top + 1, 2)) {
         let name = lua.lua_tostring(L, -1);
@@ -94,11 +93,11 @@ const lastlevel = function(L) {
     let li = 1;
     let le = 1;
     /* find an upper bound */
-    while (ldebug.lua_getstack(L, le, ar)) { li = le; le *= 2; }
+    while (lua.lua_getstack(L, le, ar)) { li = le; le *= 2; }
     /* do a binary search */
     while (li < le) {
         let m = Math.floor((li + le)/2);
-        if (ldebug.lua_getstack(L, m, ar)) li = m + 1;
+        if (lua.lua_getstack(L, m, ar)) li = m + 1;
         else le = m;
     }
     return le - 1;
@@ -113,12 +112,12 @@ const luaL_traceback = function(L, L1, msg, level) {
         lua.lua_pushstring(L, msg.concat('\n'.charCodeAt(0)));
     luaL_checkstack(L, 10, null);
     lua.lua_pushliteral(L, "stack traceback:");
-    while (ldebug.lua_getstack(L1, level++, ar)) {
+    while (lua.lua_getstack(L1, level++, ar)) {
         if (n1-- === 0) {  /* too many levels? */
             lua.lua_pushliteral(L, "\n\t...");  /* add a '...' */
             level = last - LEVELS2 + 1;  /* and skip to last ones */
         } else {
-            ldebug.lua_getinfo(L1, lua.to_luastring("Slnt", true), ar);
+            lua.lua_getinfo(L1, lua.to_luastring("Slnt", true), ar);
             lua.lua_pushstring(L, ['\n'.charCodeAt(0), '\t'.charCodeAt(0), '.'.charCodeAt(0), '.'.charCodeAt(0), '.'.charCodeAt(0)].concat(ar.short_src));
             if (ar.currentline > 0)
                 lua.lua_pushliteral(L, `${ar.currentline}:`);
@@ -139,10 +138,10 @@ const panic = function(L) {
 const luaL_argerror = function(L, arg, extramsg) {
     let ar = new lua.lua_Debug();
 
-    if (!ldebug.lua_getstack(L, 0, ar))  /* no stack frame? */
+    if (!lua.lua_getstack(L, 0, ar))  /* no stack frame? */
         return luaL_error(L, lua.to_luastring(`bad argument #${arg} (${lobject.jsstring(extramsg)})`));
 
-    ldebug.lua_getinfo(L, 'n', ar);
+    lua.lua_getinfo(L, 'n', ar);
 
     if (ar.namewhat === lua.to_luastring('method', true)) {
         arg--;  /* do not count 'self' */
@@ -171,8 +170,8 @@ const typeerror = function(L, arg, tname) {
 
 const luaL_where = function(L, level) {
     let ar = new lua.lua_Debug();
-    if (ldebug.lua_getstack(L, level, ar)) {
-        ldebug.lua_getinfo(L, lua.to_luastring("Sl", true), ar);
+    if (lua.lua_getstack(L, level, ar)) {
+        lua.lua_getinfo(L, lua.to_luastring("Sl", true), ar);
         if (ar.currentline > 0) {
             lua.lua_pushstring(L, lua.to_luastring(`${lobject.jsstring(ar.short_src)}:${ar.currentline}:`));
             return;

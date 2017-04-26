@@ -7,7 +7,6 @@ const lua        = require('./lua.js');
 const lauxlib    = require('./lauxlib.js');
 const lstate     = require('./lstate.js');
 const ldo        = require('./ldo.js');
-const ldebug     = require('./ldebug.js');
 const llimit     = require('./llimit.js');
 const luaconf    = require('./luaconf.js');
 
