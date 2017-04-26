@@ -473,7 +473,13 @@ const lua_createtable = function(L, narray, nrec) {
 };
 
 const lua_newuserdata = function(L, size) {
-    L.stack[L.top++] = new lobject.TValue(CT.LUA_TUSERDATA, new ArrayBuffer(size));
+    let box;
+    if (typeof size == "number")
+        box = new ArrayBuffer(size);
+    else // if size is not passed, create a new empty object
+        box = Object.create(null);
+
+    L.stack[L.top++] = new lobject.TValue(CT.LUA_TUSERDATA, box);
 
     assert(L.top <= L.ci.top, "stack overflow");
 
