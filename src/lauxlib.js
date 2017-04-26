@@ -375,10 +375,11 @@ const luaL_tolstring = function(L, idx) {
                         s = '-inf';
                     else if (Number.isNaN(n))
                         s = 'nan';
-                    else if (a >= 100000000000000 || a < 0.0001)
+                    else if (a >= 100000000000000 || (a > 0 && a < 0.0001))
                         s = n.toExponential();
                     else
                         s = n.toPrecision(16).replace(/(\.[0-9][1-9]*)0+$/, "$1");
+
                     lua.lua_pushstring(L, lua.to_luastring(s));
                 }
                 break;
