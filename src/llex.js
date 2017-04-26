@@ -500,6 +500,7 @@ const llex = function(ls, seminfo) {
     ls.buff.buffer = [];
 
     for (;;) {
+        assert(typeof ls.current == "number");
         switch (ls.current) {
             case char['\n']: case char['\r']: {  /* line breaks */
                 inclinenumber(ls);
