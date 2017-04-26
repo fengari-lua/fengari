@@ -90,26 +90,30 @@ class MBuffer {
     }
 
     getc() {
-        if (this.buffer instanceof DataView)
-            return this.n-- > 0 ? this.buffer.getUint8(this.off++, true) : this.fill();
-
-        return this.n-- > 0 ? this.buffer[this.off++] : this.fill();
+        if (this.n <= 0)
+            this.fill();
+        if (this.n <= 0)
+            return -1;
+        let r;
+        if (this.buffer instanceof DataView) {
+            r = this.buffer.getUint8(this.off++, true);
+        } else {
+            r = this.buffer[this.off++];
+        }
+        if (this.n-- === 0) // remove reference to input so it can get freed
+            this.buffer = null;
+        return r;
     }
 
     fill() {
         if (this.reader) {
             this.buffer = this.reader(this.L, this.data);
             assert(typeof this.buffer !== "string", "Should only load binary of array of bytes");
-            if (this.buffer === null)
-                return -1;
-            this.n = this.buffer instanceof DataView ? this.buffer.byteLength - 1 : this.buffer.length - 1;
-            this.off = 0;
-        } else return -1;
-
-        if (this.buffer instanceof DataView)
-            return this.buffer.getUint8(this.off++, true);
-
-        return this.buffer[this.off++];
+            if (this.buffer !== null) {
+                this.n = ((this.buffer instanceof DataView) ? this.buffer.byteLength : this.buffer.length);
+                this.off = 0;
+            }
+        }
     }
 }
 
