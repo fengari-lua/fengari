@@ -17,8 +17,6 @@ test('LOADK, RETURN', function (t) {
     
     t.plan(2);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         L = getState(luaCode);
         lua.lua_call(L, 0, -1);
@@ -41,8 +39,6 @@ test('MOVE', function (t) {
     
     t.plan(2);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         L = getState(luaCode);
         lua.lua_call(L, 0, -1);
@@ -63,8 +59,6 @@ test('Binary op', function (t) {
     `, L;
     
     t.plan(2);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
@@ -88,8 +82,6 @@ test('Unary op, LOADBOOL', function (t) {
     
     t.plan(2);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         L = getState(luaCode);
         lua.lua_call(L, 0, -1);
@@ -110,8 +102,6 @@ test('NEWTABLE', function (t) {
     `, L;
     
     t.plan(2);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
@@ -137,8 +127,6 @@ test('CALL', function (t) {
     `, L;
     
     t.plan(2);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
@@ -170,8 +158,6 @@ test('Multiple return', function (t) {
     
     t.plan(2);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         L = getState(luaCode);
         lua.lua_call(L, 0, -1);
@@ -195,8 +181,6 @@ test('TAILCALL', function (t) {
     `, L;
     
     t.plan(2);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
@@ -222,8 +206,6 @@ test('VARARG', function (t) {
     
     t.plan(2);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         L = getState(luaCode);
         lua.lua_call(L, 0, -1);
@@ -245,8 +227,6 @@ test('LE, JMP', function (t) {
     `, L;
     
     t.plan(2);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
@@ -270,8 +250,6 @@ test('LT', function (t) {
     
     t.plan(2);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         L = getState(luaCode);
         lua.lua_call(L, 0, -1);
@@ -293,8 +271,6 @@ test('EQ', function (t) {
     `, L;
     
     t.plan(2);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
@@ -319,8 +295,6 @@ test('TESTSET (and)', function (t) {
     
     t.plan(2);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         L = getState(luaCode);
         lua.lua_call(L, 0, -1);
@@ -343,8 +317,6 @@ test('TESTSET (or)', function (t) {
     `, L;
     
     t.plan(2);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
@@ -373,8 +345,6 @@ test('TEST (true)', function (t) {
     
     t.plan(2);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         L = getState(luaCode);
         lua.lua_call(L, 0, -1);
@@ -402,8 +372,6 @@ test('TEST (false)', function (t) {
     
     t.plan(2);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         L = getState(luaCode);
         lua.lua_call(L, 0, -1);
@@ -429,8 +397,6 @@ test('FORPREP, FORLOOP (int)', function (t) {
     `, L;
     
     t.plan(2);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
@@ -458,8 +424,6 @@ test('FORPREP, FORLOOP (float)', function (t) {
     
     t.plan(2);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         L = getState(luaCode);
         lua.lua_call(L, 0, -1);
@@ -484,8 +448,6 @@ test('SETTABLE, GETTABLE', function (t) {
     `, L;
     
     t.plan(3);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
@@ -523,8 +485,6 @@ test('SETUPVAL, GETUPVAL', function (t) {
     
     t.plan(2);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         L = getState(luaCode);
         lua.lua_call(L, 0, -1);
@@ -549,8 +509,6 @@ test('SETTABUP, GETTABUP', function (t) {
     `, L;
     
     t.plan(3);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
@@ -585,8 +543,6 @@ test('SELF', function (t) {
     
     t.plan(2);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         L = getState(luaCode);
         lua.lua_call(L, 0, -1);
@@ -608,8 +564,6 @@ test('SETLIST', function (t) {
     `, L;
     
     t.plan(2);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
@@ -637,8 +591,6 @@ test('Variable SETLIST', function (t) {
     
     t.plan(2);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         L = getState(luaCode);
         lua.lua_call(L, 0, -1);
@@ -660,8 +612,6 @@ test('Long SETLIST', function (t) {
     `, L;
     
     t.plan(2);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
@@ -685,7 +635,7 @@ test('Long SETLIST', function (t) {
 //    
 //     t.plan(1);
 //
-//     t.comment("Running following code: \n" + luaCode);
+//
 //
 //     // t.doesNotThrow(function () {
 //         L = getState(luaCode);
@@ -725,8 +675,6 @@ test('TFORCALL, TFORLOOP', function (t) {
     
     t.plan(2);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         L = getState(luaCode);
         lua.lua_call(L, 0, -1);
@@ -750,8 +698,6 @@ test('LEN', function (t) {
     `, L;
     
     t.plan(4);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         L = getState(luaCode);
@@ -784,8 +730,6 @@ test('CONCAT', function (t) {
     `, L;
     
     t.plan(2);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         L = getState(luaCode);

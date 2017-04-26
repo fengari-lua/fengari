@@ -17,7 +17,7 @@ const checkerror = `
     end
 `;
 
-test('testing string comparisons', function (t) {
+test('[test-suite] strings: string comparisons', function (t) {
     let luaCode = `
         assert('alo' < 'alo1')
         assert('' < 'a')
@@ -59,7 +59,7 @@ test('testing string comparisons', function (t) {
 });
 
 
-test('testing string.sub', function (t) {
+test('[test-suite] strings: string.sub', function (t) {
     let luaCode = `
         assert('alo' < 'alo1')
         assert('' < 'a')
@@ -101,7 +101,7 @@ test('testing string.sub', function (t) {
 });
 
 
-test('testing string.find', function (t) {
+test('[test-suite] strings: string.find', function (t) {
     let luaCode = `
         assert(string.find("123456789", "345") == 3)
         a,b = string.find("123456789", "345")
@@ -139,7 +139,7 @@ test('testing string.find', function (t) {
 });
 
 
-test('testing string.len and #', function (t) {
+test('[test-suite] strings: string.len and #', function (t) {
     let luaCode = `
         assert(string.len("") == 0)
         assert(string.len("\\0\\0\\0") == 3)
@@ -171,7 +171,7 @@ test('testing string.len and #', function (t) {
 });
 
 
-test('testing string.byte/string.char', function (t) {
+test('[test-suite] strings: string.byte/string.char', function (t) {
     let luaCode = `
         assert(string.byte("a") == 97)
         assert(string.byte("\\xe4") > 127)
@@ -228,7 +228,7 @@ test('testing string.byte/string.char', function (t) {
 });
 
 
-test('testing repetitions with separator', function (t) {
+test('[test-suite] strings: repetitions with separator', function (t) {
     let luaCode = `
         assert(string.rep('teste', 0, 'xuxu') == '')
         assert(string.rep('teste', 1, 'xuxu') == 'teste')
@@ -265,7 +265,7 @@ test('testing repetitions with separator', function (t) {
 });
 
 
-test('testing tostring', function (t) {
+test('[test-suite] strings: tostring', function (t) {
     let luaCode = `
         assert(type(tostring(nil)) == 'string')
         assert(type(tostring(12)) == 'string')
@@ -317,7 +317,7 @@ test('testing tostring', function (t) {
 });
 
 
-test('testing string.format', function (t) {
+test('[test-suite] strings: string.format', function (t) {
     let luaCode = `
         x = '"ílo"\\n\\\\'
         assert(string.format('%q%s', x, x) == '"\\\\"ílo\\\\"\\\\\\n\\\\\\\\""ílo"\\n\\\\')
@@ -364,7 +364,7 @@ test('testing string.format', function (t) {
 });
 
 
-test('testing %q', function (t) {
+test('[test-suite] strings: %q', function (t) {
     let luaCode = `
         do
           local function checkQ (v)
@@ -405,7 +405,7 @@ test('testing %q', function (t) {
 });
 
 
-test('testing embedded zeros error', function (t) {
+test('[test-suite] strings: embedded zeros error', function (t) {
     let luaCode = `
         assert(string.format("\\0%s\\0", "\\0\\0\\1") == "\\0\\0\\0\\1\\0")
         checkerror("contains zeros", string.format, "%10s", "\\0")
@@ -432,7 +432,7 @@ test('testing embedded zeros error', function (t) {
 });
 
 
-test('testing format x tostring', function (t) {
+test('[test-suite] strings: format x tostring', function (t) {
     let luaCode = `
         assert(string.format("%s %s", nil, true) == "nil true")
         assert(string.format("%s %.4s", false, true) == "false true")
@@ -475,7 +475,7 @@ test('testing format x tostring', function (t) {
 });
 
 
-test('testing longest number that can be formatted', function (t) {
+test('[test-suite] strings: longest number that can be formatted', function (t) {
     let luaCode = `
         do
           local i = 1
@@ -512,7 +512,7 @@ test('testing longest number that can be formatted', function (t) {
 });
 
 
-test('testing large numbers for format', function (t) {
+test('[test-suite] strings: large numbers for format', function (t) {
     let luaCode = `
         do   -- assume at least 32 bits
           local max, min = 0x7fffffff, -0x80000000    -- "large" for 32 bits
@@ -561,7 +561,7 @@ test('testing large numbers for format', function (t) {
 });
 
 
-test("testing 'format %a %A'", function (t) {
+test("[test-suite] strings: 'format %a %A'", function (t) {
     let luaCode = `
         do
           local function matchhexa (n)
@@ -618,7 +618,7 @@ test("testing 'format %a %A'", function (t) {
 });
 
 
-test("testing errors in format", function (t) {
+test("[test-suite] strings: errors in format", function (t) {
     let luaCode = `
         local function check (fmt, msg)
           checkerror(msg, string.format, fmt, 10)
@@ -658,7 +658,7 @@ test("testing errors in format", function (t) {
 });
 
 
-test("testing table.concat", function (t) {
+test("[test-suite] strings: table.concat", function (t) {
     let luaCode = `
         checkerror("table expected", table.concat, 3)
         assert(table.concat{} == "")
@@ -711,7 +711,7 @@ test("testing table.concat", function (t) {
 
 // TODO: os.setlocale NYI
 if (false) {
-    test("testing locale", function (t) {
+    test("[test-suite] strings: locale", function (t) {
         let luaCode = `
             if not _port then
 
@@ -767,7 +767,7 @@ if (false) {
 }
 
 
-test("testing bug in Lua 5.3.2: 'gmatch' iterator does not work across coroutines", function (t) {
+test("[test-suite] strings: bug in Lua 5.3.2: 'gmatch' iterator does not work across coroutines", function (t) {
     let luaCode = `
         do
           local f = string.gmatch("1 2 3 4 5", "%d+")

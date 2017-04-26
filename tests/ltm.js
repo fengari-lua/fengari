@@ -22,8 +22,6 @@ test('__index, __newindex: with actual table', function (t) {
     
     t.plan(3);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         let bc = toByteCode(luaCode);
 
@@ -55,8 +53,6 @@ test('__newindex: with non table', function (t) {
     `, L;
     
     t.plan(2);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         let bc = toByteCode(luaCode);
@@ -90,8 +86,6 @@ test('__index function in metatable', function (t) {
     `, L;
     
     t.plan(3);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         let bc = toByteCode(luaCode);
@@ -135,8 +129,6 @@ test('__newindex function in metatable', function (t) {
     
     t.plan(3);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         let bc = toByteCode(luaCode);
 
@@ -176,8 +168,6 @@ test('__index table in metatable', function (t) {
     `, L;
     
     t.plan(3);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         let bc = toByteCode(luaCode);
@@ -221,8 +211,6 @@ test('__newindex table in metatable', function (t) {
     `, L;
     
     t.plan(4);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         let bc = toByteCode(luaCode);
@@ -278,8 +266,6 @@ test('__index table with own metatable', function (t) {
     
     t.plan(3);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         let bc = toByteCode(luaCode);
 
@@ -332,8 +318,6 @@ test('__newindex table with own metatable', function (t) {
     `, L;
     
     t.plan(4);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         let bc = toByteCode(luaCode);
@@ -436,8 +420,6 @@ test('binary __xxx functions in metatable', function (t) {
     
     t.plan(3);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         let bc = toByteCode(luaCode);
 
@@ -490,8 +472,6 @@ test('__eq', function (t) {
     
     t.plan(3);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         let bc = toByteCode(luaCode);
 
@@ -529,8 +509,6 @@ test('__lt', function (t) {
     `, L;
     
     t.plan(3);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         let bc = toByteCode(luaCode);
@@ -570,8 +548,6 @@ test('__le', function (t) {
     
     t.plan(3);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         let bc = toByteCode(luaCode);
 
@@ -609,8 +585,6 @@ test('__le that uses __lt', function (t) {
     `, L;
     
     t.plan(3);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         let bc = toByteCode(luaCode);
@@ -653,8 +627,6 @@ test('__unm, __bnot', function (t) {
     `, L;
     
     t.plan(4);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         let bc = toByteCode(luaCode);
@@ -701,8 +673,6 @@ test('__len', function (t) {
     
     t.plan(3);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         let bc = toByteCode(luaCode);
 
@@ -742,8 +712,6 @@ test('__concat', function (t) {
     
     t.plan(3);
 
-    t.comment("Running following code: \n" + luaCode);
-
     t.doesNotThrow(function () {
         let bc = toByteCode(luaCode);
 
@@ -782,8 +750,6 @@ test('__call', function (t) {
     `, L;
     
     t.plan(3);
-
-    t.comment("Running following code: \n" + luaCode);
 
     t.doesNotThrow(function () {
         let bc = toByteCode(luaCode);
