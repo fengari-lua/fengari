@@ -1,7 +1,6 @@
 "use strict";
 
 const lua     = require('./lua.js');
-const lapi    = require('./lapi.js');
 const lauxlib = require('./lauxlib.js');
 const llimit  = require('./llimit.js');
 
@@ -60,7 +59,6 @@ const utf8_decode = function(s, val) {
 const utflen = function(L) {
     let n = 0;
     let s = lauxlib.luaL_checkstring(L, 1);
-    s = L.stack[lapi.index2addr_(L, 1)].value;
     let len = s.length;
     let posi = u_posrelat(lauxlib.luaL_optinteger(L, 2, 1), len);
     let posj = u_posrelat(lauxlib.luaL_optinteger(L, 3, -1), len);
@@ -115,7 +113,6 @@ const utfchar = function(L) {
 */
 const byteoffset = function(L) {
     let s = lauxlib.luaL_checkstring(L, 1);
-    s = L.stack[lapi.index2addr_(L, 1)].value;
     let n = lauxlib.luaL_checkinteger(L, 2);
     let posi = n >= 0 ? 1 : s.length + 1;
     posi = u_posrelat(lauxlib.luaL_optinteger(L, 3, posi), s.length);
@@ -161,7 +158,6 @@ const byteoffset = function(L) {
 */
 const codepoint = function(L) {
     let s = lauxlib.luaL_checkstring(L, 1);
-    s = L.stack[lapi.index2addr_(L, 1)].value;
     let posi = u_posrelat(lauxlib.luaL_optinteger(L, 2, 1), s.length);
     let pose = u_posrelat(lauxlib.luaL_optinteger(L, 3, posi), s.length);
 
@@ -188,7 +184,6 @@ const codepoint = function(L) {
 
 const iter_aux = function(L) {
     let s = lauxlib.luaL_checkstring(L, 1);
-    s = L.stack[lapi.index2addr_(L, 1)].value;
     let len = s.length;
     let n = lua.lua_tointeger(L, 2) - 1;
 
