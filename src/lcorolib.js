@@ -9,7 +9,6 @@ const lstate  = require('./lstate.js');
 const ldo     = require('./ldo.js');
 const ldebug  = require('./ldebug.js');
 const lobject = require('./lobject.js');
-const CT      = lua.constant_types;
 const TS      = lua.thread_status;
 
 const getco = function(L) {
@@ -65,7 +64,7 @@ const luaB_auxwrap = function(L) {
     let co = lapi.lua_tothread(L, lua.lua_upvalueindex(1));
     let r = auxresume(L, co, lapi.lua_gettop(L));
     if (r < 0) {
-        if (lapi.lua_type(L, -1) === CT.LUA_TSTRING) {  /* error object is a string? */
+        if (lapi.lua_type(L, -1) === lua.LUA_TSTRING) {  /* error object is a string? */
             lauxlib.luaL_where(L, 1);  /* add extra info */
             lapi.lua_insert(L, -2);
             lapi.lua_concat(L, 2);
@@ -78,7 +77,7 @@ const luaB_auxwrap = function(L) {
 };
 
 const luaB_cocreate = function(L) {
-    lauxlib.luaL_checktype(L, 1, CT.LUA_TFUNCTION);
+    lauxlib.luaL_checktype(L, 1, lua.LUA_TFUNCTION);
     let NL = lstate.lua_newthread(L);
     lapi.lua_pushvalue(L, 1);  /* move function to top */
     lapi.lua_xmove(L, NL, 1);  /* move function from L to NL */

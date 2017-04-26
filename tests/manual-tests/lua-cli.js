@@ -193,7 +193,7 @@ for (let i = 1; i < script; i++) {
 }
 
 const pushargs = function(L) {
-    if (lapi.lua_getglobal(L, lua.to_luastring("arg")) !== lua.constant_types.LUA_TTABLE)
+    if (lapi.lua_getglobal(L, lua.to_luastring("arg")) !== lua.LUA_TTABLE)
         lauxlib.luaL_error(L, lua.to_luastring("'arg' is not a table"));
     let n = lauxlib.luaL_len(L, -1);
     lauxlib.luaL_checkstack(L, n+3, lua.to_luastring("too many arguments to script"));

@@ -13,7 +13,6 @@ const lapi       = require("../src/lapi.js");
 const lauxlib    = require("../src/lauxlib.js");
 const lua        = require('../src/lua.js');
 const linit      = require('../src/linit.js');
-const CT         = lua.constant_types;
 
 test('luaL_newstate, lua_pushnil, luaL_typename', function (t) {
     let L;

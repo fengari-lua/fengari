@@ -33,14 +33,14 @@ const db_getmetatable = function(L) {
 
 const db_setmetatable = function(L) {
     const t = lapi.lua_type(L, 2);
-    lauxlib.luaL_argcheck(L, t == lua.CT.LUA_TNIL || t == lua.CT.LUA_TTABLE, 2, lua.to_luastring("nil or table expected", true));
+    lauxlib.luaL_argcheck(L, t == lua.LUA_TNIL || t == lua.LUA_TTABLE, 2, lua.to_luastring("nil or table expected", true));
     lapi.lua_settop(L, 2);
     lapi.lua_setmetatable(L, 1);
     return 1;  /* return 1st argument */
 };
 
 const db_getuservalue = function(L) {
-    if (lapi.lua_type(L, 1) !== lua.CT.LUA_TUSERDATA)
+    if (lapi.lua_type(L, 1) !== lua.LUA_TUSERDATA)
         lapi.lua_pushnil(L);
     else
         lapi.lua_getuservalue(L, 1);
@@ -49,7 +49,7 @@ const db_getuservalue = function(L) {
 
 
 const db_setuservalue = function(L) {
-   lauxlib.luaL_checktype(L, 1, lua.CT.LUA_TUSERDATA);
+   lauxlib.luaL_checktype(L, 1, lua.LUA_TUSERDATA);
    lauxlib.luaL_checkany(L, 2);
    lapi.lua_settop(L, 2);
    lapi.lua_setuservalue(L, 1);
@@ -219,7 +219,7 @@ const db_setlocal = function(L) {
 */
 const auxupvalue = function(L, get) {
     let n = lauxlib.luaL_checkinteger(L, 2);  /* upvalue index */
-    lauxlib.luaL_checktype(L, 1, lua.CT.LUA_TFUNCTION);  /* closure */
+    lauxlib.luaL_checktype(L, 1, lua.LUA_TFUNCTION);  /* closure */
     let name = get ? lapi.lua_getupvalue(L, 1, n) : lapi.lua_setupvalue(L, 1, n);
     if (name === null) return 0;
     lapi.lua_pushstring(L, name);
@@ -243,7 +243,7 @@ const db_setupvalue = function(L) {
 */
 const checkupval = function(L, argf, argnup) {
     let nup = lauxlib.luaL_checkinteger(L, argnup);  /* upvalue index */
-    lauxlib.luaL_checktype(L, argf, lua.CT.LUA_TFUNCTION);  /* closure */
+    lauxlib.luaL_checktype(L, argf, lua.LUA_TFUNCTION);  /* closure */
     lauxlib.luaL_argcheck(L, (lapi.lua_getupvalue(L, argf, nup) !== null), argnup, lua.to_luastring("invalid upvalue index", true));
     return nup;
 };
@@ -278,7 +278,7 @@ const hooknames = ["call", "return", "line", "count", "tail call"].map(e => lua.
 const hookf = function(L, ar) {
     lapi.lua_rawgetp(L, lua.LUA_REGISTRYINDEX, HOOKKEY);
     lapi.lua_pushthread(L);
-    if (lapi.lua_rawget(L, -2) === lua.CT.LUA_TFUNCTION) {  /* is there a hook function? */
+    if (lapi.lua_rawget(L, -2) === lua.LUA_TFUNCTION) {  /* is there a hook function? */
         lapi.lua_pushstring(L, hooknames[ar.event]);  /* push event name */
         if (ar.currentline >= 0)
             lapi.lua_pushinteger(L, ar.currentline);  /* push current line */
@@ -322,11 +322,11 @@ const db_sethook = function(L) {
     }
     else {
         const smask = lauxlib.luaL_checkstring(L, arg + 2);
-        lauxlib.luaL_checktype(L, arg+1, lua.CT.LUA_TFUNCTION);
+        lauxlib.luaL_checktype(L, arg+1, lua.LUA_TFUNCTION);
         count = lauxlib.luaL_optinteger(L, arg + 3, 0);
         func = hookf; mask = makemask(smask, count);
     }
-    if (lapi.lua_rawgetp(L, lua.LUA_REGISTRYINDEX, HOOKKEY) === lua.CT.LUA_TNIL) {
+    if (lapi.lua_rawgetp(L, lua.LUA_REGISTRYINDEX, HOOKKEY) === lua.LUA_TNIL) {
         lapi.lua_createtable(L, 0, 2);  /* create a hook table */
         lapi.lua_pushvalue(L, -1);
         lapi.lua_rawsetp(L, lua.LUA_REGISTRYINDEX, HOOKKEY);  /* set it in position */
@@ -411,7 +411,7 @@ if (typeof require === "function") {
             prompt: 'lua_debug> '
         });
 
-        // TODO: if in browser, use a designated input in the DOM ?  
+        // TODO: if in browser, use a designated input in the DOM ?
         const db_debug = function(L) {
             for (;;) {
                 let input = readlineSync.prompt();

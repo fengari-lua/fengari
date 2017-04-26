@@ -14,7 +14,6 @@ const lauxlib    = require("../src/lauxlib.js");
 const lua        = require('../src/lua.js');
 const linit      = require('../src/linit.js');
 const lstate     = require('../src/lstate.js');
-const CT         = lua.constant_types;
 
 
 test('coroutine.create, coroutine.yield, coroutine.resume', function (t) {

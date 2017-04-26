@@ -33,7 +33,7 @@ const getfield = function(L, key, d, delta) {
     let t = lapi.lua_getfield(L, -1, lua.to_luastring(key));  /* get field and its type */
     let res = lapi.lua_tointegerx(L, -1);
     if (res !== false) {  /* field is not an integer? */
-        if (t != lua.CT.LUA_TNIL)  /* some other value? */
+        if (t != lua.LUA_TNIL)  /* some other value? */
             return lauxlib.luaL_error(L, lua.to_luastring(`field '${key}' is not an integer`), true);
         else if (d < 0)  /* absent field; no default? */
             return lauxlib.luaL_error(L, lua.to_luastring(`field '${key}' missing in date table`), true);
@@ -51,7 +51,7 @@ const getfield = function(L, key, d, delta) {
 const os_time = function(L) {
     let t = new Date();
     if (!lapi.lua_isnoneornil(L, 1))  /* called with arg */{
-        lauxlib.luaL_checktype(L, 1, lua.CT.LUA_TTABLE);  /* make sure table is at the top */
+        lauxlib.luaL_checktype(L, 1, lua.LUA_TTABLE);  /* make sure table is at the top */
         lapi.lua_settop(L, 1);
         t.setSeconds(getfield(L, "sec", 0, 0));
         t.setSeconds(getfield(L, "min", 0, 0));

@@ -6,7 +6,6 @@ const lua     = require('./lua.js');
 const lapi    = require('./lapi.js');
 const lauxlib = require('./lauxlib.js');
 const lobject = require('./lobject.js');
-const CT      = lua.constant_types;
 const TS      = lua.thread_status;
 
 const luaB_print = function(L) {
@@ -51,9 +50,9 @@ const luaB_getmetatable = function(L) {
 
 const luaB_setmetatable = function(L) {
     let t = lapi.lua_type(L, 2);
-    lauxlib.luaL_checktype(L, 1, CT.LUA_TTABLE);
-    lauxlib.luaL_argcheck(L, t === CT.LUA_TNIL || t === CT.LUA_TTABLE, 2, lua.to_luastring("nil or table expected", true));
-    if (lauxlib.luaL_getmetafield(L, 1, lua.to_luastring("__metatable", true)) !== CT.LUA_TNIL)
+    lauxlib.luaL_checktype(L, 1, lua.LUA_TTABLE);
+    lauxlib.luaL_argcheck(L, t === lua.LUA_TNIL || t === lua.LUA_TTABLE, 2, lua.to_luastring("nil or table expected", true));
+    if (lauxlib.luaL_getmetafield(L, 1, lua.to_luastring("__metatable", true)) !== lua.LUA_TNIL)
         return lauxlib.luaL_error(L, lua.to_luastring("cannot change a protected metatable", true));
     lapi.lua_settop(L, 2);
     lapi.lua_setmetatable(L, 1);
@@ -69,13 +68,13 @@ const luaB_rawequal = function(L) {
 
 const luaB_rawlen = function(L) {
     let t = lapi.lua_type(L, 1);
-    lauxlib.luaL_argcheck(L, t === CT.LUA_TTABLE || t === CT.LUA_TSTRING, 1, lua.to_luastring("table or string expected", true));
+    lauxlib.luaL_argcheck(L, t === lua.LUA_TTABLE || t === lua.LUA_TSTRING, 1, lua.to_luastring("table or string expected", true));
     lapi.lua_pushinteger(L, lapi.lua_rawlen(L, 1));
     return 1;
 };
 
 const luaB_rawget = function(L) {
-    lauxlib.luaL_checktype(L, 1, CT.LUA_TTABLE);
+    lauxlib.luaL_checktype(L, 1, lua.LUA_TTABLE);
     lauxlib.luaL_checkany(L, 2);
     lapi.lua_settop(L, 2);
     lapi.lua_rawget(L, 1);
@@ -83,7 +82,7 @@ const luaB_rawget = function(L) {
 };
 
 const luaB_rawset = function(L) {
-    lauxlib.luaL_checktype(L, 1, CT.LUA_TTABLE);
+    lauxlib.luaL_checktype(L, 1, lua.LUA_TTABLE);
     lauxlib.luaL_checkany(L, 2);
     lauxlib.luaL_checkany(L, 3);
     lapi.lua_settop(L, 3);
@@ -93,14 +92,14 @@ const luaB_rawset = function(L) {
 
 const luaB_type = function(L) {
     let t = lapi.lua_type(L, 1);
-    lauxlib.luaL_argcheck(L, t !== CT.LUA_TNONE, 1, lua.to_luastring("value expected", true));
+    lauxlib.luaL_argcheck(L, t !== lua.LUA_TNONE, 1, lua.to_luastring("value expected", true));
     lapi.lua_pushstring(L, lapi.lua_typename(L, t));
     return 1;
 };
 
 const pairsmeta = function(L, method, iszero, iter) {
     lauxlib.luaL_checkany(L, 1);
-    if (lauxlib.luaL_getmetafield(L, 1, method) === CT.LUA_TNIL) {  /* no metamethod? */
+    if (lauxlib.luaL_getmetafield(L, 1, method) === lua.LUA_TNIL) {  /* no metamethod? */
         lapi.lua_pushcfunction(L, iter);  /* will return generator, */
         lapi.lua_pushvalue(L, 1);  /* state, */
         if (iszero) lapi.lua_pushinteger(L, 0);  /* and initial value */
@@ -113,7 +112,7 @@ const pairsmeta = function(L, method, iszero, iter) {
 };
 
 const luaB_next = function(L) {
-    lauxlib.luaL_checktype(L, 1, CT.LUA_TTABLE);
+    lauxlib.luaL_checktype(L, 1, lua.LUA_TTABLE);
     lapi.lua_settop(L, 2);  /* create a 2nd argument if there isn't one */
     if (lapi.lua_next(L, 1))
         return 2;
@@ -133,7 +132,7 @@ const luaB_pairs = function(L) {
 const ipairsaux = function(L) {
     let i = lauxlib.luaL_checkinteger(L, 2) + 1;
     lapi.lua_pushinteger(L, i);
-    return lapi.lua_geti(L, 1, i) === CT.LUA_TNIL ? 1 : 2;
+    return lapi.lua_geti(L, 1, i) === lua.LUA_TNIL ? 1 : 2;
 };
 
 /*
@@ -154,7 +153,7 @@ const luaB_ipairs = function(L) {
 const luaB_tonumber = function(L) {
     if (lapi.lua_type(L, 2) <= 0) {  /* standard conversion? */
         lauxlib.luaL_checkany(L, 1);
-        if (lapi.lua_type(L, 1) === CT.LUA_TNUMBER) {  /* already a number? */
+        if (lapi.lua_type(L, 1) === lua.LUA_TNUMBER) {  /* already a number? */
             lapi.lua_settop(L, 1);
             return 1;
         } else {
@@ -164,7 +163,7 @@ const luaB_tonumber = function(L) {
         }
     } else {
         let base = lauxlib.luaL_checkinteger(L, 2);
-        lauxlib.luaL_checktype(L, 1, CT.LUA_TSTRING);  /* no numbers as strings */
+        lauxlib.luaL_checktype(L, 1, lua.LUA_TSTRING);  /* no numbers as strings */
         let s = lapi.lua_tostring(L, 1);
         lauxlib.luaL_argcheck(L, 2 <= base && base <= 36, 2, lua.to_luastring("base out of range", true));
         let n = parseInt(lobject.jsstring(s), base);
@@ -181,7 +180,7 @@ const luaB_tonumber = function(L) {
 const luaB_error = function(L) {
     let level = lauxlib.luaL_optinteger(L, 2, 1);
     lapi.lua_settop(L, 1);
-    if (lapi.lua_type(L, 1) === CT.LUA_TSTRING && level > 0) {
+    if (lapi.lua_type(L, 1) === lua.LUA_TSTRING && level > 0) {
         lauxlib.luaL_where(L, level);  /* add extra information */
         lapi.lua_pushvalue(L, 1);
         lapi.lua_concat(L, 2);
@@ -203,7 +202,7 @@ const luaB_assert = function(L) {
 
 const luaB_select = function(L) {
     let n = lapi.lua_gettop(L);
-    if (lapi.lua_type(L, 1) === CT.LUA_TSTRING && lapi.lua_tostring(L, 1)[0] === "#".charCodeAt(0)) {
+    if (lapi.lua_type(L, 1) === lua.LUA_TSTRING && lapi.lua_tostring(L, 1)[0] === "#".charCodeAt(0)) {
         lapi.lua_pushinteger(L, n - 1);
         return 1;
     } else {
@@ -246,7 +245,7 @@ const luaB_pcall = function(L) {
 */
 const luaB_xpcall = function(L) {
     let n = lapi.lua_gettop(L);
-    lauxlib.luaL_checktype(L, 2, CT.LUA_TFUNCTION);  /* check error function */
+    lauxlib.luaL_checktype(L, 2, lua.LUA_TFUNCTION);  /* check error function */
     lapi.lua_pushboolean(L, 1);  /* first result */
     lapi.lua_pushvalue(L, 1);  /* function */
     lapi.lua_rotate(L, 3, 2);  /* move them below function's arguments */
@@ -306,7 +305,7 @@ const luaB_load = function(L) {
         status = lauxlib.luaL_loadbufferx(L, s, chunkname, mode);
     } else {  /* loading from a reader function */
         let chunkname = lauxlib.luaL_optstring(L, 2, lua.to_luastring("=(load)", true));
-        lauxlib.luaL_checktype(L, 1, CT.LUA_TFUNCTION);
+        lauxlib.luaL_checktype(L, 1, lua.LUA_TFUNCTION);
         lapi.lua_settop(L, RESERVEDSLOT);  /* create reserved slot */
         status = lapi.lua_load(L, generic_reader, null, chunkname, mode);
     }

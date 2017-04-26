@@ -11,7 +11,6 @@ const ldo        = require('./ldo.js');
 const ldebug     = require('./ldebug.js');
 const llimit     = require('./llimit.js');
 const luaconf    = require('./luaconf.js');
-const CT         = lua.constant_types;
 const TS         = lua.thread_status;
 
 var RNG          = seedrandom();
@@ -195,7 +194,7 @@ const math_max = function(L) {
 };
 
 const math_type = function(L) {
-    if (lapi.lua_type(L, 1) === CT.LUA_TNUMBER) {
+    if (lapi.lua_type(L, 1) === lua.LUA_TNUMBER) {
         if (lapi.lua_isinteger(L, 1))
             lapi.lua_pushliteral(L, "integer");
         else

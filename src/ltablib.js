@@ -10,7 +10,6 @@ const ldo     = require('./ldo.js');
 const ldebug  = require('./ldebug.js');
 const llimit  = require('./llimit.js');
 const lobject = require('./lobject.js');
-const CT      = lua.constant_types;
 const TS      = lua.thread_status;
 
 
@@ -25,7 +24,7 @@ const TAB_RW = (TAB_R | TAB_W); /* read/write */
 
 const checkfield = function(L, key, n) {
     lapi.lua_pushstring(L, key);
-    return lapi.lua_rawget(L, -n) !== CT.LUA_TNIL;
+    return lapi.lua_rawget(L, -n) !== lua.LUA_TNIL;
 };
 
 /*
@@ -33,7 +32,7 @@ const checkfield = function(L, key, n) {
 ** has a metatable with the required metamethods)
 */
 const checktab = function(L, arg, what) {
-    if (lapi.lua_type(L, arg) !== CT.LUA_TTABLE) {  /* is it not a table? */
+    if (lapi.lua_type(L, arg) !== lua.LUA_TTABLE) {  /* is it not a table? */
         let n = 1;
         if (lapi.lua_getmetatable(L, arg) &&  /* must have metatable */
             (!(what & TAB_R) || checkfield(L, lua.to_luastring("__index", true), ++n)) &&
@@ -42,7 +41,7 @@ const checktab = function(L, arg, what) {
             lapi.lua_pop(L, n);  /* pop metatable and tested metamethods */
         }
         else
-            lauxlib.luaL_checktype(L, arg, CT.LUA_TTABLE);  /* force an error */
+            lauxlib.luaL_checktype(L, arg, lua.LUA_TTABLE);  /* force an error */
     }
 };
 
@@ -185,7 +184,7 @@ const unpack = function(L) {
 const auxsort = function(L) {
     let t = lapi.index2addr(L, 1);
 
-    if (lapi.lua_type(L, 2) !== CT.LUA_TFUNCTION) {  /* no function? */
+    if (lapi.lua_type(L, 2) !== lua.LUA_TFUNCTION) {  /* no function? */
         [...t.value.entries()]
             .sort(function (a, b) {
                 if (typeof a[0] !== 'number') return 1;
@@ -216,7 +215,7 @@ const sort = function(L) {
     if (n > 1) {  /* non-trivial interval? */
         lauxlib.luaL_argcheck(L, n < llimit.MAX_INT, 1, lua.to_luastring("array too big", true));
         if (!lapi.lua_isnoneornil(L, 2))  /* is there a 2nd argument? */
-            lauxlib.luaL_checktype(L, 2, CT.LUA_TFUNCTION);  /* must be a function */
+            lauxlib.luaL_checktype(L, 2, lua.LUA_TFUNCTION);  /* must be a function */
         lapi.lua_settop(L, 2);  /* make sure there are two arguments */
         auxsort(L);
     }

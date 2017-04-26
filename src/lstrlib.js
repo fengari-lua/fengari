@@ -9,7 +9,6 @@ const lobject = require('./lobject.js');
 const lua     = require('./lua.js');
 const luaconf = require('./luaconf.js');
 const llimit  = require('./llimit.js');
-const CT      = lua.constant_types;
 const char    = lua.char;
 
 const sL_ESC  = '%';
@@ -79,7 +78,7 @@ const writer = function(L, b, size, B) {
 const str_dump = function(L) {
     let b = [];
     let strip = lapi.lua_toboolean(L, 2);
-    lauxlib.luaL_checktype(L, 1, CT.LUA_TFUNCTION);
+    lauxlib.luaL_checktype(L, 1, lua.LUA_TFUNCTION);
     lapi.lua_settop(L, 1);
     if (lapi.lua_dump(L, writer, b, strip) !== 0)
         return lauxlib.luaL_error(L, lua.to_luastring("unable to dump given function"));
@@ -219,12 +218,12 @@ const checkdp = function(buff) {
 
 const addliteral = function(L, b, arg) {
     switch(lapi.lua_type(L, arg)) {
-        case CT.LUA_TSTRING: {
+        case lua.LUA_TSTRING: {
             let s = lapi.lua_tostring(L, arg);
             addquoted(b, s, s.length);
             break;
         }
-        case CT.LUA_TNUMBER: {
+        case lua.LUA_TNUMBER: {
             if (!lapi.lua_isinteger(L, arg)) {  /* float? */
                 let n = lapi.lua_tonumber(L, arg);  /* write as hexa ('%a') */
                 concat(b, lua_number2strx(L, lua.to_luastring(`%${luaconf.LUA_INTEGER_FRMLEN}a`), n));
@@ -235,7 +234,7 @@ const addliteral = function(L, b, arg) {
             }
             break;
         }
-        case CT.LUA_TNIL: case CT.LUA_TBOOLEAN: {
+        case lua.LUA_TNIL: case lua.LUA_TBOOLEAN: {
             concat(b, lauxlib.luaL_tolstring(L, arg));
             break;
         }
@@ -1304,13 +1303,13 @@ const add_s = function(ms, b, s, e) {
 const add_value = function(ms, b, s, e, tr) {
     let L = ms.L;
     switch (tr) {
-        case CT.LUA_TFUNCTION: {
+        case lua.LUA_TFUNCTION: {
             lapi.lua_pushvalue(L, 3);
             let n = push_captures(ms, s, e);
             lapi.lua_call(L, n, 1);
             break;
         }
-        case CT.LUA_TTABLE: {
+        case lua.LUA_TTABLE: {
             push_onecapture(ms, 0, s, e);
             lapi.lua_gettable(L, 3);
             break;
@@ -1340,7 +1339,7 @@ const str_gsub = function(L) {
     let n = 0;  /* replacement count */
     let ms = new MatchState(L);
     let b = new lauxlib.luaL_Buffer(L);
-    lauxlib.luaL_argcheck(L, tr === CT.LUA_TNUMBER || tr === CT.LUA_TSTRING || tr === CT.LUA_TFUNCTION || tr === CT.LUA_TTABLE, 3,
+    lauxlib.luaL_argcheck(L, tr === lua.LUA_TNUMBER || tr === lua.LUA_TSTRING || tr === lua.LUA_TFUNCTION || tr === lua.LUA_TTABLE, 3,
         lua.to_luastring("string/function/table expected", true));
     lauxlib.luaL_buffinit(L, b);
     if (anchor) {
@@ -1394,7 +1393,7 @@ const createmetatable = function(L) {
     lapi.lua_pop(L, 1);  /* pop dummy string */
     lapi.lua_pushvalue(L, -2);  /* get string library */
     lapi.lua_setfield(L, -2, lua.to_luastring("__index", true));  /* lobject.table_index = string */
-    lapi.lua_pop(L, 1);  /* pop metatable */  
+    lapi.lua_pop(L, 1);  /* pop metatable */
 };
 
 const luaopen_string = function(L) {

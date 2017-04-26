@@ -9,7 +9,6 @@ const lua     = require('./lua.js');
 const char    = lua.char;
 const ldebug  = require('./ldebug.js');
 const lobject = require('./lobject.js');
-const CT      = lua.constant_types;
 
 const LUA_LOADED_TABLE = "_LOADED";
 
@@ -35,7 +34,7 @@ const findfield = function(L, objidx, level) {
     lapi.lua_pushnil(L);  /* start 'next' loop */
 
     while (lapi.lua_next(L, -2)) {  /* for each pair in table */
-        if (lapi.lua_type(L, -2) === CT.LUA_TSTRING) {  /* ignore non-string keys */
+        if (lapi.lua_type(L, -2) === lua.LUA_TSTRING) {  /* ignore non-string keys */
             if (lapi.lua_rawequal(L, objidx, -1)) {  /* found object? */
                 lapi.lua_pop(L, 1);  /* remove value (but keep name) */
                 return 1;
@@ -161,9 +160,9 @@ const luaL_argerror = function(L, arg, extramsg) {
 
 const typeerror = function(L, arg, tname) {
     let typearg;
-    if (luaL_getmetafield(L, arg, lua.to_luastring("__name", true)) === CT.LUA_TSTRING)
+    if (luaL_getmetafield(L, arg, lua.to_luastring("__name", true)) === lua.LUA_TSTRING)
         typearg = lapi.lua_tostring(L, -1);
-    else if (lapi.lua_type(L, arg) === CT.LUA_TLIGHTUSERDATA)
+    else if (lapi.lua_type(L, arg) === lua.LUA_TLIGHTUSERDATA)
         typearg = lua.to_luastring("light userdata", true);
     else
         typearg = luaL_typename(L, arg);
@@ -219,7 +218,7 @@ const luaL_argcheck = function(L, cond, arg, extramsg) {
 };
 
 const luaL_checkany = function(L, arg) {
-    if (lapi.lua_type(L, arg) === CT.LUA_TNONE)
+    if (lapi.lua_type(L, arg) === lua.LUA_TNONE)
         luaL_argerror(L, arg, lua.to_luastring("value expected", true));
 };
 
@@ -234,7 +233,7 @@ const luaL_checkstring = function(L, n) {
 
 const luaL_checklstring = function(L, arg) {
     let s = lapi.lua_tolstring(L, arg);
-    if (s === null || s === undefined) tag_error(L, arg, CT.LUA_TSTRING);
+    if (s === null || s === undefined) tag_error(L, arg, lua.LUA_TSTRING);
     return s;
 };
 
@@ -250,13 +249,13 @@ const interror = function(L, arg) {
     if (lapi.lua_isnumber(L, arg))
         luaL_argerror(L, arg, lua.to_luastring("number has no integer representation", true));
     else
-        tag_error(L, arg, CT.LUA_TNUMBER);
+        tag_error(L, arg, lua.LUA_TNUMBER);
 };
 
 const luaL_checknumber = function(L, arg) {
     let d = lapi.lua_tonumber(L, arg);
     if (d === false)
-        tag_error(L, arg, CT.LUA_TNUMBER);
+        tag_error(L, arg, lua.LUA_TNUMBER);
     return d;
 };
 
@@ -332,11 +331,11 @@ const luaL_loadstring = function(L, s) {
 
 const luaL_getmetafield = function(L, obj, event) {
     if (!lapi.lua_getmetatable(L, obj))
-        return CT.LUA_TNIL;
+        return lua.LUA_TNIL;
     else {
         lapi.lua_pushstring(L, event);
         let tt = lapi.lua_rawget(L, -2);
-        if (tt === CT.LUA_TNIL)
+        if (tt === lua.LUA_TNIL)
             lapi.lua_pop(L, 2);
         return tt;
     }
@@ -344,7 +343,7 @@ const luaL_getmetafield = function(L, obj, event) {
 
 const luaL_callmeta = function(L, obj, event) {
     obj = lapi.lua_absindex(L, obj);
-    if (luaL_getmetafield(L, obj, event) === CT.LUA_TNIL)
+    if (luaL_getmetafield(L, obj, event) === lua.LUA_TNIL)
         return false;
 
     lapi.lua_pushvalue(L, obj);
@@ -368,21 +367,21 @@ const luaL_tolstring = function(L, idx) {
             luaL_error(L, lua.to_luastring("'__tostring' must return a string", true));
     } else {
         switch(lapi.lua_type(L, idx)) {
-            case CT.LUA_TNUMBER:
-            case CT.LUA_TBOOLEAN:
+            case lua.LUA_TNUMBER:
+            case lua.LUA_TBOOLEAN:
                 lapi.lua_pushstring(L, lua.to_luastring(`${lapi.index2addr(L, idx).value}`));
                 break;
-            case CT.LUA_TSTRING:
+            case lua.LUA_TSTRING:
                 lapi.lua_pushstring(L, lapi.index2addr(L, idx).value);
                 break;
-            case CT.LUA_TNIL:
+            case lua.LUA_TNIL:
                 lapi.lua_pushstring(L, lua.to_luastring(`nil`));
                 break;
             default:
                 let tt = luaL_getmetafield(L, idx, lua.to_luastring("__name", true));
-                let kind = tt === CT.LUA_TSTRING ? lapi.lua_tostring(L, -1) : luaL_typename(L, idx);
+                let kind = tt === lua.LUA_TSTRING ? lapi.lua_tostring(L, -1) : luaL_typename(L, idx);
                 lapi.lua_pushstring(L, lua.to_luastring(`${lobject.jsstring(kind)}: 0x${lapi.index2addr(L, -1).id.toString(16)}`));
-                if (tt !== CT.LUA_TNIL)
+                if (tt !== lua.LUA_TNIL)
                     lapi.lua_remove(L, -2);
                 break;
         }
@@ -420,7 +419,7 @@ const luaL_requiref = function(L, modname, openf, glb) {
 ** into the stack
 */
 const luaL_getsubtable = function(L, idx, fname) {
-    if (lapi.lua_getfield(L, idx, fname) === CT.LUA_TTABLE)
+    if (lapi.lua_getfield(L, idx, fname) === lua.LUA_TTABLE)
         return true;  /* table already there */
     else {
         lapi.lua_pop(L, 1);  /* remove previous result */
