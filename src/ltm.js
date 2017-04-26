@@ -68,12 +68,13 @@ const luaT_init = function(L) {
 ** with metatable, use their '__name' metafield, if present.
 */
 const luaT_objtypename = function(L, o) {
-    if ((o.ttistable() && o.metatable !== null) || (o.ttisfulluserdata() && o.metatable !== null)) {
-        let name = lobject.table_index(o, defs.to_luastring('__name', true));
+    let mt;
+    if ((o.ttistable() && (mt = o.metatable) !== null) ||
+        (o.ttisfulluserdata() && (mt = o.metatable) !== null)) {
+        let name = lobject.table_index(mt, defs.to_luastring('__name', true));
         if (name.ttisstring())
-            return name.jsstring();
+            return name.value;
     }
-
     return ttypename(o.ttnov());
 };
 
