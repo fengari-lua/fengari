@@ -117,57 +117,13 @@ class TValue {
     }
 
     jsstring(from, to) {
-        return jsstring(this.value, from, to);
+        return defs.to_jsstring(this.value, from, to);
     }
 
 }
 
 const luaO_nilobject = new TValue(CT.LUA_TNIL, null);
 module.exports.luaO_nilobject = luaO_nilobject;
-
-const jsstring = function(value, from, to) {
-    assert(Array.isArray(value), "jsstring expect a array of bytes");
-
-    let u0, u1, u2, u3, u4, u5;
-    let idx = 0;
-    value = value.slice(from ? from : 0, to);
-
-    var str = '';
-    while (1) {
-        // For UTF8 byte structure, see http://en.wikipedia.org/wiki/UTF-8#Description and https://www.ietf.org/rfc/rfc2279.txt and https://tools.ietf.org/html/rfc3629
-        u0 = value[idx++];
-        if (u0 === 0) { str += "\0"; continue; } // Lua string embed '\0'
-        if (!u0) return str;
-        if (!(u0 & 0x80)) { str += String.fromCharCode(u0); continue; }
-        u1 = value[idx++] & 63;
-        if ((u0 & 0xE0) == 0xC0) { str += String.fromCharCode(((u0 & 31) << 6) | u1); continue; }
-        u2 = value[idx++] & 63;
-        if ((u0 & 0xF0) == 0xE0) {
-            u0 = ((u0 & 15) << 12) | (u1 << 6) | u2;
-        } else {
-            u3 = value[idx++] & 63;
-            if ((u0 & 0xF8) == 0xF0) {
-                u0 = ((u0 & 7) << 18) | (u1 << 12) | (u2 << 6) | u3;
-            } else {
-                u4 = value[idx++] & 63;
-                if ((u0 & 0xFC) == 0xF8) {
-                    u0 = ((u0 & 3) << 24) | (u1 << 18) | (u2 << 12) | (u3 << 6) | u4;
-                } else {
-                    u5 = value[idx++] & 63;
-                    u0 = ((u0 & 1) << 30) | (u1 << 24) | (u2 << 18) | (u3 << 12) | (u4 << 6) | u5;
-                }
-            }
-        }
-        if (u0 < 0x10000) {
-            str += String.fromCharCode(u0);
-        } else {
-            var ch = u0 - 0x10000;
-            str += String.fromCharCode(0xD800 | (ch >> 10), 0xDC00 | (ch & 0x3FF));
-        }
-    }
-
-    return str;
-};
 
 const table_keyValue = function(key) {
     // Those lua values are used by value, others by reference
@@ -398,11 +354,11 @@ const lua_strx2number = function(s) {
         e += exp1;
     }
     if (neg) r = -r;
-    return jsstring(s).trim().search(/s/) < 0 ? ldexp(r, e) : null;  /* Only valid if nothing left is s*/
+    return defs.to_jsstring(s).trim().search(/s/) < 0 ? ldexp(r, e) : null;  /* Only valid if nothing left is s*/
 };
 
 const l_str2dloc = function(s, mode) {
-    let flt = mode === 'x' ? lua_strx2number(s) : parseFloat(jsstring(s));
+    let flt = mode === 'x' ? lua_strx2number(s) : parseFloat(defs.to_jsstring(s));
     return !isNaN(flt) ? flt : null;  /* OK if no trailing characters */
 };
 
@@ -552,7 +508,6 @@ module.exports.TValue         = TValue;
 module.exports.UTF8BUFFSZ     = UTF8BUFFSZ;
 module.exports.frexp          = frexp;
 module.exports.intarith       = intarith;
-module.exports.jsstring       = jsstring;
 module.exports.ldexp          = ldexp;
 module.exports.luaO_chunkid   = luaO_chunkid;
 module.exports.luaO_hexavalue = luaO_hexavalue;

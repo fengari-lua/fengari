@@ -2,7 +2,6 @@
 
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
-const lobject = require('./lobject.js');
 
 const luaB_print = function(L) {
     let n = lua.lua_gettop(L); /* number of arguments */
@@ -22,8 +21,8 @@ const luaB_print = function(L) {
     }
 
     // Don't use console.log if Node
-    if (process.stdout) process.stdout.write(lobject.jsstring(str) + "\n");
-    else console.log(lobject.jsstring(str));
+    if (process.stdout) process.stdout.write(lua.to_jsstring(str) + "\n");
+    else console.log(lua.to_jsstring(str));
     return 0;
 };
 
@@ -162,7 +161,7 @@ const luaB_tonumber = function(L) {
         lauxlib.luaL_checktype(L, 1, lua.LUA_TSTRING);  /* no numbers as strings */
         let s = lua.lua_tostring(L, 1);
         lauxlib.luaL_argcheck(L, 2 <= base && base <= 36, 2, lua.to_luastring("base out of range", true));
-        let n = parseInt(lobject.jsstring(s), base);
+        let n = parseInt(lua.to_jsstring(s), base);
         if (!isNaN(n)) {
             lua.lua_pushinteger(L, n);
             return 1;

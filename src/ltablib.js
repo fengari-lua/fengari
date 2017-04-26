@@ -4,7 +4,6 @@ const lua     = require('./lua.js');
 const lapi    = require('./lapi.js');
 const lauxlib = require('./lauxlib.js');
 const llimit  = require('./llimit.js');
-const lobject = require('./lobject.js');
 
 
 /*
@@ -47,7 +46,7 @@ const aux_getn = function(L, n, w) {
 const addfield = function(L, b, i) {
     lua.lua_geti(L, 1, i);
     if (!lua.lua_isstring(L, -1))
-        lauxlib.luaL_error(L, lua.to_luastring(`invalid value (${lobject.jsstring(lauxlib.luaL_typename(L, -1))}) at index ${i} in table for 'concat'`));
+        lauxlib.luaL_error(L, lua.to_luastring(`invalid value (${lua.to_jsstring(lauxlib.luaL_typename(L, -1))}) at index ${i} in table for 'concat'`));
 
     lauxlib.luaL_addvalue(b);
 };

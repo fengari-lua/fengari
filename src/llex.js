@@ -159,7 +159,7 @@ const save = function(ls, c) {
 
 const luaX_token2str = function(ls, token) {
     if (typeof token === "string" || token < FIRST_RESERVED) {  /* single-byte symbols? */
-        return defs.to_luastring(`'${typeof token === "string" ? token : lobject.jsstring([token])}'`);
+        return defs.to_luastring(`'${typeof token === "string" ? token : defs.to_jsstring([token])}'`);
     } else {
         let s = luaX_tokens[token - FIRST_RESERVED];
         if (token < R.TK_EOS)  /* fixed format (symbols and reserved words)? */
@@ -283,7 +283,7 @@ const txtToken = function(ls, token) {
         case R.TK_NAME: case R.TK_STRING:
         case R.TK_FLT: case R.TK_INT:
             save(ls, 0);
-            return defs.to_luastring(`'${lobject.jsstring(ls.buff.buffer)}'`);
+            return defs.to_luastring(`'${defs.to_jsstring(ls.buff.buffer)}'`);
         default:
             return luaX_token2str(ls, token);
     }
@@ -292,7 +292,7 @@ const txtToken = function(ls, token) {
 const lexerror = function(ls, msg, token) {
     msg = ldebug.luaG_addinfo(ls.L, msg, ls.source, ls.linenumber);
     if (token)
-        lapi.lua_pushstring(ls.L, defs.to_luastring(`${msg instanceof TValue ? msg.jsstring() : msg} near ${lobject.jsstring(txtToken(ls, token))}`));
+        lapi.lua_pushstring(ls.L, defs.to_luastring(`${msg instanceof TValue ? msg.jsstring() : msg} near ${defs.to_jsstring(txtToken(ls, token))}`));
     ldo.luaD_throw(ls.L, TS.LUA_ERRSYNTAX);
 };
 

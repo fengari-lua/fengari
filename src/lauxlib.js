@@ -3,7 +3,6 @@
 
 const lapi    = require('./lapi.js');
 const lua     = require('./lua.js');
-const lobject = require('./lobject.js');
 const linit   = require('./linit.js');
 
 const LUA_LOADED_TABLE = "_LOADED";
@@ -59,7 +58,7 @@ const pushglobalfuncname = function(L, ar) {
     lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, lua.to_luastring(LUA_LOADED_TABLE, true));
     if (findfield(L, top + 1, 2)) {
         let name = lua.lua_tostring(L, -1);
-        if (lobject.jsstring(name).startsWith("_G.")) {  /* name start with '_G.'? */
+        if (lua.to_jsstring(name).startsWith("_G.")) {  /* name start with '_G.'? */
             lua.lua_pushstring(L, name.slice(3));  /* push name without prefix */
             lua.lua_remove(L, -2);  /* remove original name */
         }
@@ -140,20 +139,20 @@ const luaL_argerror = function(L, arg, extramsg) {
     let ar = new lua.lua_Debug();
 
     if (!lua.lua_getstack(L, 0, ar))  /* no stack frame? */
-        return luaL_error(L, lua.to_luastring(`bad argument #${arg} (${lobject.jsstring(extramsg)})`));
+        return luaL_error(L, lua.to_luastring(`bad argument #${arg} (${lua.to_jsstring(extramsg)})`));
 
     lua.lua_getinfo(L, 'n', ar);
 
     if (ar.namewhat === lua.to_luastring('method', true)) {
         arg--;  /* do not count 'self' */
         if (arg === 0)  /* error is in the self argument itself? */
-            return luaL_error(L, lua.to_luastring(`calling '${lobject.jsstring(ar.name)}' on  bad self (${lobject.jsstring(extramsg)})`));
+            return luaL_error(L, lua.to_luastring(`calling '${lua.to_jsstring(ar.name)}' on  bad self (${lua.to_jsstring(extramsg)})`));
     }
 
     if (ar.name === null)
         ar.name = pushglobalfuncname(L, ar) ? lua.lua_tostring(L, -1) : ["?".charCodeAt(0)];
 
-    return luaL_error(L, lua.to_luastring(`bad argument #${arg} to '${lobject.jsstring(ar.name)}' (${lobject.jsstring(extramsg)})`));
+    return luaL_error(L, lua.to_luastring(`bad argument #${arg} to '${lua.to_jsstring(ar.name)}' (${lua.to_jsstring(extramsg)})`));
 };
 
 const typeerror = function(L, arg, tname) {
@@ -165,7 +164,7 @@ const typeerror = function(L, arg, tname) {
     else
         typearg = luaL_typename(L, arg);
 
-    let msg = lua.lua_pushstring(L, lua.to_luastring(`${lobject.jsstring(tname)} expected, got ${lobject.jsstring(typearg)}`));
+    let msg = lua.lua_pushstring(L, lua.to_luastring(`${lua.to_jsstring(tname)} expected, got ${lua.to_jsstring(typearg)}`));
     return luaL_argerror(L, arg, msg);
 };
 
@@ -174,7 +173,7 @@ const luaL_where = function(L, level) {
     if (lua.lua_getstack(L, level, ar)) {
         lua.lua_getinfo(L, lua.to_luastring("Sl", true), ar);
         if (ar.currentline > 0) {
-            lua.lua_pushstring(L, lua.to_luastring(`${lobject.jsstring(ar.short_src)}:${ar.currentline}:`));
+            lua.lua_pushstring(L, lua.to_luastring(`${lua.to_jsstring(ar.short_src)}:${ar.currentline}:`));
             return;
         }
     }
@@ -184,7 +183,7 @@ const luaL_where = function(L, level) {
 const luaL_error = function(L, fmt, ...args) {
     let i = 0;
 
-    fmt = lobject.jsstring(fmt);
+    fmt = lua.to_jsstring(fmt);
     // TODO: bypassing lua_pushvstring for now
     fmt = fmt.replace(/(^%[sfIpdcU]|([^%])%[sfIpdcU])/g, function (m, p1, p2, off) {
         return p2 ? p2 + args[i++] : args[i++];
@@ -205,7 +204,7 @@ const luaL_fileresult = function(L, stat, fname, e) {
     else {
         lua.lua_pushnil(L);
         if (fname)
-            lua.lua_pushstring(L, lua.to_luastring(`${lobject.jsstring(fname)}: ${e.message}`));
+            lua.lua_pushstring(L, lua.to_luastring(`${lua.to_jsstring(fname)}: ${e.message}`));
         else
             lua.lua_pushstring(L, lua.to_luastring(e.message));
         lua.lua_pushinteger(L, -e.errno);
@@ -460,7 +459,7 @@ const luaL_tolstring = function(L, idx) {
             default:
                 let tt = luaL_getmetafield(L, idx, lua.to_luastring("__name", true));
                 let kind = tt === lua.LUA_TSTRING ? lua.lua_tostring(L, -1) : luaL_typename(L, idx);
-                lua.lua_pushstring(L, lua.to_luastring(`${lobject.jsstring(kind)}: 0x${lapi.index2addr(L, -1).id.toString(16)}`));
+                lua.lua_pushstring(L, lua.to_luastring(`${lua.to_jsstring(kind)}: 0x${lapi.index2addr(L, -1).id.toString(16)}`));
                 if (tt !== lua.LUA_TNIL)
                     lua.lua_remove(L, -2);
                 break;
@@ -537,7 +536,7 @@ const luaL_setfuncs = function(L, l, nup) {
 const luaL_checkstack = function(L, space, msg) {
     if (!lua.lua_checkstack(L, space)) {
         if (msg)
-            luaL_error(L, lua.to_luastring(`stack overflow (${lobject.jsstring(msg)})`));
+            luaL_error(L, lua.to_luastring(`stack overflow (${lua.to_jsstring(msg)})`));
         else
             luaL_error(L, lua.to_luastring('stack overflow', true));
     }
@@ -592,7 +591,7 @@ if (typeof require === "function") {
         const errfile = function(L, what, fnameindex, error) {
             let serr = error.message;
             let filename = lua.lua_tostring(L, fnameindex).slice(1);
-            lua.lua_pushstring(L, lua.to_luastring(`cannot ${what} ${lobject.jsstring(filename)}: ${serr}`));
+            lua.lua_pushstring(L, lua.to_luastring(`cannot ${what} ${lua.to_jsstring(filename)}: ${serr}`));
             lua.lua_remove(L, fnameindex);
             return lua.LUA_ERRFILE;
         };
@@ -652,7 +651,7 @@ if (typeof require === "function") {
                 lua.lua_pushliteral(L, "=stdin");
                 lf.f = process.stdin.fd;
             } else {
-                let jsfilename = lobject.jsstring(filename);
+                let jsfilename = lua.to_jsstring(filename);
                 lua.lua_pushliteral(L, `@${jsfilename}`);
                 try {
                     lf.f = fs.openSync(jsfilename, "r");

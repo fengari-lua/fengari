@@ -532,12 +532,12 @@ const varinfo = function(L, o) {
             kind = getobjname(ci.func.p, ci.pcOff, stkid - ci.u.l.base);
     }
 
-    return defs.to_luastring(kind ? ` (${lobject.jsstring(kind.funcname)} '${lobject.jsstring(kind.name.value ? kind.name.value : kind.name)}')` : ``);
+    return defs.to_luastring(kind ? ` (${defs.to_jsstring(kind.funcname)} '${defs.to_jsstring(kind.name.value ? kind.name.value : kind.name)}')` : ``);
 };
 
 const luaG_typeerror = function(L, o, op) {
     let t = ltm.luaT_objtypename(L, o);
-    luaG_runerror(L, defs.to_luastring(`attempt to ${lobject.jsstring(op)} a ${lobject.jsstring(t)} value${lobject.jsstring(varinfo(L, o))}`));
+    luaG_runerror(L, defs.to_luastring(`attempt to ${defs.to_jsstring(op)} a ${defs.to_jsstring(t)} value${defs.to_jsstring(varinfo(L, o))}`));
 };
 
 const luaG_concaterror = function(L, p1, p2) {
@@ -559,9 +559,9 @@ const luaG_ordererror = function(L, p1, p2) {
     let t1 = ltm.luaT_objtypename(L, p1);
     let t2 = ltm.luaT_objtypename(L, p2);
     if (t1.join() === t2.join())
-        luaG_runerror(L, defs.to_luastring(`attempt to compare two ${lobject.jsstring(t1)} values`));
+        luaG_runerror(L, defs.to_luastring(`attempt to compare two ${defs.to_jsstring(t1)} values`));
     else
-        luaG_runerror(L, defs.to_luastring(`attempt to compare ${lobject.jsstring(t1)} with ${lobject.jsstring(t2)}`));
+        luaG_runerror(L, defs.to_luastring(`attempt to compare ${defs.to_jsstring(t1)} with ${defs.to_jsstring(t2)}`));
 };
 
 /* add src:line information to 'msg' */
@@ -570,7 +570,7 @@ const luaG_addinfo = function(L, msg, src, line) {
     if (src)
         buff = lobject.luaO_chunkid(src, luaconf.LUA_IDSIZE);
 
-    L.stack[L.top++] = L.l_G.intern(defs.to_luastring(`${lobject.jsstring(buff)}:${line}: ${lobject.jsstring(msg)}`));
+    L.stack[L.top++] = L.l_G.intern(defs.to_luastring(`${defs.to_jsstring(buff)}:${line}: ${defs.to_jsstring(msg)}`));
 
     return L.stack[L.top - 1];
 };
@@ -601,7 +601,7 @@ const luaG_tointerror = function(L, p1, p2) {
     let temp = lvm.tointeger(p1);
     if (temp === false)
         p2 = p1;
-    luaG_runerror(L, defs.to_luastring(`number${lobject.jsstring(varinfo(L, p2))} has no integer representation`));
+    luaG_runerror(L, defs.to_luastring(`number${defs.to_jsstring(varinfo(L, p2))} has no integer representation`));
 };
 
 const luaG_traceexec = function(L) {

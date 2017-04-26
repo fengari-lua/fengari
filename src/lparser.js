@@ -159,7 +159,7 @@ const semerror = function(ls, msg) {
 };
 
 const error_expected = function(ls, token) {
-    llex.luaX_syntaxerror(ls, defs.to_luastring(`${lobject.jsstring(llex.luaX_token2str(ls, token))} expected`));
+    llex.luaX_syntaxerror(ls, defs.to_luastring(`${defs.to_jsstring(llex.luaX_token2str(ls, token))} expected`));
 };
 
 const errorlimit = function(fs, limit, what) {
@@ -204,7 +204,7 @@ const check_match = function(ls, what, who, where) {
             error_expected(ls, what);
         else
             llex.luaX_syntaxerror(ls,
-                defs.to_luastring(`${lobject.jsstring(llex.luaX_token2str(ls, what))} expected (to close ${lobject.jsstring(llex.luaX_token2str(ls, who))} at line ${where}`));
+                defs.to_luastring(`${defs.to_jsstring(llex.luaX_token2str(ls, what))} expected (to close ${defs.to_jsstring(llex.luaX_token2str(ls, who))} at line ${where}`));
     }
 };
 

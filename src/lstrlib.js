@@ -346,7 +346,7 @@ const str_format = function(L) {
                             lua.lua_pop(L, 1);  /* remove result from 'luaL_tolstring' */
                         } else {  /* format the string into 'buff' */
                             // TODO: will failt if s is not valid UTF-8
-                            concat(b, lua.to_luastring(sprintf(String.fromCharCode(...form), lobject.jsstring(s))));
+                            concat(b, lua.to_luastring(sprintf(String.fromCharCode(...form), lua.to_jsstring(s))));
                             lua.lua_pop(L, 1);  /* remove result from 'luaL_tolstring' */
                         }
                     }
@@ -642,13 +642,13 @@ const str_reverse = function(L) {
 
 const str_lower = function(L) {
     // TODO: will fail on invalid UTF-8
-    lua.lua_pushstring(L, lua.to_luastring(lobject.jsstring(lauxlib.luaL_checkstring(L, 1)).toLowerCase()));
+    lua.lua_pushstring(L, lua.to_luastring(lua.to_jsstring(lauxlib.luaL_checkstring(L, 1)).toLowerCase()));
     return 1;
 };
 
 const str_upper = function(L) {
     // TODO: will fail on invalid UTF-8
-    lua.lua_pushstring(L, lua.to_luastring(lobject.jsstring(lauxlib.luaL_checkstring(L, 1)).toUpperCase()));
+    lua.lua_pushstring(L, lua.to_luastring(lua.to_jsstring(lauxlib.luaL_checkstring(L, 1)).toUpperCase()));
     return 1;
 };
 
@@ -1319,7 +1319,7 @@ const add_value = function(ms, b, s, e, tr) {
         lua.lua_pop(L, 1);
         lua.lua_pushlstring(L, s, e - s);  /* keep original text */
     } else if (!lua.lua_isstring(L, -1))
-        lauxlib.luaL_error(L, lua.to_luastring(`invalid replacement value (a ${lobject.jsstring(lauxlib.luaL_typename(L, -1))})`));
+        lauxlib.luaL_error(L, lua.to_luastring(`invalid replacement value (a ${lua.to_jsstring(lauxlib.luaL_typename(L, -1))})`));
         lauxlib.luaL_addvalue(b);  /* add result to accumulator */
 };
 

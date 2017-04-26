@@ -79,6 +79,7 @@ module.exports.LUA_VERSUFFIX           = defs.LUA_VERSUFFIX;
 module.exports.LUA_YIELD               = defs.thread_status.LUA_YIELD;
 module.exports.lua_Debug               = defs.lua_Debug;
 module.exports.lua_upvalueindex        = defs.lua_upvalueindex;
+module.exports.to_jsstring             = defs.to_jsstring;
 module.exports.to_luastring            = defs.to_luastring;
 
 module.exports.lua_absindex            = lapi.lua_absindex;
