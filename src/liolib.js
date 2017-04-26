@@ -12,6 +12,19 @@ const tolstream = function(L) {
     return lauxlib.luaL_checkudata(L, 1, lauxlib.LUA_FILEHANDLE);
 };
 
+const isclosed = function(p) {
+    return p.closef === null;
+};
+
+const f_tostring = function(L) {
+    let p = tolstream(L);
+    if (isclosed(p))
+        lua.lua_pushliteral(L, "file (closed)");
+    else
+        lua.lua_pushstring(L, lua.to_luastring(`file (${p.f.toString()})`));
+    return 1;
+};
+
 const newprefile = function(L) {
     let p = lua.lua_newuserdata(L);
     p.f = null;
@@ -24,6 +37,7 @@ const iolib = {
 };
 
 const flib = {
+    "__tostring": f_tostring
 };
 
 const createmeta = function(L) {

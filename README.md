@@ -46,7 +46,7 @@
         - [ ] `file:setvbuf()`
         - [ ] `file:write()`
         - [ ] `file:__gc()`
-        - [ ] `file:__tostring()`
+        - [x] `file:__tostring()`
 - [ ] C API
     - [x] ...
     - [ ] lua_arith
