@@ -7,6 +7,7 @@ const defs                 = require('./defs.js');
 const lobject              = require('./lobject.js');
 const ldo                  = require('./ldo.js');
 const lapi                 = require('./lapi.js');
+const ltable               = require('./ltable.js');
 const luaT_init            = require('./ltm.js').luaT_init;
 const CT                   = defs.constant_types;
 const TS                   = defs.thread_status;
@@ -106,10 +107,10 @@ const stack_init = function(L1, L) {
 ** Create registry table and its predefined values
 */
 const init_registry = function(L, g) {
-    let registry = new lobject.TValue(CT.LUA_TTABLE, new Map());
+    let registry = new lobject.TValue(CT.LUA_TTABLE, ltable.luaH_new(L));
     g.l_registry = registry;
     registry.value.set(defs.LUA_RIDX_MAINTHREAD, L);
-    registry.value.set(defs.LUA_RIDX_GLOBALS, new lobject.TValue(CT.LUA_TTABLE, new Map()));
+    registry.value.set(defs.LUA_RIDX_GLOBALS, new lobject.TValue(CT.LUA_TTABLE, ltable.luaH_new(L)));
 };
 
 /*

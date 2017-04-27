@@ -9,6 +9,7 @@ const llex     = require('./llex.js');
 const llimit   = require('./llimit.js');
 const lobject  = require('./lobject.js');
 const lopcode  = require('./lopcodes.js');
+const ltable   = require('./ltable.js');
 const BinOpr   = lcode.BinOpr;
 const OpCodesI = lopcode.OpCodesI;
 const Proto    = lfunc.Proto;
@@ -1546,7 +1547,7 @@ const luaY_parser = function(L, z, buff, dyd, name, firstchar) {
     let funcstate = new FuncState();
     let cl = lfunc.luaF_newLclosure(L, 1);  /* create main closure */
     L.stack[L.top++] = cl;
-    lexstate.h = new TValue(defs.CT.LUA_TTABLE, new Map());  /* create table for scanner */
+    lexstate.h = new TValue(defs.CT.LUA_TTABLE, ltable.luaH_new(L));  /* create table for scanner */
     L.stack[L.top++] = lexstate.h;
     funcstate.f = cl.p = new Proto(L);
     funcstate.f.source = new TValue(defs.CT.LUA_TLNGSTR, name);

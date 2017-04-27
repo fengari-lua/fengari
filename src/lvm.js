@@ -207,7 +207,7 @@ const luaV_execute = function(L) {
                 break;
             }
             case OCi.OP_NEWTABLE: {
-                L.stack[ra] = new TValue(CT.LUA_TTABLE, new Map());
+                L.stack[ra] = new TValue(CT.LUA_TTABLE, ltable.luaH_new(L));
                 break;
             }
             case OCi.OP_SELF: {

@@ -4,7 +4,6 @@
 const defs    = require('./defs.js');
 const lobject = require('./lobject.js');
 const CT      = defs.constant_types;
-const TValue  = lobject.TValue;
 
 
 const ordered_intindexes = function(table) {
@@ -22,6 +21,11 @@ const ordered_indexes = function(table) {
             if (typeof b !== "number" || b <= 0) return -1;
             return a > b ? 1 : -1;
         });
+};
+
+const luaH_new = function(L) {
+    let t = new Map();
+    return t;
 };
 
 /*
@@ -62,9 +66,9 @@ const luaH_next = function(L, table, keyI) {
         let tnidx = typeof nidx;
 
         if (tnidx === 'number' && nidx % 1 === 0)
-            L.stack[keyI] = new TValue(CT.LUA_TNUMINT, indexes[i + 1]);
+            L.stack[keyI] = new lobject.TValue(CT.LUA_TNUMINT, indexes[i + 1]);
         else if (tnidx === 'string')
-            L.stack[keyI] = new TValue(CT.LUA_TLNGSTR, indexes[i + 1].split('|').map(e => Number.parseInt(e)).slice(0, -1));
+            L.stack[keyI] = new lobject.TValue(CT.LUA_TLNGSTR, indexes[i + 1].split('|').map(e => Number.parseInt(e)).slice(0, -1));
         else
             L.stack[keyI] = indexes[i + 1];
 
@@ -75,5 +79,6 @@ const luaH_next = function(L, table, keyI) {
     return 0;
 };
 
+module.exports.luaH_new = luaH_new;
 module.exports.luaH_next = luaH_next;
 module.exports.luaH_getn = luaH_getn;

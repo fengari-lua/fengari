@@ -460,7 +460,7 @@ const lua_rawget = function(L, idx) {
 
 // narray and nrec are mostly useless for this implementation
 const lua_createtable = function(L, narray, nrec) {
-    let t = new lobject.TValue(CT.LUA_TTABLE, new Map());
+    let t = new lobject.TValue(CT.LUA_TTABLE, ltable.luaH_new(L));
     L.stack[L.top++] = t;
 
     assert(L.top <= L.ci.top, "stack overflow");
