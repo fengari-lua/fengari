@@ -167,6 +167,7 @@ const table_keyValue = function(key) {
         if ([CT.LUA_TNIL,
             CT.LUA_TBOOLEAN,
             CT.LUA_TSTRING,
+            CT.LUA_TTHREAD,
             CT.LUA_TNUMINT].indexOf(key.type) > -1) {
             key = key.value;
         } else if ([CT.LUA_TSHRSTR, CT.LUA_TLNGSTR].indexOf(key.type) > -1) {
