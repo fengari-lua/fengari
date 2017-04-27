@@ -41,10 +41,9 @@ class CallInfo {
 
 }
 
-class lua_State extends lobject.TValue {
+class lua_State {
 
     constructor() {
-        super(CT.LUA_TTHREAD, null);
         this.base_ci = new CallInfo(); // Will be populated later
         this.top = 0;
         this.ci = null;
@@ -57,8 +56,6 @@ class lua_State extends lobject.TValue {
         this.errorJmp = null;
         this.nny = 1;
         this.errfunc = 0;
-
-        this.value = this;
     }
 
 }
@@ -147,7 +144,7 @@ const preinit_thread = function(L, g) {
 const lua_newthread = function(L) {
     let g = L.l_G;
     let L1 = new lua_State();
-    L.stack[L.top++] = L1;
+    L.stack[L.top++] = new lobject.TValue(CT.LUA_TTHREAD, L1);
     assert(L.top <= L.ci.top, "stack overflow");
     preinit_thread(L1, g);
     L1.hookmask = L.hookmask;

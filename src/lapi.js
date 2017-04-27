@@ -305,7 +305,7 @@ const lua_pushlightuserdata = function(L, p) {
 };
 
 const lua_pushthread = function(L) {
-    L.stack[L.top++] = L;
+    L.stack[L.top++] = new TValue(CT.LUA_TTHREAD, L);
     assert(L.top <= L.ci.top, "stack overflow");
 
     return L.l_G.mainthread === L;
