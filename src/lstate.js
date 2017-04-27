@@ -64,7 +64,6 @@ class global_State {
 
     constructor(L) {
         this.mainthread = L;
-        this.strt = new Map();
         this.l_registry = new lobject.TValue(CT.LUA_TNIL, null);
         this.panic = null;
         this.version = null;
