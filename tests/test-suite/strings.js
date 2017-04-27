@@ -2,10 +2,8 @@
 
 const test     = require('tape');
 
-const lapi     = require("../../src/lapi.js");
 const lauxlib  = require("../../src/lauxlib.js");
 const lua      = require('../../src/lua.js');
-
 
 const checkerror = `
     local maxi, mini = math.maxinteger, math.mininteger
@@ -51,7 +49,7 @@ test('[test-suite] strings: string comparisons', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
@@ -93,7 +91,7 @@ test('[test-suite] strings: string.sub', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
@@ -131,7 +129,7 @@ test('[test-suite] strings: string.find', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
@@ -163,7 +161,7 @@ test('[test-suite] strings: string.len and #', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
@@ -220,7 +218,7 @@ test('[test-suite] strings: string.byte/string.char', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
@@ -257,7 +255,7 @@ test('[test-suite] strings: repetitions with separator', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
@@ -309,7 +307,7 @@ test('[test-suite] strings: tostring', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
@@ -356,7 +354,7 @@ test('[test-suite] strings: string.format', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
@@ -397,7 +395,7 @@ test('[test-suite] strings: %q', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
@@ -424,7 +422,7 @@ test('[test-suite] strings: embedded zeros error', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
@@ -467,7 +465,7 @@ test('[test-suite] strings: format x tostring', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
@@ -504,7 +502,7 @@ test('[test-suite] strings: longest number that can be formatted', function (t) 
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
@@ -553,7 +551,7 @@ test('[test-suite] strings: large numbers for format', function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
@@ -610,7 +608,7 @@ test("[test-suite] strings: 'format %a %A'", function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
@@ -650,7 +648,7 @@ test("[test-suite] strings: errors in format", function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
@@ -701,7 +699,7 @@ test("[test-suite] strings: table.concat", function (t) {
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
@@ -758,7 +756,7 @@ if (false) {
 
         t.doesNotThrow(function () {
 
-            lapi.lua_call(L, 0, -1);
+            lua.lua_call(L, 0, -1);
 
         }, "Lua program ran without error");
 
@@ -790,7 +788,7 @@ test("[test-suite] strings: bug in Lua 5.3.2: 'gmatch' iterator does not work ac
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 
