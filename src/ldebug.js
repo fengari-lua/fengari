@@ -7,6 +7,7 @@ const defs    = require('./defs.js');
 const ldo     = require('./ldo.js');
 const lobject = require('./lobject.js');
 const lstate  = require('./lstate.js');
+const ltable  = require('./ltable.js');
 const luaconf = require('./luaconf.js');
 const OC      = require('./lopcodes.js');
 const lvm     = require('./lvm.js');
@@ -179,7 +180,7 @@ const collectvalidlines = function(L, f) {
         assert(L.top <= L.ci.top, "stack overflow");
     } else {
         let lineinfo = f.l.p.lineinfo;
-        let t = new TValue(CT.LUA_TTABLE, new Map());
+        let t = new TValue(CT.LUA_TTABLE, ltable.luaH_new(L));
         L.stack[L.top++] = t;
         assert(L.top <= L.ci.top, "stack overflow");
         let v = new TValue(true, CT.LUA_TBOOLEAN);
