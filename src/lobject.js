@@ -117,6 +117,41 @@ class TValue {
         return this.ttisnil() || (this.ttisboolean() && this.value === false);
     }
 
+    setfltvalue(x) {
+        this.type = CT.LUA_TNUMFLT;
+        this.value = x;
+    }
+
+    setivalue(x) {
+        this.type = CT.LUA_TNUMINT;
+        this.value = x;
+    }
+
+    setnilvalue() {
+        this.type = CT.LUA_TNIL;
+        this.value = void 0;
+    }
+
+    setfvalue(x) {
+        this.type = CT.LUA_TLCF;
+        this.value = x;
+    }
+
+    setpvalue(x) {
+        this.type = CT.LUA_TLIGHTUSERDATA;
+        this.value = x;
+    }
+
+    setbvalue(x) {
+        this.type = CT.LUA_TBOOLEAN;
+        this.value = x;
+    }
+
+    setfrom(tv) { /* in lua C source setobj2t is often used for this */
+        this.type = tv.type;
+        this.value = tv.value;
+    }
+
     jsstring(from, to) {
         return defs.to_jsstring(this.value, from, to);
     }
