@@ -525,7 +525,6 @@ const luaV_execute = function(L) {
                     let oci = nci.previous;
                     let nfunc = nci.func;
                     let nfuncOff = nci.funcOff;
-                    let ofunc = oci.func;
                     let ofuncOff = oci.funcOff;
                     let lim = nci.l_base + nfunc.value.p.numparams;
                     if (cl.p.p.length > 0) lfunc.luaF_close(L, oci.l_base);

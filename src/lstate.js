@@ -168,7 +168,6 @@ const lua_newstate = function() {
 };
 
 const close_state = function(L) {
-    let g = L.l_G;
     lfunc.luaF_close(L, L.stack);  /* close all upvalues for this thread */
 };
 
