@@ -70,7 +70,7 @@ const luaT_init = function(L) {
 const luaT_objtypename = function(L, o) {
     let mt;
     if ((o.ttistable() && (mt = o.metatable) !== null) ||
-        (o.ttisfulluserdata() && (mt = o.metatable) !== null)) {
+        (o.ttisfulluserdata() && (mt = o.value.metatable) !== null)) {
         let name = lobject.table_index(mt, defs.to_luastring('__name', true));
         if (name.ttisstring())
             return name.value;

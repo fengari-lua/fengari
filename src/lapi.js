@@ -466,15 +466,22 @@ const lua_createtable = function(L, narray, nrec) {
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
-// ignore size argument
-const lua_newuserdata = function(L, size) {
-    let box = Object.create(null);
+const luaS_newudata = function(L, size) {
+    return {
+        metatable: null,
+        uservalue: null,
+        len: size,
+        data: Object.create(null) // ignores size argument
+    };
+};
 
-    L.stack[L.top++] = new lobject.TValue(CT.LUA_TUSERDATA, box);
+const lua_newuserdata = function(L, size) {
+    let u = luaS_newudata(L, size);
+    L.stack[L.top++] = new lobject.TValue(CT.LUA_TUSERDATA, u);
 
     assert(L.top <= L.ci.top, "stack overflow");
 
-    return box;
+    return u.data;
 };
 
 const aux_upvalue = function(L, fi, n) {
@@ -562,8 +569,8 @@ const lua_getmetatable = function(L, objindex) {
 const lua_getuservalue = function(L, idx) {
     let o = index2addr(L, idx);
     assert(L, o.ttisfulluserdata(), "full userdata expected");
-    L.stack[L.top].type = o.type;
-    L.stack[L.top++].value = o.value;
+    let uv = o.uservalue;
+    L.stack[L.top++] = new TValue(uv.type, uv.value);
     assert(L.top <= L.ci.top, "stack overflow");
     return L.stack[L.top - 1].ttnov();
 };
@@ -667,6 +674,7 @@ const lua_touserdata = function(L, idx) {
     let o = index2addr(L, idx);
     switch (o.ttnov()) {
         case CT.LUA_TUSERDATA:
+            return o.value.data;
         case CT.LUA_TLIGHTUSERDATA:
             return o.value;
         default: return null;
@@ -832,11 +840,9 @@ const lua_setuservalue = function(L, idx) {
     assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     let o = index2addr(L, idx);
     assert(L, o.ttisfulluserdata(), "full userdata expected");
-    L.stack[L.top - 1].type = o.type;
-    L.stack[L.top - 1].value = o.value;
-    L.top--;
+    o.uservalue.setfrom(L.stack[L.top - 1]);
+    L.stack[--L.top] = void 0;
 };
-
 
 const lua_callk = function(L, nargs, nresults, ctx, k) {
     assert(k === null || !(L.ci.callstatus & lstate.CIST_LUA), "cannot use continuations inside hooks");
