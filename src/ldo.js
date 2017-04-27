@@ -52,7 +52,7 @@ const luaD_precall = function(L, off, nresults) {
     switch(func.type) {
         case CT.LUA_TCCL:
         case CT.LUA_TLCF: {
-            let f = func.type === CT.LUA_TCCL ? func.f : func.value;
+            let f = func.type === CT.LUA_TCCL ? func.value.f : func.value;
 
             // next_ci
             if (L.ci.next) {
@@ -85,7 +85,7 @@ const luaD_precall = function(L, off, nresults) {
             return true;
         }
         case CT.LUA_TLCL: {
-            let p = func.p;
+            let p = func.value.p;
             let n = L.top - off - 1;
             let fsize = p.maxstacksize;
             let base;

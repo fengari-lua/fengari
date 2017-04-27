@@ -18,7 +18,7 @@ const CT      = defs.constant_types;
 const TS      = defs.thread_status;
 
 const currentline = function(ci) {
-    return ci.func.p.lineinfo ? ci.func.p.lineinfo[ci.pcOff] : -1;
+    return ci.func.value.p.lineinfo ? ci.func.value.p.lineinfo[ci.pcOff] : -1;
 };
 
 /*
@@ -87,7 +87,7 @@ const upvalname = function(p, uv) {
 };
 
 const findvararg = function(ci, n, pos) {
-    let nparams = ci.func.p.numparams;
+    let nparams = ci.func.value.p.numparams;
     if (n >= ci.u.l.base - ci.funcOff - nparams)
         return null;  /* no such vararg */
     else {
@@ -106,7 +106,7 @@ const findlocal = function(L, ci, n) {
             return findvararg(ci, -n);
         else {
             base = ci.u.l.base;
-            name = lfunc.luaF_getlocalname(ci.func.p, n, ci.pcOff);
+            name = lfunc.luaF_getlocalname(ci.func.value.p, n, ci.pcOff);
         }
     } else
         base = ci.funcOff + 1;
@@ -272,7 +272,7 @@ const lua_getinfo = function(L, what, ar) {
         assert(ci.func.ttisfunction());
     }
 
-    cl = func.ttisclosure() ? func : null;
+    cl = func.ttisclosure() ? func.value : null;
     status = auxgetinfo(L, what, ar, cl, ci);
     if (what.indexOf('f'.charCodeAt(0)) >= 0) {
         L.stack[L.top++] = func;
@@ -439,7 +439,7 @@ const funcnamefromcode = function(L, ci) {
     };
 
     let tm = 0;  /* (initial value avoids warnings) */
-    let p = ci.func.p;  /* calling function */
+    let p = ci.func.value.p;  /* calling function */
     let pc = ci.pcOff - 1;  /* calling instruction index */
     let i = p.code[pc];  /* calling instruction */
 
@@ -530,7 +530,7 @@ const varinfo = function(L, o) {
         kind = getupvalname(L, ci, o);  /* check whether 'o' is an upvalue */
         let stkid = isinstack(L, ci, o);
         if (!kind && stkid)  /* no? try a register */
-            kind = getobjname(ci.func.p, ci.pcOff, stkid - ci.u.l.base);
+            kind = getobjname(ci.func.value.p, ci.pcOff, stkid - ci.u.l.base);
     }
 
     return defs.to_luastring(kind ? ` (${defs.to_jsstring(kind.funcname)} '${defs.to_jsstring(kind.name.value ? kind.name.value : kind.name)}')` : ``);
@@ -579,7 +579,7 @@ const luaG_addinfo = function(L, msg, src, line) {
 const luaG_runerror = function(L, msg) {
     let ci = L.ci;
     if (ci.callstatus & lstate.CIST_LUA)  /* if Lua function, add source:line information */
-        luaG_addinfo(L, msg, ci.func.p.source, currentline(ci));
+        luaG_addinfo(L, msg, ci.func.value.p.source, currentline(ci));
     luaG_errormsg(L);
 };
 
@@ -620,7 +620,7 @@ const luaG_traceexec = function(L) {
     if (counthook)
         ldo.luaD_hook(L, defs.LUA_HOOKCOUNT, -1);  /* call count hook */
     if (mask & defs.LUA_MASKLINE) {
-        let p = ci.func.p;
+        let p = ci.func.value.p;
         let npc = ci.pcOff; // pcRel(ci.u.l.savedpc, p);
         let newline = p.lineinfo ? p.lineinfo[npc] : -1;
         if (npc === 0 ||  /* call linehook when enter a new function, */

@@ -282,7 +282,7 @@ class BytecodeParser {
 
         let cl = new lobject.LClosure(this.L, this.readByte());
 
-        this.L.stack[this.L.top] = cl;
+        this.L.stack[this.L.top] = new lobject.TValue(defs.CT.LUA_TLCL, cl);
         this.L.top++;
 
         cl.p = new Proto();
