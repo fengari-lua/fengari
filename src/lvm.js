@@ -114,7 +114,7 @@ const luaV_execute = function(L) {
             specialCase = null;
         } else {
             ci = L.ci;
-            cl = ci.func;
+            cl = ci.func.value;
             k = cl.p.k;
             base = ci.u.l.base;
 
@@ -523,7 +523,7 @@ const luaV_execute = function(L) {
                     let nfuncOff = nci.funcOff;
                     let ofunc = oci.func;
                     let ofuncOff = oci.funcOff;
-                    let lim = nci.u.l.base + nfunc.p.numparams;
+                    let lim = nci.u.l.base + nfunc.value.p.numparams;
                     if (cl.p.p.length > 0) lfunc.luaF_close(L, oci.u.l.base);
                     for (let aux = 0; nfuncOff + aux < lim; aux++)
                         L.stack[ofuncOff + aux] = L.stack[nfuncOff + aux];
@@ -538,7 +538,7 @@ const luaV_execute = function(L) {
                     ci = L.ci;
                     L.ciOff--;
 
-                    assert(L.top === oci.u.l.base + L.stack[ofuncOff].p.maxstacksize);
+                    assert(L.top === oci.u.l.base + L.stack[ofuncOff].value.p.maxstacksize);
 
                     continue newframe;
                 }
@@ -668,7 +668,7 @@ const luaV_execute = function(L) {
                 let ncl = new LClosure(L, nup);
                 ncl.p = p;
 
-                L.stack[ra] = ncl;
+                L.stack[ra] = new TValue(CT.LUA_TLCL, ncl);
 
                 for (let i = 0; i < nup; i++) {
                     if (uv[i].instack)

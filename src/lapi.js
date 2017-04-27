@@ -54,7 +54,7 @@ const index2addr = function(L, idx) {
         if (ci.func.ttislcf()) /* light C function? */
             return lobject.luaO_nilobject; /* it has no upvalues */
         else {
-            return idx <= ci.func.nupvalues ? ci.func.upvalue[idx - 1] : lobject.luaO_nilobject;
+            return idx <= ci.func.value.nupvalues ? ci.func.value.upvalue[idx - 1] : lobject.luaO_nilobject;
         }
     }
 };
@@ -277,7 +277,7 @@ const lua_pushcclosure = function(L, fn, n) {
             cl.upvalue[n] = L.stack[L.top + n];
         }
 
-        L.stack[L.top] = cl;
+        L.stack[L.top] = new TValue(CT.LUA_TCCL, cl);
     }
 
     L.top++;
@@ -812,7 +812,7 @@ const lua_load = function(L, reader, data, chunckname, mode) {
     if (!chunckname) chunckname = [defs.char["?"]];
     let status = ldo.luaD_protectedparser(L, z, chunckname, mode);
     if (status === TS.LUA_OK) {  /* no errors? */
-        let f = L.stack[L.top - 1]; /* get newly created function */
+        let f = L.stack[L.top - 1].value; /* get newly created function */
         if (f.nupvalues >= 1) {  /* does it have an upvalue? */
             /* get global table from registry */
             let reg = L.l_G.l_registry;
@@ -828,7 +828,7 @@ const lua_dump = function(L, writer, data, strip) {
     assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     let o = L.stack[L.top -1];
     if (o.ttisLclosure())
-        return ldump.luaU_dump(L, o.p, writer, data, strip);
+        return ldump.luaU_dump(L, o.value.p, writer, data, strip);
     return 1;
 };
 

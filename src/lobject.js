@@ -195,11 +195,9 @@ const table_index = function(table, key) {
     return v ? v : luaO_nilobject;
 };
 
-class LClosure extends TValue {
+class LClosure {
 
     constructor(L, n) {
-        super(CT.LUA_TLCL, null);
-
         this.p = null;
         this.nupvalues = n;
 
@@ -213,22 +211,16 @@ class LClosure extends TValue {
         this.upvals = [
             _ENV
         ];
-
-        this.value = this;
     }
 
 }
 
-class CClosure extends TValue {
+class CClosure {
 
     constructor(f, n) {
-        super(CT.LUA_TCCL, null);
-
         this.f = f;
         this.nupvalues = n;
         this.upvalue = new Array(n);
-
-        this.value = this;
     }
 
 }
