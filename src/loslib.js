@@ -95,9 +95,11 @@ if (typeof require === "function") {
 
     let fs = false;
     let tmp = false;
+    let child_process = false;
     try {
         fs = require('fs');
         tmp = require('tmp');
+        child_process = require('child_process');
     } catch (e) {}
 
     if (fs && tmp) {
@@ -142,6 +144,37 @@ if (typeof require === "function") {
         syslib.remove = os_remove;
         syslib.rename = os_rename;
         syslib.tmpname = os_tmpname;
+    }
+
+    if (child_process) {
+        const os_execute = function(L) {
+            let cmd = lauxlib.luaL_optstring(L, 1, null);
+            let out = false;
+            if (cmd !== null) {
+                try {
+                    out = child_process.execSync(lua.to_jsstring(cmd));
+                } catch (e) {
+                    return lauxlib.luaL_execresult(L, false, e);
+                }
+
+                // if (out) console.log(out);
+
+                return lauxlib.luaL_execresult(L, true);
+            } else {
+                try {
+                    out = child_process.execSync(lua.to_jsstring(cmd));
+                    lua.lua_pushboolean(L, 1);
+                } catch (e) {
+                    lua.lua_pushboolean(L, 0);
+                }
+
+                // if (out) console.log(out);
+
+                return 1;
+            }
+        };
+
+        syslib.execute = os_execute;
     }
 
 }

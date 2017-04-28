@@ -24,6 +24,7 @@
     - [x] utf8
     - [ ] Package
     - [ ] os
+        - [x] `os.execute()`
         - [x] `os.exit()`
         - [x] `os.getenv()`
         - [x] `os.remove()`
@@ -33,7 +34,6 @@
         - [ ] `os.clock()`
         - [ ] `os.date()`
         - [ ] `os.difftime()`
-        - [ ] `os.execute()`
         - [ ] `os.setlocale()`
     - [ ] io
         - [ ] `io.stdin`
@@ -75,7 +75,6 @@
     - [ ] luaL_checkversion
     - [ ] luaL_dofile
     - [ ] luaL_dostring
-    - [ ] luaL_execresult
     - [ ] luaL_gsub
     - [ ] luaL_newlibtable
     - [ ] luaL_optnumber

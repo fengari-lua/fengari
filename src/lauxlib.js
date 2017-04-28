@@ -200,8 +200,7 @@ const luaL_fileresult = function(L, stat, fname, e) {
     if (stat) {
         lua.lua_pushboolean(L, 1);
         return 1;
-    }
-    else {
+    } else {
         lua.lua_pushnil(L);
         if (fname)
             lua.lua_pushstring(L, lua.to_luastring(`${lua.to_jsstring(fname)}: ${e.message}`));
@@ -212,6 +211,23 @@ const luaL_fileresult = function(L, stat, fname, e) {
     }
 };
 
+/* Unlike normal lua, we pass in an error object */
+const luaL_execresult = function(L, stat, e) {
+    let what = lua.to_luastring("exit");  /* type of termination */
+    if (e && e.status === -1)  /* error? */
+        return luaL_fileresult(L, 0, null, e);
+    else {
+        if (e && e.signal) {
+            lua.lua_pushnil(L);
+            lua.lua_pushliteral(L, "signal");
+        } else {
+            lua.lua_pushboolean(L, 1);
+            lua.lua_pushliteral(L, "exit");
+        }
+        lua.lua_pushinteger(L, e ? e.status : 0);
+        return 3;
+    }
+};
 
 const luaL_getmetatable = function(L, n) {
     return lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, n);
@@ -693,8 +709,8 @@ const lua_writestringerror = function(s) {
     else console.error(s);
 };
 
-module.exports.LUA_LOADED_TABLE     = LUA_LOADED_TABLE;
 module.exports.LUA_FILEHANDLE       = LUA_FILEHANDLE;
+module.exports.LUA_LOADED_TABLE     = LUA_LOADED_TABLE;
 module.exports.luaL_Buffer          = luaL_Buffer;
 module.exports.luaL_addchar         = luaL_addchar;
 module.exports.luaL_addlstring      = luaL_addlstring;
@@ -714,6 +730,7 @@ module.exports.luaL_checkstring     = luaL_checkstring;
 module.exports.luaL_checktype       = luaL_checktype;
 module.exports.luaL_checkudata      = luaL_checkudata;
 module.exports.luaL_error           = luaL_error;
+module.exports.luaL_execresult      = luaL_execresult;
 module.exports.luaL_fileresult      = luaL_fileresult;
 module.exports.luaL_getmetafield    = luaL_getmetafield;
 module.exports.luaL_getmetatable    = luaL_getmetatable;
