@@ -83,6 +83,36 @@ if (process && process.exit) {
     syslib.exit = os_exit;
 }
 
+
+// Only with Node
+if (typeof require === "function") {
+
+    let fs = false;
+    let tmp = false;
+    try {
+        fs = require('fs');
+        tmp = require('tmp');
+    } catch (e) {}
+
+    if (fs && tmp) {
+        // TODO: on POSIX system, should create the file
+        const lua_tmpname = function() {
+            return tmp.tmpNameSync();
+        };
+
+        const os_tmpname = function(L) {
+            let name = lua_tmpname();
+            if (!name)
+                return lauxlib.luaL_error(L, lua.to_luastring("unable to generate a unique filename"));
+            lua.lua_pushstring(L, lua.to_luastring(name));
+            return 1;
+        };
+
+        syslib.tmpname = os_tmpname;
+    }
+
+}
+
 const luaopen_os = function(L) {
     lauxlib.luaL_newlib(L, syslib);
     return 1;
