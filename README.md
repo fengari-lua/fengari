@@ -25,6 +25,7 @@
     - [ ] Package
     - [ ] os
         - [x] `os.exit()`
+        - [x] `os.remove()`
         - [x] `os.rename()`
         - [x] `os.time()`
         - [x] `os.tmpname()`
@@ -33,7 +34,6 @@
         - [ ] `os.difftime()`
         - [ ] `os.execute()`
         - [ ] `os.getenv()`
-        - [ ] `os.remove()`
         - [ ] `os.setlocale()`
     - [ ] io
         - [ ] `io.stdin`

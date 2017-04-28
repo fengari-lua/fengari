@@ -100,6 +100,20 @@ if (typeof require === "function") {
             return tmp.tmpNameSync();
         };
 
+        const os_remove = function(L) {
+            let filename = lauxlib.luaL_checkstring(L, 1);
+            try {
+                if (fs.lstatSync(lua.to_jsstring(filename)).isDirectory()) {
+                    fs.rmdirSync(lua.to_jsstring(filename));
+                } else {
+                    fs.unlinkSync(lua.to_jsstring(filename));
+                }
+            } catch (e) {
+                return lauxlib.luaL_fileresult(L, false, filename, e);
+            }
+            return lauxlib.luaL_fileresult(L, true);
+        };
+
         const os_rename = function(L) {
             let fromname = lua.to_jsstring(lauxlib.luaL_checkstring(L, 1));
             let toname = lua.to_jsstring(lauxlib.luaL_checkstring(L, 2));
@@ -119,8 +133,9 @@ if (typeof require === "function") {
             return 1;
         };
 
-        syslib.tmpname = os_tmpname;
+        syslib.remove = os_remove;
         syslib.rename = os_rename;
+        syslib.tmpname = os_tmpname;
     }
 
 }
