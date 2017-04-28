@@ -25,16 +25,16 @@
     - [ ] Package
     - [ ] os
         - [x] `os.exit()`
+        - [x] `os.rename()`
         - [x] `os.time()`
+        - [x] `os.tmpname()`
         - [ ] `os.clock()`
         - [ ] `os.date()`
         - [ ] `os.difftime()`
         - [ ] `os.execute()`
         - [ ] `os.getenv()`
         - [ ] `os.remove()`
-        - [ ] `os.rename()`
         - [ ] `os.setlocale()`
-        - [ ] `os.tmpname()`
     - [ ] io
         - [ ] `io.stdin`
         - [ ] `io.stdout`

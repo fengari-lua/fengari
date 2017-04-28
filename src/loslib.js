@@ -100,6 +100,17 @@ if (typeof require === "function") {
             return tmp.tmpNameSync();
         };
 
+        const os_rename = function(L) {
+            let fromname = lua.to_jsstring(lauxlib.luaL_checkstring(L, 1));
+            let toname = lua.to_jsstring(lauxlib.luaL_checkstring(L, 2));
+            try {
+                fs.renameSync(fromname, toname);
+            } catch (e) {
+                return lauxlib.luaL_fileresult(L, false, false, e);
+            }
+            return lauxlib.luaL_fileresult(L, true);
+        };
+
         const os_tmpname = function(L) {
             let name = lua_tmpname();
             if (!name)
@@ -109,6 +120,7 @@ if (typeof require === "function") {
         };
 
         syslib.tmpname = os_tmpname;
+        syslib.rename = os_rename;
     }
 
 }
