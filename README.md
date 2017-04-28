@@ -24,6 +24,17 @@
     - [x] utf8
     - [ ] Package
     - [ ] os
+        - [x] `os.exit()`
+        - [x] `os.time()`
+        - [ ] `os.clock()`
+        - [ ] `os.date()`
+        - [ ] `os.difftime()`
+        - [ ] `os.execute()`
+        - [ ] `os.getenv()`
+        - [ ] `os.remove()`
+        - [ ] `os.rename()`
+        - [ ] `os.setlocale()`
+        - [ ] `os.tmpname()`
     - [ ] io
         - [ ] `io.stdin`
         - [ ] `io.stdout`
@@ -50,8 +61,6 @@
 - [ ] C API
     - [x] ...
     - [ ] lua_arith
-    - [ ] lua_close
-    - [ ] lua_isboolean
     - [ ] lua_islightuserdata
     - [ ] lua_pushfstring
     - [ ] lua_pushvfstring

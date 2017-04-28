@@ -8,6 +8,7 @@ const lobject              = require('./lobject.js');
 const ldo                  = require('./ldo.js');
 const lapi                 = require('./lapi.js');
 const ltable               = require('./ltable.js');
+const lfunc                = require('./lfunc.js');
 const luaT_init            = require('./ltm.js').luaT_init;
 const CT                   = defs.constant_types;
 const TS                   = defs.thread_status;
@@ -167,6 +168,16 @@ const lua_newstate = function() {
     return L;
 };
 
+const close_state = function(L) {
+    let g = L.l_G;
+    lfunc.luaF_close(L, L.stack);  /* close all upvalues for this thread */
+};
+
+const lua_close = function(L) {
+    L = L.l_G.mainthread;  /* only the main thread can be closed */
+    close_state(L);
+};
+
 module.exports.lua_State      = lua_State;
 module.exports.CallInfo       = CallInfo;
 module.exports.CIST_OAH       = (1<<0);  /* original value of 'allowhook' */
@@ -178,5 +189,6 @@ module.exports.CIST_TAIL      = (1<<5);  /* call was tail called */
 module.exports.CIST_HOOKYIELD = (1<<6);  /* last hook called yielded */
 module.exports.CIST_LEQ       = (1<<7);  /* using __lt for __le */
 module.exports.CIST_FIN       = (1<<8);   /* call is running a finalizer */
+module.exports.lua_close      = lua_close;
 module.exports.lua_newstate   = lua_newstate;
 module.exports.lua_newthread  = lua_newthread;

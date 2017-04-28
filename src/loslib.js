@@ -66,6 +66,23 @@ const syslib = {
     "time": os_time
 };
 
+// Only with Node
+if (process && process.exit) {
+    const os_exit = function(L) {
+        let status;
+        if (lua.lua_isboolean(L, 1))
+            status = (lua.lua_toboolean(L, 1) ? 0 : 1);
+        else
+            status = lauxlib.luaL_optinteger(L, 1, 0);
+        if (lua.lua_toboolean(L, 2))
+            lua.lua_close(L);
+        if (L) process.exit(status);  /* 'if' to avoid warnings for unreachable 'return' */
+        return 0;
+    };
+
+    syslib.exit = os_exit;
+}
+
 const luaopen_os = function(L) {
     lauxlib.luaL_newlib(L, syslib);
     return 1;

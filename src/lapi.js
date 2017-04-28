@@ -757,6 +757,10 @@ const lua_isnil = function(L, n) {
     return lua_type(L, n) === CT.LUA_TNIL;
 };
 
+const lua_isboolean = function(L, n) {
+    return lua_type(L, n) === CT.LUA_TBOOLEAN;
+};
+
 const lua_isnone = function(L, n) {
     return lua_type(L, n) === CT.LUA_TNONE;
 };
@@ -1037,6 +1041,7 @@ module.exports.lua_gettop            = lua_gettop;
 module.exports.lua_getupvalue        = lua_getupvalue;
 module.exports.lua_getuservalue      = lua_getuservalue;
 module.exports.lua_insert            = lua_insert;
+module.exports.lua_isboolean         = lua_isboolean;
 module.exports.lua_iscfunction       = lua_iscfunction;
 module.exports.lua_isfunction        = lua_isfunction;
 module.exports.lua_isinteger         = lua_isinteger;
