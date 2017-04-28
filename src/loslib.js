@@ -67,7 +67,7 @@ const syslib = {
 };
 
 // Only with Node
-if (process && process.exit) {
+if (process && process.exit && process.env) {
     const os_exit = function(L) {
         let status;
         if (lua.lua_isboolean(L, 1))
@@ -80,7 +80,13 @@ if (process && process.exit) {
         return 0;
     };
 
+    const os_getenv = function(L) {
+        lua.lua_pushliteral(L, process.env[lua.to_jsstring(lauxlib.luaL_checkstring(L, 1))]);  /* if NULL push nil */
+        return 1;
+    };
+
     syslib.exit = os_exit;
+    syslib.getenv = os_getenv;
 }
 
 
