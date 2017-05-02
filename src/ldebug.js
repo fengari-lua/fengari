@@ -183,7 +183,7 @@ const collectvalidlines = function(L, f) {
         let t = new TValue(CT.LUA_TTABLE, ltable.luaH_new(L));
         L.stack[L.top++] = t;
         assert(L.top <= L.ci.top, "stack overflow");
-        let v = new TValue(true, CT.LUA_TBOOLEAN);
+        let v = new TValue(CT.LUA_TBOOLEAN, true);
         for (let i = 0; i < f.l.p.length; i++)
             lobject.table_newindex(t, lineinfo[i], v);
     }
