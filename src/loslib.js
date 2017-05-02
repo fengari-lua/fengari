@@ -157,7 +157,7 @@ if (typeof require === "function") {
                     return lauxlib.luaL_execresult(L, false, e);
                 }
 
-                // if (out) console.log(out);
+                if (out) console.log(out.asciiSlice());
 
                 return lauxlib.luaL_execresult(L, true);
             } else {
@@ -168,7 +168,7 @@ if (typeof require === "function") {
                     lua.lua_pushboolean(L, 0);
                 }
 
-                // if (out) console.log(out);
+                if (out) console.log(out.asciiSlice());
 
                 return 1;
             }
