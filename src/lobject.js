@@ -147,6 +147,11 @@ class TValue {
         this.value = x;
     }
 
+    sethvalue(x) {
+        this.type = CT.LUA_TTABLE;
+        this.value = x;
+    }
+
     setfrom(tv) { /* in lua C source setobj2t is often used for this */
         this.type = tv.type;
         this.value = tv.value;
