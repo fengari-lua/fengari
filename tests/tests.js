@@ -4,7 +4,7 @@ const fs             = require('fs');
 const child_process  = require('child_process');
 const tmp            = require('tmp');
 
-const BytecodeParser = require("../src/lundump.js");
+const lua            = require("../src/lua.js");
 const lauxlib        = require("../src/lauxlib.js");
 
 const toByteCode = function (luaCode) {
@@ -21,11 +21,9 @@ const toByteCode = function (luaCode) {
 };
 
 const getState = function(luaCode) {
-    var dv = toByteCode(luaCode);
-
     let L = lauxlib.luaL_newstate();
 
-    let p = new BytecodeParser(L, dv).luaU_undump();
+    lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     return L;
 };
