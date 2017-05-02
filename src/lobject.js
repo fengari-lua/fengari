@@ -18,7 +18,6 @@ class TValue {
         this.id = tvalueCount++;
         this.type = type;
         this.value = value;
-        this.metatable = null;
     }
 
     /* type tag of a TValue (bits 0-3 for tags + variant bits 4-5) */
@@ -163,41 +162,6 @@ class TValue {
 
 const luaO_nilobject = new TValue(CT.LUA_TNIL, null);
 module.exports.luaO_nilobject = luaO_nilobject;
-
-const table_keyValue = function(key) {
-    // Those lua values are used by value, others by reference
-    if (key instanceof TValue) {
-        if ([CT.LUA_TNIL,
-            CT.LUA_TBOOLEAN,
-            CT.LUA_TSTRING,
-            CT.LUA_TTHREAD,
-            CT.LUA_TNUMINT].indexOf(key.type) > -1) {
-            key = key.value;
-        } else if ([CT.LUA_TSHRSTR, CT.LUA_TLNGSTR].indexOf(key.type) > -1) {
-            key = key.value.map(e => `${e}|`).join('');
-        }
-    } else if (typeof key === "string") { // To avoid
-        key = defs.to_luastring(key).map(e => `${e}|`).join('');
-    } else if (Array.isArray(key)) {
-        key = key.map(e => `${e}|`).join('');
-    }
-
-    return key;
-};
-
-const table_newindex = function(table, key, value) {
-    key = table_keyValue(key);
-
-    table.value.set(key, value);
-};
-
-const table_index = function(table, key) {
-    key = table_keyValue(key);
-
-    let v = table.value.get(key);
-
-    return v ? v : luaO_nilobject;
-};
 
 class LClosure {
 
@@ -512,6 +476,3 @@ module.exports.luaO_str2num   = luaO_str2num;
 module.exports.luaO_utf8desc  = luaO_utf8desc;
 module.exports.luaO_utf8esc   = luaO_utf8esc;
 module.exports.numarith       = numarith;
-module.exports.table_index    = table_index;
-module.exports.table_keyValue = table_keyValue;
-module.exports.table_newindex = table_newindex;

@@ -7,6 +7,7 @@ const defs    = require('./defs.js');
 const lobject = require('./lobject.js');
 const ldo     = require('./ldo.js');
 const lstate  = require('./lstate.js');
+const ltable  = require('./ltable.js');
 const ldebug  = require('./ldebug.js');
 const lvm     = require('./lvm.js');
 const CT      = defs.constant_types;
@@ -69,9 +70,9 @@ const luaT_init = function(L) {
 */
 const luaT_objtypename = function(L, o) {
     let mt;
-    if ((o.ttistable() && (mt = o.metatable) !== null) ||
+    if ((o.ttistable() && (mt = o.value.metatable) !== null) ||
         (o.ttisfulluserdata() && (mt = o.value.metatable) !== null)) {
-        let name = lobject.table_index(mt, defs.to_luastring('__name', true));
+        let name = ltable.luaH_getstr(mt, defs.to_luastring('__name', true));
         if (name.ttisstring())
             return name.value;
     }
@@ -142,13 +143,13 @@ const luaT_gettmbyobj = function(L, o, event) {
     switch(o.ttnov()) {
         case CT.LUA_TTABLE:
         case CT.LUA_TUSERDATA:
-            mt = o.metatable;
+            mt = o.value.metatable;
             break;
         default:
             mt = L.l_G.mt[o.ttnov()];
     }
 
-    return mt ? lobject.table_index(mt, event) : lobject.luaO_nilobject;
+    return mt ? ltable.luaH_getstr(mt, event) : lobject.luaO_nilobject;
 };
 
 module.exports.TMS              = TMS;

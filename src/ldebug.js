@@ -180,12 +180,12 @@ const collectvalidlines = function(L, f) {
         assert(L.top <= L.ci.top, "stack overflow");
     } else {
         let lineinfo = f.l.p.lineinfo;
-        let t = new TValue(CT.LUA_TTABLE, ltable.luaH_new(L));
-        L.stack[L.top++] = t;
+        let t = ltable.luaH_new(L);
+        L.stack[L.top++] = new TValue(CT.LUA_TTABLE, t);
         assert(L.top <= L.ci.top, "stack overflow");
         let v = new TValue(CT.LUA_TBOOLEAN, true);
         for (let i = 0; i < f.l.p.length; i++)
-            lobject.table_newindex(t, lineinfo[i], v);
+            ltable.luaH_setint(t, lineinfo[i], v);
     }
 };
 

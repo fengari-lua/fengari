@@ -11,9 +11,9 @@ const lua        = require('../src/lua.js');
 const inttable2array = function(t) {
     let a = [];
 
-    t.forEach(function (v, k) {
+    t.strong.forEach(function (v, k) {
         if (typeof k === 'number')
-            a[k - 1] = v;
+            a[k - 1] = v.value;
     });
 
     return a.map(e => e.value);
@@ -70,9 +70,9 @@ test('table.pack', function (t) {
     }, "JS Lua program ran without error");
 
     t.deepEqual(
-        [...lua.lua_topointer(L, -1).entries()]
+        [...lua.lua_topointer(L, -1).strong.entries()]
             .filter(e => typeof e[0] === 'number') // Filter out the 'n' field
-            .map(e => e[1].value).reverse(),
+            .map(e => e[1].value.value).reverse(),
         [1, 2, 3],
         "Correct element(s) on the stack"
     );
@@ -145,9 +145,9 @@ test('table.insert', function (t) {
     }, "JS Lua program ran without error");
 
     t.deepEqual(
-        [...lua.lua_topointer(L, -1).entries()]
+        [...lua.lua_topointer(L, -1).strong.entries()]
             .filter(e => typeof e[0] === 'number')
-            .map(e => e[1].value).sort(),
+            .map(e => e[1].value.value).sort(),
         [1, 2, 3, 4, 5],
         "Correct element(s) on the stack"
     );
@@ -179,9 +179,9 @@ test('table.remove', function (t) {
     }, "JS Lua program ran without error");
 
     t.deepEqual(
-        [...lua.lua_topointer(L, -1).entries()]
+        [...lua.lua_topointer(L, -1).strong.entries()]
             .filter(e => typeof e[0] === 'number')
-            .map(e => e[1].value).sort(),
+            .map(e => e[1].value.value).sort(),
         [1, 2, 3, 4, null, null],
         "Correct element(s) on the stack"
     );
@@ -212,9 +212,9 @@ test('table.move', function (t) {
     }, "JS Lua program ran without error");
 
     t.deepEqual(
-        [...lua.lua_topointer(L, -1).entries()]
+        [...lua.lua_topointer(L, -1).strong.entries()]
             .filter(e => typeof e[0] === 'number')
-            .map(e => e[1].value).sort(),
+            .map(e => e[1].value.value).sort(),
         [1, 2, 3, 4, 5, 6],
         "Correct element(s) on the stack"
     );

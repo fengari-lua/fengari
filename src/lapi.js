@@ -329,18 +329,14 @@ const auxsetstr = function(L, t, k) {
 
     assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
 
-    if (t.ttistable() && !lobject.table_index(t, k).ttisnil()) {
-        lobject.table_newindex(t, k, L.stack[L.top - 1]);
-        L.top--; /* pop value */
-    } else {
-        L.stack[L.top++] = str;
-        lvm.settable(L, t, L.stack[L.top - 1], L.stack[L.top - 2]);
-        L.top -= 2; /* pop value and key */
-    }
+    L.stack[L.top++] = str;
+    lvm.settable(L, t, L.stack[L.top - 1], L.stack[L.top - 2]);
+    /* pop value and key */
+    L.top -= 2;
 };
 
 const lua_setglobal = function(L, name) {
-    auxsetstr(L, L.l_G.l_registry.value.get(defs.LUA_RIDX_GLOBALS), name);
+    auxsetstr(L, ltable.luaH_getint(L.l_G.l_registry.value, defs.LUA_RIDX_GLOBALS), name);
 };
 
 const lua_setmetatable = function(L, objindex) {
@@ -351,13 +347,13 @@ const lua_setmetatable = function(L, objindex) {
         mt = null;
     else {
         assert(L.stack[L.top - 1].ttistable(), "table expected");
-        mt = L.stack[L.top - 1];
+        mt = L.stack[L.top - 1].value;
     }
 
     switch (obj.ttnov()) {
         case CT.LUA_TUSERDATA:
         case CT.LUA_TTABLE: {
-            obj.metatable = mt;
+            obj.value.metatable = mt;
             break;
         }
         default: {
@@ -366,7 +362,7 @@ const lua_setmetatable = function(L, objindex) {
         }
     }
 
-    L.top--;
+    L.stack[--L.top] = void 0;
     return true;
 };
 
@@ -383,17 +379,23 @@ const lua_setfield = function(L, idx, k) {
 };
 
 const lua_seti = function(L, idx, n) {
+    assert(typeof n === "number");
     assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     let t = index2addr(L, idx);
-    lvm.settable(L, t, n, L.stack[L.top - 1]);
-    L.top--;  /* pop value */
+    L.stack[L.top++] = new TValue(CT.LUA_TNUMINT, n);
+    assert(L.top <= L.ci.top, "stack overflow");
+    lvm.settable(L, t, L.stack[L.top - 1], L.stack[L.top - 2]);
+    /* pop value and key */
+    L.stack[--L.top] = void 0;
+    L.stack[--L.top] = void 0;
 };
 
 const lua_rawset = function(L, idx) {
     assert(2 < L.top - L.ci.funcOff, "not enough elements in the stack");
     let o = index2addr(L, idx);
     assert(o.ttistable(), "table expected");
-    lobject.table_newindex(o, L.stack[L.top - 2], L.stack[L.top - 1]);
+    let slot = ltable.luaH_set(o.value, L.stack[L.top - 2]);
+    slot.setfrom(L.stack[L.top - 1]);
     L.top -= 2;
 };
 
@@ -401,8 +403,9 @@ const lua_rawsetp = function(L, idx, p) {
     assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     let o = index2addr(L, idx);
     assert(L, o.ttistable(), "table expected");
-    let k = p;
-    lobject.table_newindex(o, k, L.stack[L.top - 1]);
+    let k = new TValue(CT.LUA_TLIGHTUSERDATA, p);
+    let slot = ltable.luaH_set(o.value, k);
+    slot.setfrom(L.stack[L.top - 1]);
     L.top--;
 };
 
@@ -414,15 +417,10 @@ const auxgetstr = function(L, t, k) {
     assert(Array.isArray(k), "key must be an array of bytes");
 
     let str = L.l_G.intern(k);
-    let slot = lobject.table_index(t, k);
-    if (t.ttistable() && !slot.ttisnil()) {
-        L.stack[L.top++] = slot;
-        assert(L.top <= L.ci.top, "stack overflow");
-    } else {
-        L.stack[L.top++] = str;
-        assert(L.top <= L.ci.top, "stack overflow");
-        lvm.gettable(L, t, L.stack[L.top - 1], L.top - 1);
-    }
+
+    L.stack[L.top++] = str;
+    assert(L.top <= L.ci.top, "stack overflow");
+    lvm.gettable(L, t, L.stack[L.top - 1], L.top - 1);
 
     return L.stack[L.top - 1].ttnov();
 };
@@ -432,8 +430,7 @@ const lua_rawgeti = function(L, idx, n) {
 
     assert(t.ttistable(), "table expected");
 
-    L.stack[L.top++] = lobject.table_index(t, n);
-
+    L.stack[L.top++] = ltable.luaH_getint(t.value, n);
     assert(L.top <= L.ci.top, "stack overflow");
 
     return L.stack[L.top - 1].ttnov();
@@ -442,8 +439,8 @@ const lua_rawgeti = function(L, idx, n) {
 const lua_rawgetp = function(L, idx, p) {
     let t = index2addr(L, idx);
     assert(t.ttistable(), "table expected");
-    let k = p;
-    L.stack[L.top++] = lobject.table_index(t, k);
+    let k = new TValue(CT.LUA_TLIGHTUSERDATA, p);
+    L.stack[L.top++] = ltable.luaH_get(t.value, k);
     assert(L.top <= L.ci.top, "stack overflow");
     return L.stack[L.top - 1].ttnov();
 };
@@ -453,7 +450,7 @@ const lua_rawget = function(L, idx) {
 
     assert(t.ttistable(t), "table expected");
 
-    L.stack[L.top - 1] = lobject.table_index(t, L.stack[L.top - 1]);
+    L.stack[L.top - 1] = ltable.luaH_get(t.value, L.stack[L.top - 1]);
 
     return L.stack[L.top - 1].ttnov();
 };
@@ -550,7 +547,7 @@ const lua_getmetatable = function(L, objindex) {
     switch (obj.ttnov()) {
         case CT.LUA_TTABLE:
         case CT.LUA_TUSERDATA:
-            mt = obj.metatable;
+            mt = obj.value.metatable;
             break;
         default:
             mt = L.l_G.mt[obj.ttnov];
@@ -558,7 +555,7 @@ const lua_getmetatable = function(L, objindex) {
     }
 
     if (mt !== null && mt !== undefined) {
-        L.stack[L.top++] = mt;
+        L.stack[L.top++] = new TValue(CT.LUA_TTABLE, mt);
         assert(L.top <= L.ci.top, "stack overflow");
         res = true;
     }
@@ -587,20 +584,14 @@ const lua_getfield = function(L, idx, k) {
 
 const lua_geti = function(L, idx, n) {
     let t = index2addr(L, idx);
-    let slot = lobject.table_index(t, n);
-    if (!slot.ttisnil()) {
-        L.stack[L.top++] = slot;
-        assert(L.top <= L.ci.top, "stack overflow");
-    } else {
-        L.stack[L.top++] = new TValue(CT.LUA_TNUMINT, n);
-        assert(L.top <= L.ci.top, "stack overflow");
-        lvm.gettable(L, t, L.stack[L.top - 1], L.top - 1);
-    }
+    L.stack[L.top++] = new TValue(CT.LUA_TNUMINT, n);
+    assert(L.top <= L.ci.top, "stack overflow");
+    lvm.gettable(L, t, L.stack[L.top - 1], L.top - 1);
     return L.stack[L.top - 1].ttnov();
 };
 
 const lua_getglobal = function(L, name) {
-    return auxgetstr(L, L.l_G.l_registry.value.get(defs.LUA_RIDX_GLOBALS), name);
+    return auxgetstr(L, ltable.luaH_getint(L.l_G.l_registry.value, defs.LUA_RIDX_GLOBALS), name);
 };
 
 /*
@@ -656,7 +647,7 @@ const lua_rawlen = function(L, idx) {
         case CT.LUA_TUSERDATA:
             return o.len;
         case CT.LUA_TTABLE:
-            return ltable.luaH_getn(o);
+            return ltable.luaH_getn(o.value);
         default:
             return 0;
     }
@@ -819,8 +810,7 @@ const lua_load = function(L, reader, data, chunckname, mode) {
         let f = L.stack[L.top - 1].value; /* get newly created function */
         if (f.nupvalues >= 1) {  /* does it have an upvalue? */
             /* get global table from registry */
-            let reg = L.l_G.l_registry;
-            let gt = reg.value.get(defs.LUA_RIDX_GLOBALS);
+            let gt = ltable.luaH_getint(L.l_G.l_registry.value, defs.LUA_RIDX_GLOBALS);
             /* set global table as 1st upvalue of 'f' (may be LUA_ENV) */
             f.upvals[0].u.value = new TValue(gt.type, gt.value);
         }
@@ -936,14 +926,15 @@ const lua_error = function(L) {
 const lua_next = function(L, idx) {
     let t = index2addr(L, idx);
     assert(t.ttistable(), "table expected");
-    let more = ltable.luaH_next(L, t, L.top - 1);
+    let more = ltable.luaH_next(L, t.value, L.top - 1);
     if (more) {
         L.top++;
         assert(L.top <= L.ci.top, "stack overflow");
-    } else
+        return 1;
+    } else {
         L.top--;
-
-    return more;
+        return 0;
+    }
 };
 
 const lua_concat = function(L, n) {

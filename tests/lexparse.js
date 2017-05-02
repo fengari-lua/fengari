@@ -740,13 +740,13 @@ test('SETTABLE, GETTABLE', function (t) {
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lua.lua_topointer(L, -1).get(1).jsstring(),
+        lua.lua_topointer(L, -1).strong.get(1).value.jsstring(),
         "hello",
         "Program output is correct"
     );
 
     t.strictEqual(
-        lua.lua_topointer(L, -1).get('116|119|111|').jsstring(),
+        lua.lua_topointer(L, -1).strong.get('116|119|111|').value.jsstring(),
         "world",
         "Program output is correct"
     );
@@ -833,13 +833,13 @@ test('SETTABUP, GETTABUP', function (t) {
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lua.lua_topointer(L, -1).get(1).jsstring(),
+        lua.lua_topointer(L, -1).strong.get(1).value.jsstring(),
         "hello",
         "Program output is correct"
     );
 
     t.strictEqual(
-        lua.lua_topointer(L, -1).get('116|119|111|').jsstring(),
+        lua.lua_topointer(L, -1).strong.get('116|119|111|').value.jsstring(),
         "world",
         "Program output is correct"
     );
@@ -922,7 +922,7 @@ test('SETLIST', function (t) {
     }, "Lua program ran without error");
 
     t.deepEqual(
-        [...lua.lua_topointer(L, -1).entries()].map(e => e[1].value).sort(),
+        [...lua.lua_topointer(L, -1).strong.entries()].map(e => e[1].value.value).sort(),
         [1, 2, 3, 4, 5, 6, 7, 8, 9],
         "Program output is correct"
     );
@@ -965,7 +965,7 @@ test('Variable SETLIST', function (t) {
     }, "Lua program ran without error");
 
     t.deepEqual(
-        [...lua.lua_topointer(L, -1).entries()].map(e => e[1].value).sort(),
+        [...lua.lua_topointer(L, -1).strong.entries()].map(e => e[1].value.value).sort(),
         [1, 2, 3, 4, 5, 6, 7, 8, 9],
         "Program output is correct"
     );
@@ -1003,7 +1003,7 @@ test('Long SETLIST', function (t) {
     }, "Lua program ran without error");
 
     t.deepEqual(
-        [...lua.lua_topointer(L, -1).entries()].map(e => e[1].value).reverse(),
+        [...lua.lua_topointer(L, -1).strong.entries()].map(e => e[1].value.value).reverse(),
         [1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5],
         "Program output is correct"
     );

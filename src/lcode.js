@@ -7,6 +7,7 @@ const llex     = require('./llex.js');
 const lobject  = require('./lobject.js');
 const lopcode  = require('./lopcodes.js');
 const lparser  = require('./lparser.js');
+const ltable   = require('./ltable.js');
 require('./lstate.js'); /* XXX: if this isn't here then things break on require("ltm") */
 const ltm      = require('./ltm.js');
 const lvm      = require('./lvm.js');
@@ -482,7 +483,7 @@ const freeexps = function(fs, e1, e2) {
 */
 const addk = function(fs, key, v) {
     let f = fs.f;
-    let idx = lobject.table_index(fs.ls.h, key);  /* index scanner table */
+    let idx = ltable.luaH_set(fs.ls.h.value, key);  /* index scanner table */
     if (idx && !idx.ttisnil()) {  /* is there an index there? */
         /* correct value? (warning: must distinguish floats from integers!) */
         if (idx.value < fs.nk && f.k[idx.value].ttype() === v.ttype() && f.k[idx.value].value === v.value)
@@ -490,7 +491,7 @@ const addk = function(fs, key, v) {
     }
     /* constant not found; create a new entry */
     let k = fs.nk;
-    lobject.table_newindex(fs.ls.h, key, new TValue(CT.LUA_TNUMINT, k));
+    idx.setivalue(k);
     f.k[k] = v;
     fs.nk++;
     return k;

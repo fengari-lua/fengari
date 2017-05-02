@@ -417,19 +417,19 @@ test('select', function (t) {
     }, "JS Lua program ran without error");
 
     t.deepEqual(
-        [...lua.lua_topointer(L, -3).entries()].map(e => e[1].value),
+        [...lua.lua_topointer(L, -3).strong.entries()].map(e => e[1].value.value),
         [3],
         "Correct element(s) on the stack"
     );
 
     t.deepEqual(
-        [...lua.lua_topointer(L, -2).entries()].map(e => e[1].value).sort(),
+        [...lua.lua_topointer(L, -2).strong.entries()].map(e => e[1].value.value).sort(),
         [2, 3],
         "Correct element(s) on the stack"
     );
 
     t.deepEqual(
-        [...lua.lua_topointer(L, -1).entries()].map(e => e[1].value).sort(),
+        [...lua.lua_topointer(L, -1).strong.entries()].map(e => e[1].value.value).sort(),
         [2, 3],
         "Correct element(s) on the stack"
     );

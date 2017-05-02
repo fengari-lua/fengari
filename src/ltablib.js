@@ -4,6 +4,7 @@ const lua     = require('./lua.js');
 const lapi    = require('./lapi.js');
 const lauxlib = require('./lauxlib.js');
 const llimit  = require('./llimit.js');
+const ltable  = require('./ltable.js');
 
 
 /*
@@ -175,32 +176,43 @@ const unpack = function(L) {
 
 // TODO: Maybe do the quicksort after all
 const auxsort = function(L) {
-    let t = lapi.index2addr(L, 1);
-
-    if (lua.lua_type(L, 2) !== lua.LUA_TFUNCTION) {  /* no function? */
-        [...t.value.entries()]
-            .sort(function (a, b) {
-                if (typeof a[0] !== 'number') return 1;
-                else if (typeof b[0] !== 'number') return -1;
-                return lapi.lua_compare_(L, a[1], b[1], lua.LUA_OPLT) === 1 ? -1 : 1;  /* a < b */
-            })
-            .forEach((e, i) => typeof e[0] === 'number' ? t.value.set(i + 1, e[1]) : true);
-    } else {
-        [...t.value.entries()]
-            .sort(function (a, b) {
-                if (typeof a[0] !== 'number') return 1;
-                else if (typeof b[0] !== 'number') return -1;
-
-                lua.lua_pushvalue(L, 2);  /* push function */
-                lua.lua_pushtvalue(L, a[1]);  /* since we use Map.sort, a and b are not on the stack */
-                lua.lua_pushtvalue(L, b[1]);
-                lua.lua_call(L, 2, 1);  /* call function */
-                let res = lua.lua_toboolean(L, -1);  /* get result */
-                lua.lua_pop(L, 1);  /* pop result */
-                return res ? -1 : 1;
-            })
-            .forEach((e, i) => typeof e[0] === 'number' ? t.value.set(i + 1, e[1]) : true);
+    let a = [];
+    for (let i=1; ;i++) {
+        if(lua.lua_geti(L, 1, i) === lua.LUA_TNIL) {
+            lua.lua_pop(L, 1);
+            break;
+        }
+        let t = lapi.index2addr(L, -1);
+        a.push({
+            oldkey: i,
+            value: t
+        });
+        lua.lua_pop(L, 1);
     }
+
+    let sort_function;
+    if (lua.lua_type(L, 2) !== lua.LUA_TFUNCTION) {  /* no function? */
+        sort_function = function (a, b) {
+            return lapi.lua_compare_(L, a.value, b.value, lua.LUA_OPLT) === 1 ? -1 : 1;  /* a < b */
+        };
+    } else {
+        sort_function = function (a, b) {
+            lua.lua_pushvalue(L, 2);  /* push function */
+            lua.lua_pushtvalue(L, a.value);  /* since we use Map.sort, a and b are not on the stack */
+            lua.lua_pushtvalue(L, b.value);
+            lua.lua_call(L, 2, 1);  /* call function */
+            let res = lua.lua_toboolean(L, -1);  /* get result */
+            lua.lua_pop(L, 1);  /* pop result */
+            return res ? -1 : 1;
+        };
+    }
+    a.sort(sort_function)
+        .forEach(function(e, i) {
+            if (e.oldkey != i+1) {
+                lua.lua_pushtvalue(L, e.value);
+                lua.lua_seti(L, 1, i+1);
+            }
+        });
 };
 
 const sort = function(L) {
