@@ -61,7 +61,7 @@ test('os.time (with format)', function (t) {
 
     t.strictEqual(
         lua.lua_tointeger(L, -1),
-        1423393200,
+        new Date(2015, 1, 8, 12, 0, 0, 0).getTime() / 1000,
         "Correct element(s) on the stack"
     );
 
