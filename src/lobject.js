@@ -7,9 +7,7 @@ const defs    = require('./defs.js');
 const ljstype = require('./ljstype.js');
 const luaconf = require('./luaconf.js');
 const llimit  = require('./llimit.js');
-const ltable  = require('./ltable.js');
 const CT      = defs.constant_types;
-const UpVal   = require('./lfunc.js').UpVal;
 const char    = defs.char;
 
 let tvalueCount = 0;
@@ -206,17 +204,7 @@ class LClosure {
     constructor(L, n) {
         this.p = null;
         this.nupvalues = n;
-
-        let _ENV = new UpVal(L);
-        _ENV.refcount = 0;
-        _ENV.v = null;
-        _ENV.u.open.next = null;
-        _ENV.u.open.touched = true;
-        _ENV.u.value = new TValue(CT.LUA_TTABLE, ltable.luaH_new(L));
-
-        this.upvals = [
-            _ENV
-        ];
+        this.upvals = Array(n);
     }
 
 }

@@ -1,12 +1,12 @@
 /*jshint esversion: 6 */
 "use strict";
 
-const assert         = require('assert');
+const assert  = require('assert');
 
-const defs           = require('./defs.js');
-const lobject        = require('./lobject.js');
-const Proto          = require('./lfunc.js').Proto;
-const OpCodes        = require('./lopcodes.js');
+const defs     = require('./defs.js');
+const lfunc    = require('./lfunc.js');
+const lobject  = require('./lobject.js');
+const lopcodes = require('./lopcodes.js');
 
 const LUAI_MAXSHORTLEN = 40;
 
@@ -128,7 +128,7 @@ class BytecodeParser {
 
     readCode(f) {
         let n = this.readInt();
-        let o = OpCodes;
+        let o = lopcodes;
         let p = BytecodeParser;
 
         for (let i = 0; i < n; i++) {
@@ -191,7 +191,7 @@ class BytecodeParser {
         let n = this.readInt();
 
         for (let i = 0; i < n; i++) {
-            f.p[i] = new Proto(this.L);
+            f.p[i] = new lfunc.Proto(this.L);
             this.readFunction(f.p[i], f.source);
         }
     }
@@ -280,12 +280,12 @@ class BytecodeParser {
     luaU_undump() {
         this.checkHeader();
 
-        let cl = new lobject.LClosure(this.L, this.readByte());
+        let cl = lfunc.luaF_newLclosure(this.L, this.readByte());
 
         this.L.stack[this.L.top] = new lobject.TValue(defs.CT.LUA_TLCL, cl);
         this.L.top++;
 
-        cl.p = new Proto();
+        cl.p = new lfunc.Proto();
 
         this.readFunction(cl.p);
 

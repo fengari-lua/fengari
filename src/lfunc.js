@@ -57,7 +57,6 @@ class UpVal {
 
 const luaF_newLclosure = function(L, n) {
     let c = new lobject.LClosure(L, n);
-    while (n--) c.upvals[n] = null;
     return c;
 };
 
