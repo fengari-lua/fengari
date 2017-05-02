@@ -73,8 +73,6 @@
     - [ ] luaL_addsize
     - [ ] luaL_checkoption
     - [ ] luaL_checkversion
-    - [ ] luaL_dofile
-    - [ ] luaL_dostring
     - [ ] luaL_gsub
     - [ ] luaL_newlibtable
     - [ ] luaL_optnumber

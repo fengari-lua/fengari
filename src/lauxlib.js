@@ -403,6 +403,10 @@ const luaL_loadstring = function(L, s) {
     return luaL_loadbuffer(L, s, s.length, s);
 };
 
+const luaL_dostring = function(L, s) {
+    return (luaL_loadstring(L, s) || lua.lua_pcall(L, 0, lua.LUA_MULTRET, 0));
+};
+
 const luaL_getmetafield = function(L, obj, event) {
     if (!lua.lua_getmetatable(L, obj))
         return lua.LUA_TNIL;
@@ -699,6 +703,11 @@ if (typeof require === "function") {
             return luaL_loadfilex(L, filename, null);
         };
 
+        const luaL_dofile = function(L, filename) {
+            return (luaL_loadfile(L, filename) || lua.lua_pcall(L, 0, lua.LUA_MULTRET, 0));
+        };
+
+        module.exports.luaL_dofile    = luaL_dofile;
         module.exports.luaL_loadfilex = luaL_loadfilex;
         module.exports.luaL_loadfile  = luaL_loadfile;
     }
@@ -729,6 +738,7 @@ module.exports.luaL_checkstack      = luaL_checkstack;
 module.exports.luaL_checkstring     = luaL_checkstring;
 module.exports.luaL_checktype       = luaL_checktype;
 module.exports.luaL_checkudata      = luaL_checkudata;
+module.exports.luaL_dostring        = luaL_dostring;
 module.exports.luaL_error           = luaL_error;
 module.exports.luaL_execresult      = luaL_execresult;
 module.exports.luaL_fileresult      = luaL_fileresult;
