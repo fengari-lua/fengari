@@ -778,7 +778,7 @@ const lua_isinteger = function(L, idx) {
 };
 
 const lua_isnumber = function(L, idx) {
-    return lvm.tonumber(L, idx);
+    return lvm.tonumber(index2addr(L, idx)) !== false;
 };
 
 const lua_isstring = function(L, idx) {
