@@ -24,6 +24,8 @@
     - [x] utf8
     - [ ] Package
     - [ ] os
+        - [x] `os.clock()`
+        - [x] `os.difftime()`
         - [x] `os.execute()`
         - [x] `os.exit()`
         - [x] `os.getenv()`
@@ -31,10 +33,8 @@
         - [x] `os.rename()`
         - [x] `os.time()`
         - [x] `os.tmpname()`
-        - [ ] `os.clock()`
         - [ ] `os.date()`
-        - [ ] `os.difftime()`
-        - [ ] `os.setlocale()`
+        - [ ] ~~`os.setlocale()`~~
     - [ ] io
         - [ ] `io.stdin`
         - [ ] `io.stdout`

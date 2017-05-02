@@ -80,7 +80,7 @@ const syslib = {
 };
 
 // Only with Node
-if (process && process.exit && process.env) {
+if (process && process.exit && process.env && process.uptime) {
     const os_exit = function(L) {
         let status;
         if (lua.lua_isboolean(L, 1))
@@ -98,6 +98,12 @@ if (process && process.exit && process.env) {
         return 1;
     };
 
+    const os_clock = function(L) {
+        lua.lua_pushnumber(L, process.uptime());
+        return 1;
+    };
+
+    syslib.clock = os_clock;
     syslib.exit = os_exit;
     syslib.getenv = os_getenv;
 }
