@@ -263,6 +263,83 @@ const LUA_MASKRET   = (1 << LUA_HOOKRET);
 const LUA_MASKLINE  = (1 << LUA_HOOKLINE);
 const LUA_MASKCOUNT = (1 << LUA_HOOKCOUNT);
 
+/*
+** LUA_PATH_SEP is the character that separates templates in a path.
+** LUA_PATH_MARK is the string that marks the substitution points in a
+** template.
+** LUA_EXEC_DIR in a Windows path is replaced by the executable's
+** directory.
+*/
+const LUA_PATH_SEP  = ";";
+module.exports.LUA_PATH_SEP = LUA_PATH_SEP;
+
+const LUA_PATH_MARK = "?";
+module.exports.LUA_PATH_MARK = LUA_PATH_MARK;
+
+const LUA_EXEC_DIR  = "!";
+module.exports.LUA_EXEC_DIR = LUA_EXEC_DIR;
+
+
+/*
+@@ LUA_PATH_DEFAULT is the default path that Lua uses to look for
+** Lua libraries.
+@@ LUA_CPATH_DEFAULT is the default path that Lua uses to look for
+** C libraries.
+** CHANGE them if your machine has a non-conventional directory
+** hierarchy or if you want to install your libraries in
+** non-conventional directories.
+*/
+const LUA_VDIR = LUA_VERSION_MAJOR + "." + LUA_VERSION_MINOR;
+module.exports.LUA_VDIR = LUA_VDIR;
+
+let os = false;
+if (typeof require === "function" && (os = require('os')) && typeof os.platform === "function" && os.platform() === 'win32') {
+    /*
+    ** In Windows, any exclamation mark ('!') in the path is replaced by the
+    ** path of the directory of the executable file of the current process.
+    */
+    const LUA_LDIR = "!\\lua\\";
+    module.exports.LUA_LDIR = LUA_LDIR;
+
+    const LUA_CDIR = "!\\";
+    module.exports.LUA_CDIR = LUA_CDIR;
+
+    const LUA_SHRDIR = "!\\..\\share\\lua\\" + LUA_VDIR + "\\";
+    module.exports.LUA_SHRDIR = LUA_SHRDIR;
+
+    const LUA_PATH_DEFAULT =
+        LUA_LDIR + "?.lua;" + LUA_LDIR + "?\\init.lua;" +
+        LUA_CDIR + "?.lua;" + LUA_CDIR + "?\\init.lua;" +
+        LUA_SHRDIR + "?.lua;" + LUA_SHRDIR + "?\\init.lua;" +
+        ".\\?.lua;.\\?\\init.lua";
+    module.exports.LUA_PATH_DEFAULT = LUA_PATH_DEFAULT;
+
+    const LUA_CPATH_DEFAULT =
+        LUA_CDIR + "?.dll;" +
+        LUA_CDIR + "..\\lib\\lua\\" + LUA_VDIR + "\\?.dll;" +
+        LUA_CDIR + "loadall.dll;.\\?.dll";
+    module.exports.LUA_CPATH_DEFAULT = LUA_CPATH_DEFAULT;
+} else {
+    const LUA_ROOT = "/usr/local/";
+    module.exports.LUA_ROOT = LUA_ROOT;
+    
+    const LUA_LDIR = LUA_ROOT + "share/lua/" + LUA_VDIR + "/";
+    module.exports.LUA_LDIR = LUA_LDIR;
+    
+    const LUA_CDIR = LUA_ROOT + "lib/lua/" + LUA_VDIR + "/";
+    module.exports.LUA_CDIR = LUA_CDIR;
+    
+    const LUA_PATH_DEFAULT =
+        LUA_LDIR + "?.lua;" + LUA_LDIR + "?/init.lua;" +
+        LUA_CDIR + "?.lua;" + LUA_CDIR + "?/init.lua;" +
+        "./?.lua;./?/init.lua";
+    module.exports.LUA_PATH_DEFAULT = LUA_PATH_DEFAULT;
+    
+    const LUA_CPATH_DEFAULT =
+        LUA_CDIR + "?.so;" + LUA_CDIR + "loadall.so;./?.so";
+    module.exports.LUA_CPATH_DEFAULT = LUA_CPATH_DEFAULT;
+}
+
 module.exports.CT                      = CT;
 module.exports.FENGARI_AUTHORS         = FENGARI_AUTHORS;
 module.exports.FENGARI_COPYRIGHT       = FENGARI_COPYRIGHT;

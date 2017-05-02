@@ -81,6 +81,17 @@ module.exports.lua_Debug               = defs.lua_Debug;
 module.exports.lua_upvalueindex        = defs.lua_upvalueindex;
 module.exports.to_jsstring             = defs.to_jsstring;
 module.exports.to_luastring            = defs.to_luastring;
+module.exports.LUA_VDIR                = defs.LUA_VDIR;
+module.exports.LUA_LDIR                = defs.LUA_LDIR;
+module.exports.LUA_CDIR                = defs.LUA_CDIR;
+module.exports.LUA_SHRDIR              = defs.LUA_SHRDIR;
+module.exports.LUA_PATH_DEFAULT        = defs.LUA_PATH_DEFAULT;
+module.exports.LUA_CPATH_DEFAULT       = defs.LUA_CPATH_DEFAULT;
+module.exports.LUA_ROOT                = defs.LUA_ROOT;
+module.exports.LUA_LDIR                = defs.LUA_LDIR;
+module.exports.LUA_CDIR                = defs.LUA_CDIR;
+module.exports.LUA_PATH_DEFAULT        = defs.LUA_PATH_DEFAULT;
+module.exports.LUA_CPATH_DEFAULT       = defs.LUA_CPATH_DEFAULT;
 
 module.exports.lua_absindex            = lapi.lua_absindex;
 module.exports.lua_atpanic             = lapi.lua_atpanic;

@@ -44,4 +44,4 @@ module.exports[LUA_DBLIBNAME] = require("./ldblib.js").luaopen_debug;
 
 const LUA_LOADLIBNAME = "package";
 module.exports.LUA_LOADLIBNAME = LUA_LOADLIBNAME;
-// module.exports[LUA_LOADLIBNAME] = require("./loadlib.js").luaopen_package;
+module.exports[LUA_LOADLIBNAME] = require("./loadlib.js").luaopen_package;

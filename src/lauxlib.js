@@ -4,7 +4,11 @@
 const lua     = require('./lua.js');
 const linit   = require('./linit.js');
 
+/* key, in the registry, for table of loaded modules */
 const LUA_LOADED_TABLE = "_LOADED";
+
+/* key, in the registry, for table of preloaded loaders */
+const LUA_PRELOAD_TABLE = "_PRELOAD";
 
 const LUA_FILEHANDLE = lua.to_luastring("FILE*", true);
 
@@ -541,6 +545,34 @@ const luaL_requiref = function(L, modname, openf, glb) {
     }
 };
 
+const find_subarray = function(arr, subarr, from_index) {
+    var i = from_index >>> 0,
+        sl = subarr.length,
+        l = arr.length + 1 - sl;
+
+    loop: for (; i < l; i++) {
+        for (let j = 0; j < sl; j++)
+            if (arr[i+j] !== subarr[j])
+                continue loop;
+        return i;
+    }
+    return -1;
+};
+
+const luaL_gsub = function(L, s, p, r) {
+    let wild;
+    let i = 0;
+    let b = [];
+    while ((wild = find_subarray(s, p)) >= 0) {
+        b.push(...s.slice(i, wild)); /* push prefix */
+        b.push(...r);  /* push replacement in place of pattern */
+        i = wild + p.length;  /* continue after 'p' */
+    }
+    b.push(s.slice(i));  /* push last suffix */
+    lua.lua_pushstring(L, b);
+    return lua.lua_tostring(L, -1);
+};
+
 /*
 ** ensure that stack[idx][fname] has a table and push that table
 ** into the stack
@@ -748,6 +780,7 @@ const lua_writestringerror = function(s) {
 
 module.exports.LUA_FILEHANDLE       = LUA_FILEHANDLE;
 module.exports.LUA_LOADED_TABLE     = LUA_LOADED_TABLE;
+module.exports.LUA_PRELOAD_TABLE    = LUA_PRELOAD_TABLE;
 module.exports.luaL_Buffer          = luaL_Buffer;
 module.exports.luaL_addchar         = luaL_addchar;
 module.exports.luaL_addlstring      = luaL_addlstring;
@@ -773,6 +806,7 @@ module.exports.luaL_fileresult      = luaL_fileresult;
 module.exports.luaL_getmetafield    = luaL_getmetafield;
 module.exports.luaL_getmetatable    = luaL_getmetatable;
 module.exports.luaL_getsubtable     = luaL_getsubtable;
+module.exports.luaL_gsub            = luaL_gsub;
 module.exports.luaL_len             = luaL_len;
 module.exports.luaL_loadbuffer      = luaL_loadbuffer;
 module.exports.luaL_loadbufferx     = luaL_loadbufferx;
