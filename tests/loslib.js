@@ -35,6 +35,38 @@ test('os.time', function (t) {
 
 });
 
+test('os.difftime', function (t) {
+    let luaCode = `
+        local t1 = os.time()
+        local t2 = os.time()
+        return os.difftime(t2, t1)
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lauxlib.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.ok(
+        lua.lua_isnumber(L, -1),
+        "Correct element(s) on the stack"
+    );
+
+});
+
 
 test('os.getenv', function (t) {
     let luaCode = `

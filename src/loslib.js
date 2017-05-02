@@ -15,7 +15,7 @@ const setallfields = function(L, time) {
     setfield(L, "hour", time.getHours());
     setfield(L, "day", time.getDate());
     setfield(L, "month", time.getMonth());
-    setfield(L, "year", time.getYear());
+    setfield(L, "year", time.getFullYear());
     setfield(L, "wday", time.getDay());
     let now = new Date();
     setfield(L, "yday", Math.floor((now - (new Date(now.getFullYear(), 0, 0))) / (1000 * 60 * 60 * 24)));
@@ -49,11 +49,11 @@ const os_time = function(L) {
         lauxlib.luaL_checktype(L, 1, lua.LUA_TTABLE);  /* make sure table is at the top */
         lua.lua_settop(L, 1);
         t.setSeconds(getfield(L, "sec", 0, 0));
-        t.setSeconds(getfield(L, "min", 0, 0));
-        t.setSeconds(getfield(L, "hour", 12, 0));
-        t.setSeconds(getfield(L, "day", -1, 0));
-        t.setSeconds(getfield(L, "month", -1, 1));
-        t.setSeconds(getfield(L, "year", -1, 1900));
+        t.setMinutes(getfield(L, "min", 0, 0));
+        t.setHours(getfield(L, "hour", 12, 0));
+        t.setDate(getfield(L, "day", -1, 0));
+        t.setMonth(getfield(L, "month", -1, 1));
+        t.setFullYear(getfield(L, "year", -1, 1900));
         setallfields(L, t);
     }
 
@@ -61,9 +61,22 @@ const os_time = function(L) {
     return 1;
 };
 
+const l_checktime = function(L, arg) {
+    let t = lauxlib.luaL_checkinteger(L, arg);
+    // lauxlib.luaL_argcheck(L, t, arg, lua.to_luastring("time out-of-bounds"));
+    return t;
+};
+
+const os_difftime = function(L) {
+    let t1 = l_checktime(L, 1);
+    let t2 = l_checktime(L, 2);
+    lua.lua_pushnumber(L, new Date(t1) - new Date(t2));
+    return 1;
+};
 
 const syslib = {
-    "time": os_time
+    "time": os_time,
+    "difftime": os_difftime
 };
 
 // Only with Node
