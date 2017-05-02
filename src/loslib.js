@@ -6,7 +6,7 @@ const llimit  = require('./llimit.js');
 
 const setfield = function(L, key, value) {
     lua.lua_pushinteger(L, value);
-    lua.lua_setfield(L, -2, key);
+    lua.lua_setfield(L, -2, lua.to_luastring(key, true));
 };
 
 const setallfields = function(L, time) {
@@ -25,10 +25,10 @@ const setallfields = function(L, time) {
 const L_MAXDATEFIELD = (llimit.MAX_INT / 2);
 
 const getfield = function(L, key, d, delta) {
-    let t = lua.lua_getfield(L, -1, lua.to_luastring(key));  /* get field and its type */
+    let t = lua.lua_getfield(L, -1, lua.to_luastring(key, true));  /* get field and its type */
     let res = lua.lua_tointegerx(L, -1);
-    if (res !== false) {  /* field is not an integer? */
-        if (t != lua.LUA_TNIL)  /* some other value? */
+    if (res === false) {  /* field is not an integer? */
+        if (t !== lua.LUA_TNIL)  /* some other value? */
             return lauxlib.luaL_error(L, lua.to_luastring(`field '${key}' is not an integer`), true);
         else if (d < 0)  /* absent field; no default? */
             return lauxlib.luaL_error(L, lua.to_luastring(`field '${key}' missing in date table`), true);
@@ -53,7 +53,7 @@ const os_time = function(L) {
         t.setHours(getfield(L, "hour", 12, 0));
         t.setDate(getfield(L, "day", -1, 0));
         t.setMonth(getfield(L, "month", -1, 1));
-        t.setFullYear(getfield(L, "year", -1, 1900));
+        t.setFullYear(getfield(L, "year", -1, 0));
         setallfields(L, t);
     }
 
