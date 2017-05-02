@@ -1,5 +1,7 @@
 language: node
 
+cache: yarn
+
 before_install:
     - pip install --user hererocks
     - hererocks lua53 -l5.3 -rlatest --cflags="-DLUA_INT_TYPE=LUA_INT_INT"
@@ -7,12 +9,13 @@ before_install:
     - nvm install node
     - export NODE=$(nvm which node)
     - export NPM=${NODE%node}npm
+    - $NPM install -g yarn
 
 install:
-    - $NPM i
+    - yarn
 
 script:
-    - $NPM t
+    - yarn test
 
 notifications:
     email: false
