@@ -162,26 +162,31 @@ if (typeof require === "function") {
     if (child_process) {
         const os_execute = function(L) {
             let cmd = lauxlib.luaL_optstring(L, 1, null);
-            let out = false;
             if (cmd !== null) {
                 try {
-                    out = child_process.execSync(lua.to_jsstring(cmd));
+                    child_process.execSync(
+                        lua.to_jsstring(cmd),
+                        {
+                            stdio: [process.stdin, process.stdout, process.stderr]
+                        }
+                    );
                 } catch (e) {
                     return lauxlib.luaL_execresult(L, false, e);
                 }
 
-                if (out) console.log(out.asciiSlice());
-
                 return lauxlib.luaL_execresult(L, true);
             } else {
                 try {
-                    out = child_process.execSync(lua.to_jsstring(cmd));
+                    child_process.execSync(
+                        lua.to_jsstring(cmd),
+                        {
+                            stdio: [process.stdin, process.stdout, process.stderr]
+                        }
+                    );
                     lua.lua_pushboolean(L, 1);
                 } catch (e) {
                     lua.lua_pushboolean(L, 0);
                 }
-
-                if (out) console.log(out.asciiSlice());
 
                 return 1;
             }
