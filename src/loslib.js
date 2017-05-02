@@ -1,22 +1,37 @@
 "use strict";
 
-const lua     = require('./lua.js');
-const lauxlib = require('./lauxlib.js');
-const llimit  = require('./llimit.js');
+const lua      = require('./lua.js');
+const lauxlib  = require('./lauxlib.js');
+const llimit   = require('./llimit.js');
+
+const strftime = require('strftime');
+
+/* options for ANSI C 89 (only 1-char options) */
+const L_STRFTIMEC89 = lua.to_luastring("aAbBcdHIjmMpSUwWxXyYZ%", true);
+
+/* options for ISO C 99 and POSIX */
+const L_STRFTIMEC99 = lua.to_luastring("aAbBcCdDeFgGhHIjmMnprRStTuUVwWxXyYzZ%||EcECExEXEyEYOdOeOHOIOmOMOSOuOUOVOwOWOy", true);  /* two-char options */
+
+/* options for Windows */
+const L_STRFTIMEWIN = lua.to_luastring("aAbBcdHIjmMpSUwWxXyYzZ%||#c#x#d#H#I#j#m#M#S#U#w#W#y#Y", true);  /* two-char options */
+
+// const LUA_STRFTIMEOPTIONS = L_STRFTIMEWIN;
+const LUA_STRFTIMEOPTIONS = L_STRFTIMEC89;
+// const LUA_STRFTIMEOPTIONS = L_STRFTIMEC99;
 
 const setfield = function(L, key, value) {
     lua.lua_pushinteger(L, value);
     lua.lua_setfield(L, -2, lua.to_luastring(key, true));
 };
 
-const setallfields = function(L, time) {
-    setfield(L, "sec", time.getSeconds());
-    setfield(L, "min", time.getMinutes());
-    setfield(L, "hour", time.getHours());
-    setfield(L, "day", time.getDate());
-    setfield(L, "month", time.getMonth());
-    setfield(L, "year", time.getFullYear());
-    setfield(L, "wday", time.getDay());
+const setallfields = function(L, time, utc) {
+    setfield(L, "sec",   !utc ? time.getSeconds()  : time.getUTCSeconds());
+    setfield(L, "min",   !utc ? time.getMinutes()  : time.getUTCMinutes());
+    setfield(L, "hour",  !utc ? time.getHours()    : time.getUTCHours());
+    setfield(L, "day",   !utc ? time.getDate()     : time.getUTCDate());
+    setfield(L, "month", !utc ? time.getMonth()    : time.getUTCMonth());
+    setfield(L, "year",  !utc ? time.getFullYear() : time.getUTCFullYear());
+    setfield(L, "wday",  !utc ? time.getDay()      : time.getUTCDay());
     let now = new Date();
     setfield(L, "yday", Math.floor((now - (new Date(now.getFullYear(), 0, 0))) / (1000 * 60 * 60 * 24)));
     // setboolfield(L, "isdst", time.get);
@@ -41,6 +56,60 @@ const getfield = function(L, key, d, delta) {
     }
     lua.lua_pop(L, 1);
     return res;
+};
+
+const checkoption = function(L, conv, buff) {
+    let option = LUA_STRFTIMEOPTIONS;
+    let oplen = 1;  /* length of options being checked */
+    for (; option.length > 0 && oplen <= conv.length; option = option.slice(oplen)) {
+        if (option[0] === '|'.charCodeAt(0))  /* next block? */
+            oplen++;  /* will check options with next length (+1) */
+        else if (lua.to_jsstring(conv.slice(0, oplen)) === lua.to_jsstring(option.slice(0, oplen))) {  /* match? */
+            buff.push(...conv.slice(0, oplen)); /* copy valid option to buffer */
+            return conv.slice(oplen);  /* return next item */
+        }
+    }
+    lauxlib.luaL_argerror(L, 1, lua.lua_pushliteral(L, `invalid conversion specifier '%${conv}'`, conv));
+};
+
+/* maximum size for an individual 'strftime' item */
+const SIZETIMEFMT = 250;
+
+
+const os_date = function(L) {
+    let s = lauxlib.luaL_optlstring(L, 1, "%c");
+    let t = lauxlib.luaL_opt(L, l_checktime, 2, new Date().getTime() / 1000) * 1000;
+    let stm = new Date(t);
+    let utc = false;
+    if (s[0] === '!'.charCodeAt(0)) {  /* UTC? */
+        utc = true;
+        s = s.slice(1);  /* skip '!' */
+    }
+
+    if (stm === null)  /* invalid date? */
+        lauxlib.luaL_error(L, lua.to_luastring("time result cannot be represented in this installation", true));
+
+    if (lua.to_jsstring(s) === "*t") {
+        lua.lua_createtable(L, 0, 9);  /* 9 = number of fields */
+        setallfields(L, stm, utc);
+    } else {
+        let cc;  /* buffer for individual conversion specifiers */
+        let b = [];
+        while (s.length > 0) {
+            cc = ['%'.charCodeAt(0)];
+
+            if (s[0] !== '%'.charCodeAt(0)) {  /* not a conversion specifier? */
+                b.push(s[0]);
+                s = s.slice(1);
+            } else {
+                s = s.slice(1);  /* skip '%' */
+                s = checkoption(L, s, cc);  /* copy specifier to 'cc' */
+                b.push(...(lua.to_luastring(strftime(lua.to_jsstring(cc), stm))));
+            }
+        }
+        lua.lua_pushstring(L, b);
+    }
+    return 1;
 };
 
 const os_time = function(L) {
@@ -75,8 +144,9 @@ const os_difftime = function(L) {
 };
 
 const syslib = {
-    "time": os_time,
-    "difftime": os_difftime
+    "date": os_date,
+    "difftime": os_difftime,
+    "time": os_time
 };
 
 // Only with Node

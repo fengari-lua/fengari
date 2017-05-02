@@ -38,7 +38,11 @@ test('os.time', function (t) {
 
 test('os.time (with format)', function (t) {
     let luaCode = `
-        return os.time({day=8,month=2,year=2015})
+        return os.time({
+            day = 8,
+            month = 2,
+            year = 2015
+        })
     `, L;
     
     t.plan(3);
@@ -95,6 +99,42 @@ test('os.difftime', function (t) {
 
     t.ok(
         lua.lua_isnumber(L, -1),
+        "Correct element(s) on the stack"
+    );
+
+});
+
+
+test('os.date', function (t) {
+    let luaCode = `
+        return os.date('%Y-%m-%d', os.time({
+            day = 8,
+            month = 2,
+            year = 2015
+        }))
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lauxlib.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lua.lua_tojsstring(L, -1),
+        "2015-02-08",
         "Correct element(s) on the stack"
     );
 
