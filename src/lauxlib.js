@@ -444,7 +444,8 @@ const luaL_tolstring = function(L, idx) {
         if (!lua.lua_isstring(L, -1))
             luaL_error(L, lua.to_luastring("'__tostring' must return a string", true));
     } else {
-        switch(lua.lua_type(L, idx)) {
+        let t = lua.lua_type(L, idx);
+        switch(t) {
             case lua.LUA_TNUMBER: {
                 if (lua.lua_isinteger(L, idx))
                     lua.lua_pushstring(L, lua.to_luastring(lua.lua_tointeger(L, idx).toString()));
@@ -479,7 +480,29 @@ const luaL_tolstring = function(L, idx) {
             default:
                 let tt = luaL_getmetafield(L, idx, lua.to_luastring("__name", true));
                 let kind = tt === lua.LUA_TSTRING ? lua.lua_tostring(L, -1) : luaL_typename(L, idx);
-                lua.lua_pushstring(L, lua.to_luastring(`${lua.to_jsstring(kind)}: 0x${lapi.index2addr(L, -1).id.toString(16)}`));
+                let p = lua.lua_topointer(L, idx);
+                let id;
+                switch (t) {
+                case lua.LUA_TLIGHTUSERDATA:
+                    /* user provided object. no id available */
+                    id = "<id NYI>";
+                    break;
+                case lua.LUA_TFUNCTION:
+                    /* light C functions are returned from lua_topointer directly */
+                    if (typeof p == "function") {
+                        id = "<id NYI>";
+                        break;
+                    }
+                    /* fall through */
+                case lua.LUA_TTABLE:
+                case lua.LUA_TTHREAD:
+                case lua.LUA_TUSERDATA:
+                    id = `0x${p.id.toString(16)}`;
+                    break;
+                default:
+                    throw Error("unhandled type: "+t);
+                }
+                lua.lua_pushstring(L, lua.to_luastring(`${lua.to_jsstring(kind)}: ${id}`));
                 if (tt !== lua.LUA_TNIL)
                     lua.lua_remove(L, -2);
                 break;

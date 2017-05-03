@@ -10,12 +10,10 @@ const llimit  = require('./llimit.js');
 const CT      = defs.constant_types;
 const char    = defs.char;
 
-let tvalueCount = 0;
 
 class TValue {
 
     constructor(type, value) {
-        this.id = tvalueCount++;
         this.type = type;
         this.value = value;
     }
@@ -166,6 +164,8 @@ module.exports.luaO_nilobject = luaO_nilobject;
 class LClosure {
 
     constructor(L, n) {
+        this.id = L.l_G.id_counter++;
+
         this.p = null;
         this.nupvalues = n;
         this.upvals = Array(n);
@@ -175,7 +175,9 @@ class LClosure {
 
 class CClosure {
 
-    constructor(f, n) {
+    constructor(L, f, n) {
+        this.id = L.l_G.id_counter++;
+
         this.f = f;
         this.nupvalues = n;
         this.upvalue = new Array(n);

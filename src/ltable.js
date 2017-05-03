@@ -36,6 +36,7 @@ const table_hash = function(key) {
 
 const luaH_new = function(L) {
     let t = {
+        id: L.l_G.id_counter++,
         strong: new Map(),
         metatable: null
     };

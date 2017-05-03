@@ -270,7 +270,7 @@ const lua_pushcclosure = function(L, fn, n) {
         assert(n < L.top - L.ci.funcOff, "not enough elements in the stack");
         assert(n <= MAXUPVAL, "upvalue index too large");
 
-        let cl = new CClosure(fn, n);
+        let cl = new CClosure(L, fn, n);
 
         L.top -= n;
         while (n--) {
@@ -473,6 +473,7 @@ const lua_createtable = function(L, narray, nrec) {
 
 const luaS_newudata = function(L, size) {
     return {
+        id: L.l_G.id_counter++,
         metatable: null,
         uservalue: null,
         len: size,
@@ -693,7 +694,7 @@ const lua_topointer = function(L, idx) {
         case CT.LUA_TCCL:
         case CT.LUA_TLCF:
         case CT.LUA_TTHREAD:
-        case CT.LUA_TUSERDATA:
+        case CT.LUA_TUSERDATA: /* note: this differs in behaviour to reference lua implementation */
         case CT.LUA_TLIGHTUSERDATA:
             return o.value;
         default:

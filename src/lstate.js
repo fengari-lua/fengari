@@ -45,6 +45,7 @@ class CallInfo {
 class lua_State {
 
     constructor() {
+        this.id = null;
         this.base_ci = new CallInfo(); // Will be populated later
         this.top = 0;
         this.ci = null;
@@ -64,6 +65,8 @@ class lua_State {
 class global_State {
 
     constructor(L) {
+        this.id_counter = 0; /* used to give objects unique ids */
+
         this.mainthread = L;
         this.l_registry = new lobject.TValue(CT.LUA_TNIL, null);
         this.panic = null;
@@ -123,6 +126,7 @@ const f_luaopen = function(L) {
 };
 
 const preinit_thread = function(L, g) {
+    L.id = g.id_counter++;
     L.l_G = g;
     L.stack = [];
     L.ci = null;
