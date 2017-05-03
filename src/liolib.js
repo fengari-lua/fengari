@@ -44,6 +44,20 @@ const newprefile = function(L) {
     return p;
 };
 
+const aux_close = function(L) {
+    let p = tolstream(L);
+    let cf = p.closef;
+    p.closef = null;
+    return cf(L);
+};
+
+const io_close = function(L) {
+    if (lua.lua_isnone(L, 1))  /* no argument? */
+        lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, IO_OUTPUT);  /* use standard output */
+    tofile(L);  /* make sure argument is an open stream */
+    return aux_close(L);
+};
+
 const getiofile = function(L, findex) {
     lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, findex);
     let p = lua.lua_touserdata(L, -1);
@@ -80,10 +94,12 @@ const f_write = function(L) {
 };
 
 const iolib = {
+    "close": io_close,
     "write": io_write
 };
 
 const flib = {
+    "close": io_close,
     "write": f_write,
     "__tostring": f_tostring
 };
