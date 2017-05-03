@@ -247,10 +247,10 @@ if (typeof require === "function") {
                         }
                     );
                 } catch (e) {
-                    return lauxlib.luaL_execresult(L, false, e);
+                    return lauxlib.luaL_execresult(L, e);
                 }
 
-                return lauxlib.luaL_execresult(L, true);
+                return lauxlib.luaL_execresult(L, null);
             } else {
                 try {
                     child_process.execSync(

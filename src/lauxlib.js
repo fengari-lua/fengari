@@ -211,21 +211,27 @@ const luaL_fileresult = function(L, stat, fname, e) {
 };
 
 /* Unlike normal lua, we pass in an error object */
-const luaL_execresult = function(L, stat, e) {
-    let what = lua.to_luastring("exit");  /* type of termination */
-    if (e && e.status === -1)  /* error? */
-        return luaL_fileresult(L, 0, null, e);
-    else {
-        if (e && e.signal) {
-            lua.lua_pushnil(L);
-            lua.lua_pushliteral(L, "signal");
-        } else {
-            lua.lua_pushboolean(L, 1);
-            lua.lua_pushliteral(L, "exit");
-        }
-        lua.lua_pushinteger(L, e ? e.status : 0);
+const luaL_execresult = function(L, e) {
+    let what, stat;
+    if (e === null) {
+        lua.lua_pushboolean(L, 1);
+        lua.lua_pushliteral(L, "exit");
+        lua.lua_pushinteger(L, 0);
         return 3;
+    } else if (e.status) {
+        what = "exit";
+        stat = e.status;
+    } else if (e.signal) {
+        what = "signal";
+        stat = e.signal;
+    } else {
+        /* XXX: node seems to have e.errno as a string instead of a number */
+        return luaL_fileresult(L, 0, null, e);
     }
+    lua.lua_pushnil(L);
+    lua.lua_pushliteral(L, what);
+    lua.lua_pushinteger(L, stat);
+    return 3;
 };
 
 const luaL_getmetatable = function(L, n) {
