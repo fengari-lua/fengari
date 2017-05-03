@@ -11,8 +11,8 @@ const LUA_FILEHANDLE = lua.to_luastring("FILE*", true);
 
 class luaL_Buffer {
     constructor() {
+        this.b = null;
         this.L = null;
-        this.b = "";
     }
 }
 
