@@ -1,7 +1,6 @@
 /*jshint esversion: 6 */
 "use strict";
 
-const lapi    = require('./lapi.js');
 const lua     = require('./lua.js');
 const linit   = require('./linit.js');
 

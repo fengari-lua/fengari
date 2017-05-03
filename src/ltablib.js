@@ -4,7 +4,6 @@ const lua     = require('./lua.js');
 const lapi    = require('./lapi.js');
 const lauxlib = require('./lauxlib.js');
 const llimit  = require('./llimit.js');
-const ltable  = require('./ltable.js');
 
 
 /*
