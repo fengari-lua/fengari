@@ -25,9 +25,9 @@
     - [x] os (~~`os.setlocale()`~~)
     - [ ] Package
     - [ ] io
-        - [ ] `io.stdin`
-        - [ ] `io.stdout`
-        - [ ] `io.stderr`
+        - [x] `io.stdin`
+        - [x] `io.stdout`
+        - [x] `io.stderr`
         - [ ] `io.flush()`
         - [ ] `io.input()`
         - [ ] `io.lines()`
@@ -37,16 +37,16 @@
         - [ ] `io.read()`
         - [ ] `io.tmpfile()`
         - [ ] `io.type()`
-        - [ ] `io.write()`
-        - [ ] `io.close()`
+        - [x] `io.write()`
+        - [x] `io.close()`
         - [ ] `file:flush()`
         - [ ] `file:lines()`
         - [ ] `file:read()`
         - [ ] `file:read()`
         - [ ] `file:setvbuf()`
-        - [ ] `file:write()`
+        - [x] `file:write()`
         - [ ] `file:__gc()`
-        - [ ] `file:__tostring()`
+        - [x] `file:__tostring()`
 - [ ] C API
     - [x] ...
     - [ ] lua_arith
