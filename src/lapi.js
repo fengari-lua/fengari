@@ -486,7 +486,7 @@ const lua_newuserdata = function(L, size) {
 
 const aux_upvalue = function(L, fi, n) {
     switch(fi.ttype()) {
-        case CT.LUAT_TCCL: {  /* C closure */
+        case CT.LUA_TCCL: {  /* C closure */
             let f = fi.value;
             if (!(1 <= n && n <= f.nupvalues)) return null;
             return {
