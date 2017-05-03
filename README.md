@@ -27,11 +27,11 @@
         - [x] `package.config`
         - [x] `package.cpath`
         - [x] `package.loaded`
+        - [x] `package.loadlib`
         - [x] `package.path`
         - [x] `package.preload`
         - [x] `package.searchers`
         - [x] `require`
-        - [ ] `package.loadlib`
         - [ ] `package.searchpath`
     - [ ] io
         - [x] `file:__tostring()`

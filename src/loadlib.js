@@ -34,20 +34,38 @@ const AUXMARK       = [1];
 const LIB_FAIL      = "absent";
 const DLMSG         = "dynamic libraries not enabled; check your Lua installation";
 
+/*
+** load JS library in file 'path'. If 'seeglb', load with all names in
+** the library global.
+** Returns the library; in case of error, returns NULL plus an
+** error string in the stack.
+*/
+const lsys_load = function(L, path) {
+    try {
+        path = lua.to_jsstring(path);
 
-const lsys_unloadlib = function(lib) {
+        // Relative path ?
+        if (path.startsWith('.'))
+            path = `${process.env.PWD}/${path}`;
+
+        return require(path);
+    } catch (e) {
+        lua.lua_pushjsstring(L, e.message);
+    }
 };
 
-
-const lsys_load = function(L, path, seeglb) {
-    lua.lua_pushliteral(L, DLMSG);
-    return null;
-};
-
-
+/*
+** Try to find a function named 'sym' in library 'lib'.
+** Returns the function; in case of error, returns NULL plus an
+** error string in the stack.
+*/
 const lsys_sym = function(L, lib, sym) {
-    lua.lua_pushliteral(L, DLMSG);
-    return null;
+    let f = lib[lua.to_jsstring(sym)];
+
+    if (f && typeof f === 'function')
+        return f;
+
+    lua.lua_pushliteral(L, `'${lua.to_jsstring(sym)}'`);
 };
 
 /*
@@ -106,6 +124,20 @@ const lookforfunc = function(L, path, sym) {
             return ERRFUNC;  /* unable to find function */
         lua.lua_pushcfunction(L, f);  /* else create new function */
         return 0;  /* no errors */
+    }
+};
+
+const ll_loadlib = function(L) {
+    let path = lauxlib.luaL_checkstring(L, 1);
+    let init = lauxlib.luaL_checkstring(L, 2);
+    let stat = lookforfunc(L, path, init);
+    if (stat === 0)  /* no errors? */
+        return 1;  /* return the loaded function */
+    else {  /* error; error message is on stack top */
+        lua.lua_pushnil(L);
+        lua.lua_insert(L, -2);
+        lua.lua_pushjsstring(L, (stat === ERRLIB) ? LIB_FAIL : "init");
+        return 3;  /* return nil, error message, and where */
     }
 };
 
@@ -315,7 +347,9 @@ const ll_require = function(L) {
     return 1;
 };
 
-const pk_funcs = {};
+const pk_funcs = {
+    "loadlib": ll_loadlib
+};
 
 const ll_funcs = {
     "require": ll_require
