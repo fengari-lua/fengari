@@ -53,7 +53,6 @@
     - [ ] lua_islightuserdata
     - [ ] lua_pushfstring
     - [ ] lua_pushvfstring
-    - [ ] lua_rawseti
     - [ ] lua_register
     - [ ] lua_setallocf
     - [ ] lua_tocfunction

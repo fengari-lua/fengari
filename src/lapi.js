@@ -399,6 +399,14 @@ const lua_rawset = function(L, idx) {
     L.top -= 2;
 };
 
+const lua_rawseti = function(L, idx, n) {
+    assert(2 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    let o = index2addr(L, idx);
+    assert(o.ttistable(), "table expected");
+    ltable.luaH_setint(o.value, n, L.stack[L.top - 1]);
+    L.stack[--L.top] = void 0;
+};
+
 const lua_rawsetp = function(L, idx, p) {
     assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     let o = index2addr(L, idx);
@@ -1074,6 +1082,7 @@ module.exports.lua_rawgeti           = lua_rawgeti;
 module.exports.lua_rawgetp           = lua_rawgetp;
 module.exports.lua_rawlen            = lua_rawlen;
 module.exports.lua_rawset            = lua_rawset;
+module.exports.lua_rawseti           = lua_rawseti;
 module.exports.lua_rawsetp           = lua_rawsetp;
 module.exports.lua_remove            = lua_remove;
 module.exports.lua_replace           = lua_replace;
