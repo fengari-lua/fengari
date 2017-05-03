@@ -1,7 +1,8 @@
 "use strict";
 
+const assert  = require('assert');
+
 const lua     = require('./lua.js');
-const lapi    = require('./lapi.js');
 const lauxlib = require('./lauxlib.js');
 const llimit  = require('./llimit.js');
 
@@ -172,46 +173,118 @@ const unpack = function(L) {
     return n;
 };
 
+const l_randomizePivot = function() {
+    return Math.floor(Math.random()*1<<32);
+};
 
-// TODO: Maybe do the quicksort after all
-const auxsort = function(L) {
-    let a = [];
-    for (let i=1; ;i++) {
-        if(lua.lua_geti(L, 1, i) === lua.LUA_TNIL) {
-            lua.lua_pop(L, 1);
-            break;
+const RANLIMIT = 100;
+
+const set2 = function(L, i, j) {
+    lua.lua_seti(L, 1, i);
+    lua.lua_seti(L, 1, j);
+};
+
+const sort_comp = function(L, a, b) {
+    if (lua.lua_isnil(L, 2))  /* no function? */
+        return lua.lua_compare(L, a, b, lua.LUA_OPLT);  /* a < b */
+    else {  /* function */
+        lua.lua_pushvalue(L, 2);    /* push function */
+        lua.lua_pushvalue(L, a-1);  /* -1 to compensate function */
+        lua.lua_pushvalue(L, b-2);  /* -2 to compensate function and 'a' */
+        lua.lua_call(L, 2, 1);      /* call function */
+        let res = lua.lua_toboolean(L, -1);  /* get result */
+        lua.lua_pop(L, 1);          /* pop result */
+        return res;
+    }
+};
+
+const partition = function(L, lo, up) {
+    let i = lo;  /* will be incremented before first use */
+    let j = up - 1;  /* will be decremented before first use */
+    /* loop invariant: a[lo .. i] <= P <= a[j .. up] */
+    for (;;) {
+        /* next loop: repeat ++i while a[i] < P */
+        while (lua.lua_geti(L, 1, ++i), sort_comp(L, -1, -2)) {
+            if (i == up - 1)  /* a[i] < P  but a[up - 1] == P  ?? */
+                lauxlib.luaL_error(L, "invalid order function for sorting");
+            lua.lua_pop(L, 1);  /* remove a[i] */
         }
-        let t = lapi.index2addr(L, -1);
-        a.push({
-            oldkey: i,
-            value: t
-        });
-        lua.lua_pop(L, 1);
+        /* after the loop, a[i] >= P and a[lo .. i - 1] < P */
+        /* next loop: repeat --j while P < a[j] */
+        while (lua.lua_geti(L, 1, --j), sort_comp(L, -3, -1)) {
+            if (j < i)  /* j < i  but  a[j] > P ?? */
+                lauxlib.luaL_error(L, "invalid order function for sorting");
+            lua.lua_pop(L, 1);  /* remove a[j] */
+        }
+        /* after the loop, a[j] <= P and a[j + 1 .. up] >= P */
+        if (j < i) {  /* no elements out of place? */
+            /* a[lo .. i - 1] <= P <= a[j + 1 .. i .. up] */
+            lua.lua_pop(L, 1);  /* pop a[j] */
+            /* swap pivot (a[up - 1]) with a[i] to satisfy pos-condition */
+            set2(L, up - 1, i);
+            return i;
+        }
+        /* otherwise, swap a[i] - a[j] to restore invariant and repeat */
+        set2(L, i, j);
     }
+};
 
-    let sort_function;
-    if (lua.lua_type(L, 2) !== lua.LUA_TFUNCTION) {  /* no function? */
-        sort_function = function (a, b) {
-            return lapi.lua_compare_(L, a.value, b.value, lua.LUA_OPLT) === 1 ? -1 : 1;  /* a < b */
-        };
-    } else {
-        sort_function = function (a, b) {
-            lua.lua_pushvalue(L, 2);  /* push function */
-            lua.lua_pushtvalue(L, a.value);  /* since we use Map.sort, a and b are not on the stack */
-            lua.lua_pushtvalue(L, b.value);
-            lua.lua_call(L, 2, 1);  /* call function */
-            let res = lua.lua_toboolean(L, -1);  /* get result */
-            lua.lua_pop(L, 1);  /* pop result */
-            return res ? -1 : 1;
-        };
-    }
-    a.sort(sort_function)
-        .forEach(function(e, i) {
-            if (e.oldkey != i+1) {
-                lua.lua_pushtvalue(L, e.value);
-                lua.lua_seti(L, 1, i+1);
-            }
-        });
+const choosePivot = function(lo, up, rnd) {
+    let r4 = Math.floor((up - lo) / 4);  /* range/4 */
+    let p = rnd % (r4 * 2) + (lo + r4);
+    assert(lo + r4 <= p && p <= up - r4);
+    return p;
+};
+
+const auxsort = function(L, lo, up, rnd) {
+    while (lo < up) {  /* loop for tail recursion */
+        /* sort elements 'lo', 'p', and 'up' */
+        lua.lua_geti(L, 1, lo);
+        lua.lua_geti(L, 1, up);
+        if (sort_comp(L, -1, -2))  /* a[up] < a[lo]? */
+            set2(L, lo, up);  /* swap a[lo] - a[up] */
+        else
+            lua.lua_pop(L, 2);  /* remove both values */
+        if (up - lo == 1)  /* only 2 elements? */
+            return;  /* already sorted */
+        let p;  /* Pivot index */
+        if (up - lo < RANLIMIT || rnd === 0)  /* small interval or no randomize? */
+            p = Math.floor((lo + up)/2);  /* middle element is a good pivot */
+        else  /* for larger intervals, it is worth a random pivot */
+            p = choosePivot(lo, up, rnd);
+        lua.lua_geti(L, 1, p);
+        lua.lua_geti(L, 1, lo);
+        if (sort_comp(L, -2, -1))  /* a[p] < a[lo]? */
+            set2(L, p, lo);  /* swap a[p] - a[lo] */
+        else {
+            lua.lua_pop(L, 1);  /* remove a[lo] */
+            lua.lua_geti(L, 1, up);
+            if (sort_comp(L, -1, -2))  /* a[up] < a[p]? */
+                set2(L, p, up);  /* swap a[up] - a[p] */
+            else
+                lua.lua_pop(L, 2);
+        }
+        if (up - lo == 2)  /* only 3 elements? */
+            return;  /* already sorted */
+        lua.lua_geti(L, 1, p);  /* get middle element (Pivot) */
+        lua.lua_pushvalue(L, -1);  /* push Pivot */
+        lua.lua_geti(L, 1, up - 1);  /* push a[up - 1] */
+        set2(L, p, up - 1);  /* swap Pivot (a[p]) with a[up - 1] */
+        p = partition(L, lo, up);
+        let n;
+        /* a[lo .. p - 1] <= a[p] == P <= a[p + 1 .. up] */
+        if (p - lo < up - p) {  /* lower interval is smaller? */
+            auxsort(L, lo, p - 1, rnd);  /* call recursively for lower interval */
+            n = p - lo;  /* size of smaller interval */
+            lo = p + 1;  /* tail call for [p + 1 .. up] (upper interval) */
+        } else {
+            auxsort(L, p + 1, up, rnd);  /* call recursively for upper interval */
+            n = up - p;  /* size of smaller interval */
+            up = p - 1;  /* tail call for [lo .. p - 1]  (lower interval) */
+        }
+        if ((up - lo) / 128 > n) /* partition too imbalanced? */
+            rnd = l_randomizePivot();  /* try a new randomization */
+    }  /* tail call auxsort(L, lo, up, rnd) */
 };
 
 const sort = function(L) {
@@ -221,7 +294,7 @@ const sort = function(L) {
         if (!lua.lua_isnoneornil(L, 2))  /* is there a 2nd argument? */
             lauxlib.luaL_checktype(L, 2, lua.LUA_TFUNCTION);  /* must be a function */
         lua.lua_settop(L, 2);  /* make sure there are two arguments */
-        auxsort(L);
+        auxsort(L, 1, n, 0);
     }
     return 0;
 };
