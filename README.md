@@ -5,7 +5,7 @@
 </p>
 
 # fengari
-🐺 φεγγάρι - The Lua VM written in JS ES6 targeting the browser
+🐺 φεγγάρι - The Lua VM written in JS ES6 for Node and the browser
 
 ## So far
 
@@ -24,10 +24,23 @@
     - [x] utf8
     - [x] os (~~`os.setlocale()`~~)
     - [ ] Package
+        - [x] `package.config`
+        - [x] `package.cpath`
+        - [x] `package.loaded`
+        - [x] `package.path`
+        - [x] `package.preload`
+        - [x] `package.searchers`
+        - [x] `require`
+        - [ ] `package.loadlib`
+        - [ ] `package.searchpath`
     - [ ] io
+        - [x] `file:__tostring()`
+        - [x] `file:write()`
+        - [x] `io.close()`
+        - [x] `io.stderr`
         - [x] `io.stdin`
         - [x] `io.stdout`
-        - [x] `io.stderr`
+        - [x] `io.write()`
         - [ ] `io.flush()`
         - [ ] `io.input()`
         - [ ] `io.lines()`
@@ -37,68 +50,63 @@
         - [ ] `io.read()`
         - [ ] `io.tmpfile()`
         - [ ] `io.type()`
-        - [x] `io.write()`
-        - [x] `io.close()`
         - [ ] `file:flush()`
         - [ ] `file:lines()`
         - [ ] `file:read()`
         - [ ] `file:read()`
         - [ ] `file:setvbuf()`
-        - [x] `file:write()`
         - [ ] `file:__gc()`
-        - [x] `file:__tostring()`
 - [ ] C API
     - [x] ...
-    - [ ] lua_arith
-    - [ ] lua_islightuserdata
-    - [ ] lua_pushfstring
-    - [ ] lua_pushvfstring
-    - [ ] lua_register
-    - [ ] lua_setallocf
-    - [ ] lua_tocfunction
+    - [ ] `lua_arith`
+    - [ ] `lua_islightuserdata`
+    - [ ] `lua_pushfstring`
+    - [ ] `lua_pushvfstring`
+    - [ ] `lua_register`
+    - [ ] `lua_setallocf`
+    - [ ] `lua_tocfunction`
 - [ ] Auxiliary library
     - [x] ...
-    - [ ] luaL_addsize
-    - [ ] luaL_checkoption
-    - [ ] luaL_checkversion
-    - [ ] luaL_gsub
-    - [ ] luaL_newlibtable
-    - [ ] luaL_optnumber
-    - [ ] luaL_prepbuffer
-    - [ ] luaL_pushresultsize
-    - [ ] luaL_ref
-    - [ ] luaL_unref
+    - [ ] `luaL_addsize`
+    - [ ] `luaL_checkoption`
+    - [ ] `luaL_checkversion`
+    - [ ] `luaL_newlibtable`
+    - [ ] `luaL_optnumber`
+    - [ ] `luaL_prepbuffer`
+    - [ ] `luaL_pushresultsize`
+    - [ ] `luaL_ref`
+    - [ ] `luaL_unref`
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
-    - [x] constructs.lua (`_soft`)
-    - [x] locals.lua
-    - [x] strings.lua
-    - [ ] all.lua
-    - [ ] big.lua
-    - [ ] checktable.lua
-    - [ ] errors.lua
-    - [ ] gc.lua
-    - [ ] literals.lua
-    - [ ] math.lua
-    - [ ] sort.lua
-    - [ ] utf8.lua
-    - [ ] api.lua
-    - [ ] bitwise.lua
-    - [ ] closure.lua
-    - [ ] coroutine.lua
-    - [ ] events.lua
-    - [ ] goto.lua
-    - [ ] nextvar.lua
-    - [ ] vararg.lua
-    - [ ] attrib.lua
-    - [ ] calls.lua
-    - [ ] code.lua
-    - [ ] db.lua
-    - [ ] files.lua
-    - [ ] heavy.lua
-    - [ ] main.lua
-    - [ ] pm.lua
-    - [ ] tpack.lua
-    - [ ] verybig.lua
+    - [x] `constructs.lua (`_soft`)
+    - [x] `locals.lua
+    - [x] `strings.lua
+    - [ ] `all.lua`
+    - [ ] `big.lua`
+    - [ ] `checktable.lua`
+    - [ ] `errors.lua`
+    - [ ] `gc.lua`
+    - [ ] `literals.lua`
+    - [ ] `math.lua`
+    - [ ] `sort.lua`
+    - [ ] `utf8.lua`
+    - [ ] `api.lua`
+    - [ ] `bitwise.lua`
+    - [ ] `closure.lua`
+    - [ ] `coroutine.lua`
+    - [ ] `events.lua`
+    - [ ] `goto.lua`
+    - [ ] `nextvar.lua`
+    - [ ] `vararg.lua`
+    - [ ] `attrib.lua`
+    - [ ] `calls.lua`
+    - [ ] `code.lua`
+    - [ ] `db.lua`
+    - [ ] `files.lua`
+    - [ ] `heavy.lua`
+    - [ ] `main.lua`
+    - [ ] `pm.lua`
+    - [ ] `tpack.lua`
+    - [ ] `verybig.lua`
 - [ ] DOM API binding
 
 ## References

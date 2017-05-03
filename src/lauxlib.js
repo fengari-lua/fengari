@@ -561,14 +561,13 @@ const find_subarray = function(arr, subarr, from_index) {
 
 const luaL_gsub = function(L, s, p, r) {
     let wild;
-    let i = 0;
     let b = [];
     while ((wild = find_subarray(s, p)) >= 0) {
-        b.push(...s.slice(i, wild)); /* push prefix */
+        b.push(...s.slice(0, wild)); /* push prefix */
         b.push(...r);  /* push replacement in place of pattern */
-        i = wild + p.length;  /* continue after 'p' */
+        s = s.slice(wild + p.length);  /* continue after 'p' */
     }
-    b.push(s.slice(i));  /* push last suffix */
+    b.push(...s);  /* push last suffix */
     lua.lua_pushstring(L, b);
     return lua.lua_tostring(L, -1);
 };

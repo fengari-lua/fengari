@@ -294,6 +294,9 @@ module.exports.LUA_VDIR = LUA_VDIR;
 
 let os = false;
 if (typeof require === "function" && (os = require('os')) && typeof os.platform === "function" && os.platform() === 'win32') {
+    const LUA_DIRSEP = "\\";
+    module.exports.LUA_DIRSEP = LUA_DIRSEP;
+
     /*
     ** In Windows, any exclamation mark ('!') in the path is replaced by the
     ** path of the directory of the executable file of the current process.
@@ -320,6 +323,9 @@ if (typeof require === "function" && (os = require('os')) && typeof os.platform 
         LUA_CDIR + "loadall.dll;.\\?.dll";
     module.exports.LUA_CPATH_DEFAULT = LUA_CPATH_DEFAULT;
 } else {
+    const LUA_DIRSEP = "/";
+    module.exports.LUA_DIRSEP = LUA_DIRSEP;
+
     const LUA_ROOT = "/usr/local/";
     module.exports.LUA_ROOT = LUA_ROOT;
     
