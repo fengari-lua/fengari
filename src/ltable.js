@@ -79,7 +79,7 @@ const setgeneric = function(t, hash, key) {
 };
 
 const luaH_setint = function(t, key, value) {
-    assert(typeof key == "number" && value instanceof lobject.TValue && key|0 === key);
+    assert(typeof key == "number" && value instanceof lobject.TValue && (key|0) === key);
     let hash = key; /* table_hash known result */
     let v = t.strong.get(hash);
     if (v) {
