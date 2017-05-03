@@ -124,11 +124,6 @@ const lua_pushvalue = function(L, idx) {
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
-const lua_pushtvalue = function(L, tvalue) {
-    L.stack[L.top++] = tvalue;
-    assert(L.top <= L.ci.top, "stack overflow");
-};
-
 const lua_settop = function(L, idx) {
     let func = L.ci.funcOff;
     if (idx >= 0) {
@@ -1070,7 +1065,6 @@ module.exports.lua_pushnil           = lua_pushnil;
 module.exports.lua_pushnumber        = lua_pushnumber;
 module.exports.lua_pushstring        = lua_pushstring;
 module.exports.lua_pushthread        = lua_pushthread;
-module.exports.lua_pushtvalue        = lua_pushtvalue;
 module.exports.lua_pushvalue         = lua_pushvalue;
 module.exports.lua_rawequal          = lua_rawequal;
 module.exports.lua_rawget            = lua_rawget;
