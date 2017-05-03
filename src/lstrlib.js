@@ -1333,7 +1333,7 @@ const str_gsub = function(L) {
     let anchor = p[0] === '^'.charCodeAt(0);
     let n = 0;  /* replacement count */
     let ms = new MatchState(L);
-    let b = new lauxlib.luaL_Buffer(L);
+    let b = new lauxlib.luaL_Buffer();
     lauxlib.luaL_argcheck(L, tr === lua.LUA_TNUMBER || tr === lua.LUA_TSTRING || tr === lua.LUA_TFUNCTION || tr === lua.LUA_TTABLE, 3,
         lua.to_luastring("string/function/table expected", true));
     lauxlib.luaL_buffinit(L, b);

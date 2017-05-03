@@ -10,8 +10,8 @@ const LUA_FILEHANDLE = lua.to_luastring("FILE*", true);
 
 
 class luaL_Buffer {
-    constructor(L) {
-        this.L = L;
+    constructor() {
+        this.L = null;
         this.b = "";
     }
 }
