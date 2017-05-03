@@ -217,6 +217,22 @@ const searchpath = function(L, name, path, sep, dirsep) {
     return null;  /* not found */
 };
 
+const ll_searchpath = function(L) {
+    let f = searchpath(
+        L,
+        lauxlib.luaL_checkstring(L, 1),
+        lauxlib.luaL_checkstring(L, 2),
+        lauxlib.luaL_optstring(L, 3, [".".charCodeAt(0)]),
+        lauxlib.luaL_optstring(L, 4, [lua.LUA_DIRSEP.charCodeAt(0)])
+    );
+    if (f !== null) return 1;
+    else {  /* error message is on top of the stack */
+        lua.lua_pushnil(L);
+        lua.lua_insert(L, -2);
+        return 2;  /* return nil + error message */
+    }
+};
+
 const findfile = function(L, name, pname, dirsep) {
     lua.lua_getfield(L, lua.lua_upvalueindex(1), pname);
     let path = lua.lua_tostring(L, -1);
@@ -348,7 +364,8 @@ const ll_require = function(L) {
 };
 
 const pk_funcs = {
-    "loadlib": ll_loadlib
+    "loadlib": ll_loadlib,
+    "searchpath": ll_searchpath
 };
 
 const ll_funcs = {

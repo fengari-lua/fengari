@@ -98,3 +98,35 @@ test('package.loadlib', function (t) {
     );
 
 });
+
+
+test('package.searchpath', function (t) {
+    let luaCode = `
+        return package.searchpath('module-hello', './?.lua;./tests/?.lua')
+    `, L;
+    
+    t.plan(3);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lauxlib.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+    t.strictEqual(
+        lua.lua_tojsstring(L, -1),
+        "./tests/module-hello.lua",
+        "Correct element(s) on the stack"
+    );
+
+});

@@ -23,16 +23,7 @@
     - [x] Table
     - [x] utf8
     - [x] os (~~`os.setlocale()`~~)
-    - [ ] Package
-        - [x] `package.config`
-        - [x] `package.cpath`
-        - [x] `package.loaded`
-        - [x] `package.loadlib`
-        - [x] `package.path`
-        - [x] `package.preload`
-        - [x] `package.searchers`
-        - [x] `require`
-        - [ ] `package.searchpath`
+    - [x] Package
     - [ ] io
         - [x] `file:__tostring()`
         - [x] `file:write()`
