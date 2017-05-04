@@ -183,18 +183,10 @@ const luaL_where = function(L, level) {
     lua.lua_pushstring(L, []);
 };
 
-const luaL_error = function(L, fmt, ...args) {
-    let i = 0;
-
-    fmt = lua.to_jsstring(fmt);
-    // TODO: bypassing lua_pushvstring for now
-    fmt = fmt.replace(/(^%[sfIpdcU]|([^%])%[sfIpdcU])/g, function (m, p1, p2, off) {
-        return p2 ? p2 + args[i++] : args[i++];
-    });
-    fmt = lua.to_luastring(fmt);
-
-    lua.lua_pushstring(L, fmt);
-
+const luaL_error = function(L, fmt, ...argp) {
+    luaL_where(L, 1);
+    lua.lua_pushvfstring(L, fmt, argp);
+    lua.lua_concat(L, 2);
     return lua.lua_error(L);
 };
 
