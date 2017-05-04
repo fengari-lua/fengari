@@ -340,18 +340,18 @@ test('debug.traceback (with a global)', function (t) {
     t.strictEqual(
         lua.lua_tojsstring(L, -1),
 `stack traceback:
-\t...[string "traceback-test"]9: in function 'rec'
-\t...[string "traceback-test"]7: in function 'rec'
-\t...[string "traceback-test"]7: in function 'rec'
-\t...[string "traceback-test"]7: in function 'rec'
-\t...[string "traceback-test"]7: in function 'rec'
-\t...[string "traceback-test"]7: in function 'rec'
-\t...[string "traceback-test"]7: in function 'rec'
-\t...[string "traceback-test"]7: in function 'rec'
-\t...[string "traceback-test"]7: in function 'rec'
-\t...[string "traceback-test"]7: in function 'rec'
-\t...[string "traceback-test"]7: in function 'rec'
-\t...[string "traceback-test"]15: in main chunk`,
+\t[string "traceback-test"]:9: in function 'rec'
+\t[string "traceback-test"]:7: in function 'rec'
+\t[string "traceback-test"]:7: in function 'rec'
+\t[string "traceback-test"]:7: in function 'rec'
+\t[string "traceback-test"]:7: in function 'rec'
+\t[string "traceback-test"]:7: in function 'rec'
+\t[string "traceback-test"]:7: in function 'rec'
+\t[string "traceback-test"]:7: in function 'rec'
+\t[string "traceback-test"]:7: in function 'rec'
+\t[string "traceback-test"]:7: in function 'rec'
+\t[string "traceback-test"]:7: in function 'rec'
+\t[string "traceback-test"]:15: in main chunk`,
         "Correct element(s) on the stack"
     );
 
@@ -399,18 +399,18 @@ test('debug.traceback (with a upvalue)', function (t) {
     t.strictEqual(
         lua.lua_tojsstring(L, -1),
 `stack traceback:
-\t...[string "traceback-test"]10: in upvalue 'rec'
-\t...[string "traceback-test"]8: in upvalue 'rec'
-\t...[string "traceback-test"]8: in upvalue 'rec'
-\t...[string "traceback-test"]8: in upvalue 'rec'
-\t...[string "traceback-test"]8: in upvalue 'rec'
-\t...[string "traceback-test"]8: in upvalue 'rec'
-\t...[string "traceback-test"]8: in upvalue 'rec'
-\t...[string "traceback-test"]8: in upvalue 'rec'
-\t...[string "traceback-test"]8: in upvalue 'rec'
-\t...[string "traceback-test"]8: in upvalue 'rec'
-\t...[string "traceback-test"]8: in local 'rec'
-\t...[string "traceback-test"]16: in main chunk`,
+\t[string "traceback-test"]:10: in upvalue 'rec'
+\t[string "traceback-test"]:8: in upvalue 'rec'
+\t[string "traceback-test"]:8: in upvalue 'rec'
+\t[string "traceback-test"]:8: in upvalue 'rec'
+\t[string "traceback-test"]:8: in upvalue 'rec'
+\t[string "traceback-test"]:8: in upvalue 'rec'
+\t[string "traceback-test"]:8: in upvalue 'rec'
+\t[string "traceback-test"]:8: in upvalue 'rec'
+\t[string "traceback-test"]:8: in upvalue 'rec'
+\t[string "traceback-test"]:8: in upvalue 'rec'
+\t[string "traceback-test"]:8: in local 'rec'
+\t[string "traceback-test"]:16: in main chunk`,
         "Correct element(s) on the stack"
     );
 

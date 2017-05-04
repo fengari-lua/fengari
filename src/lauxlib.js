@@ -121,7 +121,7 @@ const luaL_traceback = function(L, L1, msg, level) {
             level = last - LEVELS2 + 1;  /* and skip to last ones */
         } else {
             lua.lua_getinfo(L1, lua.to_luastring("Slnt", true), ar);
-            lua.lua_pushstring(L, ['\n'.charCodeAt(0), '\t'.charCodeAt(0), '.'.charCodeAt(0), '.'.charCodeAt(0), '.'.charCodeAt(0)].concat(ar.short_src));
+            lua.lua_pushstring(L, ['\n'.charCodeAt(0), '\t'.charCodeAt(0)].concat(ar.short_src).concat([':'.charCodeAt(0)]));
             if (ar.currentline > 0)
                 lua.lua_pushliteral(L, `${ar.currentline}:`);
             lua.lua_pushliteral(L, " in ");
