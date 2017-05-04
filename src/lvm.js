@@ -7,8 +7,6 @@ const defs        = require('./defs.js');
 const OC          = require('./lopcodes.js');
 const luaconf     = require('./luaconf.js');
 const lobject     = require('./lobject.js');
-const TValue      = lobject.TValue;
-const LClosure    = lobject.LClosure;
 const lfunc       = require('./lfunc.js');
 const lstate      = require('./lstate.js');
 const llimit      = require('./llimit.js');
@@ -140,17 +138,17 @@ const luaV_execute = function(L) {
             }
             case OCi.OP_LOADK: {
                 let konst = k[i.Bx];
-                L.stack[ra] = new TValue(konst.type, konst.value);
+                L.stack[ra] = new lobject.TValue(konst.type, konst.value);
                 break;
             }
             case OCi.OP_LOADKX: {
                 assert(ci.u.l.savedpc[ci.pcOff].opcode === OCi.OP_EXTRAARG);
                 let konst = k[ci.u.l.savedpc[ci.pcOff++].Ax];
-                L.stack[ra] = new TValue(konst.type, konst.value);
+                L.stack[ra] = new lobject.TValue(konst.type, konst.value);
                 break;
             }
             case OCi.OP_LOADBOOL: {
-                L.stack[ra] = new TValue(CT.LUA_TBOOLEAN, i.B !== 0);
+                L.stack[ra] = new lobject.TValue(CT.LUA_TBOOLEAN, i.B !== 0);
 
                 if (i.C !== 0)
                     ci.pcOff++; /* skip next instruction (if C) */
@@ -159,7 +157,7 @@ const luaV_execute = function(L) {
             }
             case OCi.OP_LOADNIL: {
                 for (let j = 0; j <= i.B; j++)
-                    L.stack[ra + j] = new TValue(CT.LUA_TNIL, null);
+                    L.stack[ra + j] = new lobject.TValue(CT.LUA_TNIL, null);
                 break;
             }
             case OCi.OP_GETUPVAL: {
@@ -207,7 +205,7 @@ const luaV_execute = function(L) {
                 break;
             }
             case OCi.OP_NEWTABLE: {
-                L.stack[ra] = new TValue(CT.LUA_TTABLE, ltable.luaH_new(L));
+                L.stack[ra] = new lobject.TValue(CT.LUA_TTABLE, ltable.luaH_new(L));
                 break;
             }
             case OCi.OP_SELF: {
@@ -228,9 +226,9 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value + op2.value)|0);
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (op1.value + op2.value)|0);
                 } else if (numberop1 !== false && numberop2 !== false) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMFLT, numberop1 + numberop2);
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, numberop1 + numberop2);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_ADD);
                     base = ci.u.l.base;
@@ -244,9 +242,9 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value - op2.value)|0);
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (op1.value - op2.value)|0);
                 } else if (numberop1 !== false && numberop2 !== false) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMFLT, numberop1 - numberop2);
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, numberop1 - numberop2);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_SUB);
                     base = ci.u.l.base;
@@ -260,9 +258,9 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value * op2.value)|0);
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (op1.value * op2.value)|0);
                 } else if (numberop1 !== false && numberop2 !== false) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMFLT, numberop1 * numberop2);
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, numberop1 * numberop2);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_MUL);
                     base = ci.u.l.base;
@@ -276,9 +274,9 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (op1.value - Math.floor(op1.value / op2.value) * op2.value)|0);
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (op1.value - Math.floor(op1.value / op2.value) * op2.value)|0);
                 } else if (numberop1 !== false && numberop2 !== false) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMFLT, (numberop1 - Math.floor(numberop1 / numberop2) * numberop2));
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, (numberop1 - Math.floor(numberop1 / numberop2) * numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_MOD);
                     base = ci.u.l.base;
@@ -292,7 +290,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (numberop1 !== false && numberop2 !== false) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMFLT, Math.pow(numberop1, numberop2));
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, Math.pow(numberop1, numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_POW);
                     base = ci.u.l.base;
@@ -306,7 +304,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (numberop1 !== false && numberop2 !== false) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMFLT, numberop1 / numberop2);
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, numberop1 / numberop2);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_DIV);
                     base = ci.u.l.base;
@@ -320,9 +318,9 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, Math.floor(op1.value / op2.value)|0);
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, Math.floor(op1.value / op2.value)|0);
                 } else if (numberop1 !== false && numberop2 !== false) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMFLT, Math.floor(numberop1 / numberop2));
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, Math.floor(numberop1 / numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_IDIV);
                     base = ci.u.l.base;
@@ -336,7 +334,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tointeger(op2);
 
                 if (numberop1 !== false && numberop2) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (numberop1 & numberop2));
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (numberop1 & numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_BAND);
                     base = ci.u.l.base;
@@ -350,7 +348,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tointeger(op2);
 
                 if (numberop1 !== false && numberop2) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (numberop1 | numberop2));
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (numberop1 | numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_BOR);
                     base = ci.u.l.base;
@@ -364,7 +362,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tointeger(op2);
 
                 if (numberop1 !== false && numberop2) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (numberop1 ^ numberop2));
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (numberop1 ^ numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_BXOR);
                     base = ci.u.l.base;
@@ -378,7 +376,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tointeger(op2);
 
                 if (numberop1 !== false && numberop2) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (numberop1 << numberop2)); // TODO: luaV_shiftl ?
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (numberop1 << numberop2)); // TODO: luaV_shiftl ?
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_SHL);
                     base = ci.u.l.base;
@@ -392,7 +390,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tointeger(op2);
 
                 if (numberop1 !== false && numberop2) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, (numberop1 >> numberop2));
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (numberop1 >> numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_SHR);
                     base = ci.u.l.base;
@@ -404,9 +402,9 @@ const luaV_execute = function(L) {
                 let numberop = tonumber(op);
 
                 if (op.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, -op.value);
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, -op.value);
                 } else if (numberop !== false) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMFLT, -numberop);
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, -numberop);
                 } else {
                     ltm.luaT_trybinTM(L, op, op, ra, ltm.TMS.TM_UNM);
                     base = ci.u.l.base;
@@ -418,7 +416,7 @@ const luaV_execute = function(L) {
                 let numberop = tonumber(op);
 
                 if (op.ttisinteger()) {
-                    L.stack[ra] = new TValue(CT.LUA_TNUMINT, ~op.value);
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, ~op.value);
                 } else {
                     ltm.luaT_trybinTM(L, op, op, ra, ltm.TMS.TM_BNOT);
                     base = ci.u.l.base;
@@ -427,7 +425,7 @@ const luaV_execute = function(L) {
             }
             case OCi.OP_NOT: {
                 let op = L.stack[RB(L, base, i)];
-                L.stack[ra] = new TValue(CT.LUA_TBOOLEAN, op.l_isfalse());
+                L.stack[ra] = new lobject.TValue(CT.LUA_TBOOLEAN, op.l_isfalse());
                 break;
             }
             case OCi.OP_LEN: {
@@ -565,7 +563,7 @@ const luaV_execute = function(L) {
                     if (0 < step ? idx <= limit : limit <= idx) {
                         ci.pcOff += i.sBx;
                         L.stack[ra].value = idx;
-                        L.stack[ra + 3] = new TValue(CT.LUA_TNUMINT, idx); // TODO: if tvalue already there, just update it
+                        L.stack[ra + 3] = new lobject.TValue(CT.LUA_TNUMINT, idx); // TODO: if tvalue already there, just update it
                     }
                 } else { /* floating loop */
                     let step = L.stack[ra + 2].value;
@@ -576,7 +574,7 @@ const luaV_execute = function(L) {
                     if (0 < step ? idx <= limit : limit <= idx) {
                         ci.pcOff += i.sBx;
                         L.stack[ra].value = idx;
-                        L.stack[ra + 3] = new TValue(CT.LUA_TNUMFLT, idx); // TODO: if tvalue already there, just update it
+                        L.stack[ra + 3] = new lobject.TValue(CT.LUA_TNUMFLT, idx); // TODO: if tvalue already there, just update it
                     }
                 }
                 break;
@@ -665,10 +663,10 @@ const luaV_execute = function(L) {
                 let p = cl.p.p[i.Bx];
                 let nup = p.upvalues.length;
                 let uv = p.upvalues;
-                let ncl = new LClosure(L, nup);
+                let ncl = new lobject.LClosure(L, nup);
                 ncl.p = p;
 
-                L.stack[ra] = new TValue(CT.LUA_TLCL, ncl);
+                L.stack[ra] = new lobject.TValue(CT.LUA_TLCL, ncl);
 
                 for (let i = 0; i < nup; i++) {
                     if (uv[i].instack)
@@ -699,7 +697,7 @@ const luaV_execute = function(L) {
                     L.stack[ra + j] = L.stack[base - n + j];
 
                 for (; j < b; j++) /* complete required results with nil */
-                    L.stack[ra + j] = new TValue(CT.LUA_TNIL, null);
+                    L.stack[ra + j] = new lobject.TValue(CT.LUA_TNIL, null);
                 break;
             }
             case OCi.OP_EXTRAARG: {
@@ -954,8 +952,8 @@ const l_strcmp = function(ls, rs) {
             ll -= len;
             r = r.slice(len);
             lr -= len;
-            jl = new TValue(null, l).jsstring();
-            jr = new TValue(null, r).jsstring();
+            jl = new lobject.TValue(null, l).jsstring();
+            jr = new lobject.TValue(null, r).jsstring();
         }
     }
 
@@ -973,12 +971,12 @@ const luaV_objlen = function(L, ra, rb) {
         case CT.LUA_TTABLE: {
             tm = ltm.luaT_gettmbyobj(L, rb, ltm.TMS.TM_LEN);
             if (!tm.ttisnil()) break;
-            L.stack[ra] = new TValue(CT.LUA_TNUMINT, ltable.luaH_getn(rb.value));
+            L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, ltable.luaH_getn(rb.value));
             return;
         }
         case CT.LUA_TSHRSTR:
         case CT.LUA_TLNGSTR:
-            L.stack[ra] = new TValue(CT.LUA_TNUMINT, rb.value.length);
+            L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, rb.value.length);
             return;
         default: {
             tm = ltm.luaT_gettmbyobj(L, rb, ltm.TMS.TM_LEN);
@@ -1054,7 +1052,7 @@ const gettable = function(L, table, key, ra, recur) {
         let element = ltable.luaH_get(table.value, key);
 
         if (!element.ttisnil()) {
-            L.stack[ra] = new TValue(element.type, element.value);
+            L.stack[ra] = new lobject.TValue(element.type, element.value);
         } else {
             luaV_finishget(L, table, key, ra, element, recur);
         }
@@ -1074,7 +1072,7 @@ const luaV_finishget = function(L, t, key, val, slot, recur) {
         assert(slot.ttisnil());
         tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_INDEX); // TODO: fasttm
         if (tm.ttisnil()) {
-            L.stack[val] = new TValue(CT.LUA_TNIL, null);
+            L.stack[val] = new lobject.TValue(CT.LUA_TNIL, null);
             return;
         }
     }
