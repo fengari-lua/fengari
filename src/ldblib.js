@@ -145,10 +145,11 @@ const db_getinfo = function(L) {
     }
     if (options.indexOf('l'.charCodeAt(0)) > -1)
         settabsi(L, lua.to_luastring("currentline", true), ar.currentline);
-    if (options.indexOf('u'.charCodeAt(0)) > -1)
+    if (options.indexOf('u'.charCodeAt(0)) > -1) {
         settabsi(L, lua.to_luastring("nups", true), ar.nups);
         settabsi(L, lua.to_luastring("nparams", true), ar.nparams);
         settabsb(L, lua.to_luastring("isvararg", true), ar.isvararg);
+    }
     if (options.indexOf('n'.charCodeAt(0)) > - 1) {
         settabss(L, lua.to_luastring("name", true), ar.name ? ar.name : null);
         settabss(L, lua.to_luastring("namewhat", true), ar.namewhat ? ar.namewhat : null);
