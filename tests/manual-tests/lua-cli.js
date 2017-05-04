@@ -3,7 +3,6 @@
 
 const lua          = require('../../src/lua.js');
 const lauxlib      = require('../../src/lauxlib.js');
-const fs           = require('fs');
 const readlineSync = require('readline-sync');
 
 const stdin = lua.to_luastring("=stdin");
