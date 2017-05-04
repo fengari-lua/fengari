@@ -86,7 +86,7 @@ const upvalname = function(p, uv) {
     return s;
 };
 
-const findvararg = function(ci, n, pos) {
+const findvararg = function(ci, n) {
     let nparams = ci.func.value.p.numparams;
     if (n >= ci.u.l.base - ci.funcOff - nparams)
         return null;  /* no such vararg */
@@ -509,7 +509,7 @@ const isinstack = function(L, ci, o) {
 ** with instructions OP_GETTABUP/OP_SETTABUP, which operate directly on
 ** upvalues.)
 */
-const getupvalname = function(L, ci, o, name) {
+const getupvalname = function(L, ci, o) {
     let c = ci.func;
     for (let i = 0; i < c.nupvalues; i++) {
         if (c.upvals[i].val(L) === o) {
