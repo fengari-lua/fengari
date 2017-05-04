@@ -297,10 +297,14 @@ const luaD_rawrunprotected = function(L, f, ud) {
     try {
         f(L, ud);
     } catch (e) {
-        if (lj.status === 0) {
+        if (lj.status === TS.LUA_OK) {
+            /* error was not thrown via luaD_throw, i.e. it is a JS error */
             lj.status = -1;
-            /* error was not thrown via luaD_throw; push error object as light user data */
-            lapi.lua_pushlightuserdata(L, e);
+            /* run error handler (if possible) with error object as light userdata */
+            try {
+                lapi.lua_pushlightuserdata(L, e);
+                ldebug.luaG_errormsg(L);
+            } catch (e) {}
         }
     }
 
