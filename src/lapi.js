@@ -554,7 +554,7 @@ const lua_getmetatable = function(L, objindex) {
             mt = obj.value.metatable;
             break;
         default:
-            mt = L.l_G.mt[obj.ttnov];
+            mt = L.l_G.mt[obj.ttnov()];
             break;
     }
 
