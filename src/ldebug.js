@@ -144,17 +144,17 @@ const lua_getlocal = function(L, ar, n) {
 };
 
 const lua_setlocal = function(L, ar, n) {
-  swapextra(L);
-  let local = findlocal(L, ar.i_ci, n);
-  let name = local.name;
-  let pos = local.pos;
-  if (name) {
-      L.stack[pos].type = L.stack[L.top - 1].type;
-      L.stack[pos].value = L.stack[L.top - 1].value;
-      L.top--;  /* pop value */
-  }
-  swapextra(L);
-  return name;
+    swapextra(L);
+    let local = findlocal(L, ar.i_ci, n);
+    let name = local.name;
+    let pos = local.pos;
+    if (name) {
+        L.stack[pos].type = L.stack[L.top - 1].type;
+        L.stack[pos].value = L.stack[L.top - 1].value;
+        L.top--;  /* pop value */
+    }
+    swapextra(L);
+    return name;
 };
 
 const funcinfo = function(ar, cl) {
