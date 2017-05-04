@@ -205,9 +205,9 @@ const lua_pushnumber = function(L, n) {
 };
 
 const lua_pushinteger = function(L, n) {
-    assert(typeof n === "number");
+    assert(typeof n === "number" && (n|0) === n);
 
-    L.stack[L.top++] = new TValue(CT.LUA_TNUMINT, n|0);
+    L.stack[L.top++] = new TValue(CT.LUA_TNUMINT, n);
 
     assert(L.top <= L.ci.top, "stack overflow");
 };
@@ -374,7 +374,7 @@ const lua_setfield = function(L, idx, k) {
 };
 
 const lua_seti = function(L, idx, n) {
-    assert(typeof n === "number");
+    assert(typeof n === "number" && (n|0) === n);
     assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     let t = index2addr(L, idx);
     L.stack[L.top++] = new TValue(CT.LUA_TNUMINT, n);
@@ -587,6 +587,7 @@ const lua_getfield = function(L, idx, k) {
 };
 
 const lua_geti = function(L, idx, n) {
+    assert(typeof n === "number" && (n|0) === n);
     let t = index2addr(L, idx);
     L.stack[L.top++] = new TValue(CT.LUA_TNUMINT, n);
     assert(L.top <= L.ci.top, "stack overflow");

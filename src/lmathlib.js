@@ -39,7 +39,7 @@ const math_random = function(L) {
             lua.to_luastring("interval too large", true));
 
     r *= (up - low) + 1;
-    lua.lua_pushinteger(L, r + low);
+    lua.lua_pushinteger(L, Math.floor(r) + low);
     return 1;
 };
 
