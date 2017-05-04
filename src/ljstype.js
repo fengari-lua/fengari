@@ -8,6 +8,10 @@ const lisxdigit = function(c) {
     return /^[0-9a-fA-F]$/.test(String.fromCharCode(c));
 };
 
+const lisprint = function(c) {
+    return /^[\x20-\x7E]$/.test(String.fromCharCode(c));
+};
+
 const lisspace = function(c) {
     return /^\s$/.test(String.fromCharCode(c));
 };
@@ -23,5 +27,6 @@ const lislalnum = function(c) {
 module.exports.lisdigit   = lisdigit;
 module.exports.lislalnum  = lislalnum;
 module.exports.lislalpha  = lislalpha;
+module.exports.lisprint   = lisprint;
 module.exports.lisspace   = lisspace;
 module.exports.lisxdigit  = lisxdigit;
