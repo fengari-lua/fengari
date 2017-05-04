@@ -3,9 +3,6 @@
 const lua      = require('./lua.js');
 const lauxlib  = require('./lauxlib.js');
 
-const fs       = require('fs');
-
-
 const LUA_IGMARK    = ["-".charCodeAt(0)];
 
 const CLIBS         = lua.to_luastring("__CLIBS__", true);
@@ -78,19 +75,34 @@ const noenv = function(L) {
     return b;
 };
 
-const readable = function(filename) {
-    let fd = false;
-
-    try {
-        fd = fs.openSync(lua.to_jsstring(filename), 'r');
-    } catch (e) {
-        return false;
-    }
-
-    fs.closeSync(fd);
-
-    return true;
+let readable = function(filename) {
+    return false;
 };
+// Only with Node
+if (typeof require === "function") {
+
+    let fs = false;
+    try {
+        fs = require('fs');
+    } catch (e) {}
+
+    if (fs) {
+        readable = function(filename) {
+            let fd = false;
+
+            try {
+                fd = fs.openSync(lua.to_jsstring(filename), 'r');
+            } catch (e) {
+                return false;
+            }
+
+            fs.closeSync(fd);
+
+            return true;
+        };
+    }
+}
+
 
 /* error codes for 'lookforfunc' */
 const ERRLIB  = 1;

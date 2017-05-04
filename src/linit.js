@@ -15,6 +15,7 @@ const loadlib  = require('./loadlib.js');
 const lualib   = require('./lualib.js');
 
 const loadedlibs = {
+    [lualib.LUA_LOADLIBNAME]: loadlib.luaopen_package,
     [lualib.LUA_COLIBNAME]:   lcorolib.luaopen_coroutine,
     [lualib.LUA_DBLIBNAME]:   ldblib.luaopen_debug,
     [lualib.LUA_MATHLIBNAME]: lmathlib.luaopen_math,
@@ -25,19 +26,6 @@ const loadedlibs = {
     [lualib.LUA_UTF8LIBNAME]: lutf8lib.luaopen_utf8,
     "_G":                     lbaselib.luaopen_base
 };
-
-// Only with Node
-if (typeof require === "function") {
-
-    let fs = false;
-    try {
-        fs = require('fs');
-    } catch (e) {}
-
-    if (fs) {
-        loadedlibs[lualib.LUA_LOADLIBNAME] = loadlib.luaopen_package;
-    }
-}
 
 const luaL_openlibs = function(L) {
     /* "require" functions from 'loadedlibs' and set results to global table */
