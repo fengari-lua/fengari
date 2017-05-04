@@ -173,7 +173,7 @@ const setpath = function(L, fieldname, envname, dft) {
                 .concat(AUXMARK)
                 .concat(lua.to_luastring(lua.LUA_PATH_SEP, true))
         );
-        lauxlib.luaL_gsub(L, path, AUXMARK, dft);
+        lauxlib.luaL_gsub(L, path, AUXMARK, lua.to_luastring(dft));
         lua.lua_remove(L, -2); /* remove result from 1st 'gsub' */
     }
     lua.lua_setfield(L, -3, fieldname);  /* package[fieldname] = path value */
@@ -225,7 +225,7 @@ const searchpath = function(L, name, path, sep, dirsep) {
         lua.lua_remove(L, -1);  /* remove file name */
         msg.push(...lua.to_luastring(`\n\tno file '${lua.to_jsstring(filename)}'`));
     }
-    lua.lua_pushstring(msg);  /* create error message */
+    lua.lua_pushstring(L, msg);  /* create error message */
     return null;  /* not found */
 };
 
@@ -335,8 +335,8 @@ const findloader = function(L, name) {
     for (let i = 1; ; i++) {
         if (lua.lua_rawgeti(L, 3, i) === lua.LUA_TNIL) {  /* no more searchers? */
             lua.lua_pop(L, 1);  /* remove nil */
-            lua.lua_pushstring(msg);  /* create error message */
-            lauxlib.luaL_error(L, `module '${lua.to_jsstring(name)}' not found:${lua.lua_tojsstring(L, -1)}`);
+            lua.lua_pushstring(L, msg);  /* create error message */
+            lauxlib.luaL_error(L, lua.to_luastring(`module '${lua.to_jsstring(name)}' not found:${lua.lua_tojsstring(L, -1)}`));
         }
         lua.lua_pushstring(L, name);
         lua.lua_call(L, 1, 2);  /* call it */
