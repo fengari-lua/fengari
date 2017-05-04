@@ -72,7 +72,7 @@ const lsys_sym = function(L, lib, sym) {
 ** return registry.LUA_NOENV as a boolean
 */
 const noenv = function(L) {
-    lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, "LUA_NOENV");
+    lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, lua.to_luastring("LUA_NOENV"));
     let b = lua.lua_toboolean(L, -1);
     lua.lua_pop(L, 1);  /* remove value */
     return b;
