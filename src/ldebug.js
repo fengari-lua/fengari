@@ -576,8 +576,9 @@ const luaG_addinfo = function(L, msg, src, line) {
     return L.stack[L.top - 1];
 };
 
-const luaG_runerror = function(L, msg) {
+const luaG_runerror = function(L, fmt, ...argp) {
     let ci = L.ci;
+    let msg = lobject.luaO_pushvfstring(L, fmt, argp);
     if (ci.callstatus & lstate.CIST_LUA)  /* if Lua function, add source:line information */
         luaG_addinfo(L, msg, ci.func.value.p.source, currentline(ci));
     luaG_errormsg(L);

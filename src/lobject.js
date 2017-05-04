@@ -5,7 +5,9 @@ const assert = require('assert');
 
 const defs    = require('./defs.js');
 const ljstype = require('./ljstype.js');
+const ldebug  = require('./ldebug.js');
 const luaconf = require('./luaconf.js');
+const lvm     = require('./lvm.js');
 const llimit  = require('./llimit.js');
 const CT      = defs.constant_types;
 const char    = defs.char;
@@ -415,6 +417,61 @@ const luaO_utf8esc = function(x) {
     };
 };
 
+const pushstr = function(L, str) {
+    L.stack[L.top++] = L.l_G.intern(str);
+};
+
+const luaO_pushvfstring = function(L, fmt, argp) {
+    let n = 0;
+    let i = 0;
+    let a = 0;
+    let e;
+    while (1) {
+        e = fmt.indexOf(char['%'], i);
+        if (e == -1) break;
+        pushstr(L, fmt.slice(i, e));
+        switch(fmt[e+1]) {
+            case char['s']:
+                let s = argp[a++];
+                if (s === null) s = defs.to_luastring("(null)", true)
+                pushstr(L, s);
+                break;
+            case char['c']:
+                let buff = argp[a++];
+                if (ljstype.lisprint(buff))
+                    pushstr(L, [buff]);
+                else
+                    luaO_pushfstring(L, defs.to_luastring("<\\%d>", true), buff);
+                break;
+            case char['d']:
+            case char['I']:
+            case char['f']:
+                pushstr(L, defs.to_luastring(''+argp[a++]));
+                break;
+            // case char['p']:
+            case char['U']:
+                pushstr(L, defs.to_luastring(String.fromCodePoint(argp[a++])));
+                break;
+            case char['%']:
+                pushstr(L, char['%']);
+                break;
+            default: {
+                ldebug.luaG_runerror(L, defs.to_luastring("invalid option '%%%c' to 'lua_pushfstring'"), fmt[e + 1]);
+            }
+        }
+        n += 2;
+        i = e + 2;
+    }
+    pushstr(L, fmt.slice(i));
+    if (n > 0) lvm.luaV_concat(L, n+1);
+    return L.stack[L.top-1].value;
+};
+
+const luaO_pushfstring = function(L, fmt, ...argp) {
+    return luaO_pushvfstring(L, fmt, argp);
+};
+
+
 /*
 ** converts an integer to a "floating point byte", represented as
 ** (eeeeexxx), where the real value is (1xxx) * 2^(eeeee - 1) if
@@ -465,16 +522,18 @@ const numarith = function(L, op, v1, v2) {
     }
 };
 
-module.exports.CClosure       = CClosure;
-module.exports.LClosure       = LClosure;
-module.exports.LocVar         = LocVar;
-module.exports.TValue         = TValue;
-module.exports.UTF8BUFFSZ     = UTF8BUFFSZ;
-module.exports.intarith       = intarith;
-module.exports.luaO_chunkid   = luaO_chunkid;
-module.exports.luaO_hexavalue = luaO_hexavalue;
-module.exports.luaO_int2fb    = luaO_int2fb;
-module.exports.luaO_str2num   = luaO_str2num;
-module.exports.luaO_utf8desc  = luaO_utf8desc;
-module.exports.luaO_utf8esc   = luaO_utf8esc;
-module.exports.numarith       = numarith;
+module.exports.CClosure          = CClosure;
+module.exports.LClosure          = LClosure;
+module.exports.LocVar            = LocVar;
+module.exports.TValue            = TValue;
+module.exports.UTF8BUFFSZ        = UTF8BUFFSZ;
+module.exports.intarith          = intarith;
+module.exports.luaO_chunkid      = luaO_chunkid;
+module.exports.luaO_hexavalue    = luaO_hexavalue;
+module.exports.luaO_int2fb       = luaO_int2fb;
+module.exports.luaO_pushfstring  = luaO_pushfstring;
+module.exports.luaO_pushvfstring = luaO_pushvfstring;
+module.exports.luaO_str2num      = luaO_str2num;
+module.exports.luaO_utf8desc     = luaO_utf8desc;
+module.exports.luaO_utf8esc      = luaO_utf8esc;
+module.exports.numarith          = numarith;

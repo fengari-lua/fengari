@@ -51,8 +51,6 @@
     - [x] ...
     - [ ] `lua_arith`
     - [ ] `lua_islightuserdata`
-    - [ ] `lua_pushfstring`
-    - [ ] `lua_pushvfstring`
     - [ ] `lua_register`
     - [ ] `lua_setallocf`
     - [ ] `lua_tocfunction`

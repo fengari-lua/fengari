@@ -239,6 +239,16 @@ const lua_pushstring = function (L, s) {
     return s;
 };
 
+const lua_pushvfstring = function (L, fmt, argp) {
+    assert(Array.isArray(fmt));
+    return lobject.luaO_pushvfstring(L, fmt, argp);
+};
+
+const lua_pushfstring = function (L, fmt, ...argp) {
+    assert(Array.isArray(fmt));
+    return lobject.luaO_pushvfstring(L, fmt, argp);
+};
+
 const lua_pushliteral = function (L, s) {
     assert(typeof s === "string" || s === undefined || s === null, "lua_pushliteral expects a JS string");
 
@@ -1065,6 +1075,8 @@ module.exports.lua_pushlstring       = lua_pushlstring;
 module.exports.lua_pushnil           = lua_pushnil;
 module.exports.lua_pushnumber        = lua_pushnumber;
 module.exports.lua_pushstring        = lua_pushstring;
+module.exports.lua_pushfstring       = lua_pushfstring;
+module.exports.lua_pushvfstring      = lua_pushvfstring;
 module.exports.lua_pushthread        = lua_pushthread;
 module.exports.lua_pushvalue         = lua_pushvalue;
 module.exports.lua_rawequal          = lua_rawequal;
