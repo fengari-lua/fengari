@@ -17,8 +17,25 @@ const report = function(L, status) {
     return status;
 };
 
+const msghandler = function(L) {
+    let msg = lua.lua_tostring(L, 1);
+    if (msg === null) {  /* is error object not a string? */
+        if (lauxlib.luaL_callmeta(L, 1, "__tostring") &&  /* does it have a metamethod */
+          lua.lua_type(L, -1) == lua.LUA_TSTRING)  /* that produces a string? */
+            return 1;  /* that is the message */
+        else
+            msg = lua.lua_pushstring(L, lua.to_luastring(`(error object is a ${lua.to_jsstring(lauxlib.luaL_typename(L, 1))} value)`));
+    }
+    lauxlib.luaL_traceback(L, L, msg, 1);  /* append a standard traceback */
+    return 1;  /* return the traceback */
+};
+
 const docall = function(L, narg, nres) {
-    let status = lua.lua_pcall(L, narg, nres, 0);
+    let base = lua.lua_gettop(L) - narg;
+    lua.lua_pushcfunction(L, msghandler);
+    lua.lua_insert(L, base);
+    let status = lua.lua_pcall(L, narg, nres, base);
+    lua.lua_remove(L, base);
     return status;
 };
 
