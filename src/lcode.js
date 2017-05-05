@@ -501,7 +501,8 @@ const addk = function(fs, key, v) {
 ** Add a string to list of constants and return its index.
 */
 const luaK_stringK = function(fs, s) {
-    return addk(fs, s, s);  /* use string itself as key */
+    let o = new TValue(CT.LUA_TLNGSTR, s);
+    return addk(fs, o, o);  /* use string itself as key */
 };
 
 

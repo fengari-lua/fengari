@@ -78,7 +78,6 @@ const lua_getstack = function(L, level, ar) {
     return status;
 };
 
-// TODO: returns TValue or String array ?
 const upvalname = function(p, uv) {
     assert(uv < p.upvalues.length);
     let s = p.upvalues[uv].name;
@@ -396,7 +395,6 @@ const getobjname = function(p, lastpc, reg) {
                 let k = i.C;  /* key index */
                 let t = i.B;  /* table index */
                 let vn = op === 'OP_GETTABLE' ? lfunc.luaF_getlocalname(p, t + 1, pc) : upvalname(p, t);
-                vn = vn ? vn.jsstring() : null;
                 r.name = kname(p, pc, k).name;
                 r.funcname = vn && vn === "_ENV" ? defs.to_luastring("global", true) : defs.to_luastring("field", true);
                 return r;
@@ -536,7 +534,7 @@ const varinfo = function(L, o) {
             kind = getobjname(ci.func.value.p, ci.pcOff, stkid - ci.u.l.base);
     }
 
-    return defs.to_luastring(kind ? ` (${defs.to_jsstring(kind.funcname)} '${defs.to_jsstring(kind.name.value ? kind.name.value : kind.name)}')` : ``);
+    return kind ? lobject.luaO_pushfstring(L, defs.to_luastring(" (%s '%s')", true), kind.funcname, kind.name) : defs.to_luastring("", true);
 };
 
 const luaG_typeerror = function(L, o, op) {

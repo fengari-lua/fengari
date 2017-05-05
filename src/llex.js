@@ -3,14 +3,11 @@
 const assert   = require('assert');
 
 const defs     = require('./defs.js');
-const lapi     = require('./lapi.js');
 const ldebug   = require('./ldebug.js');
 const ldo      = require('./ldo.js');
 const ljstype  = require('./ljstype');
 const lobject  = require('./lobject');
 const llimit   = require('./llimit.js');
-const TValue   = lobject.TValue;
-const CT       = defs.constant_types;
 const TS       = defs.thread_status;
 const char     = defs.char;
 
@@ -162,8 +159,8 @@ const save = function(ls, c) {
 };
 
 const luaX_token2str = function(ls, token) {
-    if (typeof token === "string" || token < FIRST_RESERVED) {  /* single-byte symbols? */
-        return defs.to_luastring(`'${typeof token === "string" ? token : defs.to_jsstring([token])}'`);
+    if (token < FIRST_RESERVED) {  /* single-byte symbols? */
+        return lobject.luaO_pushfstring(ls.L, defs.to_luastring("'%c'", true), token);
     } else {
         let s = luaX_tokens[token - FIRST_RESERVED];
         if (token < R.TK_EOS)  /* fixed format (symbols and reserved words)? */
@@ -224,7 +221,7 @@ const luaX_setinput = function(L, ls, z, source, firstchar) {
     ls.linenumber = 1;
     ls.lastline = 1;
     ls.source = source;
-    ls.envn = L.l_G.intern(defs.to_luastring("_ENV", true));
+    ls.envn = defs.to_luastring("_ENV", true);
 };
 
 const check_next1 = function(ls, c) {
@@ -296,7 +293,7 @@ const txtToken = function(ls, token) {
 const lexerror = function(ls, msg, token) {
     msg = ldebug.luaG_addinfo(ls.L, msg, ls.source, ls.linenumber);
     if (token)
-        lapi.lua_pushstring(ls.L, defs.to_luastring(`${msg instanceof TValue ? msg.jsstring() : msg} near ${defs.to_jsstring(txtToken(ls, token))}`));
+        lobject.luaO_pushfstring(ls.L, defs.to_luastring("%s near %s"), msg, txtToken(ls, token));
     ldo.luaD_throw(ls.L, TS.LUA_ERRSYNTAX);
 };
 
@@ -361,10 +358,7 @@ const read_long_string = function(ls, seminfo, sep) {
     }
 
     if (seminfo)
-        seminfo.ts = new TValue(
-            CT.LUA_TLNGSTR,
-            ls.buff.buffer.slice(2 + sep, 2 + sep - 2 * (2 + sep))
-        );
+        seminfo.ts = ls.buff.buffer.slice(2 + sep, 2 + sep - 2 * (2 + sep));
 };
 
 const esccheck = function(ls, c, msg) {
@@ -489,10 +483,7 @@ const read_string = function(ls, del, seminfo) {
     }
     save_and_next(ls);  /* skip delimiter */
 
-    seminfo.ts = new TValue(
-        CT.LUA_TLNGSTR,
-        ls.buff.buffer.slice(1, ls.buff.n-1)
-    );
+    seminfo.ts = ls.buff.buffer.slice(1, ls.buff.n-1);
 };
 
 const isreserved = function(w) {
@@ -604,9 +595,9 @@ const llex = function(ls, seminfo) {
                         save_and_next(ls);
                     } while (ljstype.lislalnum(ls.current));
 
-                    let ts = new TValue(CT.LUA_TLNGSTR, ls.buff.buffer);
+                    let ts = ls.buff.buffer;
                     seminfo.ts = ts;
-                    let kidx = luaX_tokens.slice(0, 22).indexOf(ts.jsstring());
+                    let kidx = luaX_tokens.slice(0, 22).indexOf(defs.to_jsstring(ts));
                     if (kidx >= 0)  /* reserved word? */
                         return kidx + FIRST_RESERVED;
                     else

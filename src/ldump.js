@@ -136,14 +136,14 @@ const DumpDebug = function(f, D) {
     n = D.strip ? 0 : f.locvars.length;
     DumpInt(n, D);
     for (let i = 0; i < n; i++) {
-        DumpString(f.locvars[i].varname.value, D);
+        DumpString(f.locvars[i].varname, D);
         DumpInt(f.locvars[i].startpc, D);
         DumpInt(f.locvars[i].endpc, D);
     }
     n = D.strip ? 0 : f.upvalues.length;
     DumpInt(n, D);
     for (let i = 0; i < n; i++)
-        DumpString(f.upvalues[i].name.value, D);
+        DumpString(f.upvalues[i].name, D);
 };
 
 const DumpFunction = function(f, psource, D) {

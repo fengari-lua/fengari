@@ -160,7 +160,7 @@ const semerror = function(ls, msg) {
 };
 
 const error_expected = function(ls, token) {
-    llex.luaX_syntaxerror(ls, defs.to_luastring(`${defs.to_jsstring(llex.luaX_token2str(ls, token))} expected`));
+    llex.luaX_syntaxerror(ls, lobject.luaO_pushfstring(ls.L, defs.to_luastring("%s expected", true), llex.luaX_token2str(ls, token)));
 };
 
 const errorlimit = function(fs, limit, what) {
@@ -204,8 +204,9 @@ const check_match = function(ls, what, who, where) {
         if (where === ls.linenumber)
             error_expected(ls, what);
         else
-            llex.luaX_syntaxerror(ls,
-                defs.to_luastring(`${defs.to_jsstring(llex.luaX_token2str(ls, what))} expected (to close ${defs.to_jsstring(llex.luaX_token2str(ls, who))} at line ${where}`));
+            llex.luaX_syntaxerror(ls, lobject.luaO_pushfstring(ls.L,
+                defs.to_luastring("%s expected (to close %s at line %d)"),
+                    llex.luaX_token2str(ls, what), llex.luaX_token2str(ls, who), where));
     }
 };
 
@@ -249,7 +250,7 @@ const new_localvar = function(ls, name) {
 };
 
 const new_localvarliteral = function(ls, name) {
-    new_localvar(ls, new TValue(defs.CT.LUA_TLNGSTR, name));
+    new_localvar(ls, defs.to_luastring(name, true));
 };
 
 const getlocvar = function(fs, i) {
@@ -274,7 +275,7 @@ const removevars = function(fs, tolevel) {
 const searchupvalue = function(fs, name) {
     let up = fs.f.upvalues;
     for (let i = 0; i < fs.nups; i++) {
-        if (up[i].name.value.join() === name.value.join())
+        if (up[i].name.join() === name.join())
             return i;
     }
     return -1;  /* not found */
@@ -292,7 +293,7 @@ const newupvalue = function(fs, name, v) {
 
 const searchvar = function(fs, n) {
     for (let i = fs.nactvar - 1; i >= 0; i--) {
-        if (n.value.join() === getlocvar(fs, i).varname.value.join())
+        if (n.join() === getlocvar(fs, i).varname.join())
             return i;
     }
 
@@ -384,10 +385,12 @@ const closegoto = function(ls, g, label) {
     let fs = ls.fs;
     let gl = ls.dyd.gt;
     let gt = gl.arr[g];
-    assert(gt.name.value.join() === label.name.value.join());
+    assert(gt.name.join() === label.name.join());
     if (gt.nactvar < label.nactvar) {
         let vname = getlocvar(fs, gt.nactvar).varname;
-        semerror(ls, defs.to_luastring(`<goto ${gt.name.jsstring()}> at line ${gt.line} jumps into the scope of local '${vname.jsstring()}'`));
+        let msg = lobject.luaO_pushfstring(ls.L, defs.to_luastring("<goto %s> at line %d jumps into the scope of local '%s'"),
+            gt.name, gt.line, vname);
+        semerror(ls, msg);
     }
     lcode.luaK_patchlist(fs, gt.pc, label.pc);
     /* remove goto from pending list */
@@ -406,7 +409,7 @@ const findlabel = function(ls, g) {
     /* check labels in current block for a match */
     for (let i = bl.firstlabel; i < dyd.label.n; i++) {
         let lb = dyd.label.arr[i];
-        if (lb.name.value.join() === gt.name.value.join()) {  /* correct label? */
+        if (lb.name.join() === gt.name.join()) {  /* correct label? */
             if (gt.nactvar > lb.nactvar && (bl.upval || dyd.label.n > bl.firstlabel))
                 lcode.luaK_patchclose(ls.fs, gt.pc, lb.nactvar);
             closegoto(ls, g, lb);  /* close it */
@@ -435,7 +438,7 @@ const findgotos = function(ls, lb) {
     let gl = ls.dyd.gt;
     let i = ls.fs.bl.firstgoto;
     while (i < gl.n) {
-        if (gl.arr[i].name.value.join() === lb.name.value.join())
+        if (gl.arr[i].name.join() === lb.name.join())
             closegoto(ls, i, lb);
         else
             i++;
@@ -480,7 +483,7 @@ const enterblock = function(fs, bl, isloop) {
 ** create a label named 'break' to resolve break statements
 */
 const breaklabel = function(ls) {
-    let n = new TValue(defs.CT.LUA_TLNGSTR, defs.to_luastring("break", true));
+    let n = defs.to_luastring("break", true);
     let l = newlabelentry(ls, ls.dyd.label, n, 0, ls.fs.pc);
     findgotos(ls, ls.dyd.label.arr[l]);
 };
@@ -490,10 +493,11 @@ const breaklabel = function(ls) {
 ** message when label name is a reserved word (which can only be 'break')
 */
 const undefgoto = function(ls, gt) {
-    const msg = llex.isreserved(gt.name.value)
-                ? `<${gt.name.jsstring()}> at line ${gt.line} not inside a loop`
-                : `no visible label '${gt.name.jsstring()}' for <goto> at line ${gt.line}`;
-    semerror(ls, defs.to_luastring(msg));
+    let msg = llex.isreserved(gt.name)
+              ? "<%s> at line %d not inside a loop"
+              : "no visible label '%s' for <goto> at line %d";
+    msg = lobject.luaO_pushfstring(ls.L, defs.to_luastring(msg), gt.name, gt.line);
+    semerror(ls, msg);
 };
 
 /*
@@ -767,7 +771,7 @@ const body = function(ls, e, ismethod, line) {
     open_func(ls, new_fs, bl);
     checknext(ls, char['(']);
     if (ismethod) {
-        new_localvarliteral(ls, defs.to_luastring("self", true));  /* create 'self' parameter */
+        new_localvarliteral(ls, "self");  /* create 'self' parameter */
         adjustlocalvars(ls, 1);
     }
     parlist(ls);
@@ -1142,7 +1146,7 @@ const gotostat = function(ls, pc) {
         label = str_checkname(ls);
     else {
         llex.luaX_next(ls);  /* skip break */
-        label = new TValue(defs.CT.LUA_TLNGSTR, defs.to_luastring("break", true));
+        label = defs.to_luastring("break", true);
     }
     let g = newlabelentry(ls, ls.dyd.gt, label, line, pc);
     findlabel(ls, g);  /* close it if label already defined */
@@ -1151,7 +1155,7 @@ const gotostat = function(ls, pc) {
 /* check for repeated labels on the same block */
 const checkrepeated = function(fs, ll, label) {
     for (let i = fs.bl.firstlabel; i < ll.n; i++) {
-        if (label.value.join() === ll.arr[i].name.value.join()) {
+        if (label.join() === ll.arr[i].name.join()) {
             semerror(fs.ls, defs.to_luastring(`label '${label.jsstring()}' already defined on line ${ll.arr[i].line}`));
         }
     }
@@ -1253,9 +1257,9 @@ const fornum = function(ls, varname, line) {
     /* fornum -> NAME = exp1,exp1[,exp1] forbody */
     let fs = ls.fs;
     let base = fs.freereg;
-    new_localvarliteral(ls, defs.to_luastring("(for index)", true));
-    new_localvarliteral(ls, defs.to_luastring("(for limit)", true));
-    new_localvarliteral(ls, defs.to_luastring("(for step)", true));
+    new_localvarliteral(ls, "(for index)");
+    new_localvarliteral(ls, "(for limit)");
+    new_localvarliteral(ls, "(for step)");
     new_localvar(ls, varname);
     checknext(ls, char['=']);
     exp1(ls);  /* initial value */
@@ -1277,9 +1281,9 @@ const forlist = function(ls, indexname) {
     let nvars = 4;  /* gen, state, control, plus at least one declared var */
     let base = fs.freereg;
     /* create control variables */
-    new_localvarliteral(ls, defs.to_luastring("(for generator)", true));
-    new_localvarliteral(ls, defs.to_luastring("(for state)", true));
-    new_localvarliteral(ls, defs.to_luastring("(for control)", true));
+    new_localvarliteral(ls, "(for generator)");
+    new_localvarliteral(ls, "(for state)");
+    new_localvarliteral(ls, "(for control)");
     /* create declared variables */
     new_localvar(ls, indexname);
     while (testnext(ls, char[','])) {

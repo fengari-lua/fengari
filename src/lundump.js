@@ -204,7 +204,7 @@ class BytecodeParser {
         n = this.readInt();
         for (let i = 0; i < n; i++) {
             f.locvars[i] = {
-                varname: new lobject.TValue(defs.CT.LUA_TLNGSTR, defs.to_luastring(this.readString())),
+                varname: defs.to_luastring(this.readString()),
                 startpc: this.readInt(),
                 endpc:   this.readInt()
             };

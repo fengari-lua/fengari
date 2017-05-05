@@ -181,7 +181,7 @@ const db_getlocal = function(L) {
         let name = lua.lua_getlocal(L1, ar, nvar);
         if (name) {
             lua.lua_xmove(L1, L, 1);  /* move local value */
-            lua.lua_pushstring(L, name.value);  /* push name */
+            lua.lua_pushstring(L, name);  /* push name */
             lua.lua_rotate(L, -2, 1);  /* re-order */
             return 2;
         }
@@ -208,7 +208,7 @@ const db_setlocal = function(L) {
     let name = lua.lua_setlocal(L1, ar, nvar);
     if (name === null)
         lua.lua_pop(L1, 1);  /* pop value (if not popped by 'lua_setlocal') */
-    lua.lua_pushstring(L, name.value);
+    lua.lua_pushstring(L, name);
     return 1;
 };
 
