@@ -8,7 +8,7 @@ const CT      = defs.constant_types;
 
 class Proto {
 
-    constructor(L) {
+    constructor() {
         this.k = [];              // constants used by the function
         this.p = [];              // functions defined inside the function
         this.code = [];           // opcodes
@@ -54,10 +54,10 @@ const luaF_newLclosure = function(L, n) {
 
 const findupval = function(L, level) {
     let pp = L.openupval;
-
-    while(pp !== null && pp.v >= level) {
-        let p = pp;
-
+    let p = pp;
+    while (pp !== null && pp.v >= level) {
+        p = pp;
+        assert(p.isopen());
         if (p.v === level)
             return p;
 
@@ -66,11 +66,14 @@ const findupval = function(L, level) {
 
     let uv = new UpVal();
 
-    uv.open_next = pp;
+    if (p) {  /* The openupval list is not empty */
+        uv.open_next = p;  /* link it to list of open upvalues */
+    }
+
     L.openupval = uv;
 
     uv.L = L;
-    uv.v = level;
+    uv.v = level;  /* current value lives in the stack */
 
     return uv;
 };
