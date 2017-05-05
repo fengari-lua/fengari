@@ -16,7 +16,6 @@ const Proto    = lfunc.Proto;
 const R        = llex.RESERVED;
 const TValue   = lobject.TValue;
 const UnOpr    = lcode.UnOpr;
-const UpVal    = lfunc.UpVal;
 const char     = defs.char;
 
 const MAXVARS = 200;
@@ -284,10 +283,11 @@ const searchupvalue = function(fs, name) {
 const newupvalue = function(fs, name, v) {
     let f = fs.f;
     checklimit(fs, fs.nups + 1, lfunc.MAXUPVAL, defs.to_luastring("upvalues", true));
-    f.upvalues[fs.nups] = new UpVal(fs.ls.L);
-    f.upvalues[fs.nups].instack = v.k === expkind.VLOCAL;
-    f.upvalues[fs.nups].idx = v.u.info;
-    f.upvalues[fs.nups].name = name;
+    f.upvalues[fs.nups] = {
+        instack: v.k === expkind.VLOCAL,
+        idx: v.u.info,
+        name: name
+    };
     return fs.nups++;
 };
 
