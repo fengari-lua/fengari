@@ -567,11 +567,13 @@ const luaG_ordererror = function(L, p1, p2) {
 
 /* add src:line information to 'msg' */
 const luaG_addinfo = function(L, msg, src, line) {
-    let buff = ['?'.charCodeAt(0)];
+    let buff;
     if (src)
         buff = lobject.luaO_chunkid(src, luaconf.LUA_IDSIZE);
+    else
+        buff = ['?'.charCodeAt(0)];
 
-    return lobject.luaO_pushfstring(L, defs.to_luastring("%s:%d: %s", true), buff, line, msg)
+    return lobject.luaO_pushfstring(L, defs.to_luastring("%s:%d: %s", true), buff, line, msg);
 };
 
 const luaG_runerror = function(L, fmt, ...argp) {
