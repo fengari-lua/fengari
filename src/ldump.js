@@ -150,7 +150,7 @@ const DumpFunction = function(f, psource, D) {
     if (D.strip || f.source === psource)
         DumpString(null, D);  /* no debug info or same source as its parent */
     else
-        DumpString(f.source.value, D);
+        DumpString(f.source, D);
     DumpInt(f.linedefined, D);
     DumpInt(f.lastlinedefined, D);
     DumpByte(f.numparams, D);

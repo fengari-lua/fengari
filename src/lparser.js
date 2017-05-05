@@ -1550,7 +1550,7 @@ const luaY_parser = function(L, z, buff, dyd, name, firstchar) {
     lexstate.h = new TValue(defs.CT.LUA_TTABLE, ltable.luaH_new(L));  /* create table for scanner */
     L.stack[L.top++] = lexstate.h;
     funcstate.f = cl.p = new Proto(L);
-    funcstate.f.source = new TValue(defs.CT.LUA_TLNGSTR, name);
+    funcstate.f.source = name;
     lexstate.buff = buff;
     lexstate.dyd = dyd;
     dyd.actvar.n = dyd.gt.n = dyd.label.n = 0;

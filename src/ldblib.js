@@ -137,7 +137,7 @@ const db_getinfo = function(L) {
         lauxlib.luaL_argerror(L, arg + 2, lua.to_luastring("invalid option", true));
     lua.lua_newtable(L);  /* table to collect results */
     if (options.indexOf('S'.charCodeAt(0)) > -1) {
-        settabss(L, lua.to_luastring("source", true), ar.source.value);
+        settabss(L, lua.to_luastring("source", true), ar.source);
         settabss(L, lua.to_luastring("short_src", true), ar.short_src);
         settabss(L, lua.to_luastring("linedefined", true), lua.to_luastring(`${ar.linedefined}`));
         settabss(L, lua.to_luastring("lastlinedefined", true), lua.to_luastring(`${ar.lastlinedefined}`));
