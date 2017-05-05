@@ -392,8 +392,8 @@ test("[test-suite] calls: test for generic load", function (t) {
         assert(a() == "\0" and _G.x == 33)
         assert(debug.getinfo(a).source == "modname")
         -- cannot read text in binary mode
-        -- cannotload("attempt to load a text chunk", load(read1(x), "modname", "b", {}))
-        -- cannotload("attempt to load a text chunk", load(x, "modname", "b"))
+        cannotload("attempt to load a text chunk", load(read1(x), "modname", "b", {}))
+        cannotload("attempt to load a text chunk", load(x, "modname", "b"))
 
         a = assert(load(function () return nil end))
         a()  -- empty chunk

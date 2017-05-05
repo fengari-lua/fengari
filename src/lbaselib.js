@@ -297,7 +297,7 @@ const luaB_load = function(L) {
     let status;
     if (s !== null) {  /* loading a string? */
         let chunkname = lauxlib.luaL_optstring(L, 2, s);
-        status = lauxlib.luaL_loadbufferx(L, s, chunkname, mode);
+        status = lauxlib.luaL_loadbufferx(L, s, s.length, chunkname, mode);
     } else {  /* loading from a reader function */
         let chunkname = lauxlib.luaL_optstring(L, 2, lua.to_luastring("=(load)", true));
         lauxlib.luaL_checktype(L, 1, lua.LUA_TFUNCTION);
