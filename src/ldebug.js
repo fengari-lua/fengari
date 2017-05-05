@@ -134,10 +134,13 @@ const lua_getlocal = function(L, ar, n) {
             name = lfunc.luaF_getlocalname(L.stack[L.top - 1].value.p, n, 0);
     } else {  /* active function; get information through 'ar' */
         let local = findlocal(L, ar.i_ci, n);
-        name = local.name;
-        let pos = L.stack[local.pos];
-        if (name)
+        if (local) {
+            name = local.name;
+            let pos = L.stack[local.pos];
             L.stack[L.top++] = new TValue(pos.type, pos.value);
+        } else {
+            name = null;
+        }
     }
     swapextra(L);
     return name;
