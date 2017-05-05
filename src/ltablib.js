@@ -47,7 +47,8 @@ const aux_getn = function(L, n, w) {
 const addfield = function(L, b, i) {
     lua.lua_geti(L, 1, i);
     if (!lua.lua_isstring(L, -1))
-        lauxlib.luaL_error(L, lua.to_luastring(`invalid value (${lua.to_jsstring(lauxlib.luaL_typename(L, -1))}) at index ${i} in table for 'concat'`));
+        lauxlib.luaL_error(L, lua.to_luastring("invalid value (%s) at index %d in table for 'concat'"),
+            lauxlib.luaL_typename(L, -1), i);
 
     lauxlib.luaL_addvalue(b);
 };
@@ -206,14 +207,14 @@ const partition = function(L, lo, up) {
         /* next loop: repeat ++i while a[i] < P */
         while (lua.lua_geti(L, 1, ++i), sort_comp(L, -1, -2)) {
             if (i == up - 1)  /* a[i] < P  but a[up - 1] == P  ?? */
-                lauxlib.luaL_error(L, "invalid order function for sorting");
+                lauxlib.luaL_error(L, lua.to_luastring("invalid order function for sorting"));
             lua.lua_pop(L, 1);  /* remove a[i] */
         }
         /* after the loop, a[i] >= P and a[lo .. i - 1] < P */
         /* next loop: repeat --j while P < a[j] */
         while (lua.lua_geti(L, 1, --j), sort_comp(L, -3, -1)) {
             if (j < i)  /* j < i  but  a[j] > P ?? */
-                lauxlib.luaL_error(L, "invalid order function for sorting");
+                lauxlib.luaL_error(L, lua.to_luastring("invalid order function for sorting"));
             lua.lua_pop(L, 1);  /* remove a[j] */
         }
         /* after the loop, a[j] <= P and a[j + 1 .. up] >= P */

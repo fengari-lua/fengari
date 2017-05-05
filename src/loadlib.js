@@ -249,7 +249,7 @@ const findfile = function(L, name, pname, dirsep) {
     lua.lua_getfield(L, lua.lua_upvalueindex(1), pname);
     let path = lua.lua_tostring(L, -1);
     if (path === null)
-        lauxlib.luaL_error(L, `'package.${lua.to_jsstring(pname)}' must be a string`);
+        lauxlib.luaL_error(L, lua.to_luastring("'package.%s' must be a string"), pname);
     return searchpath(L, name, path, ['.'.charCodeAt(0)], dirsep);
 };
 
@@ -258,7 +258,8 @@ const checkload = function(L, stat, filename) {
         lua.lua_pushstring(L, filename);  /* will be 2nd argument to module */
         return 2;  /* return open function and file name */
     } else
-        return lauxlib.luaL_error(L, lua.to_luastring(`error loading module '${lua.lua_tojsstring(L, 1)}' from file '${lua.to_jsstring(filename)}':\n\t${lua.lua_tojsstring(L, 1)}`));
+        return lauxlib.luaL_error(L, lua.to_luastring("error loading module '%s' from file '%s':\n\t%s"),
+                lua.lua_tostring(L, 1), filename, lua.lua_tostring(L, 1));
 };
 
 const searcher_Lua = function(L) {
@@ -336,7 +337,7 @@ const findloader = function(L, name) {
         if (lua.lua_rawgeti(L, 3, i) === lua.LUA_TNIL) {  /* no more searchers? */
             lua.lua_pop(L, 1);  /* remove nil */
             lua.lua_pushstring(L, msg);  /* create error message */
-            lauxlib.luaL_error(L, lua.to_luastring(`module '${lua.to_jsstring(name)}' not found:${lua.lua_tojsstring(L, -1)}`));
+            lauxlib.luaL_error(L, lua.to_luastring("module '%s' not found:%s"), name, lua.lua_tostring(L, -1));
         }
         lua.lua_pushstring(L, name);
         lua.lua_call(L, 1, 2);  /* call it */

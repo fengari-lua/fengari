@@ -31,7 +31,7 @@ const f_tostring = function(L) {
 const tofile = function(L) {
     let p = tolstream(L);
     if (isclosed(p))
-        lauxlib.luaL_error(L, "attempt to use a closed file");
+        lauxlib.luaL_error(L, lua.to_luastring("attempt to use a closed file"));
     assert(p.f);
     return p.f;
 };
@@ -62,7 +62,7 @@ const getiofile = function(L, findex) {
     lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, findex);
     let p = lua.lua_touserdata(L, -1);
     if (isclosed(p))
-        lauxlib.luaL_error(L, lua.to_luastring(`standard ${lua.to_jsstring(findex.slice(IOPREF_LEN))} file is closed`));
+        lauxlib.luaL_error(L, lua.to_luastring("standard %s file is closed"), findex.slice(IOPREF_LEN));
     return p.f;
 };
 

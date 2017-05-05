@@ -142,20 +142,20 @@ const luaL_argerror = function(L, arg, extramsg) {
     let ar = new lua.lua_Debug();
 
     if (!lua.lua_getstack(L, 0, ar))  /* no stack frame? */
-        return luaL_error(L, lua.to_luastring(`bad argument #${arg} (${lua.to_jsstring(extramsg)})`));
+        return luaL_error(L, lua.to_luastring("bad argument #%d (%s)"), arg, extramsg);
 
     lua.lua_getinfo(L, 'n', ar);
 
     if (ar.namewhat === lua.to_luastring('method', true)) {
         arg--;  /* do not count 'self' */
         if (arg === 0)  /* error is in the self argument itself? */
-            return luaL_error(L, lua.to_luastring(`calling '${lua.to_jsstring(ar.name)}' on  bad self (${lua.to_jsstring(extramsg)})`));
+            return luaL_error(L, lua.to_luastring("calling '%s' on bad self (%s)"), ar.name, extramsg);
     }
 
     if (ar.name === null)
         ar.name = pushglobalfuncname(L, ar) ? lua.lua_tostring(L, -1) : ["?".charCodeAt(0)];
 
-    return luaL_error(L, lua.to_luastring(`bad argument #${arg} to '${lua.to_jsstring(ar.name)}' (${lua.to_jsstring(extramsg)})`));
+    return luaL_error(L, lua.to_luastring("bad argument #%d to '%s' (%s)"), arg, ar.name, extramsg);
 };
 
 const typeerror = function(L, arg, tname) {
@@ -167,7 +167,7 @@ const typeerror = function(L, arg, tname) {
     else
         typearg = luaL_typename(L, arg);
 
-    let msg = lua.lua_pushstring(L, lua.to_luastring(`${lua.to_jsstring(tname)} expected, got ${lua.to_jsstring(typearg)}`));
+    let msg = lua.lua_pushfstring(L, lua.to_luastring("%s expected, got %s"), tname, typearg);
     return luaL_argerror(L, arg, msg);
 };
 
@@ -176,7 +176,7 @@ const luaL_where = function(L, level) {
     if (lua.lua_getstack(L, level, ar)) {
         lua.lua_getinfo(L, lua.to_luastring("Sl", true), ar);
         if (ar.currentline > 0) {
-            lua.lua_pushstring(L, lua.to_luastring(`${lua.to_jsstring(ar.short_src)}:${ar.currentline}:`));
+            lua.lua_pushfstring(L, lua.to_luastring("%s:%d: "), ar.short_src, ar.currentline);
             return;
         }
     }
@@ -607,7 +607,7 @@ const luaL_setfuncs = function(L, l, nup) {
 const luaL_checkstack = function(L, space, msg) {
     if (!lua.lua_checkstack(L, space)) {
         if (msg)
-            luaL_error(L, lua.to_luastring(`stack overflow (${lua.to_jsstring(msg)})`));
+            luaL_error(L, lua.to_luastring("stack overflow (%s)"), msg);
         else
             luaL_error(L, lua.to_luastring('stack overflow', true));
     }

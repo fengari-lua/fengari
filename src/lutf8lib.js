@@ -117,7 +117,7 @@ const byteoffset = function(L) {
     let posi = n >= 0 ? 1 : s.length + 1;
     posi = u_posrelat(lauxlib.luaL_optinteger(L, 3, posi), s.length);
 
-    lauxlib.luaL_argcheck(L, 1 <= posi && --posi <= s.length, 3, lua.to_luastring("position ot ouf range", true));
+    lauxlib.luaL_argcheck(L, 1 <= posi && --posi <= s.length, 3, lua.to_luastring("position out of range", true));
 
     if (n === 0) {
         /* find beginning of current byte sequence */
