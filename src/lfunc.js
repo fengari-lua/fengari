@@ -2,7 +2,9 @@
 "use strict";
 const assert  = require('assert');
 
+const defs    = require('./defs.js');
 const lobject = require('./lobject.js');
+const CT      = defs.constant_types;
 
 class Proto {
 
@@ -28,7 +30,7 @@ class UpVal {
 
     constructor(L) {
         this.L = L; // Keep track of the thread it comes from
-        this.v = null; /* if null, upval is closed, value is in u.value */
+        this.v = null; /* if open: stack index. if closed: null (find value in this.u.value) */
         this.refcount = 0;
         this.u = {
             open: { /* (when open) */
@@ -44,10 +46,11 @@ class UpVal {
     }
 
     setval(L, ra) {
-        let o = L.stack[ra];
         if (this.v !== null) {
-            this.L.stack[this.v] = new lobject.TValue(o.type, o.value);
-        } else this.u.value = new lobject.TValue(o.type, o.value);
+            this.L.stack[this.v] = L.stack[ra];
+        } else {
+            this.u.value.setfrom(L.stack[ra]);
+        }
     }
 
     isopen() {
@@ -91,7 +94,8 @@ const luaF_close = function(L, level) {
         assert(uv.isopen());
         L.openupval = uv.u.open.next; /* remove from 'open' list */
         if (uv.refcount > 0) {
-            uv.u.value = L.stack[uv.v];
+            let from = L.stack[uv.v];
+            uv.u.value = new lobject.TValue(from.type, from.value);
             uv.v = null;
         }
     }
@@ -104,8 +108,8 @@ const luaF_initupvals = function(L, cl) {
     for (let i = 0; i < cl.nupvalues; i++) {
         let uv = new UpVal(L);
         uv.refcount = 1;
-        uv.u.value = null;
-        uv.v = uv.u.value;
+        uv.u.value = new lobject.TValue(CT.LUA_TNIL, null);
+        uv.v = null;
         cl.upvals[i] = uv;
     }
 };
