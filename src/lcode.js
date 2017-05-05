@@ -513,6 +513,7 @@ const luaK_stringK = function(fs, s) {
 ** are no "precision" problems.
 */
 const luaK_intK = function(fs, n) {
+    /* FIXME: shouldn't use string as key. need to use pointer */
     let k = new TValue(CT.LUA_TLNGSTR, defs.to_luastring(`${n}`));
     let o = new TValue(CT.LUA_TNUMINT, n);
     return addk(fs, k, o);

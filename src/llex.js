@@ -142,7 +142,7 @@ class LexState {
         this.L = null;
         this.z = new MBuffer();
         this.buff = new MBuffer();  /* buffer for tokens */
-        this.h = null;  /* to avoid collection/reuse strings */
+        this.h = null;  /* to reuse strings */
         this.dyd = null;  /* dynamic structures used by the parser */
         this.source = null;  /* current source name */
         this.envn = null;  /* environment variable name */

@@ -541,7 +541,6 @@ const lua_setupvalue = function(L, funcindex, n) {
         let val = aux.val;
 
         L.top--;
-        // TODO: what if it's not a pure TValue (closure, table)
         val.type = L.stack[L.top].type;
         val.value = L.stack[L.top].value;
 
