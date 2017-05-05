@@ -98,28 +98,26 @@ const RKC = function(L, base, k, i) {
 };
 
 const luaV_execute = function(L) {
-    let OCi = OC.OpCodesI;
+    const OCi = OC.OpCodesI;
     let ci = L.ci;
-    let opcode, k, base, i, ra;
-    var cl;
 
     ci.callstatus |= lstate.CIST_FRESH;
     newframe:
     for (;;) {
         assert(ci === L.ci);
-        cl = ci.func.value;
-        k = cl.p.k;
-        base = ci.l_base;
+        let cl = ci.func.value;
+        let k = cl.p.k;
+        let base = ci.l_base;
 
-        i = ci.l_savedpc[ci.pcOff++];
+        let i = ci.l_savedpc[ci.pcOff++];
 
         if (L.hookmask & (defs.LUA_MASKLINE | defs.LUA_MASKCOUNT)) {
             ldebug.luaG_traceexec(L);
             base = ci.l_base;
         }
 
-        ra = RA(L, base, i);
-        opcode = i.opcode;
+        let ra = RA(L, base, i);
+        let opcode = i.opcode;
 
         if (i.breakpoint) // TODO: remove, used until lapi
             return;
