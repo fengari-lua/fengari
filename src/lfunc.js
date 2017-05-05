@@ -29,6 +29,7 @@ class UpVal {
     constructor(L) {
         this.L = L; // Keep track of the thread it comes from
         this.v = null; /* if null, upval is closed, value is in u.value */
+        this.refcount = 0;
         this.u = {
             open: { /* (when open) */
                 next: null, /* linked list */
@@ -74,7 +75,6 @@ const findupval = function(L, level) {
     }
 
     let uv = new UpVal(L);
-    uv.refcount = 0;
     uv.u.open.next = pp;
     uv.u.open.touched = true;
 
