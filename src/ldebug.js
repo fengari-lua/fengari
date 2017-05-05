@@ -87,7 +87,7 @@ const upvalname = function(p, uv) {
 
 const findvararg = function(ci, n) {
     let nparams = ci.func.value.p.numparams;
-    if (n >= ci.u.l.base - ci.funcOff - nparams)
+    if (n >= ci.l_base - ci.funcOff - nparams)
         return null;  /* no such vararg */
     else {
         return {
@@ -104,7 +104,7 @@ const findlocal = function(L, ci, n) {
         if (n < 0)  /* access to vararg values? */
             return findvararg(ci, -n);
         else {
-            base = ci.u.l.base;
+            base = ci.l_base;
             name = lfunc.luaF_getlocalname(ci.func.value.p, n, ci.pcOff);
         }
     } else
@@ -497,7 +497,7 @@ const funcnamefromcode = function(L, ci) {
 };
 
 const isinstack = function(L, ci, o) {
-    for (let i = ci.u.l.base; i < ci.top; i++) {
+    for (let i = ci.l_base; i < ci.top; i++) {
         if (L.stack[i] === o)
             return i;
     }
@@ -531,7 +531,7 @@ const varinfo = function(L, o) {
         kind = getupvalname(L, ci, o);  /* check whether 'o' is an upvalue */
         let stkid = isinstack(L, ci, o);
         if (!kind && stkid)  /* no? try a register */
-            kind = getobjname(ci.func.value.p, ci.pcOff, stkid - ci.u.l.base);
+            kind = getobjname(ci.func.value.p, ci.pcOff, stkid - ci.l_base);
     }
 
     return kind ? lobject.luaO_pushfstring(L, defs.to_luastring(" (%s '%s')", true), kind.funcname, kind.name) : defs.to_luastring("", true);
@@ -633,7 +633,7 @@ const luaG_traceexec = function(L) {
     if (L.status === TS.LUA_YIELD) {  /* did hook yield? */
         if (counthook)
             L.hookcount = 1;  /* undo decrement to zero */
-        ci.u.l.savedpc--;  /* undo increment (resume will increment it again) */
+        ci.l_savedpc--;  /* undo increment (resume will increment it again) */
         ci.callstatus |= lstate.CIST_HOOKYIELD;  /* mark that it yielded */
         ci.func = L.top - 1;  /* protect stack below results */
         ldo.luaD_throw(L, TS.LUA_YIELD);

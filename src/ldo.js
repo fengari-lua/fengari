@@ -114,10 +114,10 @@ const luaD_precall = function(L, off, nresults) {
             ci.nresults = nresults;
             ci.func = func;
             ci.funcOff = off;
-            ci.u.l.base = base;
+            ci.l_base = base;
             ci.top = base + fsize;
             L.top = ci.top;
-            ci.u.l.savedpc = p.code;
+            ci.l_savedpc = p.code;
             ci.pcOff = 0;
             ci.callstatus = lstate.CIST_LUA;
 
@@ -323,19 +323,19 @@ const finishCcall = function(L, status) {
     let ci = L.ci;
 
     /* must have a continuation and must be able to call it */
-    assert(ci.u.c.k !== null && L.nny === 0);
+    assert(ci.c_k !== null && L.nny === 0);
     /* error status can only happen in a protected call */
     assert(ci.callstatus & lstate.CIST_YPCALL || status === TS.LUA_YIELD);
 
     if (ci.callstatus & TS.CIST_YPCALL) {  /* was inside a pcall? */
         ci.callstatus &= ~TS.CIST_YPCALL;  /* continuation is also inside it */
-        L.errfunc = ci.u.c.old_errfunc;  /* with the same error function */
+        L.errfunc = ci.c_old_errfunc;  /* with the same error function */
     }
 
     /* finish 'lua_callk'/'lua_pcall'; CIST_YPCALL and 'errfunc' already
        handled */
     if (ci.nresults === LUA_MULTRET && L.ci.top < L.top) L.ci.top = L.top;
-    let n = ci.u.c.k(L, status, ci.u.c.ctx);  /* call continuation function */
+    let n = ci.c_k(L, status, ci.c_ctx);  /* call continuation function */
     assert(n < (L.top - L.ci.funcOff), "not enough elements in the stack");
     luaD_poscall(L, ci, L.top - n, n);  /* finish 'luaD_precall' */
 };
@@ -390,7 +390,7 @@ const recover = function(L, status) {
     L.ci = ci;
     L.allowhook = ci.callstatus & lstate.CIST_OAH;  /* restore original 'allowhook' */
     L.nny = 0;  /* should be zero to be yieldable */
-    L.errfunc = ci.u.c.old_errfunc;
+    L.errfunc = ci.c_old_errfunc;
     return 1;  /* continue running the coroutine */
 };
 
@@ -428,8 +428,8 @@ const resume = function(L, n) {
         if (ci.callstatus & lstate.CIST_LUA)  /* yielded inside a hook? */
             lvm.luaV_execute(L);  /* just continue running Lua code */
         else {  /* 'common' yield */
-            if (ci.u.c.k !== null) {  /* does it have a continuation function? */
-                n = ci.u.c.k(L, TS.LUA_YIELD, ci.u.c.ctx); /* call continuation */
+            if (ci.c_k !== null) {  /* does it have a continuation function? */
+                n = ci.c_k(L, TS.LUA_YIELD, ci.c_ctx); /* call continuation */
                 assert(n < (L.top - L.ci.funcOff), "not enough elements in the stack");
                 firstArg = L.top - n;  /* yield results come from continuation */
             }
@@ -502,9 +502,9 @@ const lua_yieldk = function(L, nresults, ctx, k) {
     if (ci.callstatus & lstate.CIST_LUA)  /* inside a hook? */
         assert(k === null, "hooks cannot continue after yielding");
     else {
-        ci.u.c.k = k;
+        ci.c_k = k;
         if (k !== null)  /* is there a continuation? */
-            ci.u.c.ctx = ctx;  /* save context */
+            ci.c_ctx = ctx;  /* save context */
         ci.funcOff = L.top - nresults - 1;  /* protect stack below results */
         ci.func = L.stack[ci.funcOff];
         luaD_throw(L, TS.LUA_YIELD);

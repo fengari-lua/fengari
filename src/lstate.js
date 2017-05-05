@@ -25,17 +25,15 @@ class CallInfo {
         this.previous = previous;
         this.next = next;
         this.pcOff = 0;
-        this.u = {
-            l: {  /* only for Lua functions */
-                base: base,  /* base for this function */
-                savedpc: []
-            },
-            c: {  /* only for JS functions */
-                k: null,  /* continuation in case of yields */
-                old_errfunc: null,
-                ctx: null  /* context info. in case of yields */
-            }
-        };
+
+        /* only for Lua functions */
+        this.l_base = base; /* base for this function */
+        this.l_savedpc = [];
+        /* only for JS functions */
+        this.c_k = null;  /* continuation in case of yields */
+        this.c_old_errfunc = null;
+        this.c_ctx = null;  /* context info. in case of yields */
+
         this.nresults = 0;
         this.callstatus = 0;
     }

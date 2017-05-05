@@ -856,8 +856,8 @@ const lua_callk = function(L, nargs, nresults, ctx, k) {
 
     let func = L.top - (nargs + 1);
     if (k !== null && L.nny === 0) { /* need to prepare continuation? */
-        L.ci.u.c.k = k;
-        L.ci.u.c.ctx = ctx;
+        L.ci.c_k = k;
+        L.ci.c_ctx = ctx;
         ldo.luaD_call(L, func, nresults);
     } else { /* no continuation or no yieldable */
         ldo.luaD_callnoyield(L, func, nresults);
@@ -900,17 +900,17 @@ const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
         status = ldo.luaD_pcall(L, f_call, c, c.funcOff, func);
     } else { /* prepare continuation (call is already protected by 'resume') */
         let ci = L.ci;
-        ci.u.c.k = k;  /* prepare continuation (call is already protected by 'resume') */
-        ci.u.c.ctx = ctx;  /* prepare continuation (call is already protected by 'resume') */
+        ci.c_k = k;  /* prepare continuation (call is already protected by 'resume') */
+        ci.c_ctx = ctx;  /* prepare continuation (call is already protected by 'resume') */
         /* save information for error recovery */
         ci.extra = c.funcOff;
-        ci.u.c.old_errfunc = L.errfunc;
+        ci.c_old_errfunc = L.errfunc;
         L.errfunc = func;
         ci.callstatus &= ~lstate.CIST_OAH | L.allowhook;
         ci.callstatus |= lstate.CIST_YPCALL;  /* function can do error recovery */
         ldo.luaD_call(L, c.funcOff, nresults);  /* do the call */
         ci.callstatus &= ~lstate.CIST_YPCALL;
-        L.errfunc = ci.u.c.old_errfunc;
+        L.errfunc = ci.c_old_errfunc;
         status = TS.LUA_OK;
     }
 

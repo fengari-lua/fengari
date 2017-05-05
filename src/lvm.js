@@ -23,8 +23,8 @@ const LUA_MULTRET = defs.LUA_MULTRET;
 const luaV_finishOp = function(L) {
     let ci = L.ci;
     let OCi = OC.OpCodesI;
-    let base = ci.u.l.base;
-    let inst = ci.u.l.savedpc[ci.pcOff - 1];  /* interrupted instruction */
+    let base = ci.l_base;
+    let inst = ci.l_savedpc[ci.pcOff - 1];  /* interrupted instruction */
     let op = inst.opcode;
 
     switch (op) {  /* finish its execution */
@@ -44,7 +44,7 @@ const luaV_finishOp = function(L) {
                 ci.callstatus ^= lstate.CIST_LEQ;  /* clear mark */
                 res = res !== 1 ? 1 : 0;  /* negate result */
             }
-            assert(ci.u.l.savedpc[ci.pcOff] === OCi.OP_JMP);
+            assert(ci.l_savedpc[ci.pcOff] === OCi.OP_JMP);
             if (res !== inst.A)  /* condition failed? */
                 ci.pcOff++;  /* skip jump instruction */
             break;
@@ -60,12 +60,12 @@ const luaV_finishOp = function(L) {
             }
 
             /* move final result to final position */
-            L.stack[ci.u.l.base + inst.A] = L.stack[L.top - 1];
+            L.stack[ci.l_base + inst.A] = L.stack[L.top - 1];
             L.top = ci.top;  /* restore top */
             break;
         }
         case OCi.OP_TFORCALL: {
-            assert(ci.u.l.savedpc[ci.pcOff] === OCi.OP_TFORLOOP);
+            assert(ci.l_savedpc[ci.pcOff] === OCi.OP_TFORLOOP);
             L.top = ci.top;  /* correct top */
             break;
         }
@@ -114,13 +114,13 @@ const luaV_execute = function(L) {
             ci = L.ci;
             cl = ci.func.value;
             k = cl.p.k;
-            base = ci.u.l.base;
+            base = ci.l_base;
 
-            i = ci.u.l.savedpc[ci.pcOff++];
+            i = ci.l_savedpc[ci.pcOff++];
 
             if (L.hookmask & (defs.LUA_MASKLINE | defs.LUA_MASKCOUNT)) {
                 ldebug.luaG_traceexec(L);
-                base = ci.u.l.base;
+                base = ci.l_base;
             }
 
 
@@ -142,8 +142,8 @@ const luaV_execute = function(L) {
                 break;
             }
             case OCi.OP_LOADKX: {
-                assert(ci.u.l.savedpc[ci.pcOff].opcode === OCi.OP_EXTRAARG);
-                let konst = k[ci.u.l.savedpc[ci.pcOff++].Ax];
+                assert(ci.l_savedpc[ci.pcOff].opcode === OCi.OP_EXTRAARG);
+                let konst = k[ci.l_savedpc[ci.pcOff++].Ax];
                 L.stack[ra] = new lobject.TValue(konst.type, konst.value);
                 break;
             }
@@ -179,7 +179,7 @@ const luaV_execute = function(L) {
                 let key = RKC(L, base, k, i);
 
                 gettable(L, table, key, ra);
-                base = ci.u.l.base;
+                base = ci.l_base;
                 break;
             }
             case OCi.OP_SETTABUP: {
@@ -188,7 +188,7 @@ const luaV_execute = function(L) {
                 let v = RKC(L, base, k, i);
 
                 settable(L, table, key, v);
-                base = ci.u.l.base;
+                base = ci.l_base;
 
                 break;
             }
@@ -197,7 +197,7 @@ const luaV_execute = function(L) {
                 let key = RKC(L, base, k, i);
 
                 gettable(L, table, key, ra);
-                base = ci.u.l.base;
+                base = ci.l_base;
                 break;
             }
             case OCi.OP_SETTABLE: {
@@ -206,7 +206,7 @@ const luaV_execute = function(L) {
                 let v = RKC(L, base, k, i);
 
                 settable(L, table, key, v);
-                base = ci.u.l.base;
+                base = ci.l_base;
 
                 break;
             }
@@ -221,7 +221,7 @@ const luaV_execute = function(L) {
                 L.stack[ra + 1] = table;
 
                 gettable(L, table, key, ra);
-                base = ci.u.l.base;
+                base = ci.l_base;
 
                 break;
             }
@@ -237,7 +237,7 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, numberop1 + numberop2);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_ADD);
-                    base = ci.u.l.base;
+                    base = ci.l_base;
                 }
                 break;
             }
@@ -253,7 +253,7 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, numberop1 - numberop2);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_SUB);
-                    base = ci.u.l.base;
+                    base = ci.l_base;
                 }
                 break;
             }
@@ -269,7 +269,7 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, numberop1 * numberop2);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_MUL);
-                    base = ci.u.l.base;
+                    base = ci.l_base;
                 }
                 break;
             }
@@ -285,7 +285,7 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, (numberop1 - Math.floor(numberop1 / numberop2) * numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_MOD);
-                    base = ci.u.l.base;
+                    base = ci.l_base;
                 }
                 break;
             }
@@ -299,7 +299,7 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, Math.pow(numberop1, numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_POW);
-                    base = ci.u.l.base;
+                    base = ci.l_base;
                 }
                 break;
             }
@@ -313,7 +313,7 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, numberop1 / numberop2);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_DIV);
-                    base = ci.u.l.base;
+                    base = ci.l_base;
                 }
                 break;
             }
@@ -329,7 +329,7 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, Math.floor(numberop1 / numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_IDIV);
-                    base = ci.u.l.base;
+                    base = ci.l_base;
                 }
                 break;
             }
@@ -343,7 +343,7 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (numberop1 & numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_BAND);
-                    base = ci.u.l.base;
+                    base = ci.l_base;
                 }
                 break;
             }
@@ -357,7 +357,7 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (numberop1 | numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_BOR);
-                    base = ci.u.l.base;
+                    base = ci.l_base;
                 }
                 break;
             }
@@ -371,7 +371,7 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (numberop1 ^ numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_BXOR);
-                    base = ci.u.l.base;
+                    base = ci.l_base;
                 }
                 break;
             }
@@ -385,7 +385,7 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (numberop1 << numberop2)); // TODO: luaV_shiftl ?
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_SHL);
-                    base = ci.u.l.base;
+                    base = ci.l_base;
                 }
                 break;
             }
@@ -399,7 +399,7 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (numberop1 >> numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_SHR);
-                    base = ci.u.l.base;
+                    base = ci.l_base;
                 }
                 break;
             }
@@ -413,7 +413,7 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, -numberop);
                 } else {
                     ltm.luaT_trybinTM(L, op, op, ra, ltm.TMS.TM_UNM);
-                    base = ci.u.l.base;
+                    base = ci.l_base;
                 }
                 break;
             }
@@ -425,7 +425,7 @@ const luaV_execute = function(L) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, ~op.value);
                 } else {
                     ltm.luaT_trybinTM(L, op, op, ra, ltm.TMS.TM_BNOT);
-                    base = ci.u.l.base;
+                    base = ci.l_base;
                 }
                 break;
             }
@@ -436,7 +436,7 @@ const luaV_execute = function(L) {
             }
             case OCi.OP_LEN: {
                 luaV_objlen(L, ra, L.stack[RB(L, base, i)]);
-                base = ci.u.l.base;
+                base = ci.l_base;
                 break;
             }
             case OCi.OP_CONCAT: {
@@ -445,7 +445,7 @@ const luaV_execute = function(L) {
                 let rb;
                 L.top = base + c + 1; /* mark the end of concat operands */
                 luaV_concat(L, c - b + 1);
-                base = ci.u.l.base;
+                base = ci.l_base;
                 ra = RA(L, base, i); /* 'luaV_concat' may invoke TMs and move the stack */
                 rb = base + b;
                 L.stack[ra] = L.stack[rb];
@@ -461,7 +461,7 @@ const luaV_execute = function(L) {
                     ci.pcOff++;
                 else
                     donextjump(L, ci);
-                base = ci.u.l.base;
+                base = ci.l_base;
                 break;
             }
             case OCi.OP_LT: {
@@ -469,7 +469,7 @@ const luaV_execute = function(L) {
                     ci.pcOff++;
                 else
                     donextjump(L, ci);
-                base = ci.u.l.base;
+                base = ci.l_base;
                 break;
             }
             case OCi.OP_LE: {
@@ -477,7 +477,7 @@ const luaV_execute = function(L) {
                     ci.pcOff++;
                 else
                     donextjump(L, ci);
-                base = ci.u.l.base;
+                base = ci.l_base;
                 break;
             }
             case OCi.OP_TEST: {
@@ -507,7 +507,7 @@ const luaV_execute = function(L) {
                 if (ldo.luaD_precall(L, ra, nresults)) {
                     if (nresults >= 0)
                         L.top = ci.top;
-                    base = ci.u.l.base;
+                    base = ci.l_base;
                 } else {
                     ci = L.ci;
                     continue newframe;
@@ -518,7 +518,7 @@ const luaV_execute = function(L) {
             case OCi.OP_TAILCALL: {
                 if (i.B !== 0) L.top = ra + i.B;
                 if (ldo.luaD_precall(L, ra, LUA_MULTRET)) { // JS function
-                    base = ci.u.l.base;
+                    base = ci.l_base;
                 } else {
                     /* tail call: put called frame (n) in place of caller one (o) */
                     let nci = L.ci;
@@ -527,22 +527,22 @@ const luaV_execute = function(L) {
                     let nfuncOff = nci.funcOff;
                     let ofunc = oci.func;
                     let ofuncOff = oci.funcOff;
-                    let lim = nci.u.l.base + nfunc.value.p.numparams;
-                    if (cl.p.p.length > 0) lfunc.luaF_close(L, oci.u.l.base);
+                    let lim = nci.l_base + nfunc.value.p.numparams;
+                    if (cl.p.p.length > 0) lfunc.luaF_close(L, oci.l_base);
                     for (let aux = 0; nfuncOff + aux < lim; aux++)
                         L.stack[ofuncOff + aux] = L.stack[nfuncOff + aux];
                     oci.func = nci.func;
-                    oci.u.l.base = ofuncOff + (nci.u.l.base - nfuncOff);
+                    oci.l_base = ofuncOff + (nci.l_base - nfuncOff);
                     L.top = ofuncOff + (L.top - nfuncOff);
                     oci.top = L.top;
-                    oci.u.l.savedpc = nci.u.l.savedpc;
+                    oci.l_savedpc = nci.l_savedpc;
                     oci.pcOff = nci.pcOff;
                     oci.callstatus |= lstate.CIST_TAIL;
                     L.ci = oci;
                     ci = L.ci;
                     L.ciOff--;
 
-                    assert(L.top === oci.u.l.base + L.stack[ofuncOff].value.p.maxstacksize);
+                    assert(L.top === oci.l_base + L.stack[ofuncOff].value.p.maxstacksize);
 
                     continue newframe;
                 }
@@ -629,9 +629,9 @@ const luaV_execute = function(L) {
                 L.stack[cb]     = L.stack[ra];
                 L.top = cb + 3; /* func. + 2 args (state and index) */
                 ldo.luaD_call(L, cb, i.C);
-                base = ci.u.l.base;
+                base = ci.l_base;
                 L.top = ci.top;
-                i = ci.u.l.savedpc[ci.pcOff++];
+                i = ci.l_savedpc[ci.pcOff++];
                 ra = RA(L, base, i);
                 assert(i.opcode === OCi.OP_TFORLOOP);
                 specialCase = OCi.OP_TFORLOOP;
@@ -651,8 +651,8 @@ const luaV_execute = function(L) {
                 if (n === 0) n = L.top - ra - 1;
 
                 if (c === 0) {
-                    assert(ci.u.l.savedpc[ci.pcOff].opcode === OCi.OP_EXTRAARG);
-                    c = ci.u.l.savedpc[ci.pcOff++].Ax;
+                    assert(ci.l_savedpc[ci.pcOff].opcode === OCi.OP_EXTRAARG);
+                    c = ci.l_savedpc[ci.pcOff++].Ax;
                 }
 
                 let h = L.stack[ra].value;
@@ -693,7 +693,7 @@ const luaV_execute = function(L) {
 
                 if (b < 0) {
                     b = n;  /* get all var. arguments */
-                    base = ci.u.l.base;
+                    base = ci.l_base;
                     ra = RA(L, base, i); /* previous call may change the stack */
 
                     L.top = ra + n;
@@ -715,12 +715,12 @@ const luaV_execute = function(L) {
 
 const dojump = function(L, ci, i, e) {
     let a = i.A;
-    if (a !== 0) lfunc.luaF_close(L, ci.u.l.base + a - 1);
+    if (a !== 0) lfunc.luaF_close(L, ci.l_base + a - 1);
     ci.pcOff += i.sBx + e;
 };
 
 const donextjump = function(L, ci) {
-    dojump(L, ci, ci.u.l.savedpc[ci.pcOff], 1);
+    dojump(L, ci, ci.l_savedpc[ci.pcOff], 1);
 };
 
 
