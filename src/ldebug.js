@@ -571,9 +571,7 @@ const luaG_addinfo = function(L, msg, src, line) {
     if (src)
         buff = lobject.luaO_chunkid(src, luaconf.LUA_IDSIZE);
 
-    L.stack[L.top++] = L.l_G.intern(defs.to_luastring(`${defs.to_jsstring(buff)}:${line}: ${defs.to_jsstring(msg)}`));
-
-    return L.stack[L.top - 1];
+    return lobject.luaO_pushfstring(L, defs.to_luastring("%s:%d: %s", true), buff, line, msg)
 };
 
 const luaG_runerror = function(L, fmt, ...argp) {
