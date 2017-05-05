@@ -74,19 +74,17 @@ const pushglobalfuncname = function(L, ar) {
     }
 };
 
-const sv = s => s ? s : [];
-
 const pushfuncname = function(L, ar) {
     if (pushglobalfuncname(L, ar)) {  /* try first a global name */
-        lua.lua_pushstring(L, lua.to_luastring("function '", true).concat(lua.lua_tostring(L, -1)).concat(["'".charCodeAt(0)]));
+        lua.lua_pushfstring(L, lua.to_luastring("function '%s'"), lua.lua_tostring(L, -1));
         lua.lua_remove(L, -2);  /* remove name */
     }
     else if (ar.namewhat)  /* is there a name from code? */
-        lua.lua_pushstring(L, sv(ar.namewhat).concat(" ".charCodeAt(0), "'".charCodeAt(0), ...sv(ar.name.value), "'".charCodeAt(0)));  /* use it */
+        lua.lua_pushfstring(L, lua.to_luastring("%s '%s'"), ar.namewhat, ar.name);  /* use it */
     else if (ar.what && ar.what[0] === 'm'.charCodeAt(0))  /* main? */
         lua.lua_pushliteral(L, "main chunk");
     else if (ar.what && ar.what[0] != 'C'.charCodeAt(0))  /* for Lua functions, use <file:line> */
-        lua.lua_pushstring(L, lua.to_luastring("function <", true).concat(...sv(ar.short_src), ':'.charCodeAt(0), ...lua.to_luastring(`${ar.linedefined}>`)));
+        lua.lua_pushfstring(L, lua.to_luastring("function <%s:%d>"), ar.short_src, ar.linedefined);
     else  /* nothing left... */
         lua.lua_pushliteral(L, "?");
 };
