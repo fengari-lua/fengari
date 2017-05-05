@@ -666,7 +666,7 @@ const luaV_execute = function(L) {
 
                 for (let i = 0; i < nup; i++) {
                     if (uv[i].instack)
-                        ncl.upvals[i] = lfunc.findupval(L, base + uv[i].idx);
+                        ncl.upvals[i] = lfunc.luaF_findupval(L, base + uv[i].idx);
                     else
                         ncl.upvals[i] = cl.upvals[uv[i].idx];
                     ncl.upvals[i].refcount++;
