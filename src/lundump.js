@@ -8,11 +8,11 @@ const lfunc    = require('./lfunc.js');
 const lobject  = require('./lobject.js');
 const lopcodes = require('./lopcodes.js');
 
-const LUAI_MAXSHORTLEN = 40;
-
 class BytecodeParser {
 
     constructor(L, dataView, name) {
+        assert(dataView instanceof DataView, "BytecodeParser only operates on a dataView")
+
         this.L = L;
         this.intSize = 4;
         this.size_tSize = 8;

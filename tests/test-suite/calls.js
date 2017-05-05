@@ -378,7 +378,6 @@ test("[test-suite] calls: test for generic load", function (t) {
         function read1 (x)
           local i = 0
           return function ()
-            --print(x)
             i=i+1
             return string.sub(x, i, i)
           end
@@ -401,7 +400,7 @@ test("[test-suite] calls: test for generic load", function (t) {
         assert(not load(function () return true end))
     `, L;
     
-    t.plan(1);
+    t.plan(2);
 
     t.doesNotThrow(function () {
 
@@ -413,10 +412,38 @@ test("[test-suite] calls: test for generic load", function (t) {
 
     }, "Lua program loaded without error");
 
-    // t.doesNotThrow(function () {
+    t.doesNotThrow(function () {
 
         lua.lua_call(L, 0, -1);
 
-    // }, "Lua program ran without error");
+    }, "Lua program ran without error");
+
+});
+
+
+test("[test-suite] calls: small bug", function (t) {
+    let luaCode = `
+        local t = {nil, "return ", "3"}
+        f, msg = load(function () return table.remove(t, 1) end)
+        assert(f() == nil)   -- should read the empty chunk
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lauxlib.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
 
 });
