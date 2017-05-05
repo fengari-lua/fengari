@@ -41,8 +41,8 @@ class UpVal {
         };
     }
 
-    val(L) {
-        return this.v !== null ? L.stack[this.v] : this.u.value;
+    val() {
+        return this.v !== null ? this.L.stack[this.v] : this.u.value;
     }
 
     setval(L, ra) {
@@ -94,7 +94,7 @@ const luaF_close = function(L, level) {
         assert(uv.isopen());
         L.openupval = uv.u.open.next; /* remove from 'open' list */
         if (uv.refcount > 0) {
-            let from = L.stack[uv.v];
+            let from = uv.L.stack[uv.v];
             uv.u.value = new lobject.TValue(from.type, from.value);
             uv.v = null;
         }

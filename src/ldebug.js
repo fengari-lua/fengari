@@ -513,7 +513,7 @@ const isinstack = function(L, ci, o) {
 const getupvalname = function(L, ci, o) {
     let c = ci.func;
     for (let i = 0; i < c.nupvalues; i++) {
-        if (c.upvals[i].val(L) === o) {
+        if (c.upvals[i].val() === o) {
             return {
                 name: upvalname(c.p, i),
                 funcname: defs.to_luastring('upvalue', true)

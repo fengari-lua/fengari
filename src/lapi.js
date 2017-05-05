@@ -512,7 +512,7 @@ const aux_upvalue = function(L, fi, n) {
             let name = p.upvalues[n-1].name;
             return {
                 name: name ? name : "(*no name)",
-                val: f.upvals[n-1].val(L)
+                val: f.upvals[n-1].val()
             };
         }
         default: return null;  /* not a closure */

@@ -161,7 +161,7 @@ const luaV_execute = function(L) {
                 break;
             }
             case OCi.OP_GETUPVAL: {
-                let o = cl.upvals[i.B].val(L);
+                let o = cl.upvals[i.B].val();
                 L.stack[ra] = new lobject.TValue(o.type, o.value);
                 break;
             }
@@ -170,7 +170,7 @@ const luaV_execute = function(L) {
                 break;
             }
             case OCi.OP_GETTABUP: {
-                let table = cl.upvals[i.B].val(L);
+                let table = cl.upvals[i.B].val();
                 let key = RKC(L, base, k, i);
 
                 gettable(L, table, key, ra);
@@ -178,7 +178,7 @@ const luaV_execute = function(L) {
                 break;
             }
             case OCi.OP_SETTABUP: {
-                let table = cl.upvals[i.A].val(L);
+                let table = cl.upvals[i.A].val();
                 let key = RKB(L, base, k, i);
                 let v = RKC(L, base, k, i);
 
