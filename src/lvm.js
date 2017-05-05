@@ -100,33 +100,26 @@ const RKC = function(L, base, k, i) {
 const luaV_execute = function(L) {
     let OCi = OC.OpCodesI;
     let ci = L.ci;
-    let specialCase = null; // To enable jump to specific opcode without reading current op/ra
     let opcode, k, base, i, ra;
     var cl;
 
     ci.callstatus |= lstate.CIST_FRESH;
     newframe:
     for (;;) {
-        if (specialCase) {
-            opcode = specialCase;
-            specialCase = null;
-        } else {
-            ci = L.ci;
-            cl = ci.func.value;
-            k = cl.p.k;
+        assert(ci === L.ci);
+        cl = ci.func.value;
+        k = cl.p.k;
+        base = ci.l_base;
+
+        i = ci.l_savedpc[ci.pcOff++];
+
+        if (L.hookmask & (defs.LUA_MASKLINE | defs.LUA_MASKCOUNT)) {
+            ldebug.luaG_traceexec(L);
             base = ci.l_base;
-
-            i = ci.l_savedpc[ci.pcOff++];
-
-            if (L.hookmask & (defs.LUA_MASKLINE | defs.LUA_MASKCOUNT)) {
-                ldebug.luaG_traceexec(L);
-                base = ci.l_base;
-            }
-
-
-            ra = RA(L, base, i);
-            opcode = i.opcode;
         }
+
+        ra = RA(L, base, i);
+        opcode = i.opcode;
 
         if (i.breakpoint) // TODO: remove, used until lapi
             return;
@@ -629,13 +622,13 @@ const luaV_execute = function(L) {
                 L.stack[cb]     = L.stack[ra];
                 L.top = cb + 3; /* func. + 2 args (state and index) */
                 ldo.luaD_call(L, cb, i.C);
+                /* go straight to OP_TFORLOOP */
                 base = ci.l_base;
                 L.top = ci.top;
                 i = ci.l_savedpc[ci.pcOff++];
                 ra = RA(L, base, i);
                 assert(i.opcode === OCi.OP_TFORLOOP);
-                specialCase = OCi.OP_TFORLOOP;
-                break;
+                /* fall through */
             }
             case OCi.OP_TFORLOOP: {
                 if (!L.stack[ra + 1].ttisnil()) { /* continue loop? */
