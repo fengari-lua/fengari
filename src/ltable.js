@@ -34,13 +34,16 @@ const table_hash = function(key) {
     }
 };
 
+class Table {
+    constructor(L) {
+        this.id = L.l_G.id_counter++;
+        this.strong = new Map();
+        this.metatable = null;
+    }
+}
+
 const luaH_new = function(L) {
-    let t = {
-        id: L.l_G.id_counter++,
-        strong: new Map(),
-        metatable: null
-    };
-    return t;
+    return new Table(L);
 };
 
 const getgeneric = function(t, hash) {
