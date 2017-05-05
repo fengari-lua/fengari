@@ -551,8 +551,7 @@ const luaG_concaterror = function(L, p1, p2) {
 ** Error when both values are convertible to numbers, but not to integers
 */
 const luaG_opinterror = function(L, p1, p2, msg) {
-    let temp = lvm.tonumber(p1);
-    if (temp !== false)
+    if (lvm.tonumber(p1) === false)
         p2 = p1;
     luaG_typeerror(L, p2, msg);
 };

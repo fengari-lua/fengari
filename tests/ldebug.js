@@ -175,7 +175,7 @@ test('luaG_opinterror', function (t) {
     }, "JS Lua program ran without error");
 
     t.ok(
-        lua.lua_tojsstring(L, -1).endsWith("attempt to perform arithmetic on a string value"),
+        lua.lua_tojsstring(L, -1).endsWith("attempt to perform arithmetic on a table value"),
         "Correct error was thrown"
     );
 });
