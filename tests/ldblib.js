@@ -351,7 +351,7 @@ test('debug.traceback (with a global)', function (t) {
 \t[string "traceback-test"]:7: in function 'rec'
 \t[string "traceback-test"]:7: in function 'rec'
 \t[string "traceback-test"]:7: in function 'rec'
-\t[string "traceback-test"]:15: in main chunk`,
+\t[string "traceback-test"]:13: in main chunk`,
         "Correct element(s) on the stack"
     );
 
@@ -410,7 +410,7 @@ test('debug.traceback (with a upvalue)', function (t) {
 \t[string "traceback-test"]:8: in upvalue 'rec'
 \t[string "traceback-test"]:8: in upvalue 'rec'
 \t[string "traceback-test"]:8: in local 'rec'
-\t[string "traceback-test"]:16: in main chunk`,
+\t[string "traceback-test"]:14: in main chunk`,
         "Correct element(s) on the stack"
     );
 

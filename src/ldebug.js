@@ -18,7 +18,7 @@ const CT      = defs.constant_types;
 const TS      = defs.thread_status;
 
 const currentline = function(ci) {
-    return ci.func.value.p.lineinfo ? ci.func.value.p.lineinfo[ci.pcOff] : -1;
+    return ci.func.value.p.lineinfo ? ci.func.value.p.lineinfo[ci.pcOff-1] : -1;
 };
 
 /*
