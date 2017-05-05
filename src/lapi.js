@@ -822,7 +822,7 @@ const lua_load = function(L, reader, data, chunckname, mode) {
             /* get global table from registry */
             let gt = ltable.luaH_getint(L.l_G.l_registry.value, defs.LUA_RIDX_GLOBALS);
             /* set global table as 1st upvalue of 'f' (may be LUA_ENV) */
-            f.upvals[0].u.value = new TValue(gt.type, gt.value);
+            f.upvals[0].value.setfrom(gt);
         }
     }
     return status;
@@ -1001,7 +1001,6 @@ const lua_upvaluejoin = function(L, fidx1, n1, fidx2, n2) {
     let f1 = ref1.closure;
 
     f1.upvals[up1] = up2;
-    up2.u.open.touched = true; // TODO: useful
 };
 
 // This functions are only there for compatibility purposes

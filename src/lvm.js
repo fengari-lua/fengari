@@ -166,7 +166,12 @@ const luaV_execute = function(L) {
                 break;
             }
             case OCi.OP_SETUPVAL: {
-                cl.upvals[i.B].setval(L, ra);
+                let uv = cl.upvals[i.B];
+                if (uv.v !== null) {
+                    uv.L.stack[uv.v] = L.stack[ra];
+                } else {
+                    uv.value.setfrom(L.stack[ra]);
+                }
                 break;
             }
             case OCi.OP_GETTABUP: {

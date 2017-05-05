@@ -28,29 +28,16 @@ class Proto {
 
 class UpVal {
 
-    constructor(L) {
-        this.L = L; // Keep track of the thread it comes from
-        this.v = null; /* if open: stack index. if closed: null (find value in this.u.value) */
+    constructor() {
+        this.L = null; /* Keep track of the thread it comes from */
+        this.v = null; /* if open: stack index. if closed: null (find it in this.value) */
+        this.open_next = null; /* linked list (when open) */
         this.refcount = 0;
-        this.u = {
-            open: { /* (when open) */
-                next: null, /* linked list */
-                touched: false /* mark to avoid cycles with dead threads */
-            },
-            value: null /* the value (when closed) */
-        };
+        this.value = null; /* the TValue (when closed) */
     }
 
     val() {
-        return this.v !== null ? this.L.stack[this.v] : this.u.value;
-    }
-
-    setval(L, ra) {
-        if (this.v !== null) {
-            this.L.stack[this.v] = L.stack[ra];
-        } else {
-            this.u.value.setfrom(L.stack[ra]);
-        }
+        return this.v !== null ? this.L.stack[this.v] : this.value;
     }
 
     isopen() {
@@ -67,22 +54,22 @@ const luaF_newLclosure = function(L, n) {
 
 const findupval = function(L, level) {
     let pp = L.openupval;
-    
+
     while(pp !== null && pp.v >= level) {
         let p = pp;
 
         if (p.v === level)
             return p;
 
-        pp = p.u.open.next;
+        pp = p.open_next;
     }
 
-    let uv = new UpVal(L);
-    uv.u.open.next = pp;
-    uv.u.open.touched = true;
+    let uv = new UpVal();
 
+    uv.open_next = pp;
     L.openupval = uv;
 
+    uv.L = L;
     uv.v = level;
 
     return uv;
@@ -92,11 +79,12 @@ const luaF_close = function(L, level) {
     while (L.openupval !== null && L.openupval.v >= level) {
         let uv = L.openupval;
         assert(uv.isopen());
-        L.openupval = uv.u.open.next; /* remove from 'open' list */
+        L.openupval = uv.open_next; /* remove from 'open' list */
         if (uv.refcount > 0) {
             let from = uv.L.stack[uv.v];
-            uv.u.value = new lobject.TValue(from.type, from.value);
+            uv.L = null;
             uv.v = null;
+            uv.value = new lobject.TValue(from.type, from.value);
         }
     }
 };
@@ -108,8 +96,7 @@ const luaF_initupvals = function(L, cl) {
     for (let i = 0; i < cl.nupvalues; i++) {
         let uv = new UpVal(L);
         uv.refcount = 1;
-        uv.u.value = new lobject.TValue(CT.LUA_TNIL, null);
-        uv.v = null;
+        uv.value = new lobject.TValue(CT.LUA_TNIL, null);
         cl.upvals[i] = uv;
     }
 };
