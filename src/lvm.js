@@ -161,7 +161,8 @@ const luaV_execute = function(L) {
                 break;
             }
             case OCi.OP_GETUPVAL: {
-                L.stack[ra] = cl.upvals[i.B].val(L);
+                let o = cl.upvals[i.B].val(L);
+                L.stack[ra] = new lobject.TValue(o.type, o.value);
                 break;
             }
             case OCi.OP_SETUPVAL: {

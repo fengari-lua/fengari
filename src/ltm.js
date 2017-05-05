@@ -83,9 +83,9 @@ const luaT_callTM = function(L, f, p1, p2, p3, hasres) {
     let result = p3;
     let func = L.top;
 
-    L.stack[L.top] = f;      /* push function (assume EXTRA_STACK) */
-    L.stack[L.top + 1] = p1; /* 1st argument */
-    L.stack[L.top + 2] = p2; /* 2nd argument */
+    L.stack[L.top] = new lobject.TValue(f.type, f.value); /* push function (assume EXTRA_STACK) */
+    L.stack[L.top + 1] = new lobject.TValue(p1.type, p1.value); /* 1st argument */
+    L.stack[L.top + 2] = new lobject.TValue(p2.type, p2.value); /* 2nd argument */
     L.top += 3;
 
     if (!hasres)  /* no result? 'p3' is third argument */

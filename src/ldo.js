@@ -233,7 +233,7 @@ const tryfuncTM = function(L, off, func) {
     for (let p = L.top; p > off; p--)
         L.stack[p] = L.stack[p-1];
     L.top++; /* slot ensured by caller */
-    L.stack[off] = tm; /* tag method is the new function to be called */
+    L.stack[off] = new lobject.TValue(tm.type, tm.value); /* tag method is the new function to be called */
 };
 
 /*
