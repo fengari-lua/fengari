@@ -504,8 +504,8 @@ const undefgoto = function(ls, gt) {
 ** adds a new prototype into list of prototypes
 */
 const addprototype = function(ls) {
-    let clp = new Proto();
     let L = ls.L;
+    let clp = new Proto(L);
     let fs = ls.fs;
     let f = fs.f;  /* prototype of current function */
     f.p[fs.np++] = clp;
@@ -536,7 +536,7 @@ const open_func = function(ls, fs, bl) {
     fs.nactvar = 0;
     fs.firstlocal = ls.dyd.actvar.n;
     fs.bl = null;
-    let f = new Proto();
+    let f = new Proto(ls.L);
     f = fs.f;
     f.source = ls.source;
     f.maxstacksize = 2;  /* registers 0/1 are always valid */
