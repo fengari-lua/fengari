@@ -82,8 +82,6 @@ const findupval = function(L, level) {
 
     uv.v = level;
 
-    // Thread with upvalue list business ? lfunc.c:75
-
     return uv;
 };
 

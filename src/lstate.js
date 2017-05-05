@@ -54,7 +54,6 @@ class lua_State {
         this.openupval = null;
         this.status = TS.LUA_OK;
         this.next = null;
-        this.twups = [this];
         this.errorJmp = null;
         this.nny = 1;
         this.errfunc = 0;
@@ -71,7 +70,6 @@ class global_State {
         this.l_registry = new lobject.TValue(CT.LUA_TNIL, null);
         this.panic = null;
         this.version = null;
-        this.twups = [];
         this.mt = new Array(LUA_NUMTAGS);
     }
 
@@ -131,7 +129,6 @@ const preinit_thread = function(L, g) {
     L.stack = [];
     L.ci = null;
     L.nci = 0;
-    L.twups = [L];  /* thread has no upvalues */
     L.errorJmp = null;
     L.nCcalls = 0;
     L.hook = null;
