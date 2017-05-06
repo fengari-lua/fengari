@@ -67,8 +67,6 @@ const luaX_tokens = [
     "<number>", "<integer>", "<name>", "<string>"
 ];
 
-const NUM_RESERVED = Object.keys(RESERVED).length;
-
 class MBuffer {
     constructor(L, data, reader) {
         this.L = L;
@@ -99,6 +97,18 @@ class MBuffer {
         }
         if (this.n-- === 0) // remove reference to input so it can get freed
             this.buffer = null;
+        return r;
+    }
+
+    read(size) {
+        let r = [];
+
+        while (size > 0) {
+            let byte = this.getc();
+            if (byte !== -1) r.push(byte);
+            size--;
+        }
+
         return r;
     }
 

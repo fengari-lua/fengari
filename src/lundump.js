@@ -7,11 +7,12 @@ const defs     = require('./defs.js');
 const lfunc    = require('./lfunc.js');
 const lobject  = require('./lobject.js');
 const lopcodes = require('./lopcodes.js');
+const llex     = require('./llex.js');
 
 class BytecodeParser {
 
-    constructor(L, dataView, name) {
-        assert(dataView instanceof DataView, "BytecodeParser only operates on a dataView")
+    constructor(L, buffer, name) {
+        assert(buffer instanceof llex.MBuffer, "BytecodeParser only operates on a MBuffer");
 
         this.L = L;
         this.intSize = 4;
@@ -20,56 +21,55 @@ class BytecodeParser {
         this.integerSize = 4;
         this.numberSize = 8;
 
-        this.dataView = dataView;
-        this.offset = 0;
+        // Used to do buffer to number conversions
+        this.dv = new DataView(
+            new ArrayBuffer(
+                Math.max(this.intSize, this.size_tSize, this.instructionSize, this.integerSize, this.numberSize)
+            )
+        );
+
+        this.buffer = buffer;
         this.name = name;
     }
 
-    peekByte() {
-        return this.dataView.getUint8(this.offset, true);
+    read(size) {
+        let buffer = this.buffer.read(size);
+        if (buffer.length < size) this.error("truncated");
+        return buffer;
     }
 
     readByte() {
-        let byte = this.peekByte();
-        this.offset++;
-        return byte;
-    }
-
-    peekInteger() {
-        return this.dataView.getInt32(this.offset, true);
+        return this.read(1)[0];
     }
 
     readInteger() {
-        let integer = this.peekInteger();
-        this.offset += this.integerSize;
+        let buffer = this.read(this.integerSize);
+        for (let i = 0; i < buffer.length; i++)
+            this.dv.setUint8(i, buffer[i]);
 
-        return integer;
+        return this.dv.getInt32(0, true);
     }
 
     readSize_t() {
         return this.readInteger();
     }
 
-    peekInt() {
-        return this.dataView.getInt32(this.offset, true);
-    }
-
     readInt() {
-        let integer = this.peekInt();
-        this.offset += 4;
+        let buffer = this.read(this.intSize);
 
-        return integer;
-    }
+        for (let i = 0; i < buffer.length; i++)
+            this.dv.setUint8(i, buffer[i]);
 
-    peekNumber() {
-        return this.dataView.getFloat64(this.offset, true);
+        return this.dv.getInt32(0, true);
     }
 
     readNumber() {
-        let number = this.peekNumber();
-        this.offset += this.numberSize;
+        let buffer = this.read(this.numberSize);
 
-        return number;
+        for (let i = 0; i < buffer.length; i++)
+            this.dv.setUint8(i, buffer[i]);
+
+        return this.dv.getFloat64(0, true);
     }
 
     read8bitString(n) {
@@ -182,7 +182,7 @@ class BytecodeParser {
                 f.k.push(this.L.l_G.intern(this.read8bitString()));
                 break;
             default:
-                throw new Error(`unrecognized constant '${t}'`);
+                this.error(`unrecognized constant '${t}'`);
             }
         }
     }
@@ -233,17 +233,17 @@ class BytecodeParser {
     }
 
     checkHeader() {
-        if (this.readString(4) !== defs.LUA_SIGNATURE)
-            throw new Error("bad LUA_SIGNATURE, expected '<esc>Lua'");
+        if (this.readString(3) !== defs.LUA_SIGNATURE.slice(1))  /* 1st char already checked */
+            this.error("bad LUA_SIGNATURE, expected '<esc>Lua'");
 
         if (this.readByte() !== 0x53)
-            throw new Error("bad Lua version, expected 5.3");
+            this.error("bad Lua version, expected 5.3");
 
         if (this.readByte() !== 0)
-            throw new Error("supports only official PUC-Rio implementation");
+            this.error("supports only official PUC-Rio implementation");
 
         if (this.readString(6) !== "\x19\x93\r\n\x1a\n")
-            throw new Error("bytecode corrupted");
+            this.error("bytecode corrupted");
 
         this.intSize         = this.readByte();
         this.size_tSize      = this.readByte();
@@ -258,10 +258,10 @@ class BytecodeParser {
         this.checksize(this.numberSize, 8, "number");
 
         if (this.readInteger() !== 0x5678)
-            throw new Error("endianness mismatch");
+            this.error("endianness mismatch");
 
         if (this.readNumber() !== 370.5)
-            throw new Error("float format mismatch");
+            this.error("float format mismatch");
 
     }
 
