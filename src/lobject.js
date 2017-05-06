@@ -184,7 +184,7 @@ class LClosure {
 
         this.p = null;
         this.nupvalues = n;
-        this.upvals = Array(n);
+        this.upvals = new Array(n); /* list of upvalues as UpVals. initialised in luaF_initupvals */
     }
 
 }
@@ -196,7 +196,7 @@ class CClosure {
 
         this.f = f;
         this.nupvalues = n;
-        this.upvalue = new Array(n);
+        this.upvalue = new Array(n); /* list of upvalues as TValues */
     }
 
 }
