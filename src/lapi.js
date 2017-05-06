@@ -280,7 +280,8 @@ const lua_pushcclosure = function(L, fn, n) {
 
         L.top -= n;
         while (n--) {
-            cl.upvalue[n] = L.stack[L.top + n];
+            cl.upvalue[n].setfrom(L.stack[L.top + n])
+            L.stack[L.top + n] = void 0;
         }
 
         L.stack[L.top] = new TValue(CT.LUA_TCCL, cl);

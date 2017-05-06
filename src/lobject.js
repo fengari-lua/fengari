@@ -197,6 +197,9 @@ class CClosure {
         this.f = f;
         this.nupvalues = n;
         this.upvalue = new Array(n); /* list of upvalues as TValues */
+        while (n--) {
+            this.upvalue[n] = new TValue(CT.LUA_TNIL, null);
+        }
     }
 
 }
