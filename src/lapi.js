@@ -527,7 +527,8 @@ const lua_getupvalue = function(L, funcindex, n) {
 
         L.stack[L.top++] = new TValue(val.type, val.value);
 
-        return name;
+        // FIXME: should always be a lua string
+        return typeof name === 'string' ? defs.to_luastring(name) : name;
     }
     return null;
 };
@@ -544,7 +545,8 @@ const lua_setupvalue = function(L, funcindex, n) {
         val.type = L.stack[L.top].type;
         val.value = L.stack[L.top].value;
 
-        return name;
+        // FIXME: should always be a lua string
+        return typeof name === 'string' ? defs.to_luastring(name) : name;
     }
     return null;
 };
