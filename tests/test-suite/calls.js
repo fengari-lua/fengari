@@ -398,6 +398,26 @@ test("[test-suite] calls: test for generic load", function (t) {
         a()  -- empty chunk
 
         assert(not load(function () return true end))
+
+        local t = {nil, "return ", "3"}
+        f, msg = load(function () return table.remove(t, 1) end)
+        assert(f() == nil)   -- should read the empty chunk
+
+        f = load(string.dump(function () return 1 end), nil, "b", {})
+        assert(type(f) == "function" and f() == 1)
+
+
+        x = string.dump(load("x = 1; return x"))
+        a = assert(load(read1(x), nil, "b"))
+        assert(a() == 1 and _G.x == 1)
+        cannotload("attempt to load a binary chunk", load(read1(x), nil, "t"))
+        cannotload("attempt to load a binary chunk", load(x, nil, "t"))
+
+        assert(not pcall(string.dump, print))  -- no dump of C functions
+
+        cannotload("unexpected symbol", load(read1("*a = 123")))
+        cannotload("unexpected symbol", load("*a = 123"))
+        cannotload("hhi", load(function () error("hhi") end))
     `, L;
     
     t.plan(2);
@@ -421,11 +441,131 @@ test("[test-suite] calls: test for generic load", function (t) {
 });
 
 
-test("[test-suite] calls: small bug", function (t) {
+test("[test-suite] calls: any value is valid for _ENV", function (t) {
     let luaCode = `
-        local t = {nil, "return ", "3"}
-        f, msg = load(function () return table.remove(t, 1) end)
-        assert(f() == nil)   -- should read the empty chunk
+        assert(load("return _ENV", nil, nil, 123)() == 123)
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lauxlib.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});
+
+
+test("[test-suite] calls: load when _ENV is not first upvalue", function (t) {
+    let luaCode = `
+        local x; XX = 123
+        local function h ()
+          local y=x   -- use 'x', so that it becomes 1st upvalue
+          return XX   -- global name
+        end
+        local d = string.dump(h)
+        x = load(d, "", "b")
+        assert(debug.getupvalue(x, 2) == '_ENV')
+        debug.setupvalue(x, 2, _G)
+        assert(x() == 123)
+
+        assert(assert(load("return XX + ...", nil, nil, {XX = 13}))(4) == 17)
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lauxlib.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});
+
+
+test("[test-suite] calls: test generic load with nested functions", function (t) {
+    let luaCode = `
+        function read1 (x)
+          local i = 0
+          return function ()
+            i=i+1
+            return string.sub(x, i, i)
+          end
+        end
+
+        x = [[
+          return function (x)
+            return function (y)
+             return function (z)
+               return x+y+z
+             end
+           end
+          end
+        ]]
+
+        a = assert(load(read1(x)))
+        assert(a()(2)(3)(10) == 15)
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lauxlib.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});
+
+
+test("[test-suite] calls: test for dump/undump with upvalues", function (t) {
+    let luaCode = `
+        local a, b = 20, 30
+        x = load(string.dump(function (x)
+          if x == "set" then a = 10+b; b = b+1 else
+          return a
+          end
+        end), "", "b", nil)
+        assert(x() == nil)
+        assert(debug.setupvalue(x, 1, "hi") == "a")
+        assert(x() == "hi")
+        assert(debug.setupvalue(x, 2, 13) == "b")
+        assert(not debug.setupvalue(x, 3, 10))   -- only 2 upvalues
+        x("set")
+        assert(x() == 23)
+        x("set")
+        assert(x() == 24)
     `, L;
     
     t.plan(2);
