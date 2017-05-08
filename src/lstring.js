@@ -13,6 +13,7 @@ const luaS_hash = function(str) {
 
 /* variant that takes ownership of array */
 const luaS_bless = function(L, str) {
+    Object.freeze(str);
     return str;
 };
 
