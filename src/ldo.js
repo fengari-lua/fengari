@@ -1,34 +1,33 @@
 /*jshint esversion: 6 */
 "use strict";
 
-const assert         = require('assert');
+const assert = require('assert');
 
-const defs           = require('./defs.js');
-const lapi           = require('./lapi.js');
-const ldebug         = require('./ldebug.js');
-const lfunc          = require('./lfunc.js');
-const llex           = require('./llex.js');
-const llimit         = require('./llimit.js');
-const lobject        = require('./lobject.js');
-const lparser        = require('./lparser.js');
-const lstate         = require('./lstate.js');
-const lstring        = require('./lstring.js');
-const ltm            = require('./ltm.js');
-const lundump        = require('./lundump.js');
-const lvm            = require('./lvm.js');
-const CT             = defs.constant_types;
-const TS             = defs.thread_status;
-const LUA_MULTRET    = defs.LUA_MULTRET;
-const TValue         = lobject.TValue;
+const defs    = require('./defs.js');
+const lapi    = require('./lapi.js');
+const ldebug  = require('./ldebug.js');
+const lfunc   = require('./lfunc.js');
+const llex    = require('./llex.js');
+const llimit  = require('./llimit.js');
+const lobject = require('./lobject.js');
+const lparser = require('./lparser.js');
+const lstate  = require('./lstate.js');
+const lstring = require('./lstring.js');
+const ltm     = require('./ltm.js');
+const lundump = require('./lundump.js');
+const lvm     = require('./lvm.js');
+
+const CT = defs.constant_types;
+const TS = defs.thread_status;
 
 const seterrorobj = function(L, errcode, oldtop) {
     switch (errcode) {
         case TS.LUA_ERRMEM: {
-            L.stack[oldtop] = new TValue(CT.LUA_TLNGSTR, lstring.luaS_newliteral(L, "not enough memory"));
+            L.stack[oldtop] = new lobject.TValue(CT.LUA_TLNGSTR, lstring.luaS_newliteral(L, "not enough memory"));
             break;
         }
         case TS.LUA_ERRERR: {
-            L.stack[oldtop] = new TValue(CT.LUA_TLNGSTR, lstring.luaS_newliteral(L, "error in error handling"));
+            L.stack[oldtop] = new lobject.TValue(CT.LUA_TLNGSTR, lstring.luaS_newliteral(L, "error in error handling"));
             break;
         }
         default: {
@@ -95,7 +94,7 @@ const luaD_precall = function(L, off, nresults) {
                 base = adjust_varargs(L, p, n);
             } else {
                 for (; n < p.numparams; n++)
-                    L.stack[L.top++] = new TValue(CT.LUA_TNIL, null); // complete missing arguments
+                    L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null); // complete missing arguments
                 base = off + 1;
             }
 
@@ -155,7 +154,7 @@ const moveresults = function(L, firstResult, res, nres, wanted) {
             L.stack[res] = L.stack[firstResult];
             break;
         }
-        case LUA_MULTRET: {
+        case defs.LUA_MULTRET: {
             for (let i = 0; i < nres; i++)
                 L.stack[res + i] = L.stack[firstResult + i];
             L.top = res + nres;
@@ -171,7 +170,7 @@ const moveresults = function(L, firstResult, res, nres, wanted) {
                 for (i = 0; i < nres; i++)
                     L.stack[res + i] = L.stack[firstResult + i];
                 for (; i < wanted; i++)
-                    L.stack[res + i] = new TValue(CT.LUA_TNIL, null);
+                    L.stack[res + i] = new lobject.TValue(CT.LUA_TNIL, null);
             }
             break;
         }
@@ -217,11 +216,11 @@ const adjust_varargs = function(L, p, actual) {
     let i;
     for (i = 0; i < nfixargs && i < actual; i++) {
         L.stack[L.top++] = L.stack[fixed + i];
-        L.stack[fixed + i] = new TValue(CT.LUA_TNIL, null);
+        L.stack[fixed + i] = new lobject.TValue(CT.LUA_TNIL, null);
     }
 
     for (; i < nfixargs; i++)
-        L.stack[L.top++] = new TValue(CT.LUA_TNIL, null);
+        L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
 
     return base;
 };
@@ -335,7 +334,7 @@ const finishCcall = function(L, status) {
 
     /* finish 'lua_callk'/'lua_pcall'; CIST_YPCALL and 'errfunc' already
        handled */
-    if (ci.nresults === LUA_MULTRET && L.ci.top < L.top) L.ci.top = L.top;
+    if (ci.nresults === defs.LUA_MULTRET && L.ci.top < L.top) L.ci.top = L.top;
     let n = ci.c_k(L, status, ci.c_ctx);  /* call continuation function */
     assert(n < (L.top - L.ci.funcOff), "not enough elements in the stack");
     luaD_poscall(L, ci, L.top - n, n);  /* finish 'luaD_precall' */
@@ -402,7 +401,7 @@ const recover = function(L, status) {
 */
 const resume_error = function(L, msg, narg) {
     L.top -= narg;  /* remove args from the stack */
-    L.stack[L.top++] = new TValue(CT.LUA_TLNGSTR, lstring.luaS_newliteral(L, msg));  /* push error message */
+    L.stack[L.top++] = new lobject.TValue(CT.LUA_TLNGSTR, lstring.luaS_newliteral(L, msg));  /* push error message */
     assert(L.top <= L.ci.top, "stack overflow");
     return TS.LUA_ERRRUN;
 };
