@@ -916,11 +916,11 @@ const LTintfloat = function(l, r) {
 ** The code is a little tricky because it allows '\0' in the strings.
 */
 const l_strcmp = function(ls, rs) {
-    let l = ls;
-    let ll = ls.length;
+    let l = ls.getstr();
+    let ll = ls.tsslen();
     let jl = defs.to_jsstring(l);
-    let r = rs;
-    let lr = rs.length;
+    let r = rs.getstr();
+    let lr = rs.tsslen();
     let jr = defs.to_jsstring(r);
     for (;;) {
         let temp = jl === jr; // TODO: strcoll ?
