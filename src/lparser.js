@@ -255,7 +255,7 @@ const new_localvar = function(ls, name) {
 };
 
 const new_localvarliteral = function(ls, name) {
-    new_localvar(ls, defs.to_luastring(name, true));
+    new_localvar(ls, llex.luaX_newstring(ls, defs.to_luastring(name, true)));
 };
 
 const getlocvar = function(fs, i) {
