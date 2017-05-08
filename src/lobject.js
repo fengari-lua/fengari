@@ -155,8 +155,21 @@ class TValue {
         this.value = tv.value;
     }
 
+    tsvalue() {
+        assert(this.ttisstring());
+        return this.value;
+    }
+
+    svalue() {
+        return this.tsvalue();
+    }
+
+    vslen() {
+        return this.tsvalue().length;
+    }
+
     jsstring(from, to) {
-        return defs.to_jsstring(this.value, from, to);
+        return defs.to_jsstring(this.svalue(), from, to);
     }
 
 }
@@ -465,7 +478,7 @@ const luaO_pushvfstring = function(L, fmt, argp) {
     }
     pushstr(L, fmt.slice(i));
     if (n > 0) lvm.luaV_concat(L, n+1);
-    return L.stack[L.top-1].value;
+    return L.stack[L.top-1].svalue();
 };
 
 const luaO_pushfstring = function(L, fmt, ...argp) {

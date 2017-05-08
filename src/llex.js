@@ -210,7 +210,7 @@ const luaX_newstring = function(ls, str) {
         /* HACK: Workaround lack of ltable 'keyfromval' */
         let tpair = ls.h.strong.get(lstring.luaS_hash(ts));
         assert(tpair.value == o);
-        ts = tpair.key.value; /* re-use value previously stored */
+        ts = tpair.key.tsvalue(); /* re-use value previously stored */
     }
     return ts;
 };

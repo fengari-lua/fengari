@@ -297,7 +297,7 @@ const kname = function(p, pc, c) {
     if (OC.ISK(c)) {  /* is 'c' a constant? */
         let kvalue = p.k[OC.INDEXK(c)];
         if (kvalue.ttisstring()) {  /* literal constant? */
-            r.name = kvalue.value;  /* it is its own name */
+            r.name = kvalue.svalue();  /* it is its own name */
             return r;
         }
         /* else no reasonable name found */
@@ -408,7 +408,7 @@ const getobjname = function(p, lastpc, reg) {
             case 'OP_LOADKX': {
                 let b = op === 'OP_LOADK' ? i.Bx : p.code[pc + 1].Ax;
                 if (p.k[b].ttisstring()) {
-                    r.name = p.k[b].value;
+                    r.name = p.k[b].tsvalue();
                     r.funcname = defs.to_luastring("constant", true);
                     return r;
                 }

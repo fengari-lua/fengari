@@ -75,7 +75,7 @@ const luaT_objtypename = function(L, o) {
         (o.ttisfulluserdata() && (mt = o.value.metatable) !== null)) {
         let name = ltable.luaH_getstr(mt, defs.to_luastring('__name', true));
         if (name.ttisstring())
-            return name.value;
+            return name.svalue();
     }
     return ttypename(o.ttnov());
 };

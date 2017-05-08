@@ -624,7 +624,7 @@ const lua_tolstring = function(L, idx) {
     if ((!o.ttisstring() && !o.ttisnumber()))
         return null;
 
-    return o.ttisstring() ? o.value : defs.to_luastring(`${o.value}`);
+    return o.ttisstring() ? o.svalue() : defs.to_luastring(`${o.value}`);
 };
 
 const lua_tostring =  lua_tolstring;
@@ -658,7 +658,7 @@ const lua_rawlen = function(L, idx) {
     switch (o.ttype()) {
         case CT.LUA_TSHRSTR:
         case CT.LUA_TLNGSTR:
-            return o.value.length;
+            return o.vslen();
         case CT.LUA_TUSERDATA:
             return o.len;
         case CT.LUA_TTABLE:

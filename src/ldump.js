@@ -106,7 +106,7 @@ const DumpConstants = function(f, D) {
                 break;
             case CT.LUA_TSHRSTR:
             case CT.LUA_TLNGSTR:
-                DumpString(o.value, D);
+                DumpString(o.tsvalue(), D);
                 break;
         }
     }

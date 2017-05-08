@@ -859,7 +859,7 @@ const luaV_tointeger = function(obj, mode) {
     } else if (obj.ttisinteger()) {
         return obj.value;
     } else if (obj.ttisstring()) {
-        return luaV_tointeger(lobject.luaO_str2num(obj.value), mode);
+        return luaV_tointeger(lobject.luaO_str2num(obj.svalue()), mode);
     }
 
     return false;
@@ -874,7 +874,7 @@ const tonumber = function(v) {
         return v.value;
 
     if (v.ttnov() === CT.LUA_TSTRING)
-        return lobject.luaO_str2num(v.value);
+        return lobject.luaO_str2num(v.svalue());
 
     return false;
 };
@@ -999,6 +999,10 @@ const tostring = function(L, i) {
     return false;
 };
 
+const isemptystr = function(o) {
+    return o.ttisstring() && o.vslen() === 0;
+};
+
 /*
 ** Main operation for concatenation: concat 'total' values in the stack,
 ** from 'L->top - total' up to 'L->top - 1'.
@@ -1011,23 +1015,23 @@ const luaV_concat = function(L, total) {
 
         if (!(L.stack[top-2].ttisstring() || L.stack[top-2].ttisnumber()) || !tostring(L, top - 1))
             ltm.luaT_trybinTM(L, L.stack[top-2], L.stack[top-1], top-2, ltm.TMS.TM_CONCAT);
-        else if (L.stack[top-1].ttisstring() && L.stack[top-1].value.length === 0)
+        else if (isemptystr(L.stack[top-1])) {
             tostring(L, top - 2);
-        else if (L.stack[top-2].ttisstring() && L.stack[top-2].value.length === 0)
+        } else if (isemptystr(L.stack[top-2])) {
             L.stack[top - 2] = L.stack[top - 1];
-        else {
+        } else {
             /* at least two non-empty string values; get as many as possible */
-            let tl = L.stack[top-1].value.length;
+            let tl = L.stack[top-1].vslen();
             /* collect total length and number of strings */
             for (n = 1; n < total && tostring(L, top - n - 1); n++) {
-                let l = L.stack[top - n - 1].value.length;
+                let l = L.stack[top - n - 1].vslen();
                 // TODO: string length overflow ?
                 tl += l;
             }
 
             let ts = [];
             for (let i = n; i > 0; i--) {
-                ts = ts.concat(L.stack[top - i].value);
+                ts = ts.concat(L.stack[top - i].svalue());
             }
 
             L.stack[top - n] = new lobject.TValue(CT.LUA_TLNGSTR, lstring.luaS_bless(L, ts));
