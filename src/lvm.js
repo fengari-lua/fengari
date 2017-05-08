@@ -719,7 +719,7 @@ const luaV_lessthan = function(L, l, r) {
     if (l.ttisnumber() && r.ttisnumber())
         return LTnum(l, r) ? 1 : 0;
     else if (l.ttisstring() && r.ttisstring())
-        return l_strcmp(l, r) < 0 ? 1 : 0;
+        return l_strcmp(l.tsvalue(), r.tsvalue()) < 0 ? 1 : 0;
     else {
         let res = ltm.luaT_callorderTM(L, l, r, ltm.TMS.TM_LT);
         if (res < 0)
@@ -734,7 +734,7 @@ const luaV_lessequal = function(L, l, r) {
     if (l.ttisnumber() && r.ttisnumber())
         return LEnum(l, r) ? 1 : 0;
     else if (l.ttisstring() && r.ttisstring())
-        return l_strcmp(l, r) <= 0 ? 1 : 0;
+        return l_strcmp(l.tsvalue(), r.tsvalue()) <= 0 ? 1 : 0;
     else {
         res = ltm.luaT_callorderTM(L, l, r, ltm.TMS.TM_LE);
         if (res >= 0)
@@ -773,18 +773,7 @@ const luaV_equalobj = function(L, t1, t2) {
             return t1.value === t2.value ? 1 : 0;
         case CT.LUA_TSHRSTR:
         case CT.LUA_TLNGSTR: {
-            let l1 = t1.value.length;
-            let l2 = t2.value.length;
-
-            if (l1 !== l2) return 0;
-
-            let i;
-            for (i = 0; i < l1; i++) {
-                if (t1.value[i] !== t2.value[i])
-                    return 0;
-            }
-
-            return 1;
+            return lstring.luaS_eqlngstr(t1.tsvalue(), t2.tsvalue()) ? 1 : 0;
         }
         case CT.LUA_TLIGHTUSERDATA:
         case CT.LUA_TUSERDATA:
@@ -927,12 +916,12 @@ const LTintfloat = function(l, r) {
 ** The code is a little tricky because it allows '\0' in the strings.
 */
 const l_strcmp = function(ls, rs) {
-    let l = ls.value;
-    let jl = ls.jsstring();
-    let ll = l.length;
-    let r = rs.value;
-    let lr = r.length;
-    let jr = rs.jsstring();
+    let l = ls;
+    let ll = ls.length;
+    let jl = defs.to_jsstring(l);
+    let r = rs;
+    let lr = rs.length;
+    let jr = defs.to_jsstring(r);
     for (;;) {
         let temp = jl === jr; // TODO: strcoll ?
         if (!temp)  /* not equal? */
@@ -949,14 +938,10 @@ const l_strcmp = function(ls, rs) {
             ll -= len;
             r = r.slice(len);
             lr -= len;
-            jl = new lobject.TValue(null, l).jsstring();
-            jr = new lobject.TValue(null, r).jsstring();
+            jl = defs.to_jsstring(l);
+            jr = defs.to_jsstring(r);
         }
     }
-
-    ls = ls.jsstring();
-    rs = rs.jsstring();
-    return ls === rs ? 0 : (ls < rs ? -1 : 1);
 };
 
 /*
@@ -973,7 +958,7 @@ const luaV_objlen = function(L, ra, rb) {
         }
         case CT.LUA_TSHRSTR:
         case CT.LUA_TLNGSTR:
-            L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, rb.value.length);
+            L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, rb.vslen());
             return;
         default: {
             tm = ltm.luaT_gettmbyobj(L, rb, ltm.TMS.TM_LEN);
