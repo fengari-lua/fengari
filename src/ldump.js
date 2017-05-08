@@ -154,7 +154,7 @@ const DumpFunction = function(f, psource, D) {
     DumpInt(f.linedefined, D);
     DumpInt(f.lastlinedefined, D);
     DumpByte(f.numparams, D);
-    DumpByte(f.is_vararg, D);
+    DumpByte(f.is_vararg?1:0, D);
     DumpByte(f.maxstacksize, D);
     DumpCode(f, D);
     DumpConstants(f, D);
