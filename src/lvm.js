@@ -1021,20 +1021,13 @@ const luaV_concat = function(L, total) {
             L.stack[top - 2] = L.stack[top - 1];
         } else {
             /* at least two non-empty string values; get as many as possible */
-            let tl = L.stack[top-1].vslen();
-            /* collect total length and number of strings */
+            let toconcat = new Array(total);
+            toconcat[total-1] = L.stack[top-1].svalue();
             for (n = 1; n < total && tostring(L, top - n - 1); n++) {
-                let l = L.stack[top - n - 1].vslen();
-                // TODO: string length overflow ?
-                tl += l;
+                toconcat[total-n-1] = L.stack[top - n - 1].svalue();
             }
-
-            let ts = [];
-            for (let i = n; i > 0; i--) {
-                ts = ts.concat(L.stack[top - i].svalue());
-            }
-
-            L.stack[top - n] = new lobject.TValue(CT.LUA_TLNGSTR, lstring.luaS_bless(L, ts));
+            let ts = lstring.luaS_bless(L, Array.prototype.concat.apply([], toconcat));
+            L.stack[top - total] = new lobject.TValue(CT.LUA_TLNGSTR, ts);
         }
         total -= n - 1; /* got 'n' strings to create 1 new */
         L.top -= n - 1; /* popped 'n' strings and pushed one */
