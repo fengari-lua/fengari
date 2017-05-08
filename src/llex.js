@@ -194,6 +194,11 @@ const save_and_next = function(ls) {
     next(ls);
 };
 
+const luaX_newstring = function(ls, str) {
+    /* TODO: caching in ls.h */
+    return lstring.luaS_new(ls.L, str);
+};
+
 /*
 ** increment line number and skips newline sequence (any of
 ** \n, \r, \n\r, or \r\n)
@@ -369,7 +374,7 @@ const read_long_string = function(ls, seminfo, sep) {
     }
 
     if (seminfo)
-        seminfo.ts = lstring.luaS_bless(ls.L, ls.buff.buffer.slice(2 + sep, 2 + sep - 2 * (2 + sep)));
+        seminfo.ts = luaX_newstring(ls, ls.buff.buffer.slice(2 + sep, 2 + sep - 2 * (2 + sep)));
 };
 
 const esccheck = function(ls, c, msg) {
@@ -494,7 +499,7 @@ const read_string = function(ls, del, seminfo) {
     }
     save_and_next(ls);  /* skip delimiter */
 
-    seminfo.ts = lstring.luaS_bless(ls.L, ls.buff.buffer.slice(1, ls.buff.n-1));
+    seminfo.ts = luaX_newstring(ls, ls.buff.buffer.slice(1, ls.buff.n-1));
 };
 
 const isreserved = function(w) {
@@ -606,7 +611,7 @@ const llex = function(ls, seminfo) {
                         save_and_next(ls);
                     } while (ljstype.lislalnum(ls.current));
 
-                    let ts = lstring.luaS_new(ls.L, ls.buff.buffer);
+                    let ts = luaX_newstring(ls, ls.buff.buffer);
                     seminfo.ts = ts;
                     let kidx = luaX_tokens.slice(0, 22).indexOf(defs.to_jsstring(ts));
                     if (kidx >= 0)  /* reserved word? */
@@ -647,6 +652,7 @@ module.exports.MBuffer          = MBuffer;
 module.exports.RESERVED         = RESERVED;
 module.exports.isreserved       = isreserved;
 module.exports.luaX_lookahead   = luaX_lookahead;
+module.exports.luaX_newstring   = luaX_newstring;
 module.exports.luaX_next        = luaX_next;
 module.exports.luaX_setinput    = luaX_setinput;
 module.exports.luaX_syntaxerror = luaX_syntaxerror;
