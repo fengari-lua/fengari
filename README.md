@@ -66,9 +66,10 @@
     - [ ] `luaL_ref`
     - [ ] `luaL_unref`
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
-    - [x] `constructs.lua (`_soft`)
-    - [x] `locals.lua
-    - [x] `strings.lua
+    - [x] `calls.lua`
+    - [x] `constructs.lua` (`_soft`)
+    - [x] `locals.lua`
+    - [x] `strings.lua`
     - [ ] `all.lua`
     - [ ] `big.lua`
     - [ ] `checktable.lua`
@@ -87,7 +88,6 @@
     - [ ] `nextvar.lua`
     - [ ] `vararg.lua`
     - [ ] `attrib.lua`
-    - [ ] `calls.lua`
     - [ ] `code.lua`
     - [ ] `db.lua`
     - [ ] `files.lua`

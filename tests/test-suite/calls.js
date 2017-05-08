@@ -634,3 +634,122 @@ test("[test-suite] calls: test for dump/undump with many upvalues", function (t)
     }, "Lua program ran without error");
 
 });
+
+
+test("[test-suite] calls: test for long method names", function (t) {
+    let luaCode = `
+        do
+          local t = {x = 1}
+          function t:_012345678901234567890123456789012345678901234567890123456789 ()
+            return self.x
+          end
+          assert(t:_012345678901234567890123456789012345678901234567890123456789() == 1)
+        end
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lauxlib.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});
+
+
+test("[test-suite] calls: test for bug in parameter adjustment", function (t) {
+    let luaCode = `
+        assert((function () return nil end)(4) == nil)
+        assert((function () local a; return a end)(4) == nil)
+        assert((function (a) return a end)() == nil)
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lauxlib.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});
+
+
+test("[test-suite] calls: testing binary chunks", function (t) {
+    let luaCode = `
+        do
+          local header = string.pack("c4BBc6BBBBBj",
+            "\\27Lua",                -- signature
+            5*16 + 3,                -- version 5.3
+            0,                       -- format
+            "\\x19\\x93\\r\\n\\x1a\\n",    -- data
+            string.packsize("i"),    -- sizeof(int)
+            string.packsize("T"),    -- sizeof(size_t)
+            4,                       -- size of instruction
+            string.packsize("j"),    -- sizeof(lua integer)
+            string.packsize("n"),    -- sizeof(lua number)
+            0x5678                   -- LUAC_INT
+            -- LUAC_NUM may not have a unique binary representation (padding...)
+          )
+          local c = string.dump(function () local a = 1; local b = 3; return a+b*3 end)
+
+          assert(string.sub(c, 1, #header) == header)
+
+          -- corrupted header
+          for i = 1, #header do
+            local s = string.sub(c, 1, i - 1) ..
+                      string.char(string.byte(string.sub(c, i, i)) + 1) ..
+                      string.sub(c, i + 1, -1)
+            assert(#s == #c)
+            assert(not load(s))
+          end
+
+          -- loading truncated binary chunks
+          for i = 1, #c - 1 do
+            local st, msg = load(string.sub(c, 1, i))
+            assert(not st and string.find(msg, "truncated"))
+          end
+          assert(assert(load(c))() == 10)
+        end
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lauxlib.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});

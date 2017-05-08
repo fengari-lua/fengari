@@ -485,7 +485,7 @@ test('string.pack/unpack/packsize', function (t) {
 
     t.strictEqual(
         lua.lua_tointeger(L, -2),
-        16,
+        12,
         "Correct element(s) on the stack"
     );
 

@@ -368,7 +368,7 @@ const LUAL_PACKPADBYTE = 0x00;
 /* maximum size for the binary representation of an integer */
 const MAXINTSIZE = 16;
 
-const SZINT = 8; // Size of lua_Integer
+const SZINT = 4; // Size of lua_Integer
 
 /* number of bits in a character */
 const NB = 8;
@@ -449,7 +449,7 @@ const getoption = function(h, fmt) {
         case 'H'.charCodeAt(0): r.size = 2; r.opt = KOption.Kuint;  return r;
         case 'l'.charCodeAt(0): r.size = 8; r.opt = KOption.Kint;   return r; // sizeof(long): 8
         case 'L'.charCodeAt(0): r.size = 8; r.opt = KOption.Kuint;  return r;
-        case 'j'.charCodeAt(0): r.size = 8; r.opt = KOption.Kint;   return r; // sizeof(lua_Integer): 8
+        case 'j'.charCodeAt(0): r.size = 4; r.opt = KOption.Kint;   return r; // sizeof(lua_Integer): 8
         case 'J'.charCodeAt(0): r.size = 8; r.opt = KOption.Kuint;  return r;
         case 'T'.charCodeAt(0): r.size = 8; r.opt = KOption.Kuint;  return r; // sizeof(size_t): 8
         case 'f'.charCodeAt(0): r.size = 4; r.opt = KOption.Kfloat; return r; // sizeof(float): 4
