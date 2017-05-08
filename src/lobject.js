@@ -453,7 +453,7 @@ const luaO_pushvfstring = function(L, fmt, argp) {
                 pushstr(L, defs.to_luastring(String.fromCodePoint(argp[a++])));
                 break;
             case char['%']:
-                pushstr(L, char['%']);
+                pushstr(L, [char['%']]);
                 break;
             default: {
                 ldebug.luaG_runerror(L, defs.to_luastring("invalid option '%%%c' to 'lua_pushfstring'"), fmt[e + 1]);
