@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "./node_modules/babel-tape-runner/bin/babel-tape-runner tests/*.js tests/test-suite/*.js | faucet"
+    "test": "babel-tape-runner tests/*.js tests/test-suite/*.js | faucet"
   },
   "repository": {
     "type": "git",
