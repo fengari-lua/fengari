@@ -4,7 +4,6 @@
 const assert         = require('assert');
 
 const defs           = require('./defs.js');
-const BytecodeParser = require('./lundump.js');
 const lapi           = require('./lapi.js');
 const ldebug         = require('./ldebug.js');
 const lfunc          = require('./lfunc.js');
@@ -15,6 +14,7 @@ const lparser        = require('./lparser.js');
 const lstate         = require('./lstate.js');
 const lstring        = require('./lstring.js');
 const ltm            = require('./ltm.js');
+const lundump        = require('./lundump.js');
 const lvm            = require('./lvm.js');
 const CT             = defs.constant_types;
 const TS             = defs.thread_status;
@@ -575,7 +575,7 @@ const f_parser = function(L, p) {
     let c = p.z.getc();  /* read first character */
     if (c === defs.LUA_SIGNATURE.charCodeAt(0)) {
         checkmode(L, p.mode, defs.to_luastring("binary", true));
-        cl = new BytecodeParser(L, p.z, p.name).luaU_undump();
+        cl = lundump.luaU_undump(L, p.z, p.name);
     } else {
         checkmode(L, p.mode, defs.to_luastring("text", true));
         cl = lparser.luaY_parser(L, p.z, p.buff, p.dyd, p.name, c);

@@ -4,6 +4,7 @@
 const assert  = require('assert');
 
 const defs     = require('./defs.js');
+const ldo      = require('./ldo.js');
 const lfunc    = require('./lfunc.js');
 const lobject  = require('./lobject.js');
 const lopcodes = require('./lopcodes.js');
@@ -15,14 +16,24 @@ let LUAC_DATA = [0x19, 0x93, defs.char["\r"], defs.char["\n"], 0x1a, defs.char["
 class BytecodeParser {
 
     constructor(L, buffer, name) {
-        assert(buffer instanceof llex.MBuffer, "BytecodeParser only operates on a MBuffer");
-
-        this.L = L;
         this.intSize = 4;
         this.size_tSize = 8;
         this.instructionSize = 4;
         this.integerSize = 4;
         this.numberSize = 8;
+
+        assert(buffer instanceof llex.MBuffer, "BytecodeParser only operates on a MBuffer");
+        assert(Array.isArray(name));
+
+        if (name[0] == defs.char["@"] || name[0] == defs.char["="])
+            this.name = name.slice(1);
+        else if (name[0] == defs.LUA_SIGNATURE.charCodeAt(0))
+            this.name = defs.to_luastring("binary string", true);
+        else
+            this.name = name;
+
+        this.L = L;
+        this.buffer = buffer;
 
         // Used to do buffer to number conversions
         this.dv = new DataView(
@@ -30,9 +41,6 @@ class BytecodeParser {
                 Math.max(this.intSize, this.size_tSize, this.instructionSize, this.integerSize, this.numberSize)
             )
         );
-
-        this.buffer = buffer;
-        this.name = name;
     }
 
     read(size) {
@@ -220,15 +228,15 @@ class BytecodeParser {
     }
 
     checkHeader() {
-        this.checkliteral(defs.to_luastring(defs.LUA_SIGNATURE.substring(1)), "bad LUA_SIGNATURE, expected '<esc>Lua'"); /* 1st char already checked */
+        this.checkliteral(defs.to_luastring(defs.LUA_SIGNATURE.substring(1)), "not a"); /* 1st char already checked */
 
         if (this.readByte() !== 0x53)
-            this.error("bad Lua version, expected 5.3");
+            this.error("version mismatch in");
 
         if (this.readByte() !== 0)
-            this.error("supports only official PUC-Rio implementation");
+            this.error("format mismatch in");
 
-        this.checkliteral(LUAC_DATA, "bytecode corrupted");
+        this.checkliteral(LUAC_DATA, "corrupted");
 
         this.intSize         = this.readByte();
         this.size_tSize      = this.readByte();
@@ -243,17 +251,15 @@ class BytecodeParser {
         this.checksize(this.numberSize, 8, "number");
 
         if (this.readInteger() !== 0x5678)
-            this.error("endianness mismatch");
+            this.error("endianness mismatch in");
 
         if (this.readNumber() !== 370.5)
-            this.error("float format mismatch");
+            this.error("float format mismatch in");
 
     }
 
     error(why) {
-        const lapi = require('./lapi.js');
-        const ldo  = require('./ldo.js');
-        lapi.lua_pushstring(this.L, defs.to_luastring(`${this.name}: ${why} precompiled chunk`, true));
+        lobject.luaO_pushfstring(this.L, defs.to_luastring("%s: %s precompiled chunk"), this.name, defs.to_luastring(why));
         ldo.luaD_throw(this.L, defs.thread_status.LUA_ERRSYNTAX);
     }
 
@@ -261,24 +267,18 @@ class BytecodeParser {
         if (byte !== size)
             this.error(`${tname} size mismatch in`);
     }
-
-    luaU_undump() {
-        this.checkHeader();
-
-        let cl = lfunc.luaF_newLclosure(this.L, this.readByte());
-
-        this.L.stack[this.L.top] = new lobject.TValue(defs.CT.LUA_TLCL, cl);
-        this.L.top++;
-
-        cl.p = new lfunc.Proto(this.L);
-
-        this.readFunction(cl.p);
-
-        assert(cl.nupvalues === cl.p.upvalues.length);
-
-        return cl;
-    }
-
 }
 
-module.exports = BytecodeParser;
+const luaU_undump = function(L, buffer, name) {
+    let S = new BytecodeParser(L, buffer, name);
+    S.checkHeader();
+    let cl = lfunc.luaF_newLclosure(L, S.readByte());
+    L.stack[L.top++] = new lobject.TValue(defs.CT.LUA_TLCL, cl);
+    cl.p = new lfunc.Proto(L);
+    S.readFunction(cl.p, null);
+    assert(cl.nupvalues === cl.p.upvalues.length);
+    /* luai_verifycode */
+    return cl;
+};
+
+module.exports.luaU_undump = luaU_undump;
