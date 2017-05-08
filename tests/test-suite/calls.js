@@ -587,3 +587,50 @@ test("[test-suite] calls: test for dump/undump with upvalues", function (t) {
     }, "Lua program ran without error");
 
 });
+
+
+test("[test-suite] calls: test for dump/undump with many upvalues", function (t) {
+    let luaCode = `
+        do
+          local nup = 200    -- maximum number of local variables
+          local prog = {"local a1"}
+          for i = 2, nup do prog[#prog + 1] = ", a" .. i end
+          prog[#prog + 1] = " = 1"
+          for i = 2, nup do prog[#prog + 1] = ", " .. i end
+          local sum = 1
+          prog[#prog + 1] = "; return function () return a1"
+          for i = 2, nup do prog[#prog + 1] = " + a" .. i; sum = sum + i end
+          prog[#prog + 1] = " end"
+          prog = table.concat(prog)
+          local f = assert(load(prog))()
+          assert(f() == sum)
+
+          f = load(string.dump(f))   -- main chunk now has many upvalues
+          local a = 10
+          local h = function () return a end
+          for i = 1, nup do
+            debug.upvaluejoin(f, i, h, 1)
+          end
+          assert(f() == 10 * nup)
+        end
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lauxlib.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});

@@ -130,7 +130,7 @@ const tmove = function(L) {
 
 const tconcat = function(L) {
     let last = aux_getn(L, 1, TAB_R);
-    let sep = lauxlib.luaL_optlstring(L, 2, "");
+    let sep = lauxlib.luaL_optlstring(L, 2, []);
     let i = lauxlib.luaL_optinteger(L, 3, 1);
     last = lauxlib.luaL_optinteger(L, 4, last);
 
