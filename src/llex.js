@@ -629,7 +629,7 @@ const llex = function(ls, seminfo) {
 
                     let ts = luaX_newstring(ls, ls.buff.buffer);
                     seminfo.ts = ts;
-                    let kidx = luaX_tokens.slice(0, 22).indexOf(defs.to_jsstring(ts));
+                    let kidx = luaX_tokens.slice(0, 22).indexOf(defs.to_jsstring(ts.getstr()));
                     if (kidx >= 0)  /* reserved word? */
                         return kidx + FIRST_RESERVED;
                     else

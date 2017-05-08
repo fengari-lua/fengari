@@ -66,8 +66,8 @@ const DumpString = function(s, D) {
     if (s === null)
         DumpByte(0, D);
     else {
-        let size = s.length + 1;
-        let str = s;
+        let size = s.tsslen() + 1;
+        let str = s.getstr();
         if (size < 0xFF)
             DumpByte(size, D);
         else {

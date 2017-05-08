@@ -82,7 +82,7 @@ const upvalname = function(p, uv) {
     assert(uv < p.upvalues.length);
     let s = p.upvalues[uv].name;
     if (s === null) return ["?".charCodeAt(0)];
-    return s;
+    return s.getstr();
 };
 
 const findvararg = function(ci, n) {
@@ -167,7 +167,7 @@ const funcinfo = function(ar, cl) {
         ar.what = "J";
     } else {
         let p = cl.p;
-        ar.source = p.source ? p.source : defs.to_luastring("=?", true);
+        ar.source = p.source ? p.source.getstr() : defs.to_luastring("=?", true);
         ar.linedefined = p.linedefined;
         ar.lastlinedefined = p.lastlinedefined;
         ar.what = ar.linedefined === 0 ? defs.to_luastring("main", true) : defs.to_luastring("Lua", true);
@@ -491,7 +491,7 @@ const funcnamefromcode = function(L, ci) {
             return null;  /* cannot find a reasonable name */
     }
 
-    r.name = L.l_G.tmname[tm];
+    r.name = L.l_G.tmname[tm].getstr();
     r.funcname = defs.to_luastring("metamethod", true);
     return r;
 };
@@ -569,7 +569,7 @@ const luaG_ordererror = function(L, p1, p2) {
 const luaG_addinfo = function(L, msg, src, line) {
     let buff;
     if (src)
-        buff = lobject.luaO_chunkid(src, luaconf.LUA_IDSIZE);
+        buff = lobject.luaO_chunkid(src.getstr(), luaconf.LUA_IDSIZE);
     else
         buff = ['?'.charCodeAt(0)];
 

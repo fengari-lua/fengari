@@ -53,7 +53,7 @@ const luaH_getint = function(t, key) {
 };
 
 const luaH_getstr = function(t, key) {
-    assert(Array.isArray(key));
+    assert(key instanceof lstring.TString);
     return getgeneric(t, lstring.luaS_hash(key));
 };
 

@@ -512,7 +512,7 @@ const aux_upvalue = function(L, fi, n) {
             if (!(1 <= n && n <= p.upvalues.length)) return null;
             let name = p.upvalues[n-1].name;
             return {
-                name: name ? name : defs.to_luastring("(*no name)", true),
+                name: name ? name.getstr() : defs.to_luastring("(*no name)", true),
                 val: f.upvals[n-1].val()
             };
         }

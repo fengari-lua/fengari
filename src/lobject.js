@@ -161,11 +161,11 @@ class TValue {
     }
 
     svalue() {
-        return this.tsvalue();
+        return this.tsvalue().getstr();
     }
 
     vslen() {
-        return this.tsvalue().length;
+        return this.tsvalue().tsslen();
     }
 
     jsstring(from, to) {

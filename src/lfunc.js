@@ -114,7 +114,7 @@ const luaF_getlocalname = function(f, local_number, pc) {
         if (pc < f.locvars[i].endpc) {  /* is variable active? */
             local_number--;
             if (local_number === 0)
-                return f.locvars[i].varname;
+                return f.locvars[i].varname.getstr();
         }
     }
     return null;  /* not found */
