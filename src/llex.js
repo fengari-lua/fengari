@@ -8,6 +8,7 @@ const ldo      = require('./ldo.js');
 const ljstype  = require('./ljstype.js');
 const lobject  = require('./lobject.js');
 const lstring  = require('./lstring.js');
+const ltable   = require('./ltable.js');
 const llimit   = require('./llimit.js');
 const TS       = defs.thread_status;
 const char     = defs.char;
@@ -194,9 +195,24 @@ const save_and_next = function(ls) {
     next(ls);
 };
 
+/*
+** creates a new string and anchors it in scanner's table so that
+** it will not be collected until the end of the compilation
+** (by that time it should be anchored somewhere)
+*/
 const luaX_newstring = function(ls, str) {
-    /* TODO: caching in ls.h */
-    return lstring.luaS_new(ls.L, str);
+    let L = ls.L;
+    let ts = lstring.luaS_new(L, str);
+    let o = ltable.luaH_set(ls.h, new lobject.TValue(defs.CT.LUA_TLNGSTR, ts));
+    if (o.ttisnil()) { /* not in use yet? */
+        o.setbvalue(true);
+    } else { /* string already present */
+        /* HACK: Workaround lack of ltable 'keyfromval' */
+        let tpair = ls.h.strong.get(lstring.luaS_hash(ts));
+        assert(tpair.value == o);
+        ts = tpair.key.value; /* re-use value previously stored */
+    }
+    return ts;
 };
 
 /*
