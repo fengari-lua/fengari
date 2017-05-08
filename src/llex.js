@@ -208,7 +208,7 @@ const luaX_newstring = function(ls, str) {
         o.setbvalue(true);
     } else { /* string already present */
         /* HACK: Workaround lack of ltable 'keyfromval' */
-        let tpair = ls.h.strong.get(lstring.luaS_hash(ts));
+        let tpair = ls.h.strong.get(lstring.luaS_hashlongstr(ts));
         assert(tpair.value == o);
         ts = tpair.key.tsvalue(); /* re-use value previously stored */
     }

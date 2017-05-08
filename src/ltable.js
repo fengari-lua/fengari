@@ -24,7 +24,7 @@ const table_hash = function(key) {
         return key.value;
     case CT.LUA_TSHRSTR:
     case CT.LUA_TLNGSTR:
-        return lstring.luaS_hash(key.value);
+        return lstring.luaS_hashlongstr(key.tsvalue());
     default:
         throw new Error("unknown key type: " + key.type);
     }
@@ -54,7 +54,7 @@ const luaH_getint = function(t, key) {
 
 const luaH_getstr = function(t, key) {
     assert(key instanceof lstring.TString);
-    return getgeneric(t, lstring.luaS_hash(key));
+    return getgeneric(t, lstring.luaS_hashlongstr(key));
 };
 
 const luaH_get = function(t, key) {
