@@ -9,7 +9,7 @@ const ldo                  = require('./ldo.js');
 const lapi                 = require('./lapi.js');
 const ltable               = require('./ltable.js');
 const lfunc                = require('./lfunc.js');
-const luaT_init            = require('./ltm.js').luaT_init;
+const ltm                  = require('./ltm.js');
 const CT                   = defs.constant_types;
 const TS                   = defs.thread_status;
 const LUA_NUMTAGS          = defs.LUA_NUMTAGS;
@@ -68,6 +68,7 @@ class global_State {
         this.l_registry = new lobject.TValue(CT.LUA_TNIL, null);
         this.panic = null;
         this.version = null;
+        this.tmname = new Array(ltm.TMS.TM_N);
         this.mt = new Array(LUA_NUMTAGS);
     }
 
@@ -105,7 +106,7 @@ const f_luaopen = function(L) {
     let g = L.l_G;
     stack_init(L, L);
     init_registry(L, g);
-    luaT_init(L);
+    ltm.luaT_init(L);
     g.version = lapi.lua_version(null);
 };
 
