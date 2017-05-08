@@ -1017,7 +1017,7 @@ const luaV_concat = function(L, total) {
             L.stack[top - 2] = L.stack[top - 1];
         else {
             /* at least two non-empty string values; get as many as possible */
-            let tl = L.stack[top-2].value.length;
+            let tl = L.stack[top-1].value.length;
             /* collect total length and number of strings */
             for (n = 1; n < total && tostring(L, top - n - 1); n++) {
                 let l = L.stack[top - n - 1].value.length;
