@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "babel-tape-runner tests/*.js tests/test-suite/*.js | faucet"
+    "test": "tape tests/*.js tests/test-suite/*.js | faucet"
   },
   "repository": {
     "type": "git",
@@ -27,13 +27,8 @@
   },
   "homepage": "https://github.com/giann/fengari#readme",
   "devDependencies": {
-    "docdash": "^0.4.0",
-    "js-beautify": "^1.6.8",
-    "jsdoc": "^3.4.3",
-    "tap-bail": "0.0.0",
-    "babel-tape-runner": "^2.0.1",
-    "faucet": "0.0.1",
-    "tmp": "0.0.31"
+    "tape": "^2.0.1",
+    "faucet": "0.0.1"
   },
   "dependencies": {
     "readline-sync": "^1.4.7",

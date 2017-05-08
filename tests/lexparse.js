@@ -1,7 +1,6 @@
 "use strict";
 
 const test       = require('tape');
-const beautify   = require('js-beautify').js_beautify;
 
 const tests      = require("./tests.js");
 const toByteCode = tests.toByteCode;
