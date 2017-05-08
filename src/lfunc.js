@@ -8,7 +8,8 @@ const CT      = defs.constant_types;
 
 class Proto {
 
-    constructor() {
+    constructor(L) {
+        this.id = L.l_G.id_counter++;
         this.k = [];              // constants used by the function
         this.p = [];              // functions defined inside the function
         this.code = [];           // opcodes
