@@ -116,7 +116,7 @@ const luaT_callTM = function(L, f, p1, p2, p3, hasres) {
     L.top += 3;
 
     if (!hasres)  /* no result? 'p3' is third argument */
-        L.stack[L.top++] = p3;  /* 3rd argument */
+        L.stack[L.top++] = new lobject.TValue(p3.type, p3.value);  /* 3rd argument */
 
     if (L.ci.callstatus & lstate.CIST_LUA)
         ldo.luaD_call(L, func, hasres);
