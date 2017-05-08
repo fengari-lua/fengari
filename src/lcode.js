@@ -543,7 +543,10 @@ const boolK = function(fs, b) {
 ** Add nil to list of constants and return its index.
 */
 const nilK = function(fs) {
-    return addk(fs, new TValue(CT.LUA_TLNGSTR, defs.to_luastring(`null`)), new TValue(CT.LUA_TNIL, null));
+    let v = new TValue(CT.LUA_TNIL, null);
+    let k = new TValue(CT.LUA_TTABLE, fs.ls.h);
+    /* cannot use nil as key; instead use table itself to represent nil */
+    return addk(fs, k, v);
 };
 
 /*
