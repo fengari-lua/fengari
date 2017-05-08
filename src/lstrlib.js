@@ -631,7 +631,7 @@ const str_pack = function(L) {
 };
 
 const str_reverse = function(L) {
-    lua.lua_pushstring(L, lauxlib.luaL_checkstring(L, 1).reverse());
+    lua.lua_pushstring(L, lauxlib.luaL_checkstring(L, 1).slice(0).reverse());
     return 1;
 };
 
