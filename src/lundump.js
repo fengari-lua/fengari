@@ -9,6 +9,8 @@ const lobject  = require('./lobject.js');
 const lopcodes = require('./lopcodes.js');
 const llex     = require('./llex.js');
 
+let LUAC_DATA = [0x19, 0x93, defs.char["\r"], defs.char["\n"], 0x1a, defs.char["\n"]];
+
 class BytecodeParser {
 
     constructor(L, buffer, name) {
@@ -100,12 +102,7 @@ class BytecodeParser {
             return null;
         }
 
-        let string = "";
-
-        for (let i = 0; i < size; i++)
-            string += String.fromCharCode(this.readByte());
-
-        return string;
+        return this.read(size);
     }
 
     /* creates a mask with 'n' 1 bits at position 'p' */
@@ -204,7 +201,7 @@ class BytecodeParser {
         n = this.readInt();
         for (let i = 0; i < n; i++) {
             f.locvars[i] = {
-                varname: defs.to_luastring(this.readString()),
+                varname: this.readString(),
                 startpc: this.readInt(),
                 endpc:   this.readInt()
             };
@@ -218,7 +215,7 @@ class BytecodeParser {
 
     readFunction(f, psource) {
         f.source = this.readString();
-        if (f.source === null || f.source === undefined || f.source.length === 0)  /* no source in dump? */
+        if (f.source === null)  /* no source in dump? */
             f.source = psource;  /* reuse parent's source */
         f.linedefined = this.readInt();
         f.lastlinedefined = this.readInt();
@@ -233,7 +230,7 @@ class BytecodeParser {
     }
 
     checkHeader() {
-        if (this.readString(3) !== defs.LUA_SIGNATURE.slice(1))  /* 1st char already checked */
+        if (this.readString(3).join() !== defs.to_luastring(defs.LUA_SIGNATURE.substring(1)).join())  /* 1st char already checked */
             this.error("bad LUA_SIGNATURE, expected '<esc>Lua'");
 
         if (this.readByte() !== 0x53)
@@ -242,7 +239,7 @@ class BytecodeParser {
         if (this.readByte() !== 0)
             this.error("supports only official PUC-Rio implementation");
 
-        if (this.readString(6) !== "\x19\x93\r\n\x1a\n")
+        if (this.readString(6).join() !== LUAC_DATA.join())
             this.error("bytecode corrupted");
 
         this.intSize         = this.readByte();
