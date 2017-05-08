@@ -9,9 +9,9 @@ const lopcode  = require('./lopcodes.js');
 const lparser  = require('./lparser.js');
 const lstring  = require('./lstring.js');
 const ltable   = require('./ltable.js');
-require('./lstate.js'); /* XXX: if this isn't here then things break on require("ltm") */
 const ltm      = require('./ltm.js');
 const lvm      = require('./lvm.js');
+
 const CT       = defs.CT;
 const OpCodesI = lopcode.OpCodesI;
 const TValue   = lobject.TValue;
