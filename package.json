@@ -17,7 +17,10 @@
     "lua",
     "vm"
   ],
-  "author": "Benoit Giannangeli",
+  "contributors": [
+    "Benoit Giannangeli",
+    "Daurnimator <quae@daurnimator.com>"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/giann/fengari/issues"
