@@ -70,31 +70,31 @@
     - [x] `constructs.lua` (`_soft`)
     - [x] `locals.lua`
     - [x] `strings.lua`
+    - [x] `vararg.lua`
     - [ ] `all.lua`
-    - [ ] `big.lua`
-    - [ ] `checktable.lua`
-    - [ ] `errors.lua`
-    - [ ] `gc.lua`
-    - [ ] `literals.lua`
-    - [ ] `math.lua`
-    - [ ] `sort.lua`
-    - [ ] `utf8.lua`
     - [ ] `api.lua`
-    - [ ] `bitwise.lua`
-    - [ ] `closure.lua`
-    - [ ] `coroutine.lua`
-    - [ ] `events.lua`
-    - [ ] `goto.lua`
-    - [ ] `nextvar.lua`
-    - [ ] `vararg.lua`
     - [ ] `attrib.lua`
+    - [ ] `big.lua`
+    - [ ] `bitwise.lua`
+    - [ ] `checktable.lua`
+    - [ ] `closure.lua`
     - [ ] `code.lua`
+    - [ ] `coroutine.lua`
     - [ ] `db.lua`
+    - [ ] `errors.lua`
+    - [ ] `events.lua`
     - [ ] `files.lua`
+    - [ ] `gc.lua`
+    - [ ] `goto.lua`
     - [ ] `heavy.lua`
+    - [ ] `literals.lua`
     - [ ] `main.lua`
+    - [ ] `math.lua`
+    - [ ] `nextvar.lua`
     - [ ] `pm.lua`
+    - [ ] `sort.lua`
     - [ ] `tpack.lua`
+    - [ ] `utf8.lua`
     - [ ] `verybig.lua`
 - [ ] DOM API binding
 
