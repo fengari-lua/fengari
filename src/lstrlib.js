@@ -409,14 +409,13 @@ const digit = function(c) {
 };
 
 const getnum = function(fmt, df) {
-    if (!digit(fmt.s[0]))  /* no number? */
+    if (fmt.off >= fmt.s.length || !digit(fmt.s[fmt.off]))  /* no number? */
         return df;  /* return default value */
     else {
         let a = 0;
         do {
-            a = a * 10 + (fmt.s[0] - '0'.charCodeAt(0));
-            fmt.s = fmt.s.slice(1);
-        } while (digit(fmt.s[0]) && a <= (MAXSIZE - 9)/10);
+            a = a * 10 + (fmt.s[fmt.off++] - '0'.charCodeAt(0));
+        } while (fmt.off < fmt.s.length && digit(fmt.s[fmt.off]) && a <= (MAXSIZE - 9)/10);
         return a;
     }
 };
@@ -441,8 +440,7 @@ const getoption = function(h, fmt) {
         size: NaN
     };
 
-    r.opt = fmt.s[0];
-    fmt.s = fmt.s.slice(1);
+    r.opt = fmt.s[fmt.off++];
     r.size = 0;  /* default */
     switch (r.opt) {
         case 'b'.charCodeAt(0): r.size = 1; r.opt = KOption.Kint;   return r; // sizeof(char): 1
@@ -503,7 +501,7 @@ const getdetails = function(h, totalsize, fmt) {
     r.opt = opt.opt;
     let align = r.size;  /* usually, alignment follows size */
     if (r.opt === KOption.Kpaddalign) {  /* 'X' gets alignment from following option */
-        if (fmt.s[0] === 0)
+        if (fmt.off >= fmt.s.length || fmt.s[fmt.off] === 0)
             lauxlib.luaL_argerror(h.L, 1, lua.to_luastring("invalid next option for option 'X'", true));
         else {
             let o = getoption(h, fmt);
@@ -557,16 +555,14 @@ const packnum = function(b, n, islittle, size) {
 const str_pack = function(L) {
     let b = [];
     let h = new Header(L);
-    let fmt = lauxlib.luaL_checkstring(L, 1);  /* format string */
-    fmt.push(0); // Add \0 to avoid overflow
-    fmt = {
-        s: fmt,
+    let fmt = {
+        s: lauxlib.luaL_checkstring(L, 1),  /* format string */
         off: 0
     };
     let arg = 1;  /* current argument to pack */
     let totalsize = 0;  /* accumulate total size of result */
     lua.lua_pushnil(L);  /* mark to separate arguments from string buffer */
-    while (fmt.s.length - 1 > 0) {
+    while (fmt.off < fmt.s.length) {
         let details = getdetails(h, totalsize, fmt);
         let opt = details.opt;
         let size = details.size;
@@ -689,14 +685,12 @@ const str_byte = function(L) {
 
 const str_packsize = function(L) {
     let h = new Header(L);
-    let fmt = lauxlib.luaL_checkstring(L, 1);
-    fmt.push(0); // Add \0 to avoid overflow
-    fmt = {
-        s: fmt,
+    let fmt = {
+        s: lauxlib.luaL_checkstring(L, 1),
         off: 0
     };
     let totalsize = 0;  /* accumulate total size of result */
-    while (fmt.s.length - 1 > 0) {
+    while (fmt.off < fmt.s.length) {
         let details = getdetails(h, totalsize, fmt);
         let opt = details.opt;
         let size = details.size;
@@ -756,10 +750,8 @@ const unpacknum = function(L, b, islittle, size) {
 
 const str_unpack = function(L) {
     let h = new Header(L);
-    let fmt = lauxlib.luaL_checkstring(L, 1);
-    fmt.push(0); // Add \0 to avoid overflow
-    fmt = {
-        s: fmt,
+    let fmt = {
+        s: lauxlib.luaL_checkstring(L, 1),
         off: 0
     };
     let data = lauxlib.luaL_checkstring(L, 2);
@@ -767,7 +759,7 @@ const str_unpack = function(L) {
     let pos = posrelat(lauxlib.luaL_optinteger(L, 3, 1), ld) - 1;
     let n = 0;  /* number of results */
     lauxlib.luaL_argcheck(L, pos <= ld, 3, lua.to_luastring("initial position out of string", true));
-    while (fmt.s.length - 1 > 0) {
+    while (fmt.off < fmt.s.length) {
         let details = getdetails(h, pos, fmt);
         let opt = details.opt;
         let size = details.size;
