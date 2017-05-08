@@ -71,18 +71,6 @@ class global_State {
         this.mt = new Array(LUA_NUMTAGS);
     }
 
-    intern(stringArray) {
-        // TODO: when weak value maps are available
-        // let key = stringArray.map(e => `${e}|`).join('');
-
-        // if (!this.strt.has(key))
-        //     this.strt.set(key, new lobject.TValue(CT.LUA_TLNGSTR, stringArray));
-
-        // return this.strt.get(key);
-
-        return new lobject.TValue(CT.LUA_TLNGSTR, stringArray);
-    }
-
 }
 
 

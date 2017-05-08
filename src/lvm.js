@@ -9,6 +9,7 @@ const luaconf     = require('./luaconf.js');
 const lobject     = require('./lobject.js');
 const lfunc       = require('./lfunc.js');
 const lstate      = require('./lstate.js');
+const lstring     = require('./lstring.js');
 const llimit      = require('./llimit.js');
 const ldo         = require('./ldo.js');
 const ltm         = require('./ltm.js');
@@ -991,7 +992,7 @@ const tostring = function(L, i) {
     if (o.ttisstring()) return true;
 
     if (o.ttisnumber() && !isNaN(o.value)) {
-        L.stack[i] = L.l_G.intern(defs.to_luastring(`${o.value}`));
+        L.stack[i] = new lobject.TValue(CT.LUA_TLNGSTR, lstring.luaS_bless(L, defs.to_luastring(`${o.value}`)));
         return true;
     }
 
@@ -1029,7 +1030,7 @@ const luaV_concat = function(L, total) {
                 ts = ts.concat(L.stack[top - i].value);
             }
 
-            L.stack[top - n] = L.l_G.intern(ts);
+            L.stack[top - n] = new lobject.TValue(CT.LUA_TLNGSTR, lstring.luaS_bless(L, ts));
         }
         total -= n - 1; /* got 'n' strings to create 1 new */
         L.top -= n - 1; /* popped 'n' strings and pushed one */

@@ -7,6 +7,7 @@ const llex     = require('./llex.js');
 const lobject  = require('./lobject.js');
 const lopcode  = require('./lopcodes.js');
 const lparser  = require('./lparser.js');
+const lstring  = require('./lstring.js');
 const ltable   = require('./ltable.js');
 require('./lstate.js'); /* XXX: if this isn't here then things break on require("ltm") */
 const ltm      = require('./ltm.js');
@@ -514,7 +515,7 @@ const luaK_stringK = function(fs, s) {
 */
 const luaK_intK = function(fs, n) {
     /* FIXME: shouldn't use string as key. need to use pointer */
-    let k = new TValue(CT.LUA_TLNGSTR, defs.to_luastring(`${n}`));
+    let k = new TValue(CT.LUA_TLNGSTR, lstring.luaS_bless(fs.L, defs.to_luastring(`${n}`)));
     let o = new TValue(CT.LUA_TNUMINT, n);
     return addk(fs, k, o);
 };

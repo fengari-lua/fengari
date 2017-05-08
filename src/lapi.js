@@ -10,6 +10,7 @@ const lfunc     = require('./lfunc.js');
 const llex      = require('./llex.js');
 const lobject   = require('./lobject.js');
 const lstate    = require('./lstate.js');
+const lstring   = require('./lstring.js');
 const ltm       = require('./ltm.js');
 const luaconf   = require('./luaconf.js');
 const lvm       = require('./lvm.js');
@@ -216,7 +217,7 @@ const lua_pushlstring = function(L, s, len) {
     assert(Array.isArray(s), "lua_pushlstring expects array of byte");
     assert(typeof len === "number");
 
-    let ts = len === 0 ? L.l_G.intern(defs.to_luastring("", true)) : new TValue(CT.LUA_TLNGSTR, s.slice(0, len));
+    let ts = new TValue(CT.LUA_TLNGSTR, lstring.luaS_bless(L, s.slice(0, len)));
     L.stack[L.top++] = ts;
 
     assert(L.top <= L.ci.top, "stack overflow");
@@ -230,7 +231,7 @@ const lua_pushstring = function (L, s) {
     if (s === undefined || s === null)
         L.stack[L.top] = new TValue(CT.LUA_TNIL, null);
     else {
-        L.stack[L.top] = new TValue(CT.LUA_TLNGSTR, s);
+        L.stack[L.top] = new TValue(CT.LUA_TLNGSTR, lstring.luaS_new(L, s));
     }
 
     L.top++;
@@ -255,7 +256,7 @@ const lua_pushliteral = function (L, s) {
     if (s === undefined || s === null)
         L.stack[L.top] = new TValue(CT.LUA_TNIL, null);
     else {
-        let ts = L.l_G.intern(defs.to_luastring(s));
+        let ts = new TValue(CT.LUA_TLNGSTR, lstring.luaS_newliteral(L, s));
         L.stack[L.top] = ts;
     }
 
@@ -330,7 +331,7 @@ const lua_pushglobaltable = function(L) {
 const auxsetstr = function(L, t, k) {
     assert(Array.isArray(k), "key must be an array of bytes");
 
-    let str = L.l_G.intern(k);
+    let str = new TValue(CT.LUA_TLNGSTR, lstring.luaS_new(L, k));
 
     assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
 
@@ -429,7 +430,7 @@ const lua_rawsetp = function(L, idx, p) {
 const auxgetstr = function(L, t, k) {
     assert(Array.isArray(k), "key must be an array of bytes");
 
-    let str = L.l_G.intern(k);
+    let str = new TValue(CT.LUA_TLNGSTR, lstring.luaS_new(L, k));
 
     L.stack[L.top++] = str;
     assert(L.top <= L.ci.top, "stack overflow");
@@ -952,7 +953,7 @@ const lua_concat = function(L, n) {
     if (n >= 2)
         lvm.luaV_concat(L, n);
     else if (n === 0) {
-        L.stack[L.top++] = L.l_G.intern(defs.to_luastring("", true));
+        L.stack[L.top++] = new TValue(CT.LUA_TLNGSTR, lstring.luaS_newliteral(L, []));
         assert(L.top <= L.ci.top, "stack overflow");
     }
 };

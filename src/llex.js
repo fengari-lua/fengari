@@ -7,6 +7,7 @@ const ldebug   = require('./ldebug.js');
 const ldo      = require('./ldo.js');
 const ljstype  = require('./ljstype');
 const lobject  = require('./lobject');
+const lstring  = require('./lstring.js');
 const llimit   = require('./llimit.js');
 const TS       = defs.thread_status;
 const char     = defs.char;
@@ -231,7 +232,7 @@ const luaX_setinput = function(L, ls, z, source, firstchar) {
     ls.linenumber = 1;
     ls.lastline = 1;
     ls.source = source;
-    ls.envn = defs.to_luastring("_ENV", true);
+    ls.envn = lstring.luaS_newliteral(L, "_ENV");
 };
 
 const check_next1 = function(ls, c) {
@@ -368,7 +369,7 @@ const read_long_string = function(ls, seminfo, sep) {
     }
 
     if (seminfo)
-        seminfo.ts = ls.buff.buffer.slice(2 + sep, 2 + sep - 2 * (2 + sep));
+        seminfo.ts = lstring.luaS_bless(ls.L, ls.buff.buffer.slice(2 + sep, 2 + sep - 2 * (2 + sep)));
 };
 
 const esccheck = function(ls, c, msg) {
@@ -493,7 +494,7 @@ const read_string = function(ls, del, seminfo) {
     }
     save_and_next(ls);  /* skip delimiter */
 
-    seminfo.ts = ls.buff.buffer.slice(1, ls.buff.n-1);
+    seminfo.ts = lstring.luaS_bless(ls.L, ls.buff.buffer.slice(1, ls.buff.n-1));
 };
 
 const isreserved = function(w) {
@@ -605,7 +606,7 @@ const llex = function(ls, seminfo) {
                         save_and_next(ls);
                     } while (ljstype.lislalnum(ls.current));
 
-                    let ts = ls.buff.buffer;
+                    let ts = lstring.luaS_new(ls.L, ls.buff.buffer);
                     seminfo.ts = ts;
                     let kidx = luaX_tokens.slice(0, 22).indexOf(defs.to_jsstring(ts));
                     if (kidx >= 0)  /* reserved word? */

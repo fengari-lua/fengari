@@ -7,6 +7,7 @@ const defs     = require('./defs.js');
 const lfunc    = require('./lfunc.js');
 const lobject  = require('./lobject.js');
 const lopcodes = require('./lopcodes.js');
+const lstring  = require('./lstring.js');
 const llex     = require('./llex.js');
 
 let LUAC_DATA = [0x19, 0x93, defs.char["\r"], defs.char["\n"], 0x1a, defs.char["\n"]];
@@ -36,6 +37,7 @@ class BytecodeParser {
 
     read(size) {
         let buffer = this.buffer.read(size);
+        assert(Array.isArray(buffer));
         if (buffer.length < size) this.error("truncated");
         return buffer;
     }
@@ -74,8 +76,8 @@ class BytecodeParser {
         return this.dv.getFloat64(0, true);
     }
 
-    read8bitString(n) {
-        let size = typeof n !== 'undefined' ? n : Math.max(this.readByte() - 1, 0);
+    readString() {
+        let size = Math.max(this.readByte() - 1, 0);
 
         if (size + 1 === 0xFF)
             size = this.readSize_t() - 1;
@@ -84,25 +86,7 @@ class BytecodeParser {
             return null;
         }
 
-        let string = [];
-
-        for (let i = 0; i < size; i++)
-            string.push(this.readByte());
-
-        return string;
-    }
-
-    readString(n) {
-        let size = typeof n !== 'undefined' ? n : Math.max(this.readByte() - 1, 0);
-
-        if (size + 1 === 0xFF)
-            size = this.readSize_t() - 1;
-
-        if (size === 0) {
-            return null;
-        }
-
-        return this.read(size);
+        return lstring.luaS_new(this.L, this.read(size));
     }
 
     /* creates a mask with 'n' 1 bits at position 'p' */
@@ -176,7 +160,7 @@ class BytecodeParser {
                 break;
             case defs.CT.LUA_TSHRSTR:
             case defs.CT.LUA_TLNGSTR:
-                f.k.push(this.L.l_G.intern(this.read8bitString()));
+                f.k.push(new lobject.TValue(defs.CT.LUA_TLNGSTR, this.readString()));
                 break;
             default:
                 this.error(`unrecognized constant '${t}'`);
@@ -229,9 +213,14 @@ class BytecodeParser {
         this.readDebug(f);
     }
 
+    checkliteral(s, msg) {
+        let buff = this.read(s.length);
+        if (buff.join() !== s.join())
+            this.error(msg);
+    }
+
     checkHeader() {
-        if (this.readString(3).join() !== defs.to_luastring(defs.LUA_SIGNATURE.substring(1)).join())  /* 1st char already checked */
-            this.error("bad LUA_SIGNATURE, expected '<esc>Lua'");
+        this.checkliteral(defs.to_luastring(defs.LUA_SIGNATURE.substring(1)), "bad LUA_SIGNATURE, expected '<esc>Lua'"); /* 1st char already checked */
 
         if (this.readByte() !== 0x53)
             this.error("bad Lua version, expected 5.3");
@@ -239,8 +228,7 @@ class BytecodeParser {
         if (this.readByte() !== 0)
             this.error("supports only official PUC-Rio implementation");
 
-        if (this.readString(6).join() !== LUAC_DATA.join())
-            this.error("bytecode corrupted");
+        this.checkliteral(LUAC_DATA, "bytecode corrupted");
 
         this.intSize         = this.readByte();
         this.size_tSize      = this.readByte();

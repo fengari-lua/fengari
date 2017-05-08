@@ -7,6 +7,7 @@ const defs    = require('./defs.js');
 const lobject = require('./lobject.js');
 const ldo     = require('./ldo.js');
 const lstate  = require('./lstate.js');
+const lstring = require('./lstring.js');
 const ltable  = require('./ltable.js');
 const ldebug  = require('./ldebug.js');
 const lvm     = require('./lvm.js');
@@ -61,7 +62,7 @@ const ttypename = function(t) {
 const luaT_init = function(L) {
     L.l_G.tmname = [];
     for (let event in TMS)
-        L.l_G.tmname.push(L.l_G.intern(TMS[event]));
+        L.l_G.tmname.push(new lobject.TValue(CT.LUA_TLNGSTR, lstring.luaS_new(L, TMS[event])));
 };
 
 /*

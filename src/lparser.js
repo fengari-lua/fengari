@@ -9,6 +9,7 @@ const llex     = require('./llex.js');
 const llimit   = require('./llimit.js');
 const lobject  = require('./lobject.js');
 const lopcode  = require('./lopcodes.js');
+const lstring  = require('./lstring.js');
 const ltable   = require('./ltable.js');
 const BinOpr   = lcode.BinOpr;
 const OpCodesI = lopcode.OpCodesI;
@@ -22,6 +23,11 @@ const MAXVARS = 200;
 
 const hasmultret = function(k) {
     return k === expkind.VCALL || k === expkind.VVARARG;
+};
+
+const eqstr = function(a, b) {
+    /* TODO: use plain equality as strings are cached */
+    return lstring.luaS_eqlngstr(a, b);
 };
 
 class BlockCnt {
@@ -274,7 +280,7 @@ const removevars = function(fs, tolevel) {
 const searchupvalue = function(fs, name) {
     let up = fs.f.upvalues;
     for (let i = 0; i < fs.nups; i++) {
-        if (up[i].name.join() === name.join())
+        if (eqstr(up[i].name, name))
             return i;
     }
     return -1;  /* not found */
@@ -293,7 +299,7 @@ const newupvalue = function(fs, name, v) {
 
 const searchvar = function(fs, n) {
     for (let i = fs.nactvar - 1; i >= 0; i--) {
-        if (n.join() === getlocvar(fs, i).varname.join())
+        if (eqstr(n, getlocvar(fs, i).varname))
             return i;
     }
 
@@ -385,7 +391,7 @@ const closegoto = function(ls, g, label) {
     let fs = ls.fs;
     let gl = ls.dyd.gt;
     let gt = gl.arr[g];
-    assert(gt.name.join() === label.name.join());
+    assert(eqstr(gt.name, label.name));
     if (gt.nactvar < label.nactvar) {
         let vname = getlocvar(fs, gt.nactvar).varname;
         let msg = lobject.luaO_pushfstring(ls.L, defs.to_luastring("<goto %s> at line %d jumps into the scope of local '%s'"),
@@ -409,7 +415,7 @@ const findlabel = function(ls, g) {
     /* check labels in current block for a match */
     for (let i = bl.firstlabel; i < dyd.label.n; i++) {
         let lb = dyd.label.arr[i];
-        if (lb.name.join() === gt.name.join()) {  /* correct label? */
+        if (eqstr(lb.name, gt.name)) {  /* correct label? */
             if (gt.nactvar > lb.nactvar && (bl.upval || dyd.label.n > bl.firstlabel))
                 lcode.luaK_patchclose(ls.fs, gt.pc, lb.nactvar);
             closegoto(ls, g, lb);  /* close it */
@@ -438,7 +444,7 @@ const findgotos = function(ls, lb) {
     let gl = ls.dyd.gt;
     let i = ls.fs.bl.firstgoto;
     while (i < gl.n) {
-        if (gl.arr[i].name.join() === lb.name.join())
+        if (eqstr(gl.arr[i].name, lb.name))
             closegoto(ls, i, lb);
         else
             i++;
@@ -483,7 +489,7 @@ const enterblock = function(fs, bl, isloop) {
 ** create a label named 'break' to resolve break statements
 */
 const breaklabel = function(ls) {
-    let n = defs.to_luastring("break", true);
+    let n = lstring.luaS_newliteral(ls.L, "break");
     let l = newlabelentry(ls, ls.dyd.label, n, 0, ls.fs.pc);
     findgotos(ls, ls.dyd.label.arr[l]);
 };
@@ -1146,7 +1152,7 @@ const gotostat = function(ls, pc) {
         label = str_checkname(ls);
     else {
         llex.luaX_next(ls);  /* skip break */
-        label = defs.to_luastring("break", true);
+        label = lstring.luaS_newliteral(ls.L, "break");
     }
     let g = newlabelentry(ls, ls.dyd.gt, label, line, pc);
     findlabel(ls, g);  /* close it if label already defined */
@@ -1155,7 +1161,7 @@ const gotostat = function(ls, pc) {
 /* check for repeated labels on the same block */
 const checkrepeated = function(fs, ll, label) {
     for (let i = fs.bl.firstlabel; i < ll.n; i++) {
-        if (label.join() === ll.arr[i].name.join()) {
+        if (eqstr(label, ll.arr[i].name)) {
             semerror(fs.ls, defs.to_luastring(`label '${label.jsstring()}' already defined on line ${ll.arr[i].line}`));
         }
     }
@@ -1554,7 +1560,7 @@ const luaY_parser = function(L, z, buff, dyd, name, firstchar) {
     lexstate.h = new TValue(defs.CT.LUA_TTABLE, ltable.luaH_new(L));  /* create table for scanner */
     L.stack[L.top++] = lexstate.h;
     funcstate.f = cl.p = new Proto(L);
-    funcstate.f.source = name;
+    funcstate.f.source = lstring.luaS_new(L, name);
     lexstate.buff = buff;
     lexstate.dyd = dyd;
     dyd.actvar.n = dyd.gt.n = dyd.label.n = 0;

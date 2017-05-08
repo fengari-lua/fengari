@@ -6,6 +6,7 @@ const assert = require('assert');
 const defs    = require('./defs.js');
 const ljstype = require('./ljstype.js');
 const ldebug  = require('./ldebug.js');
+const lstring = require('./lstring.js');
 const luaconf = require('./luaconf.js');
 const lvm     = require('./lvm.js');
 const llimit  = require('./llimit.js');
@@ -418,7 +419,7 @@ const luaO_utf8esc = function(x) {
 };
 
 const pushstr = function(L, str) {
-    L.stack[L.top++] = L.l_G.intern(str);
+    L.stack[L.top++] = new TValue(CT.LUA_TLNGSTR, lstring.luaS_new(L, str));
 };
 
 const luaO_pushvfstring = function(L, fmt, argp) {

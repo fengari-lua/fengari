@@ -13,6 +13,7 @@ const llimit         = require('./llimit.js');
 const lobject        = require('./lobject.js');
 const lparser        = require('./lparser.js');
 const lstate         = require('./lstate.js');
+const lstring        = require('./lstring.js');
 const ltm            = require('./ltm.js');
 const lvm            = require('./lvm.js');
 const CT             = defs.constant_types;
@@ -23,11 +24,11 @@ const TValue         = lobject.TValue;
 const seterrorobj = function(L, errcode, oldtop) {
     switch (errcode) {
         case TS.LUA_ERRMEM: {
-            L.stack[oldtop] = L.l_G.intern(defs.to_luastring("not enough memory", true));
+            L.stack[oldtop] = new TValue(CT.LUA_TLNGSTR, lstring.luaS_newliteral(L, "not enough memory"));
             break;
         }
         case TS.LUA_ERRERR: {
-            L.stack[oldtop] = L.l_G.intern(defs.to_luastring("error in error handling", true));
+            L.stack[oldtop] = new TValue(CT.LUA_TLNGSTR, lstring.luaS_newliteral(L, "error in error handling"));
             break;
         }
         default: {
@@ -401,7 +402,7 @@ const recover = function(L, status) {
 */
 const resume_error = function(L, msg, narg) {
     L.top -= narg;  /* remove args from the stack */
-    L.stack[L.top++] = L.l_G.intern(defs.to_luastring(msg));  /* push error message */
+    L.stack[L.top++] = new TValue(CT.LUA_TLNGSTR, lstring.luaS_newliteral(L, msg));  /* push error message */
     assert(L.top <= L.ci.top, "stack overflow");
     return TS.LUA_ERRRUN;
 };

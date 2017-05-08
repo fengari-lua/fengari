@@ -6,12 +6,8 @@ const assert = require('assert');
 const defs    = require('./defs.js');
 const ldebug  = require('./ldebug.js');
 const lobject = require('./lobject.js');
+const lstring = require('./lstring.js');
 const CT      = defs.constant_types;
-
-/* converts strings (arrays) to a consistent map key */
-const hashstr = function(str) {
-    return str.map(e => `${e}|`).join('');
-};
 
 const table_hash = function(key) {
     switch(key.type) {
@@ -28,7 +24,7 @@ const table_hash = function(key) {
         return key.value;
     case CT.LUA_TSHRSTR:
     case CT.LUA_TLNGSTR:
-        return hashstr(key.value);
+        return lstring.luaS_hash(key.value);
     default:
         throw new Error("unknown key type: " + key.type);
     }
@@ -58,7 +54,7 @@ const luaH_getint = function(t, key) {
 
 const luaH_getstr = function(t, key) {
     assert(Array.isArray(key));
-    return getgeneric(t, hashstr(key));
+    return getgeneric(t, lstring.luaS_hash(key));
 };
 
 const luaH_get = function(t, key) {
