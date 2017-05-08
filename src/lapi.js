@@ -647,8 +647,8 @@ const lua_todataview = function(L, idx) {
     if (!o.ttisstring() && !o.ttisnumber())
         return null;
 
-    let dv = new DataView(new ArrayBuffer(o.value.length));
-    o.value.forEach((e, i) => dv.setUint8(i, e, true));
+    let dv = new DataView(new ArrayBuffer(o.vslen()));
+    o.svalue().forEach((e, i) => dv.setUint8(i, e, true));
 
     return dv;
 };
