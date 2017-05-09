@@ -1,5 +1,7 @@
 "use strict";
 
+global.WEB = false;
+
 const fs             = require('fs');
 const child_process  = require('child_process');
 const tmp            = require('tmp');
