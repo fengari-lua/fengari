@@ -2,6 +2,8 @@
 
 const test     = require('tape');
 
+global.WEB = false;
+
 const lauxlib  = require("../../src/lauxlib.js");
 const lua      = require('../../src/lua.js');
 
