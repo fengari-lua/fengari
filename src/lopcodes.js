@@ -251,12 +251,12 @@ const GET_OPCODE = function(i) {
 
 const SET_OPCODE = function(i, o) {
     i.code = (i.code & MASK0(SIZE_OP, POS_OP)) | ((o << POS_OP) & MASK1(SIZE_OP, POS_OP));
-    fullins(i);
+    return fullins(i);
 };
 
 const setarg = function(i, v, pos, size) {
     i.code = (i.code & MASK0(size, pos)) | ((v << pos) & MASK1(size, pos));
-    fullins(i);
+    return fullins(i);
 };
 
 const GETARG_A = function(i) {
@@ -264,7 +264,7 @@ const GETARG_A = function(i) {
 };
 
 const SETARG_A = function(i,v) {
-    setarg(i, v, POS_A, SIZE_A);
+    return setarg(i, v, POS_A, SIZE_A);
 };
 
 const GETARG_B = function(i) {
@@ -272,7 +272,7 @@ const GETARG_B = function(i) {
 };
 
 const SETARG_B = function(i,v) {
-    setarg(i, v, POS_B, SIZE_B);
+    return setarg(i, v, POS_B, SIZE_B);
 };
 
 const GETARG_C = function(i) {
@@ -280,7 +280,7 @@ const GETARG_C = function(i) {
 };
 
 const SETARG_C = function(i,v) {
-    setarg(i, v, POS_C, SIZE_C);
+    return setarg(i, v, POS_C, SIZE_C);
 };
 
 const GETARG_Bx = function(i) {
@@ -288,7 +288,7 @@ const GETARG_Bx = function(i) {
 };
 
 const SETARG_Bx = function(i,v) {
-    setarg(i, v, POS_Bx, SIZE_Bx);
+    return setarg(i, v, POS_Bx, SIZE_Bx);
 };
 
 const GETARG_Ax = function(i) {
@@ -296,7 +296,7 @@ const GETARG_Ax = function(i) {
 };
 
 const SETARG_Ax = function(i,v) {
-    setarg(i, v, POS_Ax, SIZE_Ax);
+    return setarg(i, v, POS_Ax, SIZE_Ax);
 };
 
 const GETARG_sBx = function(i) {
@@ -304,7 +304,7 @@ const GETARG_sBx = function(i) {
 };
 
 const SETARG_sBx = function(i, b) {
-    SETARG_Bx(i, b + MAXARG_sBx);
+    return SETARG_Bx(i, b + MAXARG_sBx);
 };
 
 /*
