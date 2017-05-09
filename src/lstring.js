@@ -43,7 +43,6 @@ const luaS_hashlongstr = function(ts) {
 
 /* variant that takes ownership of array */
 const luaS_bless = function(L, str) {
-    Object.freeze(str);
     return new TString(L, str);
 };
 
