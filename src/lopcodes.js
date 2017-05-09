@@ -245,6 +245,10 @@ const MASK0 = function(n, p) {
     return (~MASK1(n, p));
 };
 
+const GET_OPCODE = function(i) {
+    return i.opcode;
+};
+
 const SET_OPCODE = function(i, o) {
     i.code = (i.code & MASK0(SIZE_OP, POS_OP)) | ((o << POS_OP) & MASK1(SIZE_OP, POS_OP));
     fullins(i);
@@ -255,24 +259,48 @@ const setarg = function(i, v, pos, size) {
     fullins(i);
 };
 
+const GETARG_A = function(i) {
+    return i.A;
+};
+
 const SETARG_A = function(i,v) {
     setarg(i, v, POS_A, SIZE_A);
+};
+
+const GETARG_B = function(i) {
+    return i.B;
 };
 
 const SETARG_B = function(i,v) {
     setarg(i, v, POS_B, SIZE_B);
 };
 
+const GETARG_C = function(i) {
+    return i.C;
+};
+
 const SETARG_C = function(i,v) {
     setarg(i, v, POS_C, SIZE_C);
+};
+
+const GETARG_Bx = function(i) {
+    return i.Bx;
 };
 
 const SETARG_Bx = function(i,v) {
     setarg(i, v, POS_Bx, SIZE_Bx);
 };
 
+const GETARG_Ax = function(i) {
+    return i.Ax;
+};
+
 const SETARG_Ax = function(i,v) {
     setarg(i, v, POS_Ax, SIZE_Ax);
+};
+
+const GETARG_sBx = function(i) {
+    return i.sBx;
 };
 
 const SETARG_sBx = function(i, b) {
@@ -326,6 +354,13 @@ module.exports.BITRK               = BITRK;
 module.exports.CREATE_ABC          = CREATE_ABC;
 module.exports.CREATE_ABx          = CREATE_ABx;
 module.exports.CREATE_Ax           = CREATE_Ax;
+module.exports.GET_OPCODE          = GET_OPCODE;
+module.exports.GETARG_A            = GETARG_A;
+module.exports.GETARG_B            = GETARG_B;
+module.exports.GETARG_C            = GETARG_C;
+module.exports.GETARG_Bx           = GETARG_Bx;
+module.exports.GETARG_Ax           = GETARG_Ax;
+module.exports.GETARG_sBx          = GETARG_sBx;
 module.exports.INDEXK              = INDEXK;
 module.exports.ISK                 = ISK;
 module.exports.LFIELDS_PER_FLUSH   = LFIELDS_PER_FLUSH;
