@@ -859,8 +859,10 @@ const tonumber = function(v) {
     if (v.ttnov() === CT.LUA_TNUMBER)
         return v.value;
 
-    if (v.ttnov() === CT.LUA_TSTRING)
-        return lobject.luaO_str2num(v.svalue());
+    if (v.ttnov() === CT.LUA_TSTRING) {
+        let number = lobject.luaO_str2num(v.svalue());
+        return number ? number.value : false;
+    }
 
     return false;
 };

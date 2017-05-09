@@ -2,6 +2,8 @@
 
 const test     = require('tape');
 
+global.WEB = false;
+
 const lauxlib  = require("../../src/lauxlib.js");
 const lua      = require('../../src/lua.js');
 
@@ -59,7 +61,7 @@ test("[test-suite] events: testing metatable", function (t) {
         setmetatable(t, t)   -- causes a bug in 5.1 !
         t.__newindex = f
         a[1] = 30; a.x = "101"; a[5] = 200
-        -- assert(a[1] == 27 and a.x == 98 and a[5] == 197)
+        assert(a[1] == 27 and a.x == 98 and a[5] == 197)
     `, L;
     
     t.plan(2);
