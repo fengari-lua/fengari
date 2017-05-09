@@ -438,10 +438,14 @@ test('select', function (t) {
 
 test('tonumber', function (t) {
     let luaCode = `
-        return tonumber('123'), tonumber('12.3'), tonumber('az', 36), tonumber('10', 2)
+        return tonumber('foo'),
+            tonumber('123'),
+            tonumber('12.3'),
+            tonumber('az', 36),
+            tonumber('10', 2)
     `, L;
-    
-    t.plan(5);
+
+    t.plan(6);
 
     t.doesNotThrow(function () {
 
@@ -456,6 +460,11 @@ test('tonumber', function (t) {
         lua.lua_call(L, 0, -1);
 
     }, "JS Lua program ran without error");
+
+    t.ok(
+        lua.lua_isnil(L, -5),
+        "Correct element(s) on the stack"
+    );
 
     t.strictEqual(
         lua.lua_tonumber(L, -4),

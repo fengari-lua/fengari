@@ -731,9 +731,13 @@ const lua_compare = function(L, index1, index2, op) {
 };
 
 const lua_stringtonumber = function(L, s) {
-    L.stack[L.top++] = lobject.luaO_str2num(s);
-    assert(L.top <= L.ci.top, "stack overflow");
-    return s.length;
+    let tv = lobject.luaO_str2num(s);
+    if (tv) {
+        L.stack[L.top++] = tv;
+        assert(L.top <= L.ci.top, "stack overflow");
+        return s.length;
+    }
+    return 0;
 };
 
 const lua_tointegerx = function(L, idx) {
