@@ -281,7 +281,7 @@ const lua_pushcclosure = function(L, fn, n) {
         L.top -= n;
         while (n--) {
             cl.upvalue[n].setfrom(L.stack[L.top + n])
-            L.stack[L.top + n] = void 0;
+            delete L.stack[L.top + n];
         }
 
         L.stack[L.top] = new TValue(CT.LUA_TCCL, cl);
@@ -369,7 +369,7 @@ const lua_setmetatable = function(L, objindex) {
         }
     }
 
-    L.stack[--L.top] = void 0;
+    delete L.stack[--L.top];
     return true;
 };
 
@@ -393,8 +393,8 @@ const lua_seti = function(L, idx, n) {
     assert(L.top <= L.ci.top, "stack overflow");
     lvm.settable(L, t, L.stack[L.top - 1], L.stack[L.top - 2]);
     /* pop value and key */
-    L.stack[--L.top] = void 0;
-    L.stack[--L.top] = void 0;
+    delete L.stack[--L.top];
+    delete L.stack[--L.top];
 };
 
 const lua_rawset = function(L, idx) {
@@ -411,7 +411,7 @@ const lua_rawseti = function(L, idx, n) {
     let o = index2addr(L, idx);
     assert(o.ttistable(), "table expected");
     ltable.luaH_setint(o.value, n, L.stack[L.top - 1]);
-    L.stack[--L.top] = void 0;
+    delete L.stack[--L.top];
 };
 
 const lua_rawsetp = function(L, idx, p) {
@@ -847,7 +847,7 @@ const lua_setuservalue = function(L, idx) {
     let o = index2addr(L, idx);
     assert(L, o.ttisfulluserdata(), "full userdata expected");
     o.uservalue.setfrom(L.stack[L.top - 1]);
-    L.stack[--L.top] = void 0;
+    delete L.stack[--L.top];
 };
 
 const lua_callk = function(L, nargs, nresults, ctx, k) {
