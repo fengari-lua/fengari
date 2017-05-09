@@ -292,8 +292,7 @@ module.exports.LUA_EXEC_DIR = LUA_EXEC_DIR;
 const LUA_VDIR = LUA_VERSION_MAJOR + "." + LUA_VERSION_MINOR;
 module.exports.LUA_VDIR = LUA_VDIR;
 
-let os = false;
-if (!WEB && os.platform() === 'win32') {
+if (!WEB && (require('os')).platform() === 'win32') {
     const LUA_DIRSEP = "\\";
     module.exports.LUA_DIRSEP = LUA_DIRSEP;
 
