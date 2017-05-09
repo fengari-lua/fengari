@@ -133,7 +133,9 @@ const lua_settop = function(L, idx) {
         L.top = func + 1 + idx;
     } else {
         assert(-(idx + 1) <= L.top - (func + 1), "invalid new top");
-        L.top += idx + 1; /* 'subtract' index (index is negative) */
+        let newtop = L.top + idx + 1; /* 'subtract' index (index is negative) */
+        while (L.top > newtop)
+            delete L.stack[--L.top];
     }
 };
 
@@ -339,7 +341,8 @@ const auxsetstr = function(L, t, k) {
     L.stack[L.top++] = str;
     lvm.settable(L, t, L.stack[L.top - 1], L.stack[L.top - 2]);
     /* pop value and key */
-    L.top -= 2;
+    delete L.stack[--L.top];
+    delete L.stack[--L.top];
 };
 
 const lua_setglobal = function(L, name) {
