@@ -79,28 +79,23 @@ let readable = function(filename) {
     return false;
 };
 // Only with Node
-if (typeof require === "function") {
+if (!WEB) {
 
-    let fs = false;
-    try {
-        fs = require('fs');
-    } catch (e) {}
+    const fs = require('fs');
 
-    if (fs) {
-        readable = function(filename) {
-            let fd = false;
+    readable = function(filename) {
+        let fd = false;
 
-            try {
-                fd = fs.openSync(lua.to_jsstring(filename), 'r');
-            } catch (e) {
-                return false;
-            }
+        try {
+            fd = fs.openSync(lua.to_jsstring(filename), 'r');
+        } catch (e) {
+            return false;
+        }
 
-            fs.closeSync(fd);
+        fs.closeSync(fd);
 
-            return true;
-        };
-    }
+        return true;
+    };
 }
 
 

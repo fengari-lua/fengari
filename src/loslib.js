@@ -180,96 +180,87 @@ if (process && process.exit && process.env && process.uptime) {
 
 
 // Only with Node
-if (typeof require === "function") {
+if (!WEB) {
 
-    let fs = false;
-    let tmp = false;
-    let child_process = false;
-    try {
-        fs = require('fs');
-        tmp = require('tmp');
-        child_process = require('child_process');
-    } catch (e) {}
+    const fs = require('fs');
+    const tmp = require('tmp');
+    const child_process = require('child_process');
 
-    if (fs && tmp) {
-        // TODO: on POSIX system, should create the file
-        const lua_tmpname = function() {
-            return tmp.tmpNameSync();
-        };
+    // TODO: on POSIX system, should create the file
+    const lua_tmpname = function() {
+        return tmp.tmpNameSync();
+    };
 
-        const os_remove = function(L) {
-            let filename = lauxlib.luaL_checkstring(L, 1);
-            try {
-                if (fs.lstatSync(lua.to_jsstring(filename)).isDirectory()) {
-                    fs.rmdirSync(lua.to_jsstring(filename));
-                } else {
-                    fs.unlinkSync(lua.to_jsstring(filename));
-                }
-            } catch (e) {
-                return lauxlib.luaL_fileresult(L, false, filename, e);
-            }
-            return lauxlib.luaL_fileresult(L, true);
-        };
-
-        const os_rename = function(L) {
-            let fromname = lua.to_jsstring(lauxlib.luaL_checkstring(L, 1));
-            let toname = lua.to_jsstring(lauxlib.luaL_checkstring(L, 2));
-            try {
-                fs.renameSync(fromname, toname);
-            } catch (e) {
-                return lauxlib.luaL_fileresult(L, false, false, e);
-            }
-            return lauxlib.luaL_fileresult(L, true);
-        };
-
-        const os_tmpname = function(L) {
-            let name = lua_tmpname();
-            if (!name)
-                return lauxlib.luaL_error(L, lua.to_luastring("unable to generate a unique filename"));
-            lua.lua_pushstring(L, lua.to_luastring(name));
-            return 1;
-        };
-
-        syslib.remove = os_remove;
-        syslib.rename = os_rename;
-        syslib.tmpname = os_tmpname;
-    }
-
-    if (child_process) {
-        const os_execute = function(L) {
-            let cmd = lauxlib.luaL_optstring(L, 1, null);
-            if (cmd !== null) {
-                try {
-                    child_process.execSync(
-                        lua.to_jsstring(cmd),
-                        {
-                            stdio: [process.stdin, process.stdout, process.stderr]
-                        }
-                    );
-                } catch (e) {
-                    return lauxlib.luaL_execresult(L, e);
-                }
-
-                return lauxlib.luaL_execresult(L, null);
+    const os_remove = function(L) {
+        let filename = lauxlib.luaL_checkstring(L, 1);
+        try {
+            if (fs.lstatSync(lua.to_jsstring(filename)).isDirectory()) {
+                fs.rmdirSync(lua.to_jsstring(filename));
             } else {
-                try {
-                    child_process.execSync(
-                        lua.to_jsstring(cmd),
-                        {
-                            stdio: [process.stdin, process.stdout, process.stderr]
-                        }
-                    );
-                    lua.lua_pushboolean(L, 1);
-                } catch (e) {
-                    lua.lua_pushboolean(L, 0);
-                }
-
-                return 1;
+                fs.unlinkSync(lua.to_jsstring(filename));
             }
-        };
+        } catch (e) {
+            return lauxlib.luaL_fileresult(L, false, filename, e);
+        }
+        return lauxlib.luaL_fileresult(L, true);
+    };
 
-        syslib.execute = os_execute;
-    }
+    const os_rename = function(L) {
+        let fromname = lua.to_jsstring(lauxlib.luaL_checkstring(L, 1));
+        let toname = lua.to_jsstring(lauxlib.luaL_checkstring(L, 2));
+        try {
+            fs.renameSync(fromname, toname);
+        } catch (e) {
+            return lauxlib.luaL_fileresult(L, false, false, e);
+        }
+        return lauxlib.luaL_fileresult(L, true);
+    };
+
+    const os_tmpname = function(L) {
+        let name = lua_tmpname();
+        if (!name)
+            return lauxlib.luaL_error(L, lua.to_luastring("unable to generate a unique filename"));
+        lua.lua_pushstring(L, lua.to_luastring(name));
+        return 1;
+    };
+
+    syslib.remove = os_remove;
+    syslib.rename = os_rename;
+    syslib.tmpname = os_tmpname;
+
+    const os_execute = function(L) {
+        let cmd = lauxlib.luaL_optstring(L, 1, null);
+        if (cmd !== null) {
+            try {
+                child_process.execSync(
+                    lua.to_jsstring(cmd),
+                    {
+                        stdio: [process.stdin, process.stdout, process.stderr]
+                    }
+                );
+            } catch (e) {
+                return lauxlib.luaL_execresult(L, e);
+            }
+
+            return lauxlib.luaL_execresult(L, null);
+        } else {
+            try {
+                child_process.execSync(
+                    lua.to_jsstring(cmd),
+                    {
+                        stdio: [process.stdin, process.stdout, process.stderr]
+                    }
+                );
+                lua.lua_pushboolean(L, 1);
+            } catch (e) {
+                lua.lua_pushboolean(L, 0);
+            }
+
+            return 1;
+        }
+    };
+
+    syslib.execute = os_execute;
 
 }
 

@@ -293,7 +293,7 @@ const LUA_VDIR = LUA_VERSION_MAJOR + "." + LUA_VERSION_MINOR;
 module.exports.LUA_VDIR = LUA_VDIR;
 
 let os = false;
-if (typeof require === "function" && (os = require('os')) && typeof os.platform === "function" && os.platform() === 'win32') {
+if (!WEB && os.platform() === 'win32') {
     const LUA_DIRSEP = "\\";
     module.exports.LUA_DIRSEP = LUA_DIRSEP;
 

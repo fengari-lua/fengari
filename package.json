@@ -7,6 +7,7 @@
     "test": "tests"
   },
   "scripts": {
+    "build": "webpack",
     "test": "tape tests/*.js tests/test-suite/*.js | faucet"
   },
   "repository": {
@@ -27,8 +28,10 @@
   },
   "homepage": "https://github.com/giann/fengari#readme",
   "devDependencies": {
+    "faucet": "0.0.1",
     "tape": "^2.0.1",
-    "faucet": "0.0.1"
+    "babili-webpack-plugin": "^0.0.11",
+    "webpack": "^2.5.1"
   },
   "dependencies": {
     "readline-sync": "^1.4.7",

@@ -331,38 +331,33 @@ const base_funcs = {
 };
 
 // Only with Node
-if (typeof require === "function") {
+if (!WEB) {
 
-    let fs = false;
-    try {
-        fs = require('fs');
-    } catch (e) {}
+    const fs = require('fs');
 
-    if (fs) {
-        const luaB_loadfile = function(L) {
-            let fname = lauxlib.luaL_optstring(L, 1, null);
-            let mode = lauxlib.luaL_optstring(L, 2, null);
-            let env = !lua.lua_isnone(L, 3) ? 3 : 0;  /* 'env' index or 0 if no 'env' */
-            let status = lauxlib.luaL_loadfilex(L, fname, mode);
-            return load_aux(L, status, env);
-        };
+    const luaB_loadfile = function(L) {
+        let fname = lauxlib.luaL_optstring(L, 1, null);
+        let mode = lauxlib.luaL_optstring(L, 2, null);
+        let env = !lua.lua_isnone(L, 3) ? 3 : 0;  /* 'env' index or 0 if no 'env' */
+        let status = lauxlib.luaL_loadfilex(L, fname, mode);
+        return load_aux(L, status, env);
+    };
 
-        const dofilecont = function(L, d1, d2) {
-            return lua.lua_gettop(L) - 1;
-        };
+    const dofilecont = function(L, d1, d2) {
+        return lua.lua_gettop(L) - 1;
+    };
 
-        const luaB_dofile = function(L) {
-            let fname = lauxlib.luaL_optstring(L, 1, null);
-            lua.lua_settop(L, 1);
-            if (lauxlib.luaL_loadfile(L, fname) !== lua.LUA_OK)
-                return lua.lua_error(L);
-            lua.lua_callk(L, 0, lua.LUA_MULTRET, 0, dofilecont);
-            return dofilecont(L, 0, 0);
-        };
+    const luaB_dofile = function(L) {
+        let fname = lauxlib.luaL_optstring(L, 1, null);
+        lua.lua_settop(L, 1);
+        if (lauxlib.luaL_loadfile(L, fname) !== lua.LUA_OK)
+            return lua.lua_error(L);
+        lua.lua_callk(L, 0, lua.LUA_MULTRET, 0, dofilecont);
+        return dofilecont(L, 0, 0);
+    };
 
-        base_funcs.loadfile = luaB_loadfile;
-        base_funcs.dofile   = luaB_dofile;
-    }
+    base_funcs.loadfile = luaB_loadfile;
+    base_funcs.dofile   = luaB_dofile;
 
 }
 
