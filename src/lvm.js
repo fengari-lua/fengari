@@ -995,21 +995,26 @@ const luaV_concat = function(L, total) {
         let top = L.top;
         let n = 2; /* number of elements handled in this pass (at least 2) */
 
-        if (!(L.stack[top-2].ttisstring() || L.stack[top-2].ttisnumber()) || !tostring(L, top - 1))
+        if (!(L.stack[top-2].ttisstring() || L.stack[top-2].ttisnumber()) || !tostring(L, top - 1)) {
             ltm.luaT_trybinTM(L, L.stack[top-2], L.stack[top-1], top-2, ltm.TMS.TM_CONCAT);
-        else if (isemptystr(L.stack[top-1])) {
+            delete L.stack[top - 1];
+        } else if (isemptystr(L.stack[top-1])) {
             tostring(L, top - 2);
+            delete L.stack[top - 1];
         } else if (isemptystr(L.stack[top-2])) {
             L.stack[top - 2] = L.stack[top - 1];
+            delete L.stack[top - 1];
         } else {
             /* at least two non-empty string values; get as many as possible */
             let toconcat = new Array(total);
             toconcat[total-1] = L.stack[top-1].svalue();
+            delete L.stack[top - 1];
             for (n = 1; n < total && tostring(L, top - n - 1); n++) {
                 toconcat[total-n-1] = L.stack[top - n - 1].svalue();
+                delete L.stack[top - n - 1];
             }
             let ts = lstring.luaS_bless(L, Array.prototype.concat.apply([], toconcat));
-            L.stack[top - total] = new lobject.TValue(CT.LUA_TLNGSTR, ts);
+            L.stack[top - n] = new lobject.TValue(CT.LUA_TLNGSTR, ts);
         }
         total -= n - 1; /* got 'n' strings to create 1 new */
         L.top -= n - 1; /* popped 'n' strings and pushed one */
