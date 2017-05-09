@@ -4,7 +4,7 @@
 const assert         = require('assert');
 
 const defs        = require('./defs.js');
-const OC          = require('./lopcodes.js');
+const lopcodes    = require('./lopcodes.js');
 const luaconf     = require('./luaconf.js');
 const lobject     = require('./lobject.js');
 const lfunc       = require('./lfunc.js');
@@ -23,7 +23,7 @@ const LUA_MULTRET = defs.LUA_MULTRET;
 */
 const luaV_finishOp = function(L) {
     let ci = L.ci;
-    let OCi = OC.OpCodesI;
+    let OCi = lopcodes.OpCodesI;
     let base = ci.l_base;
     let inst = ci.l_savedpc[ci.pcOff - 1];  /* interrupted instruction */
     let op = inst.opcode;
@@ -91,15 +91,15 @@ const RC = function(L, base, i) {
 };
 
 const RKB = function(L, base, k, i) {
-    return OC.ISK(i.B) ? k[OC.INDEXK(i.B)] : L.stack[base + i.B];
+    return lopcodes.ISK(i.B) ? k[lopcodes.INDEXK(i.B)] : L.stack[base + i.B];
 };
 
 const RKC = function(L, base, k, i) {
-    return OC.ISK(i.C) ? k[OC.INDEXK(i.C)] : L.stack[base + i.C];
+    return lopcodes.ISK(i.C) ? k[lopcodes.INDEXK(i.C)] : L.stack[base + i.C];
 };
 
 const luaV_execute = function(L) {
-    const OCi = OC.OpCodesI;
+    const OCi = lopcodes.OpCodesI;
     let ci = L.ci;
 
     ci.callstatus |= lstate.CIST_FRESH;
@@ -644,7 +644,7 @@ const luaV_execute = function(L) {
                 }
 
                 let h = L.stack[ra].value;
-                let last = ((c - 1) * OC.LFIELDS_PER_FLUSH) + n;
+                let last = ((c - 1) * lopcodes.LFIELDS_PER_FLUSH) + n;
 
                 for (; n > 0; n--) {
                     ltable.luaH_setint(h, last--, L.stack[ra + n]);

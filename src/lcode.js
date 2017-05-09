@@ -5,7 +5,7 @@ const assert   = require('assert');
 const defs     = require('./defs.js');
 const llex     = require('./llex.js');
 const lobject  = require('./lobject.js');
-const lopcode  = require('./lopcodes.js');
+const lopcodes = require('./lopcodes.js');
 const lparser  = require('./lparser.js');
 const lstring  = require('./lstring.js');
 const ltable   = require('./ltable.js');
@@ -13,7 +13,7 @@ const ltm      = require('./ltm.js');
 const lvm      = require('./lvm.js');
 
 const CT       = defs.CT;
-const OpCodesI = lopcode.OpCodesI;
+const OpCodesI = lopcodes.OpCodesI;
 const TValue   = lobject.TValue;
 
 const luaO_arith = function(L, op, p1, p2, res) {
@@ -150,8 +150,8 @@ const luaK_nil = function(fs, from, n) {
                     (from <= pfrom && pfrom <= l + 1)) {  /* can connect both? */
                 if (pfrom < from) from = pfrom;  /* from = min(from, pfrom) */
                 if (pl > l) l = pl;  /* l = max(l, pl) */
-                lopcode.SETARG_A(previous, from);
-                lopcode.SETARG_B(previous, l - from);
+                lopcodes.SETARG_A(previous, from);
+                lopcodes.SETARG_B(previous, l - from);
                 return;
             }
         }  /* else go through */
@@ -183,9 +183,9 @@ const fixjump = function(fs, pc, dest) {
     let jmp = fs.f.code[pc];
     let offset = dest - (pc + 1);
     assert(dest !== NO_JUMP);
-    if (Math.abs(offset) > lopcode.MAXARG_sBx)
+    if (Math.abs(offset) > lopcodes.MAXARG_sBx)
         llex.luaX_syntaxerror(fs.ls, defs.to_luastring("control structure too long", true));
-    lopcode.SETARG_sBx(jmp, offset);
+    lopcodes.SETARG_sBx(jmp, offset);
 };
 
 /*
@@ -257,7 +257,7 @@ const luaK_getlabel = function(fs) {
 ** unconditional.
 */
 const getjumpcontrol = function(fs, pc) {
-    if (pc >= 1 && lopcode.testTMode(fs.f.code[pc - 1].opcode))
+    if (pc >= 1 && lopcodes.testTMode(fs.f.code[pc - 1].opcode))
         return fs.f.code[pc - 1];
     else
         return fs.f.code[pc];
@@ -274,12 +274,12 @@ const patchtestreg = function(fs, node, reg) {
     let i = getjumpcontrol(fs, node);
     if (i.opcode !== OpCodesI.OP_TESTSET)
         return false;  /* cannot patch other instructions */
-    if (reg !== lopcode.NO_REG && reg !== i.B)
-        lopcode.SETARG_A(i, reg);
+    if (reg !== lopcodes.NO_REG && reg !== i.B)
+        lopcodes.SETARG_A(i, reg);
     else {
         /* no register to put value or register already has the value;
            change instruction to simple test */
-        i = lopcode.CREATE_ABC(OpCodesI.OP_TEST, i.B, 0, i.C);
+        i = lopcodes.CREATE_ABC(OpCodesI.OP_TEST, i.B, 0, i.C);
     }
     return true;
 };
@@ -289,7 +289,7 @@ const patchtestreg = function(fs, node, reg) {
 */
 const removevalues = function(fs, list) {
     for (; list !== NO_JUMP; list = getjump(fs, list))
-        patchtestreg(fs, list, lopcode.NO_REG);
+        patchtestreg(fs, list, lopcodes.NO_REG);
 };
 
 /*
@@ -314,7 +314,7 @@ const patchlistaux = function(fs, list, vtarget, reg, dtarget) {
 ** jumps
 */
 const dischargejpc = function(fs) {
-    patchlistaux(fs, fs.jpc, fs.pc, lopcode.NO_REG, fs.pc);
+    patchlistaux(fs, fs.jpc, fs.pc, lopcodes.NO_REG, fs.pc);
     fs.jpc = NO_JUMP;
 };
 
@@ -337,7 +337,7 @@ const luaK_patchlist = function(fs, list, target) {
         luaK_patchtohere(fs, list);  /* add list to pending jumps */
     else {
         assert(target < fs.pc);
-        patchlistaux(fs, list, target, lopcode.NO_REG, target);
+        patchlistaux(fs, list, target, lopcodes.NO_REG, target);
     }
 };
 
@@ -351,7 +351,7 @@ const luaK_patchclose = function(fs, list, level) {
     for (; list !== NO_JUMP; list = getjump(fs, list)) {
         let ins = fs.f.code[list];
         assert(ins.opcode === OpCodesI.OP_JMP && (ins.A === 0 || ins.A >= level));
-        lopcode.SETARG_A(ins, level);
+        lopcodes.SETARG_A(ins, level);
     }
 };
 
@@ -373,33 +373,33 @@ const luaK_code = function(fs, i) {
 ** of parameters versus opcode.)
 */
 const luaK_codeABC = function(fs, o, a, b, c) {
-    assert(lopcode.getOpMode(o) === lopcode.iABC);
-    assert(lopcode.getBMode(o) !== lopcode.OpArgN || b === 0);
-    assert(lopcode.getCMode(o) !== lopcode.OpArgN || c === 0);
-    assert(a <= lopcode.MAXARG_A && b <= lopcode.MAXARG_B && c <= lopcode.MAXARG_C);
-    return luaK_code(fs, lopcode.CREATE_ABC(o, a, b, c));
+    assert(lopcodes.getOpMode(o) === lopcodes.iABC);
+    assert(lopcodes.getBMode(o) !== lopcodes.OpArgN || b === 0);
+    assert(lopcodes.getCMode(o) !== lopcodes.OpArgN || c === 0);
+    assert(a <= lopcodes.MAXARG_A && b <= lopcodes.MAXARG_B && c <= lopcodes.MAXARG_C);
+    return luaK_code(fs, lopcodes.CREATE_ABC(o, a, b, c));
 };
 
 /*
 ** Format and emit an 'iABx' instruction.
 */
 const luaK_codeABx = function(fs, o, a, bc) {
-    assert(lopcode.getOpMode(o) === lopcode.iABx || lopcode.getOpMode(o) === lopcode.iAsBx);
-    assert(lopcode.getCMode(o) === lopcode.OpArgN);
-    assert(a <= lopcode.MAXARG_A && bc <= lopcode.MAXARG_Bx);
-    return luaK_code(fs, lopcode.CREATE_ABx(o, a, bc));
+    assert(lopcodes.getOpMode(o) === lopcodes.iABx || lopcodes.getOpMode(o) === lopcodes.iAsBx);
+    assert(lopcodes.getCMode(o) === lopcodes.OpArgN);
+    assert(a <= lopcodes.MAXARG_A && bc <= lopcodes.MAXARG_Bx);
+    return luaK_code(fs, lopcodes.CREATE_ABx(o, a, bc));
 };
 
 const luaK_codeAsBx = function(fs,o,A,sBx) {
-    return luaK_codeABx(fs, o, A, (sBx) + lopcode.MAXARG_sBx);
+    return luaK_codeABx(fs, o, A, (sBx) + lopcodes.MAXARG_sBx);
 };
 
 /*
 ** Emit an "extra argument" instruction (format 'iAx')
 */
 const codeextraarg = function(fs, a) {
-    assert(a <= lopcode.MAXARG_Ax);
-    return luaK_code(fs, lopcode.CREATE_Ax(OpCodesI.OP_EXTRAARG, a));
+    assert(a <= lopcodes.MAXARG_Ax);
+    return luaK_code(fs, lopcodes.CREATE_Ax(OpCodesI.OP_EXTRAARG, a));
 };
 
 /*
@@ -408,7 +408,7 @@ const codeextraarg = function(fs, a) {
 ** instruction with "extra argument".
 */
 const luaK_codek = function(fs, reg, k) {
-    if (k <= lopcode.MAXARG_Bx)
+    if (k <= lopcodes.MAXARG_Bx)
         return luaK_codeABx(fs, OpCodesI.OP_LOADK, reg, k);
     else {
         let p = luaK_codeABx(fs, OpCodesI.OP_LOADKX, reg, 0);
@@ -443,7 +443,7 @@ const luaK_reserveregs = function(fs, n) {
 ** a local variable.
 */
 const freereg = function(fs, reg) {
-    if (!lopcode.ISK(reg) && reg >= fs.nactvar) {
+    if (!lopcodes.ISK(reg) && reg >= fs.nactvar) {
         fs.freereg--;
         assert(reg === fs.freereg);
     }
@@ -557,12 +557,12 @@ const nilK = function(fs) {
 const luaK_setreturns = function(fs, e, nresults) {
     let ek = lparser.expkind;
     if (e.k === ek.VCALL) {  /* expression is an open function call? */
-        lopcode.SETARG_C(getinstruction(fs, e), nresults + 1);
+        lopcodes.SETARG_C(getinstruction(fs, e), nresults + 1);
     }
     else if (e.k === ek.VVARARG) {
         let pc = getinstruction(fs, e);
-        lopcode.SETARG_B(pc, nresults + 1);
-        lopcode.SETARG_A(pc, fs.freereg);
+        lopcodes.SETARG_B(pc, nresults + 1);
+        lopcodes.SETARG_A(pc, fs.freereg);
         luaK_reserveregs(fs, 1);
     }
     else assert(nresults === defs.LUA_MULTRET);
@@ -590,7 +590,7 @@ const luaK_setoneret = function(fs, e) {
         e.k = ek.VNONRELOC;  /* result has fixed position */
         e.u.info = getinstruction(fs, e).A;
     } else if (e.k === ek.VVARARG) {
-        lopcode.SETARG_B(getinstruction(fs, e), 2);
+        lopcodes.SETARG_B(getinstruction(fs, e), 2);
         e.k = ek.VRELOCABLE;  /* can relocate its simple result */
     }
 };
@@ -668,7 +668,7 @@ const discharge2reg = function(fs, e, reg) {
         }
         case ek.VRELOCABLE: {
             let pc = getinstruction(fs, e);
-            lopcode.SETARG_A(pc, reg);  /* instruction will put result in 'reg' */
+            lopcodes.SETARG_A(pc, reg);  /* instruction will put result in 'reg' */
             break;
         }
         case ek.VNONRELOC: {
@@ -810,8 +810,8 @@ const luaK_exp2RK = function(fs, e) {
 
     if (vk) {
         e.k = ek.VK;
-        if (e.u.info <= lopcode.MAXINDEXRK)  /* constant fits in 'argC'? */
-            return lopcode.RKASK(e.u.info);
+        if (e.u.info <= lopcodes.MAXINDEXRK)  /* constant fits in 'argC'? */
+            return lopcodes.RKASK(e.u.info);
     }
 
     /* not a constant in the right range: put it in a register */
@@ -864,8 +864,8 @@ const luaK_self = function(fs, e, key) {
 */
 const negatecondition = function(fs, e) {
     let pc = getjumpcontrol(fs, e.u.info);
-    assert(lopcode.testTMode(pc.opcode) && pc.opcode !== OpCodesI.OP_TESTSET && pc.opcode !== OpCodesI.OP_TEST);
-    lopcode.SETARG_A(pc, !(pc.A));
+    assert(lopcodes.testTMode(pc.opcode) && pc.opcode !== OpCodesI.OP_TESTSET && pc.opcode !== OpCodesI.OP_TEST);
+    lopcodes.SETARG_A(pc, !(pc.A));
 };
 
 /*
@@ -885,7 +885,7 @@ const jumponcond = function(fs, e, cond) {
     }
     discharge2anyreg(fs, e);
     freeexp(fs, e);
-    return condjump(fs, OpCodesI.OP_TESTSET, lopcode.NO_REG, e.u.info, cond);
+    return condjump(fs, OpCodesI.OP_TESTSET, lopcodes.NO_REG, e.u.info, cond);
 };
 
 /*
@@ -1072,7 +1072,7 @@ const codecomp = function(fs, opr, e1, e2) {
 
     let rk1;
     if (e1.k === ek.VK)
-        rk1 = lopcode.RKASK(e1.u.info);
+        rk1 = lopcodes.RKASK(e1.u.info);
     else {
         assert(e1.k === ek.VNONRELOC);
         rk1 = e1.u.info;
@@ -1185,7 +1185,7 @@ const luaK_posfix = function(fs, op, e1, e2, line) {
             if (e2.k === ek.VRELOCABLE && ins.opcode === OpCodesI.OP_CONCAT) {
                 assert(e1.u.info === ins.B - 1);
                 freeexp(fs, e1);
-                lopcode.SETARG_B(ins, e1.u.info);
+                lopcodes.SETARG_B(ins, e1.u.info);
                 e1.k = ek.VRELOCABLE; e1.u.info = e2.u.info;
             }
             else {
@@ -1227,12 +1227,12 @@ const luaK_fixline = function(fs, line) {
 ** table (or LUA_MULTRET to add up to stack top).
 */
 const luaK_setlist = function(fs, base, nelems, tostore) {
-    let c =  (nelems - 1)/lopcode.LFIELDS_PER_FLUSH + 1;
+    let c =  (nelems - 1)/lopcodes.LFIELDS_PER_FLUSH + 1;
     let b = (tostore === defs.LUA_MULTRET) ? 0 : tostore;
-    assert(tostore !== 0 && tostore <= lopcode.LFIELDS_PER_FLUSH);
-    if (c <= lopcode.MAXARG_C)
+    assert(tostore !== 0 && tostore <= lopcodes.LFIELDS_PER_FLUSH);
+    if (c <= lopcodes.MAXARG_C)
         luaK_codeABC(fs, OpCodesI.OP_SETLIST, base, b, c);
-    else if (c <= lopcode.MAXARG_Ax) {
+    else if (c <= lopcodes.MAXARG_Ax) {
         luaK_codeABC(fs, OpCodesI.OP_SETLIST, base, b, 0);
         codeextraarg(fs, c);
     }

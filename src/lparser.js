@@ -8,11 +8,11 @@ const lfunc    = require('./lfunc.js');
 const llex     = require('./llex.js');
 const llimit   = require('./llimit.js');
 const lobject  = require('./lobject.js');
-const lopcode  = require('./lopcodes.js');
+const lopcodes = require('./lopcodes.js');
 const lstring  = require('./lstring.js');
 const ltable   = require('./ltable.js');
 const BinOpr   = lcode.BinOpr;
-const OpCodesI = lopcode.OpCodesI;
+const OpCodesI = lopcodes.OpCodesI;
 const Proto    = lfunc.Proto;
 const R        = llex.RESERVED;
 const TValue   = lobject.TValue;
@@ -665,7 +665,7 @@ const closelistfield = function(fs, cc) {
     if (cc.v.k === expkind.VVOID) return;  /* there is no list item */
     lcode.luaK_exp2nextreg(fs, cc.v);
     cc.v.k = expkind.VVOID;
-    if (cc.tostore === lopcode.LFIELDS_PER_FLUSH) {
+    if (cc.tostore === lopcodes.LFIELDS_PER_FLUSH) {
         lcode.luaK_setlist(fs, cc.t.u.info, cc.na, cc.tostore);  /* flush */
         cc.tostore = 0;  /* no more items pending */
     }
@@ -734,8 +734,8 @@ const constructor = function(ls, t) {
     } while (testnext(ls, char[',']) || testnext(ls, char[';']));
     check_match(ls, char['}'], char['{'], line);
     lastlistfield(fs, cc);
-    lopcode.SETARG_B(fs.f.code[pc], lobject.luaO_int2fb(cc.na));  /* set initial array size */
-    lopcode.SETARG_C(fs.f.code[pc], lobject.luaO_int2fb(cc.nh));  /* set initial table size */
+    lopcodes.SETARG_B(fs.f.code[pc], lobject.luaO_int2fb(cc.na));  /* set initial array size */
+    lopcodes.SETARG_C(fs.f.code[pc], lobject.luaO_int2fb(cc.nh));  /* set initial table size */
 };
 
 /* }====================================================================== */
@@ -1432,7 +1432,7 @@ const exprstat= function(ls) {
     }
     else {  /* stat -> func */
         check_condition(ls, v.v.k === expkind.VCALL, defs.to_luastring("syntax error", true));
-        lopcode.SETARG_C(lcode.getinstruction(fs, v.v), 1);  /* call statement uses no results */
+        lopcodes.SETARG_C(lcode.getinstruction(fs, v.v), 1);  /* call statement uses no results */
     }
 };
 
@@ -1448,7 +1448,7 @@ const retstat = function(ls) {
         if (hasmultret(e.k)) {
             lcode.luaK_setmultret(fs, e);
             if (e.k === expkind.VCALL && nret === 1) {  /* tail call? */
-                lopcode.SET_OPCODE(lcode.getinstruction(fs, e), OpCodesI.OP_TAILCALL);
+                lopcodes.SET_OPCODE(lcode.getinstruction(fs, e), OpCodesI.OP_TAILCALL);
                 assert(lcode.getinstruction(fs, e).A === fs.nactvar);
             }
             first = fs.nactvar;

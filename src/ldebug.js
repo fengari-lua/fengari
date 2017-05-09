@@ -3,19 +3,20 @@
 
 const assert = require('assert');
 
-const defs    = require('./defs.js');
-const ldo     = require('./ldo.js');
-const lobject = require('./lobject.js');
-const lstate  = require('./lstate.js');
-const ltable  = require('./ltable.js');
-const luaconf = require('./luaconf.js');
-const OC      = require('./lopcodes.js');
-const lvm     = require('./lvm.js');
-const ltm     = require('./ltm.js');
-const lfunc   = require('./lfunc.js');
-const TValue  = lobject.TValue;
-const CT      = defs.constant_types;
-const TS      = defs.thread_status;
+const defs     = require('./defs.js');
+const ldo      = require('./ldo.js');
+const lfunc    = require('./lfunc.js');
+const lobject  = require('./lobject.js');
+const lopcodes = require('./lopcodes.js');
+const lstate   = require('./lstate.js');
+const ltable   = require('./ltable.js');
+const ltm      = require('./ltm.js');
+const luaconf  = require('./luaconf.js');
+const lvm      = require('./lvm.js');
+
+const TValue = lobject.TValue;
+const CT     = defs.constant_types;
+const TS     = defs.thread_status;
 
 const currentline = function(ci) {
     return ci.func.value.p.lineinfo ? ci.func.value.p.lineinfo[ci.pcOff-1] : -1;
@@ -294,8 +295,8 @@ const kname = function(p, pc, c) {
         funcname: null
     };
 
-    if (OC.ISK(c)) {  /* is 'c' a constant? */
-        let kvalue = p.k[OC.INDEXK(c)];
+    if (lopcodes.ISK(c)) {  /* is 'c' a constant? */
+        let kvalue = p.k[lopcodes.INDEXK(c)];
         if (kvalue.ttisstring()) {  /* literal constant? */
             r.name = kvalue.svalue();  /* it is its own name */
             return r;
@@ -326,7 +327,7 @@ const findsetreg = function(p, lastpc, reg) {
     let jmptarget = 0;  /* any code before this address is conditional */
     for (let pc = 0; pc < lastpc; pc++) {
         let i = p.code[pc];
-        let op = OC.OpCodes[i.opcode];
+        let op = lopcodes.OpCodes[i.opcode];
         let a = i.A;
         switch (op) {
             case 'OP_LOADNIL': {
@@ -357,7 +358,7 @@ const findsetreg = function(p, lastpc, reg) {
                 break;
             }
             default:
-                if (OC.testAMode(i.opcode) && reg === a)
+                if (lopcodes.testAMode(i.opcode) && reg === a)
                     setreg = filterpc(pc, jmptarget);
                 break;
         }
@@ -382,7 +383,7 @@ const getobjname = function(p, lastpc, reg) {
     let pc = findsetreg(p, lastpc, reg);
     if (pc !== -1) {  /* could find instruction? */
         let i = p.code[pc];
-        let op = OC.OpCodes[i.opcode];
+        let op = lopcodes.OpCodes[i.opcode];
         switch (op) {
             case 'OP_MOVE': {
                 let b = i.B;  /* move from 'b' to 'a' */
@@ -450,7 +451,7 @@ const funcnamefromcode = function(L, ci) {
         return r;
     }
 
-    switch (OC.OpCodes[i.opcode]) {
+    switch (lopcodes.OpCodes[i.opcode]) {
         case 'OP_CALL':
         case 'OP_TAILCALL':
             return getobjname(p, pc, i.A);  /* get function name */
