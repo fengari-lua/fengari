@@ -15,6 +15,7 @@ install:
     - yarn
 
 script:
+    - yarn build
     - yarn test
 
 notifications:
