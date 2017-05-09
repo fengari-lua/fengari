@@ -47,3 +47,5 @@ help
 *.sublime-workspace
 
 .gdb_history
+
+dist
