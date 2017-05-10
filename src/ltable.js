@@ -139,7 +139,7 @@ const luaH_next = function(L, table, keyI) {
 
         if (!table.strong.has(hash))
             /* item not in table */
-            return ldebug.luaG_runerror(L, "invalid key to 'next'");
+            return ldebug.luaG_runerror(L, defs.to_luastring("invalid key to 'next'"))
 
         let indexes = table.strong.keys();
         while (1) {

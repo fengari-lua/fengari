@@ -297,3 +297,87 @@ test("[test-suite] events: test comparison", function (t) {
     }, "Lua program ran without error");
 
 });
+
+
+// TODO: uncomment asserts when next is fixed for cleared table entries
+test("[test-suite] events: test 'partial order'", function (t) {
+    let luaCode = `
+        t = {}
+
+        local function rawSet(x)
+          local y = {}
+          for _,k in pairs(x) do y[k] = 1 end
+          return y
+        end
+
+        local function Set(x)
+          return setmetatable(rawSet(x), t)
+        end
+
+        t.__lt = function (a,b)
+          for k in pairs(a) do
+            if not b[k] then return false end
+            b[k] = nil
+          end
+          return next(b) ~= nil
+        end
+
+        t.__le = nil
+
+        assert(Set{1,2,3} < Set{1,2,3,4})
+        -- assert(not(Set{1,2,3,4} < Set{1,2,3,4}))
+        -- assert((Set{1,2,3,4} <= Set{1,2,3,4}))
+        -- assert((Set{1,2,3,4} >= Set{1,2,3,4}))
+        assert((Set{1,3} <= Set{3,5}))   -- wrong!! model needs a 'le' method ;-)
+
+        t.__le = function (a,b)
+          for k in pairs(a) do
+            if not b[k] then return false end
+          end
+          return true
+        end
+
+        assert(not (Set{1,3} <= Set{3,5}))   -- now its OK!
+        assert(not(Set{1,3} <= Set{3,5}))
+        assert(not(Set{1,3} >= Set{3,5}))
+
+        t.__eq = function (a,b)
+          for k in pairs(a) do
+            if not b[k] then return false end
+            b[k] = nil
+          end
+          return next(b) == nil
+        end
+
+        local s = Set{1,3,5}
+        -- assert(s == Set{3,5,1})
+        assert(not rawequal(s, Set{3,5,1}))
+        assert(rawequal(s, s))
+        -- assert(Set{1,3,5,1} == rawSet{3,5,1})
+        -- assert(rawSet{1,3,5,1} == Set{3,5,1})
+        assert(Set{1,3,5} ~= Set{3,5,1,6})
+
+        -- '__eq' is not used for table accesses
+        t[Set{1,3,5}] = 1
+        assert(t[Set{1,3,5}] == nil)
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});
