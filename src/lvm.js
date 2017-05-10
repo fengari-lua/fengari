@@ -845,7 +845,8 @@ const luaV_tointeger = function(obj, mode) {
     } else if (obj.ttisinteger()) {
         return obj.value;
     } else if (obj.ttisstring()) {
-        return luaV_tointeger(lobject.luaO_str2num(obj.svalue()), mode);
+        let n = lobject.luaO_str2num(obj.svalue());
+        return n !== false ? luaV_tointeger(n, mode) : false;
     }
 
     return false;

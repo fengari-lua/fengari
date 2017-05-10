@@ -87,31 +87,7 @@ test("[test-suite] events: testing metatable", function (t) {
             assert(a[i*3] == 20 + i*4)
           end
         end
-    `, L;
-    
-    t.plan(2);
 
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lauxlib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
-});
-
-
-test("[test-suite] events: new index", function (t) {
-    let luaCode = `
         do  -- newindex
           local foi
           local a = {}
@@ -124,6 +100,86 @@ test("[test-suite] events: new index", function (t) {
           foi = false; a[1]=nil; assert(not foi)
           foi = false; a[1]=nil; assert(foi)
         end
+
+        setmetatable(t, nil)
+        function f (t, ...) return t, {...} end
+        t.__call = f
+
+        do
+          local x,y = a(table.unpack{'a', 1})
+          assert(x==a and y[1]=='a' and y[2]==1 and y[3]==nil)
+          x,y = a()
+          assert(x==a and y[1]==nil)
+        end
+
+
+        local b = setmetatable({}, t)
+        setmetatable(b,t)
+
+        function f(op)
+          return function (...) cap = {[0] = op, ...} ; return (...) end
+        end
+        t.__add = f("add")
+        t.__sub = f("sub")
+        t.__mul = f("mul")
+        t.__div = f("div")
+        t.__idiv = f("idiv")
+        t.__mod = f("mod")
+        t.__unm = f("unm")
+        t.__pow = f("pow")
+        t.__len = f("len")
+        t.__band = f("band")
+        t.__bor = f("bor")
+        t.__bxor = f("bxor")
+        t.__shl = f("shl")
+        t.__shr = f("shr")
+        t.__bnot = f("bnot")
+
+        assert(b+5 == b)
+        assert(cap[0] == "add" and cap[1] == b and cap[2] == 5 and cap[3]==nil)
+        assert(b+'5' == b)
+        assert(cap[0] == "add" and cap[1] == b and cap[2] == '5' and cap[3]==nil)
+        assert(5+b == 5)
+        assert(cap[0] == "add" and cap[1] == 5 and cap[2] == b and cap[3]==nil)
+        assert('5'+b == '5')
+        assert(cap[0] == "add" and cap[1] == '5' and cap[2] == b and cap[3]==nil)
+        b=b-3; assert(getmetatable(b) == t)
+        assert(5-a == 5)
+        assert(cap[0] == "sub" and cap[1] == 5 and cap[2] == a and cap[3]==nil)
+        assert('5'-a == '5')
+        assert(cap[0] == "sub" and cap[1] == '5' and cap[2] == a and cap[3]==nil)
+        assert(a*a == a)
+        assert(cap[0] == "mul" and cap[1] == a and cap[2] == a and cap[3]==nil)
+        assert(a/0 == a)
+        assert(cap[0] == "div" and cap[1] == a and cap[2] == 0 and cap[3]==nil)
+        assert(a%2 == a)
+        assert(cap[0] == "mod" and cap[1] == a and cap[2] == 2 and cap[3]==nil)
+        assert(a // (1/0) == a)
+        assert(cap[0] == "idiv" and cap[1] == a and cap[2] == 1/0 and cap[3]==nil)
+        assert(a & "hi" == a)
+        assert(cap[0] == "band" and cap[1] == a and cap[2] == "hi" and cap[3]==nil)
+        assert(a | "hi" == a)
+        assert(cap[0] == "bor" and cap[1] == a and cap[2] == "hi" and cap[3]==nil)
+        assert("hi" ~ a == "hi")
+        assert(cap[0] == "bxor" and cap[1] == "hi" and cap[2] == a and cap[3]==nil)
+        assert(-a == a)
+        assert(cap[0] == "unm" and cap[1] == a)
+        assert(a^4 == a)
+        assert(cap[0] == "pow" and cap[1] == a and cap[2] == 4 and cap[3]==nil)
+        assert(a^'4' == a)
+        assert(cap[0] == "pow" and cap[1] == a and cap[2] == '4' and cap[3]==nil)
+        assert(4^a == 4)
+        assert(cap[0] == "pow" and cap[1] == 4 and cap[2] == a and cap[3]==nil)
+        assert('4'^a == '4')
+        assert(cap[0] == "pow" and cap[1] == '4' and cap[2] == a and cap[3]==nil)
+        assert(#a == a)
+        assert(cap[0] == "len" and cap[1] == a)
+        assert(~a == a)
+        assert(cap[0] == "bnot" and cap[1] == a)
+        assert(a << 3 == a)
+        assert(cap[0] == "shl" and cap[1] == a and cap[2] == 3)
+        assert(1.5 >> a == 1.5)
+        assert(cap[0] == "shr" and cap[1] == 1.5 and cap[2] == a)
     `, L;
     
     t.plan(2);
