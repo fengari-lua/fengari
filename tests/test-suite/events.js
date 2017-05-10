@@ -201,3 +201,98 @@ test("[test-suite] events: testing metatable", function (t) {
     }, "Lua program ran without error");
 
 });
+
+
+test("[test-suite] events: test for rawlen", function (t) {
+    let luaCode = `
+        t = setmetatable({1,2,3}, {__len = function () return 10 end})
+        assert(#t == 10 and rawlen(t) == 3)
+        assert(rawlen"abc" == 3)
+        assert(not pcall(rawlen, io.stdin))
+        assert(not pcall(rawlen, 34))
+        assert(not pcall(rawlen))
+
+        -- rawlen for long strings
+        assert(rawlen(string.rep('a', 1000)) == 1000)
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lauxlib.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});
+
+
+test("[test-suite] events: test comparison", function (t) {
+    let luaCode = `
+        t = {}
+        t.__lt = function (a,b,c)
+          collectgarbage()
+          assert(c == nil)
+          if type(a) == 'table' then a = a.x end
+          if type(b) == 'table' then b = b.x end
+         return a<b, "dummy"
+        end
+
+        function Op(x) return setmetatable({x=x}, t) end
+
+        local function test ()
+          assert(not(Op(1)<Op(1)) and (Op(1)<Op(2)) and not(Op(2)<Op(1)))
+          assert(not(1 < Op(1)) and (Op(1) < 2) and not(2 < Op(1)))
+          assert(not(Op('a')<Op('a')) and (Op('a')<Op('b')) and not(Op('b')<Op('a')))
+          assert(not('a' < Op('a')) and (Op('a') < 'b') and not(Op('b') < Op('a')))
+          assert((Op(1)<=Op(1)) and (Op(1)<=Op(2)) and not(Op(2)<=Op(1)))
+          assert((Op('a')<=Op('a')) and (Op('a')<=Op('b')) and not(Op('b')<=Op('a')))
+          assert(not(Op(1)>Op(1)) and not(Op(1)>Op(2)) and (Op(2)>Op(1)))
+          assert(not(Op('a')>Op('a')) and not(Op('a')>Op('b')) and (Op('b')>Op('a')))
+          assert((Op(1)>=Op(1)) and not(Op(1)>=Op(2)) and (Op(2)>=Op(1)))
+          assert((1 >= Op(1)) and not(1 >= Op(2)) and (Op(2) >= 1))
+          assert((Op('a')>=Op('a')) and not(Op('a')>=Op('b')) and (Op('b')>=Op('a')))
+          assert(('a' >= Op('a')) and not(Op('a') >= 'b') and (Op('b') >= Op('a')))
+        end
+
+        test()
+
+        t.__le = function (a,b,c)
+          assert(c == nil)
+          if type(a) == 'table' then a = a.x end
+          if type(b) == 'table' then b = b.x end
+         return a<=b, "dummy"
+        end
+
+        test()  -- retest comparisons, now using both 'lt' and 'le'
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lauxlib.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});

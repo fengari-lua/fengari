@@ -737,9 +737,9 @@ const luaV_lessequal = function(L, l, r) {
         if (res >= 0)
             return res ? 1 : 0;
     }
-
+    /* try 'lt': */
     L.ci.callstatus |= lstate.CIST_LEQ; /* mark it is doing 'lt' for 'le' */
-    res = ltm.luaT_callorderTM(L, l, r, ltm.TMS.TM_LT);
+    res = ltm.luaT_callorderTM(L, r, l, ltm.TMS.TM_LT);
     L.ci.callstatus ^= lstate.CIST_LEQ; /* clear mark */
     if (res < 0)
         ldebug.luaG_ordererror(L, l, r);
