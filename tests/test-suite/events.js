@@ -62,6 +62,68 @@ test("[test-suite] events: testing metatable", function (t) {
         t.__newindex = f
         a[1] = 30; a.x = "101"; a[5] = 200
         assert(a[1] == 27 and a.x == 98 and a[5] == 197)
+
+        do    -- bug in Lua 5.3.2
+          local mt = {}
+          mt.__newindex = mt
+          local t = setmetatable({}, mt)
+          t[1] = 10     -- will segfault on some machines
+          assert(mt[1] == 10)
+        end
+
+        local c = {}
+        a = setmetatable({}, t)
+        t.__newindex = c
+        a[1] = 10; a[2] = 20; a[3] = 90
+        assert(c[1] == 10 and c[2] == 20 and c[3] == 90)
+
+        do
+          local a;
+          a = setmetatable({}, {__index = setmetatable({},
+                             {__index = setmetatable({},
+                             {__index = function (_,n) return a[n-3]+4, "lixo" end})})})
+          a[0] = 20
+          for i=0,10 do
+            assert(a[i*3] == 20 + i*4)
+          end
+        end
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lauxlib.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});
+
+
+test("[test-suite] events: new index", function (t) {
+    let luaCode = `
+        do  -- newindex
+          local foi
+          local a = {}
+          for i=1,10 do a[i] = 0; a['a'..i] = 0; end
+          setmetatable(a, {__newindex = function (t,k,v) foi=true; rawset(t,k,v) end})
+          foi = false; a[1]=0; assert(not foi)
+          foi = false; a['a1']=0; assert(not foi)
+          foi = false; a['a11']=0; assert(foi)
+          foi = false; a[11]=0; assert(foi)
+          foi = false; a[1]=nil; assert(not foi)
+          foi = false; a[1]=nil; assert(foi)
+        end
     `, L;
     
     t.plan(2);
