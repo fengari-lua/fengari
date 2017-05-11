@@ -182,6 +182,7 @@ class TValue {
 }
 
 const luaO_nilobject = new TValue(CT.LUA_TNIL, null);
+Object.freeze(luaO_nilobject);
 module.exports.luaO_nilobject = luaO_nilobject;
 
 class LClosure {
