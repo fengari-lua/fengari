@@ -43,6 +43,7 @@ const clean_dead_keys = function(t) {
     for (let i=0; i<t.dead_hashes.length; i++) {
         t.strong.delete(t.dead_hashes[i]);
     }
+    t.dead_hashes.length = 0;
 };
 
 const luaH_new = function(L) {
