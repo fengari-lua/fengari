@@ -34,7 +34,7 @@ class Table {
     constructor(L) {
         this.id = L.l_G.id_counter++;
         this.strong = new Map();
-        this.dead_hashes = [];
+        this.dead = new Map();
         this.f = void 0; /* first entry */
         this.l = void 0; /* last entry */
         this.metatable = null;
@@ -42,7 +42,7 @@ class Table {
 }
 
 const add = function(t, hash, key, value) {
-    clean_dead_keys(t);
+    t.dead.clear();
     let prev;
     let entry = {
         key: key,
@@ -56,35 +56,24 @@ const add = function(t, hash, key, value) {
     t.l = entry;
 };
 
-const remove = function(t, hash) {
-    let entry = t.strong.get(hash);
-    if (entry) {
-        let next = entry.n;
-        let prev = entry.p;
-        if(prev) prev.n = next;
-        if(next) next.p = prev;
-        if(t.f === entry) t.f = next;
-        if(t.l === entry) t.l = prev;
-        t.strong.delete(hash);
-    }
-};
 
-/* Can't remove from table immediately due to next() */
+/* Move out of 'strong' part and into 'dead' part. */
 const mark_dead = function(t, hash) {
     let e = t.strong.get(hash);
     if (e) {
         e.key.setdeadvalue();
         e.value = new lobject.TValue(CT.LUA_TNIL, null);
-        t.dead_hashes.push(hash);
+        let next = e.n;
+        let prev = e.p;
+        e.p = void 0; /* no need to know previous item any more */
+        if(prev) prev.n = next;
+        if(next) next.p = prev;
+        if(t.f === e) t.f = next;
+        if(t.l === e) t.l = prev;
+        t.strong.delete(hash);
+        t.dead.set(hash, e);
     }
 }
-
-const clean_dead_keys = function(t) {
-    for (let i=0; i<t.dead_hashes.length; i++) {
-        remove(t, t.dead_hashes[i]);
-    }
-    t.dead_hashes.length = 0;
-};
 
 const luaH_new = function(L) {
     return new Table(L);
@@ -174,22 +163,30 @@ const luaH_next = function(L, table, keyI) {
     let entry;
     if (keyO.type === CT.LUA_TNIL) {
         entry = table.f;
+        if (!entry)
+            return false;
     } else {
         /* First find current key */
         let hash = table_hash(keyO);
+        /* Look in main part of table */
         entry = table.strong.get(hash);
-        if (!entry)
-            /* item not in table */
-            return ldebug.luaG_runerror(L, defs.to_luastring("invalid key to 'next'"))
-        entry = entry.n;
-    }
-    /* Iterate until either out of keys, or until finding a non-dead key */
-    while (1) {
-        if (!entry)
-            return false;
-        if (!entry.key.ttisdeadkey())
-            break;
-        entry = entry.n;
+        if (entry) {
+            entry = entry.n;
+            if (!entry)
+                return false;
+        } else if (!entry) {
+            /* Try dead keys */
+            entry = table.dead.get(hash);
+            if (!entry)
+                /* item not in table */
+                return ldebug.luaG_runerror(L, defs.to_luastring("invalid key to 'next'"))
+            /* Iterate until either out of keys, or until finding a non-dead key */
+            do {
+                entry = entry.n;
+                if (!entry)
+                    return false;
+            } while (entry.key.ttisdeadkey())
+        }
     }
     L.stack[keyI] = new lobject.TValue(entry.key.type, entry.key.value);
     L.stack[keyI+1] = new lobject.TValue(entry.value.type, entry.value.value);
