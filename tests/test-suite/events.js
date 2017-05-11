@@ -8,6 +8,8 @@ const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
 
+const ltests  = require('./ltests.js');
+
 
 test("[test-suite] events: testing metatable", function (t) {
     let luaCode = `
@@ -369,6 +371,51 @@ test("[test-suite] events: test 'partial order'", function (t) {
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});
+
+
+test("[test-suite] events: __eq between userdata", function (t) {
+    let luaCode = `
+        T = require('T')
+
+        local u1 = T.newuserdata(0)
+        local u2 = T.newuserdata(0)
+        local u3 = T.newuserdata(0)
+        assert(u1 ~= u2 and u1 ~= u3)
+        debug.setuservalue(u1, 1);
+        debug.setuservalue(u2, 2);
+        debug.setuservalue(u3, 1);
+        debug.setmetatable(u1, {__eq = function (a, b)
+          return debug.getuservalue(a) == debug.getuservalue(b)
+        end})
+        debug.setmetatable(u2, {__eq = function (a, b)
+          return true
+        end})
+        assert(u1 == u3 and u3 == u1 and u1 ~= u2)
+        assert(u2 == u1 and u2 == u3 and u3 == u2)
+        assert(u2 ~= {})   -- different types cannot be equal
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
