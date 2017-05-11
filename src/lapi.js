@@ -496,7 +496,7 @@ const luaS_newudata = function(L, size) {
     return {
         id: L.l_G.id_counter++,
         metatable: null,
-        uservalue: null,
+        uservalue: new lobject.TValue(CT.LUA_TNIL, null),
         len: size,
         data: Object.create(null) // ignores size argument
     };
@@ -595,7 +595,7 @@ const lua_getmetatable = function(L, objindex) {
 const lua_getuservalue = function(L, idx) {
     let o = index2addr(L, idx);
     assert(L, o.ttisfulluserdata(), "full userdata expected");
-    let uv = o.uservalue;
+    let uv = o.value.uservalue;
     L.stack[L.top++] = new TValue(uv.type, uv.value);
     assert(L.top <= L.ci.top, "stack overflow");
     return L.stack[L.top - 1].ttnov();
@@ -895,7 +895,7 @@ const lua_setuservalue = function(L, idx) {
     assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     let o = index2addr(L, idx);
     assert(L, o.ttisfulluserdata(), "full userdata expected");
-    o.uservalue.setfrom(L.stack[L.top - 1]);
+    o.value.uservalue.setfrom(L.stack[L.top - 1]);
     delete L.stack[--L.top];
 };
 
