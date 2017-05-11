@@ -184,7 +184,7 @@ test('table.remove', function (t) {
         [...lua.lua_topointer(L, -1).strong.entries()]
             .filter(e => typeof e[0] === 'number')
             .map(e => e[1].value.value).sort(),
-        [1, 2, 3, 4, null, null],
+        [1, 2, 3, 4],
         "Correct element(s) on the stack"
     );
 });

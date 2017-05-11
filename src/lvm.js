@@ -1079,7 +1079,10 @@ const settable = function(L, table, key, v, recur) {
         let element = ltable.luaH_set(table.value, key);
 
         if (!element.ttisnil()) {
-            element.setfrom(v);
+            if (v.ttisnil())
+                ltable.luaH_delete(table.value, key);
+            else
+                element.setfrom(v);
         } else {
             luaV_finishset(L, table, key, v, element, recur);
         }
@@ -1094,7 +1097,10 @@ const luaV_finishset = function(L, t, key, val, slot, recur) {
         assert(slot.ttisnil());
         tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_NEWINDEX); // TODO: fasttm
         if (tm.ttisnil()) {
-            slot.setfrom(val);
+            if (val.ttisnil())
+                ltable.luaH_delete(t.value, key);
+            else
+                slot.setfrom(val);
             return;
         }
     } else { /* not a table; check metamethod */
