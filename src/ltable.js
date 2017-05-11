@@ -150,9 +150,10 @@ const luaH_getn = function(t) {
 const luaH_next = function(L, table, keyI) {
     let keyO = L.stack[keyI];
 
-    let iterresult;
+    let iterator;
+    /* Iterate until we find the current key */
     if (keyO.type === CT.LUA_TNIL) {
-        iterresult = table.strong.keys().next();
+        iterator = table.strong.keys();
     } else {
         let hash = table_hash(keyO);
 
@@ -160,18 +161,21 @@ const luaH_next = function(L, table, keyI) {
             /* item not in table */
             return ldebug.luaG_runerror(L, defs.to_luastring("invalid key to 'next'"))
 
-        let indexes = table.strong.keys();
-        while (1) {
-            let e = indexes.next();
+        iterator = table.strong.keys();
+        do {
+            let e = iterator.next();
             if (e.done)
                 throw "unreachable";
-            else if (e.value == hash)
-                break;
-        }
-        iterresult = indexes.next();
+        } while(e.value !== hash);
     }
-    if (iterresult.done)
-        return false;
+    /* Now iterator is positioned at current key.
+     * Iterate until either out of keys, or until finding a non-dead key */
+    let iterresult
+    do {
+        iterresult = indexes.next();
+        if (iterresult.done)
+            return false;
+    } while(iterresult.value.ttisdeadkey());
 
     let entry = table.strong.get(iterresult.value);
     L.stack[keyI] = new lobject.TValue(entry.key.type, entry.key.value);
