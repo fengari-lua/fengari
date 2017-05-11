@@ -4,8 +4,9 @@ const test     = require('tape');
 
 global.WEB = false;
 
-const lauxlib  = require("../../src/lauxlib.js");
-const lua      = require('../../src/lua.js');
+const lua     = require('../../src/lua.js');
+const lauxlib = require('../../src/lauxlib.js');
+const lualib  = require('../../src/lualib.js');
 
 
 test("[test-suite] vararg: testing vararg", function (t) {
@@ -82,7 +83,7 @@ test("[test-suite] vararg: testing vararg", function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -127,7 +128,7 @@ test("[test-suite] vararg: new-style varargs", function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -177,7 +178,7 @@ test("[test-suite] vararg: varargs for main chunks", function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -213,7 +214,7 @@ test("[test-suite] vararg: bug in 5.2.2", function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 

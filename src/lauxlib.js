@@ -2,7 +2,6 @@
 "use strict";
 
 const lua     = require('./lua.js');
-const linit   = require('./linit.js');
 
 /* key, in the registry, for table of loaded modules */
 const LUA_LOADED_TABLE = "_LOADED";
@@ -798,7 +797,6 @@ module.exports.luaL_loadstring      = luaL_loadstring;
 module.exports.luaL_newlib          = luaL_newlib;
 module.exports.luaL_newmetatable    = luaL_newmetatable;
 module.exports.luaL_newstate        = luaL_newstate;
-module.exports.luaL_openlibs        = linit.luaL_openlibs;
 module.exports.luaL_opt             = luaL_opt;
 module.exports.luaL_optinteger      = luaL_optinteger;
 module.exports.luaL_optlstring      = luaL_optlstring;

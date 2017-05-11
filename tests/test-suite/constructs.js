@@ -4,8 +4,9 @@ const test     = require('tape');
 
 global.WEB = false;
 
-const lauxlib  = require("../../src/lauxlib.js");
-const lua      = require('../../src/lua.js');
+const lua     = require('../../src/lua.js');
+const lauxlib = require('../../src/lauxlib.js');
+const lualib  = require('../../src/lualib.js');
 
 
 const checkload = `
@@ -27,7 +28,7 @@ test('[test-suite] constructs: testing semicolons', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkload + luaCode));
 
@@ -53,7 +54,7 @@ test('[test-suite] constructs: invalid operations should not raise errors when n
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkload + luaCode));
 
@@ -118,7 +119,7 @@ test('[test-suite] constructs: testing priorities', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkload + luaCode));
 
@@ -304,7 +305,7 @@ test('[test-suite] constructs: silly loops', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkload + luaCode));
 
@@ -393,7 +394,7 @@ if (false) {
 
             L = lauxlib.luaL_newstate();
 
-            lauxlib.luaL_openlibs(L);
+            lualib.luaL_openlibs(L);
 
             lauxlib.luaL_loadstring(L, lua.to_luastring(checkload + luaCode));
 
@@ -430,7 +431,7 @@ test("[test-suite] constructs: testing some syntax errors (chosen through 'gcov'
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(checkload + luaCode));
 

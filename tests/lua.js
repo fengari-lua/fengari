@@ -2,12 +2,13 @@
 
 const test     = require('tape');
 
-const lapi     = require("../src/lapi.js");
-const lauxlib  = require("../src/lauxlib.js");
-const lua      = require('../src/lua.js');
+const lua     = require('../src/lua.js');
+const lauxlib = require('../src/lauxlib.js');
+const lualib  = require('../src/lualib.js');
+const lapi    = require('../src/lapi.js');
+
 
 // TODO: remove
-
 if (false) {
     test('locals.lua', function (t) {
         let luaCode = `
@@ -22,7 +23,7 @@ if (false) {
 
             L = lauxlib.luaL_newstate();
 
-            lauxlib.luaL_openlibs(L);
+            lualib.luaL_openlibs(L);
 
             lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -50,7 +51,7 @@ if (false) {
 
             L = lauxlib.luaL_newstate();
 
-            lauxlib.luaL_openlibs(L);
+            lualib.luaL_openlibs(L);
 
             lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -76,7 +77,7 @@ if (false) {
 
             L = lauxlib.luaL_newstate();
 
-            lauxlib.luaL_openlibs(L);
+            lualib.luaL_openlibs(L);
 
             lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 

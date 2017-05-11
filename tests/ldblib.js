@@ -2,8 +2,10 @@
 
 const test     = require('tape');
 
-const lauxlib  = require("../src/lauxlib.js");
-const lua      = require('../src/lua.js');
+const lua     = require('../src/lua.js');
+const lauxlib = require('../src/lauxlib.js');
+const lualib  = require('../src/lualib.js');
+
 
 test('debug.sethook', function (t) {
     let luaCode = `
@@ -28,7 +30,7 @@ test('debug.sethook', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -72,7 +74,7 @@ test('debug.gethook', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -132,7 +134,7 @@ test('debug.getlocal', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -180,7 +182,7 @@ test('debug.setlocal', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -235,7 +237,7 @@ test('debug.upvalueid', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -279,7 +281,7 @@ test('debug.upvaluejoin', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -324,7 +326,7 @@ test('debug.traceback (with a global)', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         luaCode = lua.to_luastring(luaCode);
         lauxlib.luaL_loadbuffer(L, luaCode, luaCode.length, lua.to_luastring("traceback-test"));
@@ -383,7 +385,7 @@ test('debug.traceback (with a upvalue)', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         luaCode = lua.to_luastring(luaCode);
         lauxlib.luaL_loadbuffer(L, luaCode, luaCode.length, lua.to_luastring("traceback-test"));
@@ -437,7 +439,7 @@ test('debug.getinfo', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         luaCode = lua.to_luastring(luaCode);
         lauxlib.luaL_loadbuffer(L, luaCode, luaCode.length, lua.to_luastring("getinfo-test"));

@@ -5,6 +5,8 @@ global.WEB = false;
 
 const lua          = require('../../src/lua.js');
 const lauxlib      = require('../../src/lauxlib.js');
+const lualib       = require('../../src/lualib.js');
+
 const readlineSync = require('readline-sync');
 
 const stdin = lua.to_luastring("=stdin");
@@ -158,7 +160,7 @@ if (has_E) {
 }
 
 /* open standard libraries */
-lauxlib.luaL_openlibs(L);
+lualib.luaL_openlibs(L);
 
 /* create table 'arg' */
 lua.lua_createtable(L, process.argv.length - (script + 1), script + 1);

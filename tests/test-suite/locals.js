@@ -4,8 +4,9 @@ const test     = require('tape');
 
 global.WEB = false;
 
-const lauxlib  = require("../../src/lauxlib.js");
-const lua      = require('../../src/lua.js');
+const lua     = require('../../src/lua.js');
+const lauxlib = require('../../src/lauxlib.js');
+const lualib  = require('../../src/lualib.js');
 
 
 test('[test-suite] locals: bug in 5.1', function (t) {
@@ -26,7 +27,7 @@ test('[test-suite] locals: bug in 5.1', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -98,7 +99,7 @@ test('[test-suite] locals: local scope', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -138,7 +139,7 @@ test('[test-suite] locals: test for global table of loaded chunks', function (t)
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(getenv + luaCode));
 
@@ -181,7 +182,7 @@ test('[test-suite] locals: old test for limits for special instructions (now jus
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -235,7 +236,7 @@ test('[test-suite] locals: testing lexical environments', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(getenv + luaCode));
 

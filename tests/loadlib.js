@@ -2,8 +2,10 @@
 
 const test     = require('tape');
 
-const lauxlib  = require("../src/lauxlib.js");
-const lua      = require('../src/lua.js');
+const lua     = require('../src/lua.js');
+const lauxlib = require('../src/lauxlib.js');
+const lualib  = require('../src/lualib.js');
+
 
 test('require an existing module', function (t) {
     let luaCode = `
@@ -16,7 +18,7 @@ test('require an existing module', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -47,7 +49,7 @@ test('require a file', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -79,7 +81,7 @@ test('package.loadlib', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -111,7 +113,7 @@ test('package.searchpath', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 

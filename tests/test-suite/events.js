@@ -4,8 +4,9 @@ const test     = require('tape');
 
 global.WEB = false;
 
-const lauxlib  = require("../../src/lauxlib.js");
-const lua      = require('../../src/lua.js');
+const lua     = require('../../src/lua.js');
+const lauxlib = require('../../src/lauxlib.js');
+const lualib  = require('../../src/lualib.js');
 
 
 test("[test-suite] events: testing metatable", function (t) {
@@ -188,7 +189,7 @@ test("[test-suite] events: testing metatable", function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -222,7 +223,7 @@ test("[test-suite] events: test for rawlen", function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
@@ -283,7 +284,7 @@ test("[test-suite] events: test comparison", function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 

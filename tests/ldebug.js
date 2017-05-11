@@ -5,8 +5,9 @@ const test       = require('tape');
 const tests      = require("./tests.js");
 const toByteCode = tests.toByteCode;
 
-const lauxlib    = require("../src/lauxlib.js");
-const lua        = require('../src/lua.js');
+const lua     = require('../src/lua.js');
+const lauxlib = require('../src/lauxlib.js');
+const lualib  = require('../src/lualib.js');
 
 test('luaG_typeerror', function (t) {
     let luaCode = `
@@ -22,7 +23,7 @@ test('luaG_typeerror', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-typeerror"), lua.to_luastring("binary"));
 
@@ -52,7 +53,7 @@ test('luaG_typeerror', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-typeerror"), lua.to_luastring("binary"));
 
@@ -81,7 +82,7 @@ test('luaG_typeerror', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-typeerror"), lua.to_luastring("binary"));
 
@@ -110,7 +111,7 @@ test('luaG_typeerror', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-typeerror"), lua.to_luastring("binary"));
 
@@ -138,7 +139,7 @@ test('luaG_concaterror', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-typeerror"), lua.to_luastring("binary"));
 
@@ -166,7 +167,7 @@ test('luaG_opinterror', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-typeerror"), lua.to_luastring("binary"));
 
@@ -194,7 +195,7 @@ test('luaG_tointerror', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test-typeerror"), lua.to_luastring("binary"));
 

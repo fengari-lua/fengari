@@ -13,21 +13,21 @@ const loslib   = require('./loslib.js');
 const loadlib  = require('./loadlib.js');
 const lualib   = require('./lualib.js');
 
-const loadedlibs = {
-    [lualib.LUA_LOADLIBNAME]: loadlib.luaopen_package,
-    [lualib.LUA_COLIBNAME]:   lcorolib.luaopen_coroutine,
-    [lualib.LUA_DBLIBNAME]:   ldblib.luaopen_debug,
-    [lualib.LUA_MATHLIBNAME]: lmathlib.luaopen_math,
-    [lualib.LUA_OSLIBNAME]:   loslib.luaopen_os,
-    [lualib.LUA_STRLIBNAME]:  lstrlib.luaopen_string,
-    [lualib.LUA_TABLIBNAME]:  ltablib.luaopen_table,
-    [lualib.LUA_UTF8LIBNAME]: lutf8lib.luaopen_utf8,
-    "_G":                     lbaselib.luaopen_base
-};
-
-if (!WEB) loadedlibs[lualib.LUA_IOLIBNAME] = require('./liolib.js').luaopen_io;
-
 const luaL_openlibs = function(L) {
+    const loadedlibs = {
+        [lualib.LUA_LOADLIBNAME]: loadlib.luaopen_package,
+        [lualib.LUA_COLIBNAME]:   lcorolib.luaopen_coroutine,
+        [lualib.LUA_DBLIBNAME]:   ldblib.luaopen_debug,
+        [lualib.LUA_MATHLIBNAME]: lmathlib.luaopen_math,
+        [lualib.LUA_OSLIBNAME]:   loslib.luaopen_os,
+        [lualib.LUA_STRLIBNAME]:  lstrlib.luaopen_string,
+        [lualib.LUA_TABLIBNAME]:  ltablib.luaopen_table,
+        [lualib.LUA_UTF8LIBNAME]: lutf8lib.luaopen_utf8,
+        "_G":                     lbaselib.luaopen_base
+    };
+
+    if (!WEB) loadedlibs[lualib.LUA_IOLIBNAME] = require('./liolib.js').luaopen_io;
+
     /* "require" functions from 'loadedlibs' and set results to global table */
     for (let lib in loadedlibs) {
         lauxlib.luaL_requiref(L, lua.to_luastring(lib), loadedlibs[lib], 1);

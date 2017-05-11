@@ -2,11 +2,12 @@
 
 const test       = require('tape');
 
-const lua        = require("../src/lua.js");
-const lauxlib    = require("../src/lauxlib.js");
-
 const tests      = require("./tests.js");
 const toByteCode = tests.toByteCode;
+
+const lua     = require('../src/lua.js');
+const lauxlib = require('../src/lauxlib.js');
+const lualib  = require('../src/lualib.js');
 
 
 test('__index, __newindex: with actual table', function (t) {
@@ -22,7 +23,7 @@ test('__index, __newindex: with actual table', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
         lua.lua_call(L, 0, -1);
@@ -54,7 +55,7 @@ test('__newindex: with non table', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
@@ -87,7 +88,7 @@ test('__index function in metatable', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
@@ -129,7 +130,7 @@ test('__newindex function in metatable', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
@@ -169,7 +170,7 @@ test('__index table in metatable', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
@@ -212,7 +213,7 @@ test('__newindex table in metatable', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
@@ -266,7 +267,7 @@ test('__index table with own metatable', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
@@ -319,7 +320,7 @@ test('__newindex table with own metatable', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
@@ -420,7 +421,7 @@ test('binary __xxx functions in metatable', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
@@ -472,7 +473,7 @@ test('__eq', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
@@ -510,7 +511,7 @@ test('__lt', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
@@ -548,7 +549,7 @@ test('__le', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
@@ -586,7 +587,7 @@ test('__le that uses __lt', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
@@ -628,7 +629,7 @@ test('__unm, __bnot', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
@@ -673,7 +674,7 @@ test('__len', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
@@ -712,7 +713,7 @@ test('__concat', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");
@@ -751,7 +752,7 @@ test('__call', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_openlibs(L);
+        lualib.luaL_openlibs(L);
 
         lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
     }, "Bytecode parsed without errors");

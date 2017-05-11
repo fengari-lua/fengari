@@ -1,7 +1,8 @@
 "use strict";
 
-const lauxlib  = require("../../src/lauxlib.js");
-const lua      = require('../../src/lua.js');
+const lua     = require('../../src/lua.js');
+const lauxlib = require('../../src/lauxlib.js');
+const lualib  = require('../../src/lualib.js');
 
 let luaCode = `
     a = "debug me"
@@ -10,7 +11,7 @@ let luaCode = `
 
 L = lauxlib.luaL_newstate();
 
-lauxlib.luaL_openlibs(L);
+lualib.luaL_openlibs(L);
 
 lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
