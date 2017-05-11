@@ -404,8 +404,14 @@ const lua_rawset = function(L, idx) {
     assert(2 < L.top - L.ci.funcOff, "not enough elements in the stack");
     let o = index2addr(L, idx);
     assert(o.ttistable(), "table expected");
-    let slot = ltable.luaH_set(o.value, L.stack[L.top - 2]);
-    slot.setfrom(L.stack[L.top - 1]);
+    let k = L.stack[L.top - 2];
+    let v = L.stack[L.top - 1];
+    if (v.ttisnil()) {
+        ltable.luaH_delete(o.value, k);
+    } else {
+        let slot = ltable.luaH_set(o.value, k);
+        slot.setfrom(v);
+    }
     L.top -= 2;
 };
 
@@ -422,8 +428,13 @@ const lua_rawsetp = function(L, idx, p) {
     let o = index2addr(L, idx);
     assert(L, o.ttistable(), "table expected");
     let k = new TValue(CT.LUA_TLIGHTUSERDATA, p);
-    let slot = ltable.luaH_set(o.value, k);
-    slot.setfrom(L.stack[L.top - 1]);
+    let v = L.stack[L.top - 1];
+    if (v.ttisnil()) {
+        ltable.luaH_delete(o.value, k);
+    } else {
+        let slot = ltable.luaH_set(o.value, k);
+        slot.setfrom(v);
+    }
     L.top--;
 };
 
