@@ -13,6 +13,8 @@ const llimit  = require('./llimit.js');
 const CT      = defs.constant_types;
 const char    = defs.char;
 
+const LUA_TPROTO = CT.LUA_NUMTAGS;
+const LUA_TDEADKEY = CT.LUA_NUMTAGS+1;
 
 class TValue {
 
@@ -108,7 +110,7 @@ class TValue {
     }
 
     ttisdeadkey() {
-        return this.checktag(CT.LUA_TDEADKEY);
+        return this.checktag(LUA_TDEADKEY);
     }
 
     l_isfalse() {
@@ -150,6 +152,11 @@ class TValue {
         this.value = x;
     }
 
+    setdeadvalue() {
+        this.type = LUA_TDEADKEY;
+        this.value = null;
+    }
+
     setfrom(tv) { /* in lua C source setobj2t is often used for this */
         this.type = tv.type;
         this.value = tv.value;
@@ -175,6 +182,7 @@ class TValue {
 }
 
 const luaO_nilobject = new TValue(CT.LUA_TNIL, null);
+Object.freeze(luaO_nilobject);
 module.exports.luaO_nilobject = luaO_nilobject;
 
 class LClosure {
@@ -539,6 +547,8 @@ const numarith = function(L, op, v1, v2) {
     }
 };
 
+module.exports.LUA_TPROTO        = LUA_TPROTO;
+module.exports.LUA_TDEADKEY      = LUA_TDEADKEY;
 module.exports.CClosure          = CClosure;
 module.exports.LClosure          = LClosure;
 module.exports.LocVar            = LocVar;

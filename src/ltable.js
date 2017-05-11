@@ -34,9 +34,16 @@ class Table {
     constructor(L) {
         this.id = L.l_G.id_counter++;
         this.strong = new Map();
+        this.dead_hashes = [];
         this.metatable = null;
     }
 }
+
+const clean_dead_keys = function(t) {
+    for (let i=0; i<t.dead_hashes.length; i++) {
+        t.strong.delete(t.dead_hashes[i]);
+    }
+};
 
 const luaH_new = function(L) {
     return new Table(L);
@@ -69,6 +76,7 @@ const setgeneric = function(t, hash, key) {
     if (v)
         return v.value;
 
+    clean_dead_keys(t);
     let tv = new lobject.TValue(CT.LUA_TNIL, null);
     t.strong.set(hash, {
         key: key,
@@ -81,7 +89,7 @@ const luaH_setint = function(t, key, value) {
     assert(typeof key == "number" && (key|0) === key && value instanceof lobject.TValue);
     let hash = key; /* table_hash known result */
     if (value.ttisnil()) {
-        t.strong.delete(hash);
+        delete_hash(t, hash);
         return;
     }
     let v = t.strong.get(hash);
@@ -89,6 +97,7 @@ const luaH_setint = function(t, key, value) {
         let tv = v.value;
         tv.setfrom(value);
     } else {
+        clean_dead_keys(t);
         t.strong.set(hash, {
             key: new lobject.TValue(CT.LUA_TNUMINT, key),
             value: new lobject.TValue(value.type, value.value)
@@ -102,10 +111,20 @@ const luaH_set = function(t, key) {
     return setgeneric(t, hash, new lobject.TValue(key.type, key.value));
 };
 
+/* Can't remove from table immediately due to next() */
+const delete_hash = function(t, hash) {
+    let e = t.strong.get(hash);
+    if (e) {
+        e.key.setdeadvalue();
+        e.value = new lobject.TValue(CT.LUA_TNIL, null);
+        t.dead_hashes.push(hash);
+    }
+};
+
 const luaH_delete = function(t, key) {
     assert(key instanceof lobject.TValue);
     let hash = table_hash(key);
-    t.strong.delete(hash);
+    return delete_hash(t, hash);
 };
 
 /*
