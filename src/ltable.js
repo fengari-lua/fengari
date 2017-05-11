@@ -116,7 +116,7 @@ const delete_hash = function(t, hash) {
     let e = t.strong.get(hash);
     if (e) {
         e.key.setdeadvalue();
-        e.value = lobject.luaO_nilobject;
+        e.value = new lobject.TValue(CT.LUA_TNIL, null);
         t.dead_hashes.push(hash);
     }
 };
