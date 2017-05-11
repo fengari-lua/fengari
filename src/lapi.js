@@ -723,6 +723,37 @@ const lua_topointer = function(L, idx) {
     }
 };
 
+
+/* A proxy is a function that the same lua value to the given lua state. */
+
+/* Having a weakmap of created proxies was only way I could think of to provide an 'isproxy' function */
+const seen = new WeakMap();
+
+/* is the passed object a proxy? is it from the given state? (if passed) */
+const lua_isproxy = function(p, L) {
+    let G = seen.get(p);
+    if (!G)
+        return false;
+    return (L === null) || (L.l_G === G);
+};
+
+/* Use 'create_proxy' helper function so that 'L' is not in scope */
+const create_proxy = function(G, type, value) {
+    let proxy = function(L) {
+        assert(L instanceof lstate.lua_State && G === L.l_G, "must be from same global state");
+        L.stack[L.top++] = new TValue(type, value);
+    };
+    seen.set(proxy, G);
+    return proxy;
+};
+
+const lua_toproxy = function(L, idx) {
+    let tv = index2addr(L, idx);
+    /* pass broken down tv incase it is an upvalue index */
+    return create_proxy(L.l_G, tv.type, tv.value);
+};
+
+
 const lua_compare = function(L, index1, index2, op) {
     let o1 = index2addr(L, index1);
     let o2 = index2addr(L, index2);
@@ -1068,6 +1099,7 @@ module.exports.lua_isnil             = lua_isnil;
 module.exports.lua_isnone            = lua_isnone;
 module.exports.lua_isnoneornil       = lua_isnoneornil;
 module.exports.lua_isnumber          = lua_isnumber;
+module.exports.lua_isproxy           = lua_isproxy;
 module.exports.lua_isstring          = lua_isstring;
 module.exports.lua_istable           = lua_istable;
 module.exports.lua_isthread          = lua_isthread;
@@ -1127,6 +1159,7 @@ module.exports.lua_toljsstring       = lua_toljsstring;
 module.exports.lua_tolstring         = lua_tolstring;
 module.exports.lua_tonumber          = lua_tonumber;
 module.exports.lua_topointer         = lua_topointer;
+module.exports.lua_toproxy           = lua_toproxy;
 module.exports.lua_tostring          = lua_tostring;
 module.exports.lua_tothread          = lua_tothread;
 module.exports.lua_touserdata        = lua_touserdata;
