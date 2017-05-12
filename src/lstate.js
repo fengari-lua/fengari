@@ -154,6 +154,11 @@ const lua_newthread = function(L) {
     return L1;
 };
 
+const luaE_freethread = function(L, L1) {
+    lfunc.luaF_close(L1, L1.stack);
+    freestack(L1);
+};
+
 const lua_newstate = function() {
     let L = new lua_State();
     let g = new global_State(L);
@@ -177,17 +182,19 @@ const lua_close = function(L) {
     close_state(L);
 };
 
-module.exports.lua_State      = lua_State;
-module.exports.CallInfo       = CallInfo;
-module.exports.CIST_OAH       = (1<<0);  /* original value of 'allowhook' */
-module.exports.CIST_LUA       = (1<<1);  /* call is running a Lua function */
-module.exports.CIST_HOOKED    = (1<<2);  /* call is running a debug hook */
-module.exports.CIST_FRESH     = (1<<3);  /* call is running on a fresh invocation of luaV_execute */
-module.exports.CIST_YPCALL    = (1<<4);  /* call is a yieldable protected call */
-module.exports.CIST_TAIL      = (1<<5);  /* call was tail called */
-module.exports.CIST_HOOKYIELD = (1<<6);  /* last hook called yielded */
-module.exports.CIST_LEQ       = (1<<7);  /* using __lt for __le */
-module.exports.CIST_FIN       = (1<<8);   /* call is running a finalizer */
-module.exports.lua_close      = lua_close;
-module.exports.lua_newstate   = lua_newstate;
-module.exports.lua_newthread  = lua_newthread;
+module.exports.lua_State       = lua_State;
+module.exports.CallInfo        = CallInfo;
+module.exports.CIST_OAH        = (1<<0);  /* original value of 'allowhook' */
+module.exports.CIST_LUA        = (1<<1);  /* call is running a Lua function */
+module.exports.CIST_HOOKED     = (1<<2);  /* call is running a debug hook */
+module.exports.CIST_FRESH      = (1<<3);  /* call is running on a fresh invocation of luaV_execute */
+module.exports.CIST_YPCALL     = (1<<4);  /* call is a yieldable protected call */
+module.exports.CIST_TAIL       = (1<<5);  /* call was tail called */
+module.exports.CIST_HOOKYIELD  = (1<<6);  /* last hook called yielded */
+module.exports.CIST_LEQ        = (1<<7);  /* using __lt for __le */
+module.exports.CIST_FIN        = (1<<8);   /* call is running a finalizer */
+module.exports.lua_close       = lua_close;
+module.exports.lua_newstate    = lua_newstate;
+module.exports.lua_newthread   = lua_newthread;
+module.exports.luaE_freeCI     = luaE_freeCI;
+module.exports.luaE_freethread = luaE_freethread;
