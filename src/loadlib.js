@@ -19,17 +19,14 @@ const LUA_CSUBSEP   = lua.LUA_DIRSEP;
 const LUA_LSUBSEP   = lua.LUA_DIRSEP;
 
 /* prefix for open functions in C libraries */
-const LUA_POF       = "luaopen_";
+const LUA_POF       = lua.to_luastring("luaopen_");
 
 /* separator for open functions in C libraries */
-const LUA_OFSEP     = "_";
-// const LIB_FAIL      = "open";
+const LUA_OFSEP     = lua.to_luastring("_");
+const LIB_FAIL      = "open";
 
 const AUXMARK       = [1];
 
-
-const LIB_FAIL      = "absent";
-const DLMSG         = "dynamic libraries not enabled; check your Lua installation";
 
 /*
 ** load JS library in file 'path'. If 'seeglb', load with all names in
@@ -47,7 +44,8 @@ const lsys_load = function(L, path) {
 
         return require(path);
     } catch (e) {
-        lua.lua_pushjsstring(L, e.message);
+        lua.lua_pushstring(L, lua.to_luastring(e.message));
+        return null;
     }
 };
 
@@ -61,8 +59,10 @@ const lsys_sym = function(L, lib, sym) {
 
     if (f && typeof f === 'function')
         return f;
-
-    lua.lua_pushliteral(L, `'${lua.to_jsstring(sym)}'`);
+    else {
+        lua.lua_pushfstring(L, lua.to_luastring("undefined symbol: %s"), sym);
+        return null;
+    }
 };
 
 /*
@@ -143,7 +143,7 @@ const ll_loadlib = function(L) {
     else {  /* error; error message is on stack top */
         lua.lua_pushnil(L);
         lua.lua_insert(L, -2);
-        lua.lua_pushjsstring(L, (stat === ERRLIB) ? LIB_FAIL : "init");
+        lua.lua_pushliteral(L, (stat === ERRLIB) ? LIB_FAIL : "init");
         return 3;  /* return nil, error message, and where */
     }
 };
@@ -278,12 +278,12 @@ const loadfunc = function(L, filename, modname) {
     let mark = modname.indexOf(LUA_IGMARK[0]);
     if (mark >= 0) {
         openfunc = lua.lua_pushlstring(L, modname, mark);
-        openfunc = lua.lua_pushstring(L, lua.to_luastring(`${LUA_POF}${openfunc}`));
+        openfunc = lua.lua_pushfstring(L, lua.to_luastring("%s%s"), LUA_POF, openfunc);
         let stat = lookforfunc(L, filename, openfunc);
         if (stat !== ERRFUNC) return stat;
         modname = mark + 1;  /* else go ahead and try old-style name */
     }
-    openfunc = lua.lua_pushstring(L, lua.to_luastring(`${LUA_POF}${modname}`));
+    openfunc = lua.lua_pushfstring(L, lua.to_luastring("%s%s"), LUA_POF, modname);
     return lookforfunc(L, filename, openfunc);
 };
 
