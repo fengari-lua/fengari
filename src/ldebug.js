@@ -531,7 +531,7 @@ const varinfo = function(L, o) {
         kind = getupvalname(L, ci, o);  /* check whether 'o' is an upvalue */
         let stkid = isinstack(L, ci, o);
         if (!kind && stkid)  /* no? try a register */
-            kind = getobjname(ci.func.value.p, ci.pcOff, stkid - ci.l_base);
+            kind = getobjname(ci.func.value.p, ci.pcOff - 1, stkid - ci.l_base);
     }
 
     return kind ? lobject.luaO_pushfstring(L, defs.to_luastring(" (%s '%s')", true), kind.funcname, kind.name) : defs.to_luastring("", true);
