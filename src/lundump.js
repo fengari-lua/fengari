@@ -158,7 +158,7 @@ class BytecodeParser {
                 f.k.push(new lobject.TValue(defs.CT.LUA_TNIL, null));
                 break;
             case defs.CT.LUA_TBOOLEAN:
-                f.k.push(new lobject.TValue(defs.CT.LUA_TBOOLEAN, this.readByte()));
+                f.k.push(new lobject.TValue(defs.CT.LUA_TBOOLEAN, this.readByte() !== 0));
                 break;
             case defs.CT.LUA_TNUMFLT:
                 f.k.push(new lobject.TValue(defs.CT.LUA_TNUMFLT, this.readNumber()));

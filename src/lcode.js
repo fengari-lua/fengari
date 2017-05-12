@@ -799,8 +799,8 @@ const luaK_exp2RK = function(fs, e) {
     let vk = false;
     luaK_exp2val(fs, e);
     switch (e.k) {  /* move constants to 'k' */
-        case ek.VTRUE: e.u.info = boolK(fs, 1); vk = true; break;
-        case ek.VFALSE: e.u.info = boolK(fs, 0); vk = true; break;
+        case ek.VTRUE: e.u.info = boolK(fs, true); vk = true; break;
+        case ek.VFALSE: e.u.info = boolK(fs, false); vk = true; break;
         case ek.VNIL: e.u.info = nilK(fs); vk = true; break;
         case ek.VKINT: e.u.info = luaK_intK(fs, e.u.ival); vk = true; break;
         case ek.VKFLT: e.u.info = luaK_numberK(fs, e.u.nval); vk = true; break;
