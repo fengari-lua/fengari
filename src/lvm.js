@@ -489,14 +489,12 @@ const luaV_execute = function(L) {
                         L.stack[ofuncOff + aux] = L.stack[nfuncOff + aux];
                     oci.func = nci.func;
                     oci.l_base = ofuncOff + (nci.l_base - nfuncOff);
-                    L.top = ofuncOff + (L.top - nfuncOff);
-                    oci.top = L.top;
+                    oci.top = L.top = ofuncOff + (L.top - nfuncOff);
                     oci.l_savedpc = nci.l_savedpc;
                     oci.pcOff = nci.pcOff;
                     oci.callstatus |= lstate.CIST_TAIL;
                     oci.next = null;
-                    L.ci = oci;
-                    ci = L.ci;
+                    ci = L.ci = oci;
                     L.ciOff--;
 
                     assert(L.top === oci.l_base + L.stack[ofuncOff].value.p.maxstacksize);

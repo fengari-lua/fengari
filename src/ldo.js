@@ -89,8 +89,7 @@ const luaD_precall = function(L, off, nresults) {
             ci.nresults = nresults;
             ci.func = func;
             ci.l_base = base;
-            ci.top = base + fsize;
-            L.top = ci.top;
+            L.top = ci.top = base + fsize;
             ci.l_savedpc = p.code;
             ci.pcOff = 0;
             ci.callstatus = lstate.CIST_LUA;
