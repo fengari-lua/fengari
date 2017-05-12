@@ -67,7 +67,7 @@ const mark_dead = function(t, hash) {
     let e = t.strong.get(hash);
     if (e) {
         e.key.setdeadvalue();
-        e.value = new lobject.TValue(CT.LUA_TNIL, null);
+        e.value = void 0;
         let next = e.n;
         let prev = e.p;
         e.p = void 0; /* no need to know previous item any more */
