@@ -19,7 +19,7 @@ const TS = defs.thread_status;
 
 const currentpc = function(ci) {
     assert(ci.callstatus & lstate.CIST_LUA);
-    return ci.pcOff - 1;
+    return ci.l_savedpc - 1;
 };
 
 const currentline = function(ci) {
@@ -48,7 +48,7 @@ const lua_sethook = function(L, func, mask, count) {
         func = null;
     }
     if (L.ci.callstatus & lstate.CIST_LUA)
-        L.oldpc = L.ci.pcOff;
+        L.oldpc = L.ci.l_savedpc;
     L.hook = func;
     L.basehookcount = count;
     L.hookcount = L.basehookcount;
@@ -625,18 +625,18 @@ const luaG_traceexec = function(L) {
         ldo.luaD_hook(L, defs.LUA_HOOKCOUNT, -1);  /* call count hook */
     if (mask & defs.LUA_MASKLINE) {
         let p = ci.func.value.p;
-        let npc = ci.pcOff; // pcRel(ci.u.l.savedpc, p);
+        let npc = ci.l_savedpc; // pcRel(ci.u.l.savedpc, p);
         let newline = p.lineinfo ? p.lineinfo[npc] : -1;
         if (npc === 0 ||  /* call linehook when enter a new function, */
-            ci.pcOff <= L.oldpc ||  /* when jump back (loop), or when */
+            ci.l_savedpc <= L.oldpc ||  /* when jump back (loop), or when */
             newline !== p.lineinfo ? p.lineinfo[L.oldpc] : -1)  /* enter a new line */
             ldo.luaD_hook(L, defs.LUA_HOOKLINE, newline);  /* call line hook */
     }
-    L.oldpc = ci.pcOff;
+    L.oldpc = ci.l_savedpc;
     if (L.status === TS.LUA_YIELD) {  /* did hook yield? */
         if (counthook)
             L.hookcount = 1;  /* undo decrement to zero */
-        ci.pcOff--;  /* undo increment (resume will increment it again) */
+        ci.l_savedpc--;  /* undo increment (resume will increment it again) */
         ci.callstatus |= lstate.CIST_HOOKYIELD;  /* mark that it yielded */
         ci.func = L.top - 1;  /* protect stack below results */
         ldo.luaD_throw(L, TS.LUA_YIELD);

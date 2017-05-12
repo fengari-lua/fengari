@@ -91,7 +91,7 @@ const luaD_precall = function(L, off, nresults) {
             ci.l_base = base;
             L.top = ci.top = base + fsize;
             ci.l_code = p.code;
-            ci.pcOff = 0;
+            ci.l_savedpc = 0;
             ci.callstatus = lstate.CIST_LUA;
 
             return false;
@@ -108,7 +108,7 @@ const luaD_poscall = function(L, ci, firstResult, nres) {
     if (L.hookmask & (defs.LUA_MASKRET | defs.LUA_MASKLINE)) {
         if (L.hookmask & defs.LUA_MASKRET)
             luaD_hook(L, defs.LUA_HOOKRET, -1);
-        L.oldpc = ci.previous.pcOff;  /* 'oldpc' for caller function */
+        L.oldpc = ci.previous.l_savedpc;  /* 'oldpc' for caller function */
     }
 
     let res = ci.funcOff;
