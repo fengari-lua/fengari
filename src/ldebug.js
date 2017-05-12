@@ -136,8 +136,7 @@ const lua_getlocal = function(L, ar, n) {
         let local = findlocal(L, ar.i_ci, n);
         if (local) {
             name = local.name;
-            let pos = L.stack[local.pos];
-            L.stack[L.top++] = new TValue(pos.type, pos.value);
+            L.stack[L.top++] = L.stack[local.pos];
         } else {
             name = null;
         }
