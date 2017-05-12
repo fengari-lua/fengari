@@ -25,7 +25,7 @@ const luaV_finishOp = function(L) {
     let ci = L.ci;
     let OCi = lopcodes.OpCodesI;
     let base = ci.l_base;
-    let inst = ci.l_savedpc[ci.pcOff - 1];  /* interrupted instruction */
+    let inst = ci.l_code[ci.pcOff - 1];  /* interrupted instruction */
     let op = inst.opcode;
 
     switch (op) {  /* finish its execution */
@@ -45,7 +45,7 @@ const luaV_finishOp = function(L) {
                 ci.callstatus ^= lstate.CIST_LEQ;  /* clear mark */
                 res = res !== 1 ? 1 : 0;  /* negate result */
             }
-            assert(ci.l_savedpc[ci.pcOff] === OCi.OP_JMP);
+            assert(ci.l_code[ci.pcOff] === OCi.OP_JMP);
             if (res !== inst.A)  /* condition failed? */
                 ci.pcOff++;  /* skip jump instruction */
             break;
@@ -66,7 +66,7 @@ const luaV_finishOp = function(L) {
             break;
         }
         case OCi.OP_TFORCALL: {
-            assert(ci.l_savedpc[ci.pcOff] === OCi.OP_TFORLOOP);
+            assert(ci.l_code[ci.pcOff] === OCi.OP_TFORLOOP);
             L.top = ci.top;  /* correct top */
             break;
         }
@@ -110,7 +110,7 @@ const luaV_execute = function(L) {
         let k = cl.p.k;
         let base = ci.l_base;
 
-        let i = ci.l_savedpc[ci.pcOff++];
+        let i = ci.l_code[ci.pcOff++];
 
         if (L.hookmask & (defs.LUA_MASKLINE | defs.LUA_MASKCOUNT)) {
             ldebug.luaG_traceexec(L);
@@ -130,8 +130,8 @@ const luaV_execute = function(L) {
                 break;
             }
             case OCi.OP_LOADKX: {
-                assert(ci.l_savedpc[ci.pcOff].opcode === OCi.OP_EXTRAARG);
-                let konst = k[ci.l_savedpc[ci.pcOff++].Ax];
+                assert(ci.l_code[ci.pcOff].opcode === OCi.OP_EXTRAARG);
+                let konst = k[ci.l_code[ci.pcOff++].Ax];
                 L.stack[ra] = new lobject.TValue(konst.type, konst.value);
                 break;
             }
@@ -490,7 +490,7 @@ const luaV_execute = function(L) {
                     oci.func = nci.func;
                     oci.l_base = ofuncOff + (nci.l_base - nfuncOff);
                     oci.top = L.top = ofuncOff + (L.top - nfuncOff);
-                    oci.l_savedpc = nci.l_savedpc;
+                    oci.l_code = nci.l_code;
                     oci.pcOff = nci.pcOff;
                     oci.callstatus |= lstate.CIST_TAIL;
                     oci.next = null;
@@ -585,7 +585,7 @@ const luaV_execute = function(L) {
                 ldo.luaD_call(L, cb, i.C);
                 /* go straight to OP_TFORLOOP */
                 L.top = ci.top;
-                i = ci.l_savedpc[ci.pcOff++];
+                i = ci.l_code[ci.pcOff++];
                 ra = RA(L, base, i);
                 assert(i.opcode === OCi.OP_TFORLOOP);
                 /* fall through */
@@ -604,8 +604,8 @@ const luaV_execute = function(L) {
                 if (n === 0) n = L.top - ra - 1;
 
                 if (c === 0) {
-                    assert(ci.l_savedpc[ci.pcOff].opcode === OCi.OP_EXTRAARG);
-                    c = ci.l_savedpc[ci.pcOff++].Ax;
+                    assert(ci.l_code[ci.pcOff].opcode === OCi.OP_EXTRAARG);
+                    c = ci.l_code[ci.pcOff++].Ax;
                 }
 
                 let h = L.stack[ra].value;
@@ -670,7 +670,7 @@ const dojump = function(L, ci, i, e) {
 };
 
 const donextjump = function(L, ci) {
-    dojump(L, ci, ci.l_savedpc[ci.pcOff], 1);
+    dojump(L, ci, ci.l_code[ci.pcOff], 1);
 };
 
 

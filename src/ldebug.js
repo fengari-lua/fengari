@@ -631,7 +631,7 @@ const luaG_traceexec = function(L) {
     if (L.status === TS.LUA_YIELD) {  /* did hook yield? */
         if (counthook)
             L.hookcount = 1;  /* undo decrement to zero */
-        ci.l_savedpc--;  /* undo increment (resume will increment it again) */
+        ci.pcOff--;  /* undo increment (resume will increment it again) */
         ci.callstatus |= lstate.CIST_HOOKYIELD;  /* mark that it yielded */
         ci.func = L.top - 1;  /* protect stack below results */
         ldo.luaD_throw(L, TS.LUA_YIELD);

@@ -27,8 +27,8 @@ class CallInfo {
 
         /* only for Lua functions */
         this.l_base = NaN; /* base for this function */
-        this.l_savedpc = null;
-        this.pcOff = NaN; /* offset into l_savedpc */
+        this.l_code = null; /* reference to this.func.p.code */
+        this.pcOff = NaN; /* offset into l_code */
         /* only for JS functions */
         this.c_k = null;  /* continuation in case of yields */
         this.c_old_errfunc = null;
