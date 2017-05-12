@@ -47,30 +47,16 @@ const seterrorobj = function(L, errcode, oldtop) {
 */
 const luaD_precall = function(L, off, nresults) {
     let func = L.stack[off];
-    let ci;
 
     switch(func.type) {
         case CT.LUA_TCCL:
         case CT.LUA_TLCF: {
             let f = func.type === CT.LUA_TCCL ? func.value.f : func.value;
 
-            // next_ci
-            if (L.ci.next) {
-                L.ci = L.ci.next;
-                ci = L.ci;
-            } else {
-                ci = new lstate.CallInfo(off);
-                L.ci.next = ci;
-                ci.previous = L.ci;
-                ci.next = null;
-
-                L.ci = ci;
-                L.ciOff++;
-            }
-
+            let ci = lstate.luaE_extendCI(L);
+            ci.funcOff = off;
             ci.nresults = nresults;
             ci.func = func;
-            ci.funcOff = off;
             ci.top = L.top + defs.LUA_MINSTACK;
             ci.callstatus = 0;
             if (L.hookmask & defs.LUA_MASKCALL)
@@ -98,27 +84,14 @@ const luaD_precall = function(L, off, nresults) {
                 base = off + 1;
             }
 
-            // next_ci
-            if (L.ci.next) {
-                L.ci = L.ci.next;
-                ci = L.ci;
-            } else {
-                ci = new lstate.CallInfo(off);
-                L.ci.next = ci;
-                ci.previous = L.ci;
-                ci.next = null;
-
-                L.ci = ci;
-                L.ciOff++;
-            }
+            let ci = lstate.luaE_extendCI(L);
+            ci.funcOff = off;
             ci.nresults = nresults;
             ci.func = func;
-            ci.funcOff = off;
             ci.l_base = base;
-            ci.top = base + fsize;
-            L.top = ci.top;
-            ci.l_savedpc = p.code;
-            ci.pcOff = 0;
+            L.top = ci.top = base + fsize;
+            ci.l_code = p.code;
+            ci.l_savedpc = 0;
             ci.callstatus = lstate.CIST_LUA;
 
             return false;
@@ -135,12 +108,12 @@ const luaD_poscall = function(L, ci, firstResult, nres) {
     if (L.hookmask & (defs.LUA_MASKRET | defs.LUA_MASKLINE)) {
         if (L.hookmask & defs.LUA_MASKRET)
             luaD_hook(L, defs.LUA_HOOKRET, -1);
-        L.oldpc = ci.previous.pcOff;  /* 'oldpc' for caller function */
+        L.oldpc = ci.previous.l_savedpc;  /* 'oldpc' for caller function */
     }
 
     let res = ci.funcOff;
     L.ci = ci.previous;
-    L.ciOff--;
+    L.ci.next = null;
     return moveresults(L, firstResult, res, nres, wanted);
 };
 

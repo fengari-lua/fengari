@@ -17,8 +17,13 @@ const lvm      = require('./lvm.js');
 const CT = defs.constant_types;
 const TS = defs.thread_status;
 
+const currentpc = function(ci) {
+    assert(ci.callstatus & lstate.CIST_LUA);
+    return ci.l_savedpc - 1;
+};
+
 const currentline = function(ci) {
-    return ci.func.value.p.lineinfo ? ci.func.value.p.lineinfo[ci.pcOff-1] : -1;
+    return ci.func.value.p.lineinfo ? ci.func.value.p.lineinfo[currentpc(ci)] : -1;
 };
 
 /*
@@ -43,7 +48,7 @@ const lua_sethook = function(L, func, mask, count) {
         func = null;
     }
     if (L.ci.callstatus & lstate.CIST_LUA)
-        L.oldpc = L.ci.pcOff;
+        L.oldpc = L.ci.l_savedpc;
     L.hook = func;
     L.basehookcount = count;
     L.hookcount = L.basehookcount;
@@ -105,7 +110,7 @@ const findlocal = function(L, ci, n) {
             return findvararg(ci, -n);
         else {
             base = ci.l_base;
-            name = lfunc.luaF_getlocalname(ci.func.value.p, n, ci.pcOff);
+            name = lfunc.luaF_getlocalname(ci.func.value.p, n, currentpc(ci));
         }
     } else
         base = ci.funcOff + 1;
@@ -439,7 +444,7 @@ const funcnamefromcode = function(L, ci) {
 
     let tm = 0;  /* (initial value avoids warnings) */
     let p = ci.func.value.p;  /* calling function */
-    let pc = ci.pcOff - 1;  /* calling instruction index */
+    let pc = currentpc(ci);  /* calling instruction index */
     let i = p.code[pc];  /* calling instruction */
 
     if (ci.callstatus & lstate.CIST_HOOKED) {
@@ -529,7 +534,7 @@ const varinfo = function(L, o) {
         kind = getupvalname(L, ci, o);  /* check whether 'o' is an upvalue */
         let stkid = isinstack(L, ci, o);
         if (!kind && stkid)  /* no? try a register */
-            kind = getobjname(ci.func.value.p, ci.pcOff - 1, stkid - ci.l_base);
+            kind = getobjname(ci.func.value.p, currentpc(ci), stkid - ci.l_base);
     }
 
     return kind ? lobject.luaO_pushfstring(L, defs.to_luastring(" (%s '%s')", true), kind.funcname, kind.name) : defs.to_luastring("", true);
@@ -620,14 +625,14 @@ const luaG_traceexec = function(L) {
         ldo.luaD_hook(L, defs.LUA_HOOKCOUNT, -1);  /* call count hook */
     if (mask & defs.LUA_MASKLINE) {
         let p = ci.func.value.p;
-        let npc = ci.pcOff; // pcRel(ci.u.l.savedpc, p);
+        let npc = ci.l_savedpc; // pcRel(ci.u.l.savedpc, p);
         let newline = p.lineinfo ? p.lineinfo[npc] : -1;
         if (npc === 0 ||  /* call linehook when enter a new function, */
-            ci.pcOff <= L.oldpc ||  /* when jump back (loop), or when */
+            ci.l_savedpc <= L.oldpc ||  /* when jump back (loop), or when */
             newline !== p.lineinfo ? p.lineinfo[L.oldpc] : -1)  /* enter a new line */
             ldo.luaD_hook(L, defs.LUA_HOOKLINE, newline);  /* call line hook */
     }
-    L.oldpc = ci.pcOff;
+    L.oldpc = ci.l_savedpc;
     if (L.status === TS.LUA_YIELD) {  /* did hook yield? */
         if (counthook)
             L.hookcount = 1;  /* undo decrement to zero */

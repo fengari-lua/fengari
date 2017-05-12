@@ -25,7 +25,7 @@ const luaV_finishOp = function(L) {
     let ci = L.ci;
     let OCi = lopcodes.OpCodesI;
     let base = ci.l_base;
-    let inst = ci.l_savedpc[ci.pcOff - 1];  /* interrupted instruction */
+    let inst = ci.l_code[ci.l_savedpc - 1];  /* interrupted instruction */
     let op = inst.opcode;
 
     switch (op) {  /* finish its execution */
@@ -45,9 +45,9 @@ const luaV_finishOp = function(L) {
                 ci.callstatus ^= lstate.CIST_LEQ;  /* clear mark */
                 res = res !== 1 ? 1 : 0;  /* negate result */
             }
-            assert(ci.l_savedpc[ci.pcOff] === OCi.OP_JMP);
+            assert(ci.l_code[ci.l_savedpc] === OCi.OP_JMP);
             if (res !== inst.A)  /* condition failed? */
-                ci.pcOff++;  /* skip jump instruction */
+                ci.l_savedpc++;  /* skip jump instruction */
             break;
         }
         case OCi.OP_CONCAT: {
@@ -66,7 +66,7 @@ const luaV_finishOp = function(L) {
             break;
         }
         case OCi.OP_TFORCALL: {
-            assert(ci.l_savedpc[ci.pcOff] === OCi.OP_TFORLOOP);
+            assert(ci.l_code[ci.l_savedpc] === OCi.OP_TFORLOOP);
             L.top = ci.top;  /* correct top */
             break;
         }
@@ -110,7 +110,7 @@ const luaV_execute = function(L) {
         let k = cl.p.k;
         let base = ci.l_base;
 
-        let i = ci.l_savedpc[ci.pcOff++];
+        let i = ci.l_code[ci.l_savedpc++];
 
         if (L.hookmask & (defs.LUA_MASKLINE | defs.LUA_MASKCOUNT)) {
             ldebug.luaG_traceexec(L);
@@ -130,8 +130,8 @@ const luaV_execute = function(L) {
                 break;
             }
             case OCi.OP_LOADKX: {
-                assert(ci.l_savedpc[ci.pcOff].opcode === OCi.OP_EXTRAARG);
-                let konst = k[ci.l_savedpc[ci.pcOff++].Ax];
+                assert(ci.l_code[ci.l_savedpc].opcode === OCi.OP_EXTRAARG);
+                let konst = k[ci.l_code[ci.l_savedpc++].Ax];
                 L.stack[ra] = new lobject.TValue(konst.type, konst.value);
                 break;
             }
@@ -139,7 +139,7 @@ const luaV_execute = function(L) {
                 L.stack[ra] = new lobject.TValue(CT.LUA_TBOOLEAN, i.B !== 0);
 
                 if (i.C !== 0)
-                    ci.pcOff++; /* skip next instruction (if C) */
+                    ci.l_savedpc++; /* skip next instruction (if C) */
 
                 break;
             }
@@ -420,28 +420,28 @@ const luaV_execute = function(L) {
             }
             case OCi.OP_EQ: {
                 if (luaV_equalobj(L, RKB(L, base, k, i), RKC(L, base, k, i)) !== i.A)
-                    ci.pcOff++;
+                    ci.l_savedpc++;
                 else
                     donextjump(L, ci);
                 break;
             }
             case OCi.OP_LT: {
                 if (luaV_lessthan(L, RKB(L, base, k, i), RKC(L, base, k, i)) !== i.A)
-                    ci.pcOff++;
+                    ci.l_savedpc++;
                 else
                     donextjump(L, ci);
                 break;
             }
             case OCi.OP_LE: {
                 if (luaV_lessequal(L, RKB(L, base, k, i), RKC(L, base, k, i)) !== i.A)
-                    ci.pcOff++;
+                    ci.l_savedpc++;
                 else
                     donextjump(L, ci);
                 break;
             }
             case OCi.OP_TEST: {
                 if (i.C ? L.stack[ra].l_isfalse() : !L.stack[ra].l_isfalse())
-                    ci.pcOff++;
+                    ci.l_savedpc++;
                 else
                     donextjump(L, ci);
                 break;
@@ -449,7 +449,7 @@ const luaV_execute = function(L) {
             case OCi.OP_TESTSET: {
                 let rb = L.stack[RB(L, base, i)];
                 if (i.C ? rb.l_isfalse() : !rb.l_isfalse())
-                    ci.pcOff++;
+                    ci.l_savedpc++;
                 else {
                     L.stack[ra] = rb;
                     donextjump(L, ci);
@@ -489,14 +489,12 @@ const luaV_execute = function(L) {
                         L.stack[ofuncOff + aux] = L.stack[nfuncOff + aux];
                     oci.func = nci.func;
                     oci.l_base = ofuncOff + (nci.l_base - nfuncOff);
-                    L.top = ofuncOff + (L.top - nfuncOff);
-                    oci.top = L.top;
+                    oci.top = L.top = ofuncOff + (L.top - nfuncOff);
+                    oci.l_code = nci.l_code;
                     oci.l_savedpc = nci.l_savedpc;
-                    oci.pcOff = nci.pcOff;
                     oci.callstatus |= lstate.CIST_TAIL;
-                    L.ci = oci;
-                    ci = L.ci;
-                    L.ciOff--;
+                    oci.next = null;
+                    ci = L.ci = oci;
 
                     assert(L.top === oci.l_base + L.stack[ofuncOff].value.p.maxstacksize);
 
@@ -523,7 +521,7 @@ const luaV_execute = function(L) {
                     let limit = L.stack[ra + 1].value;
 
                     if (0 < step ? idx <= limit : limit <= idx) {
-                        ci.pcOff += i.sBx;
+                        ci.l_savedpc += i.sBx;
                         L.stack[ra].value = idx;
                         L.stack[ra + 3] = new lobject.TValue(CT.LUA_TNUMINT, idx); // TODO: if tvalue already there, just update it
                     }
@@ -534,7 +532,7 @@ const luaV_execute = function(L) {
 
                     // TODO: luai_numlt, luai_numle
                     if (0 < step ? idx <= limit : limit <= idx) {
-                        ci.pcOff += i.sBx;
+                        ci.l_savedpc += i.sBx;
                         L.stack[ra].value = idx;
                         L.stack[ra + 3] = new lobject.TValue(CT.LUA_TNUMFLT, idx); // TODO: if tvalue already there, just update it
                     }
@@ -575,7 +573,7 @@ const luaV_execute = function(L) {
                     init.value = ninit - nstep;
                 }
 
-                ci.pcOff += i.sBx;
+                ci.l_savedpc += i.sBx;
                 break;
             }
             case OCi.OP_TFORCALL: {
@@ -587,7 +585,7 @@ const luaV_execute = function(L) {
                 ldo.luaD_call(L, cb, i.C);
                 /* go straight to OP_TFORLOOP */
                 L.top = ci.top;
-                i = ci.l_savedpc[ci.pcOff++];
+                i = ci.l_code[ci.l_savedpc++];
                 ra = RA(L, base, i);
                 assert(i.opcode === OCi.OP_TFORLOOP);
                 /* fall through */
@@ -595,7 +593,7 @@ const luaV_execute = function(L) {
             case OCi.OP_TFORLOOP: {
                 if (!L.stack[ra + 1].ttisnil()) { /* continue loop? */
                     L.stack[ra] = L.stack[ra + 1]; /* save control variable */
-                    ci.pcOff += i.sBx; /* jump back */
+                    ci.l_savedpc += i.sBx; /* jump back */
                 }
                 break;
             }
@@ -606,8 +604,8 @@ const luaV_execute = function(L) {
                 if (n === 0) n = L.top - ra - 1;
 
                 if (c === 0) {
-                    assert(ci.l_savedpc[ci.pcOff].opcode === OCi.OP_EXTRAARG);
-                    c = ci.l_savedpc[ci.pcOff++].Ax;
+                    assert(ci.l_code[ci.l_savedpc].opcode === OCi.OP_EXTRAARG);
+                    c = ci.l_code[ci.l_savedpc++].Ax;
                 }
 
                 let h = L.stack[ra].value;
@@ -668,11 +666,11 @@ const luaV_execute = function(L) {
 const dojump = function(L, ci, i, e) {
     let a = i.A;
     if (a !== 0) lfunc.luaF_close(L, ci.l_base + a - 1);
-    ci.pcOff += i.sBx + e;
+    ci.l_savedpc += i.sBx + e;
 };
 
 const donextjump = function(L, ci) {
-    dojump(L, ci, ci.l_savedpc[ci.pcOff], 1);
+    dojump(L, ci, ci.l_code[ci.l_savedpc], 1);
 };
 
 
