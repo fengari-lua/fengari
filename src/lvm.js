@@ -494,6 +494,7 @@ const luaV_execute = function(L) {
                     oci.l_savedpc = nci.l_savedpc;
                     oci.pcOff = nci.pcOff;
                     oci.callstatus |= lstate.CIST_TAIL;
+                    oci.next = null;
                     L.ci = oci;
                     ci = L.ci;
                     L.ciOff--;

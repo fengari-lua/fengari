@@ -47,7 +47,6 @@ const seterrorobj = function(L, errcode, oldtop) {
 */
 const luaD_precall = function(L, off, nresults) {
     let func = L.stack[off];
-    let ci;
 
     switch(func.type) {
         case CT.LUA_TCCL:
@@ -55,18 +54,12 @@ const luaD_precall = function(L, off, nresults) {
             let f = func.type === CT.LUA_TCCL ? func.value.f : func.value;
 
             // next_ci
-            if (L.ci.next) {
-                L.ci = L.ci.next;
-                ci = L.ci;
-            } else {
-                ci = new lstate.CallInfo(off);
-                L.ci.next = ci;
-                ci.previous = L.ci;
-                ci.next = null;
-
-                L.ci = ci;
-                L.ciOff++;
-            }
+            let ci = new lstate.CallInfo(off);
+            L.ci.next = ci;
+            ci.previous = L.ci;
+            ci.next = null;
+            L.ci = ci;
+            L.ciOff++;
 
             ci.nresults = nresults;
             ci.func = func;
@@ -99,18 +92,13 @@ const luaD_precall = function(L, off, nresults) {
             }
 
             // next_ci
-            if (L.ci.next) {
-                L.ci = L.ci.next;
-                ci = L.ci;
-            } else {
-                ci = new lstate.CallInfo(off);
-                L.ci.next = ci;
-                ci.previous = L.ci;
-                ci.next = null;
+            let ci = new lstate.CallInfo(off);
+            L.ci.next = ci;
+            ci.previous = L.ci;
+            ci.next = null;
+            L.ci = ci;
+            L.ciOff++;
 
-                L.ci = ci;
-                L.ciOff++;
-            }
             ci.nresults = nresults;
             ci.func = func;
             ci.funcOff = off;
@@ -140,6 +128,7 @@ const luaD_poscall = function(L, ci, firstResult, nres) {
 
     let res = ci.funcOff;
     L.ci = ci.previous;
+    L.ci.next = null;
     L.ciOff--;
     return moveresults(L, firstResult, res, nres, wanted);
 };
