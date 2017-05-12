@@ -18,24 +18,24 @@ const BASIC_STACK_SIZE = 2 * defs.LUA_MINSTACK;
 
 class CallInfo {
 
-    constructor(funcOff, func, top, base, previous, next) {
-        this.func = func;
-        this.funcOff = funcOff;
-        this.top = top;
-        this.previous = previous;
-        this.next = next;
-        this.pcOff = 0;
+    constructor() {
+        this.func = null;
+        this.funcOff = NaN;
+        this.top = NaN;
+        this.previous = null;
+        this.next = null;
 
         /* only for Lua functions */
-        this.l_base = base; /* base for this function */
-        this.l_savedpc = [];
+        this.l_base = NaN; /* base for this function */
+        this.l_savedpc = null;
+        this.pcOff = NaN; /* offset into l_savedpc */
         /* only for JS functions */
         this.c_k = null;  /* continuation in case of yields */
         this.c_old_errfunc = null;
         this.c_ctx = null;  /* context info. in case of yields */
 
-        this.nresults = 0;
-        this.callstatus = 0;
+        this.nresults = NaN;
+        this.callstatus = NaN;
     }
 
 }
