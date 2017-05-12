@@ -88,11 +88,10 @@ if (!WEB) {
 
         try {
             fd = fs.openSync(lua.to_jsstring(filename), 'r');
+            fs.closeSync(fd);
         } catch (e) {
             return false;
         }
-
-        fs.closeSync(fd);
 
         return true;
     };
