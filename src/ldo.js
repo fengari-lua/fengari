@@ -275,11 +275,12 @@ const luaD_throw = function(L, errcode) {
             g.mainthread.stack[g.mainthread.top++] = L.stack[L.top - 1];  /* copy error obj. */
             luaD_throw(g.mainthread, errcode);  /* re-throw in main thread */
         } else {  /* no handler at all; abort */
-            if (g.panic) {  /* panic function? */
+            let panic = g.panic;
+            if (panic) {  /* panic function? */
                 seterrorobj(L, errcode, L.top);  /* assume EXTRA_STACK */
                 if (L.ci.top < L.top)
                     L.ci.top = L.top;  /* pushing msg. can break this invariant */
-                g.panic(L);  /* call panic function (last chance to jump out) */
+                panic(L);  /* call panic function (last chance to jump out) */
             }
             throw new Error(`Aborted ${errcode}`);
         }
