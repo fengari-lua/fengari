@@ -254,7 +254,7 @@ const checkload = function(L, stat, filename) {
         return 2;  /* return open function and file name */
     } else
         return lauxlib.luaL_error(L, lua.to_luastring("error loading module '%s' from file '%s':\n\t%s"),
-                lua.lua_tostring(L, 1), filename, lua.lua_tostring(L, 1));
+                lua.lua_tostring(L, 1), filename, lua.lua_tostring(L, -1));
 };
 
 const searcher_Lua = function(L) {
