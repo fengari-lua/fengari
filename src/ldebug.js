@@ -14,9 +14,8 @@ const ltm      = require('./ltm.js');
 const luaconf  = require('./luaconf.js');
 const lvm      = require('./lvm.js');
 
-const TValue = lobject.TValue;
-const CT     = defs.constant_types;
-const TS     = defs.thread_status;
+const CT = defs.constant_types;
+const TS = defs.thread_status;
 
 const currentline = function(ci) {
     return ci.func.value.p.lineinfo ? ci.func.value.p.lineinfo[ci.pcOff-1] : -1;
@@ -177,14 +176,14 @@ const funcinfo = function(ar, cl) {
 
 const collectvalidlines = function(L, f) {
     if (f === null || f instanceof lobject.CClosure) {
-        L.stack[L.top++] = new TValue(CT.LUA_TNIL, null);
+        L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
         assert(L.top <= L.ci.top, "stack overflow");
     } else {
         let lineinfo = f.l.p.lineinfo;
         let t = ltable.luaH_new(L);
-        L.stack[L.top++] = new TValue(CT.LUA_TTABLE, t);
+        L.stack[L.top++] = new lobject.TValue(CT.LUA_TTABLE, t);
         assert(L.top <= L.ci.top, "stack overflow");
-        let v = new TValue(CT.LUA_TBOOLEAN, true);
+        let v = new lobject.TValue(CT.LUA_TBOOLEAN, true);
         for (let i = 0; i < f.l.p.length; i++)
             ltable.luaH_setint(t, lineinfo[i], v);
     }
