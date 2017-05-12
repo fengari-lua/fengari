@@ -428,3 +428,48 @@ test("[test-suite] events: __eq between userdata", function (t) {
     }, "Lua program ran without error");
 
 });
+
+
+test("[test-suite] events: concat", function (t) {
+    let luaCode = `
+        t = {}
+
+        t.__concat = function (a,b,c)
+          assert(c == nil)
+          if type(a) == 'table' then a = a.val end
+          if type(b) == 'table' then b = b.val end
+          if A then return a..b
+          else
+            return setmetatable({val=a..b}, t)
+          end
+        end
+
+        c = {val="c"}; setmetatable(c, t)
+        d = {val="d"}; setmetatable(d, t)
+
+        A = true
+        assert(c..d == 'cd')
+        assert(0 .."a".."b"..c..d.."e".."f"..(5+3).."g" == "0abcdef8g")
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});

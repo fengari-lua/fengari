@@ -973,14 +973,13 @@ const luaV_concat = function(L, total) {
             delete L.stack[top - 1];
         } else {
             /* at least two non-empty string values; get as many as possible */
-            let toconcat = new Array(total);
-            toconcat[total-1] = L.stack[top-1].svalue();
+            let concatenated = L.stack[top-1].svalue();
             delete L.stack[top - 1];
             for (n = 1; n < total && tostring(L, top - n - 1); n++) {
-                toconcat[total-n-1] = L.stack[top - n - 1].svalue();
+                concatenated = L.stack[top - n - 1].svalue().concat(concatenated);
                 delete L.stack[top - n - 1];
             }
-            let ts = lstring.luaS_bless(L, Array.prototype.concat.apply([], toconcat));
+            let ts = lstring.luaS_bless(L, concatenated);
             L.stack[top - n] = new lobject.TValue(CT.LUA_TLNGSTR, ts);
         }
         total -= n - 1; /* got 'n' strings to create 1 new */
