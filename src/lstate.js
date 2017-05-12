@@ -75,6 +75,11 @@ class global_State {
 }
 
 
+const luaE_freeCI = function(L) {
+    let ci = L.ci;
+    ci.next = null;
+};
+
 const stack_init = function(L1, L) {
     L1.stack = new Array(BASIC_STACK_SIZE); // TODO: for now we don't care about the stack size
     L1.top = 0;
@@ -86,6 +91,12 @@ const stack_init = function(L1, L) {
     L1.stack[L1.top++] = new lobject.TValue(CT.LUA_TNIL, null);
     ci.top = L1.top + defs.LUA_MINSTACK;
     L1.ci = ci;
+};
+
+const freestack = function(L) {
+    L.ci = L.base_ci;
+    luaE_freeCI(L);
+    L.stack = null;
 };
 
 /*
@@ -158,6 +169,7 @@ const lua_newstate = function() {
 
 const close_state = function(L) {
     lfunc.luaF_close(L, L.stack);  /* close all upvalues for this thread */
+    freestack(L);
 };
 
 const lua_close = function(L) {
