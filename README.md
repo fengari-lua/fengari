@@ -106,6 +106,12 @@ Alias for `lua_pushcfunction`.
 Alias for `lua_pushcclosure`.
 
 
+### `lua_atnativeerror(L, func)`
+
+Sets a function to be called if a native JavaScript error is thrown across a lua pcall.
+The function will be run as if it were a message handler (see https://www.lua.org/manual/5.3/manual.html#2.3).
+
+
 ### `b = lua_isproxy(p, L)`
 
 Returns a boolean `b` indicating whether `p` is a proxy (See `lua_toproxy`).

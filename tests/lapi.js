@@ -481,3 +481,43 @@ test('lua_settable, lua_gettable', function (t) {
         "Correct element(s) on the stack"
     );
 });
+
+test('lua_atnativeerror', function(t) {
+    t.plan(7);
+
+    let L = lauxlib.luaL_newstate();
+    let errob = {};
+
+    lua.lua_pushcfunction(L, function(L) {
+        throw errob;
+    });
+    t.strictEqual(lua.lua_pcall(L, 0, 0, 0), -1, "without a native error handler pcall should be -1");
+    lua.lua_pop(L, 1);
+
+
+    lua.lua_atnativeerror(L, function(L) {
+        let e = lua.lua_touserdata(L, 1);
+        t.strictEqual(e, errob);
+        lua.lua_pushstring(L, lua.to_luastring("runtime error!"));
+        return 1;
+    });
+    lua.lua_pushcfunction(L, function(L) {
+        throw errob;
+    });
+    t.strictEqual(lua.lua_pcall(L, 0, 0, 0), lua.LUA_ERRRUN, "should return lua.LUA_ERRRUN");
+    t.strictEqual(lua.lua_tojsstring(L, -1), "runtime error!");
+    lua.lua_pop(L, 1);
+
+
+    lua.lua_atnativeerror(L, function(L) {
+        let e = lua.lua_touserdata(L, 1);
+        t.strictEqual(e, errob);
+        lauxlib.luaL_error(L, lua.to_luastring("runtime error!"));
+    });
+    lua.lua_pushcfunction(L, function(L) {
+        throw errob;
+    });
+    t.strictEqual(lua.lua_pcall(L, 0, 0, 0), lua.LUA_ERRRUN, "luaL_error from a native error handler should result in LUA_ERRRUN");
+    t.strictEqual(lua.lua_tojsstring(L, -1), "runtime error!");
+    lua.lua_pop(L, 1);
+});

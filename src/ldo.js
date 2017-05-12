@@ -273,12 +273,26 @@ const luaD_rawrunprotected = function(L, f, ud) {
     } catch (e) {
         if (lj.status === TS.LUA_OK) {
             /* error was not thrown via luaD_throw, i.e. it is a JS error */
-            lj.status = -1;
-            /* run error handler (if possible) with error object as light userdata */
-            try {
-                lapi.lua_pushlightuserdata(L, e);
-                ldebug.luaG_errormsg(L);
-            } catch (e) {}
+            /* run user error handler (if it exists) */
+            let atnativeerror = L.l_G.atnativeerror;
+            if (atnativeerror) {
+                try {
+                    lj.status = TS.LUA_OK;
+
+                    lapi.lua_pushcfunction(L, atnativeerror);
+                    lapi.lua_pushlightuserdata(L, e);
+                    luaD_callnoyield(L, L.top - 2, 1);
+
+                    lj.status = TS.LUA_ERRRUN;
+                } catch(e2) {
+                    if (lj.status === TS.LUA_OK) {
+                        /* also failed */
+                        lj.status = -1;
+                    }
+                }
+            } else {
+                lj.status = -1;
+            }
         }
     }
 

@@ -95,6 +95,7 @@ module.exports.LUA_DIRSEP              = defs.LUA_DIRSEP;
 module.exports.lua_absindex            = lapi.lua_absindex;
 module.exports.lua_arith               = lapi.lua_arith;
 module.exports.lua_atpanic             = lapi.lua_atpanic;
+module.exports.lua_atnativeerror       = lapi.lua_atnativeerror;
 module.exports.lua_call                = lapi.lua_call;
 module.exports.lua_callk               = lapi.lua_callk;
 module.exports.lua_checkstack          = lapi.lua_checkstack;

@@ -36,6 +36,12 @@ const lua_atpanic = function(L, panicf) {
     return old;
 };
 
+const lua_atnativeerror = function(L, errorf) {
+    let old = L.l_G.atnativeerror;
+    L.l_G.atnativeerror = errorf;
+    return old;
+};
+
 // Return value for idx on stack
 const index2addr = function(L, idx) {
     let ci = L.ci;
@@ -1104,6 +1110,7 @@ module.exports.index2addr_           = index2addr_;
 module.exports.lua_absindex          = lua_absindex;
 module.exports.lua_arith             = lua_arith;
 module.exports.lua_atpanic           = lua_atpanic;
+module.exports.lua_atnativeerror     = lua_atnativeerror;
 module.exports.lua_call              = lua_call;
 module.exports.lua_callk             = lua_callk;
 module.exports.lua_checkstack        = lua_checkstack;

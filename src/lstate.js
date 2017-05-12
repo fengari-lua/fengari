@@ -66,6 +66,7 @@ class global_State {
         this.mainthread = L;
         this.l_registry = new lobject.TValue(CT.LUA_TNIL, null);
         this.panic = null;
+        this.atnativeerror = null;
         this.version = null;
         this.tmname = new Array(ltm.TMS.TM_N);
         this.mt = new Array(LUA_NUMTAGS);
