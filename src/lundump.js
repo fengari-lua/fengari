@@ -212,7 +212,7 @@ class BytecodeParser {
         f.linedefined = this.readInt();
         f.lastlinedefined = this.readInt();
         f.numparams = this.readByte();
-        f.is_vararg = this.readByte();
+        f.is_vararg = this.readByte() !== 0;
         f.maxstacksize = this.readByte();
         this.readCode(f);
         this.readConstants(f);

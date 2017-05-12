@@ -745,7 +745,7 @@ const parlist = function(ls) {
     let fs = ls.fs;
     let f = fs.f;
     let nparams = 0;
-    f.is_vararg = 0;
+    f.is_vararg = false;
     if (ls.t.token !== char[')']) {  /* is 'parlist' not empty? */
         do {
             switch (ls.t.token) {
@@ -756,7 +756,7 @@ const parlist = function(ls) {
                 }
                 case R.TK_DOTS: {  /* param -> '...' */
                     llex.luaX_next(ls);
-                    f.is_vararg = 1;  /* declared vararg */
+                    f.is_vararg = true;  /* declared vararg */
                     break;
                 }
                 default: llex.luaX_syntaxerror(ls, defs.to_luastring("<name> or '...' expected", true));
