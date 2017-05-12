@@ -74,6 +74,15 @@ class global_State {
 
 }
 
+const luaE_extendCI = function(L) {
+    let ci = new CallInfo();
+    L.ci.next = ci;
+    ci.previous = L.ci;
+    ci.next = null;
+    L.ci = ci;
+    L.ciOff++;
+    return ci;
+};
 
 const luaE_freeCI = function(L) {
     let ci = L.ci;
@@ -196,5 +205,6 @@ module.exports.CIST_FIN        = (1<<8);   /* call is running a finalizer */
 module.exports.lua_close       = lua_close;
 module.exports.lua_newstate    = lua_newstate;
 module.exports.lua_newthread   = lua_newthread;
+module.exports.luaE_extendCI   = luaE_extendCI;
 module.exports.luaE_freeCI     = luaE_freeCI;
 module.exports.luaE_freethread = luaE_freethread;

@@ -53,17 +53,10 @@ const luaD_precall = function(L, off, nresults) {
         case CT.LUA_TLCF: {
             let f = func.type === CT.LUA_TCCL ? func.value.f : func.value;
 
-            // next_ci
-            let ci = new lstate.CallInfo(off);
-            L.ci.next = ci;
-            ci.previous = L.ci;
-            ci.next = null;
-            L.ci = ci;
-            L.ciOff++;
-
+            let ci = lstate.luaE_extendCI(L);
+            ci.funcOff = off;
             ci.nresults = nresults;
             ci.func = func;
-            ci.funcOff = off;
             ci.top = L.top + defs.LUA_MINSTACK;
             ci.callstatus = 0;
             if (L.hookmask & defs.LUA_MASKCALL)
@@ -91,17 +84,10 @@ const luaD_precall = function(L, off, nresults) {
                 base = off + 1;
             }
 
-            // next_ci
-            let ci = new lstate.CallInfo(off);
-            L.ci.next = ci;
-            ci.previous = L.ci;
-            ci.next = null;
-            L.ci = ci;
-            L.ciOff++;
-
+            let ci = lstate.luaE_extendCI(L);
+            ci.funcOff = off;
             ci.nresults = nresults;
             ci.func = func;
-            ci.funcOff = off;
             ci.l_base = base;
             ci.top = base + fsize;
             L.top = ci.top;
