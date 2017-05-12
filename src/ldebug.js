@@ -160,7 +160,7 @@ const lua_setlocal = function(L, ar, n) {
 };
 
 const funcinfo = function(ar, cl) {
-    if (cl === null || cl.type === CT.LUA_TCCL) {
+    if (cl === null || cl instanceof lobject.CClosure) {
         ar.source = defs.to_luastring("=[JS]", true);
         ar.linedefined = -1;
         ar.lastlinedefined = -1;
@@ -177,7 +177,7 @@ const funcinfo = function(ar, cl) {
 };
 
 const collectvalidlines = function(L, f) {
-    if (f === null || f.c.type === CT.LUA_TCCL) {
+    if (f === null || f instanceof lobject.CClosure) {
         L.stack[L.top++] = new TValue(CT.LUA_TNIL, null);
         assert(L.top <= L.ci.top, "stack overflow");
     } else {
@@ -223,7 +223,7 @@ const auxgetinfo = function(L, what, ar, f, ci) {
             }
             case 'u': {
                 ar.nups = f === null ? 0 : f.nupvalues;
-                if (f === null || f.type === CT.LUA_TCCL) {
+                if (f === null || f instanceof lobject.CClosure) {
                     ar.isvararg = true;
                     ar.nparams = 0;
                 } else {
