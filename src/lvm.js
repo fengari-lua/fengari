@@ -495,7 +495,6 @@ const luaV_execute = function(L) {
                     oci.callstatus |= lstate.CIST_TAIL;
                     oci.next = null;
                     ci = L.ci = oci;
-                    L.ciOff--;
 
                     assert(L.top === oci.l_base + L.stack[ofuncOff].value.p.maxstacksize);
 

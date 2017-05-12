@@ -114,7 +114,6 @@ const luaD_poscall = function(L, ci, firstResult, nres) {
     let res = ci.funcOff;
     L.ci = ci.previous;
     L.ci.next = null;
-    L.ciOff--;
     return moveresults(L, firstResult, res, nres, wanted);
 };
 

@@ -47,7 +47,6 @@ class lua_State {
         this.base_ci = new CallInfo(); // Will be populated later
         this.top = 0;
         this.ci = null;
-        this.ciOff = null;
         this.stack = [];
         this.openupval = null;
         this.status = TS.LUA_OK;
@@ -80,7 +79,6 @@ const luaE_extendCI = function(L) {
     ci.previous = L.ci;
     ci.next = null;
     L.ci = ci;
-    L.ciOff++;
     return ci;
 };
 
@@ -135,7 +133,6 @@ const preinit_thread = function(L, g) {
     L.l_G = g;
     L.stack = null;
     L.ci = null;
-    L.nci = 0;
     L.errorJmp = null;
     L.nCcalls = 0;
     L.hook = null;
