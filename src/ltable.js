@@ -34,7 +34,8 @@ class Table {
     constructor(L) {
         this.id = L.l_G.id_counter++;
         this.strong = new Map();
-        this.dead = new Map();
+        this.dead_strong = new Map();
+        this.dead_weak = void 0; /* initialised when needed */
         this.f = void 0; /* first entry */
         this.l = void 0; /* last entry */
         this.metatable = null;
@@ -42,7 +43,8 @@ class Table {
 }
 
 const add = function(t, hash, key, value) {
-    t.dead.clear();
+    t.dead_strong.clear();
+    t.dead_weak = void 0;
     let prev;
     let entry = {
         key: key,
@@ -56,6 +58,9 @@ const add = function(t, hash, key, value) {
     t.l = entry;
 };
 
+const is_valid_weakmap_key = function(k) {
+    return typeof k === 'object' ? k !== null : typeof k === 'function';
+};
 
 /* Move out of 'strong' part and into 'dead' part. */
 const mark_dead = function(t, hash) {
@@ -71,9 +76,15 @@ const mark_dead = function(t, hash) {
         if(t.f === e) t.f = next;
         if(t.l === e) t.l = prev;
         t.strong.delete(hash);
-        t.dead.set(hash, e);
+        if (is_valid_weakmap_key(hash)) {
+            if (!t.dead_weak) t.dead_weak = new WeakMap();
+            t.dead_weak.set(hash, e);
+        } else {
+            /* can't be used as key in weakmap */
+            t.dead_strong.set(hash, e);
+        }
     }
-}
+};
 
 const luaH_new = function(L) {
     return new Table(L);
@@ -174,18 +185,18 @@ const luaH_next = function(L, table, keyI) {
             entry = entry.n;
             if (!entry)
                 return false;
-        } else if (!entry) {
+        } else {
             /* Try dead keys */
-            entry = table.dead.get(hash);
+            entry = table.dead_weak.get(hash) || table.dead_strong.get(hash);
             if (!entry)
                 /* item not in table */
-                return ldebug.luaG_runerror(L, defs.to_luastring("invalid key to 'next'"))
+                return ldebug.luaG_runerror(L, defs.to_luastring("invalid key to 'next'"));
             /* Iterate until either out of keys, or until finding a non-dead key */
             do {
                 entry = entry.n;
                 if (!entry)
                     return false;
-            } while (entry.key.ttisdeadkey())
+            } while (entry.key.ttisdeadkey());
         }
     }
     L.stack[keyI] = new lobject.TValue(entry.key.type, entry.key.value);
