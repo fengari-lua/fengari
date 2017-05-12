@@ -44,7 +44,6 @@
         - [ ] `file:flush()`
         - [ ] `file:lines()`
         - [ ] `file:read()`
-        - [ ] `file:read()`
         - [ ] `file:setvbuf()`
         - [ ] `file:__gc()`
 - [ ] C API
