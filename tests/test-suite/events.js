@@ -480,3 +480,277 @@ test("[test-suite] events: concat", function (t) {
     }, "Lua program ran without error");
 
 });
+
+
+test("[test-suite] events: concat metamethod x numbers (bug in 5.1.1)", function (t) {
+    let luaCode = `
+        c = {}
+        local x
+        setmetatable(c, {__concat = function (a,b)
+          assert(type(a) == "number" and b == c or type(b) == "number" and a == c)
+          return c
+        end})
+        assert(c..5 == c and 5 .. c == c)
+        assert(4 .. c .. 5 == c and 4 .. 5 .. 6 .. 7 .. c == c)
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});
+
+
+test("[test-suite] events: test comparison compatibilities", function (t) {
+    let luaCode = `
+        local t1, t2, c, d
+        t1 = {};  c = {}; setmetatable(c, t1)
+        d = {}
+        t1.__eq = function () return true end
+        t1.__lt = function () return true end
+        setmetatable(d, t1)
+        assert(c == d and c < d and not(d <= c))
+        t2 = {}
+        t2.__eq = t1.__eq
+        t2.__lt = t1.__lt
+        setmetatable(d, t2)
+        assert(c == d and c < d and not(d <= c))
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});
+
+
+test("[test-suite] events: test for several levels of callstest for several levels of calls", function (t) {
+    let luaCode = `
+        local i
+        local tt = {
+          __call = function (t, ...)
+            i = i+1
+            if t.f then return t.f(...)
+            else return {...}
+            end
+          end
+        }
+        
+        local a = setmetatable({}, tt)
+        local b = setmetatable({f=a}, tt)
+        local c = setmetatable({f=b}, tt)
+        
+        i = 0
+        x = c(3,4,5)
+        assert(i == 3 and x[1] == 3 and x[3] == 5)
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});
+
+
+test("[test-suite] events: __index on _ENV", function (t) {
+    let luaCode = `
+        local _g = _G
+        _ENV = setmetatable({}, {__index=function (_,k) return _g[k] end})
+
+        a = {}
+        rawset(a, "x", 1, 2, 3)
+        assert(a.x == 1 and rawget(a, "x", 3) == 1)
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});
+
+
+test("[test-suite] events: testing metatables for basic types", function (t) {
+    let luaCode = `
+        mt = {__index = function (a,b) return a+b end,
+              __len = function (x) return math.floor(x) end}
+        debug.setmetatable(10, mt)
+        assert(getmetatable(-2) == mt)
+        assert((10)[3] == 13)
+        assert((10)["3"] == 13)
+        assert(#3.45 == 3)
+        debug.setmetatable(23, nil)
+        assert(getmetatable(-2) == nil)
+
+        debug.setmetatable(true, mt)
+        assert(getmetatable(false) == mt)
+        mt.__index = function (a,b) return a or b end
+        assert((true)[false] == true)
+        assert((false)[false] == false)
+        debug.setmetatable(false, nil)
+        assert(getmetatable(true) == nil)
+
+        debug.setmetatable(nil, mt)
+        assert(getmetatable(nil) == mt)
+        mt.__add = function (a,b) return (a or 0) + (b or 0) end
+        assert(10 + nil == 10)
+        assert(nil + 23 == 23)
+        assert(nil + nil == 0)
+        debug.setmetatable(nil, nil)
+        assert(getmetatable(nil) == nil)
+
+        debug.setmetatable(nil, {})
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});
+
+
+test("[test-suite] events: loops in delegation", function (t) {
+    let luaCode = `
+        a = {}; setmetatable(a, a); a.__index = a; a.__newindex = a
+        assert(not pcall(function (a,b) return a[b] end, a, 10))
+        assert(not pcall(function (a,b,c) a[b] = c end, a, 10, true))
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});
+
+
+test("[test-suite] events: bug in 5.1", function (t) {
+    let luaCode = `
+        T, K, V = nil
+        grandparent = {}
+        grandparent.__newindex = function(t,k,v) T=t; K=k; V=v end
+
+        parent = {}
+        parent.__newindex = parent
+        setmetatable(parent, grandparent)
+
+        child = setmetatable({}, parent)
+        child.foo = 10      --> CRASH (on some machines)
+        assert(T == parent and K == "foo" and V == 10)
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});

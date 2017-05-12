@@ -67,6 +67,7 @@
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
     - [x] `calls.lua`
     - [x] `constructs.lua` (`_soft`)
+    - [x] `events.lua`
     - [x] `locals.lua`
     - [x] `strings.lua`
     - [x] `vararg.lua`
@@ -81,7 +82,6 @@
     - [ ] `coroutine.lua`
     - [ ] `db.lua`
     - [ ] `errors.lua`
-    - [ ] `events.lua`
     - [ ] `files.lua`
     - [ ] `gc.lua`
     - [ ] `goto.lua`
