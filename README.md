@@ -68,6 +68,7 @@
     - [x] `calls.lua`
     - [x] `constructs.lua` (`_soft`)
     - [x] `events.lua`
+    - [x] `literals.lua`
     - [x] `locals.lua`
     - [x] `strings.lua`
     - [x] `vararg.lua`
@@ -86,7 +87,6 @@
     - [ ] `gc.lua`
     - [ ] `goto.lua`
     - [ ] `heavy.lua`
-    - [ ] `literals.lua`
     - [ ] `main.lua`
     - [ ] `math.lua`
     - [ ] `nextvar.lua`
