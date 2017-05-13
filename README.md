@@ -47,17 +47,7 @@
         - [ ] `file:setvbuf()`
         - [ ] `file:__gc()`
 - [x] C API
-- [ ] Auxiliary library
-    - [x] ...
-    - [ ] `luaL_addsize`
-    - [ ] `luaL_checkoption`
-    - [ ] `luaL_checkversion`
-    - [ ] `luaL_newlibtable`
-    - [ ] `luaL_optnumber`
-    - [ ] `luaL_prepbuffer`
-    - [ ] `luaL_pushresultsize`
-    - [ ] `luaL_ref`
-    - [ ] `luaL_unref`
+- [x] Auxiliary library
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
     - [x] `calls.lua`
     - [x] `constructs.lua` (`_soft`)
@@ -83,7 +73,7 @@
     - [ ] `tpack.lua`
     - [ ] `utf8.lua`
     - [ ] `verybig.lua`
-- [ ] DOM API binding
+- [ ] DOM API binding: [https://github.com/daurnimator/fengari-interop](https://github.com/daurnimator/fengari-interop)
 
 ## References
 

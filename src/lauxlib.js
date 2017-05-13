@@ -11,6 +11,7 @@ const LUA_PRELOAD_TABLE = "_PRELOAD";
 
 const LUA_FILEHANDLE = lua.to_luastring("FILE*", true);
 
+const LUAL_NUMSIZES  = 4*16 + 8;
 
 class luaL_Buffer {
     constructor() {
@@ -269,6 +270,13 @@ const luaL_checkudata = function(L, ud, tname) {
     return p;
 };
 
+const luaL_checkoption = function(L, arg, def, lst) {
+    let name = def ? luaL_optstring(L, arg, def) : luaL_checkstring(L, arg);
+    for (let i = 0; lst[i]; i++)
+        if (lst[i].join('|') === name.join('|'))
+            return i;
+    return luaL_argerror(L, arg, lua.lua_pushfstring(L, lua.to_luastring("invalid option '%s'"), name));
+};
 
 const tag_error = function(L, arg, tag) {
     typeerror(L, arg, lua.lua_typename(L, tag));
@@ -331,6 +339,10 @@ const luaL_checknumber = function(L, arg) {
     return d;
 };
 
+const luaL_optnumber = function(L, arg, def) {
+    return luaL_opt(L, luaL_checknumber, arg, def);
+};
+
 const luaL_checkinteger = function(L, arg) {
     let d = lua.lua_tointeger(L, arg);
     if (d === false)
@@ -356,6 +368,12 @@ const luaL_buffinitsize = function(L, B, sz) {
     return B;
 };
 
+const LUAL_BUFFERSIZE = 8192;
+
+const luaL_prepbuffer = function(B) {
+    return luaL_prepbuffsize(B, LUAL_BUFFERSIZE);
+};
+
 const luaL_addlstring = function(B, s, l) {
     B.b = B.b.concat(s.slice(0, l));
 };
@@ -369,6 +387,15 @@ const luaL_pushresult = function(B) {
 
 const luaL_addchar = function(B, c) {
     B.b.push(c);
+};
+
+const luaL_addsize = function(B, s) {
+    B.n += s;
+};
+
+const luaL_pushresultsize = function(B, sz) {
+    luaL_addsize(B, sz);
+    luaL_pushresult(B);
 };
 
 const luaL_addvalue = function(B) {
@@ -610,9 +637,48 @@ const luaL_checkstack = function(L, space, msg) {
     }
 };
 
+const luaL_newlibtable = function(L) {
+    lua.lua_createtable(L);
+};
+
 const luaL_newlib = function(L, l) {
     lua.lua_createtable(L);
     luaL_setfuncs(L, l, 0);
+};
+
+/* predefined references */
+const LUA_NOREF  = -2;
+const LUA_REFNIL = -1;
+
+const luaL_ref = function(L, t) {
+    let ref;
+    if (lua.lua_isnil(L, -1)) {
+        lua.lua_pop(L, 1);  /* remove from stack */
+        return LUA_REFNIL;  /* 'nil' has a unique fixed reference */
+    }
+    t = lua.lua_absindex(L, t);
+    lua.lua_rawgeti(L, t, 0);  /* get first free element */
+    ref = lua.lua_tointeger(L, -1);  /* ref = t[freelist] */
+    lua.lua_pop(L, 1);  /* remove it from stack */
+    if (ref !== 0) {  /* any free element? */
+        lua.lua_rawgeti(L, t, ref);  /* remove it from list */
+        lua.lua_rawseti(L, t, 0);  /* (t[freelist] = t[ref]) */
+    }
+    else  /* no free elements */
+        ref = lua.lua_rawlen(L, t) + 1;  /* get a new reference */
+    lua.lua_rawseti(L, t, ref);
+    return ref;
+};
+
+
+const luaL_unref = function(L, t, ref) {
+    if (ref >= 0) {
+        t = lua.lua_absindex(L, t);
+        lua.lua_rawgeti(L, t, 0);
+        lua.lua_rawseti(L, t, ref);  /* t[ref] = t[freelist] */
+        lua.lua_pushinteger(L, ref);
+        lua.lua_rawseti(L, t, 0);  /* t[freelist] = ref */
+    }
 };
 
 // Only with Node
@@ -761,12 +827,28 @@ const lua_writestringerror = function(s) {
     else console.error(s);
 };
 
+
+const luaL_checkversion = function(L) {
+    let ver = lua.LUA_VERSION_NUM;
+    let sz = LUAL_NUMSIZES;
+    let v = lua.lua_version(L);
+    if (sz != LUAL_NUMSIZES)  /* check numeric types */
+        luaL_error(L, lua.to_luastring("core and library have incompatible numeric types"));
+    if (v != lua.lua_version(null))
+        luaL_error(L, lua.to_luastring("multiple Lua VMs detected"));
+    else if (v !== ver)
+        luaL_error(L, lua.to_luastring("version mismatch: app. needs %f, Lua core provides %f"), ver, v);
+};
+
 module.exports.LUA_FILEHANDLE       = LUA_FILEHANDLE;
 module.exports.LUA_LOADED_TABLE     = LUA_LOADED_TABLE;
+module.exports.LUA_NOREF            = LUA_NOREF;
 module.exports.LUA_PRELOAD_TABLE    = LUA_PRELOAD_TABLE;
+module.exports.LUA_REFNIL           = LUA_REFNIL;
 module.exports.luaL_Buffer          = luaL_Buffer;
 module.exports.luaL_addchar         = luaL_addchar;
 module.exports.luaL_addlstring      = luaL_addlstring;
+module.exports.luaL_addsize         = luaL_addsize;
 module.exports.luaL_addstring       = luaL_addstring;
 module.exports.luaL_addvalue        = luaL_addvalue;
 module.exports.luaL_argcheck        = luaL_argcheck;
@@ -778,10 +860,12 @@ module.exports.luaL_checkany        = luaL_checkany;
 module.exports.luaL_checkinteger    = luaL_checkinteger;
 module.exports.luaL_checklstring    = luaL_checklstring;
 module.exports.luaL_checknumber     = luaL_checknumber;
+module.exports.luaL_checkoption     = luaL_checkoption;
 module.exports.luaL_checkstack      = luaL_checkstack;
 module.exports.luaL_checkstring     = luaL_checkstring;
 module.exports.luaL_checktype       = luaL_checktype;
 module.exports.luaL_checkudata      = luaL_checkudata;
+module.exports.luaL_checkversion    = luaL_checkversion;
 module.exports.luaL_dostring        = luaL_dostring;
 module.exports.luaL_error           = luaL_error;
 module.exports.luaL_execresult      = luaL_execresult;
@@ -795,14 +879,19 @@ module.exports.luaL_loadbuffer      = luaL_loadbuffer;
 module.exports.luaL_loadbufferx     = luaL_loadbufferx;
 module.exports.luaL_loadstring      = luaL_loadstring;
 module.exports.luaL_newlib          = luaL_newlib;
+module.exports.luaL_newlibtable     = luaL_newlibtable;
 module.exports.luaL_newmetatable    = luaL_newmetatable;
 module.exports.luaL_newstate        = luaL_newstate;
 module.exports.luaL_opt             = luaL_opt;
 module.exports.luaL_optinteger      = luaL_optinteger;
 module.exports.luaL_optlstring      = luaL_optlstring;
+module.exports.luaL_optnumber       = luaL_optnumber;
 module.exports.luaL_optstring       = luaL_optstring;
+module.exports.luaL_prepbuffer      = luaL_prepbuffer;
 module.exports.luaL_prepbuffsize    = luaL_prepbuffsize;
 module.exports.luaL_pushresult      = luaL_pushresult;
+module.exports.luaL_pushresultsize  = luaL_pushresultsize;
+module.exports.luaL_ref             = luaL_ref;
 module.exports.luaL_requiref        = luaL_requiref;
 module.exports.luaL_setfuncs        = luaL_setfuncs;
 module.exports.luaL_setmetatable    = luaL_setmetatable;
@@ -810,5 +899,6 @@ module.exports.luaL_testudata       = luaL_testudata;
 module.exports.luaL_tolstring       = luaL_tolstring;
 module.exports.luaL_traceback       = luaL_traceback;
 module.exports.luaL_typename        = luaL_typename;
+module.exports.luaL_unref           = luaL_unref;
 module.exports.luaL_where           = luaL_where;
 module.exports.lua_writestringerror = lua_writestringerror;
