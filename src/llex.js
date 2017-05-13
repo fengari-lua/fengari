@@ -315,7 +315,7 @@ const txtToken = function(ls, token) {
     switch (token) {
         case R.TK_NAME: case R.TK_STRING:
         case R.TK_FLT: case R.TK_INT:
-            save(ls, 0);
+            // save(ls, 0);
             return defs.to_luastring(`'${defs.to_jsstring(ls.buff.buffer)}'`);
         default:
             return luaX_token2str(ls, token);

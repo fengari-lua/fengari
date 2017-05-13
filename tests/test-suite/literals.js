@@ -184,3 +184,68 @@ test("[test-suite] events: UTF-8 sequences", function (t) {
 
 });
 
+
+test("[test-suite] events: Error in escape sequences", function (t) {
+    let luaCode = `
+        local function lexerror (s, err)
+          local st, msg = load('return ' .. s, '')
+          if err ~= '<eof>' then err = err .. "'" end
+          assert(not st and string.find(msg, "near .-" .. err))
+        end
+
+        lexerror([["abc\\x"]], [[\\x"]])
+        lexerror([["abc\\x]], [[\\x]])
+        lexerror([["\\x]], [[\\x]])
+        lexerror([["\\x5"]], [[\\x5"]])
+        lexerror([["\\x5]], [[\\x5]])
+        lexerror([["\\xr"]], [[\\xr]])
+        lexerror([["\\xr]], [[\\xr]])
+        lexerror([["\\x.]], [[\\x.]])
+        lexerror([["\\x8%"]], [[\\x8%%]])
+        lexerror([["\\xAG]], [[\\xAG]])
+        lexerror([["\\g"]], [[\\g]])
+        lexerror([["\\g]], [[\\g]])
+        lexerror([["\\."]], [[\\%.]])
+
+        lexerror([["\\999"]], [[\\999"]])
+        lexerror([["xyz\\300"]], [[\\300"]])
+        lexerror([["   \\256"]], [[\\256"]])
+
+        -- errors in UTF-8 sequences
+        lexerror([["abc\\u{110000}"]], [[abc\\u{110000]])   -- too large
+        lexerror([["abc\\u11r"]], [[abc\\u1]])    -- missing '{'
+        lexerror([["abc\\u"]], [[abc\\u"]])    -- missing '{'
+        lexerror([["abc\\u{11r"]], [[abc\\u{11r]])    -- missing '}'
+        lexerror([["abc\\u{11"]], [[abc\\u{11"]])    -- missing '}'
+        lexerror([["abc\\u{11]], [[abc\\u{11]])    -- missing '}'
+        lexerror([["abc\\u{r"]], [[abc\\u{r]])     -- no digits
+
+        -- unfinished strings
+        lexerror("[=[alo]]", "<eof>")
+        lexerror("[=[alo]=", "<eof>")
+        lexerror("[=[alo]", "<eof>")
+        lexerror("'alo", "<eof>")
+        lexerror("'alo \\\\z  \\n\\n", "<eof>")
+        lexerror("'alo \\\\z", "<eof>")
+        lexerror([['alo \\98]], "<eof>")
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});
