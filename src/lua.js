@@ -173,6 +173,7 @@ module.exports.lua_rawset              = lapi.lua_rawset;
 module.exports.lua_rawsetp             = lapi.lua_rawsetp;
 module.exports.lua_remove              = lapi.lua_remove;
 module.exports.lua_replace             = lapi.lua_replace;
+module.exports.lua_arith               = lapi.lua_arith;
 module.exports.lua_resume              = ldo.lua_resume;
 module.exports.lua_rotate              = lapi.lua_rotate;
 module.exports.lua_setfield            = lapi.lua_setfield;

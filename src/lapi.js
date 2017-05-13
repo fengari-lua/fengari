@@ -857,6 +857,18 @@ const lua_rawequal = function(L, index1, index2) {
     return isvalid(o1) && isvalid(o2) ? lvm.luaV_equalobj(null, o1, o2) : 0; // TODO: isvalid ?
 };
 
+const lua_arith = function(L, op) {
+    if (op !== defs.LUA_OPUNM && op !== defs.LUA_OPBNOT)
+        assert(2 < L.top - L.ci.funcOff, "not enough elements in the stack");  /* all other operations expect two operands */
+    else {  /* for unary operations, add fake 2nd operand */
+        assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+        L.stack[L.top++] = L.stack[L.top - 1];
+    }
+    /* first operand at top - 2, second at top - 1; result go to top - 2 */
+    lobject.luaO_arith(L, op, L.stack[L.top - 2], L.stack[L.top - 1], L.stack[L.top - 2]);
+    L.op--;  /* remove second operand */
+};
+
 /*
 ** 'load' and 'call' functions (run Lua code)
 */
@@ -1069,6 +1081,7 @@ const lua_getextraspace = function () {
 module.exports.index2addr            = index2addr;
 module.exports.index2addr_           = index2addr_;
 module.exports.lua_absindex          = lua_absindex;
+module.exports.lua_arith             = lua_arith;
 module.exports.lua_atpanic           = lua_atpanic;
 module.exports.lua_call              = lua_call;
 module.exports.lua_callk             = lua_callk;
@@ -1115,6 +1128,7 @@ module.exports.lua_pop               = lua_pop;
 module.exports.lua_pushboolean       = lua_pushboolean;
 module.exports.lua_pushcclosure      = lua_pushcclosure;
 module.exports.lua_pushcfunction     = lua_pushcfunction;
+module.exports.lua_pushfstring       = lua_pushfstring;
 module.exports.lua_pushglobaltable   = lua_pushglobaltable;
 module.exports.lua_pushinteger       = lua_pushinteger;
 module.exports.lua_pushjsclosure     = lua_pushjsclosure;
@@ -1125,10 +1139,9 @@ module.exports.lua_pushlstring       = lua_pushlstring;
 module.exports.lua_pushnil           = lua_pushnil;
 module.exports.lua_pushnumber        = lua_pushnumber;
 module.exports.lua_pushstring        = lua_pushstring;
-module.exports.lua_pushfstring       = lua_pushfstring;
-module.exports.lua_pushvfstring      = lua_pushvfstring;
 module.exports.lua_pushthread        = lua_pushthread;
 module.exports.lua_pushvalue         = lua_pushvalue;
+module.exports.lua_pushvfstring      = lua_pushvfstring;
 module.exports.lua_rawequal          = lua_rawequal;
 module.exports.lua_rawget            = lua_rawget;
 module.exports.lua_rawgeti           = lua_rawgeti;
