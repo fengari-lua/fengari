@@ -569,6 +569,11 @@ const lua_newtable = function(L) {
     lua_createtable(L, 0, 0);
 };
 
+const lua_register = function(L, n, f) {
+    lua_pushcfunction(L, f);
+    lua_setglobal(L, n);
+};
+
 const lua_getmetatable = function(L, objindex) {
     let obj = index2addr(L, objindex);
     let mt;
@@ -681,6 +686,12 @@ const lua_rawlen = function(L, idx) {
         default:
             return 0;
     }
+};
+
+const lua_tocfunction = function(L, idx) {
+    let o = index2addr(L, idx);
+    if (o.ttislcf() || o.ttisCclosure()) return o.value;
+    else return null;  /* not a C function */
 };
 
 const lua_tointeger = function(L, idx) {
@@ -849,6 +860,10 @@ const lua_isthread = function(L, idx) {
 
 const lua_isfunction = function(L, idx) {
     return lua_type(L, idx) === CT.LUA_TFUNCTION;
+};
+
+const lua_islightuserdata = function(L, idx) {
+    return lua_type(L, idx) === CT.LUA_TLIGHTUSERDATA;
 };
 
 const lua_rawequal = function(L, index1, index2) {
@@ -1070,12 +1085,18 @@ const lua_upvaluejoin = function(L, fidx1, n1, fidx2, n2) {
 const lua_gc = function () {};
 
 const lua_getallocf = function () {
-    console.warn("lua_getallocf is not available and will always return null");
-    return null;
+    console.warn("lua_getallocf is not available");
+    return 0;
 };
+
+const lua_setallocf = function () {
+    console.warn("lua_setallocf is not available");
+    return 0;
+};
+
 const lua_getextraspace = function () {
-    console.warn("lua_getextraspace is not available and will always return null");
-    return null;
+    console.warn("lua_getextraspace is not available");
+    return 0;
 };
 
 module.exports.index2addr            = index2addr;
@@ -1108,6 +1129,7 @@ module.exports.lua_isboolean         = lua_isboolean;
 module.exports.lua_iscfunction       = lua_iscfunction;
 module.exports.lua_isfunction        = lua_isfunction;
 module.exports.lua_isinteger         = lua_isinteger;
+module.exports.lua_islightuserdata   = lua_islightuserdata;
 module.exports.lua_isnil             = lua_isnil;
 module.exports.lua_isnone            = lua_isnone;
 module.exports.lua_isnoneornil       = lua_isnoneornil;
@@ -1150,9 +1172,11 @@ module.exports.lua_rawlen            = lua_rawlen;
 module.exports.lua_rawset            = lua_rawset;
 module.exports.lua_rawseti           = lua_rawseti;
 module.exports.lua_rawsetp           = lua_rawsetp;
+module.exports.lua_register          = lua_register;
 module.exports.lua_remove            = lua_remove;
 module.exports.lua_replace           = lua_replace;
 module.exports.lua_rotate            = lua_rotate;
+module.exports.lua_setallocf         = lua_setallocf;
 module.exports.lua_setfield          = lua_setfield;
 module.exports.lua_setglobal         = lua_setglobal;
 module.exports.lua_seti              = lua_seti;
@@ -1164,6 +1188,7 @@ module.exports.lua_setuservalue      = lua_setuservalue;
 module.exports.lua_status            = lua_status;
 module.exports.lua_stringtonumber    = lua_stringtonumber;
 module.exports.lua_toboolean         = lua_toboolean;
+module.exports.lua_tocfunction       = lua_tocfunction;
 module.exports.lua_todataview        = lua_todataview;
 module.exports.lua_tointeger         = lua_tointeger;
 module.exports.lua_tointegerx        = lua_tointegerx;

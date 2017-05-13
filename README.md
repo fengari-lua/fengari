@@ -46,13 +46,7 @@
         - [ ] `file:read()`
         - [ ] `file:setvbuf()`
         - [ ] `file:__gc()`
-- [ ] C API
-    - [x] ...
-    - [ ] `lua_arith`
-    - [ ] `lua_islightuserdata`
-    - [ ] `lua_register`
-    - [ ] `lua_setallocf`
-    - [ ] `lua_tocfunction`
+- [x] C API
 - [ ] Auxiliary library
     - [x] ...
     - [ ] `luaL_addsize`
