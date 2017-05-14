@@ -11,6 +11,19 @@ module.exports = [
             library: 'fengari'
         },
         plugins: [
+            new webpack.DefinePlugin({
+                WEB: JSON.stringify(true),
+            })
+        ]
+    },
+    {
+        entry: './src/fengari.js',
+        output: {
+            path: path.resolve(__dirname, 'dist'),
+            filename: 'fengari.min.js',
+            library: 'fengari'
+        },
+        plugins: [
             new BabiliPlugin(),
             new webpack.DefinePlugin({
                 WEB: JSON.stringify(true),
