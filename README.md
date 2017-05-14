@@ -1,7 +1,7 @@
-[![Build Status](https://travis-ci.org/giann/fengari.svg?branch=master)](https://travis-ci.org/giann/fengari) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Build Status](https://travis-ci.org/fengari-lua/fengari.svg?branch=master)](https://travis-ci.org/fengari-lua/fengari) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <p align="center">
-    <img src="https://github.com/giann/fengari/raw/master/logo.png" alt="Fengari" width="304" height="304">
+    <img src="https://github.com/fengari-lua/fengari/raw/master/logo.png" alt="Fengari" width="304" height="304">
 </p>
 
 # fengari
@@ -73,7 +73,7 @@
     - [ ] `tpack.lua`
     - [ ] `utf8.lua`
     - [ ] `verybig.lua`
-- [ ] DOM API binding: [https://github.com/daurnimator/fengari-interop](https://github.com/daurnimator/fengari-interop)
+- [ ] DOM API binding: [https://github.com/fengari-lua/fengari-interop](https://github.com/fengari-lua/fengari-interop)
 
 ## References
 
