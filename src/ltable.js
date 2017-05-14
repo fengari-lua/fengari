@@ -45,7 +45,7 @@ class Table {
 const add = function(t, hash, key, value) {
     t.dead_strong.clear();
     t.dead_weak = void 0;
-    let prev;
+    let prev = null;
     let entry = {
         key: key,
         value: value,
