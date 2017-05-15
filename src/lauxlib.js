@@ -791,12 +791,12 @@ if (!WEB) {
         }
 
         try {
-            let com;
-            if ((com = skipcomment(lf)).skipped)  /* read initial portion */
-                lf.buff[lf.n++] = '\n'.charCodeAt(0);  /* add line to correct line numbers */
-
+            let com = skipcomment(lf);
+            /* check for signature first, as we don't want to add line number corrections in binary case */
             if (com.c === lua.LUA_SIGNATURE.charCodeAt(0) && filename) {  /* binary file? */
                 lf.binary = true;
+            } else if (com.skipped) { /* read initial portion */
+                lf.buff[lf.n++] = '\n'.charCodeAt(0);  /* add line to correct line numbers */
             }
             if (com.c !== null)
                 lf.buff[lf.n++] = com.c; /* 'c' is the first character of the stream */
