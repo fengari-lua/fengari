@@ -79,6 +79,52 @@
 - [ ] DOM API binding: [https://github.com/fengari-lua/fengari-interop](https://github.com/fengari-lua/fengari-interop)
 
 
+## Extensions
+
+### `dv = lua_todataview(L, idx)`
+
+Equivalent to `lua_tolstring` but returns a [`DataView`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView) instead of a string.
+
+
+### `str = lua_toljsstring(L, idx)`
+
+Equivalent to `lua_tolstring` but returns the string as a JavaScript string (as if `to_jsstring()` was called on the result).
+
+
+### `lua_tojsstring(L, idx)`
+
+Alias for `lua_toljsstring`.
+
+
+### `lua_pushjsfunction(L, func)`
+
+Alias for `lua_pushcfunction`.
+
+
+### `lua_pushjsclosure(L, func, n)`
+
+Alias for `lua_pushcclosure`.
+
+
+### `b = lua_isproxy(p, L)`
+
+Returns a boolean `b` indicating whether `p` is a proxy (See `lua_toproxy`).
+If `L` is non-null, only returns `true` if `p` belongs to the same global state.
+
+
+### `p = lua_toproxy(L, idx)`
+
+Returns a JavaScript object `p` that holds a reference to the lua value at the stack index `idx`.
+This object can be called with a lua_State to push the value onto that state's stack.
+
+This example would be an inefficient way to write `lua_pushvalue(L, 1)`:
+
+```js
+var p = lua_toproxy(L, 1);
+p(L);
+````
+
+
 ## References
 
 - [Source code for Lua 5.3](lua.org/source/5.3/)
