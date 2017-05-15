@@ -283,6 +283,16 @@ const luaD_rawrunprotected = function(L, f, ud) {
                     lapi.lua_pushlightuserdata(L, e);
                     luaD_callnoyield(L, L.top - 2, 1);
 
+                    /* Now run the message handler (if it exists) */
+                    /* copy of luaG_errormsg without the throw */
+                    if (L.errfunc !== 0) {  /* is there an error handling function? */
+                        let errfunc = L.errfunc;
+                        L.stack[L.top] = L.stack[L.top - 1];
+                        L.stack[L.top - 1] = L.stack[errfunc];
+                        L.top++;
+                        luaD_callnoyield(L, L.top - 2, 1);
+                    }
+
                     lj.status = TS.LUA_ERRRUN;
                 } catch(e2) {
                     if (lj.status === TS.LUA_OK) {

@@ -110,6 +110,7 @@ Alias for `lua_pushcclosure`.
 
 Sets a function to be called if a native JavaScript error is thrown across a lua pcall.
 The function will be run as if it were a message handler (see https://www.lua.org/manual/5.3/manual.html#2.3).
+The current message handler will be run after the native error handler returns.
 
 
 ### `b = lua_isproxy(p, L)`
