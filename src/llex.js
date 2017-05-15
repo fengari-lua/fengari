@@ -10,6 +10,7 @@ const lobject  = require('./lobject.js');
 const lstring  = require('./lstring.js');
 const ltable   = require('./ltable.js');
 const llimit   = require('./llimit.js');
+const lzio     = require('./lzio.js');
 const TS       = defs.thread_status;
 const char     = defs.char;
 
@@ -303,7 +304,7 @@ const read_long_string = function(ls, seminfo, sep) {
     let skip = false;
     for (; !skip ;) {
         switch (ls.current) {
-            case -1: {  /* error */
+            case lzio.EOZ: {  /* error */
                 let what = seminfo ? "string" : "comment";
                 let msg = `unfinished long ${what} (starting at line ${line})`;
                 lexerror(ls, defs.to_luastring(msg), R.TK_EOS);
@@ -338,7 +339,7 @@ const read_long_string = function(ls, seminfo, sep) {
 
 const esccheck = function(ls, c, msg) {
     if (!c) {
-        if (ls.current !== -1)
+        if (ls.current !== lzio.EOZ)
             save_and_next(ls);  /* add current to buffer for error message */
         lexerror(ls, msg, R.TK_STRING);
     }
@@ -400,7 +401,7 @@ const read_string = function(ls, del, seminfo) {
 
     while (ls.current !== del) {
         switch (ls.current) {
-            case -1:
+            case lzio.EOZ:
                 lexerror(ls, defs.to_luastring("unfinished string", true), R.TK_EOS);
                 break;
             case char['\n']:
@@ -425,7 +426,7 @@ const read_string = function(ls, del, seminfo) {
                         inclinenumber(ls); c = char['\n']; will = 'only_save'; break;
                     case char['\\']: case char['\"']: case char['\'']:
                         c = ls.current; will = 'read_save'; break;
-                    case -1: will = 'no_save'; break;  /* will raise an error next loop */
+                    case lzio.EOZ: will = 'no_save'; break;  /* will raise an error next loop */
                     case char['z']: {  /* zap following span of spaces */
                         ls.buff.n -= 1;  /* remove '\\' */
                         next(ls);  /* skip the 'z' */
@@ -498,7 +499,7 @@ const llex = function(ls, seminfo) {
                 }
 
                 /* else short comment */
-                while (!currIsNewline(ls) && ls.current !== -1)
+                while (!currIsNewline(ls) && ls.current !== lzio.EOZ)
                     next(ls);  /* skip until end of line (or end of file) */
                 break;
             }
@@ -561,7 +562,7 @@ const llex = function(ls, seminfo) {
             case char['5']: case char['6']: case char['7']: case char['8']: case char['9']: {
                 return read_numeral(ls, seminfo);
             }
-            case -1: {
+            case lzio.EOZ: {
                 return R.TK_EOS;
             }
             default: {
