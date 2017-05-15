@@ -4,8 +4,11 @@
     <img src="https://github.com/fengari-lua/fengari/raw/master/logo.png" alt="Fengari" width="304" height="304">
 </p>
 
+
 # fengari
+
 🐺 φεγγάρι - The Lua VM written in JS ES6 for Node and the browser
+
 
 ## So far
 
@@ -74,6 +77,7 @@
     - [ ] `utf8.lua`
     - [ ] `verybig.lua`
 - [ ] DOM API binding: [https://github.com/fengari-lua/fengari-interop](https://github.com/fengari-lua/fengari-interop)
+
 
 ## References
 
