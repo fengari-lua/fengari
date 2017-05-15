@@ -69,63 +69,6 @@ const luaX_tokens = [
     "<number>", "<integer>", "<name>", "<string>"
 ];
 
-class MBuffer {
-    constructor(L, data, reader) {
-        this.L = L;
-        this.data = data;
-        this.n = 0;
-        this.buffer = null;
-        this.off = 0;
-        this.reader = reader ? reader : null;
-
-        if (!this.reader) {
-            assert(typeof data !== "string", "Should only load binary of array of bytes");
-            this.buffer = data ? data : [];
-            this.n = this.buffer instanceof DataView ? this.buffer.byteLength : this.buffer.length;
-            this.off = 0;
-        }
-    }
-
-    getc() {
-        if (this.n <= 0)
-            this.fill();
-        if (this.n <= 0)
-            return -1;
-        let r;
-        if (this.buffer instanceof DataView) {
-            r = this.buffer.getUint8(this.off++, true);
-        } else {
-            r = this.buffer[this.off++];
-        }
-        if (this.n-- === 0) // remove reference to input so it can get freed
-            this.buffer = null;
-        return r;
-    }
-
-    read(size) {
-        let r = [];
-
-        while (size > 0) {
-            let byte = this.getc();
-            if (byte !== -1) r.push(byte);
-            size--;
-        }
-
-        return r;
-    }
-
-    fill() {
-        if (this.reader) {
-            this.buffer = this.reader(this.L, this.data);
-            assert(typeof this.buffer !== "string", "Should only load binary of array of bytes");
-            if (this.buffer !== null) {
-                this.n = ((this.buffer instanceof DataView) ? this.buffer.byteLength : this.buffer.length);
-                this.off = 0;
-            }
-        }
-    }
-}
-
 class SemInfo {
     constructor() {
         this.r = NaN;
@@ -152,8 +95,8 @@ class LexState {
         this.lookahead = new Token();  /* look ahead token */
         this.fs = null;  /* current function (parser) */
         this.L = null;
-        this.z = new MBuffer();
-        this.buff = new MBuffer();  /* buffer for tokens */
+        this.z = null; /* input stream */
+        this.buff = null;  /* buffer for tokens */
         this.h = null;  /* to reuse strings */
         this.dyd = null;  /* dynamic structures used by the parser */
         this.source = null;  /* current source name */
@@ -187,7 +130,7 @@ const currIsNewline = function(ls) {
 };
 
 const next = function(ls) {
-    ls.current = ls.z.getc();
+    ls.current = ls.z.zgetc();
 };
 
 const save_and_next = function(ls) {
@@ -664,7 +607,6 @@ const luaX_lookahead = function(ls) {
 
 module.exports.FIRST_RESERVED   = FIRST_RESERVED;
 module.exports.LexState         = LexState;
-module.exports.MBuffer          = MBuffer;
 module.exports.RESERVED         = RESERVED;
 module.exports.isreserved       = isreserved;
 module.exports.luaX_lookahead   = luaX_lookahead;

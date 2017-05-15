@@ -2,9 +2,6 @@
 
 const test       = require('tape');
 
-const tests      = require("./tests.js");
-const toByteCode = tests.toByteCode;
-
 const lua     = require('../src/lua.js');
 const lauxlib = require('../src/lauxlib.js');
 const lualib  = require('../src/lualib.js');
@@ -19,13 +16,11 @@ test('__index, __newindex: with actual table', function (t) {
     t.plan(3);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
         lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
@@ -51,13 +46,11 @@ test('__newindex: with non table', function (t) {
     t.plan(2);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
     }, "Bytecode parsed without errors");
 
     t.throws(function () {
@@ -84,13 +77,11 @@ test('__index function in metatable', function (t) {
     t.plan(3);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
     }, "Bytecode parsed without errors");
 
 
@@ -126,13 +117,11 @@ test('__newindex function in metatable', function (t) {
     t.plan(3);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
@@ -166,13 +155,11 @@ test('__index table in metatable', function (t) {
     t.plan(3);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
@@ -209,13 +196,11 @@ test('__newindex table in metatable', function (t) {
     t.plan(4);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
@@ -263,13 +248,11 @@ test('__index table with own metatable', function (t) {
     t.plan(3);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
@@ -316,13 +299,11 @@ test('__newindex table with own metatable', function (t) {
     t.plan(4);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
@@ -417,13 +398,11 @@ test('binary __xxx functions in metatable', function (t) {
     t.plan(3);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
@@ -469,13 +448,11 @@ test('__eq', function (t) {
     t.plan(3);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
@@ -507,13 +484,11 @@ test('__lt', function (t) {
     t.plan(3);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
@@ -545,13 +520,11 @@ test('__le', function (t) {
     t.plan(3);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
@@ -583,13 +556,11 @@ test('__le that uses __lt', function (t) {
     t.plan(3);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
@@ -625,13 +596,11 @@ test('__unm, __bnot', function (t) {
     t.plan(4);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
@@ -670,13 +639,11 @@ test('__len', function (t) {
     t.plan(3);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
@@ -709,13 +676,11 @@ test('__concat', function (t) {
     t.plan(3);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {
@@ -748,13 +713,11 @@ test('__call', function (t) {
     t.plan(3);
 
     t.doesNotThrow(function () {
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
     }, "Bytecode parsed without errors");
 
     t.doesNotThrow(function () {

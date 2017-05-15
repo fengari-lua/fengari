@@ -2,9 +2,6 @@
 
 const test       = require('tape');
 
-const tests      = require("./tests.js");
-const toByteCode = tests.toByteCode;
-
 const lua     = require('../src/lua.js');
 const lauxlib = require('../src/lauxlib.js');
 const lualib  = require('../src/lualib.js');
@@ -30,13 +27,11 @@ test('table.concat', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-table.concat"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -59,13 +54,11 @@ test('table.pack', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-table.pack"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -90,13 +83,11 @@ test('table.unpack', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-table.unpack"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -134,13 +125,11 @@ test('table.insert', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-table.insert"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -168,13 +157,11 @@ test('table.remove', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-table.remove"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -201,13 +188,11 @@ test('table.move', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-table.move"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -234,13 +219,11 @@ test('table.sort (<)', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-table.sort"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -267,13 +250,11 @@ test('table.sort with cmp function', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-table.sort"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 

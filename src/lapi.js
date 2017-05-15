@@ -7,7 +7,6 @@ const ldebug    = require('./ldebug.js');
 const ldo       = require('./ldo.js');
 const ldump     = require('./ldump.js');
 const lfunc     = require('./lfunc.js');
-const llex      = require('./llex.js');
 const lobject   = require('./lobject.js');
 const lstate    = require('./lstate.js');
 const lstring   = require('./lstring.js');
@@ -15,6 +14,7 @@ const ltm       = require('./ltm.js');
 const luaconf   = require('./luaconf.js');
 const lvm       = require('./lvm.js');
 const ltable    = require('./ltable.js');
+const lzio      = require('./lzio.js');
 const MAXUPVAL  = lfunc.MAXUPVAL;
 const CT        = defs.constant_types;
 const TS        = defs.thread_status;
@@ -891,8 +891,8 @@ const lua_arith = function(L, op) {
 const lua_load = function(L, reader, data, chunckname, mode) {
     assert(Array.isArray(chunckname), "lua_load expect an array of byte as chunckname");
     assert(mode ? Array.isArray(mode) : true, "lua_load expect an array of byte as mode");
-    let z = new llex.MBuffer(L, data, reader);
     if (!chunckname) chunckname = [defs.char["?"]];
+    let z = new lzio.ZIO(L, reader, data);
     let status = ldo.luaD_protectedparser(L, z, chunckname, mode);
     if (status === TS.LUA_OK) {  /* no errors? */
         let f = L.stack[L.top - 1].value; /* get newly created function */

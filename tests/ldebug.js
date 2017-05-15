@@ -2,9 +2,6 @@
 
 const test       = require('tape');
 
-const tests      = require("./tests.js");
-const toByteCode = tests.toByteCode;
-
 const lua     = require('../src/lua.js');
 const lauxlib = require('../src/lauxlib.js');
 const lualib  = require('../src/lualib.js');
@@ -19,13 +16,11 @@ test('luaG_typeerror', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-typeerror"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_pcall(L, 0, -1, 0);
 
@@ -49,13 +44,11 @@ test('luaG_typeerror', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-typeerror"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_pcall(L, 0, -1, 0);
 
@@ -78,13 +71,11 @@ test('luaG_typeerror', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-typeerror"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_pcall(L, 0, -1, 0);
 
@@ -107,13 +98,11 @@ test('luaG_typeerror', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-typeerror"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_pcall(L, 0, -1, 0);
 
@@ -135,13 +124,11 @@ test('luaG_concaterror', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-typeerror"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_pcall(L, 0, -1, 0);
 
@@ -163,13 +150,11 @@ test('luaG_opinterror', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-typeerror"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_pcall(L, 0, -1, 0);
 
@@ -191,13 +176,11 @@ test('luaG_tointerror', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-typeerror"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_pcall(L, 0, -1, 0);
 

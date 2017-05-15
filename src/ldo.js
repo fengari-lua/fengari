@@ -7,7 +7,6 @@ const defs    = require('./defs.js');
 const lapi    = require('./lapi.js');
 const ldebug  = require('./ldebug.js');
 const lfunc   = require('./lfunc.js');
-const llex    = require('./llex.js');
 const llimit  = require('./llimit.js');
 const lobject = require('./lobject.js');
 const lparser = require('./lparser.js');
@@ -16,6 +15,7 @@ const lstring = require('./lstring.js');
 const ltm     = require('./ltm.js');
 const lundump = require('./lundump.js');
 const lvm     = require('./lvm.js');
+const lzio    = require('./lzio.js');
 
 const CT = defs.constant_types;
 const TS = defs.thread_status;
@@ -527,12 +527,12 @@ const luaD_callnoyield = function(L, off, nResults) {
 ** Execute a protected parser.
 */
 class SParser {
-    constructor() {  /* data to 'f_parser' */
-        this.z = new llex.MBuffer();
-        this.buff = new llex.MBuffer();  /* dynamic structure used by the scanner */
+    constructor(z, name, mode) {  /* data to 'f_parser' */
+        this.z = z;
+        this.buff = new lzio.MBuffer();  /* dynamic structure used by the scanner */
         this.dyd = new lparser.Dyndata();  /* dynamic structures used by the parser */
-        this.mode = null;
-        this.name = null;
+        this.mode = mode;
+        this.name = name;
     }
 }
 
@@ -545,7 +545,7 @@ const checkmode = function(L, mode, x) {
 
 const f_parser = function(L, p) {
     let cl;
-    let c = p.z.getc();  /* read first character */
+    let c = p.z.zgetc();  /* read first character */
     if (c === defs.LUA_SIGNATURE.charCodeAt(0)) {
         checkmode(L, p.mode, defs.to_luastring("binary", true));
         cl = lundump.luaU_undump(L, p.z, p.name);
@@ -559,24 +559,10 @@ const f_parser = function(L, p) {
 };
 
 const luaD_protectedparser = function(L, z, name, mode) {
-    let p = new SParser();
+    let p = new SParser(z, name, mode);
     L.nny++;  /* cannot yield during parsing */
-
-    p.z = z;
-    p.buff.L = L;
-    p.name = name;
-    p.mode = mode;
-    p.dyd.actvar.arr = [];
-    p.dyd.actvar.size = 0;
-    p.dyd.gt.arr = [];
-    p.dyd.gt.size = 0;
-    p.dyd.label.arr = [];
-    p.dyd.label.size = 0;
-
     let status = luaD_pcall(L, f_parser, p, L.top, L.errfunc);
-
     L.nny--;
-
     return status;
 };
 

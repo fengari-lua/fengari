@@ -375,7 +375,7 @@ test('lua_load and lua_call it', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-lua_load"), lua.to_luastring("binary"));
+        lua.lua_load(L, function(L, s) { let r = s.bc; s.bc = null; return r; }, {bc: bc}, lua.to_luastring("test-lua_load"), lua.to_luastring("binary"));
 
         lua.lua_call(L, 0, 1);
 
@@ -398,11 +398,9 @@ test('lua script reads js upvalues', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-lua_load"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_pushliteral(L, "hello");
         lua.lua_setglobal(L, lua.to_luastring("js"));

@@ -2,9 +2,6 @@
 
 const test       = require('tape');
 
-const tests      = require("./tests.js");
-const toByteCode = tests.toByteCode;
-
 const lua     = require('../src/lua.js');
 const lauxlib = require('../src/lauxlib.js');
 const lualib  = require('../src/lualib.js');
@@ -28,13 +25,11 @@ test('coroutine.create, coroutine.yield, coroutine.resume', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-coroutine"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -71,13 +66,11 @@ test('coroutine.status', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-coroutine.status"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -112,13 +105,11 @@ test('coroutine.isyieldable', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-coroutine.isyieldable"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -153,13 +144,11 @@ test('coroutine.running', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-coroutine.running"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -194,13 +183,11 @@ test('coroutine.wrap', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-coroutine.wrap"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 

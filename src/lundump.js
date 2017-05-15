@@ -9,20 +9,20 @@ const lfunc    = require('./lfunc.js');
 const lobject  = require('./lobject.js');
 const lopcodes = require('./lopcodes.js');
 const lstring  = require('./lstring.js');
-const llex     = require('./llex.js');
+const lzio     = require('./lzio.js');
 
 let LUAC_DATA = [0x19, 0x93, defs.char["\r"], defs.char["\n"], 0x1a, defs.char["\n"]];
 
 class BytecodeParser {
 
-    constructor(L, buffer, name) {
+    constructor(L, Z, name) {
         this.intSize = 4;
         this.size_tSize = 8;
         this.instructionSize = 4;
         this.integerSize = 4;
         this.numberSize = 8;
 
-        assert(buffer instanceof llex.MBuffer, "BytecodeParser only operates on a MBuffer");
+        assert(Z instanceof lzio.ZIO, "BytecodeParser only operates on a ZIO");
         assert(Array.isArray(name));
 
         if (name[0] == defs.char["@"] || name[0] == defs.char["="])
@@ -33,32 +33,32 @@ class BytecodeParser {
             this.name = name;
 
         this.L = L;
-        this.buffer = buffer;
+        this.Z = Z;
 
         // Used to do buffer to number conversions
-        this.dv = new DataView(
-            new ArrayBuffer(
-                Math.max(this.intSize, this.size_tSize, this.instructionSize, this.integerSize, this.numberSize)
-            )
+        this.arraybuffer = new ArrayBuffer(
+            Math.max(this.intSize, this.size_tSize, this.instructionSize, this.integerSize, this.numberSize)
         );
+        this.dv = new DataView(this.arraybuffer);
+        this.u8 = new Uint8Array(this.arraybuffer);
     }
 
     read(size) {
-        let buffer = this.buffer.read(size);
-        assert(Array.isArray(buffer));
-        if (buffer.length < size) this.error("truncated");
-        return buffer;
+        let u8 = new Uint8Array(size);
+        if(lzio.luaZ_read(this.Z, u8, 0, size) !== 0)
+            this.error("truncated");
+        return Array.from(u8);
     }
 
     readByte() {
-        return this.read(1)[0];
+        if (lzio.luaZ_read(this.Z, this.u8, 0, 1) !== 0)
+            this.error("truncated");
+        return this.u8[0];
     }
 
     readInteger() {
-        let buffer = this.read(this.integerSize);
-        for (let i = 0; i < buffer.length; i++)
-            this.dv.setUint8(i, buffer[i]);
-
+        if (lzio.luaZ_read(this.Z, this.u8, 0, this.integerSize) !== 0)
+            this.error("truncated");
         return this.dv.getInt32(0, true);
     }
 
@@ -67,20 +67,14 @@ class BytecodeParser {
     }
 
     readInt() {
-        let buffer = this.read(this.intSize);
-
-        for (let i = 0; i < buffer.length; i++)
-            this.dv.setUint8(i, buffer[i]);
-
+        if (lzio.luaZ_read(this.Z, this.u8, 0, this.intSize) !== 0)
+            this.error("truncated");
         return this.dv.getInt32(0, true);
     }
 
     readNumber() {
-        let buffer = this.read(this.numberSize);
-
-        for (let i = 0; i < buffer.length; i++)
-            this.dv.setUint8(i, buffer[i]);
-
+        if (lzio.luaZ_read(this.Z, this.u8, 0, this.numberSize) !== 0)
+            this.error("truncated");
         return this.dv.getFloat64(0, true);
     }
 
@@ -94,7 +88,7 @@ class BytecodeParser {
             return null;
         }
 
-        return lstring.luaS_new(this.L, this.read(size));
+        return lstring.luaS_bless(this.L, this.read(size));
     }
 
     /* creates a mask with 'n' 1 bits at position 'p' */
@@ -108,11 +102,9 @@ class BytecodeParser {
     }
 
     readInstruction() {
-        let ins = new DataView(new ArrayBuffer(this.instructionSize));
-        for (let i = 0; i < this.instructionSize; i++)
-            ins.setUint8(i, this.readByte());
-
-        return ins.getUint32(0, true);
+        if (lzio.luaZ_read(this.Z, this.u8, 0, this.instructionSize) !== 0)
+            this.error("truncated");
+        return this.dv.getUint32(0, true);
     }
 
     readCode(f) {
@@ -269,8 +261,8 @@ class BytecodeParser {
     }
 }
 
-const luaU_undump = function(L, buffer, name) {
-    let S = new BytecodeParser(L, buffer, name);
+const luaU_undump = function(L, Z, name) {
+    let S = new BytecodeParser(L, Z, name);
     S.checkHeader();
     let cl = lfunc.luaF_newLclosure(L, S.readByte());
     L.stack[L.top++] = new lobject.TValue(defs.CT.LUA_TLCL, cl);

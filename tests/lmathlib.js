@@ -2,9 +2,6 @@
 
 const test       = require('tape');
 
-const tests      = require("./tests.js");
-const toByteCode = tests.toByteCode;
-
 const lua     = require('../src/lua.js');
 const lauxlib = require('../src/lauxlib.js');
 const lualib  = require('../src/lualib.js');
@@ -20,13 +17,11 @@ test('math.abs, math.sin, math.cos, math.tan, math.asin, math.acos, math.atan', 
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -85,13 +80,11 @@ test('math.ceil, math.floor', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -121,13 +114,11 @@ test('math.deg, math.rad', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -157,13 +148,11 @@ test('math.log', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -199,13 +188,11 @@ test('math.exp', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -229,13 +216,11 @@ test('math.min, math.max', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -265,13 +250,11 @@ test('math.random', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -299,13 +282,11 @@ test('math.sqrt', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -329,13 +310,11 @@ test('math.tointeger', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -359,13 +338,11 @@ test('math.type', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -401,13 +378,11 @@ test('math.ult', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -431,13 +406,11 @@ test('math.fmod', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -461,13 +434,11 @@ test('math.modf', function (t) {
 
     t.doesNotThrow(function () {
 
-        let bc = toByteCode(luaCode);
-
         L = lauxlib.luaL_newstate();
 
         lualib.luaL_openlibs(L);
 
-        lua.lua_load(L, null, bc, lua.to_luastring("test-math"), lua.to_luastring("binary"));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 

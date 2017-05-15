@@ -691,17 +691,8 @@ if (!WEB) {
             this.f = null;  /* file being read */
             this.buff = new Buffer(1024);  /* area for reading file */
             this.pos = 0;  /* current position in file */
-            this.binary = false;
         }
     }
-
-    const toDataView = function(buffer, bytes) {
-        let ab = new ArrayBuffer(bytes);
-        let au = new Uint8Array(ab);
-        for (let i = 0; i < bytes; i++)
-            au[i] = buffer[i];
-        return new DataView(ab);
-    };
 
     const getF = function(L, ud) {
         let lf = ud;
@@ -715,7 +706,7 @@ if (!WEB) {
             lf.pos += bytes;
         }
         if (bytes > 0)
-            return lf.binary ? toDataView(lf.buff, bytes) : lf.buff.slice(0, bytes);
+            return lf.buff.slice(0, bytes); /* slice on a node.js Buffer is 'free' */
         else return null;
     };
 
@@ -794,7 +785,7 @@ if (!WEB) {
             let com = skipcomment(lf);
             /* check for signature first, as we don't want to add line number corrections in binary case */
             if (com.c === lua.LUA_SIGNATURE.charCodeAt(0) && filename) {  /* binary file? */
-                lf.binary = true;
+                /* no need to re-open in node.js */
             } else if (com.skipped) { /* read initial portion */
                 lf.buff[lf.n++] = '\n'.charCodeAt(0);  /* add line to correct line numbers */
             }
