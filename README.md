@@ -34,6 +34,7 @@
         - [x] `io.stderr`
         - [x] `io.stdin`
         - [x] `io.stdout`
+        - [x] `io.type()`
         - [x] `io.write()`
         - [ ] `io.flush()`
         - [ ] `io.input()`
@@ -43,7 +44,6 @@
         - [ ] `io.popen()`
         - [ ] `io.read()`
         - [ ] `io.tmpfile()`
-        - [ ] `io.type()`
         - [ ] `file:flush()`
         - [ ] `file:lines()`
         - [ ] `file:read()`

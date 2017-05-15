@@ -19,6 +19,18 @@ const isclosed = function(p) {
     return p.closef === null;
 };
 
+const io_type = function(L) {
+    lauxlib.luaL_checkany(L, 1);
+    let p = lauxlib.luaL_testudata(L, 1, lauxlib.LUA_FILEHANDLE);
+    if (p === null)
+        lua.lua_pushnil(L);  /* not a file */
+    else if (isclosed(p))
+        lua.lua_pushliteral(L, "closed file");
+    else
+        lua.lua_pushliteral(L, "file");
+    return 1;
+};
+
 const f_tostring = function(L) {
     let p = tolstream(L);
     if (isclosed(p))
@@ -95,6 +107,7 @@ const f_write = function(L) {
 
 const iolib = {
     "close": io_close,
+    "type": io_type,
     "write": io_write
 };
 
