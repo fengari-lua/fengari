@@ -24,7 +24,7 @@ const report = function(L, status) {
 const msghandler = function(L) {
     let msg = lua.lua_tostring(L, 1);
     if (msg === null) {  /* is error object not a string? */
-        if (lauxlib.luaL_callmeta(L, 1, "__tostring") &&  /* does it have a metamethod */
+        if (lauxlib.luaL_callmeta(L, 1, lua.to_luastring("__tostring")) &&  /* does it have a metamethod */
           lua.lua_type(L, -1) == lua.LUA_TSTRING)  /* that produces a string? */
             return 1;  /* that is the message */
         else
