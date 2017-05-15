@@ -695,10 +695,10 @@ if (!WEB) {
         }
     }
 
-    const toDataView = function(buffer) {
-        let ab = new ArrayBuffer(buffer.length);
+    const toDataView = function(buffer, bytes) {
+        let ab = new ArrayBuffer(bytes);
         let au = new Uint8Array(ab);
-        for (let i = 0; i < buffer.length; i++)
+        for (let i = 0; i < bytes; i++)
             au[i] = buffer[i];
         return new DataView(ab);
     };
@@ -707,6 +707,7 @@ if (!WEB) {
         let lf = ud;
         let bytes = 0;
         if (lf.n > 0) {  /* are there pre-read characters to be read? */
+            bytes = lf.n; /* return them (chars already in buffer) */
             lf.n = 0;  /* no more pre-read characters */
         } else {  /* read a block from file */
             lf.buff.fill(0);
@@ -714,7 +715,7 @@ if (!WEB) {
             lf.pos += bytes;
         }
         if (bytes > 0)
-            return lf.binary ? toDataView(lf.buff) : lf.buff.slice(0, bytes);
+            return lf.binary ? toDataView(lf.buff, bytes) : lf.buff.slice(0, bytes);
         else return null;
     };
 
@@ -766,7 +767,6 @@ if (!WEB) {
                 c: getc(lf)  /* skip end-of-line, if present */
             };
         } else {
-            lf.pos--;
             return {
                 skipped: false,
                 c: c
@@ -798,7 +798,8 @@ if (!WEB) {
             if (com.c === lua.LUA_SIGNATURE.charCodeAt(0) && filename) {  /* binary file? */
                 lf.binary = true;
             }
-
+            if (com.c !== null)
+                lf.buff[lf.n++] = com.c; /* 'c' is the first character of the stream */
             let status = lua.lua_load(L, getF, lf, lua.lua_tostring(L, -1), mode);
             if (filename) fs.closeSync(lf.f);  /* close file (even in case of errors) */
             lua.lua_remove(L, fnameindex);
