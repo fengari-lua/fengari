@@ -888,12 +888,12 @@ const lua_arith = function(L, op) {
 ** 'load' and 'call' functions (run Lua code)
 */
 
-const lua_load = function(L, reader, data, chunckname, mode) {
-    assert(Array.isArray(chunckname), "lua_load expect an array of byte as chunckname");
+const lua_load = function(L, reader, data, chunkname, mode) {
+    assert(Array.isArray(chunkname), "lua_load expect an array of byte as chunkname");
     assert(mode ? Array.isArray(mode) : true, "lua_load expect an array of byte as mode");
-    if (!chunckname) chunckname = [defs.char["?"]];
+    if (!chunkname) chunkname = [defs.char["?"]];
     let z = new lzio.ZIO(L, reader, data);
-    let status = ldo.luaD_protectedparser(L, z, chunckname, mode);
+    let status = ldo.luaD_protectedparser(L, z, chunkname, mode);
     if (status === TS.LUA_OK) {  /* no errors? */
         let f = L.stack[L.top - 1].value; /* get newly created function */
         if (f.nupvalues >= 1) {  /* does it have an upvalue? */
