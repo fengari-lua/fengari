@@ -1,8 +1,9 @@
 "use strict";
 
-const assert    = require('assert');
-
 const defs      = require('./defs.js');
+
+if (defs.LUA_USE_ASSERT) var assert = require('assert');
+
 const ldebug    = require('./ldebug.js');
 const ldo       = require('./ldo.js');
 const ldump     = require('./ldump.js');
@@ -47,17 +48,17 @@ const index2addr = function(L, idx) {
     let ci = L.ci;
     if (idx > 0) {
         let o = ci.funcOff + idx;
-        assert(idx <= ci.top - (ci.funcOff + 1), "unacceptable index");
+        if (defs.LUA_USE_ASSERT) assert(idx <= ci.top - (ci.funcOff + 1), "unacceptable index");
         if (o >= L.top) return lobject.luaO_nilobject;
         else return L.stack[o];
     } else if (idx > defs.LUA_REGISTRYINDEX) {
-        assert(idx !== 0 && -idx <= L.top, "invalid index");
+        if (defs.LUA_USE_ASSERT) assert(idx !== 0 && -idx <= L.top, "invalid index");
         return L.stack[L.top + idx];
     } else if (idx === defs.LUA_REGISTRYINDEX) {
         return L.l_G.l_registry;
     } else { /* upvalues */
         idx = defs.LUA_REGISTRYINDEX - idx;
-        assert(idx <= MAXUPVAL + 1, "upvalue index too large");
+        if (defs.LUA_USE_ASSERT) assert(idx <= MAXUPVAL + 1, "upvalue index too large");
         if (ci.func.ttislcf()) /* light C function? */
             return lobject.luaO_nilobject; /* it has no upvalues */
         else {
@@ -71,17 +72,17 @@ const index2addr_ = function(L, idx) {
     let ci = L.ci;
     if (idx > 0) {
         let o = ci.funcOff + idx;
-        assert(idx <= ci.top - (ci.funcOff + 1), "unacceptable index");
+        if (defs.LUA_USE_ASSERT) assert(idx <= ci.top - (ci.funcOff + 1), "unacceptable index");
         if (o >= L.top) return null;
         else return o;
     } else if (idx > defs.LUA_REGISTRYINDEX) {
-        assert(idx !== 0 && -idx <= L.top, "invalid index");
+        if (defs.LUA_USE_ASSERT) assert(idx !== 0 && -idx <= L.top, "invalid index");
         return L.top + idx;
     } else if (idx === defs.LUA_REGISTRYINDEX) {
         return null;
     } else { /* upvalues */
         idx = defs.LUA_REGISTRYINDEX - idx;
-        assert(idx <= MAXUPVAL + 1, "upvalue index too large");
+        if (defs.LUA_USE_ASSERT) assert(idx <= MAXUPVAL + 1, "upvalue index too large");
         if (ci.func.ttislcf()) /* light C function? */
             return null; /* it has no upvalues */
         else {
@@ -96,9 +97,9 @@ const lua_checkstack = function(L, n) {
 
 const lua_xmove = function(from, to, n) {
     if (from === to) return;
-    assert(n < (from.top - from.ci.funcOff), "not enough elements in the stack");
-    assert(from.l_G === to.l_G, "moving among independent states");
-    assert(to.ci.top - to.top >= n, "stack overflow");
+    if (defs.LUA_USE_ASSERT) assert(n < (from.top - from.ci.funcOff), "not enough elements in the stack");
+    if (defs.LUA_USE_ASSERT) assert(from.l_G === to.l_G, "moving among independent states");
+    if (defs.LUA_USE_ASSERT) assert(to.ci.top - to.top >= n, "stack overflow");
 
     from.top -= n;
     for (let i = 0; i < n; i++) {
@@ -128,7 +129,7 @@ const lua_pushvalue = function(L, idx) {
     L.stack[L.top] = index2addr(L, idx);
 
     L.top++;
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
 };
 
 const lua_settop = function(L, idx) {
@@ -138,7 +139,7 @@ const lua_settop = function(L, idx) {
             L.stack[L.top++] = new TValue(CT.LUA_TNIL, null);
         L.top = func + 1 + idx;
     } else {
-        assert(-(idx + 1) <= L.top - (func + 1), "invalid new top");
+        if (defs.LUA_USE_ASSERT) assert(-(idx + 1) <= L.top - (func + 1), "invalid new top");
         let newtop = L.top + idx + 1; /* 'subtract' index (index is negative) */
         while (L.top > newtop)
             delete L.stack[--L.top];
@@ -166,8 +167,8 @@ const lua_rotate = function(L, idx, n) {
     let p = index2addr(L, idx);
     let pIdx = index2addr_(L, idx);
 
-    assert(p !== lobject.luaO_nilobject && idx > defs.LUA_REGISTRYINDEX, "index not in the stack");
-    assert((n >= 0 ? n : -n) <= (L.top - idx), "invalid 'n'");
+    if (defs.LUA_USE_ASSERT) assert(p !== lobject.luaO_nilobject && idx > defs.LUA_REGISTRYINDEX, "index not in the stack");
+    if (defs.LUA_USE_ASSERT) assert((n >= 0 ? n : -n) <= (L.top - idx), "invalid 'n'");
 
     let m = n >= 0 ? L.top - 1 - n : pIdx - n - 1;  /* end of prefix */
 
@@ -202,39 +203,39 @@ const lua_replace = function(L, idx) {
 const lua_pushnil = function(L) {
     L.stack[L.top++] = new TValue(CT.LUA_TNIL, null);
 
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
 };
 
 const lua_pushnumber = function(L, n) {
-    assert(typeof n === "number");
+    if (defs.LUA_USE_ASSERT) assert(typeof n === "number");
 
     L.stack[L.top++] = new TValue(CT.LUA_TNUMFLT, n);
 
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
 };
 
 const lua_pushinteger = function(L, n) {
-    assert(typeof n === "number" && (n|0) === n);
+    if (defs.LUA_USE_ASSERT) assert(typeof n === "number" && (n|0) === n);
 
     L.stack[L.top++] = new TValue(CT.LUA_TNUMINT, n);
 
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
 };
 
 const lua_pushlstring = function(L, s, len) {
-    assert(Array.isArray(s), "lua_pushlstring expects array of byte");
-    assert(typeof len === "number");
+    if (defs.LUA_USE_ASSERT) assert(Array.isArray(s), "lua_pushlstring expects array of byte");
+    if (defs.LUA_USE_ASSERT) assert(typeof len === "number");
 
     let ts = new TValue(CT.LUA_TLNGSTR, lstring.luaS_bless(L, s.slice(0, len)));
     L.stack[L.top++] = ts;
 
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
 
     return ts.value;
 };
 
 const lua_pushstring = function (L, s) {
-    assert(Array.isArray(s) || s === undefined || s === null, "lua_pushstring expects array of byte");
+    if (defs.LUA_USE_ASSERT) assert(Array.isArray(s) || s === undefined || s === null, "lua_pushstring expects array of byte");
 
     if (s === undefined || s === null)
         L.stack[L.top] = new TValue(CT.LUA_TNIL, null);
@@ -243,23 +244,23 @@ const lua_pushstring = function (L, s) {
     }
 
     L.top++;
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
 
     return s;
 };
 
 const lua_pushvfstring = function (L, fmt, argp) {
-    assert(Array.isArray(fmt));
+    if (defs.LUA_USE_ASSERT) assert(Array.isArray(fmt));
     return lobject.luaO_pushvfstring(L, fmt, argp);
 };
 
 const lua_pushfstring = function (L, fmt, ...argp) {
-    assert(Array.isArray(fmt));
+    if (defs.LUA_USE_ASSERT) assert(Array.isArray(fmt));
     return lobject.luaO_pushvfstring(L, fmt, argp);
 };
 
 const lua_pushliteral = function (L, s) {
-    assert(typeof s === "string" || s === undefined || s === null, "lua_pushliteral expects a JS string");
+    if (defs.LUA_USE_ASSERT) assert(typeof s === "string" || s === undefined || s === null, "lua_pushliteral expects a JS string");
 
     if (s === undefined || s === null)
         L.stack[L.top] = new TValue(CT.LUA_TNIL, null);
@@ -269,20 +270,20 @@ const lua_pushliteral = function (L, s) {
     }
 
     L.top++;
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
 
     return s;
 };
 
 const lua_pushcclosure = function(L, fn, n) {
-    assert(typeof fn === "function");
-    assert(typeof n === "number");
+    if (defs.LUA_USE_ASSERT) assert(typeof fn === "function");
+    if (defs.LUA_USE_ASSERT) assert(typeof n === "number");
 
     if (n === 0)
         L.stack[L.top] = new TValue(CT.LUA_TLCF, fn);
     else {
-        assert(n < L.top - L.ci.funcOff, "not enough elements in the stack");
-        assert(n <= MAXUPVAL, "upvalue index too large");
+        if (defs.LUA_USE_ASSERT) assert(n < L.top - L.ci.funcOff, "not enough elements in the stack");
+        if (defs.LUA_USE_ASSERT) assert(n <= MAXUPVAL, "upvalue index too large");
 
         let cl = new CClosure(L, fn, n);
 
@@ -296,7 +297,7 @@ const lua_pushcclosure = function(L, fn, n) {
     }
 
     L.top++;
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
 };
 
 const lua_pushjsclosure = lua_pushcclosure;
@@ -310,18 +311,18 @@ const lua_pushjsfunction = lua_pushcfunction;
 const lua_pushboolean = function(L, b) {
     L.stack[L.top++] = new TValue(CT.LUA_TBOOLEAN, b ? true : false);
 
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
 };
 
 const lua_pushlightuserdata = function(L, p) {
     L.stack[L.top++] = new TValue(CT.LUA_TLIGHTUSERDATA, p);
 
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
 };
 
 const lua_pushthread = function(L) {
     L.stack[L.top++] = new TValue(CT.LUA_TTHREAD, L);
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
 
     return L.l_G.mainthread === L;
 };
@@ -338,11 +339,11 @@ const lua_pushglobaltable = function(L) {
 ** t[k] = value at the top of the stack (where 'k' is a string)
 */
 const auxsetstr = function(L, t, k) {
-    assert(Array.isArray(k), "key must be an array of bytes");
+    if (defs.LUA_USE_ASSERT) assert(Array.isArray(k), "key must be an array of bytes");
 
     let str = new TValue(CT.LUA_TLNGSTR, lstring.luaS_new(L, k));
 
-    assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    if (defs.LUA_USE_ASSERT) assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
 
     L.stack[L.top++] = str;
     lvm.settable(L, t, L.stack[L.top - 1], L.stack[L.top - 2]);
@@ -356,13 +357,13 @@ const lua_setglobal = function(L, name) {
 };
 
 const lua_setmetatable = function(L, objindex) {
-    assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    if (defs.LUA_USE_ASSERT) assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     let mt;
     let obj = index2addr(L, objindex);
     if (L.stack[L.top - 1].ttisnil())
         mt = null;
     else {
-        assert(L.stack[L.top - 1].ttistable(), "table expected");
+        if (defs.LUA_USE_ASSERT) assert(L.stack[L.top - 1].ttistable(), "table expected");
         mt = L.stack[L.top - 1].value;
     }
 
@@ -383,7 +384,7 @@ const lua_setmetatable = function(L, objindex) {
 };
 
 const lua_settable = function(L, idx) {
-    assert(2 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    if (defs.LUA_USE_ASSERT) assert(2 < L.top - L.ci.funcOff, "not enough elements in the stack");
 
     let t = index2addr(L, idx);
     lvm.settable(L, t, L.stack[L.top - 2], L.stack[L.top - 1]);
@@ -395,11 +396,11 @@ const lua_setfield = function(L, idx, k) {
 };
 
 const lua_seti = function(L, idx, n) {
-    assert(typeof n === "number" && (n|0) === n);
-    assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    if (defs.LUA_USE_ASSERT) assert(typeof n === "number" && (n|0) === n);
+    if (defs.LUA_USE_ASSERT) assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     let t = index2addr(L, idx);
     L.stack[L.top++] = new TValue(CT.LUA_TNUMINT, n);
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
     lvm.settable(L, t, L.stack[L.top - 1], L.stack[L.top - 2]);
     /* pop value and key */
     delete L.stack[--L.top];
@@ -407,9 +408,9 @@ const lua_seti = function(L, idx, n) {
 };
 
 const lua_rawset = function(L, idx) {
-    assert(2 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    if (defs.LUA_USE_ASSERT) assert(2 < L.top - L.ci.funcOff, "not enough elements in the stack");
     let o = index2addr(L, idx);
-    assert(o.ttistable(), "table expected");
+    if (defs.LUA_USE_ASSERT) assert(o.ttistable(), "table expected");
     let k = L.stack[L.top - 2];
     let v = L.stack[L.top - 1];
     if (v.ttisnil()) {
@@ -422,17 +423,17 @@ const lua_rawset = function(L, idx) {
 };
 
 const lua_rawseti = function(L, idx, n) {
-    assert(2 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    if (defs.LUA_USE_ASSERT) assert(2 < L.top - L.ci.funcOff, "not enough elements in the stack");
     let o = index2addr(L, idx);
-    assert(o.ttistable(), "table expected");
+    if (defs.LUA_USE_ASSERT) assert(o.ttistable(), "table expected");
     ltable.luaH_setint(o.value, n, L.stack[L.top - 1]);
     delete L.stack[--L.top];
 };
 
 const lua_rawsetp = function(L, idx, p) {
-    assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    if (defs.LUA_USE_ASSERT) assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     let o = index2addr(L, idx);
-    assert(L, o.ttistable(), "table expected");
+    if (defs.LUA_USE_ASSERT) assert(L, o.ttistable(), "table expected");
     let k = new TValue(CT.LUA_TLIGHTUSERDATA, p);
     let v = L.stack[L.top - 1];
     if (v.ttisnil()) {
@@ -449,12 +450,12 @@ const lua_rawsetp = function(L, idx, p) {
 */
 
 const auxgetstr = function(L, t, k) {
-    assert(Array.isArray(k), "key must be an array of bytes");
+    if (defs.LUA_USE_ASSERT) assert(Array.isArray(k), "key must be an array of bytes");
 
     let str = new TValue(CT.LUA_TLNGSTR, lstring.luaS_new(L, k));
 
     L.stack[L.top++] = str;
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
     lvm.gettable(L, t, L.stack[L.top - 1], L.top - 1);
 
     return L.stack[L.top - 1].ttnov();
@@ -463,27 +464,27 @@ const auxgetstr = function(L, t, k) {
 const lua_rawgeti = function(L, idx, n) {
     let t = index2addr(L, idx);
 
-    assert(t.ttistable(), "table expected");
+    if (defs.LUA_USE_ASSERT) assert(t.ttistable(), "table expected");
 
     L.stack[L.top++] = ltable.luaH_getint(t.value, n);
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
 
     return L.stack[L.top - 1].ttnov();
 };
 
 const lua_rawgetp = function(L, idx, p) {
     let t = index2addr(L, idx);
-    assert(t.ttistable(), "table expected");
+    if (defs.LUA_USE_ASSERT) assert(t.ttistable(), "table expected");
     let k = new TValue(CT.LUA_TLIGHTUSERDATA, p);
     L.stack[L.top++] = ltable.luaH_get(t.value, k);
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
     return L.stack[L.top - 1].ttnov();
 };
 
 const lua_rawget = function(L, idx) {
     let t = index2addr(L, idx);
 
-    assert(t.ttistable(t), "table expected");
+    if (defs.LUA_USE_ASSERT) assert(t.ttistable(t), "table expected");
 
     L.stack[L.top - 1] = ltable.luaH_get(t.value, L.stack[L.top - 1]);
 
@@ -495,7 +496,7 @@ const lua_createtable = function(L, narray, nrec) {
     let t = new lobject.TValue(CT.LUA_TTABLE, ltable.luaH_new(L));
     L.stack[L.top++] = t;
 
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
 };
 
 const luaS_newudata = function(L, size) {
@@ -512,7 +513,7 @@ const lua_newuserdata = function(L, size) {
     let u = luaS_newudata(L, size);
     L.stack[L.top++] = new lobject.TValue(CT.LUA_TUSERDATA, u);
 
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
 
     return u.data;
 };
@@ -556,7 +557,7 @@ const lua_getupvalue = function(L, funcindex, n) {
 
 const lua_setupvalue = function(L, funcindex, n) {
     let fi = index2addr(L, funcindex);
-    assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    if (defs.LUA_USE_ASSERT) assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     let aux = aux_upvalue(L, fi, n);
     if (aux) {
         let name = aux.name;
@@ -596,7 +597,7 @@ const lua_getmetatable = function(L, objindex) {
 
     if (mt !== null && mt !== undefined) {
         L.stack[L.top++] = new TValue(CT.LUA_TTABLE, mt);
-        assert(L.top <= L.ci.top, "stack overflow");
+        if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
         res = true;
     }
 
@@ -605,10 +606,10 @@ const lua_getmetatable = function(L, objindex) {
 
 const lua_getuservalue = function(L, idx) {
     let o = index2addr(L, idx);
-    assert(L, o.ttisfulluserdata(), "full userdata expected");
+    if (defs.LUA_USE_ASSERT) assert(L, o.ttisfulluserdata(), "full userdata expected");
     let uv = o.value.uservalue;
     L.stack[L.top++] = new TValue(uv.type, uv.value);
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
     return L.stack[L.top - 1].ttnov();
 };
 
@@ -623,10 +624,10 @@ const lua_getfield = function(L, idx, k) {
 };
 
 const lua_geti = function(L, idx, n) {
-    assert(typeof n === "number" && (n|0) === n);
+    if (defs.LUA_USE_ASSERT) assert(typeof n === "number" && (n|0) === n);
     let t = index2addr(L, idx);
     L.stack[L.top++] = new TValue(CT.LUA_TNUMINT, n);
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
     lvm.gettable(L, t, L.stack[L.top - 1], L.top - 1);
     return L.stack[L.top - 1].ttnov();
 };
@@ -757,7 +758,7 @@ const lua_isproxy = function(p, L) {
 /* Use 'create_proxy' helper function so that 'L' is not in scope */
 const create_proxy = function(G, type, value) {
     let proxy = function(L) {
-        assert(L instanceof lstate.lua_State && G === L.l_G, "must be from same global state");
+        if (defs.LUA_USE_ASSERT) assert(L instanceof lstate.lua_State && G === L.l_G, "must be from same global state");
         L.stack[L.top++] = new TValue(type, value);
     };
     seen.set(proxy, G);
@@ -782,7 +783,7 @@ const lua_compare = function(L, index1, index2, op) {
             case defs.LUA_OPEQ: i = lvm.luaV_equalobj(L, o1, o2); break;
             case defs.LUA_OPLT: i = lvm.luaV_lessthan(L, o1, o2); break;
             case defs.LUA_OPLE: i = lvm.luaV_lessequal(L, o1, o2); break;
-            default: assert(false, "invalid option");
+            default: if (defs.LUA_USE_ASSERT) assert(false, "invalid option");
         }
     }
 
@@ -793,7 +794,7 @@ const lua_stringtonumber = function(L, s) {
     let tv = lobject.luaO_str2num(s);
     if (tv) {
         L.stack[L.top++] = tv;
-        assert(L.top <= L.ci.top, "stack overflow");
+        if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
         return s.length;
     }
     return 0;
@@ -813,7 +814,7 @@ const lua_type = function(L, idx) {
 };
 
 const lua_typename = function(L, t) {
-    assert(CT.LUA_TNONE <= t && t < CT.LUA_NUMTAGS, "invalid tag");
+    if (defs.LUA_USE_ASSERT) assert(CT.LUA_TNONE <= t && t < CT.LUA_NUMTAGS, "invalid tag");
     return ltm.ttypename(t);
 };
 
@@ -880,9 +881,9 @@ const lua_rawequal = function(L, index1, index2) {
 
 const lua_arith = function(L, op) {
     if (op !== defs.LUA_OPUNM && op !== defs.LUA_OPBNOT)
-        assert(2 < L.top - L.ci.funcOff, "not enough elements in the stack");  /* all other operations expect two operands */
+        if (defs.LUA_USE_ASSERT) assert(2 < L.top - L.ci.funcOff, "not enough elements in the stack");  /* all other operations expect two operands */
     else {  /* for unary operations, add fake 2nd operand */
-        assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+        if (defs.LUA_USE_ASSERT) assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
         L.stack[L.top++] = L.stack[L.top - 1];
     }
     /* first operand at top - 2, second at top - 1; result go to top - 2 */
@@ -895,8 +896,8 @@ const lua_arith = function(L, op) {
 */
 
 const lua_load = function(L, reader, data, chunkname, mode) {
-    assert(Array.isArray(chunkname), "lua_load expect an array of byte as chunkname");
-    assert(mode ? Array.isArray(mode) : true, "lua_load expect an array of byte as mode");
+    if (defs.LUA_USE_ASSERT) assert(Array.isArray(chunkname), "lua_load expect an array of byte as chunkname");
+    if (defs.LUA_USE_ASSERT) assert(mode ? Array.isArray(mode) : true, "lua_load expect an array of byte as mode");
     if (!chunkname) chunkname = [defs.char["?"]];
     let z = new lzio.ZIO(L, reader, data);
     let status = ldo.luaD_protectedparser(L, z, chunkname, mode);
@@ -913,7 +914,7 @@ const lua_load = function(L, reader, data, chunkname, mode) {
 };
 
 const lua_dump = function(L, writer, data, strip) {
-    assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    if (defs.LUA_USE_ASSERT) assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     let o = L.stack[L.top -1];
     if (o.ttisLclosure())
         return ldump.luaU_dump(L, o.value.p, writer, data, strip);
@@ -925,18 +926,18 @@ const lua_status = function(L) {
 };
 
 const lua_setuservalue = function(L, idx) {
-    assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    if (defs.LUA_USE_ASSERT) assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     let o = index2addr(L, idx);
-    assert(L, o.ttisfulluserdata(), "full userdata expected");
+    if (defs.LUA_USE_ASSERT) assert(L, o.ttisfulluserdata(), "full userdata expected");
     o.value.uservalue.setfrom(L.stack[L.top - 1]);
     delete L.stack[--L.top];
 };
 
 const lua_callk = function(L, nargs, nresults, ctx, k) {
-    assert(k === null || !(L.ci.callstatus & lstate.CIST_LUA), "cannot use continuations inside hooks");
-    assert(nargs + 1 < L.top - L.ci.funcOff, "not enough elements in the stack");
-    assert(L.status === TS.LUA_OK, "cannot do calls on non-normal thread");
-    assert(nargs === defs.LUA_MULTRET || (L.ci.top - L.top >= nargs - nresults, "results from function overflow current stack size"));
+    if (defs.LUA_USE_ASSERT) assert(k === null || !(L.ci.callstatus & lstate.CIST_LUA), "cannot use continuations inside hooks");
+    if (defs.LUA_USE_ASSERT) assert(nargs + 1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    if (defs.LUA_USE_ASSERT) assert(L.status === TS.LUA_OK, "cannot do calls on non-normal thread");
+    if (defs.LUA_USE_ASSERT) assert(nargs === defs.LUA_MULTRET || (L.ci.top - L.top >= nargs - nresults, "results from function overflow current stack size"));
 
     let func = L.top - (nargs + 1);
     if (k !== null && L.nny === 0) { /* need to prepare continuation? */
@@ -956,9 +957,9 @@ const lua_call = function(L, n, r) {
 };
 
 const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
-    assert(nargs + 1 < L.top - L.ci.funcOff, "not enough elements in the stack");
-    assert(L.status === TS.LUA_OK, "cannot do calls on non-normal thread");
-    assert(nargs === defs.LUA_MULTRET || (L.ci.top - L.top >= nargs - nresults, "results from function overflow current stack size"));
+    if (defs.LUA_USE_ASSERT) assert(nargs + 1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    if (defs.LUA_USE_ASSERT) assert(L.status === TS.LUA_OK, "cannot do calls on non-normal thread");
+    if (defs.LUA_USE_ASSERT) assert(nargs === defs.LUA_MULTRET || (L.ci.top - L.top >= nargs - nresults, "results from function overflow current stack size"));
 
     let c = {
         func: null,
@@ -1013,17 +1014,17 @@ const lua_pcall = function(L, n, r, f) {
 */
 
 const lua_error = function(L) {
-    assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    if (defs.LUA_USE_ASSERT) assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     ldebug.luaG_errormsg(L);
 };
 
 const lua_next = function(L, idx) {
     let t = index2addr(L, idx);
-    assert(t.ttistable(), "table expected");
+    if (defs.LUA_USE_ASSERT) assert(t.ttistable(), "table expected");
     let more = ltable.luaH_next(L, t.value, L.top - 1);
     if (more) {
         L.top++;
-        assert(L.top <= L.ci.top, "stack overflow");
+        if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
         return 1;
     } else {
         L.top--;
@@ -1032,26 +1033,26 @@ const lua_next = function(L, idx) {
 };
 
 const lua_concat = function(L, n) {
-    assert(n < L.top - L.ci.funcOff, "not enough elements in the stack");
+    if (defs.LUA_USE_ASSERT) assert(n < L.top - L.ci.funcOff, "not enough elements in the stack");
     if (n >= 2)
         lvm.luaV_concat(L, n);
     else if (n === 0) {
         L.stack[L.top++] = new TValue(CT.LUA_TLNGSTR, lstring.luaS_newliteral(L, []));
-        assert(L.top <= L.ci.top, "stack overflow");
+        if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
     }
 };
 
 const lua_len = function(L, idx) {
     let t = index2addr(L, idx);
     lvm.luaV_objlen(L, L.top++, t);
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
 };
 
 const getupvalref = function(L, fidx, n, pf) {
     let fi = index2addr(L, fidx);
-    assert(fi.ttisLclosure(), "Lua function expected");
+    if (defs.LUA_USE_ASSERT) assert(fi.ttisLclosure(), "Lua function expected");
     let f = fi.value;
-    assert(1 <= n && n <= f.p.upvalues.length, "invalid upvalue index");
+    if (defs.LUA_USE_ASSERT) assert(1 <= n && n <= f.p.upvalues.length, "invalid upvalue index");
     return {
         closure: f,
         upval: f.upvals[n - 1],
@@ -1067,11 +1068,11 @@ const lua_upvalueid = function(L, fidx, n) {
         }
         case CT.LUA_TCCL: {  /* C closure */
             let f = fi.value;
-            assert(1 <= n && n <= f.nupvalues, "invalid upvalue index");
+            if (defs.LUA_USE_ASSERT) assert(1 <= n && n <= f.nupvalues, "invalid upvalue index");
             return f.upvalue[n - 1];
         }
         default: {
-            assert(false, "closure expected");
+            if (defs.LUA_USE_ASSERT) assert(false, "closure expected");
             return null;
         }
     }

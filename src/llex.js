@@ -1,8 +1,9 @@
 "use strict";
 
-const assert   = require('assert');
-
 const defs     = require('./defs.js');
+
+if (defs.LUA_USE_ASSERT) var assert   = require('assert');
+
 const ldebug   = require('./ldebug.js');
 const ldo      = require('./ldo.js');
 const ljstype  = require('./ljstype.js');
@@ -153,7 +154,7 @@ const luaX_newstring = function(ls, str) {
     } else { /* string already present */
         /* HACK: Workaround lack of ltable 'keyfromval' */
         let tpair = ls.h.strong.get(lstring.luaS_hashlongstr(ts));
-        assert(tpair.value == o);
+        if (defs.LUA_USE_ASSERT) assert(tpair.value == o);
         ts = tpair.key.tsvalue(); /* re-use value previously stored */
     }
     return ts;
@@ -165,7 +166,7 @@ const luaX_newstring = function(ls, str) {
 */
 const inclinenumber = function(ls) {
     let old = ls.current;
-    assert(currIsNewline(ls));
+    if (defs.LUA_USE_ASSERT) assert(currIsNewline(ls));
     next(ls);  /* skip '\n' or '\r' */
     if (currIsNewline(ls) && ls.current !== old)
         next(ls);  /* skip '\n\r' or '\r\n' */
@@ -225,7 +226,7 @@ const check_next2 = function(ls, set) {
 const read_numeral = function(ls, seminfo) {
     let expo = "Ee";
     let first = ls.current;
-    assert(ljstype.lisdigit(ls.current));
+    if (defs.LUA_USE_ASSERT) assert(ljstype.lisdigit(ls.current));
     save_and_next(ls);
     if (first === char['0'] && check_next2(ls, "xX"))  /* hexadecimal? */
         expo = "Pp";
@@ -249,7 +250,7 @@ const read_numeral = function(ls, seminfo) {
         seminfo.i = obj.value;
         return R.TK_INT;
     } else {
-        assert(obj.ttisfloat());
+        if (defs.LUA_USE_ASSERT) assert(obj.ttisfloat());
         seminfo.r = obj.value;
         return R.TK_FLT;
     }
@@ -285,7 +286,7 @@ const luaX_syntaxerror = function(ls, msg) {
 const skip_sep = function(ls) {
     let count = 0;
     let s = ls.current;
-    assert(s === char['['] || s === char[']']);
+    if (defs.LUA_USE_ASSERT) assert(s === char['['] || s === char[']']);
     save_and_next(ls);
     while (ls.current === char['=']) {
         save_and_next(ls);
@@ -471,7 +472,7 @@ const llex = function(ls, seminfo) {
     ls.buff.buffer = [];
 
     for (;;) {
-        assert(typeof ls.current == "number");
+        if (defs.LUA_USE_ASSERT) assert(typeof ls.current == "number");
         switch (ls.current) {
             case char['\n']: case char['\r']: {  /* line breaks */
                 inclinenumber(ls);
@@ -601,7 +602,7 @@ const luaX_next = function(ls) {
 };
 
 const luaX_lookahead = function(ls) {
-    assert(ls.lookahead.token === R.TK_EOS);
+    if (defs.LUA_USE_ASSERT) assert(ls.lookahead.token === R.TK_EOS);
     ls.lookahead.token = llex(ls, ls.lookahead.seminfo);
     return ls.lookahead.token;
 };
