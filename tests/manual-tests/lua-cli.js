@@ -1,7 +1,8 @@
-//#!/usr/bin/env node
+#!/usr/bin/env node
 "use strict";
 
 global.WEB = false;
+global.LUA_USE_ASSERT = false;
 
 const lua          = require('../../src/lua.js');
 const lauxlib      = require('../../src/lauxlib.js');
