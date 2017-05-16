@@ -38,10 +38,10 @@
         - [x] `io.type()`
         - [x] `io.write()`
         - [x] `io.flush()`
-        - [ ] `io.input()`
+        - [ ] `io.input()`: partially implemented
         - [ ] `io.lines()`
         - [ ] `io.open()`
-        - [ ] `io.output()`
+        - [ ] `io.output()`: partially implemented
         - [ ] `io.popen()`
         - [ ] `io.read()`
         - [ ] `io.tmpfile()`
