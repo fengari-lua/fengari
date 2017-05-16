@@ -105,14 +105,28 @@ const f_write = function(L) {
     return g_write(L, f, 2);
 };
 
+const io_flush = function (L) {
+    /* stub, as node doesn't have synchronized buffered IO */
+    getiofile(L, IO_OUTPUT);
+    return lauxlib.luaL_fileresult(L, true, null, null);
+};
+
+const f_flush = function (L) {
+    /* stub, as node doesn't have synchronized buffered IO */
+    tofile(L);
+    return lauxlib.luaL_fileresult(L, true, null, null);
+};
+
 const iolib = {
     "close": io_close,
+    "flush": io_flush,
     "type": io_type,
     "write": io_write
 };
 
 const flib = {
     "close": io_close,
+    "flush": f_flush,
     "write": f_write,
     "__tostring": f_tostring
 };

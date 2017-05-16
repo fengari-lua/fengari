@@ -29,6 +29,7 @@
     - [x] Package
     - [ ] io
         - [x] `file:__tostring()`
+        - [x] `file:flush()`
         - [x] `file:write()`
         - [x] `io.close()`
         - [x] `io.stderr`
@@ -36,7 +37,7 @@
         - [x] `io.stdout`
         - [x] `io.type()`
         - [x] `io.write()`
-        - [ ] `io.flush()`
+        - [x] `io.flush()`
         - [ ] `io.input()`
         - [ ] `io.lines()`
         - [ ] `io.open()`
@@ -44,7 +45,6 @@
         - [ ] `io.popen()`
         - [ ] `io.read()`
         - [ ] `io.tmpfile()`
-        - [ ] `file:flush()`
         - [ ] `file:lines()`
         - [ ] `file:read()`
         - [ ] `file:setvbuf()`
