@@ -523,7 +523,7 @@ const intarith = function(L, op, v1, v2) {
         case defs.LUA_OPSUB:  return (v1 - v2)|0;
         case defs.LUA_OPMUL:  return (v1 * v2)|0;
         case defs.LUA_OPMOD:  return (v1 - Math.floor(v1 / v2) * v2)|0; // % semantic on negative numbers is different in js
-        case defs.LUA_OPIDIV: return (v1 / v2)|0;
+        case defs.LUA_OPIDIV: return Math.floor(v1 / v2)|0;
         case defs.LUA_OPBAND: return (v1 & v2);
         case defs.LUA_OPBOR:  return (v1 | v2);
         case defs.LUA_OPBXOR: return (v1 ^ v2);
@@ -543,7 +543,7 @@ const numarith = function(L, op, v1, v2) {
         case defs.LUA_OPMUL:  return v1 * v2;
         case defs.LUA_OPDIV:  return v1 / v2;
         case defs.LUA_OPPOW:  return Math.pow(v1, v2);
-        case defs.LUA_OPIDIV: return (v1 / v2);
+        case defs.LUA_OPIDIV: return Math.floor(v1 / v2);
         case defs.LUA_OPUNM:  return -v1;
         case defs.LUA_OPMOD:  return v1 % v2;
         default: assert(0);
