@@ -1,8 +1,5 @@
 "use strict";
 
-const assert = require('assert');
-
-
 class MBuffer {
     constructor() {
         this.buffer = null;
@@ -13,7 +10,7 @@ class MBuffer {
 class ZIO {
     constructor(L, reader, data) {
         this.L = L;           /* Lua state (for reader) */
-        assert(typeof reader == "function", "ZIO requires a reader");
+        if (process.env.LUA_USE_APICHECK && !(typeof reader == "function")) throw Error("ZIO requires a reader");
         this.reader = reader; /* reader function */
         this.data = data;     /* additional data */
         this.n = 0;           /* bytes still unread */
@@ -38,7 +35,7 @@ const luaZ_fill = function(z) {
         z.off = 0;
         size = buff.byteLength - buff.byteOffset;
     } else {
-        assert(typeof buff !== "string", "Should only load binary of array of bytes");
+        if (process.env.LUA_USE_APICHECK && !(typeof buff !== "string")) throw Error("Should only load binary of array of bytes");
         z.buffer = buff;
         z.off = 0;
         size = buff.length;

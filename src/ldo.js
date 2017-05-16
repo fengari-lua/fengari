@@ -1,8 +1,6 @@
 /*jshint esversion: 6 */
 "use strict";
 
-const assert = require('assert');
-
 const defs    = require('./defs.js');
 const lapi    = require('./lapi.js');
 const ldebug  = require('./ldebug.js');
@@ -63,8 +61,8 @@ const luaD_precall = function(L, off, nresults) {
                 luaD_hook(L, defs.LUA_HOOKCALL, -1);
             let n = f(L); /* do the actual call */
 
-            assert(typeof n == "number" && n >= 0 && (n|0) === n, "invalid return value from JS function (expected integer)");
-            assert(n < L.top - L.ci.funcOff, "not enough elements in the stack");
+            if (process.env.LUA_USE_APICHECK && !(typeof n == "number" && n >= 0 && (n|0) === n)) throw Error("invalid return value from JS function (expected integer)");
+            if (process.env.LUA_USE_APICHECK && !(n < L.top - L.ci.funcOff)) throw Error("not enough elements in the stack");
 
             luaD_poscall(L, ci, L.top - n, n);
 
@@ -172,7 +170,7 @@ const luaD_hook = function(L, event, line) {
         L.allowhook = 0;  /* cannot call hooks inside a hook */
         ci.callstatus |= lstate.CIST_HOOKED;
         hook(L, ar);
-        assert(!L.allowhook);
+        if (process.env.LUA_USE_APICHECK && !(!L.allowhook)) throw Error("assertion failed");
         L.allowhook = 1;
         ci.top = ci_top;
         L.top = top;
@@ -321,9 +319,9 @@ const finishCcall = function(L, status) {
     let ci = L.ci;
 
     /* must have a continuation and must be able to call it */
-    assert(ci.c_k !== null && L.nny === 0);
+    if (process.env.LUA_USE_APICHECK && !(ci.c_k !== null && L.nny === 0)) throw Error("assertion failed");
     /* error status can only happen in a protected call */
-    assert(ci.callstatus & lstate.CIST_YPCALL || status === TS.LUA_YIELD);
+    if (process.env.LUA_USE_APICHECK && !(ci.callstatus & lstate.CIST_YPCALL || status === TS.LUA_YIELD)) throw Error("assertion failed");
 
     if (ci.callstatus & TS.CIST_YPCALL) {  /* was inside a pcall? */
         ci.callstatus &= ~TS.CIST_YPCALL;  /* continuation is also inside it */
@@ -334,7 +332,7 @@ const finishCcall = function(L, status) {
        handled */
     if (ci.nresults === defs.LUA_MULTRET && L.ci.top < L.top) L.ci.top = L.top;
     let n = ci.c_k(L, status, ci.c_ctx);  /* call continuation function */
-    assert(n < (L.top - L.ci.funcOff), "not enough elements in the stack");
+    if (process.env.LUA_USE_APICHECK && !(n < (L.top - L.ci.funcOff))) throw Error("not enough elements in the stack");
     luaD_poscall(L, ci, L.top - n, n);  /* finish 'luaD_precall' */
 };
 
@@ -400,7 +398,7 @@ const recover = function(L, status) {
 const resume_error = function(L, msg, narg) {
     L.top -= narg;  /* remove args from the stack */
     L.stack[L.top++] = new lobject.TValue(CT.LUA_TLNGSTR, lstring.luaS_newliteral(L, msg));  /* push error message */
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (process.env.LUA_USE_APICHECK && !(L.top <= L.ci.top)) throw Error("stack overflow");
     return TS.LUA_ERRRUN;
 };
 
@@ -418,7 +416,7 @@ const resume = function(L, n) {
         if (!luaD_precall(L, firstArg - 1, defs.LUA_MULTRET))  /* Lua function? */
             lvm.luaV_execute(L);  /* call it */
     } else {  /* resuming from previous yield */
-        assert(L.status === TS.LUA_YIELD);
+        if (process.env.LUA_USE_APICHECK && !(L.status === TS.LUA_YIELD)) throw Error("assertion failed");
         L.status = TS.LUA_OK;  /* mark that it is running (again) */
         ci.funcOff = ci.extra;
         ci.func = L.stack[ci.funcOff];
@@ -428,7 +426,7 @@ const resume = function(L, n) {
         else {  /* 'common' yield */
             if (ci.c_k !== null) {  /* does it have a continuation function? */
                 n = ci.c_k(L, TS.LUA_YIELD, ci.c_ctx); /* call continuation */
-                assert(n < (L.top - L.ci.funcOff), "not enough elements in the stack");
+                if (process.env.LUA_USE_APICHECK && !(n < (L.top - L.ci.funcOff))) throw Error("not enough elements in the stack");
                 firstArg = L.top - n;  /* yield results come from continuation */
             }
 
@@ -454,8 +452,7 @@ const lua_resume = function(L, from, nargs) {
 
     L.nny = 0;  /* allow yields */
 
-    assert((L.status === TS.LUA_OK ? nargs + 1: nargs) < (L.top - L.ci.funcOff),
-        "not enough elements in the stack");
+    if (defs.LUA_USE_APICHECK && !((L.status === TS.LUA_OK ? nargs + 1: nargs) < (L.top - L.ci.funcOff))) throw Error("not enough elements in the stack");
 
     let status = luaD_rawrunprotected(L, resume, nargs);
     if (status === -1)  /* error calling 'lua_resume'? */
@@ -471,12 +468,12 @@ const lua_resume = function(L, from, nargs) {
             seterrorobj(L, status, L.top);  /* push error message */
             L.ci.top = L.top;
         } else
-            assert(status === L.status);  /* normal end or yield */
+            if (process.env.LUA_USE_APICHECK && !(status === L.status)) throw Error("assertion failed");  /* normal end or yield */
     }
 
     L.nny = oldnny;  /* restore 'nny' */
     L.nCcalls--;
-    assert(L.nCcalls === (from ? from.nCcalls : 0));
+    if (process.env.LUA_USE_APICHECK && !(L.nCcalls === (from ? from.nCcalls : 0))) throw Error("assertion failed");
     return status;
 };
 
@@ -486,7 +483,7 @@ const lua_isyieldable = function(L) {
 
 const lua_yieldk = function(L, nresults, ctx, k) {
     let ci = L.ci;
-    assert(nresults < (L.top - L.ci.funcOff), "not enough elements in the stack");
+    if (process.env.LUA_USE_APICHECK && !(nresults < (L.top - L.ci.funcOff))) throw Error("not enough elements in the stack");
 
     if (L.nny > 0) {
         if (L !== L.l_G.mainthread)
@@ -497,9 +494,9 @@ const lua_yieldk = function(L, nresults, ctx, k) {
 
     L.status = TS.LUA_YIELD;
     ci.extra = ci.funcOff;  /* save current 'func' */
-    if (ci.callstatus & lstate.CIST_LUA)  /* inside a hook? */
-        assert(k === null, "hooks cannot continue after yielding");
-    else {
+    if (ci.callstatus & lstate.CIST_LUA)  {  /* inside a hook? */
+        if (process.env.LUA_USE_APICHECK && !(k === null)) throw Error("hooks cannot continue after yielding");
+    } else {
         ci.c_k = k;
         if (k !== null)  /* is there a continuation? */
             ci.c_ctx = ctx;  /* save context */
@@ -508,7 +505,7 @@ const lua_yieldk = function(L, nresults, ctx, k) {
         luaD_throw(L, TS.LUA_YIELD);
     }
 
-    assert(ci.callstatus & lstate.CIST_HOOKED);  /* must be inside a hook */
+    if (process.env.LUA_USE_APICHECK && !(ci.callstatus & lstate.CIST_HOOKED)) throw Error("assertion failed");  /* must be inside a hook */
     return 0;  /* return to 'luaD_hook' */
 };
 
@@ -578,7 +575,7 @@ const f_parser = function(L, p) {
         cl = lparser.luaY_parser(L, p.z, p.buff, p.dyd, p.name, c);
     }
 
-    assert(cl.nupvalues === cl.p.upvalues.length);
+    if (process.env.LUA_USE_APICHECK && !(cl.nupvalues === cl.p.upvalues.length)) throw Error("assertion failed");
     lfunc.luaF_initupvals(L, cl);
 };
 

@@ -24,10 +24,11 @@ module.exports = [
             library: 'fengari'
         },
         plugins: [
-            new BabiliPlugin(),
             new webpack.DefinePlugin({
                 WEB: JSON.stringify(true),
-            })
+                "process.env.LUA_USE_APICHECK": "false"
+            }),
+            new BabiliPlugin()
         ]
     }
 ];

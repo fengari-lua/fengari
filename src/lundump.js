@@ -1,8 +1,6 @@
 /*jshint esversion: 6 */
 "use strict";
 
-const assert  = require('assert');
-
 const defs     = require('./defs.js');
 const ldo      = require('./ldo.js');
 const lfunc    = require('./lfunc.js');
@@ -22,8 +20,8 @@ class BytecodeParser {
         this.integerSize = 4;
         this.numberSize = 8;
 
-        assert(Z instanceof lzio.ZIO, "BytecodeParser only operates on a ZIO");
-        assert(Array.isArray(name));
+        if (process.env.LUA_USE_APICHECK && !(Z instanceof lzio.ZIO)) throw Error("BytecodeParser only operates on a ZIO");
+        if (process.env.LUA_USE_APICHECK && !(Array.isArray(name))) throw Error("assertion failed");
 
         if (name[0] == defs.char["@"] || name[0] == defs.char["="])
             this.name = name.slice(1);
@@ -268,7 +266,7 @@ const luaU_undump = function(L, Z, name) {
     L.stack[L.top++] = new lobject.TValue(defs.CT.LUA_TLCL, cl);
     cl.p = new lfunc.Proto(L);
     S.readFunction(cl.p, null);
-    assert(cl.nupvalues === cl.p.upvalues.length);
+    if (process.env.LUA_USE_APICHECK && !(cl.nupvalues === cl.p.upvalues.length)) throw Error("assertion failed");
     /* luai_verifycode */
     return cl;
 };

@@ -1,8 +1,6 @@
 /*jshint esversion: 6 */
 "use strict";
 
-const assert  = require('assert');
-
 const defs    = require('./defs.js');
 const lobject = require('./lobject.js');
 const ldo     = require('./ldo.js');
@@ -124,7 +122,7 @@ const luaT_callTM = function(L, f, p1, p2, p3, hasres) {
         ldo.luaD_callnoyield(L, func, hasres);
 
     if (hasres) {
-        assert(typeof result === "number");
+        if (process.env.LUA_USE_APICHECK && !(typeof result === "number")) throw Error("assertion failed");
         L.stack[result] = L.stack[--L.top];
     }
 };

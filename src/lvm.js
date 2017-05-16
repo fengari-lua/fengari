@@ -1,7 +1,6 @@
 /*jshint esversion: 6 */
 "use strict";
 
-const assert         = require('assert');
 
 const defs        = require('./defs.js');
 const lopcodes    = require('./lopcodes.js');
@@ -41,11 +40,11 @@ const luaV_finishOp = function(L) {
             let res = !L.stack[L.top - 1].l_isfalse();
             L.top--;
             if (ci.callstatus & lstate.CIST_LEQ) {  /* "<=" using "<" instead? */
-                assert(op === OCi.OP_LE);
+                if (process.env.LUA_USE_APICHECK && !(op === OCi.OP_LE)) throw Error("assertion failed");
                 ci.callstatus ^= lstate.CIST_LEQ;  /* clear mark */
                 res = res !== 1 ? 1 : 0;  /* negate result */
             }
-            assert(ci.l_code[ci.l_savedpc] === OCi.OP_JMP);
+            if (process.env.LUA_USE_APICHECK && !(ci.l_code[ci.l_savedpc] === OCi.OP_JMP)) throw Error("assertion failed");
             if (res !== inst.A)  /* condition failed? */
                 ci.l_savedpc++;  /* skip jump instruction */
             break;
@@ -66,7 +65,7 @@ const luaV_finishOp = function(L) {
             break;
         }
         case OCi.OP_TFORCALL: {
-            assert(ci.l_code[ci.l_savedpc] === OCi.OP_TFORLOOP);
+            if (process.env.LUA_USE_APICHECK && !(ci.l_code[ci.l_savedpc] === OCi.OP_TFORLOOP)) throw Error("assertion failed");
             L.top = ci.top;  /* correct top */
             break;
         }
@@ -105,7 +104,7 @@ const luaV_execute = function(L) {
     ci.callstatus |= lstate.CIST_FRESH;
     newframe:
     for (;;) {
-        assert(ci === L.ci);
+        if (process.env.LUA_USE_APICHECK && !(ci === L.ci)) throw Error("assertion failed");
         let cl = ci.func.value;
         let k = cl.p.k;
         let base = ci.l_base;
@@ -130,7 +129,7 @@ const luaV_execute = function(L) {
                 break;
             }
             case OCi.OP_LOADKX: {
-                assert(ci.l_code[ci.l_savedpc].opcode === OCi.OP_EXTRAARG);
+                if (process.env.LUA_USE_APICHECK && !(ci.l_code[ci.l_savedpc].opcode === OCi.OP_EXTRAARG)) throw Error("assertion failed");
                 let konst = k[ci.l_code[ci.l_savedpc++].Ax];
                 L.stack[ra] = new lobject.TValue(konst.type, konst.value);
                 break;
@@ -496,7 +495,7 @@ const luaV_execute = function(L) {
                     oci.next = null;
                     ci = L.ci = oci;
 
-                    assert(L.top === oci.l_base + L.stack[ofuncOff].value.p.maxstacksize);
+                    if (process.env.LUA_USE_APICHECK && !(L.top === oci.l_base + L.stack[ofuncOff].value.p.maxstacksize)) throw Error("assertion failed");
 
                     continue newframe;
                 }
@@ -587,7 +586,7 @@ const luaV_execute = function(L) {
                 L.top = ci.top;
                 i = ci.l_code[ci.l_savedpc++];
                 ra = RA(L, base, i);
-                assert(i.opcode === OCi.OP_TFORLOOP);
+                if (process.env.LUA_USE_APICHECK && !(i.opcode === OCi.OP_TFORLOOP)) throw Error("assertion failed");
                 /* fall through */
             }
             case OCi.OP_TFORLOOP: {
@@ -604,7 +603,7 @@ const luaV_execute = function(L) {
                 if (n === 0) n = L.top - ra - 1;
 
                 if (c === 0) {
-                    assert(ci.l_code[ci.l_savedpc].opcode === OCi.OP_EXTRAARG);
+                    if (process.env.LUA_USE_APICHECK && !(ci.l_code[ci.l_savedpc].opcode === OCi.OP_EXTRAARG)) throw Error("assertion failed");
                     c = ci.l_code[ci.l_savedpc++].Ax;
                 }
 
@@ -955,7 +954,7 @@ const isemptystr = function(o) {
 ** from 'L->top - total' up to 'L->top - 1'.
 */
 const luaV_concat = function(L, total) {
-    assert(total >= 2);
+    if (process.env.LUA_USE_APICHECK && !(total >= 2)) throw Error("assertion failed");
     do {
         let top = L.top;
         let n = 2; /* number of elements handled in this pass (at least 2) */
@@ -1014,12 +1013,12 @@ const gettable = function(L, table, key, ra, recur) {
 const luaV_finishget = function(L, t, key, val, slot, recur) {
     let tm;
     if (slot === null) { /* 't' is not a table? */
-        assert(!t.ttistable());
+        if (process.env.LUA_USE_APICHECK && !(!t.ttistable())) throw Error("assertion failed");
         tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_INDEX);
         if (tm.ttisnil())
             ldebug.luaG_typeerror(L, t, defs.to_luastring('index', true));
     } else { /* 't' is a table */
-        assert(slot.ttisnil());
+        if (process.env.LUA_USE_APICHECK && !(slot.ttisnil())) throw Error("assertion failed");
         tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_INDEX); // TODO: fasttm
         if (tm.ttisnil()) {
             L.stack[val] = new lobject.TValue(CT.LUA_TNIL, null);
@@ -1060,7 +1059,7 @@ const settable = function(L, table, key, v, recur) {
 const luaV_finishset = function(L, t, key, val, slot, recur) {
     let tm;
     if (slot !== null) { /* is 't' a table? */
-        assert(slot.ttisnil());
+        if (process.env.LUA_USE_APICHECK && !(slot.ttisnil())) throw Error("assertion failed");
         tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_NEWINDEX); // TODO: fasttm
         if (tm.ttisnil()) {
             if (val.ttisnil())
