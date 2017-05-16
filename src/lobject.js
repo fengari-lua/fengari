@@ -531,6 +531,7 @@ const intarith = function(L, op, v1, v2) {
         case defs.LUA_OPSHR:  return (v1 >> v2);
         case defs.LUA_OPUNM:  return (0 - v1)|0;
         case defs.LUA_OPBNOT: return (~0 ^ v1);
+        default: assert(0);
     }
 };
 
@@ -545,6 +546,7 @@ const numarith = function(L, op, v1, v2) {
         case defs.LUA_OPIDIV: return (v1 / v2);
         case defs.LUA_OPUNM:  return -v1;
         case defs.LUA_OPMOD:  return v1 % v2;
+        default: assert(0);
     }
 };
 
