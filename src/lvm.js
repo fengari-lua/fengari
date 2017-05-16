@@ -713,8 +713,8 @@ const luaV_equalobj = function(L, t1, t2) {
         if (t1.ttnov() !== t2.ttnov() || t1.ttnov() !== CT.LUA_TNUMBER)
             return 0; /* only numbers can be equal with different variants */
         else { /* two numbers with different variants */
-            /* compare them as integers */
-            return Math.floor(t1.value) === Math.floor(t2.value) ? 1 : 0; // TODO: tointeger
+            let i1, i2; /* compare them as integers */
+            return (((i1 = luaV_tointeger(t1, 0)) !== false) && ((i2 = luaV_tointeger(t2, 0)) !== false) && (i1 === i2)) ? 1 : 0;
         }
     }
 
