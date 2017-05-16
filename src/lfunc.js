@@ -54,28 +54,26 @@ const luaF_newLclosure = function(L, n) {
 
 
 const luaF_findupval = function(L, level) {
-    let pp = L.openupval;
-    let p = pp;
-    while (pp !== null && pp.v >= level) {
-        p = pp;
+    let prevp;
+    let p = L.openupval;
+    while (p !== null && p.v >= level) {
         assert(p.isopen());
-        if (p.v === level)
-            return p;
-
-        pp = p.open_next;
+        if (p.v === level) /* found a corresponding upvalue? */
+            return p; /* return it */
+        prevp = p;
+        p = p.open_next;
     }
-
+    /* not found: create a new upvalue */
     let uv = new UpVal();
-
-    if (p) {  /* The openupval list is not empty */
-        uv.open_next = p;  /* link it to list of open upvalues */
-    }
-
-    L.openupval = uv;
-
+    /* link it to list of open upvalues */
+    uv.open_next = p;
+    if (prevp)
+        prevp.open_next = uv;
+    else
+        L.openupval = uv;
+    /* current value lives in the stack */
     uv.L = L;
-    uv.v = level;  /* current value lives in the stack */
-
+    uv.v = level;
     return uv;
 };
 
