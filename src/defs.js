@@ -4,10 +4,7 @@
 const luaconf = require('./luaconf.js');
 const llimit  = require('./llimit.js');
 
-let LUA_USE_ASSERT = true;
-module.exports.LUA_USE_ASSERT = LUA_USE_ASSERT;
-
-if (LUA_USE_ASSERT) var assert  = require('assert');
+const assert  = require('assert');
 
 // To avoid charCodeAt everywhere
 const char = [];

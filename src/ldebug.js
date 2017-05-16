@@ -3,7 +3,7 @@
 
 const defs     = require('./defs.js');
 
-if (defs.LUA_USE_ASSERT) var assert = require('assert');
+const assert = require('assert');
 
 const ldo      = require('./ldo.js');
 const lfunc    = require('./lfunc.js');
@@ -19,7 +19,7 @@ const CT = defs.constant_types;
 const TS = defs.thread_status;
 
 const currentpc = function(ci) {
-    if (defs.LUA_USE_ASSERT) assert(ci.callstatus & lstate.CIST_LUA);
+    if (LUA_USE_ASSERT) assert(ci.callstatus & lstate.CIST_LUA);
     return ci.l_savedpc - 1;
 };
 
@@ -85,7 +85,7 @@ const lua_getstack = function(L, level, ar) {
 };
 
 const upvalname = function(p, uv) {
-    if (defs.LUA_USE_ASSERT) assert(uv < p.upvalues.length);
+    if (LUA_USE_ASSERT) assert(uv < p.upvalues.length);
     let s = p.upvalues[uv].name;
     if (s === null) return ["?".charCodeAt(0)];
     return s.getstr();
@@ -183,12 +183,12 @@ const funcinfo = function(ar, cl) {
 const collectvalidlines = function(L, f) {
     if (f === null || f instanceof lobject.CClosure) {
         L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
-        if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
+        if (LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
     } else {
         let lineinfo = f.l.p.lineinfo;
         let t = ltable.luaH_new(L);
         L.stack[L.top++] = new lobject.TValue(CT.LUA_TTABLE, t);
-        if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
+        if (LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
         let v = new lobject.TValue(CT.LUA_TBOOLEAN, true);
         for (let i = 0; i < f.l.p.length; i++)
             ltable.luaH_setint(t, lineinfo[i], v);
@@ -268,21 +268,21 @@ const lua_getinfo = function(L, what, ar) {
         ci = null;
         funcOff = L.top - 1;
         func = L.stack[funcOff];
-        if (defs.LUA_USE_ASSERT) assert(L, func.ttisfunction(), "function expected");
+        if (LUA_USE_ASSERT) assert(L, func.ttisfunction(), "function expected");
         what = what.slice(1);  /* skip the '>' */
         L.top--;  /* pop function */
     } else {
         ci = ar.i_ci;
         func = ci.func;
         funcOff = ci.funcOff;
-        if (defs.LUA_USE_ASSERT) assert(ci.func.ttisfunction());
+        if (LUA_USE_ASSERT) assert(ci.func.ttisfunction());
     }
 
     cl = func.ttisclosure() ? func.value : null;
     status = auxgetinfo(L, what, ar, cl, ci);
     if (what.indexOf('f'.charCodeAt(0)) >= 0) {
         L.stack[L.top++] = func;
-        if (defs.LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
+        if (LUA_USE_ASSERT) assert(L.top <= L.ci.top, "stack overflow");
     }
 
     swapextra(L);

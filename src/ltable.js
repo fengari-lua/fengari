@@ -3,7 +3,7 @@
 
 const defs    = require('./defs.js');
 
-if (defs.LUA_USE_ASSERT) var assert = require('assert');
+const assert = require('assert');
 
 const ldebug  = require('./ldebug.js');
 const lobject = require('./lobject.js');
@@ -97,17 +97,17 @@ const getgeneric = function(t, hash) {
 };
 
 const luaH_getint = function(t, key) {
-    if (defs.LUA_USE_ASSERT) assert(typeof key == "number" && (key|0) === key);
+    if (LUA_USE_ASSERT) assert(typeof key == "number" && (key|0) === key);
     return getgeneric(t, key);
 };
 
 const luaH_getstr = function(t, key) {
-    if (defs.LUA_USE_ASSERT) assert(key instanceof lstring.TString);
+    if (LUA_USE_ASSERT) assert(key instanceof lstring.TString);
     return getgeneric(t, lstring.luaS_hashlongstr(key));
 };
 
 const luaH_get = function(t, key) {
-    if (defs.LUA_USE_ASSERT) assert(key instanceof lobject.TValue);
+    if (LUA_USE_ASSERT) assert(key instanceof lobject.TValue);
     if (key.ttisnil())
         return lobject.luaO_nilobject;
     return getgeneric(t, table_hash(key));
@@ -124,7 +124,7 @@ const setgeneric = function(t, hash, key) {
 };
 
 const luaH_setint = function(t, key, value) {
-    if (defs.LUA_USE_ASSERT) assert(typeof key == "number" && (key|0) === key && value instanceof lobject.TValue);
+    if (LUA_USE_ASSERT) assert(typeof key == "number" && (key|0) === key && value instanceof lobject.TValue);
     let hash = key; /* table_hash known result */
     if (value.ttisnil()) {
         mark_dead(t, hash);
@@ -142,13 +142,13 @@ const luaH_setint = function(t, key, value) {
 };
 
 const luaH_set = function(t, key) {
-    if (defs.LUA_USE_ASSERT) assert(key instanceof lobject.TValue);
+    if (LUA_USE_ASSERT) assert(key instanceof lobject.TValue);
     let hash = table_hash(key);
     return setgeneric(t, hash, new lobject.TValue(key.type, key.value));
 };
 
 const luaH_delete = function(t, key) {
-    if (defs.LUA_USE_ASSERT) assert(key instanceof lobject.TValue);
+    if (LUA_USE_ASSERT) assert(key instanceof lobject.TValue);
     let hash = table_hash(key);
     return mark_dead(t, hash);
 };

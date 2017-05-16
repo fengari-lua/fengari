@@ -2,7 +2,7 @@
 
 const defs = require('./defs.js');
 
-if (defs.LUA_USE_ASSERT) var assert = require("assert");
+const assert = require("assert");
 
 class TString {
 
@@ -22,19 +22,19 @@ class TString {
 }
 
 const luaS_eqlngstr = function(a, b) {
-    if (defs.LUA_USE_ASSERT) assert(a instanceof TString);
-    if (defs.LUA_USE_ASSERT) assert(b instanceof TString);
+    if (LUA_USE_ASSERT) assert(a instanceof TString);
+    if (LUA_USE_ASSERT) assert(b instanceof TString);
     return a == b || (a.realstring.length == b.realstring.length && a.realstring.join() == b.realstring.join());
 };
 
 /* converts strings (arrays) to a consistent map key */
 const luaS_hash = function(str) {
-    if (defs.LUA_USE_ASSERT) assert(Array.isArray(str));
+    if (LUA_USE_ASSERT) assert(Array.isArray(str));
     return str.map(e => `${e}|`).join('');
 };
 
 const luaS_hashlongstr = function(ts) {
-    if (defs.LUA_USE_ASSERT) assert(ts instanceof TString);
+    if (LUA_USE_ASSERT) assert(ts instanceof TString);
     if(ts.hash === null) {
         ts.hash = luaS_hash(ts.getstr());
     }

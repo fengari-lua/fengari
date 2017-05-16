@@ -3,7 +3,7 @@
 
 const defs    = require('./defs.js');
 
-if (defs.LUA_USE_ASSERT) var assert  = require('assert');
+const assert  = require('assert');
 
 const lobject = require('./lobject.js');
 const ldo     = require('./ldo.js');
@@ -125,7 +125,7 @@ const luaT_callTM = function(L, f, p1, p2, p3, hasres) {
         ldo.luaD_callnoyield(L, func, hasres);
 
     if (hasres) {
-        if (defs.LUA_USE_ASSERT) assert(typeof result === "number");
+        if (LUA_USE_ASSERT) assert(typeof result === "number");
         L.stack[result] = L.stack[--L.top];
     }
 };

@@ -3,7 +3,7 @@
 
 const defs     = require('./defs.js');
 
-if (defs.LUA_USE_ASSERT) var assert  = require('assert');
+const assert  = require('assert');
 
 const ldo      = require('./ldo.js');
 const lfunc    = require('./lfunc.js');
@@ -23,8 +23,8 @@ class BytecodeParser {
         this.integerSize = 4;
         this.numberSize = 8;
 
-        if (defs.LUA_USE_ASSERT) assert(Z instanceof lzio.ZIO, "BytecodeParser only operates on a ZIO");
-        if (defs.LUA_USE_ASSERT) assert(Array.isArray(name));
+        if (LUA_USE_ASSERT) assert(Z instanceof lzio.ZIO, "BytecodeParser only operates on a ZIO");
+        if (LUA_USE_ASSERT) assert(Array.isArray(name));
 
         if (name[0] == defs.char["@"] || name[0] == defs.char["="])
             this.name = name.slice(1);
@@ -269,7 +269,7 @@ const luaU_undump = function(L, Z, name) {
     L.stack[L.top++] = new lobject.TValue(defs.CT.LUA_TLCL, cl);
     cl.p = new lfunc.Proto(L);
     S.readFunction(cl.p, null);
-    if (defs.LUA_USE_ASSERT) assert(cl.nupvalues === cl.p.upvalues.length);
+    if (LUA_USE_ASSERT) assert(cl.nupvalues === cl.p.upvalues.length);
     /* luai_verifycode */
     return cl;
 };

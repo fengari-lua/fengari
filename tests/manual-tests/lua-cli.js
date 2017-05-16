@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+//#!/usr/bin/env node
 "use strict";
 
 global.WEB = false;
@@ -186,7 +186,7 @@ if (!has_E) {
             status = dostring(L, init, name);
         }
         if (status !== lua.LUA_OK) {
-            return process.exit(1);
+            process.exit(1);
         }
     }
 }
@@ -205,7 +205,7 @@ for (let i = 1; i < script; i++) {
             status = dolibrary(L, extra);
         }
         if (status !== lua.LUA_OK) {
-            return process.exit(1);
+            process.exit(1);
         }
     }
 }

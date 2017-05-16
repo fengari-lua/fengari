@@ -4,7 +4,7 @@
 
 const defs        = require('./defs.js');
 
-if (defs.LUA_USE_ASSERT) var assert = require('assert');
+const assert = require('assert');
 
 const lopcodes    = require('./lopcodes.js');
 const luaconf     = require('./luaconf.js');
@@ -43,11 +43,11 @@ const luaV_finishOp = function(L) {
             let res = !L.stack[L.top - 1].l_isfalse();
             L.top--;
             if (ci.callstatus & lstate.CIST_LEQ) {  /* "<=" using "<" instead? */
-                if (defs.LUA_USE_ASSERT) assert(op === OCi.OP_LE);
+                if (LUA_USE_ASSERT) assert(op === OCi.OP_LE);
                 ci.callstatus ^= lstate.CIST_LEQ;  /* clear mark */
                 res = res !== 1 ? 1 : 0;  /* negate result */
             }
-            if (defs.LUA_USE_ASSERT) assert(ci.l_code[ci.l_savedpc] === OCi.OP_JMP);
+            if (LUA_USE_ASSERT) assert(ci.l_code[ci.l_savedpc] === OCi.OP_JMP);
             if (res !== inst.A)  /* condition failed? */
                 ci.l_savedpc++;  /* skip jump instruction */
             break;
@@ -68,7 +68,7 @@ const luaV_finishOp = function(L) {
             break;
         }
         case OCi.OP_TFORCALL: {
-            if (defs.LUA_USE_ASSERT) assert(ci.l_code[ci.l_savedpc] === OCi.OP_TFORLOOP);
+            if (LUA_USE_ASSERT) assert(ci.l_code[ci.l_savedpc] === OCi.OP_TFORLOOP);
             L.top = ci.top;  /* correct top */
             break;
         }
@@ -107,7 +107,7 @@ const luaV_execute = function(L) {
     ci.callstatus |= lstate.CIST_FRESH;
     newframe:
     for (;;) {
-        if (defs.LUA_USE_ASSERT) assert(ci === L.ci);
+        if (LUA_USE_ASSERT) assert(ci === L.ci);
         let cl = ci.func.value;
         let k = cl.p.k;
         let base = ci.l_base;
@@ -132,7 +132,7 @@ const luaV_execute = function(L) {
                 break;
             }
             case OCi.OP_LOADKX: {
-                if (defs.LUA_USE_ASSERT) assert(ci.l_code[ci.l_savedpc].opcode === OCi.OP_EXTRAARG);
+                if (LUA_USE_ASSERT) assert(ci.l_code[ci.l_savedpc].opcode === OCi.OP_EXTRAARG);
                 let konst = k[ci.l_code[ci.l_savedpc++].Ax];
                 L.stack[ra] = new lobject.TValue(konst.type, konst.value);
                 break;
@@ -498,7 +498,7 @@ const luaV_execute = function(L) {
                     oci.next = null;
                     ci = L.ci = oci;
 
-                    if (defs.LUA_USE_ASSERT) assert(L.top === oci.l_base + L.stack[ofuncOff].value.p.maxstacksize);
+                    if (LUA_USE_ASSERT) assert(L.top === oci.l_base + L.stack[ofuncOff].value.p.maxstacksize);
 
                     continue newframe;
                 }
@@ -589,7 +589,7 @@ const luaV_execute = function(L) {
                 L.top = ci.top;
                 i = ci.l_code[ci.l_savedpc++];
                 ra = RA(L, base, i);
-                if (defs.LUA_USE_ASSERT) assert(i.opcode === OCi.OP_TFORLOOP);
+                if (LUA_USE_ASSERT) assert(i.opcode === OCi.OP_TFORLOOP);
                 /* fall through */
             }
             case OCi.OP_TFORLOOP: {
@@ -606,7 +606,7 @@ const luaV_execute = function(L) {
                 if (n === 0) n = L.top - ra - 1;
 
                 if (c === 0) {
-                    if (defs.LUA_USE_ASSERT) assert(ci.l_code[ci.l_savedpc].opcode === OCi.OP_EXTRAARG);
+                    if (LUA_USE_ASSERT) assert(ci.l_code[ci.l_savedpc].opcode === OCi.OP_EXTRAARG);
                     c = ci.l_code[ci.l_savedpc++].Ax;
                 }
 
@@ -957,7 +957,7 @@ const isemptystr = function(o) {
 ** from 'L->top - total' up to 'L->top - 1'.
 */
 const luaV_concat = function(L, total) {
-    if (defs.LUA_USE_ASSERT) assert(total >= 2);
+    if (LUA_USE_ASSERT) assert(total >= 2);
     do {
         let top = L.top;
         let n = 2; /* number of elements handled in this pass (at least 2) */
@@ -1016,12 +1016,12 @@ const gettable = function(L, table, key, ra, recur) {
 const luaV_finishget = function(L, t, key, val, slot, recur) {
     let tm;
     if (slot === null) { /* 't' is not a table? */
-        if (defs.LUA_USE_ASSERT) assert(!t.ttistable());
+        if (LUA_USE_ASSERT) assert(!t.ttistable());
         tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_INDEX);
         if (tm.ttisnil())
             ldebug.luaG_typeerror(L, t, defs.to_luastring('index', true));
     } else { /* 't' is a table */
-        if (defs.LUA_USE_ASSERT) assert(slot.ttisnil());
+        if (LUA_USE_ASSERT) assert(slot.ttisnil());
         tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_INDEX); // TODO: fasttm
         if (tm.ttisnil()) {
             L.stack[val] = new lobject.TValue(CT.LUA_TNIL, null);
@@ -1062,7 +1062,7 @@ const settable = function(L, table, key, v, recur) {
 const luaV_finishset = function(L, t, key, val, slot, recur) {
     let tm;
     if (slot !== null) { /* is 't' a table? */
-        if (defs.LUA_USE_ASSERT) assert(slot.ttisnil());
+        if (LUA_USE_ASSERT) assert(slot.ttisnil());
         tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_NEWINDEX); // TODO: fasttm
         if (tm.ttisnil()) {
             if (val.ttisnil())

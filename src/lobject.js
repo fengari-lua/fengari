@@ -3,7 +3,7 @@
 
 const defs    = require('./defs.js');
 
-if (defs.LUA_USE_ASSERT) var assert = require('assert');
+const assert = require('assert');
 
 const ljstype = require('./ljstype.js');
 const ldebug  = require('./ldebug.js');
@@ -165,7 +165,7 @@ class TValue {
     }
 
     tsvalue() {
-        if (defs.LUA_USE_ASSERT) assert(this.ttisstring());
+        if (LUA_USE_ASSERT) assert(this.ttisstring());
         return this.value;
     }
 
@@ -275,7 +275,7 @@ const UTF8BUFFSZ = 8;
 
 const luaO_utf8desc = function(buff, x) {
     let n = 1;  /* number of bytes put in buffer (backwards) */
-    if (defs.LUA_USE_ASSERT) assert(x <= 0x10FFFF);
+    if (LUA_USE_ASSERT) assert(x <= 0x10FFFF);
     if (x < 0x80)  /* ascii? */
         buff[UTF8BUFFSZ - 1] = x;
     else {  /* need continuation bytes */
@@ -426,7 +426,7 @@ const luaO_str2num = function(s) {
 const luaO_utf8esc = function(x) {
     let buff = [];
     let n = 1;  /* number of bytes put in buffer (backwards) */
-    if (defs.LUA_USE_ASSERT) assert(x <= 0x10ffff);
+    if (LUA_USE_ASSERT) assert(x <= 0x10ffff);
     if (x < 0x80)  /* ascii? */
         buff[UTF8BUFFSZ - 1] = x;
     else {  /* need continuation bytes */
@@ -590,7 +590,7 @@ const luaO_arith = function(L, op, p1, p2, res) {
         }
     }
     /* could not perform raw operation; try metamethod */
-    if (defs.LUA_USE_ASSERT) assert(L !== null);  /* should not fail when folding (compile time) */
+    if (LUA_USE_ASSERT) assert(L !== null);  /* should not fail when folding (compile time) */
     ltm.luaT_trybinTM(L, p1, p2, res, (op - defs.LUA_OPADD) + ltm.TMS.TM_ADD);
 };
 

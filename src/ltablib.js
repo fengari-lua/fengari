@@ -4,7 +4,7 @@ const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
 const llimit  = require('./llimit.js');
 
-if (lua.LUA_USE_ASSERT) var assert  = require('assert');
+const assert  = require('assert');
 
 
 /*
@@ -233,7 +233,7 @@ const partition = function(L, lo, up) {
 const choosePivot = function(lo, up, rnd) {
     let r4 = Math.floor((up - lo) / 4);  /* range/4 */
     let p = rnd % (r4 * 2) + (lo + r4);
-    if (lua.LUA_USE_ASSERT) assert(lo + r4 <= p && p <= up - r4);
+    if (LUA_USE_ASSERT) assert(lo + r4 <= p && p <= up - r4);
     return p;
 };
 

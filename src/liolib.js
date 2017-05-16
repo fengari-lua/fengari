@@ -5,7 +5,7 @@ const fs      = require('fs');
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
 
-if (lua.LUA_USE_ASSERT) var assert  = require('assert');
+const assert  = require('assert');
 
 const IO_PREFIX = "_IO_";
 const IOPREF_LEN = IO_PREFIX.length;
@@ -45,7 +45,7 @@ const tofile = function(L) {
     let p = tolstream(L);
     if (isclosed(p))
         lauxlib.luaL_error(L, lua.to_luastring("attempt to use a closed file"));
-    if (lua.LUA_USE_ASSERT) assert(p.f);
+    if (LUA_USE_ASSERT) assert(p.f);
     return p.f;
 };
 
