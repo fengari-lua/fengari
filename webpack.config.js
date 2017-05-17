@@ -10,6 +10,9 @@ module.exports = [
             filename: 'fengari.js',
             library: 'fengari'
         },
+        externals: {
+            "crypto": "crypto"
+        },
         plugins: [
             new webpack.DefinePlugin({
                 WEB: JSON.stringify(true),
@@ -22,6 +25,9 @@ module.exports = [
             path: path.resolve(__dirname, 'dist'),
             filename: 'fengari.min.js',
             library: 'fengari'
+        },
+        externals: {
+            "crypto": "crypto"
         },
         plugins: [
             new BabiliPlugin(),
