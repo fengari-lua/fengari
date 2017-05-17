@@ -1,7 +1,5 @@
 "use strict";
 
-const assert   = require('assert');
-
 const defs     = require('./defs.js');
 const llex     = require('./llex.js');
 const lobject  = require('./lobject.js');
@@ -9,7 +7,6 @@ const lopcodes = require('./lopcodes.js');
 const lparser  = require('./lparser.js');
 const lstring  = require('./lstring.js');
 const ltable   = require('./ltable.js');
-const ltm      = require('./ltm.js');
 const lvm      = require('./lvm.js');
 
 const CT       = defs.CT;
@@ -137,7 +134,7 @@ const getjump = function(fs, pc) {
 const fixjump = function(fs, pc, dest) {
     let jmp = fs.f.code[pc];
     let offset = dest - (pc + 1);
-    assert(dest !== NO_JUMP);
+    if (process.env.LUA_USE_APICHECK && !(dest !== NO_JUMP)) throw Error("assertion failed");
     if (Math.abs(offset) > lopcodes.MAXARG_sBx)
         llex.luaX_syntaxerror(fs.ls, defs.to_luastring("control structure too long", true));
     lopcodes.SETARG_sBx(jmp, offset);
@@ -291,7 +288,7 @@ const luaK_patchlist = function(fs, list, target) {
     if (target === fs.pc)  /* 'target' is current position? */
         luaK_patchtohere(fs, list);  /* add list to pending jumps */
     else {
-        assert(target < fs.pc);
+        if (process.env.LUA_USE_APICHECK && !(target < fs.pc)) throw Error("assertion failed");
         patchlistaux(fs, list, target, lopcodes.NO_REG, target);
     }
 };
@@ -305,7 +302,7 @@ const luaK_patchclose = function(fs, list, level) {
     level++;  /* argument is +1 to reserve 0 as non-op */
     for (; list !== NO_JUMP; list = getjump(fs, list)) {
         let ins = fs.f.code[list];
-        assert(ins.opcode === OpCodesI.OP_JMP && (ins.A === 0 || ins.A >= level));
+        if (process.env.LUA_USE_APICHECK && !(ins.opcode === OpCodesI.OP_JMP && (ins.A === 0 || ins.A >= level))) throw Error("assertion failed");
         lopcodes.SETARG_A(ins, level);
     }
 };
@@ -328,10 +325,10 @@ const luaK_code = function(fs, i) {
 ** of parameters versus opcode.)
 */
 const luaK_codeABC = function(fs, o, a, b, c) {
-    assert(lopcodes.getOpMode(o) === lopcodes.iABC);
-    assert(lopcodes.getBMode(o) !== lopcodes.OpArgN || b === 0);
-    assert(lopcodes.getCMode(o) !== lopcodes.OpArgN || c === 0);
-    assert(a <= lopcodes.MAXARG_A && b <= lopcodes.MAXARG_B && c <= lopcodes.MAXARG_C);
+    if (process.env.LUA_USE_APICHECK && !(lopcodes.getOpMode(o) === lopcodes.iABC)) throw Error("assertion failed");
+    if (process.env.LUA_USE_APICHECK && !(lopcodes.getBMode(o) !== lopcodes.OpArgN || b === 0)) throw Error("assertion failed");
+    if (process.env.LUA_USE_APICHECK && !(lopcodes.getCMode(o) !== lopcodes.OpArgN || c === 0)) throw Error("assertion failed");
+    if (process.env.LUA_USE_APICHECK && !(a <= lopcodes.MAXARG_A && b <= lopcodes.MAXARG_B && c <= lopcodes.MAXARG_C)) throw Error("assertion failed");
     return luaK_code(fs, lopcodes.CREATE_ABC(o, a, b, c));
 };
 
@@ -339,9 +336,9 @@ const luaK_codeABC = function(fs, o, a, b, c) {
 ** Format and emit an 'iABx' instruction.
 */
 const luaK_codeABx = function(fs, o, a, bc) {
-    assert(lopcodes.getOpMode(o) === lopcodes.iABx || lopcodes.getOpMode(o) === lopcodes.iAsBx);
-    assert(lopcodes.getCMode(o) === lopcodes.OpArgN);
-    assert(a <= lopcodes.MAXARG_A && bc <= lopcodes.MAXARG_Bx);
+    if (process.env.LUA_USE_APICHECK && !(lopcodes.getOpMode(o) === lopcodes.iABx || lopcodes.getOpMode(o) === lopcodes.iAsBx)) throw Error("assertion failed");
+    if (process.env.LUA_USE_APICHECK && !(lopcodes.getCMode(o) === lopcodes.OpArgN)) throw Error("assertion failed");
+    if (process.env.LUA_USE_APICHECK && !(a <= lopcodes.MAXARG_A && bc <= lopcodes.MAXARG_Bx)) throw Error("assertion failed");
     return luaK_code(fs, lopcodes.CREATE_ABx(o, a, bc));
 };
 
@@ -353,7 +350,7 @@ const luaK_codeAsBx = function(fs,o,A,sBx) {
 ** Emit an "extra argument" instruction (format 'iAx')
 */
 const codeextraarg = function(fs, a) {
-    assert(a <= lopcodes.MAXARG_Ax);
+    if (process.env.LUA_USE_APICHECK && !(a <= lopcodes.MAXARG_Ax)) throw Error("assertion failed");
     return luaK_code(fs, lopcodes.CREATE_Ax(OpCodesI.OP_EXTRAARG, a));
 };
 
@@ -400,7 +397,7 @@ const luaK_reserveregs = function(fs, n) {
 const freereg = function(fs, reg) {
     if (!lopcodes.ISK(reg) && reg >= fs.nactvar) {
         fs.freereg--;
-        assert(reg === fs.freereg);
+        if (process.env.LUA_USE_APICHECK && !(reg === fs.freereg)) throw Error("assertion failed");
     }
 };
 
@@ -520,7 +517,7 @@ const luaK_setreturns = function(fs, e, nresults) {
         lopcodes.SETARG_A(pc, fs.freereg);
         luaK_reserveregs(fs, 1);
     }
-    else assert(nresults === defs.LUA_MULTRET);
+    else if (process.env.LUA_USE_APICHECK && !(nresults === defs.LUA_MULTRET)) throw Error("assertion failed");
 };
 
 const luaK_setmultret = function(fs, e) {
@@ -541,7 +538,7 @@ const luaK_setoneret = function(fs, e) {
     let ek = lparser.expkind;
     if (e.k === ek.VCALL) {  /* expression is an open function call? */
         /* already returns 1 value */
-        assert(getinstruction(fs, e).C === 2);
+        if (process.env.LUA_USE_APICHECK && !(getinstruction(fs, e).C === 2)) throw Error("assertion failed");
         e.k = ek.VNONRELOC;  /* result has fixed position */
         e.u.info = getinstruction(fs, e).A;
     } else if (e.k === ek.VVARARG) {
@@ -573,7 +570,7 @@ const luaK_dischargevars = function(fs, e) {
                 freereg(fs, e.u.ind.t);
                 op = OpCodesI.OP_GETTABLE;
             } else {
-                assert(e.u.ind.vt === ek.VUPVAL);
+                if (process.env.LUA_USE_APICHECK && !(e.u.ind.vt === ek.VUPVAL)) throw Error("assertion failed");
                 op = OpCodesI.OP_GETTABUP;  /* 't' is in an upvalue */
             }
             e.u.info = luaK_codeABC(fs, op, 0, e.u.ind.t, e.u.ind.idx);
@@ -632,7 +629,7 @@ const discharge2reg = function(fs, e, reg) {
             break;
         }
         default: {
-            assert(e.k === ek.VJMP);
+            if (process.env.LUA_USE_APICHECK && !(e.k === ek.VJMP)) throw Error("assertion failed");
             return;  /* nothing to do... */
         }
     }
@@ -819,7 +816,7 @@ const luaK_self = function(fs, e, key) {
 */
 const negatecondition = function(fs, e) {
     let pc = getjumpcontrol(fs, e.u.info);
-    assert(lopcodes.testTMode(pc.opcode) && pc.opcode !== OpCodesI.OP_TESTSET && pc.opcode !== OpCodesI.OP_TEST);
+    if (process.env.LUA_USE_APICHECK && !(lopcodes.testTMode(pc.opcode) && pc.opcode !== OpCodesI.OP_TESTSET && pc.opcode !== OpCodesI.OP_TEST)) throw Error("assertion failed");
     lopcodes.SETARG_A(pc, !(pc.A));
 };
 
@@ -936,7 +933,7 @@ const codenot = function(fs, e) {
 */
 const luaK_indexed = function(fs, t, k) {
     let ek = lparser.expkind;
-    assert(!hasjumps(t) && (lparser.vkisinreg(t.k) || t.k === ek.VUPVAL));
+    if (process.env.LUA_USE_APICHECK && !(!hasjumps(t) && (lparser.vkisinreg(t.k) || t.k === ek.VUPVAL))) throw Error("assertion failed");
     t.u.ind.t = t.u.info;  /* register or upvalue index */
     t.u.ind.idx = luaK_exp2RK(fs, k);  /* R/K index for key */
     t.u.ind.vt = (t.k === ek.VUPVAL) ? ek.VUPVAL : ek.VLOCAL;
@@ -1029,7 +1026,7 @@ const codecomp = function(fs, opr, e1, e2) {
     if (e1.k === ek.VK)
         rk1 = lopcodes.RKASK(e1.u.info);
     else {
-        assert(e1.k === ek.VNONRELOC);
+        if (process.env.LUA_USE_APICHECK && !(e1.k === ek.VNONRELOC)) throw Error("assertion failed");
         rk1 = e1.u.info;
     }
 
@@ -1121,14 +1118,14 @@ const luaK_posfix = function(fs, op, e1, e2, line) {
     let ek = lparser.expkind;
     switch (op) {
         case BinOpr.OPR_AND: {
-            assert(e1.t === NO_JUMP);  /* list closed by 'luK_infix' */
+            if (process.env.LUA_USE_APICHECK && !(e1.t === NO_JUMP)) throw Error("assertion failed");  /* list closed by 'luK_infix' */
             luaK_dischargevars(fs, e2);
             e2.f = luaK_concat(fs, e2.f, e1.f);
             e1.to(e2);
             break;
         }
         case BinOpr.OPR_OR: {
-            assert(e1.f === NO_JUMP);  /* list closed by 'luK_infix' */
+            if (process.env.LUA_USE_APICHECK && !(e1.f === NO_JUMP)) throw Error("assertion failed");  /* list closed by 'luK_infix' */
             luaK_dischargevars(fs, e2);
             e2.t = luaK_concat(fs, e2.t, e1.t);
             e1.to(e2);
@@ -1138,7 +1135,7 @@ const luaK_posfix = function(fs, op, e1, e2, line) {
             let ins = getinstruction(fs, e2);
             luaK_exp2val(fs, e2);
             if (e2.k === ek.VRELOCABLE && ins.opcode === OpCodesI.OP_CONCAT) {
-                assert(e1.u.info === ins.B - 1);
+                if (process.env.LUA_USE_APICHECK && !(e1.u.info === ins.B - 1)) throw Error("assertion failed");
                 freeexp(fs, e1);
                 lopcodes.SETARG_B(ins, e1.u.info);
                 e1.k = ek.VRELOCABLE; e1.u.info = e2.u.info;
@@ -1184,7 +1181,7 @@ const luaK_fixline = function(fs, line) {
 const luaK_setlist = function(fs, base, nelems, tostore) {
     let c =  (nelems - 1)/lopcodes.LFIELDS_PER_FLUSH + 1;
     let b = (tostore === defs.LUA_MULTRET) ? 0 : tostore;
-    assert(tostore !== 0 && tostore <= lopcodes.LFIELDS_PER_FLUSH);
+    if (process.env.LUA_USE_APICHECK && !(tostore !== 0 && tostore <= lopcodes.LFIELDS_PER_FLUSH)) throw Error("assertion failed");
     if (c <= lopcodes.MAXARG_C)
         luaK_codeABC(fs, OpCodesI.OP_SETLIST, base, b, c);
     else if (c <= lopcodes.MAXARG_Ax) {

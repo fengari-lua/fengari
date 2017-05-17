@@ -1,8 +1,6 @@
 /*jshint esversion: 6 */
 "use strict";
 
-const assert               = require('assert');
-
 const defs                 = require('./defs.js');
 const lobject              = require('./lobject.js');
 const ldo                  = require('./ldo.js');
@@ -151,7 +149,7 @@ const lua_newthread = function(L) {
     let g = L.l_G;
     let L1 = new lua_State();
     L.stack[L.top++] = new lobject.TValue(CT.LUA_TTHREAD, L1);
-    assert(L.top <= L.ci.top, "stack overflow");
+    if (process.env.LUA_USE_APICHECK && !(L.top <= L.ci.top)) throw Error("stack overflow");
     preinit_thread(L1, g);
     L1.hookmask = L.hookmask;
     L1.basehookcount = L.basehookcount;

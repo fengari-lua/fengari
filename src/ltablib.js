@@ -1,7 +1,5 @@
 "use strict";
 
-const assert  = require('assert');
-
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
 const llimit  = require('./llimit.js');
@@ -233,7 +231,7 @@ const partition = function(L, lo, up) {
 const choosePivot = function(lo, up, rnd) {
     let r4 = Math.floor((up - lo) / 4);  /* range/4 */
     let p = rnd % (r4 * 2) + (lo + r4);
-    assert(lo + r4 <= p && p <= up - r4);
+    if (process.env.LUA_USE_APICHECK && !(lo + r4 <= p && p <= up - r4)) throw Error("assertion failed");
     return p;
 };
 

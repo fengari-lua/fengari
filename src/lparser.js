@@ -1,6 +1,5 @@
 "use strict";
 
-const assert = require('assert');
 
 const defs     = require('./defs.js');
 const lcode    = require('./lcode.js');
@@ -260,7 +259,7 @@ const new_localvarliteral = function(ls, name) {
 
 const getlocvar = function(fs, i) {
     let idx = fs.ls.dyd.actvar.arr[fs.firstlocal + i].idx;
-    assert(idx < fs.nlocvars);
+    if (process.env.LUA_USE_APICHECK && !(idx < fs.nlocvars)) throw Error("assertion failed");
     return fs.f.locvars[idx];
 };
 
@@ -351,7 +350,7 @@ const singlevar = function(ls, vr) {
     if (vr.k === expkind.VVOID) {  /* global name? */
         let key = new expdesc();
         singlevaraux(fs, ls.envn, vr, 1);  /* get environment variable */
-        assert(vr.k !== expkind.VVOID);  /* this one must exist */
+        if (process.env.LUA_USE_APICHECK && !(vr.k !== expkind.VVOID)) throw Error("assertion failed");  /* this one must exist */
         codestring(ls, key, varname);  /* key is variable name */
         lcode.luaK_indexed(fs, vr, key);  /* env[varname] */
     }
@@ -391,7 +390,7 @@ const closegoto = function(ls, g, label) {
     let fs = ls.fs;
     let gl = ls.dyd.gt;
     let gt = gl.arr[g];
-    assert(eqstr(gt.name, label.name));
+    if (process.env.LUA_USE_APICHECK && !(eqstr(gt.name, label.name))) throw Error("assertion failed");
     if (gt.nactvar < label.nactvar) {
         let vname = getlocvar(fs, gt.nactvar).varname;
         let msg = lobject.luaO_pushfstring(ls.L, defs.to_luastring("<goto %s> at line %d jumps into the scope of local '%s'"),
@@ -482,7 +481,7 @@ const enterblock = function(fs, bl, isloop) {
     bl.upval = 0;
     bl.previous = fs.bl;
     fs.bl = bl;
-    assert(fs.freereg === fs.nactvar);
+    if (process.env.LUA_USE_APICHECK && !(fs.freereg === fs.nactvar)) throw Error("assertion failed");
 };
 
 /*
@@ -564,7 +563,7 @@ const leaveblock = function(fs) {
 
     fs.bl = bl.previous;
     removevars(fs, bl.nactvar);
-    assert(bl.nactvar === fs.nactvar);
+    if (process.env.LUA_USE_APICHECK && !(bl.nactvar === fs.nactvar)) throw Error("assertion failed");
     fs.freereg = fs.nactvar;  /* free registers */
     ls.dyd.label.n = bl.firstlabel;  /* remove local labels */
     if (bl.previous)  /* inner block? */
@@ -727,7 +726,7 @@ const constructor = function(ls, t) {
     lcode.luaK_exp2nextreg(ls.fs, t);  /* fix it at stack top */
     checknext(ls, char['{']);
     do {
-        assert(cc.v.k === expkind.VVOID || cc.tostore > 0);
+        if (process.env.LUA_USE_APICHECK && !(cc.v.k === expkind.VVOID || cc.tostore > 0)) throw Error("assertion failed");
         if (ls.t.token === char['}']) break;
         closelistfield(fs, cc);
         field(ls, cc);
@@ -829,7 +828,7 @@ const funcargs = function(ls, f, line) {
             llex.luaX_syntaxerror(ls, defs.to_luastring("function arguments expected", true));
         }
     }
-    assert(f.k === expkind.VNONRELOC);
+    if (process.env.LUA_USE_APICHECK && !(f.k === expkind.VNONRELOC)) throw Error("assertion failed");
     let nparams;
     let base = f.u.info;  /* base register for call */
     if (hasmultret(args.k))
@@ -1229,7 +1228,7 @@ const exp1 = function(ls) {
     let e = new expdesc();
     expr(ls, e);
     lcode.luaK_exp2nextreg(ls.fs, e);
-    assert(e.k === expkind.VNONRELOC);
+    if (process.env.LUA_USE_APICHECK && !(e.k === expkind.VNONRELOC)) throw Error("assertion failed");
     let reg = e.u.info;
     return reg;
 };
@@ -1449,7 +1448,7 @@ const retstat = function(ls) {
             lcode.luaK_setmultret(fs, e);
             if (e.k === expkind.VCALL && nret === 1) {  /* tail call? */
                 lopcodes.SET_OPCODE(lcode.getinstruction(fs, e), OpCodesI.OP_TAILCALL);
-                assert(lcode.getinstruction(fs, e).A === fs.nactvar);
+                if (process.env.LUA_USE_APICHECK && !(lcode.getinstruction(fs, e).A === fs.nactvar)) throw Error("assertion failed");
             }
             first = fs.nactvar;
             nret = defs.LUA_MULTRET;  /* return all values */
@@ -1459,7 +1458,7 @@ const retstat = function(ls) {
             else {
                 lcode.luaK_exp2nextreg(fs, e);  /* values must go to the stack */
                 first = fs.nactvar;  /* return all active values */
-                assert(nret === fs.freereg - first);
+                if (process.env.LUA_USE_APICHECK && !(nret === fs.freereg - first)) throw Error("assertion failed");
             }
         }
     }
@@ -1530,7 +1529,7 @@ const statement = function(ls) {
         }
     }
 
-    assert(ls.fs.f.maxstacksize >= ls.fs.freereg && ls.fs.freereg >= ls.fs.nactvar);
+    if (process.env.LUA_USE_APICHECK && !(ls.fs.f.maxstacksize >= ls.fs.freereg && ls.fs.freereg >= ls.fs.nactvar)) throw Error("assertion failed");
     ls.fs.freereg = ls.fs.nactvar;  /* free registers */
     leavelevel(ls);
 };
@@ -1566,9 +1565,9 @@ const luaY_parser = function(L, z, buff, dyd, name, firstchar) {
     dyd.actvar.n = dyd.gt.n = dyd.label.n = 0;
     llex.luaX_setinput(L, lexstate, z, funcstate.f.source, firstchar);
     mainfunc(lexstate, funcstate);
-    assert(!funcstate.prev && funcstate.nups === 1 && !lexstate.fs);
+    if (process.env.LUA_USE_APICHECK && !(!funcstate.prev && funcstate.nups === 1 && !lexstate.fs)) throw Error("assertion failed");
     /* all scopes should be correctly finished */
-    assert(dyd.actvar.n === 0 && dyd.gt.n === 0 && dyd.label.n === 0);
+    if (process.env.LUA_USE_APICHECK && !(dyd.actvar.n === 0 && dyd.gt.n === 0 && dyd.label.n === 0)) throw Error("assertion failed");
     L.top--;  /* remove scanner's table */
     return cl;  /* closure is on the stack, too */
 };

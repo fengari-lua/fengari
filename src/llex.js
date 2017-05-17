@@ -1,7 +1,5 @@
 "use strict";
 
-const assert   = require('assert');
-
 const defs     = require('./defs.js');
 const ldebug   = require('./ldebug.js');
 const ldo      = require('./ldo.js');
@@ -153,7 +151,7 @@ const luaX_newstring = function(ls, str) {
     } else { /* string already present */
         /* HACK: Workaround lack of ltable 'keyfromval' */
         let tpair = ls.h.strong.get(lstring.luaS_hashlongstr(ts));
-        assert(tpair.value == o);
+        if (process.env.LUA_USE_APICHECK && !(tpair.value == o)) throw Error("assertion failed");
         ts = tpair.key.tsvalue(); /* re-use value previously stored */
     }
     return ts;
@@ -165,7 +163,7 @@ const luaX_newstring = function(ls, str) {
 */
 const inclinenumber = function(ls) {
     let old = ls.current;
-    assert(currIsNewline(ls));
+    if (process.env.LUA_USE_APICHECK && !(currIsNewline(ls))) throw Error("assertion failed");
     next(ls);  /* skip '\n' or '\r' */
     if (currIsNewline(ls) && ls.current !== old)
         next(ls);  /* skip '\n\r' or '\r\n' */
@@ -225,7 +223,7 @@ const check_next2 = function(ls, set) {
 const read_numeral = function(ls, seminfo) {
     let expo = "Ee";
     let first = ls.current;
-    assert(ljstype.lisdigit(ls.current));
+    if (process.env.LUA_USE_APICHECK && !(ljstype.lisdigit(ls.current))) throw Error("assertion failed");
     save_and_next(ls);
     if (first === char['0'] && check_next2(ls, "xX"))  /* hexadecimal? */
         expo = "Pp";
@@ -249,7 +247,7 @@ const read_numeral = function(ls, seminfo) {
         seminfo.i = obj.value;
         return R.TK_INT;
     } else {
-        assert(obj.ttisfloat());
+        if (process.env.LUA_USE_APICHECK && !(obj.ttisfloat())) throw Error("assertion failed");
         seminfo.r = obj.value;
         return R.TK_FLT;
     }
@@ -285,7 +283,7 @@ const luaX_syntaxerror = function(ls, msg) {
 const skip_sep = function(ls) {
     let count = 0;
     let s = ls.current;
-    assert(s === char['['] || s === char[']']);
+    if (process.env.LUA_USE_APICHECK && !(s === char['['] || s === char[']'])) throw Error("assertion failed");
     save_and_next(ls);
     while (ls.current === char['=']) {
         save_and_next(ls);
@@ -471,7 +469,7 @@ const llex = function(ls, seminfo) {
     ls.buff.buffer = [];
 
     for (;;) {
-        assert(typeof ls.current == "number");
+        if (process.env.LUA_USE_APICHECK && !(typeof ls.current == "number")) throw Error("assertion failed");
         switch (ls.current) {
             case char['\n']: case char['\r']: {  /* line breaks */
                 inclinenumber(ls);
@@ -601,7 +599,7 @@ const luaX_next = function(ls) {
 };
 
 const luaX_lookahead = function(ls) {
-    assert(ls.lookahead.token === R.TK_EOS);
+    if (process.env.LUA_USE_APICHECK && !(ls.lookahead.token === R.TK_EOS)) throw Error("assertion failed");
     ls.lookahead.token = llex(ls, ls.lookahead.seminfo);
     return ls.lookahead.token;
 };

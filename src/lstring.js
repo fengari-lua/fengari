@@ -1,7 +1,5 @@
 "use strict";
 
-const assert = require("assert");
-
 const defs = require('./defs.js');
 
 class TString {
@@ -22,19 +20,19 @@ class TString {
 }
 
 const luaS_eqlngstr = function(a, b) {
-    assert(a instanceof TString);
-    assert(b instanceof TString);
+    if (process.env.LUA_USE_APICHECK && !(a instanceof TString)) throw Error("assertion failed");
+    if (process.env.LUA_USE_APICHECK && !(b instanceof TString)) throw Error("assertion failed");
     return a == b || (a.realstring.length == b.realstring.length && a.realstring.join() == b.realstring.join());
 };
 
 /* converts strings (arrays) to a consistent map key */
 const luaS_hash = function(str) {
-    assert(Array.isArray(str));
+    if (process.env.LUA_USE_APICHECK && !(Array.isArray(str))) throw Error("assertion failed");
     return str.map(e => `${e}|`).join('');
 };
 
 const luaS_hashlongstr = function(ts) {
-    assert(ts instanceof TString);
+    if (process.env.LUA_USE_APICHECK && !(ts instanceof TString)) throw Error("assertion failed");
     if(ts.hash === null) {
         ts.hash = luaS_hash(ts.getstr());
     }

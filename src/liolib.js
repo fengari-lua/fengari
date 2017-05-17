@@ -1,10 +1,10 @@
 "use strict";
 
-const assert  = require('assert');
 const fs      = require('fs');
 
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
+
 
 const IO_PREFIX = "_IO_";
 const IOPREF_LEN = IO_PREFIX.length;
@@ -44,7 +44,7 @@ const tofile = function(L) {
     let p = tolstream(L);
     if (isclosed(p))
         lauxlib.luaL_error(L, lua.to_luastring("attempt to use a closed file"));
-    assert(p.f);
+    if (process.env.LUA_USE_APICHECK && !(p.f)) throw Error("assertion failed");
     return p.f;
 };
 

@@ -1,7 +1,5 @@
 "use strict";
 
-const assert  = require('assert');
-
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
 
@@ -281,7 +279,7 @@ const hookf = function(L, ar) {
         if (ar.currentline >= 0)
             lua.lua_pushinteger(L, ar.currentline);  /* push current line */
         else lua.lua_pushnil(L);
-        assert(lua.lua_getinfo(L, ["l".charCodeAt(0), "S".charCodeAt(0)], ar));
+        if (process.env.LUA_USE_APICHECK && !(lua.lua_getinfo(L, ["l".charCodeAt(0), "S".charCodeAt(0)], ar))) throw Error("assertion failed");
         lua.lua_call(L, 2, 0);  /* call hook function */
     }
 };
