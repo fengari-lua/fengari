@@ -32,10 +32,10 @@ module.exports = [
             "crypto": "crypto"
         },
         plugins: [
-            new BabiliPlugin(),
             new webpack.DefinePlugin({
                 WEB: JSON.stringify(true),
-            })
+            }),
+            new BabiliPlugin()
         ]
     }
 ];
