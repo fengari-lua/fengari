@@ -13,6 +13,7 @@ module.exports = [
         plugins: [
             new webpack.DefinePlugin({
                 WEB: JSON.stringify(true),
+                LUA_USE_ASSERT: false
             })
         ]
     },
@@ -27,6 +28,7 @@ module.exports = [
             new BabiliPlugin(),
             new webpack.DefinePlugin({
                 WEB: JSON.stringify(true),
+                LUA_USE_ASSERT: false
             })
         ]
     }

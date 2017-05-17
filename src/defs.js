@@ -1,9 +1,10 @@
 /*jshint esversion: 6 */
 "use strict";
 
-const assert  = require('assert');
 const luaconf = require('./luaconf.js');
 const llimit  = require('./llimit.js');
+
+const assert  = require('assert');
 
 // To avoid charCodeAt everywhere
 const char = [];
@@ -135,7 +136,7 @@ class lua_Debug {
 }
 
 const to_jsstring = function(value, from, to) {
-    assert(Array.isArray(value), "jsstring expect a array of bytes");
+    if (LUA_USE_ASSERT) assert(Array.isArray(value), "jsstring expect a array of bytes");
 
     let u0, u1, u2, u3, u4, u5;
     let idx = 0;
@@ -181,7 +182,7 @@ const to_jsstring = function(value, from, to) {
 const to_luastring_cache = {};
 
 const to_luastring = function(str, cache, maxBytesToWrite) {
-    assert(typeof str === "string", "to_luastring expect a js string");
+    if (LUA_USE_ASSERT) assert(typeof str === "string", "to_luastring expect a js string");
 
     if (cache) {
         let cached = to_luastring_cache[str];

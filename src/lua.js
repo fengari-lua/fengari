@@ -76,6 +76,7 @@ module.exports.LUA_VERSION_MINOR       = defs.LUA_VERSION_MINOR;
 module.exports.LUA_VERSION_NUM         = defs.LUA_VERSION_NUM;
 module.exports.LUA_VERSION_RELEASE     = defs.LUA_VERSION_RELEASE;
 module.exports.LUA_VERSUFFIX           = defs.LUA_VERSUFFIX;
+module.exports.LUA_USE_ASSERT          = defs.LUA_USE_ASSERT;
 module.exports.LUA_YIELD               = defs.thread_status.LUA_YIELD;
 module.exports.lua_Debug               = defs.lua_Debug;
 module.exports.lua_upvalueindex        = defs.lua_upvalueindex;

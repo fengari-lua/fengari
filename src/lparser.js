@@ -1,8 +1,10 @@
 "use strict";
 
-const assert = require('assert');
 
 const defs     = require('./defs.js');
+
+const assert = require('assert');
+
 const lcode    = require('./lcode.js');
 const lfunc    = require('./lfunc.js');
 const llex     = require('./llex.js');
@@ -260,7 +262,7 @@ const new_localvarliteral = function(ls, name) {
 
 const getlocvar = function(fs, i) {
     let idx = fs.ls.dyd.actvar.arr[fs.firstlocal + i].idx;
-    assert(idx < fs.nlocvars);
+    if (LUA_USE_ASSERT) assert(idx < fs.nlocvars);
     return fs.f.locvars[idx];
 };
 
@@ -351,7 +353,7 @@ const singlevar = function(ls, vr) {
     if (vr.k === expkind.VVOID) {  /* global name? */
         let key = new expdesc();
         singlevaraux(fs, ls.envn, vr, 1);  /* get environment variable */
-        assert(vr.k !== expkind.VVOID);  /* this one must exist */
+        if (LUA_USE_ASSERT) assert(vr.k !== expkind.VVOID);  /* this one must exist */
         codestring(ls, key, varname);  /* key is variable name */
         lcode.luaK_indexed(fs, vr, key);  /* env[varname] */
     }
@@ -391,7 +393,7 @@ const closegoto = function(ls, g, label) {
     let fs = ls.fs;
     let gl = ls.dyd.gt;
     let gt = gl.arr[g];
-    assert(eqstr(gt.name, label.name));
+    if (LUA_USE_ASSERT) assert(eqstr(gt.name, label.name));
     if (gt.nactvar < label.nactvar) {
         let vname = getlocvar(fs, gt.nactvar).varname;
         let msg = lobject.luaO_pushfstring(ls.L, defs.to_luastring("<goto %s> at line %d jumps into the scope of local '%s'"),
@@ -482,7 +484,7 @@ const enterblock = function(fs, bl, isloop) {
     bl.upval = 0;
     bl.previous = fs.bl;
     fs.bl = bl;
-    assert(fs.freereg === fs.nactvar);
+    if (LUA_USE_ASSERT) assert(fs.freereg === fs.nactvar);
 };
 
 /*
@@ -564,7 +566,7 @@ const leaveblock = function(fs) {
 
     fs.bl = bl.previous;
     removevars(fs, bl.nactvar);
-    assert(bl.nactvar === fs.nactvar);
+    if (LUA_USE_ASSERT) assert(bl.nactvar === fs.nactvar);
     fs.freereg = fs.nactvar;  /* free registers */
     ls.dyd.label.n = bl.firstlabel;  /* remove local labels */
     if (bl.previous)  /* inner block? */
@@ -727,7 +729,7 @@ const constructor = function(ls, t) {
     lcode.luaK_exp2nextreg(ls.fs, t);  /* fix it at stack top */
     checknext(ls, char['{']);
     do {
-        assert(cc.v.k === expkind.VVOID || cc.tostore > 0);
+        if (LUA_USE_ASSERT) assert(cc.v.k === expkind.VVOID || cc.tostore > 0);
         if (ls.t.token === char['}']) break;
         closelistfield(fs, cc);
         field(ls, cc);
@@ -829,7 +831,7 @@ const funcargs = function(ls, f, line) {
             llex.luaX_syntaxerror(ls, defs.to_luastring("function arguments expected", true));
         }
     }
-    assert(f.k === expkind.VNONRELOC);
+    if (LUA_USE_ASSERT) assert(f.k === expkind.VNONRELOC);
     let nparams;
     let base = f.u.info;  /* base register for call */
     if (hasmultret(args.k))
@@ -1229,7 +1231,7 @@ const exp1 = function(ls) {
     let e = new expdesc();
     expr(ls, e);
     lcode.luaK_exp2nextreg(ls.fs, e);
-    assert(e.k === expkind.VNONRELOC);
+    if (LUA_USE_ASSERT) assert(e.k === expkind.VNONRELOC);
     let reg = e.u.info;
     return reg;
 };
@@ -1449,7 +1451,7 @@ const retstat = function(ls) {
             lcode.luaK_setmultret(fs, e);
             if (e.k === expkind.VCALL && nret === 1) {  /* tail call? */
                 lopcodes.SET_OPCODE(lcode.getinstruction(fs, e), OpCodesI.OP_TAILCALL);
-                assert(lcode.getinstruction(fs, e).A === fs.nactvar);
+                if (LUA_USE_ASSERT) assert(lcode.getinstruction(fs, e).A === fs.nactvar);
             }
             first = fs.nactvar;
             nret = defs.LUA_MULTRET;  /* return all values */
@@ -1459,7 +1461,7 @@ const retstat = function(ls) {
             else {
                 lcode.luaK_exp2nextreg(fs, e);  /* values must go to the stack */
                 first = fs.nactvar;  /* return all active values */
-                assert(nret === fs.freereg - first);
+                if (LUA_USE_ASSERT) assert(nret === fs.freereg - first);
             }
         }
     }
@@ -1530,7 +1532,7 @@ const statement = function(ls) {
         }
     }
 
-    assert(ls.fs.f.maxstacksize >= ls.fs.freereg && ls.fs.freereg >= ls.fs.nactvar);
+    if (LUA_USE_ASSERT) assert(ls.fs.f.maxstacksize >= ls.fs.freereg && ls.fs.freereg >= ls.fs.nactvar);
     ls.fs.freereg = ls.fs.nactvar;  /* free registers */
     leavelevel(ls);
 };
@@ -1566,9 +1568,9 @@ const luaY_parser = function(L, z, buff, dyd, name, firstchar) {
     dyd.actvar.n = dyd.gt.n = dyd.label.n = 0;
     llex.luaX_setinput(L, lexstate, z, funcstate.f.source, firstchar);
     mainfunc(lexstate, funcstate);
-    assert(!funcstate.prev && funcstate.nups === 1 && !lexstate.fs);
+    if (LUA_USE_ASSERT) assert(!funcstate.prev && funcstate.nups === 1 && !lexstate.fs);
     /* all scopes should be correctly finished */
-    assert(dyd.actvar.n === 0 && dyd.gt.n === 0 && dyd.label.n === 0);
+    if (LUA_USE_ASSERT) assert(dyd.actvar.n === 0 && dyd.gt.n === 0 && dyd.label.n === 0);
     L.top--;  /* remove scanner's table */
     return cl;  /* closure is on the stack, too */
 };

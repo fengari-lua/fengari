@@ -1,12 +1,13 @@
 "use strict";
 
-const assert  = require('assert');
 const sprintf = require('sprintf-js').sprintf;
 
 const lauxlib = require('./lauxlib.js');
 const lua     = require('./lua.js');
 const luaconf = require('./luaconf.js');
 const llimit  = require('./llimit.js');
+
+const assert  = require('assert');
 
 const sL_ESC  = '%';
 const L_ESC   = sL_ESC.charCodeAt(0);
@@ -65,7 +66,7 @@ const str_char = function(L) {
 };
 
 const writer = function(L, b, size, B) {
-    assert(Array.isArray(b));
+    if (LUA_USE_ASSERT) assert(Array.isArray(b));
     B.push(...b.slice(0, size));
     return 0;
 };
@@ -740,7 +741,7 @@ const unpackint = function(L, str, islittle, size, issigned) {
 };
 
 const unpacknum = function(L, b, islittle, size) {
-    assert(b.length >= size);
+    if (LUA_USE_ASSERT) assert(b.length >= size);
 
     let dv = new DataView(new ArrayBuffer(size));
     b.forEach((e, i) => dv.setUint8(i, e, islittle));
@@ -1152,7 +1153,7 @@ const prepstate = function(ms, L, s, ls, p, lp) {
 
 const reprepstate = function(ms) {
     ms.level = 0;
-    assert(ms.matchdepth === MAXCCALLS);
+    if (LUA_USE_ASSERT) assert(ms.matchdepth === MAXCCALLS);
 };
 
 const find_subarray = function(arr, subarr, from_index) {

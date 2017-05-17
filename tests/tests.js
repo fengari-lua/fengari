@@ -1,6 +1,7 @@
 "use strict";
 
 global.WEB = false;
+global.LUA_USE_ASSERT = true;
 
 const fs             = require('fs');
 const child_process  = require('child_process');

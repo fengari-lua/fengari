@@ -1,9 +1,9 @@
 "use strict";
 
-const assert  = require('assert');
-
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
+
+const assert  = require('assert');
 
 /*
 ** If L1 != L, L1 can be in any state, and therefore there are no
@@ -281,7 +281,7 @@ const hookf = function(L, ar) {
         if (ar.currentline >= 0)
             lua.lua_pushinteger(L, ar.currentline);  /* push current line */
         else lua.lua_pushnil(L);
-        assert(lua.lua_getinfo(L, ["l".charCodeAt(0), "S".charCodeAt(0)], ar));
+        if (LUA_USE_ASSERT) assert(lua.lua_getinfo(L, ["l".charCodeAt(0), "S".charCodeAt(0)], ar));
         lua.lua_call(L, 2, 0);  /* call hook function */
     }
 };

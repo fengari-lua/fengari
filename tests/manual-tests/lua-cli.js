@@ -2,6 +2,7 @@
 "use strict";
 
 global.WEB = false;
+global.LUA_USE_ASSERT = false;
 
 const lua          = require('../../src/lua.js');
 const lauxlib      = require('../../src/lauxlib.js');
@@ -186,7 +187,7 @@ if (!has_E) {
             status = dostring(L, init, name);
         }
         if (status !== lua.LUA_OK) {
-            return process.exit(1);
+            process.exit(1);
         }
     }
 }
@@ -205,7 +206,7 @@ for (let i = 1; i < script; i++) {
             status = dolibrary(L, extra);
         }
         if (status !== lua.LUA_OK) {
-            return process.exit(1);
+            process.exit(1);
         }
     }
 }

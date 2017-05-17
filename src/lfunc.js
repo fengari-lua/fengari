@@ -1,8 +1,10 @@
 /*jshint esversion: 6 */
 "use strict";
-const assert  = require('assert');
 
 const defs    = require('./defs.js');
+
+const assert  = require('assert');
+
 const lobject = require('./lobject.js');
 const CT      = defs.constant_types;
 
@@ -57,7 +59,7 @@ const luaF_findupval = function(L, level) {
     let prevp;
     let p = L.openupval;
     while (p !== null && p.v >= level) {
-        assert(p.isopen());
+        if (LUA_USE_ASSERT) assert(p.isopen());
         if (p.v === level) /* found a corresponding upvalue? */
             return p; /* return it */
         prevp = p;
@@ -80,7 +82,7 @@ const luaF_findupval = function(L, level) {
 const luaF_close = function(L, level) {
     while (L.openupval !== null && L.openupval.v >= level) {
         let uv = L.openupval;
-        assert(uv.isopen());
+        if (LUA_USE_ASSERT) assert(uv.isopen());
         L.openupval = uv.open_next; /* remove from 'open' list */
         if (uv.refcount > 0) {
             let from = uv.L.stack[uv.v];
