@@ -5,6 +5,7 @@ const BabiliPlugin = require("babili-webpack-plugin");
 module.exports = [
     {
         entry: './src/fengari.js',
+        target: 'web',
         output: {
             path: path.resolve(__dirname, 'dist'),
             filename: 'fengari.js',
@@ -21,6 +22,7 @@ module.exports = [
     },
     {
         entry: './src/fengari.js',
+        target: 'web',
         output: {
             path: path.resolve(__dirname, 'dist'),
             filename: 'fengari.min.js',
