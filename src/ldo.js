@@ -61,7 +61,7 @@ const luaD_precall = function(L, off, nresults) {
                 luaD_hook(L, defs.LUA_HOOKCALL, -1);
             let n = f(L); /* do the actual call */
 
-            if (process.env.LUA_USE_APICHECK && !(typeof n == "number" && n >= 0 && (n|0) === n)) throw Error("invalid return value from JS function (expected integer)");
+            if (!(typeof n == "number" && n >= 0 && (n|0) === n)) throw TypeError("invalid return value from JS function (expected integer)");
             if (process.env.LUA_USE_APICHECK && !(n < L.top - L.ci.funcOff)) throw Error("not enough elements in the stack");
 
             luaD_poscall(L, ci, L.top - n, n);
