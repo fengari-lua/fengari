@@ -1337,7 +1337,7 @@ const test_then_block = function(ls, escapelist) {
         skipnoopstat(ls);  /* skip other no-op statements */
         if (block_follow(ls, 0)) {  /* 'goto' is the entire block? */
             leaveblock(fs);
-            return;  /* and that is it */
+            return escapelist;  /* and that is it */
         } else  /* must skip over 'then' part if condition is false */
             jf = lcode.luaK_jump(fs);
     } else {  /* regular case (not goto/break) */
