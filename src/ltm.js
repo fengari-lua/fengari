@@ -95,11 +95,12 @@ const luaT_init = function(L) {
 ** Return the name of the type of an object. For tables and userdata
 ** with metatable, use their '__name' metafield, if present.
 */
+const __name = defs.to_luastring('__name', true);
 const luaT_objtypename = function(L, o) {
     let mt;
     if ((o.ttistable() && (mt = o.value.metatable) !== null) ||
         (o.ttisfulluserdata() && (mt = o.value.metatable) !== null)) {
-        let name = ltable.luaH_getstr(mt, defs.to_luastring('__name', true));
+        let name = ltable.luaH_getstr(mt, lstring.luaS_bless(L, __name));
         if (name.ttisstring())
             return name.svalue();
     }
