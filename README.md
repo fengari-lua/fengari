@@ -9,6 +9,7 @@
 
 🐺 φεγγάρι - The Lua VM written in JS ES6 for Node and the browser
 
+IRC: #fengari on freenode
 
 ## So far
 
