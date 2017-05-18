@@ -545,7 +545,11 @@ const numarith = function(L, op, v1, v2) {
         case defs.LUA_OPPOW:  return Math.pow(v1, v2);
         case defs.LUA_OPIDIV: return Math.floor(v1 / v2);
         case defs.LUA_OPUNM:  return -v1;
-        case defs.LUA_OPMOD:  return v1 % v2;
+        case defs.LUA_OPMOD:
+            let m = v1 % v2;
+            if ((m*v2) < 0)
+                m += v2;
+            return m;
         default: assert(0);
     }
 };
