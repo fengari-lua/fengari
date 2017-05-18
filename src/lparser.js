@@ -1558,7 +1558,7 @@ const luaY_parser = function(L, z, buff, dyd, name, firstchar) {
     let cl = lfunc.luaF_newLclosure(L, 1);  /* create main closure */
     L.stack[L.top++] = new TValue(defs.CT.LUA_TLCL, cl);
     lexstate.h = ltable.luaH_new(L);  /* create table for scanner */
-    L.stack[L.top++] = lexstate.h;
+    L.stack[L.top++] = new TValue(defs.CT.LUA_TTABLE, lexstate.h);
     funcstate.f = cl.p = new Proto(L);
     funcstate.f.source = lstring.luaS_new(L, name);
     lexstate.buff = buff;
