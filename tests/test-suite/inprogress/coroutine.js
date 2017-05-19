@@ -4,9 +4,9 @@ const test     = require('tape');
 
 global.WEB = false;
 
-const lua     = require('../../src/lua.js');
-const lauxlib = require('../../src/lauxlib.js');
-const lualib  = require('../../src/lualib.js');
+const lua     = require('../../../src/lua.js');
+const lauxlib = require('../../../src/lauxlib.js');
+const lualib  = require('../../../src/lualib.js');
 
 
 test("[test-suite] coroutine: is main thread", function (t) {
