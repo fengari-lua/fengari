@@ -55,14 +55,20 @@ IRC: #fengari on freenode
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
     - [x] `calls.lua` (32/32)
     - [x] `constructs.lua` (`_soft`) (10/10)
+    - [x] `coroutine.lua` (32/32)
     - [x] `events.lua` (26/26)
     - [x] `literals.lua` (30/30)
     - [x] `locals.lua` (10/10)
     - [x] `strings.lua` (34/34)
     - [x] `vararg.lua` (8/8)
+    - [ ] `api.lua`
+    - [ ] `attrib.lua`
+    - [ ] `big.lua`
     - [ ] `bitwise.lua` (9/16)
     - [ ] `closure.lua` (14/16)
-    - [ ] `coroutine.lua` (32/40)
+    - [ ] `code.lua`
+    - [ ] `db.lua`
+    - [ ] `errors.lua`
     - [ ] `goto.lua` (16/18)
     - [ ] `math.lua` (44/68)
     - [ ] `nextvar.lua` (42/44)
@@ -70,12 +76,6 @@ IRC: #fengari on freenode
     - [ ] `sort.lua` (21/24)
     - [ ] `tpack.lua` (20/32)
     - [ ] `utf8.lua` (14/20)
-    - [ ] `api.lua`
-    - [ ] `attrib.lua`
-    - [ ] `big.lua`
-    - [ ] `code.lua`
-    - [ ] `db.lua`
-    - [ ] `errors.lua`
     - [ ] `verybig.lua`
 - [ ] DOM API binding: [https://github.com/fengari-lua/fengari-interop](https://github.com/fengari-lua/fengari-interop)
 
