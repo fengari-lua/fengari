@@ -53,29 +53,29 @@ IRC: #fengari on freenode
 - [x] C API
 - [x] Auxiliary library
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
-    - [x] `calls.lua`
-    - [x] `constructs.lua` (`_soft`)
-    - [x] `events.lua`
-    - [x] `literals.lua`
-    - [x] `locals.lua`
-    - [x] `strings.lua`
-    - [x] `vararg.lua`
+    - [x] `calls.lua` (32/32)
+    - [x] `constructs.lua` (`_soft`) (10/10)
+    - [x] `events.lua` (26/26)
+    - [x] `literals.lua` (30/30)
+    - [x] `locals.lua` (10/10)
+    - [x] `strings.lua` (34/34)
+    - [x] `vararg.lua` (8/8)
+    - [ ] `bitwise.lua` (9/16)
+    - [ ] `closure.lua` (14/16)
+    - [ ] `coroutine.lua` (32/40)
+    - [ ] `goto.lua` (16/18)
+    - [ ] `math.lua` (44/68)
+    - [ ] `nextvar.lua` (42/44)
+    - [ ] `pm.lua` (27/38)
+    - [ ] `sort.lua` (21/24)
+    - [ ] `tpack.lua` (20/32)
+    - [ ] `utf8.lua` (14/20)
     - [ ] `api.lua`
     - [ ] `attrib.lua`
     - [ ] `big.lua`
-    - [ ] `bitwise.lua`
-    - [ ] `closure.lua`
     - [ ] `code.lua`
-    - [ ] `coroutine.lua`
     - [ ] `db.lua`
     - [ ] `errors.lua`
-    - [ ] `goto.lua`
-    - [ ] `math.lua`
-    - [ ] `nextvar.lua`
-    - [ ] `pm.lua`
-    - [ ] `sort.lua`
-    - [ ] `tpack.lua`
-    - [ ] `utf8.lua`
     - [ ] `verybig.lua`
 - [ ] DOM API binding: [https://github.com/fengari-lua/fengari-interop](https://github.com/fengari-lua/fengari-interop)
 

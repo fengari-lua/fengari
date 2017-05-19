@@ -8,8 +8,8 @@ const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
 
-
-test("[test-suite] closure: testing equality", function (t) {
+// TODO: fengari doesn't cache closures yet/ever
+test("[test-suite] closure: testing equality", { skip: true }, function (t) {
     let luaCode = `
         a = {}
         for i = 1, 5 do  a[i] = function (x) return x + a + _ENV end  end
@@ -100,6 +100,8 @@ test("[test-suite] closure: testing closures with 'for' control variable", funct
 
 test("[test-suite] closure: testing closures with 'for' control variable x break", function (t) {
     let luaCode = `
+        local t = {"a", "b"}
+
         for i=1,3 do
           f = function () return i end
           break
