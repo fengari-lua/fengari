@@ -835,7 +835,7 @@ const LTnum = function(l, r) {
         if (r.ttisinteger())
             return l.value < r.value ? 1 : 0;
         else
-            return LTintfloat(r.value, l.value);
+            return LTintfloat(l.value, r.value);
     } else {
         if (r.ttisfloat())
             return l.value < r.value ? 1 : 0;
