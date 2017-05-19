@@ -560,7 +560,7 @@ test("[test-suite] sort: sorting", function (t) {
 
         for i,v in pairs(a) do assert(v == false) end
 
-        A = {"álo", "\0first :-)", "alo", "then this one", "45", "and a new"}
+        A = {"álo", "\\0first :-)", "alo", "then this one", "45", "and a new"}
         table.sort(A)
         check(A)
 
