@@ -191,11 +191,11 @@ test("[test-suite] bitwise: testing bitwise operations", function (t) {
 
     }, "Lua program loaded without error");
 
-    // t.doesNotThrow(function () {
+    t.doesNotThrow(function () {
 
         lua.lua_call(L, 0, -1);
 
-    // }, "Lua program ran without error");
+    }, "Lua program ran without error");
 
 });
 
