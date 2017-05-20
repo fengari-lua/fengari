@@ -91,7 +91,13 @@ const index2addr_ = function(L, idx) {
 };
 
 const lua_checkstack = function(L, n) {
-    return L.stack.length < luaconf.LUAI_MAXSTACK;
+    let ci = L.ci;
+    let res = L.stack.length < luaconf.LUAI_MAXSTACK;
+
+    if (res && ci.top < L.top + n)
+        ci.top = L.top + n;  /* adjust frame top */
+
+    return res;
 };
 
 const lua_xmove = function(from, to, n) {
