@@ -382,7 +382,7 @@ const recover = function(L, status) {
     let ci = findpcall(L);
     if (ci === null) return 0;  /* no recovery point */
     /* "finish" luaD_pcall */
-    let oldtop = L.stack[ci.extra];
+    let oldtop = ci.extra;
     lfunc.luaF_close(L, oldtop);
     seterrorobj(L, status, oldtop);
     L.ci = ci;
