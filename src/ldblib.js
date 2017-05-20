@@ -139,8 +139,8 @@ const db_getinfo = function(L) {
     if (options.indexOf('S'.charCodeAt(0)) > -1) {
         settabss(L, lua.to_luastring("source", true), ar.source);
         settabss(L, lua.to_luastring("short_src", true), ar.short_src);
-        settabss(L, lua.to_luastring("linedefined", true), lua.to_luastring(`${ar.linedefined}`));
-        settabss(L, lua.to_luastring("lastlinedefined", true), lua.to_luastring(`${ar.lastlinedefined}`));
+        settabsi(L, lua.to_luastring("linedefined", true), ar.linedefined);
+        settabsi(L, lua.to_luastring("lastlinedefined", true), ar.lastlinedefined);
         settabss(L, lua.to_luastring("what", true), ar.what);
     }
     if (options.indexOf('l'.charCodeAt(0)) > -1)
