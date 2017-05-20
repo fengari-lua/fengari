@@ -8,7 +8,8 @@
   },
   "scripts": {
     "build": "webpack",
-    "test": "tape tests/*.js tests/test-suite/*.js | faucet"
+    "test": "tape tests/*.js tests/test-suite/*.js | faucet",
+    "test-inprogress": "tape tests/test-suite/inprogress/*.js | faucet"
   },
   "repository": {
     "type": "git",
