@@ -365,7 +365,8 @@ const luaV_execute = function(L) {
                 let numberop2 = tointeger(op2);
 
                 if (numberop1 !== false && numberop2 !== false) {
-                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (numberop1 >> numberop2));
+                    // >>> to have same overflow semantic as lua
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (numberop1 >>> numberop2)|0);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_SHR);
                 }
@@ -386,7 +387,6 @@ const luaV_execute = function(L) {
             }
             case OCi.OP_BNOT: {
                 let op = L.stack[RB(L, base, i)];
-                let numberop = tonumber(op);
 
                 if (op.ttisinteger()) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, ~op.value);
