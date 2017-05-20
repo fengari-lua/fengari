@@ -1,4 +1,7 @@
+#!/usr/bin/env node
 "use strict";
+
+global.WEB = false;
 
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
@@ -15,4 +18,4 @@ lualib.luaL_openlibs(L);
 
 lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
-lua.lua_call(L, 0, -1);
+lua.lua_call(L, 0, 0);
