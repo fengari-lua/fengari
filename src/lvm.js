@@ -312,7 +312,7 @@ const luaV_execute = function(L) {
                 let numberop1 = tointeger(op1);
                 let numberop2 = tointeger(op2);
 
-                if (numberop1 !== false && numberop2) {
+                if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (numberop1 & numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_BAND);
@@ -325,7 +325,7 @@ const luaV_execute = function(L) {
                 let numberop1 = tointeger(op1);
                 let numberop2 = tointeger(op2);
 
-                if (numberop1 !== false && numberop2) {
+                if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (numberop1 | numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_BOR);
@@ -338,7 +338,7 @@ const luaV_execute = function(L) {
                 let numberop1 = tointeger(op1);
                 let numberop2 = tointeger(op2);
 
-                if (numberop1 !== false && numberop2) {
+                if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (numberop1 ^ numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_BXOR);
@@ -351,7 +351,7 @@ const luaV_execute = function(L) {
                 let numberop1 = tointeger(op1);
                 let numberop2 = tointeger(op2);
 
-                if (numberop1 !== false && numberop2) {
+                if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (numberop1 << numberop2)); // TODO: luaV_shiftl ?
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_SHL);
@@ -364,7 +364,7 @@ const luaV_execute = function(L) {
                 let numberop1 = tointeger(op1);
                 let numberop2 = tointeger(op2);
 
-                if (numberop1 !== false && numberop2) {
+                if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (numberop1 >> numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_SHR);
