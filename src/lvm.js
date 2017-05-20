@@ -45,7 +45,7 @@ const luaV_finishOp = function(L) {
                 ci.callstatus ^= lstate.CIST_LEQ;  /* clear mark */
                 res = res !== 1 ? 1 : 0;  /* negate result */
             }
-            assert(ci.l_code[ci.l_savedpc] === OCi.OP_JMP);
+            assert(ci.l_code[ci.l_savedpc].opcode === OCi.OP_JMP);
             if (res !== inst.A)  /* condition failed? */
                 ci.l_savedpc++;  /* skip jump instruction */
             break;
@@ -66,7 +66,7 @@ const luaV_finishOp = function(L) {
             break;
         }
         case OCi.OP_TFORCALL: {
-            assert(ci.l_code[ci.l_savedpc] === OCi.OP_TFORLOOP);
+            assert(ci.l_code[ci.l_savedpc].opcode === OCi.OP_TFORLOOP);
             L.top = ci.top;  /* correct top */
             break;
         }
