@@ -187,7 +187,7 @@ const luaH_next = function(L, table, keyI) {
                 return false;
         } else {
             /* Try dead keys */
-            entry = table.dead_weak.get(hash) || table.dead_strong.get(hash);
+            entry = (table.dead_weak && table.dead_weak.get(hash)) || table.dead_strong.get(hash);
             if (!entry)
                 /* item not in table */
                 return ldebug.luaG_runerror(L, defs.to_luastring("invalid key to 'next'"));
