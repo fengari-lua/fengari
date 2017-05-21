@@ -53,6 +53,7 @@ IRC: #fengari on freenode
 - [x] C API
 - [x] Auxiliary library
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
+    - [x] `bitwise.lua` (16/16)
     - [x] `calls.lua` (32/32)
     - [x] `closure.lua` (16/16)
     - [x] `constructs.lua` (`_soft`) (10/10)
@@ -62,7 +63,6 @@ IRC: #fengari on freenode
     - [x] `nextvar.lua` (44/44)
     - [x] `strings.lua` (34/34)
     - [x] `vararg.lua` (8/8)
-    - [ ] `bitwise.lua` (9/16)
     - [ ] `coroutine.lua` (32/40)
     - [ ] `errors.lua` (46/64)
     - [ ] `goto.lua` (16/18)
