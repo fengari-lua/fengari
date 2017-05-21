@@ -846,11 +846,8 @@ test("[test-suite] errors: several tests that exhaust the Lua stack", { skip: tr
         end
         -- repeated stack overflows (to check stack recovery)
         assert(checkstackmessage(doit('y()')))
-        print('+')
         assert(checkstackmessage(doit('y()')))
-        print('+')
         assert(checkstackmessage(doit('y()')))
-        print('+')
     `, L;
     
     t.plan(2);
@@ -882,7 +879,6 @@ test("[test-suite] errors: error lines in stack overflow", { skip: true }, funct
           l1 = debug.getinfo(x, "l").currentline; y()
         end
         local _, stackmsg = xpcall(g, debug.traceback, 1)
-        print('+')
         local stack = {}
         for line in string.gmatch(stackmsg, "[^\\n]*") do
           local curr = string.match(line, ":(%d+):")
@@ -921,7 +917,6 @@ test("[test-suite] errors: error in error handling", function (t) {
     let luaCode = `
         local res, msg = xpcall(error, error)
         assert(not res and type(msg) == 'string')
-        print('+')
 
         local function f (x)
           if x==0 then error('a\\n')
