@@ -242,7 +242,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (op1.value * op2.value)|0);
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, Math.imul(op1.value, op2.value));
                 } else if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, numberop1 * numberop2);
                 } else {
