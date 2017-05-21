@@ -242,7 +242,7 @@ const auxgetinfo = function(L, what, ar, f, ci) {
             case 'n': {
                 let r = getfuncname(L, ci);
                 if (r === null) {
-                    ar.namewhat = null;
+                    ar.namewhat = [];
                     ar.name = null;
                 } else {
                     ar.namewhat = r.funcname;

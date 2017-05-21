@@ -151,8 +151,8 @@ const db_getinfo = function(L) {
         settabsb(L, lua.to_luastring("isvararg", true), ar.isvararg);
     }
     if (options.indexOf('n'.charCodeAt(0)) > - 1) {
-        settabss(L, lua.to_luastring("name", true), ar.name ? ar.name : null);
-        settabss(L, lua.to_luastring("namewhat", true), ar.namewhat ? ar.namewhat : null);
+        settabss(L, lua.to_luastring("name", true), ar.name);
+        settabss(L, lua.to_luastring("namewhat", true), ar.namewhat);
     }
     if (options.indexOf('t'.charCodeAt(0)) > - 1)
         settabsb(L, lua.to_luastring("istailcall", true), ar.istailcall);

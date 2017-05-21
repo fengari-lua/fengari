@@ -79,7 +79,7 @@ const pushfuncname = function(L, ar) {
         lua.lua_pushfstring(L, lua.to_luastring("function '%s'"), lua.lua_tostring(L, -1));
         lua.lua_remove(L, -2);  /* remove name */
     }
-    else if (ar.namewhat)  /* is there a name from code? */
+    else if (ar.namewhat.length !== 0)  /* is there a name from code? */
         lua.lua_pushfstring(L, lua.to_luastring("%s '%s'"), ar.namewhat, ar.name);  /* use it */
     else if (ar.what && ar.what[0] === 'm'.charCodeAt(0))  /* main? */
         lua.lua_pushliteral(L, "main chunk");
