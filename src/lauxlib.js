@@ -142,7 +142,7 @@ const luaL_argerror = function(L, arg, extramsg) {
     if (!lua.lua_getstack(L, 0, ar))  /* no stack frame? */
         return luaL_error(L, lua.to_luastring("bad argument #%d (%s)"), arg, extramsg);
 
-    lua.lua_getinfo(L, 'n', ar);
+    lua.lua_getinfo(L, ['n'.charCodeAt(0)], ar);
 
     if (ar.namewhat === lua.to_luastring('method', true)) {
         arg--;  /* do not count 'self' */
