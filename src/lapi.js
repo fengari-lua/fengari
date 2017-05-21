@@ -800,7 +800,7 @@ const lua_stringtonumber = function(L, s) {
     if (tv) {
         L.stack[L.top++] = tv;
         assert(L.top <= L.ci.top, "stack overflow");
-        return s.length;
+        return s.length+1;
     }
     return 0;
 };

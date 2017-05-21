@@ -162,7 +162,7 @@ const luaB_tonumber = function(L) {
             return 1;
         } else {
             let s = lua.lua_tostring(L, 1);
-            if (s !== null && lua.lua_stringtonumber(L, s) === s.length)
+            if (s !== null && lua.lua_stringtonumber(L, s) === s.length+1)
                 return 1;  /* successful conversion to number */
         }
     } else {
