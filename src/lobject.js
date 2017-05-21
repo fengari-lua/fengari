@@ -230,15 +230,13 @@ const PRE  = defs.to_luastring("[string \"");
 const POS  = defs.to_luastring("\"]");
 
 const luaO_chunkid = function(source, bufflen) {
-    source = source instanceof TValue ? source.value : source;
-    bufflen = bufflen instanceof TValue ? bufflen.value : bufflen;
     let l = source.length;
-    let out = [];
+    let out;
     if (source[0] === char['=']) {  /* 'literal' source */
         if (l < bufflen)  /* small enough? */
             out = source.slice(1);
         else {  /* truncate it */
-            out = out.concat(source.slice(1, bufflen));
+            out = source.slice(1, bufflen);
         }
     } else if (source[0] === char['@']) {  /* file name */
         if (l <= bufflen)  /* small enough? */
@@ -249,19 +247,16 @@ const luaO_chunkid = function(source, bufflen) {
         }
     } else {  /* string; format as [string "source"] */
         let nli = source.indexOf(char['\n']);  /* find first new line (if any) */
-        let nl = nli > -1 ? source.slice(nli) : null;
         out = PRE;  /* add prefix */
         bufflen -= PRE.length + RETS.length + POS.length + 1;  /* save space for prefix+suffix+'\0' */
-        if (l < bufflen && nl === null) {  /* small one-line source? */
-            out = out.concat(source);  /* keep it */
+        if (l < bufflen && nli === -1) {  /* small one-line source? */
+            out = out.concat(source, POS);  /* keep it */
         } else {
-            if (nl !== null) l = nl.length - source.length;  /* stop at first newline */
+            if (nli !== -1) l = nli;  /* stop at first newline */
             if (l > bufflen) l = bufflen;
-            out = out.concat(source).concat(RETS);
+            out = out.concat(source.slice(0, l), RETS, POS);
         }
-        out = out.concat(POS);
     }
-
     return out;
 };
 
