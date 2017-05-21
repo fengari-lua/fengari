@@ -386,7 +386,7 @@ const l_str2int = function(s) {
         s = s.slice(2);  /* skip '0x' */
 
         for (; ljstype.lisxdigit(s[0]); s = s.slice(1)) {
-            a = a * 16 + luaO_hexavalue(s[0]);
+            a = (a * 16 + luaO_hexavalue(s[0]))|0;
             empty = false;
         }
     } else {  /* decimal */
@@ -394,7 +394,7 @@ const l_str2int = function(s) {
             let d = s[0] - char['0'];
             if (a >= MAXBY10 && (a > MAXBY10 || d > MAXLASTD + neg))  /* overflow? */
                 return null;  /* do not accept it (as integer) */
-            a = a * 10 + d;
+            a = (a * 10 + d)|0;
             empty = false;
         }
     }
