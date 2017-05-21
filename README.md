@@ -53,7 +53,6 @@
 - [x] C API
 - [x] Auxiliary library
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
-    - [x] `attrib.lua`
     - [x] `bitwise.lua` (16/16)
     - [x] `calls.lua` (32/32)
     - [x] `closure.lua` (16/16)
@@ -66,6 +65,7 @@
     - [x] `nextvar.lua` (44/44)
     - [x] `strings.lua` (34/34)
     - [x] `vararg.lua` (8/8)
+    - [ ] `attrib.lua`
     - [ ] `coroutine.lua` (32/40)
     - [ ] `math.lua` (44/68)
     - [ ] `pm.lua` (27/38)
