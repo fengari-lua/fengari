@@ -399,7 +399,7 @@ const getobjname = function(p, lastpc, reg) {
                 let t = i.B;  /* table index */
                 let vn = op === 'OP_GETTABLE' ? lfunc.luaF_getlocalname(p, t + 1, pc) : upvalname(p, t);
                 r.name = kname(p, pc, k).name;
-                r.funcname = vn && vn === "_ENV" ? defs.to_luastring("global", true) : defs.to_luastring("field", true);
+                r.funcname = vn && defs.to_jsstring(vn) === "_ENV" ? defs.to_luastring("global", true) : defs.to_luastring("field", true);
                 return r;
             }
             case 'OP_GETUPVAL': {
