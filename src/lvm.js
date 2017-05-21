@@ -46,7 +46,7 @@ const luaV_finishOp = function(L) {
                 res = res !== 1 ? 1 : 0;  /* negate result */
             }
             assert(ci.l_code[ci.l_savedpc].opcode === OCi.OP_JMP);
-            if (res !== inst.A)  /* condition failed? */
+            if (res !== (inst.A ? true : false))  /* condition failed? */
                 ci.l_savedpc++;  /* skip jump instruction */
             break;
         }
