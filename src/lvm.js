@@ -376,7 +376,7 @@ const luaV_execute = function(L) {
                 let numberop = tonumber(op);
 
                 if (op.ttisinteger()) {
-                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, -op.value);
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (-op.value)|0);
                 } else if (numberop !== false) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, -numberop);
                 } else {
