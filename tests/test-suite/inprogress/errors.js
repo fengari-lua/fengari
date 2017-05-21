@@ -1034,7 +1034,7 @@ test("[test-suite] errors: non string messages", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadbuffer(L, lua.to_luastring(prefix + luaCode), null, lua.to_luastring("@errors.lua"));
 
     }, "Lua program loaded without error");
 
