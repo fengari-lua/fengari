@@ -69,8 +69,9 @@ test("[test-suite] goto: error messages", function (t) {
 });
 
 
-test("[test-suite] goto: simple gotos", function (t) {
+test("[test-suite] goto", function (t) {
     let luaCode = `
+        -- simple gotos
         local x
         do
           local y = 12
@@ -79,31 +80,8 @@ test("[test-suite] goto: simple gotos", function (t) {
           ::l1:: x = y; goto l2
         end
         ::l3:: ::l3_1:: assert(x == 13)
-    `, L;
-    
-    t.plan(2);
 
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
-});
-
-
-test("[test-suite] goto: long labels", function (t) {
-    let luaCode = `
+        -- long labels
         do
           local prog = [[
           do
@@ -119,57 +97,11 @@ test("[test-suite] goto: long labels", function (t) {
           prog = string.format(prog, label, label, label, label)
           assert(assert(load(prog))() == 31)
         end
-    `, L;
-    
-    t.plan(2);
 
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
-});
-
-
-test("[test-suite] goto: goto to correct label when nested", function (t) {
-    let luaCode = `
+        -- goto to correct label when nested
         do goto l3; ::l3:: end   -- does not loop jumping to previous label 'l3'
-    `, L;
-    
-    t.plan(2);
 
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
-});
-
-
-test("[test-suite] goto: ok to jump over local dec. to end of block", function (t) {
-    let luaCode = `
+        -- ok to jump over local dec. to end of block
         do
           goto l1
           local a = 23
