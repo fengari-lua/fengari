@@ -1135,8 +1135,8 @@ const luaK_posfix = function(fs, op, e1, e2, line) {
             break;
         }
         case BinOpr.OPR_CONCAT: {
-            let ins = getinstruction(fs, e2);
             luaK_exp2val(fs, e2);
+            let ins = getinstruction(fs, e2);
             if (e2.k === ek.VRELOCABLE && ins.opcode === OpCodesI.OP_CONCAT) {
                 assert(e1.u.info === ins.B - 1);
                 freeexp(fs, e1);
