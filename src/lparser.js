@@ -171,9 +171,12 @@ const error_expected = function(ls, token) {
 const errorlimit = function(fs, limit, what) {
     let L = fs.ls.L;
     let line = fs.f.linedefined;
-    let where = (line === 0) ? "main function" : `function at line ${line}`;
-    let msg = `too many ${what} (limit is ${limit}) in ${where}`;
-    llex.luaX_syntaxerror(fs.ls, defs.to_luastring(msg));
+    let where = (line === 0)
+        ? defs.to_luastring("main function", true)
+        : lobject.luaO_pushfstring(L, defs.to_luastring("function at line %d", true), line);
+    let msg = lobject.luaO_pushfstring(L, defs.to_luastring("too many %s (limit is %d) in %s", true),
+        what, limit, where);
+    llex.luaX_syntaxerror(fs.ls, msg);
 };
 
 const checklimit = function(fs, v, l, what) {
