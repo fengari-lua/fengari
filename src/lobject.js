@@ -372,7 +372,7 @@ const l_str2d = function(s) {
     return end;
 };
 
-const MAXBY10  = llimit.MAX_INT / 10;
+const MAXBY10  = Math.floor(llimit.MAX_INT / 10);
 const MAXLASTD = llimit.MAX_INT % 10;
 
 const l_str2int = function(s) {
