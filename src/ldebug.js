@@ -514,7 +514,7 @@ const isinstack = function(L, ci, o) {
 ** upvalues.)
 */
 const getupvalname = function(L, ci, o) {
-    let c = ci.func;
+    let c = ci.func.value;
     for (let i = 0; i < c.nupvalues; i++) {
         if (c.upvals[i].val() === o) {
             return {
