@@ -311,7 +311,7 @@ const lua_strx2number = function(s) {
     neg = s[0] === char['-'];  /* check signal */
     s = neg || s[0] === char['+'] ? s.slice(1) : s;  /* skip sign if one */
     if (!(s[0] === char['0'] && (s[1] === char['x'] || s[1] === char['X'])))  /* check '0x' */
-        return 0.0;  /* invalid format (no '0x') */
+        return null;  /* invalid format (no '0x') */
 
     for (s = s.slice(2); ; s = s.slice(1)) {  /* skip '0x' and read numeral */
         if (s[0] === dot) {
@@ -328,7 +328,7 @@ const lua_strx2number = function(s) {
     }
 
     if (nosigdig + sigdig === 0)  /* no digits? */
-        return 0.0;  /* invalid format */
+        return null;  /* invalid format */
     e *= 4;  /* each digit multiplies/divides value by 2^4 */
     if (s[0] === char['p'] || s[0] === char['P']) {  /* exponent part? */
         let exp1 = 0;  /* exponent value */
@@ -337,7 +337,7 @@ const lua_strx2number = function(s) {
         neg1 = s[0] === char['-'];  /* check signal */
         s = neg1 || s[0] === char['+'] ? s.slice(1) : s;  /* skip sign if one */
         if (!ljstype.lisdigit(s[0]))
-            return 0.0;  /* invalid; must have at least one digit */
+            return null;  /* invalid; must have at least one digit */
         while (ljstype.lisdigit(s[0])) {  /* read exponent */
             exp1 = exp1 * 10 + s[0] - char['0'];
             s = s.slice(1);
