@@ -240,7 +240,7 @@ const read_numeral = function(ls, seminfo) {
         else break;
     }
 
-    save(ls, 0);
+    // save(ls, 0);
 
     let obj = lobject.luaO_str2num(ls.buff.buffer);
     if (obj === false)  /* format error? */

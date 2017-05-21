@@ -346,7 +346,8 @@ const lua_strx2number = function(s) {
         e += exp1;
     }
     if (neg) r = -r;
-    return defs.to_jsstring(s).trim().search(/s/) < 0 ? luaconf.ldexp(r, e) : null;  /* Only valid if nothing left is s*/
+    while (ljstype.lisspace(s[0])) s = s.slice(1);  /* skip trailing spaces */
+    return s.length === 0 ? luaconf.ldexp(r, e) : null;  /* Only valid if nothing left is s*/
 };
 
 const l_str2dloc = function(s, mode) {
@@ -401,7 +402,7 @@ const l_str2int = function(s) {
 
     while (ljstype.lisspace(s[0])) s = s.slice(1);  /* skip trailing spaces */
 
-    if (empty || (s.length > 0 && s[0] !== 0)) return null;  /* something wrong in the numeral */
+    if (empty || (s.length !== 0)) return null;  /* something wrong in the numeral */
     else {
         return (neg ? -a : a)|0;
     }
