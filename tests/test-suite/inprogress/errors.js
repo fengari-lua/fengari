@@ -1202,7 +1202,7 @@ test("[test-suite] errors: testing syntax limits", function (t) {
                        string.rep(repc, maxClevel - 10)
           assert(load(s))   -- 190 levels is OK
           s = init .. string.rep(rep, maxClevel + 1)
-          checkmessage(s, "too many C levels")
+          checkmessage(s, "too many JS levels")
         end
 
         testrep("local a; a", ",a", "= 1", ",1")    -- multiple assignment
