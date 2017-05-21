@@ -394,8 +394,9 @@ const closegoto = function(ls, g, label) {
     assert(eqstr(gt.name, label.name));
     if (gt.nactvar < label.nactvar) {
         let vname = getlocvar(fs, gt.nactvar).varname;
-        let msg = lobject.luaO_pushfstring(ls.L, defs.to_luastring("<goto %s> at line %d jumps into the scope of local '%s'"),
-            gt.name, gt.line, vname);
+        let msg = lobject.luaO_pushfstring(ls.L,
+            defs.to_luastring("<goto %s> at line %d jumps into the scope of local '%s'"),
+            gt.name.getstr(), gt.line, vname.getstr());
         semerror(ls, msg);
     }
     lcode.luaK_patchlist(fs, gt.pc, label.pc);
@@ -502,7 +503,7 @@ const undefgoto = function(ls, gt) {
     let msg = llex.isreserved(gt.name)
               ? "<%s> at line %d not inside a loop"
               : "no visible label '%s' for <goto> at line %d";
-    msg = lobject.luaO_pushfstring(ls.L, defs.to_luastring(msg), gt.name, gt.line);
+    msg = lobject.luaO_pushfstring(ls.L, defs.to_luastring(msg), gt.name.getstr(), gt.line);
     semerror(ls, msg);
 };
 
@@ -1162,7 +1163,10 @@ const gotostat = function(ls, pc) {
 const checkrepeated = function(fs, ll, label) {
     for (let i = fs.bl.firstlabel; i < ll.n; i++) {
         if (eqstr(label, ll.arr[i].name)) {
-            semerror(fs.ls, defs.to_luastring(`label '${label.jsstring()}' already defined on line ${ll.arr[i].line}`));
+            let msg = lobject.luaO_pushfstring(fs.ls.L,
+                    defs.to_luastring("label '%s' already defined on line %d", true),
+                    label.getstr(), ll.arr[i].line);
+            semerror(fs.ls, msg);
         }
     }
 };
