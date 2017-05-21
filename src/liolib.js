@@ -80,7 +80,14 @@ const getiofile = function(L, findex) {
 
 const g_iofile = function(L, f, mode) {
     if (!lua.lua_isnoneornil(L, 1)) {
-        lauxlib.luaL_error(L, lua.to_luastring("opening files not yet implemented"));
+        let filename = lua.lua_tostring(L, 1);
+        if (filename)
+            lauxlib.luaL_error(L, lua.to_luastring("opening files not yet implemented"));
+        else {
+            tofile(L);  /* check that it's a valid file handle */
+            lua.lua_pushvalue(L, 1);
+        }
+        lua.lua_setfield(L, lua.LUA_REGISTRYINDEX, f);
     }
     /* return current value */
     lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, f);
