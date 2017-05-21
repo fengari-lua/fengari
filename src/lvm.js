@@ -801,8 +801,7 @@ const luaV_tointeger = function(obj, mode) {
                 f += 1;  /* convert floor to ceil (remember: n !== f) */
         }
 
-        let res = luaconf.lua_numbertointeger(f);
-        return res !== 0 ? res : (n === 0 ? 0 : false);
+        return luaconf.lua_numbertointeger(f);
     } else if (obj.ttisinteger()) {
         return obj.value;
     } else if (obj.ttisstring()) {
