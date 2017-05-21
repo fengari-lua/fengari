@@ -350,9 +350,17 @@ const lua_strx2number = function(s) {
     return s.length === 0 ? luaconf.ldexp(r, e) : null;  /* Only valid if nothing left is s*/
 };
 
+const lua_str2number = function(s) {
+    /* parseFloat ignores trailing junk, validate with regex first */
+    let str = defs.to_jsstring(s);
+    if (!/^[\t\v\f \n\r]*[\+\-]?([0-9]+\.?[0-9]*|\.[0-9]*)([eE][\+\-]?[0-9]+)?[\t\v\f \n\r]*$/.test(str))
+        return null;
+    let flt = parseFloat(str);
+    return !isNaN(flt) ? flt : null;
+};
+
 const l_str2dloc = function(s, mode) {
-    let flt = mode === 'x' ? lua_strx2number(s) : parseFloat(defs.to_jsstring(s));
-    return !isNaN(flt) ? flt : null;  /* OK if no trailing characters */
+    return mode === 'x' ? lua_strx2number(s) : lua_str2number(s);
 };
 
 const l_str2d = function(s) {
