@@ -17,7 +17,7 @@ test("[test-suite] events: testing metatable", function (t) {
 
         _ENV = setmetatable({}, {__index=_G})
 
-        collectgarbage()
+        --collectgarbage()
 
         X = X+10
         assert(X == 30 and _G.X == 20)
@@ -57,7 +57,7 @@ test("[test-suite] events: testing metatable", function (t) {
         a.parent = {z=25, x=12, [4] = 24}
         assert(a[1] == 10 and a.z == 28 and a[4] == 27 and a.x == "10")
 
-        collectgarbage()
+        --collectgarbage()
 
         a = setmetatable({}, t)
         function f(t, i, v) rawset(t, i, v-3) end
@@ -244,7 +244,7 @@ test("[test-suite] events: test comparison", function (t) {
     let luaCode = `
         t = {}
         t.__lt = function (a,b,c)
-          collectgarbage()
+          --collectgarbage()
           assert(c == nil)
           if type(a) == 'table' then a = a.x end
           if type(b) == 'table' then b = b.x end

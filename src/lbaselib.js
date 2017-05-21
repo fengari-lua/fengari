@@ -85,6 +85,15 @@ const luaB_rawset = function(L) {
     return 1;
 };
 
+const opts = ["stop", "restart", "collect",
+"count", "step", "setpause", "setstepmul",
+"isrunning"].map((e) => lua.to_luastring(e));
+const luaB_collectgarbage = function(L) {
+    lauxlib.luaL_checkoption(L, 1, lua.to_luastring("collect"), opts);
+    lauxlib.luaL_checkinteger(L, 2);
+    lauxlib.luaL_error(L, lua.to_luastring("lua_gc not implemented"));
+};
+
 const luaB_type = function(L) {
     let t = lua.lua_type(L, 1);
     lauxlib.luaL_argcheck(L, t !== lua.LUA_TNONE, 1, lua.to_luastring("value expected", true));
@@ -308,8 +317,8 @@ const luaB_load = function(L) {
 };
 
 const base_funcs = {
-    "collectgarbage": function () { return 0; },
     "assert":         luaB_assert,
+    "collectgarbage": luaB_collectgarbage,
     "error":          luaB_error,
     "getmetatable":   luaB_getmetatable,
     "ipairs":         luaB_ipairs,

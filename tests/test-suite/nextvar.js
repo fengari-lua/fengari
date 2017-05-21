@@ -658,7 +658,7 @@ test("[test-suite] nextvar: erasing values", function (t) {
           n = n+1
           assert(t[k] == v)
           t[k] = nil
-          collectgarbage()
+          --collectgarbage()
           assert(t[k] == nil)
         end
         assert(n == 5)
