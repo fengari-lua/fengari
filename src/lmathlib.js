@@ -203,15 +203,15 @@ const math_type = function(L) {
 const math_fmod = function(L) {
     if (lua.lua_isinteger(L, 1) && lua.lua_isinteger(L, 2)) {
         let d = lua.lua_tointeger(L, 2);
-        if (Math.abs(d) + 1 <= 1) {
-            lauxlib.luaL_argcheck(L, d !== 0, 2, lua.to_luastring("zero", true));
-            lua.lua_pushinteger(L, 0);
+        /* no special case needed for -1 in javascript */
+        if (d === 0) {
+            lauxlib.luaL_argerror(L, 2, lua.to_luastring("zero", true));
         } else
-            lua.lua_pushinteger(L, lua.lua_tointeger(L, 1) % d);
+            lua.lua_pushinteger(L, (lua.lua_tointeger(L, 1) % d)|0);
     } else {
         let a = lauxlib.luaL_checknumber(L, 1);
         let b = lauxlib.luaL_checknumber(L, 2);
-        lua.lua_pushnumber(L, Number((a - (Math.floor(a / b) * b)).toPrecision(8)));
+        lua.lua_pushnumber(L, a%b);
     }
     return 1;
 };
