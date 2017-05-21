@@ -411,7 +411,7 @@ const getobjname = function(p, lastpc, reg) {
             case 'OP_LOADKX': {
                 let b = op === 'OP_LOADK' ? i.Bx : p.code[pc + 1].Ax;
                 if (p.k[b].ttisstring()) {
-                    r.name = p.k[b].tsvalue();
+                    r.name = p.k[b].svalue();
                     r.funcname = defs.to_luastring("constant", true);
                     return r;
                 }
