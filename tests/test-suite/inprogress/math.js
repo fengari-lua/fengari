@@ -16,6 +16,10 @@ const prefix = `
     local intbits = math.floor(math.log(maxint, 2) + 0.5) + 1
     --assert((1 << intbits) == 0)
 
+    local function isNaN (x)
+      return (x ~= x)
+    end
+
     local function checkerror (msg, f, ...)
       local s, err = pcall(f, ...)
       assert(not s and string.find(err, msg))
@@ -81,9 +85,6 @@ test("[test-suite] math: number of bits in the mantissa of a floating-point numb
           end
         end
 
-        local function isNaN (x)
-          return (x ~= x)
-        end
 
         assert(isNaN(0/0))
         assert(not isNaN(1/0))
