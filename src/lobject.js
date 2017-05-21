@@ -527,8 +527,8 @@ const intarith = function(L, op, v1, v2) {
         case defs.LUA_OPBAND: return (v1 & v2);
         case defs.LUA_OPBOR:  return (v1 | v2);
         case defs.LUA_OPBXOR: return (v1 ^ v2);
-        case defs.LUA_OPSHL:  return (v1 << v2);
-        case defs.LUA_OPSHR:  return (v1 >>> v2)|0;
+        case defs.LUA_OPSHL:  return lvm.luaV_shiftl(v1, v2);
+        case defs.LUA_OPSHR:  return lvm.luaV_shiftl(v1, -v2);
         case defs.LUA_OPUNM:  return (0 - v1)|0;
         case defs.LUA_OPBNOT: return (~0 ^ v1);
         default: assert(0);

@@ -352,7 +352,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tointeger(op2);
 
                 if (numberop1 !== false && numberop2 !== false) {
-                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (numberop1 << numberop2)); // TODO: luaV_shiftl ?
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, luaV_shiftl(numberop1, numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_SHL);
                 }
@@ -365,8 +365,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tointeger(op2);
 
                 if (numberop1 !== false && numberop2 !== false) {
-                    // >>> to have same overflow semantic as lua
-                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (numberop1 >>> numberop2)|0);
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, luaV_shiftl(numberop1, -numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_SHR);
                 }
@@ -933,6 +932,19 @@ const luaV_objlen = function(L, ra, rb) {
     ltm.luaT_callTM(L, tm, rb, rb, ra, 1);
 };
 
+const NBITS = 32;
+
+const luaV_shiftl = function(x, y) {
+    if (y < 0) {  /* shift right? */
+        if (y <= -NBITS) return 0;
+        else return x >>> -y;
+    }
+    else {  /* shift left */
+        if (y >= NBITS) return 0;
+        else return x << y;
+    }
+};
+
 const tostring = function(L, i) {
     let o = L.stack[i];
 
@@ -1107,6 +1119,7 @@ module.exports.luaV_lessequal    = luaV_lessequal;
 module.exports.luaV_lessthan     = luaV_lessthan;
 module.exports.luaV_objlen       = luaV_objlen;
 module.exports.luaV_rawequalobj = luaV_rawequalobj;
+module.exports.luaV_shiftl       = luaV_shiftl;
 module.exports.luaV_tointeger    = luaV_tointeger;
 module.exports.settable          = settable;
 module.exports.tointeger         = tointeger;
