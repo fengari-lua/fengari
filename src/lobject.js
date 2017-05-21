@@ -468,7 +468,7 @@ const luaO_pushvfstring = function(L, fmt, argp) {
         switch(fmt[e+1]) {
             case char['s']:
                 let s = argp[a++];
-                if (s === null) s = defs.to_luastring("(null)", true)
+                if (s === null) s = defs.to_luastring("(null)", true);
                 pushstr(L, s);
                 break;
             case char['c']:
