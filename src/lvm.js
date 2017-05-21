@@ -257,7 +257,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (op1.value - Math.floor(op1.value / op2.value) * op2.value)|0);
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, luaV_mod(L, op1.value, op2.value));
                 } else if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, llimit.luai_nummod(L, numberop1, numberop2));
                 } else {
@@ -298,7 +298,7 @@ const luaV_execute = function(L) {
                 let numberop2 = tonumber(op2);
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, Math.floor(op1.value / op2.value)|0);
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, luaV_div(L, op1.value, op2.value));
                 } else if (numberop1 !== false && numberop2 !== false) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, Math.floor(numberop1 / numberop2));
                 } else {
@@ -932,6 +932,19 @@ const luaV_objlen = function(L, ra, rb) {
     ltm.luaT_callTM(L, tm, rb, rb, ra, 1);
 };
 
+const luaV_div = function(L, m, n) {
+    if (n === 0)
+        ldebug.luaG_runerror(L, defs.to_luastring("attempt to divide by zero"));
+    return Math.floor(m / n)|0;
+};
+
+// % semantic on negative numbers is different in js
+const luaV_mod = function(L, m, n) {
+    if (n === 0)
+        ldebug.luaG_runerror(L, defs.to_luastring("attempt to perform 'n%%0'"));
+    return (m - Math.floor(m / n) * n)|0;
+};
+
 const NBITS = 32;
 
 const luaV_shiftl = function(x, y) {
@@ -1111,12 +1124,14 @@ module.exports.forlimit          = forlimit;
 module.exports.gettable          = gettable;
 module.exports.l_strcmp          = l_strcmp;
 module.exports.luaV_concat       = luaV_concat;
+module.exports.luaV_div          = luaV_div;
 module.exports.luaV_equalobj     = luaV_equalobj;
 module.exports.luaV_execute      = luaV_execute;
 module.exports.luaV_finishOp     = luaV_finishOp;
 module.exports.luaV_finishset    = luaV_finishset;
 module.exports.luaV_lessequal    = luaV_lessequal;
 module.exports.luaV_lessthan     = luaV_lessthan;
+module.exports.luaV_mod          = luaV_mod;
 module.exports.luaV_objlen       = luaV_objlen;
 module.exports.luaV_rawequalobj = luaV_rawequalobj;
 module.exports.luaV_shiftl       = luaV_shiftl;

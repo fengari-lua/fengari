@@ -522,8 +522,8 @@ const intarith = function(L, op, v1, v2) {
         case defs.LUA_OPADD:  return (v1 + v2)|0;
         case defs.LUA_OPSUB:  return (v1 - v2)|0;
         case defs.LUA_OPMUL:  return (v1 * v2)|0;
-        case defs.LUA_OPMOD:  return (v1 - Math.floor(v1 / v2) * v2)|0; // % semantic on negative numbers is different in js
-        case defs.LUA_OPIDIV: return Math.floor(v1 / v2)|0;
+        case defs.LUA_OPMOD:  return lvm.luaV_mod(L, v1, v2);
+        case defs.LUA_OPIDIV: return lvm.luaV_div(L, v1, v2);
         case defs.LUA_OPBAND: return (v1 & v2);
         case defs.LUA_OPBOR:  return (v1 | v2);
         case defs.LUA_OPBXOR: return (v1 ^ v2);
