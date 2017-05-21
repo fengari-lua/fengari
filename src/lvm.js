@@ -259,7 +259,7 @@ const luaV_execute = function(L) {
                 if (op1.ttisinteger() && op2.ttisinteger()) {
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, (op1.value - Math.floor(op1.value / op2.value) * op2.value)|0);
                 } else if (numberop1 !== false && numberop2 !== false) {
-                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, (numberop1 - Math.floor(numberop1 / numberop2) * numberop2));
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, llimit.luai_nummod(L, numberop1, numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, ra, ltm.TMS.TM_MOD);
                 }
