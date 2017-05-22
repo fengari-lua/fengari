@@ -804,9 +804,10 @@ const luaV_tointeger = function(obj, mode) {
         return luaconf.lua_numbertointeger(f);
     } else if (obj.ttisinteger()) {
         return obj.value;
-    } else if (obj.ttisstring()) {
-        let n = lobject.luaO_str2num(obj.svalue());
-        return n !== false ? luaV_tointeger(n, mode) : false;
+    } else if (cvt2num(obj)) {
+        let v = lobject.luaO_str2num(obj.svalue());
+        if (v !== false)
+            return luaV_tointeger(v, mode);
     }
 
     return false;
@@ -816,13 +817,14 @@ const tointeger = function(o) {
     return o.ttisinteger() ? o.value : luaV_tointeger(o, 0);
 };
 
-const tonumber = function(v) {
-    if (v.ttnov() === CT.LUA_TNUMBER)
-        return v.value;
+const tonumber = function(o) {
+    if (o.ttnov() === CT.LUA_TNUMBER)
+        return o.value;
 
-    if (v.ttnov() === CT.LUA_TSTRING) {
-        let number = lobject.luaO_str2num(v.svalue());
-        return number ? number.value : false;
+    if (cvt2num(o)) { /* string convertible to number? */
+        let v = lobject.luaO_str2num(o.svalue());
+        if (v !== false)
+            return v.value;
     }
 
     return false;
@@ -962,6 +964,10 @@ const cvt2str = function(o) {
     return o.ttisnumber();
 };
 
+const cvt2num = function(o) {
+    return o.ttisstring();
+};
+
 const tostring = function(L, i) {
     let o = L.stack[i];
 
@@ -1095,6 +1101,7 @@ module.exports.RC                = RC;
 module.exports.RKB               = RKB;
 module.exports.RKC               = RKC;
 module.exports.cvt2str           = cvt2str;
+module.exports.cvt2num           = cvt2num;
 module.exports.dojump            = dojump;
 module.exports.donextjump        = donextjump;
 module.exports.forlimit          = forlimit;
