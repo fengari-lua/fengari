@@ -546,7 +546,7 @@ const luaG_typeerror = function(L, o, op) {
 };
 
 const luaG_concaterror = function(L, p1, p2) {
-    if (p1.ttisstring() || p1.ttisnumber()) p1 = p2;
+    if (p1.ttisstring() || lvm.cvt2str(p1)) p1 = p2;
     luaG_typeerror(L, p1, defs.to_luastring('concatenate', true));
 };
 

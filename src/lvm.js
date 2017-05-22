@@ -958,12 +958,16 @@ const luaV_shiftl = function(x, y) {
     }
 };
 
+const cvt2str = function(o) {
+    return o.ttisnumber();
+};
+
 const tostring = function(L, i) {
     let o = L.stack[i];
 
     if (o.ttisstring()) return true;
 
-    if (o.ttisnumber() && !isNaN(o.value)) {
+    if (cvt2str(o) && !isNaN(o.value)) {
         L.stack[i] = new lobject.TValue(CT.LUA_TLNGSTR, lstring.luaS_bless(L, defs.to_luastring(`${o.value}`)));
         return true;
     }
@@ -985,7 +989,7 @@ const luaV_concat = function(L, total) {
         let top = L.top;
         let n = 2; /* number of elements handled in this pass (at least 2) */
 
-        if (!(L.stack[top-2].ttisstring() || L.stack[top-2].ttisnumber()) || !tostring(L, top - 1)) {
+        if (!(L.stack[top-2].ttisstring() || cvt2str(L.stack[top-2])) || !tostring(L, top - 1)) {
             ltm.luaT_trybinTM(L, L.stack[top-2], L.stack[top-1], top-2, ltm.TMS.TM_CONCAT);
             delete L.stack[top - 1];
         } else if (isemptystr(L.stack[top-1])) {
@@ -1090,6 +1094,7 @@ module.exports.RB                = RB;
 module.exports.RC                = RC;
 module.exports.RKB               = RKB;
 module.exports.RKC               = RKC;
+module.exports.cvt2str           = cvt2str;
 module.exports.dojump            = dojump;
 module.exports.donextjump        = donextjump;
 module.exports.forlimit          = forlimit;

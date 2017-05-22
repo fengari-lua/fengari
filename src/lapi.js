@@ -667,8 +667,11 @@ const lua_toboolean = function(L, idx) {
 const lua_tolstring = function(L, idx) {
     let o = index2addr(L, idx);
 
-    if ((!o.ttisstring() && !o.ttisnumber()))
-        return null;
+    if (!o.ttisstring()) {
+        if (!lvm.cvt2str(o)) {  /* not convertible? */
+            return null;
+        }
+    }
 
     return o.ttisstring() ? o.svalue() : defs.to_luastring(`${o.value}`);
 };
@@ -678,8 +681,11 @@ const lua_tostring =  lua_tolstring;
 const lua_toljsstring = function(L, idx) {
     let o = index2addr(L, idx);
 
-    if ((!o.ttisstring() && !o.ttisnumber()))
-        return null;
+    if (!o.ttisstring()) {
+        if (!lvm.cvt2str(o)) {  /* not convertible? */
+            return null;
+        }
+    }
 
     return o.ttisstring() ? o.jsstring() : `${o.value}`;
 };
@@ -872,7 +878,7 @@ const lua_isnumber = function(L, idx) {
 
 const lua_isstring = function(L, idx) {
     let o = index2addr(L, idx);
-    return o.ttisstring() || o.ttisnumber();
+    return o.ttisstring() || lvm.cvt2str(o);
 };
 
 const lua_isuserdata = function(L, idx) {
