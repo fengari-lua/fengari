@@ -451,8 +451,6 @@ test('SETTABLE, GETTABLE', function (t) {
         lua.lua_call(L, 0, -1);
     }, "Program executed without errors");
 
-    console.log(L.stack[L.top - 1]);
-
     t.deepEqual(
         L.stack[L.top - 1].value.strong.get(1).value.jsstring(),
         "hello",

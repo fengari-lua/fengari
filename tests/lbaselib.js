@@ -326,8 +326,6 @@ test('xpcall', function (t) {
 
     }, "JS Lua program ran without error");
 
-    console.log(lua.lua_tojsstring(L, -1));
-
     t.ok(
         lua.lua_tojsstring(L, -1).startsWith("Something's wrong:"),
         "msgh was called and modified the error"

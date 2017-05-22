@@ -52,7 +52,6 @@ test("[test-suite] vararg: testing vararg", function (t) {
         local t = {1, 10}
         function t:f (...) local arg = {...}; return self[...]+#arg end
         assert(t:f(1,4) == 3 and t:f(2) == 11)
-        print('+')
 
         lim = 20
         local i, a = 1, {}

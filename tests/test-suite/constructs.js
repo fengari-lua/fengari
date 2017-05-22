@@ -371,7 +371,6 @@ if (false) {
 
             cases[1] = basiccases
             for i = 2, level do cases[i] = createcases(i) end
-            print("+")
 
             local prog = [[if %s then IX = true end; return %s]]
 
