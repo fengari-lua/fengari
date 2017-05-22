@@ -950,7 +950,7 @@ test("[test-suite] errors: error in error handling", function (t) {
 });
 
 
-test("[test-suite] errors: too many results", { skip: true }, function (t) {
+test("[test-suite] errors: too many results", function (t) {
     let luaCode = `
         local function loop (x,y,z) return 1 + loop(x, y, z) end
 
