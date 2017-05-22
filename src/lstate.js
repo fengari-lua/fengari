@@ -85,11 +85,6 @@ const luaE_extendCI = function(L) {
     return ci;
 };
 
-const luaE_freeCI = function(L) {
-    let ci = L.ci;
-    ci.next = null;
-};
-
 const stack_init = function(L1, L) {
     L1.stack = new Array(BASIC_STACK_SIZE); // TODO: for now we don't care about the stack size
     L1.top = 0;
@@ -105,7 +100,6 @@ const stack_init = function(L1, L) {
 
 const freestack = function(L) {
     L.ci = L.base_ci;
-    luaE_freeCI(L);
     L.stack = null;
 };
 
@@ -207,5 +201,4 @@ module.exports.lua_close       = lua_close;
 module.exports.lua_newstate    = lua_newstate;
 module.exports.lua_newthread   = lua_newthread;
 module.exports.luaE_extendCI   = luaE_extendCI;
-module.exports.luaE_freeCI     = luaE_freeCI;
 module.exports.luaE_freethread = luaE_freethread;
