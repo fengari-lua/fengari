@@ -66,7 +66,7 @@ const index2addr = function(L, idx) {
     }
 };
 
-// Like index2addr but returns the index on stack
+// Like index2addr but returns the index on stack; doesn't allow pseudo indices
 const index2addr_ = function(L, idx) {
     let ci = L.ci;
     if (idx > 0) {
@@ -77,16 +77,8 @@ const index2addr_ = function(L, idx) {
     } else if (idx > defs.LUA_REGISTRYINDEX) {
         assert(idx !== 0 && -idx <= L.top, "invalid index");
         return L.top + idx;
-    } else if (idx === defs.LUA_REGISTRYINDEX) {
-        return null;
-    } else { /* upvalues */
-        idx = defs.LUA_REGISTRYINDEX - idx;
-        assert(idx <= MAXUPVAL + 1, "upvalue index too large");
-        if (ci.func.ttislcf()) /* light C function? */
-            return null; /* it has no upvalues */
-        else {
-            return idx <= ci.func.nupvalues ? idx - 1 : null;
-        }
+    } else { /* registry or upvalue */
+        throw Error("attempt to use pseudo-index");
     }
 };
 
