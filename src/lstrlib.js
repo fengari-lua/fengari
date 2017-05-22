@@ -95,7 +95,6 @@ const adddigit = function(buff, n, x) {
 };
 
 const num2straux = function(x) {
-    let buff = [];
     /* if 'inf' or 'NaN', format it like '%g' */
     if (Object.is(x, Infinity))
         return lua.to_luastring('inf', true);
@@ -110,6 +109,7 @@ const num2straux = function(x) {
             return ['-'.charCodeAt(0)].concat(zero);
         return zero;
     } else {
+        let buff = [];
         let fe = luaconf.frexp(x);  /* 'x' fraction and exponent */
         let m = fe[0];
         let e = fe[1];
@@ -128,8 +128,8 @@ const num2straux = function(x) {
                 m = adddigit(buff, n++, m * 16);
             } while (m > 0);
         }
-        let exp = sprintf("p%+d", e).split('').map(e => e.charCodeAt(0));
-        return buff.slice(0, n + 1).concat(exp).concat(buff.slice(n));
+        let exp = lua.to_luastring(sprintf("p%+d", e));
+        return buff.concat(exp);
     }
 };
 
