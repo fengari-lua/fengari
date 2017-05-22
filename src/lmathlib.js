@@ -44,8 +44,11 @@ const math_random = function(L) {
 };
 
 const math_abs = function(L) {
-    if (lua.lua_isinteger(L, 1))
-        lua.lua_pushinteger(L, Math.abs(lua.lua_tointeger(L, 1)));
+    if (lua.lua_isinteger(L, 1)) {
+        let n = lua.lua_tointeger(L, 1);
+        if (n < 0) n = (-n)|0;
+        lua.lua_pushinteger(L, n);
+    }
     else
         lua.lua_pushnumber(L, Math.abs(lauxlib.luaL_checknumber(L, 1)));
     return 1;
