@@ -49,7 +49,8 @@ class lua_State {
         this.base_ci = new CallInfo(); // Will be populated later
         this.top = 0;
         this.ci = null;
-        this.stack = [];
+        this.stack = null;
+        this.stack_last = NaN;
         this.openupval = null;
         this.status = TS.LUA_OK;
         this.next = null;
@@ -86,8 +87,10 @@ const luaE_extendCI = function(L) {
 };
 
 const stack_init = function(L1, L) {
-    L1.stack = new Array(BASIC_STACK_SIZE); // TODO: for now we don't care about the stack size
+    L1.stack = new Array(BASIC_STACK_SIZE);
     L1.top = 0;
+    L1.stack_last = BASIC_STACK_SIZE - EXTRA_STACK;
+    /* initialize first ci */
     let ci = L1.base_ci;
     ci.next = ci.previous = null;
     ci.callstatus = 0;

@@ -43,6 +43,7 @@ const ERRORSTACKSIZE = luaconf.LUAI_MAXSTACK + 200;
 
 const luaD_reallocstack = function(L, newsize) {
     L.stack.length = newsize;
+    L.stack_last = newsize - lstate.EXTRA_STACK;
 };
 
 const luaD_growstack = function(L, n) {
@@ -64,7 +65,7 @@ const luaD_growstack = function(L, n) {
 };
 
 const luaD_checkstack = function(L, n) {
-    if (L.stack.length - L.top <= n)
+    if (L.stack_last - L.top <= n)
         luaD_growstack(L, n);
 };
 
@@ -73,7 +74,7 @@ const stackinuse = function(L) {
     for (let ci = L.ci; ci !== null; ci = ci.previous) {
         if (lim < ci.top) lim = ci.top;
     }
-    assert(lim <= L.stack.length);
+    assert(lim <= L.stack_last);
     return lim + 1; /* part of stack in use */
 };
 
@@ -107,7 +108,7 @@ const luaD_precall = function(L, off, nresults) {
             ci.nresults = nresults;
             ci.func = func;
             ci.top = L.top + defs.LUA_MINSTACK;
-            assert(ci.top <= L.stack.length);
+            assert(ci.top <= L.stack_last);
             ci.callstatus = 0;
             if (L.hookmask & defs.LUA_MASKCALL)
                 luaD_hook(L, defs.LUA_HOOKCALL, -1);
@@ -219,6 +220,7 @@ const luaD_hook = function(L, event, line) {
         ar.currentline = line;
         ar.i_ci = ci;
         ci.top = L.top + defs.LUA_MINSTACK;
+        assert(ci.top <= L.stack_last);
         L.allowhook = 0;  /* cannot call hooks inside a hook */
         ci.callstatus |= lstate.CIST_HOOKED;
         hook(L, ar);
