@@ -1026,7 +1026,7 @@ const gettable = function(L, t, key, ra) {
                 ldebug.luaG_typeerror(L, t, defs.to_luastring('index', true)); /* no metamethod */
             /* else will try the metamethod */
         } else {
-            let slot = ltable.luaH_get(t.value, key);
+            let slot = ltable.luaH_get(L, t.value, key);
             if (!slot.ttisnil()) {
                 L.stack[ra] = new lobject.TValue(slot.type, slot.value);
                 return;
@@ -1054,10 +1054,10 @@ const settable = function(L, t, key, val) {
         let tm;
         if (t.ttistable()) {
             let h = t.value; /* save 't' table */
-            let slot = ltable.luaH_set(h, key);
+            let slot = ltable.luaH_set(L, h, key);
             if (!slot.ttisnil() || (tm = ltm.fasttm(L, h.metatable, ltm.TMS.TM_NEWINDEX)) === null) {
                 if (val.ttisnil())
-                    ltable.luaH_delete(h, key);
+                    ltable.luaH_delete(L, h, key);
                 else
                     slot.setfrom(val);
                 ltable.invalidateTMcache(h);

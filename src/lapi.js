@@ -419,9 +419,9 @@ const lua_rawset = function(L, idx) {
     let k = L.stack[L.top - 2];
     let v = L.stack[L.top - 1];
     if (v.ttisnil()) {
-        ltable.luaH_delete(o.value, k);
+        ltable.luaH_delete(L, o.value, k);
     } else {
-        let slot = ltable.luaH_set(o.value, k);
+        let slot = ltable.luaH_set(L, o.value, k);
         slot.setfrom(v);
     }
     ltable.invalidateTMcache(o.value);
@@ -443,9 +443,9 @@ const lua_rawsetp = function(L, idx, p) {
     let k = new TValue(CT.LUA_TLIGHTUSERDATA, p);
     let v = L.stack[L.top - 1];
     if (v.ttisnil()) {
-        ltable.luaH_delete(o.value, k);
+        ltable.luaH_delete(L, o.value, k);
     } else {
-        let slot = ltable.luaH_set(o.value, k);
+        let slot = ltable.luaH_set(L, o.value, k);
         slot.setfrom(v);
     }
     L.top--;
@@ -482,7 +482,7 @@ const lua_rawgetp = function(L, idx, p) {
     let t = index2addr(L, idx);
     assert(t.ttistable(), "table expected");
     let k = new TValue(CT.LUA_TLIGHTUSERDATA, p);
-    L.stack[L.top++] = ltable.luaH_get(t.value, k);
+    L.stack[L.top++] = ltable.luaH_get(L, t.value, k);
     assert(L.top <= L.ci.top, "stack overflow");
     return L.stack[L.top - 1].ttnov();
 };
@@ -492,7 +492,7 @@ const lua_rawget = function(L, idx) {
 
     assert(t.ttistable(t), "table expected");
 
-    L.stack[L.top - 1] = ltable.luaH_get(t.value, L.stack[L.top - 1]);
+    L.stack[L.top - 1] = ltable.luaH_get(L, t.value, L.stack[L.top - 1]);
 
     return L.stack[L.top - 1].ttnov();
 };

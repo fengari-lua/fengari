@@ -439,7 +439,7 @@ const freeexps = function(fs, e1, e2) {
 */
 const addk = function(fs, key, v) {
     let f = fs.f;
-    let idx = ltable.luaH_set(fs.ls.h, key);  /* index scanner table */
+    let idx = ltable.luaH_set(fs.L, fs.ls.h, key);  /* index scanner table */
     if (idx.ttisinteger()) {  /* is there an index there? */
         let k = idx.value;
         /* correct value? (warning: must distinguish floats from integers!) */

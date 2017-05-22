@@ -9,11 +9,16 @@ const lobject = require('./lobject.js');
 const lstring = require('./lstring.js');
 const CT      = defs.constant_types;
 
-const table_hash = function(key) {
+const table_hash = function(L, key) {
     switch(key.type) {
+    case CT.LUA_TNIL:
+        return ldebug.luaG_runerror(L, defs.to_luastring("table index is nil", true));
+    case CT.LUA_TNUMFLT:
+        if (isNaN(key.value))
+            return ldebug.luaG_runerror(L, defs.to_luastring("table index is NaN", true));
+        /* fall through */
     case CT.LUA_TBOOLEAN:
     case CT.LUA_TLIGHTUSERDATA: /* XXX: if user pushes conflicting lightuserdata then the table will do odd things */
-    case CT.LUA_TNUMFLT:
     case CT.LUA_TNUMINT:
     case CT.LUA_TTABLE:
     case CT.LUA_TLCL:
@@ -110,11 +115,11 @@ const luaH_getstr = function(t, key) {
     return getgeneric(t, lstring.luaS_hashlongstr(key));
 };
 
-const luaH_get = function(t, key) {
+const luaH_get = function(L, t, key) {
     assert(key instanceof lobject.TValue);
-    if (key.ttisnil())
+    if (key.ttisnil() || (key.ttisfloat() && isNaN(key.value)))
         return lobject.luaO_nilobject;
-    return getgeneric(t, table_hash(key));
+    return getgeneric(t, table_hash(L, key));
 };
 
 const setgeneric = function(t, hash, key) {
@@ -145,15 +150,15 @@ const luaH_setint = function(t, key, value) {
     }
 };
 
-const luaH_set = function(t, key) {
+const luaH_set = function(L, t, key) {
     assert(key instanceof lobject.TValue);
-    let hash = table_hash(key);
+    let hash = table_hash(L, key);
     return setgeneric(t, hash, new lobject.TValue(key.type, key.value));
 };
 
-const luaH_delete = function(t, key) {
+const luaH_delete = function(L, t, key) {
     assert(key instanceof lobject.TValue);
-    let hash = table_hash(key);
+    let hash = table_hash(L, key);
     return mark_dead(t, hash);
 };
 
@@ -183,7 +188,7 @@ const luaH_next = function(L, table, keyI) {
             return false;
     } else {
         /* First find current key */
-        let hash = table_hash(keyO);
+        let hash = table_hash(L, keyO);
         /* Look in main part of table */
         entry = table.strong.get(hash);
         if (entry) {
