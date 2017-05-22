@@ -62,12 +62,12 @@
     - [x] `goto.lua` (18/18)
     - [x] `literals.lua` (30/30)
     - [x] `locals.lua` (10/10)
+    - [x] `math.lua` (68/68)
     - [x] `nextvar.lua` (44/44)
     - [x] `strings.lua` (34/34)
     - [x] `vararg.lua` (8/8)
     - [ ] `attrib.lua`
     - [ ] `coroutine.lua` (32/40)
-    - [ ] `math.lua` (44/68)
     - [ ] `pm.lua` (27/38)
     - [ ] `sort.lua` (21/24)
     - [ ] `tpack.lua` (20/32)
