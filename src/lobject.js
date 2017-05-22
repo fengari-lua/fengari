@@ -448,6 +448,18 @@ const luaO_utf8esc = function(x) {
     };
 };
 
+/* this currently returns new TValue instead of modifying */
+const luaO_tostring = function(L, obj) {
+    let buff;
+    if (obj.ttisinteger())
+        buff = defs.to_luastring(luaconf.lua_integer2str(obj.value));
+    else {
+        let str = luaconf.lua_number2str(obj.value);
+        buff = defs.to_luastring(str);
+    }
+    return new TValue(CT.LUA_TLNGSTR, lstring.luaS_bless(L, buff));
+};
+
 const pushstr = function(L, str) {
     L.stack[L.top++] = new TValue(CT.LUA_TLNGSTR, lstring.luaS_new(L, str));
 };
@@ -476,8 +488,10 @@ const luaO_pushvfstring = function(L, fmt, argp) {
                 break;
             case char['d']:
             case char['I']:
+                L.stack[L.top++] = luaO_tostring(L, new TValue(CT.LUA_TNUMINT, argp[a++]));
+                break;
             case char['f']:
-                pushstr(L, defs.to_luastring(''+argp[a++]));
+                L.stack[L.top++] = luaO_tostring(L, new TValue(CT.LUA_TNUMFLT, argp[a++]));
                 break;
             // case char['p']:
             case char['U']:
@@ -616,6 +630,7 @@ module.exports.luaO_int2fb       = luaO_int2fb;
 module.exports.luaO_pushfstring  = luaO_pushfstring;
 module.exports.luaO_pushvfstring = luaO_pushvfstring;
 module.exports.luaO_str2num      = luaO_str2num;
+module.exports.luaO_tostring     = luaO_tostring;
 module.exports.luaO_utf8desc     = luaO_utf8desc;
 module.exports.luaO_utf8esc      = luaO_utf8esc;
 module.exports.numarith          = numarith;

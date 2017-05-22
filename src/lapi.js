@@ -671,9 +671,9 @@ const lua_tolstring = function(L, idx) {
         if (!lvm.cvt2str(o)) {  /* not convertible? */
             return null;
         }
+        o = lobject.luaO_tostring(L, o);
     }
-
-    return o.ttisstring() ? o.svalue() : defs.to_luastring(`${o.value}`);
+    return o.svalue();
 };
 
 const lua_tostring =  lua_tolstring;
@@ -685,9 +685,9 @@ const lua_toljsstring = function(L, idx) {
         if (!lvm.cvt2str(o)) {  /* not convertible? */
             return null;
         }
+        o = lobject.luaO_tostring(L, o);
     }
-
-    return o.ttisstring() ? o.jsstring() : `${o.value}`;
+    return o.jsstring();
 };
 
 const lua_tojsstring =  lua_toljsstring;

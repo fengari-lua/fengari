@@ -973,8 +973,8 @@ const tostring = function(L, i) {
 
     if (o.ttisstring()) return true;
 
-    if (cvt2str(o) && !isNaN(o.value)) {
-        L.stack[i] = new lobject.TValue(CT.LUA_TLNGSTR, lstring.luaS_bless(L, defs.to_luastring(`${o.value}`)));
+    if (cvt2str(o)) {
+        L.stack[i] = lobject.luaO_tostring(L, o);
         return true;
     }
 
