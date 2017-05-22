@@ -43,7 +43,7 @@ const luaV_finishOp = function(L) {
             if (ci.callstatus & lstate.CIST_LEQ) {  /* "<=" using "<" instead? */
                 assert(op === OCi.OP_LE);
                 ci.callstatus ^= lstate.CIST_LEQ;  /* clear mark */
-                res = res !== 1 ? 1 : 0;  /* negate result */
+                res = !res;  /* negate result */
             }
             assert(ci.l_code[ci.l_savedpc].opcode === OCi.OP_JMP);
             if (res !== (inst.A ? true : false))  /* condition failed? */

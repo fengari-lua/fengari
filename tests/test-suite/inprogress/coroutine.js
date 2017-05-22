@@ -767,6 +767,11 @@ test("[test-suite] coroutine: testing yields inside metamethods", function (t) {
 
         assert(run(function() return "a" .. "b" .. a .. "c" .. c .. b .. "x" end,
                {"concat", "concat", "concat"}) == "ab10chello12x")
+
+        assert(run(function ()
+            a.BB = print
+            return a.BB
+        end, {"nidx", "idx"}) == print)
    `, L;
 
     t.plan(2);
@@ -831,11 +836,6 @@ test("[test-suite] coroutine: tests for comparsion operators", function (t) {
           run(test)
 
         end
-
-        assert(run(function ()
-            a.BB = print
-            return a.BB
-        end, {"nidx", "idx"}) == print)
    `, L;
 
     t.plan(2);
