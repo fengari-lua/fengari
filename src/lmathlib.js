@@ -129,7 +129,9 @@ const math_sqrt = function(L) {
 const math_ult = function(L) {
     let a = lauxlib.luaL_checkinteger(L, 1);
     let b = lauxlib.luaL_checkinteger(L, 2);
-    lua.lua_pushboolean(L, Math.abs(a) < Math.abs(b));
+    if (a < 0) a += 4294967296;
+    if (b < 0) b += 4294967296;
+    lua.lua_pushboolean(L, a < b);
     return 1;
 };
 
