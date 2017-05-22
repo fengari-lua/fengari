@@ -42,6 +42,8 @@ const seterrorobj = function(L, errcode, oldtop) {
 const ERRORSTACKSIZE = luaconf.LUAI_MAXSTACK + 200;
 
 const luaD_reallocstack = function(L, newsize) {
+    assert(newsize <= luaconf.LUAI_MAXSTACK || newsize == ERRORSTACKSIZE);
+    assert(L.stack_last == L.stack.length - lstate.EXTRA_STACK);
     L.stack.length = newsize;
     L.stack_last = newsize - lstate.EXTRA_STACK;
 };
