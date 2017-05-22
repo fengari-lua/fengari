@@ -63,6 +63,11 @@ const luaD_growstack = function(L, n) {
     }
 };
 
+const luaD_checkstack = function(L, n) {
+    if (L.stack.length - L.top <= n)
+        luaD_growstack(L, n);
+};
+
 /*
 ** Prepares a function call: checks the stack, creates a new CallInfo
 ** entry, fills in the relevant information, calls hook if needed.
@@ -78,11 +83,13 @@ const luaD_precall = function(L, off, nresults) {
         case CT.LUA_TLCF: {
             let f = func.type === CT.LUA_TCCL ? func.value.f : func.value;
 
+            luaD_checkstack(L, defs.LUA_MINSTACK);
             let ci = lstate.luaE_extendCI(L);
             ci.funcOff = off;
             ci.nresults = nresults;
             ci.func = func;
             ci.top = L.top + defs.LUA_MINSTACK;
+            assert(ci.top <= L.stack.length);
             ci.callstatus = 0;
             if (L.hookmask & defs.LUA_MASKCALL)
                 luaD_hook(L, defs.LUA_HOOKCALL, -1);
@@ -96,11 +103,11 @@ const luaD_precall = function(L, off, nresults) {
             return true;
         }
         case CT.LUA_TLCL: {
+            let base;
             let p = func.value.p;
             let n = L.top - off - 1;
             let fsize = p.maxstacksize;
-            let base;
-
+            luaD_checkstack(L, fsize);
             if (p.is_vararg) {
                 base = adjust_varargs(L, p, n);
             } else {
@@ -619,6 +626,7 @@ module.exports.SParser              = SParser;
 module.exports.adjust_varargs       = adjust_varargs;
 module.exports.luaD_call            = luaD_call;
 module.exports.luaD_callnoyield     = luaD_callnoyield;
+module.exports.luaD_checkstack      = luaD_checkstack;
 module.exports.luaD_growstack       = luaD_growstack;
 module.exports.luaD_hook            = luaD_hook;
 module.exports.luaD_pcall           = luaD_pcall;

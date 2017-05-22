@@ -6,6 +6,7 @@ const assert = require('assert');
 const defs    = require('./defs.js');
 const ljstype = require('./ljstype.js');
 const ldebug  = require('./ldebug.js');
+const ldo     = require('./ldo.js');
 const lstring = require('./lstring.js');
 const luaconf = require('./luaconf.js');
 const lvm     = require('./lvm.js');
@@ -492,6 +493,7 @@ const luaO_pushvfstring = function(L, fmt, argp) {
         n += 2;
         i = e + 2;
     }
+    ldo.luaD_checkstack(L, 1);
     pushstr(L, fmt.slice(i));
     if (n > 0) lvm.luaV_concat(L, n+1);
     return L.stack[L.top-1].svalue();
