@@ -14,6 +14,8 @@ const CT                   = defs.constant_types;
 const TS                   = defs.thread_status;
 const LUA_NUMTAGS          = defs.LUA_NUMTAGS;
 
+const EXTRA_STACK = 5;
+
 const BASIC_STACK_SIZE = 2 * defs.LUA_MINSTACK;
 
 class CallInfo {
@@ -200,6 +202,7 @@ module.exports.CIST_TAIL       = (1<<5);  /* call was tail called */
 module.exports.CIST_HOOKYIELD  = (1<<6);  /* last hook called yielded */
 module.exports.CIST_LEQ        = (1<<7);  /* using __lt for __le */
 module.exports.CIST_FIN        = (1<<8);   /* call is running a finalizer */
+module.exports.EXTRA_STACK     = EXTRA_STACK;
 module.exports.lua_close       = lua_close;
 module.exports.lua_newstate    = lua_newstate;
 module.exports.lua_newthread   = lua_newthread;

@@ -13,6 +13,7 @@ const lparser = require('./lparser.js');
 const lstate  = require('./lstate.js');
 const lstring = require('./lstring.js');
 const ltm     = require('./ltm.js');
+const luaconf = require('./luaconf.js');
 const lundump = require('./lundump.js');
 const lvm     = require('./lvm.js');
 const lzio    = require('./lzio.js');
@@ -36,6 +37,30 @@ const seterrorobj = function(L, errcode, oldtop) {
     }
 
     L.top = oldtop + 1;
+};
+
+const ERRORSTACKSIZE = luaconf.LUAI_MAXSTACK + 200;
+
+const luaD_reallocstack = function(L, newsize) {
+    L.stack.length = newsize;
+};
+
+const luaD_growstack = function(L, n) {
+    let size = L.stack.length;
+    if (size > luaconf.LUAI_MAXSTACK)
+        luaD_throw(L, TS.LUA_ERRERR);
+    else {
+        let needed = L.top + n + lstate.EXTRA_STACK;
+        let newsize = 2 * size;
+        if (newsize > luaconf.LUAI_MAXSTACK) newsize = luaconf.LUAI_MAXSTACK;
+        if (newsize < needed) newsize = needed;
+        if (newsize > luaconf.LUAI_MAXSTACK) {  /* stack overflow? */
+            luaD_reallocstack(L, ERRORSTACKSIZE);
+            ldebug.luaG_runerror(L, "stack overflow");
+        }
+        else
+            luaD_reallocstack(L, newsize);
+    }
 };
 
 /*
@@ -594,12 +619,14 @@ module.exports.SParser              = SParser;
 module.exports.adjust_varargs       = adjust_varargs;
 module.exports.luaD_call            = luaD_call;
 module.exports.luaD_callnoyield     = luaD_callnoyield;
+module.exports.luaD_growstack       = luaD_growstack;
 module.exports.luaD_hook            = luaD_hook;
 module.exports.luaD_pcall           = luaD_pcall;
 module.exports.luaD_poscall         = luaD_poscall;
 module.exports.luaD_precall         = luaD_precall;
 module.exports.luaD_protectedparser = luaD_protectedparser;
 module.exports.luaD_rawrunprotected = luaD_rawrunprotected;
+module.exports.luaD_reallocstack    = luaD_reallocstack;
 module.exports.luaD_throw           = luaD_throw;
 module.exports.lua_isyieldable      = lua_isyieldable;
 module.exports.lua_resume           = lua_resume;
