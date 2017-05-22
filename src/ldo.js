@@ -85,6 +85,10 @@ const luaD_shrinkstack = function(L) {
     let goodsize = inuse + Math.floor(inuse / 8) + 2*lstate.EXTRA_STACK;
     if (goodsize > luaconf.LUAI_MAXSTACK)
         goodsize = luaconf.LUAI_MAXSTACK;  /* respect stack limit */
+    if (L.stack.length > luaconf.LUAI_MAXSTACK)  /* had been handling stack overflow? */
+        lstate.luaE_freeCI(L);  /* free all CIs (list grew because of an error) */
+    /* if thread is currently not handling a stack overflow and its
+     good size is smaller than current size, shrink its stack */
     if (inuse <= (luaconf.LUAI_MAXSTACK - lstate.EXTRA_STACK) && goodsize < L.stack.length)
         luaD_reallocstack(L, goodsize);
 };
