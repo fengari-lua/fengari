@@ -68,6 +68,24 @@ const luaD_checkstack = function(L, n) {
         luaD_growstack(L, n);
 };
 
+const stackinuse = function(L) {
+    let lim = L.top;
+    for (let ci = L.ci; ci !== null; ci = ci.previous) {
+        if (lim < ci.top) lim = ci.top;
+    }
+    assert(lim <= L.stack.length);
+    return lim + 1; /* part of stack in use */
+};
+
+const luaD_shrinkstack = function(L) {
+    let inuse = stackinuse(L);
+    let goodsize = inuse + Math.floor(inuse / 8) + 2*lstate.EXTRA_STACK;
+    if (goodsize > luaconf.LUAI_MAXSTACK)
+        goodsize = luaconf.LUAI_MAXSTACK;  /* respect stack limit */
+    if (inuse <= (luaconf.LUAI_MAXSTACK - lstate.EXTRA_STACK) && goodsize < L.stack.length)
+        luaD_reallocstack(L, goodsize);
+};
+
 /*
 ** Prepares a function call: checks the stack, creates a new CallInfo
 ** entry, fills in the relevant information, calls hook if needed.
@@ -420,6 +438,7 @@ const recover = function(L, status) {
     L.ci = ci;
     L.allowhook = ci.callstatus & lstate.CIST_OAH;  /* restore original 'allowhook' */
     L.nny = 0;  /* should be zero to be yieldable */
+    luaD_shrinkstack(L);
     L.errfunc = ci.c_old_errfunc;
     return 1;  /* continue running the coroutine */
 };
@@ -563,6 +582,7 @@ const luaD_pcall = function(L, func, u, old_top, ef) {
         L.ci = old_ci;
         L.allowhook = old_allowhooks;
         L.nny = old_nny;
+        luaD_shrinkstack(L);
     }
 
     L.errfunc = old_errfunc;
