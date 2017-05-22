@@ -181,14 +181,14 @@ const reverse = function(L, from, to) {
 ** rotate x n === BA. But BA === (A^r . B^r)^r.
 */
 const lua_rotate = function(L, idx, n) {
-    let t = L.stack[L.top - 1];
-    let p = index2addr(L, idx);
+    let t = L.top - 1;
     let pIdx = index2addr_(L, idx);
+    let p = L.stack[pIdx];
 
-    assert(p !== lobject.luaO_nilobject && idx > defs.LUA_REGISTRYINDEX, "index not in the stack");
-    assert((n >= 0 ? n : -n) <= (L.top - idx), "invalid 'n'");
+    assert(isvalid(p) && idx > defs.LUA_REGISTRYINDEX, "index not in the stack");
+    assert((n >= 0 ? n : -n) <= (t - pIdx + 1), "invalid 'n'");
 
-    let m = n >= 0 ? L.top - 1 - n : pIdx - n - 1;  /* end of prefix */
+    let m = n >= 0 ? t - n : pIdx - n - 1;  /* end of prefix */
 
     reverse(L, pIdx, m);
     reverse(L, m + 1, L.top - 1);
