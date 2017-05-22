@@ -80,7 +80,9 @@ const math_acos = function(L) {
 };
 
 const math_atan = function(L) {
-    lua.lua_pushnumber(L, Math.atan(lauxlib.luaL_checknumber(L, 1)));
+    let y = lauxlib.luaL_checknumber(L, 1);
+    let x = lauxlib.luaL_optnumber(L, 2, 1);
+    lua.lua_pushnumber(L, Math.atan2(y, x));
     return 1;
 };
 
