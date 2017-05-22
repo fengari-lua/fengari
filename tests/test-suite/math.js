@@ -746,7 +746,7 @@ test("[test-suite] math: 'tonumber' with strings", function (t) {
 });
 
 
-test("[test-suite] math: tests with very long numerals", { skip: true }, function (t) {
+test("[test-suite] math: tests with very long numerals", function (t) {
     let luaCode = `
         assert(tonumber("0x"..string.rep("f", 13)..".0") == 2.0^(4*13) - 1)
         assert(tonumber("0x"..string.rep("f", 150)..".0") == 2.0^(4*150) - 1)

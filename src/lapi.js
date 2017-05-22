@@ -66,7 +66,7 @@ const index2addr = function(L, idx) {
     }
 };
 
-// Like index2addr but returns the index on stack
+// Like index2addr but returns the index on stack; doesn't allow pseudo indices
 const index2addr_ = function(L, idx) {
     let ci = L.ci;
     if (idx > 0) {
@@ -77,16 +77,8 @@ const index2addr_ = function(L, idx) {
     } else if (idx > defs.LUA_REGISTRYINDEX) {
         assert(idx !== 0 && -idx <= L.top, "invalid index");
         return L.top + idx;
-    } else if (idx === defs.LUA_REGISTRYINDEX) {
-        return null;
-    } else { /* upvalues */
-        idx = defs.LUA_REGISTRYINDEX - idx;
-        assert(idx <= MAXUPVAL + 1, "upvalue index too large");
-        if (ci.func.ttislcf()) /* light C function? */
-            return null; /* it has no upvalues */
-        else {
-            return idx <= ci.func.nupvalues ? idx - 1 : null;
-        }
+    } else { /* registry or upvalue */
+        throw Error("attempt to use pseudo-index");
     }
 };
 
@@ -181,14 +173,14 @@ const reverse = function(L, from, to) {
 ** rotate x n === BA. But BA === (A^r . B^r)^r.
 */
 const lua_rotate = function(L, idx, n) {
-    let t = L.stack[L.top - 1];
-    let p = index2addr(L, idx);
+    let t = L.top - 1;
     let pIdx = index2addr_(L, idx);
+    let p = L.stack[pIdx];
 
-    assert(p !== lobject.luaO_nilobject && idx > defs.LUA_REGISTRYINDEX, "index not in the stack");
-    assert((n >= 0 ? n : -n) <= (L.top - idx), "invalid 'n'");
+    assert(isvalid(p) && idx > defs.LUA_REGISTRYINDEX, "index not in the stack");
+    assert((n >= 0 ? n : -n) <= (t - pIdx + 1), "invalid 'n'");
 
-    let m = n >= 0 ? L.top - 1 - n : pIdx - n - 1;  /* end of prefix */
+    let m = n >= 0 ? t - n : pIdx - n - 1;  /* end of prefix */
 
     reverse(L, pIdx, m);
     reverse(L, m + 1, L.top - 1);
@@ -667,10 +659,13 @@ const lua_toboolean = function(L, idx) {
 const lua_tolstring = function(L, idx) {
     let o = index2addr(L, idx);
 
-    if ((!o.ttisstring() && !o.ttisnumber()))
-        return null;
-
-    return o.ttisstring() ? o.svalue() : defs.to_luastring(`${o.value}`);
+    if (!o.ttisstring()) {
+        if (!lvm.cvt2str(o)) {  /* not convertible? */
+            return null;
+        }
+        o = lobject.luaO_tostring(L, o);
+    }
+    return o.svalue();
 };
 
 const lua_tostring =  lua_tolstring;
@@ -678,10 +673,13 @@ const lua_tostring =  lua_tolstring;
 const lua_toljsstring = function(L, idx) {
     let o = index2addr(L, idx);
 
-    if ((!o.ttisstring() && !o.ttisnumber()))
-        return null;
-
-    return o.ttisstring() ? o.jsstring() : `${o.value}`;
+    if (!o.ttisstring()) {
+        if (!lvm.cvt2str(o)) {  /* not convertible? */
+            return null;
+        }
+        o = lobject.luaO_tostring(L, o);
+    }
+    return o.jsstring();
 };
 
 const lua_tojsstring =  lua_toljsstring;
@@ -872,7 +870,7 @@ const lua_isnumber = function(L, idx) {
 
 const lua_isstring = function(L, idx) {
     let o = index2addr(L, idx);
-    return o.ttisstring() || o.ttisnumber();
+    return o.ttisstring() || lvm.cvt2str(o);
 };
 
 const lua_isuserdata = function(L, idx) {

@@ -288,7 +288,7 @@ test('[test-suite] strings: tostring', function (t) {
         end
 
         if tostring(0.0) == "0.0" then   -- "standard" coercion float->string
-          -- assert('' .. 12 == '12' and 12.0 .. '' == '12.0') -- TODO: How to do this in JS ?
+          assert('' .. 12 == '12' and 12.0 .. '' == '12.0')
           assert(tostring(-1203 + 0.0) == "-1203.0")
         else   -- compatible coercion
           assert(tostring(0.0) == "0")
@@ -365,8 +365,7 @@ test('[test-suite] strings: string.format', function (t) {
 });
 
 
-// TODO: http://lua-users.org/lists/lua-l/2016-05/msg00455.html
-test('[test-suite] strings: %q', { skip: true },  function (t) {
+test('[test-suite] strings: %q', function (t) {
     let luaCode = `
         do
           local function checkQ (v)

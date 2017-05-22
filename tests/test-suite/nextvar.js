@@ -907,8 +907,7 @@ test("[test-suite] nextvar: next", function (t) {
 });
 
 
-// TODO: infinite loop ?
-test("[test-suite] nextvar: testing floats in numeric for", { skip: true }, function (t) {
+test("[test-suite] nextvar: testing floats in numeric for", function (t) {
     let luaCode = `
         do
           local a

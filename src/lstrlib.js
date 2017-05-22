@@ -225,7 +225,10 @@ const addliteral = function(L, b, arg) {
                 checkdp(b);  /* ensure it uses a dot */
             } else {  /* integers */
                 let n = lua.lua_tointeger(L, arg);
-                concat(b, lua.to_luastring(sprintf("%d", n)));
+                let format = (n === llimit.LUA_MININTEGER)  /* corner case? */
+                    ? "0x%" + luaconf.LUA_INTEGER_FRMLEN + "x"  /* use hexa */
+                    : luaconf.LUA_INTEGER_FMT;  /* else use default format */
+                concat(b, lua.to_luastring(sprintf(format, n)));
             }
             break;
         }

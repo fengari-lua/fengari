@@ -59,7 +59,7 @@ const luaD_growstack = function(L, n) {
         if (newsize < needed) newsize = needed;
         if (newsize > luaconf.LUAI_MAXSTACK) {  /* stack overflow? */
             luaD_reallocstack(L, ERRORSTACKSIZE);
-            ldebug.luaG_runerror(L, "stack overflow");
+            ldebug.luaG_runerror(L, defs.to_luastring("stack overflow", true));
         }
         else
             luaD_reallocstack(L, newsize);
@@ -85,8 +85,17 @@ const luaD_shrinkstack = function(L) {
     let goodsize = inuse + Math.floor(inuse / 8) + 2*lstate.EXTRA_STACK;
     if (goodsize > luaconf.LUAI_MAXSTACK)
         goodsize = luaconf.LUAI_MAXSTACK;  /* respect stack limit */
+    if (L.stack.length > luaconf.LUAI_MAXSTACK)  /* had been handling stack overflow? */
+        lstate.luaE_freeCI(L);  /* free all CIs (list grew because of an error) */
+    /* if thread is currently not handling a stack overflow and its
+     good size is smaller than current size, shrink its stack */
     if (inuse <= (luaconf.LUAI_MAXSTACK - lstate.EXTRA_STACK) && goodsize < L.stack.length)
         luaD_reallocstack(L, goodsize);
+};
+
+const luaD_inctop = function(L) {
+  luaD_checkstack(L, 1);
+  L.top++;
 };
 
 /*
@@ -272,7 +281,7 @@ const tryfuncTM = function(L, off, func) {
 */
 const stackerror = function(L) {
     if (L.nCcalls === llimit.LUAI_MAXCCALLS)
-        ldebug.luaG_runerror(L, "JS stack overflow");
+        ldebug.luaG_runerror(L, defs.to_luastring("JS stack overflow", true));
     else if (L.nCcalls >= llimit.LUAI_MAXCCALLS + (llimit.LUAI_MAXCCALLS >> 3))
         luaD_throw(L, TS.LUA_ERRERR);  /* error while handing stack error */
 };
@@ -653,6 +662,7 @@ module.exports.luaD_callnoyield     = luaD_callnoyield;
 module.exports.luaD_checkstack      = luaD_checkstack;
 module.exports.luaD_growstack       = luaD_growstack;
 module.exports.luaD_hook            = luaD_hook;
+module.exports.luaD_inctop          = luaD_inctop;
 module.exports.luaD_pcall           = luaD_pcall;
 module.exports.luaD_poscall         = luaD_poscall;
 module.exports.luaD_precall         = luaD_precall;

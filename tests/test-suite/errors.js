@@ -836,7 +836,7 @@ test("[test-suite] errors: testing line error", function (t) {
 });
 
 
-test("[test-suite] errors: several tests that exhaust the Lua stack", { skip: true }, function (t) {
+test("[test-suite] errors: several tests that exhaust the Lua stack", function (t) {
     let luaCode = `
         C = 0
         local l = debug.getinfo(1, "l").currentline; function y () C=C+1; y() end
@@ -871,9 +871,10 @@ test("[test-suite] errors: several tests that exhaust the Lua stack", { skip: tr
 });
 
 
-test("[test-suite] errors: error lines in stack overflow", { skip: true }, function (t) {
+test("[test-suite] errors: error lines in stack overflow", function (t) {
     let luaCode = `
         C = 0
+        local l = debug.getinfo(1, "l").currentline; function y () C=C+1; y() end
         local l1
         local function g(x)
           l1 = debug.getinfo(x, "l").currentline; y()
@@ -950,7 +951,7 @@ test("[test-suite] errors: error in error handling", function (t) {
 });
 
 
-test("[test-suite] errors: too many results", { skip: true }, function (t) {
+test("[test-suite] errors: too many results", function (t) {
     let luaCode = `
         local function loop (x,y,z) return 1 + loop(x, y, z) end
 

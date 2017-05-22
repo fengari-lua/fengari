@@ -4,6 +4,7 @@ const assert = require('assert');
 
 const defs     = require('./defs.js');
 const lcode    = require('./lcode.js');
+const ldo      = require('./ldo.js');
 const lfunc    = require('./lfunc.js');
 const llex     = require('./llex.js');
 const llimit   = require('./llimit.js');
@@ -1563,9 +1564,11 @@ const luaY_parser = function(L, z, buff, dyd, name, firstchar) {
     let lexstate = new llex.LexState();
     let funcstate = new FuncState();
     let cl = lfunc.luaF_newLclosure(L, 1);  /* create main closure */
-    L.stack[L.top++] = new TValue(defs.CT.LUA_TLCL, cl);
+    ldo.luaD_inctop(L);
+    L.stack[L.top-1] = new TValue(defs.CT.LUA_TLCL, cl);
     lexstate.h = ltable.luaH_new(L);  /* create table for scanner */
-    L.stack[L.top++] = new TValue(defs.CT.LUA_TTABLE, lexstate.h);
+    ldo.luaD_inctop(L);
+    L.stack[L.top-1] = new TValue(defs.CT.LUA_TTABLE, lexstate.h);
     funcstate.f = cl.p = new Proto(L);
     funcstate.f.source = lstring.luaS_new(L, name);
     lexstate.buff = buff;

@@ -804,9 +804,10 @@ const luaV_tointeger = function(obj, mode) {
         return luaconf.lua_numbertointeger(f);
     } else if (obj.ttisinteger()) {
         return obj.value;
-    } else if (obj.ttisstring()) {
-        let n = lobject.luaO_str2num(obj.svalue());
-        return n !== false ? luaV_tointeger(n, mode) : false;
+    } else if (cvt2num(obj)) {
+        let v = lobject.luaO_str2num(obj.svalue());
+        if (v !== false)
+            return luaV_tointeger(v, mode);
     }
 
     return false;
@@ -816,13 +817,14 @@ const tointeger = function(o) {
     return o.ttisinteger() ? o.value : luaV_tointeger(o, 0);
 };
 
-const tonumber = function(v) {
-    if (v.ttnov() === CT.LUA_TNUMBER)
-        return v.value;
+const tonumber = function(o) {
+    if (o.ttnov() === CT.LUA_TNUMBER)
+        return o.value;
 
-    if (v.ttnov() === CT.LUA_TSTRING) {
-        let number = lobject.luaO_str2num(v.svalue());
-        return number ? number.value : false;
+    if (cvt2num(o)) { /* string convertible to number? */
+        let v = lobject.luaO_str2num(o.svalue());
+        if (v !== false)
+            return v.value;
     }
 
     return false;
@@ -958,13 +960,21 @@ const luaV_shiftl = function(x, y) {
     }
 };
 
+const cvt2str = function(o) {
+    return o.ttisnumber();
+};
+
+const cvt2num = function(o) {
+    return o.ttisstring();
+};
+
 const tostring = function(L, i) {
     let o = L.stack[i];
 
     if (o.ttisstring()) return true;
 
-    if (o.ttisnumber() && !isNaN(o.value)) {
-        L.stack[i] = new lobject.TValue(CT.LUA_TLNGSTR, lstring.luaS_bless(L, defs.to_luastring(`${o.value}`)));
+    if (cvt2str(o)) {
+        L.stack[i] = lobject.luaO_tostring(L, o);
         return true;
     }
 
@@ -985,7 +995,7 @@ const luaV_concat = function(L, total) {
         let top = L.top;
         let n = 2; /* number of elements handled in this pass (at least 2) */
 
-        if (!(L.stack[top-2].ttisstring() || L.stack[top-2].ttisnumber()) || !tostring(L, top - 1)) {
+        if (!(L.stack[top-2].ttisstring() || cvt2str(L.stack[top-2])) || !tostring(L, top - 1)) {
             ltm.luaT_trybinTM(L, L.stack[top-2], L.stack[top-1], top-2, ltm.TMS.TM_CONCAT);
             delete L.stack[top - 1];
         } else if (isemptystr(L.stack[top-1])) {
@@ -1090,6 +1100,8 @@ module.exports.RB                = RB;
 module.exports.RC                = RC;
 module.exports.RKB               = RKB;
 module.exports.RKC               = RKC;
+module.exports.cvt2str           = cvt2str;
+module.exports.cvt2num           = cvt2num;
 module.exports.dojump            = dojump;
 module.exports.donextjump        = donextjump;
 module.exports.forlimit          = forlimit;
