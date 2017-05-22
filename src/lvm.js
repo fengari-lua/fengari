@@ -725,6 +725,7 @@ const luaV_equalobj = function(L, t1, t2) {
             return 1;
         case CT.LUA_TBOOLEAN:
             return t1.value == t2.value ? 1 : 0; // Might be 1 or true
+        case CT.LUA_TLIGHTUSERDATA:
         case CT.LUA_TNUMINT:
         case CT.LUA_TNUMFLT:
         case CT.LUA_TLCF:
@@ -733,22 +734,20 @@ const luaV_equalobj = function(L, t1, t2) {
         case CT.LUA_TLNGSTR: {
             return lstring.luaS_eqlngstr(t1.tsvalue(), t2.tsvalue()) ? 1 : 0;
         }
-        case CT.LUA_TLIGHTUSERDATA:
         case CT.LUA_TUSERDATA:
         case CT.LUA_TTABLE:
             if (t1.value === t2.value) return 1;
             else if (L === null) return 0;
 
-            // TODO: fasttm ?
-            tm = ltm.luaT_gettmbyobj(L, t1, ltm.TMS.TM_EQ);
-            if (tm.ttisnil())
-                tm = ltm.luaT_gettmbyobj(L, t2, ltm.TMS.TM_EQ);
+            tm = ltm.fasttm(L, t1.value.metatable, ltm.TMS.TM_EQ);
+            if (tm === null)
+                tm = ltm.fasttm(L, t2.value.metatable, ltm.TMS.TM_EQ);
             break;
         default:
             return t1.value === t2.value ? 1 : 0;
     }
 
-    if (!tm || tm.ttisnil())
+    if (tm === null) /* no TM? */
         return 0;
 
     ltm.luaT_callTM(L, tm, t1, t2, L.top, 1);
@@ -911,9 +910,10 @@ const luaV_objlen = function(L, ra, rb) {
     let tm;
     switch(rb.ttype()) {
         case CT.LUA_TTABLE: {
-            tm = ltm.luaT_gettmbyobj(L, rb, ltm.TMS.TM_LEN);
-            if (!tm.ttisnil()) break;
-            L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, ltable.luaH_getn(rb.value));
+            let h = rb.value;
+            tm = ltm.fasttm(L, h.metatable, ltm.TMS.TM_LEN);
+            if (tm !== null) break; /* metamethod? break switch to call it */
+            L.stack[ra] = new lobject.TValue(CT.LUA_TNUMINT, ltable.luaH_getn(h)); /* else primitive len */
             return;
         }
         case CT.LUA_TSHRSTR:
@@ -1031,8 +1031,8 @@ const gettable = function(L, t, key, ra) {
                 L.stack[ra] = new lobject.TValue(slot.type, slot.value);
                 return;
             } else { /* 't' is a table */
-                tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_INDEX);  /* table's metamethod */
-                if (tm.ttisnil()) { /* no metamethod? */
+                tm = ltm.fasttm(L, t.value.metatable, ltm.TMS.TM_INDEX);  /* table's metamethod */
+                if (tm === null) { /* no metamethod? */
                     L.stack[ra] = new lobject.TValue(CT.LUA_TNIL, null); /* result is nil */
                     return;
                 }
@@ -1055,11 +1055,12 @@ const settable = function(L, t, key, val) {
         if (t.ttistable()) {
             let h = t.value; /* save 't' table */
             let slot = ltable.luaH_set(h, key);
-            if (!slot.ttisnil() || (tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_NEWINDEX)).ttisnil()) {
+            if (!slot.ttisnil() || (tm = ltm.fasttm(L, h.metatable, ltm.TMS.TM_NEWINDEX)) === null) {
                 if (val.ttisnil())
                     ltable.luaH_delete(h, key);
                 else
                     slot.setfrom(val);
+                ltable.invalidateTMcache(h);
                 return;
             }
             /* else will try the metamethod */

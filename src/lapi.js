@@ -424,6 +424,7 @@ const lua_rawset = function(L, idx) {
         let slot = ltable.luaH_set(o.value, k);
         slot.setfrom(v);
     }
+    ltable.invalidateTMcache(o.value);
     L.top -= 2;
 };
 

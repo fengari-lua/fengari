@@ -166,6 +166,21 @@ const luaT_callorderTM = function(L, p1, p2, event) {
         return !L.stack[L.top].l_isfalse() ? 1 : 0;
 };
 
+const fasttm = function(l, et, e) {
+    return et === null ? null :
+        (et.flags & (1 << e)) ? null : luaT_gettm(et, e, l.l_G.tmname[e]);
+};
+
+const luaT_gettm = function(events, event, ename) {
+    const tm = ltable.luaH_getstr(events, ename);
+    assert(event <= TMS.TM_EQ);
+    if (tm.ttisnil()) {  /* no tag method? */
+        events.flags |= 1<<event;  /* cache this fact */
+        return null;
+    }
+    else return tm;
+};
+
 const luaT_gettmbyobj = function(L, o, event) {
     let mt;
     switch(o.ttnov()) {
@@ -180,11 +195,13 @@ const luaT_gettmbyobj = function(L, o, event) {
     return mt ? ltable.luaH_getstr(mt, L.l_G.tmname[event]) : lobject.luaO_nilobject;
 };
 
+module.exports.fasttm           = fasttm;
 module.exports.TMS              = TMS;
 module.exports.luaT_callTM      = luaT_callTM;
 module.exports.luaT_callbinTM   = luaT_callbinTM;
 module.exports.luaT_trybinTM    = luaT_trybinTM;
 module.exports.luaT_callorderTM = luaT_callorderTM;
+module.exports.luaT_gettm       = luaT_gettm;
 module.exports.luaT_gettmbyobj  = luaT_gettmbyobj;
 module.exports.luaT_init        = luaT_init;
 module.exports.luaT_objtypename = luaT_objtypename;

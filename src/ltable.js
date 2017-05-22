@@ -39,8 +39,13 @@ class Table {
         this.f = void 0; /* first entry */
         this.l = void 0; /* last entry */
         this.metatable = null;
+        this.flags = ~0;
     }
 }
+
+const invalidateTMcache = function(t) {
+    t.flags = 0;
+};
 
 const add = function(t, hash, key, value) {
     t.dead_strong.clear();
@@ -204,6 +209,7 @@ const luaH_next = function(L, table, keyI) {
     return true;
 };
 
+module.exports.invalidateTMcache = invalidateTMcache;
 module.exports.luaH_delete  = luaH_delete;
 module.exports.luaH_get     = luaH_get;
 module.exports.luaH_getint  = luaH_getint;
