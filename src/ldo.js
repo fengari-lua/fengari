@@ -59,7 +59,7 @@ const luaD_growstack = function(L, n) {
         if (newsize < needed) newsize = needed;
         if (newsize > luaconf.LUAI_MAXSTACK) {  /* stack overflow? */
             luaD_reallocstack(L, ERRORSTACKSIZE);
-            ldebug.luaG_runerror(L, "stack overflow");
+            ldebug.luaG_runerror(L, defs.to_luastring("stack overflow", true));
         }
         else
             luaD_reallocstack(L, newsize);
@@ -281,7 +281,7 @@ const tryfuncTM = function(L, off, func) {
 */
 const stackerror = function(L) {
     if (L.nCcalls === llimit.LUAI_MAXCCALLS)
-        ldebug.luaG_runerror(L, "JS stack overflow");
+        ldebug.luaG_runerror(L, defs.to_luastring("JS stack overflow", true));
     else if (L.nCcalls >= llimit.LUAI_MAXCCALLS + (llimit.LUAI_MAXCCALLS >> 3))
         luaD_throw(L, TS.LUA_ERRERR);  /* error while handing stack error */
 };
