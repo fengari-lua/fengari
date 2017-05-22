@@ -91,8 +91,20 @@ const index2addr_ = function(L, idx) {
 };
 
 const lua_checkstack = function(L, n) {
+    let res;
     let ci = L.ci;
-    let res = L.stack.length < luaconf.LUAI_MAXSTACK;
+    assert(n >= 0, "negative 'n'");
+    if (L.stack_last - L.top > n) /* stack large enough? */
+        res = true;
+    else { /* no; need to grow stack */
+        let inuse = L.top + lstate.EXTRA_STACK;
+        if (inuse > luaconf.LUAI_MAXSTACK - n)  /* can grow without overflow? */
+            res = false;  /* no */
+        else { /* try to grow stack */
+            ldo.luaD_growstack(L, n);
+            res = true;
+        }
+    }
 
     if (res && ci.top < L.top + n)
         ci.top = L.top + n;  /* adjust frame top */
@@ -140,6 +152,7 @@ const lua_pushvalue = function(L, idx) {
 const lua_settop = function(L, idx) {
     let func = L.ci.funcOff;
     if (idx >= 0) {
+        assert(idx <= L.stack_last - (func + 1), "new top too large");
         while (L.top < func + 1 + idx)
             L.stack[L.top++] = new TValue(CT.LUA_TNIL, null);
         L.top = func + 1 + idx;

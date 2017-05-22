@@ -13,6 +13,7 @@ const lparser = require('./lparser.js');
 const lstate  = require('./lstate.js');
 const lstring = require('./lstring.js');
 const ltm     = require('./ltm.js');
+const luaconf = require('./luaconf.js');
 const lundump = require('./lundump.js');
 const lvm     = require('./lvm.js');
 const lzio    = require('./lzio.js');
@@ -38,6 +39,56 @@ const seterrorobj = function(L, errcode, oldtop) {
     L.top = oldtop + 1;
 };
 
+const ERRORSTACKSIZE = luaconf.LUAI_MAXSTACK + 200;
+
+const luaD_reallocstack = function(L, newsize) {
+    assert(newsize <= luaconf.LUAI_MAXSTACK || newsize == ERRORSTACKSIZE);
+    assert(L.stack_last == L.stack.length - lstate.EXTRA_STACK);
+    L.stack.length = newsize;
+    L.stack_last = newsize - lstate.EXTRA_STACK;
+};
+
+const luaD_growstack = function(L, n) {
+    let size = L.stack.length;
+    if (size > luaconf.LUAI_MAXSTACK)
+        luaD_throw(L, TS.LUA_ERRERR);
+    else {
+        let needed = L.top + n + lstate.EXTRA_STACK;
+        let newsize = 2 * size;
+        if (newsize > luaconf.LUAI_MAXSTACK) newsize = luaconf.LUAI_MAXSTACK;
+        if (newsize < needed) newsize = needed;
+        if (newsize > luaconf.LUAI_MAXSTACK) {  /* stack overflow? */
+            luaD_reallocstack(L, ERRORSTACKSIZE);
+            ldebug.luaG_runerror(L, "stack overflow");
+        }
+        else
+            luaD_reallocstack(L, newsize);
+    }
+};
+
+const luaD_checkstack = function(L, n) {
+    if (L.stack_last - L.top <= n)
+        luaD_growstack(L, n);
+};
+
+const stackinuse = function(L) {
+    let lim = L.top;
+    for (let ci = L.ci; ci !== null; ci = ci.previous) {
+        if (lim < ci.top) lim = ci.top;
+    }
+    assert(lim <= L.stack_last);
+    return lim + 1; /* part of stack in use */
+};
+
+const luaD_shrinkstack = function(L) {
+    let inuse = stackinuse(L);
+    let goodsize = inuse + Math.floor(inuse / 8) + 2*lstate.EXTRA_STACK;
+    if (goodsize > luaconf.LUAI_MAXSTACK)
+        goodsize = luaconf.LUAI_MAXSTACK;  /* respect stack limit */
+    if (inuse <= (luaconf.LUAI_MAXSTACK - lstate.EXTRA_STACK) && goodsize < L.stack.length)
+        luaD_reallocstack(L, goodsize);
+};
+
 /*
 ** Prepares a function call: checks the stack, creates a new CallInfo
 ** entry, fills in the relevant information, calls hook if needed.
@@ -53,11 +104,13 @@ const luaD_precall = function(L, off, nresults) {
         case CT.LUA_TLCF: {
             let f = func.type === CT.LUA_TCCL ? func.value.f : func.value;
 
+            luaD_checkstack(L, defs.LUA_MINSTACK);
             let ci = lstate.luaE_extendCI(L);
             ci.funcOff = off;
             ci.nresults = nresults;
             ci.func = func;
             ci.top = L.top + defs.LUA_MINSTACK;
+            assert(ci.top <= L.stack_last);
             ci.callstatus = 0;
             if (L.hookmask & defs.LUA_MASKCALL)
                 luaD_hook(L, defs.LUA_HOOKCALL, -1);
@@ -71,11 +124,11 @@ const luaD_precall = function(L, off, nresults) {
             return true;
         }
         case CT.LUA_TLCL: {
+            let base;
             let p = func.value.p;
             let n = L.top - off - 1;
             let fsize = p.maxstacksize;
-            let base;
-
+            luaD_checkstack(L, fsize);
             if (p.is_vararg) {
                 base = adjust_varargs(L, p, n);
             } else {
@@ -169,6 +222,7 @@ const luaD_hook = function(L, event, line) {
         ar.currentline = line;
         ar.i_ci = ci;
         ci.top = L.top + defs.LUA_MINSTACK;
+        assert(ci.top <= L.stack_last);
         L.allowhook = 0;  /* cannot call hooks inside a hook */
         ci.callstatus |= lstate.CIST_HOOKED;
         hook(L, ar);
@@ -388,6 +442,7 @@ const recover = function(L, status) {
     L.ci = ci;
     L.allowhook = ci.callstatus & lstate.CIST_OAH;  /* restore original 'allowhook' */
     L.nny = 0;  /* should be zero to be yieldable */
+    luaD_shrinkstack(L);
     L.errfunc = ci.c_old_errfunc;
     return 1;  /* continue running the coroutine */
 };
@@ -531,6 +586,7 @@ const luaD_pcall = function(L, func, u, old_top, ef) {
         L.ci = old_ci;
         L.allowhook = old_allowhooks;
         L.nny = old_nny;
+        luaD_shrinkstack(L);
     }
 
     L.errfunc = old_errfunc;
@@ -594,12 +650,15 @@ module.exports.SParser              = SParser;
 module.exports.adjust_varargs       = adjust_varargs;
 module.exports.luaD_call            = luaD_call;
 module.exports.luaD_callnoyield     = luaD_callnoyield;
+module.exports.luaD_checkstack      = luaD_checkstack;
+module.exports.luaD_growstack       = luaD_growstack;
 module.exports.luaD_hook            = luaD_hook;
 module.exports.luaD_pcall           = luaD_pcall;
 module.exports.luaD_poscall         = luaD_poscall;
 module.exports.luaD_precall         = luaD_precall;
 module.exports.luaD_protectedparser = luaD_protectedparser;
 module.exports.luaD_rawrunprotected = luaD_rawrunprotected;
+module.exports.luaD_reallocstack    = luaD_reallocstack;
 module.exports.luaD_throw           = luaD_throw;
 module.exports.lua_isyieldable      = lua_isyieldable;
 module.exports.lua_resume           = lua_resume;

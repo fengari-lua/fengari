@@ -645,6 +645,7 @@ const luaV_execute = function(L) {
 
                 if (b < 0) {
                     b = n;  /* get all var. arguments */
+                    ldo.luaD_checkstack(L, n);
                     L.top = ra + n;
                 }
 

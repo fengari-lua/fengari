@@ -14,6 +14,8 @@ const CT                   = defs.constant_types;
 const TS                   = defs.thread_status;
 const LUA_NUMTAGS          = defs.LUA_NUMTAGS;
 
+const EXTRA_STACK = 5;
+
 const BASIC_STACK_SIZE = 2 * defs.LUA_MINSTACK;
 
 class CallInfo {
@@ -47,7 +49,8 @@ class lua_State {
         this.base_ci = new CallInfo(); // Will be populated later
         this.top = 0;
         this.ci = null;
-        this.stack = [];
+        this.stack = null;
+        this.stack_last = NaN;
         this.openupval = null;
         this.status = TS.LUA_OK;
         this.next = null;
@@ -83,14 +86,11 @@ const luaE_extendCI = function(L) {
     return ci;
 };
 
-const luaE_freeCI = function(L) {
-    let ci = L.ci;
-    ci.next = null;
-};
-
 const stack_init = function(L1, L) {
-    L1.stack = new Array(BASIC_STACK_SIZE); // TODO: for now we don't care about the stack size
+    L1.stack = new Array(BASIC_STACK_SIZE);
     L1.top = 0;
+    L1.stack_last = BASIC_STACK_SIZE - EXTRA_STACK;
+    /* initialize first ci */
     let ci = L1.base_ci;
     ci.next = ci.previous = null;
     ci.callstatus = 0;
@@ -103,7 +103,6 @@ const stack_init = function(L1, L) {
 
 const freestack = function(L) {
     L.ci = L.base_ci;
-    luaE_freeCI(L);
     L.stack = null;
 };
 
@@ -200,9 +199,9 @@ module.exports.CIST_TAIL       = (1<<5);  /* call was tail called */
 module.exports.CIST_HOOKYIELD  = (1<<6);  /* last hook called yielded */
 module.exports.CIST_LEQ        = (1<<7);  /* using __lt for __le */
 module.exports.CIST_FIN        = (1<<8);   /* call is running a finalizer */
+module.exports.EXTRA_STACK     = EXTRA_STACK;
 module.exports.lua_close       = lua_close;
 module.exports.lua_newstate    = lua_newstate;
 module.exports.lua_newthread   = lua_newthread;
 module.exports.luaE_extendCI   = luaE_extendCI;
-module.exports.luaE_freeCI     = luaE_freeCI;
 module.exports.luaE_freethread = luaE_freethread;
