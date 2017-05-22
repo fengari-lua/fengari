@@ -16,6 +16,15 @@ const prefix = `
     local intbits = math.floor(math.log(maxint, 2) + 0.5) + 1
     --assert((1 << intbits) == 0)
 
+    local floatbits = 24
+    do
+      local p = 2.0^floatbits
+      while p < p + 1.0 do
+        p = p * 2.0
+        floatbits = floatbits + 1
+      end
+    end
+
     local function isNaN (x)
       return (x ~= x)
     end
@@ -76,16 +85,6 @@ test("[test-suite] math: int bits", function (t) {
 
 test("[test-suite] math: number of bits in the mantissa of a floating-point number", function (t) {
     let luaCode = `
-        local floatbits = 24
-        do
-          local p = 2.0^floatbits
-          while p < p + 1.0 do
-            p = p * 2.0
-            floatbits = floatbits + 1
-          end
-        end
-
-
         assert(isNaN(0/0))
         assert(not isNaN(1/0))
 
