@@ -288,7 +288,7 @@ test('[test-suite] strings: tostring', function (t) {
         end
 
         if tostring(0.0) == "0.0" then   -- "standard" coercion float->string
-          -- assert('' .. 12 == '12' and 12.0 .. '' == '12.0') -- TODO: How to do this in JS ?
+          assert('' .. 12 == '12' and 12.0 .. '' == '12.0')
           assert(tostring(-1203 + 0.0) == "-1203.0")
         else   -- compatible coercion
           assert(tostring(0.0) == "0")
