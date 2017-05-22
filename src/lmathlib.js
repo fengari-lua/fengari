@@ -11,6 +11,7 @@ var RNG          = seedrandom();
 
 const math_randomseed = function(L) {
     RNG = seedrandom(Math.abs(lauxlib.luaL_checknumber(L, 1)));
+    return 0;
 };
 
 const math_random = function(L) {
