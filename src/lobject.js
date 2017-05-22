@@ -456,6 +456,11 @@ const luaO_tostring = function(L, obj) {
     else {
         let str = luaconf.lua_number2str(obj.value);
         buff = defs.to_luastring(str);
+        // Assume no LUA_COMPAT_FLOATSTRING
+        if (/^[-0123456789]+$/.test(str)) {  /* looks like an int? */
+            buff.push(char[luaconf.lua_getlocaledecpoint()]);
+            buff.push(char['0']);  /* adds '.0' to result */
+        }
     }
     return new TValue(CT.LUA_TLNGSTR, lstring.luaS_bless(L, buff));
 };
