@@ -1014,97 +1014,68 @@ const luaV_concat = function(L, total) {
     } while (total > 1); /* repeat until only 1 result left */
 };
 
-const MAXTAGRECUR = 2000;
+const MAXTAGLOOP = 2000;
 
-const gettable = function(L, table, key, ra, recur) {
-    recur = recur ? recur : 0;
+const gettable = function(L, t, key, ra) {
+    for (let loop = 0; loop < MAXTAGLOOP; loop++) {
+        let tm;
 
-    if (recur >= MAXTAGRECUR)
-        ldebug.luaG_runerror(L, defs.to_luastring("'__index' chain too long; possible loop", true));
-
-    if (table.ttistable()) {
-        let element = ltable.luaH_get(table.value, key);
-
-        if (!element.ttisnil()) {
-            L.stack[ra] = new lobject.TValue(element.type, element.value);
+        if (!t.ttistable()) {
+            tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_INDEX);
+            if (tm.ttisnil())
+                ldebug.luaG_typeerror(L, t, defs.to_luastring('index', true)); /* no metamethod */
+            /* else will try the metamethod */
         } else {
-            luaV_finishget(L, table, key, ra, element, recur);
+            let slot = ltable.luaH_get(t.value, key);
+            if (!slot.ttisnil()) {
+                L.stack[ra] = new lobject.TValue(slot.type, slot.value);
+                return;
+            } else { /* 't' is a table */
+                tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_INDEX);  /* table's metamethod */
+                if (tm.ttisnil()) { /* no metamethod? */
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNIL, null); /* result is nil */
+                    return;
+                }
+            }
+            /* else will try the metamethod */
         }
-    } else {
-        luaV_finishget(L, table, key, ra, null, recur);
-    }
-};
-
-const luaV_finishget = function(L, t, key, val, slot, recur) {
-    let tm;
-    if (slot === null) { /* 't' is not a table? */
-        assert(!t.ttistable());
-        tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_INDEX);
-        if (tm.ttisnil())
-            ldebug.luaG_typeerror(L, t, defs.to_luastring('index', true));
-    } else { /* 't' is a table */
-        assert(slot.ttisnil());
-        tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_INDEX); // TODO: fasttm
-        if (tm.ttisnil()) {
-            L.stack[val] = new lobject.TValue(CT.LUA_TNIL, null);
+        if (tm.ttisfunction()) { /* is metamethod a function? */
+            ltm.luaT_callTM(L, tm, t, key, ra, 1); /* call it */
             return;
         }
+        t = tm;  /* else try to access 'tm[key]' */
     }
 
-    if (tm.ttisfunction()) {
-        ltm.luaT_callTM(L, tm, t, key, val, 1);
-        return;
-    }
-
-    gettable(L, tm, key, val, recur + 1);
+    ldebug.luaG_runerror(L, defs.to_luastring("'__index' chain too long; possible loop", true));
 };
 
-const settable = function(L, table, key, v, recur) {
-    recur = recur ? recur : 0;
-
-    if (recur >= MAXTAGRECUR)
-        ldebug.luaG_runerror(L, defs.to_luastring("'__newindex' chain too long; possible loop", true));
-
-    if (table.ttistable()) {
-        let element = ltable.luaH_set(table.value, key);
-
-        if (!element.ttisnil()) {
-            if (v.ttisnil())
-                ltable.luaH_delete(table.value, key);
-            else
-                element.setfrom(v);
-        } else {
-            luaV_finishset(L, table, key, v, element, recur);
+const settable = function(L, t, key, val) {
+    for (let loop = 0; loop < MAXTAGLOOP; loop++) {
+        let tm;
+        if (t.ttistable()) {
+            let h = t.value; /* save 't' table */
+            let slot = ltable.luaH_set(h, key);
+            if (!slot.ttisnil() || (tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_NEWINDEX)).ttisnil()) {
+                if (val.ttisnil())
+                    ltable.luaH_delete(h, key);
+                else
+                    slot.setfrom(val);
+                return;
+            }
+            /* else will try the metamethod */
+        } else { /* not a table; check metamethod */
+            if ((tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_NEWINDEX)).ttisnil())
+                ldebug.luaG_typeerror(L, t, defs.to_luastring('index', true));
         }
-    } else {
-        luaV_finishset(L, table, key, v, null, recur);
-    }
-};
-
-const luaV_finishset = function(L, t, key, val, slot, recur) {
-    let tm;
-    if (slot !== null) { /* is 't' a table? */
-        assert(slot.ttisnil());
-        tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_NEWINDEX); // TODO: fasttm
-        if (tm.ttisnil()) {
-            if (val.ttisnil())
-                ltable.luaH_delete(t.value, key);
-            else
-                slot.setfrom(val);
+        /* try the metamethod */
+        if (tm.ttisfunction()) {
+            ltm.luaT_callTM(L, tm, t, key, val, 0);
             return;
         }
-    } else { /* not a table; check metamethod */
-        tm = ltm.luaT_gettmbyobj(L, t, ltm.TMS.TM_NEWINDEX);
-        if (tm.ttisnil())
-            ldebug.luaG_typeerror(L, t, defs.to_luastring('index', true));
+        t = tm;  /* else repeat assignment over 'tm' */
     }
 
-    if (tm.ttisfunction()) {
-        ltm.luaT_callTM(L, tm, t, key, val, 0);
-        return;
-    }
-
-    settable(L, tm, key, val, recur + 1);
+    ldebug.luaG_runerror(L, defs.to_luastring("'__newindex' chain too long; possible loop", true));
 };
 
 
@@ -1127,7 +1098,6 @@ module.exports.luaV_div          = luaV_div;
 module.exports.luaV_equalobj     = luaV_equalobj;
 module.exports.luaV_execute      = luaV_execute;
 module.exports.luaV_finishOp     = luaV_finishOp;
-module.exports.luaV_finishset    = luaV_finishset;
 module.exports.luaV_lessequal    = luaV_lessequal;
 module.exports.luaV_lessthan     = luaV_lessthan;
 module.exports.luaV_mod          = luaV_mod;
