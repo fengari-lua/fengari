@@ -301,7 +301,6 @@ test("[test-suite] events: test comparison", function (t) {
 });
 
 
-// TODO: uncomment asserts when next is fixed for cleared table entries
 test("[test-suite] events: test 'partial order'", function (t) {
     let luaCode = `
         t = {}
@@ -327,9 +326,9 @@ test("[test-suite] events: test 'partial order'", function (t) {
         t.__le = nil
 
         assert(Set{1,2,3} < Set{1,2,3,4})
-        -- assert(not(Set{1,2,3,4} < Set{1,2,3,4}))
-        -- assert((Set{1,2,3,4} <= Set{1,2,3,4}))
-        -- assert((Set{1,2,3,4} >= Set{1,2,3,4}))
+        assert(not(Set{1,2,3,4} < Set{1,2,3,4}))
+        assert((Set{1,2,3,4} <= Set{1,2,3,4}))
+        assert((Set{1,2,3,4} >= Set{1,2,3,4}))
         assert((Set{1,3} <= Set{3,5}))   -- wrong!! model needs a 'le' method ;-)
 
         t.__le = function (a,b)
@@ -352,11 +351,11 @@ test("[test-suite] events: test 'partial order'", function (t) {
         end
 
         local s = Set{1,3,5}
-        -- assert(s == Set{3,5,1})
+        assert(s == Set{3,5,1})
         assert(not rawequal(s, Set{3,5,1}))
         assert(rawequal(s, s))
-        -- assert(Set{1,3,5,1} == rawSet{3,5,1})
-        -- assert(rawSet{1,3,5,1} == Set{3,5,1})
+        assert(Set{1,3,5,1} == rawSet{3,5,1})
+        assert(rawSet{1,3,5,1} == Set{3,5,1})
         assert(Set{1,3,5} ~= Set{3,5,1,6})
 
         -- '__eq' is not used for table accesses
