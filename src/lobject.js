@@ -461,7 +461,8 @@ const luaO_tostring = function(L, obj) {
 };
 
 const pushstr = function(L, str) {
-    L.stack[L.top++] = new TValue(CT.LUA_TLNGSTR, lstring.luaS_new(L, str));
+    ldo.luaD_inctop(L);
+    L.stack[L.top-1] = new TValue(CT.LUA_TLNGSTR, lstring.luaS_new(L, str));
 };
 
 const luaO_pushvfstring = function(L, fmt, argp) {
@@ -488,10 +489,12 @@ const luaO_pushvfstring = function(L, fmt, argp) {
                 break;
             case char['d']:
             case char['I']:
-                L.stack[L.top++] = luaO_tostring(L, new TValue(CT.LUA_TNUMINT, argp[a++]));
+                ldo.luaD_inctop(L);
+                L.stack[L.top-1] = luaO_tostring(L, new TValue(CT.LUA_TNUMINT, argp[a++]));
                 break;
             case char['f']:
-                L.stack[L.top++] = luaO_tostring(L, new TValue(CT.LUA_TNUMFLT, argp[a++]));
+                ldo.luaD_inctop(L);
+                L.stack[L.top-1] = luaO_tostring(L, new TValue(CT.LUA_TNUMFLT, argp[a++]));
                 break;
             // case char['p']:
             case char['U']:

@@ -89,6 +89,11 @@ const luaD_shrinkstack = function(L) {
         luaD_reallocstack(L, goodsize);
 };
 
+const luaD_inctop = function(L) {
+  luaD_checkstack(L, 1);
+  L.top++;
+};
+
 /*
 ** Prepares a function call: checks the stack, creates a new CallInfo
 ** entry, fills in the relevant information, calls hook if needed.
@@ -653,6 +658,7 @@ module.exports.luaD_callnoyield     = luaD_callnoyield;
 module.exports.luaD_checkstack      = luaD_checkstack;
 module.exports.luaD_growstack       = luaD_growstack;
 module.exports.luaD_hook            = luaD_hook;
+module.exports.luaD_inctop          = luaD_inctop;
 module.exports.luaD_pcall           = luaD_pcall;
 module.exports.luaD_poscall         = luaD_poscall;
 module.exports.luaD_precall         = luaD_precall;
