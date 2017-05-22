@@ -211,11 +211,14 @@ const luaK_getlabel = function(fs) {
 ** jump (that is, its condition), or the jump itself if it is
 ** unconditional.
 */
-const getjumpcontrol = function(fs, pc) {
+const getjumpcontroloffset = function(fs, pc) {
     if (pc >= 1 && lopcodes.testTMode(fs.f.code[pc - 1].opcode))
-        return fs.f.code[pc - 1];
+        return pc - 1;
     else
-        return fs.f.code[pc];
+        return pc;
+};
+const getjumpcontrol = function(fs, pc) {
+    return fs.f.code[getjumpcontroloffset(fs, pc)];
 };
 
 /*
@@ -226,7 +229,8 @@ const getjumpcontrol = function(fs, pc) {
 ** no register value)
 */
 const patchtestreg = function(fs, node, reg) {
-    let i = getjumpcontrol(fs, node);
+    let pc = getjumpcontroloffset(fs, node);
+    let i = fs.f.code[pc];
     if (i.opcode !== OpCodesI.OP_TESTSET)
         return false;  /* cannot patch other instructions */
     if (reg !== lopcodes.NO_REG && reg !== i.B)
@@ -234,7 +238,7 @@ const patchtestreg = function(fs, node, reg) {
     else {
         /* no register to put value or register already has the value;
            change instruction to simple test */
-        i = lopcodes.CREATE_ABC(OpCodesI.OP_TEST, i.B, 0, i.C);
+        fs.f.code[pc] = lopcodes.CREATE_ABC(OpCodesI.OP_TEST, i.B, 0, i.C);
     }
     return true;
 };
