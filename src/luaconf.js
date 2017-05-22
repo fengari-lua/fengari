@@ -2,6 +2,7 @@
 "use strict";
 
 const llimit = require('./llimit.js');
+const sprintf = require('sprintf-js').sprintf;
 
 /*
 @@ LUAI_MAXSTACK limits the size of the Lua stack.
@@ -17,6 +18,14 @@ const LUAI_MAXSTACK = 1000000;
 ** CHANGE it if you want a different size.
 */
 const LUA_IDSIZE = 60;
+
+const lua_integer2str = function(n) {
+    return sprintf(LUA_INTEGER_FMT, n);
+};
+
+const lua_number2str = function(n) {
+    return sprintf(LUA_NUMBER_FMT, n);
+};
 
 const lua_numbertointeger = function(n) {
     return n >= llimit.MIN_INT && n < -llimit.MIN_INT ? n : false;
@@ -64,4 +73,6 @@ module.exports.LUA_INTEGER_FRMLEN    = LUA_INTEGER_FRMLEN;
 module.exports.LUA_NUMBER_FMT        = LUA_NUMBER_FMT;
 module.exports.LUA_NUMBER_FRMLEN     = LUA_NUMBER_FRMLEN;
 module.exports.lua_getlocaledecpoint = lua_getlocaledecpoint;
+module.exports.lua_integer2str       = lua_integer2str;
+module.exports.lua_number2str        = lua_number2str;
 module.exports.lua_numbertointeger   = lua_numbertointeger;
