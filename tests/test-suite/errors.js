@@ -836,7 +836,7 @@ test("[test-suite] errors: testing line error", function (t) {
 });
 
 
-test("[test-suite] errors: several tests that exhaust the Lua stack", { skip: true }, function (t) {
+test("[test-suite] errors: several tests that exhaust the Lua stack", function (t) {
     let luaCode = `
         C = 0
         local l = debug.getinfo(1, "l").currentline; function y () C=C+1; y() end
