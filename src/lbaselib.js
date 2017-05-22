@@ -154,6 +154,21 @@ const luaB_ipairs = function(L) {
     return 3;
 };
 
+const b_str2int = function(s, base) {
+    let r = /^[\t\v\f \n\r]*([\+\-]?)0*([0-9A-Za-z]+)[\t\v\f \n\r]*$/.exec(lua.to_jsstring(s));
+    if (!r) return null;
+    let neg = r[1] === "-";
+    let digits = r[2];
+    let n = 0;
+    for (let si=0; si<digits.length; si++) {
+        let digit = /\d/.test(digits[si]) ? (digits.charCodeAt(si) - '0'.charCodeAt(0))
+                       : (digits[si].toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0) + 10);
+        if (digit >= base) return null;  /* invalid numeral */
+        n = ((n * base)|0) + digit;
+    }
+    return (neg ? -n : n)|0;
+};
+
 const luaB_tonumber = function(L) {
     if (lua.lua_type(L, 2) <= 0) {  /* standard conversion? */
         lauxlib.luaL_checkany(L, 1);
@@ -170,8 +185,8 @@ const luaB_tonumber = function(L) {
         lauxlib.luaL_checktype(L, 1, lua.LUA_TSTRING);  /* no numbers as strings */
         let s = lua.lua_tostring(L, 1);
         lauxlib.luaL_argcheck(L, 2 <= base && base <= 36, 2, lua.to_luastring("base out of range", true));
-        let n = parseInt(lua.to_jsstring(s), base);
-        if (!isNaN(n)) {
+        let n = b_str2int(s, base);
+        if (n !== null) {
             lua.lua_pushinteger(L, n);
             return 1;
         }
