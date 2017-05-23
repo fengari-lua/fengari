@@ -235,9 +235,9 @@ const lua_pushlstring = function(L, s, len) {
     assert(Array.isArray(s), "lua_pushlstring expects array of byte");
     assert(typeof len === "number");
 
-    let ts = new TValue(CT.LUA_TLNGSTR, lstring.luaS_bless(L, s.slice(0, len)));
-    L.stack[L.top++] = ts;
-
+    let ts = lstring.luaS_bless(L, s.slice(0, len));
+    lobject.setsvalue2s(L, L.top, ts);
+    L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
 
     return ts.value;
@@ -249,9 +249,9 @@ const lua_pushstring = function (L, s) {
     if (s === undefined || s === null)
         L.stack[L.top] = new TValue(CT.LUA_TNIL, null);
     else {
-        L.stack[L.top] = new TValue(CT.LUA_TLNGSTR, lstring.luaS_new(L, s));
+        let ts = lstring.luaS_new(L, s);
+        lobject.setsvalue2s(L, L.top, ts);
     }
-
     L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
 
@@ -350,11 +350,11 @@ const lua_pushglobaltable = function(L) {
 const auxsetstr = function(L, t, k) {
     assert(Array.isArray(k), "key must be an array of bytes");
 
-    let str = new TValue(CT.LUA_TLNGSTR, lstring.luaS_new(L, k));
-
+    let str = lstring.luaS_new(L, k);
     assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
-
-    L.stack[L.top++] = str;
+    lobject.setsvalue2s(L, L.top, str); /* push 'str' (to make it a TValue) */
+    L.top++;
+    assert(L.top <= L.ci.top, "stack overflow");
     lvm.settable(L, t, L.stack[L.top - 1], L.stack[L.top - 2]);
     /* pop value and key */
     delete L.stack[--L.top];
@@ -461,13 +461,11 @@ const lua_rawsetp = function(L, idx, p) {
 
 const auxgetstr = function(L, t, k) {
     assert(Array.isArray(k), "key must be an array of bytes");
-
-    let str = new TValue(CT.LUA_TLNGSTR, lstring.luaS_new(L, k));
-
-    L.stack[L.top++] = str;
+    let str = lstring.luaS_new(L, k);
+    lobject.setsvalue2s(L, L.top, str);
+    L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
     lvm.gettable(L, t, L.stack[L.top - 1], L.top - 1);
-
     return L.stack[L.top - 1].ttnov();
 };
 
@@ -649,7 +647,8 @@ const lua_tolstring = function(L, idx) {
         if (!lvm.cvt2str(o)) {  /* not convertible? */
             return null;
         }
-        o = lobject.luaO_tostring(L, o);
+        /* TODO: this should modify number on the stack */
+        return lobject.luaO_tostring(L, o).getstr();
     }
     return o.svalue();
 };
@@ -663,7 +662,8 @@ const lua_toljsstring = function(L, idx) {
         if (!lvm.cvt2str(o)) {  /* not convertible? */
             return null;
         }
-        o = lobject.luaO_tostring(L, o);
+        /* TODO: this should modify number on the stack */
+        return defs.to_jsstring(lobject.luaO_tostring(L, o).getstr());
     }
     return o.jsstring();
 };
@@ -1041,7 +1041,8 @@ const lua_concat = function(L, n) {
     if (n >= 2)
         lvm.luaV_concat(L, n);
     else if (n === 0) {
-        L.stack[L.top++] = new TValue(CT.LUA_TLNGSTR, lstring.luaS_newliteral(L, []));
+        lobject.setsvalue2s(L, L.top, lstring.luaS_newliteral(L, []));
+        L.top++;
         assert(L.top <= L.ci.top, "stack overflow");
     }
 };

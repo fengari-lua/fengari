@@ -967,7 +967,7 @@ const tostring = function(L, i) {
     if (o.ttisstring()) return true;
 
     if (cvt2str(o)) {
-        L.stack[i] = lobject.luaO_tostring(L, o);
+        lobject.setsvalue2s(L, i, lobject.luaO_tostring(L, o));
         return true;
     }
 
@@ -1011,7 +1011,7 @@ const luaV_concat = function(L, total) {
                 delete L.stack[top - n - 1];
             }
             let ts = lstring.luaS_bless(L, Array.prototype.concat.apply([], toconcat));
-            L.stack[top - n] = new lobject.TValue(CT.LUA_TLNGSTR, ts);
+            lobject.setsvalue2s(L, top - n, ts);
         }
         total -= n - 1; /* got 'n' strings to create 1 new */
         L.top -= n - 1; /* popped 'n' strings and pushed one */

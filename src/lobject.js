@@ -193,6 +193,9 @@ const setobjs2s = function(L, newidx, oldidx) {
 const setobj2s = function(L, newidx, oldtv) {
     L.stack[newidx] = new TValue(oldtv.type, oldtv.value);
 };
+const setsvalue2s = function(L, newidx, ts) {
+    L.stack[newidx] = new TValue(CT.LUA_TLNGSTR, ts);
+};
 
 const luaO_nilobject = new TValue(CT.LUA_TNIL, null);
 Object.freeze(luaO_nilobject);
@@ -486,12 +489,12 @@ const luaO_tostring = function(L, obj) {
             buff.push(char['0']);  /* adds '.0' to result */
         }
     }
-    return new TValue(CT.LUA_TLNGSTR, lstring.luaS_bless(L, buff));
+    return lstring.luaS_bless(L, buff);
 };
 
 const pushstr = function(L, str) {
+    setsvalue2s(L, L.top, lstring.luaS_new(L, str));
     ldo.luaD_inctop(L);
-    L.stack[L.top-1] = new TValue(CT.LUA_TLNGSTR, lstring.luaS_new(L, str));
 };
 
 const luaO_pushvfstring = function(L, fmt, argp) {
@@ -519,11 +522,11 @@ const luaO_pushvfstring = function(L, fmt, argp) {
             case char['d']:
             case char['I']:
                 ldo.luaD_inctop(L);
-                L.stack[L.top-1] = luaO_tostring(L, new TValue(CT.LUA_TNUMINT, argp[a++]));
+                setsvalue2s(L, L.top-1, luaO_tostring(L, new TValue(CT.LUA_TNUMINT, argp[a++])));
                 break;
             case char['f']:
                 ldo.luaD_inctop(L);
-                L.stack[L.top-1] = luaO_tostring(L, new TValue(CT.LUA_TNUMFLT, argp[a++]));
+                setsvalue2s(L, L.top-1, luaO_tostring(L, new TValue(CT.LUA_TNUMFLT, argp[a++])));
                 break;
             case char['p']:
                 let v = argp[a++];
@@ -678,3 +681,4 @@ module.exports.luaO_utf8esc      = luaO_utf8esc;
 module.exports.numarith          = numarith;
 module.exports.setobjs2s         = setobjs2s;
 module.exports.setobj2s          = setobj2s;
+module.exports.setsvalue2s       = setsvalue2s;
