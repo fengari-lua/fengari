@@ -29,8 +29,8 @@ const table_hash = function(L, key) {
         if (isNaN(key.value))
             return ldebug.luaG_runerror(L, defs.to_luastring("table index is NaN", true));
         /* fall through */
+    case CT.LUA_TNUMINT: /* takes advantage of floats and integers being same in JS */
     case CT.LUA_TBOOLEAN:
-    case CT.LUA_TNUMINT:
     case CT.LUA_TTABLE:
     case CT.LUA_TLCL:
     case CT.LUA_TLCF:
@@ -167,6 +167,13 @@ const setgeneric = function(t, hash, key) {
     if (v)
         return v.value;
 
+    let kv = key.value;
+    if ((key.ttisfloat() && (kv|0) === kv)) { /* does index fit in an integer? */
+        /* insert it as an integer */
+        key = new lobject.TValue(CT.LUA_TNUMINT, kv);
+    } else {
+        key = new lobject.TValue(key.type, kv);
+    }
     let tv = new lobject.TValue(CT.LUA_TNIL, null);
     add(t, hash, key, tv);
     return tv;
@@ -193,7 +200,7 @@ const luaH_setint = function(t, key, value) {
 const luaH_set = function(L, t, key) {
     assert(key instanceof lobject.TValue);
     let hash = table_hash(L, key);
-    return setgeneric(t, hash, new lobject.TValue(key.type, key.value));
+    return setgeneric(t, hash, key);
 };
 
 const luaH_delete = function(L, t, key) {
