@@ -693,7 +693,7 @@ test("[test-suite] coroutine: leaving a pending coroutine open", function (t) {
 });
 
 
-test("[test-suite] coroutine: stack overflow", { skip: true }, function (t) {
+test("[test-suite] coroutine: stack overflow", function (t) {
     let luaCode = `
         -- bug (stack overflow)
         local j = 2^9
@@ -711,8 +711,6 @@ test("[test-suite] coroutine: stack overflow", { skip: true }, function (t) {
         end
         co = nil
    `, L;
-    
-    t.comment("TODO");
 
     t.plan(2);
 
