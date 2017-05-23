@@ -232,10 +232,14 @@ const lua_pushinteger = function(L, n) {
 };
 
 const lua_pushlstring = function(L, s, len) {
-    assert(Array.isArray(s), "lua_pushlstring expects array of byte");
     assert(typeof len === "number");
-
-    let ts = lstring.luaS_bless(L, s.slice(0, len));
+    let ts;
+    if (len === 0) {
+        ts = lstring.luaS_bless(L, []);
+    } else {
+        assert(Array.isArray(s), "lua_pushlstring expects array of byte");
+        ts = lstring.luaS_bless(L, s.slice(0, len));
+    }
     lobject.setsvalue2s(L, L.top, ts);
     L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
