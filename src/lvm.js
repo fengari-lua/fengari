@@ -54,14 +54,13 @@ const luaV_finishOp = function(L) {
             let top = L.top - 1;  /* top when 'luaT_trybinTM' was called */
             let b = inst.B;  /* first element to concatenate */
             let total = top - 1 - (base + b);  /* yet to concatenate */
-            L.stack[top - 2] = L.stack[top];  /* put TM result in proper position */
+            lobject.setobjs2s(L, top - 2, top);  /* put TM result in proper position */
             if (total > 1) {  /* are there elements to concat? */
                 L.top = top - 1;  /* top is one after last element (at top-2) */
                 luaV_concat(L, total);  /* concat them (may yield again) */
             }
-
             /* move final result to final position */
-            L.stack[ci.l_base + inst.A] = L.stack[L.top - 1];
+            lobject.setobjs2s(L, ci.l_base + inst.A, L.top - 1);
             L.top = ci.top;  /* restore top */
             break;
         }
