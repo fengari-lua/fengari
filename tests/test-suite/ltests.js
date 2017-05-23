@@ -102,7 +102,7 @@ const runJS = function(L, L1, pc) {
     let status = 0;  
     if (!pc || pc.length === 0) return lauxlib.luaL_error(L, "attempt to runJS empty script");
     for (;;) {
-        let inst = getstring(L, buff, pc);
+        let inst = lua.to_jsstring(getstring(L, buff, pc).slice(0, -1));
         if (inst.length === 0) return 0;
         else if (inst === "absindex") {
             lua.lua_pushnumber(1, lua.lua_absindex(1, getindex(L, L1, pc)));
@@ -385,6 +385,7 @@ const sethook = function(L) {
         if (count > 0) mask |= lua.LUA_MASKCOUNT;
         sethookaux(L, mask, count, scpt);
     }
+    return 0;
 };
 
 const Cfunck = function(L, status, ctx) {
@@ -395,8 +396,25 @@ const Cfunck = function(L, status, ctx) {
     return runJS(L, L, lua.lua_tostring(L, ctx));
 };
 
+const coresume = function(L) {
+    let status;
+    let co = lua.lua_tothread(L, 1);
+    lauxlib.luaL_argcheck(L, co, 1, lua.to_luastring("coroutine expected", true));
+    status = lua.lua_resume(co, L, 0);
+    if (status != lua.LUA_OK && status !== lua.LUA_YIELD) {
+        lua.lua_pushboolean(L, 0);
+        lua.lua_insert(L, -2);
+        return 2;  /* return false + error message */
+    }
+    else {
+        lua.lua_pushboolean(L, 1);
+        return 1;
+    }
+};
+
 const tests_funcs = {
     "newuserdata": newuserdata,
+    "resume": coresume,
     "sethook": sethook
 };
 

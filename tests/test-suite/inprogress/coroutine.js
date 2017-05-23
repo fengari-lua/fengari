@@ -8,6 +8,7 @@ const lua     = require('../../../src/lua.js');
 const lauxlib = require('../../../src/lauxlib.js');
 const lualib  = require('../../../src/lualib.js');
 
+const ltests  = require('../ltests.js');
 
 const prefix = `
     mt = {
@@ -656,8 +657,58 @@ test("[test-suite] coroutine: access to locals of erroneous coroutines", functio
 
 });
 
-test("[test-suite] coroutine: JS Tests", { skip: true }, function (t) {
-    t.comment("TODO");
+const jsprefix = `
+    T = require('T')
+
+    function fact (t, x)
+      assert(turn == t)
+      if x == 0 then return 1
+      else return x*fact(t, x-1)
+      end
+    end
+`;
+
+test("[test-suite] coroutine: testing yields inside hooks", function (t) {
+    let luaCode = `
+        local A, B = 0, 0
+
+        local x = coroutine.create(function ()
+          T.sethook("yield 0", "", 2)
+          A = fact("A", 6)
+        end)
+
+        local y = coroutine.create(function ()
+          T.sethook("yield 0", "", 3)
+          B = fact("B", 7)
+        end)
+
+        while A==0 or B==0 do    -- A ~= 0 when 'x' finishes (similar for 'B','y')
+          if A==0 then turn = "A"; assert(T.resume(x)) end
+          if B==0 then turn = "B"; assert(T.resume(y)) end
+        end
+
+        assert(B // A == 7)    -- fact(7) // fact(6)
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(jsprefix + luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
 });
 
 
