@@ -58,7 +58,7 @@ const getstring = function(L, buff, pc) {
         while (pc.script[pc.offset] !== 0 && pc.offset < pc.script.length && delimits.indexOf(pc.script[pc.offset]) < 0)
           buff[i++] = pc.script[pc.offset++];
     }
-    buff[i] = 0;
+    buff.length = i;
     return buff;
 };
 
@@ -102,7 +102,7 @@ const runJS = function(L, L1, pc) {
     let status = 0;  
     if (!pc || pc.length === 0) return lauxlib.luaL_error(L, "attempt to runJS empty script");
     for (;;) {
-        let inst = lua.to_jsstring(getstring(L, buff, pc).slice(0, -1));
+        let inst = lua.to_jsstring(getstring(L, buff, pc));
         if (inst.length === 0) return 0;
         else if (inst === "absindex") {
             lua.lua_pushnumber(1, lua.lua_absindex(1, getindex(L, L1, pc)));

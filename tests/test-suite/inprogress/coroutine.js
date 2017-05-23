@@ -657,61 +657,6 @@ test("[test-suite] coroutine: access to locals of erroneous coroutines", functio
 
 });
 
-const jsprefix = `
-    T = require('T')
-
-    function fact (t, x)
-      assert(turn == t)
-      if x == 0 then return 1
-      else return x*fact(t, x-1)
-      end
-    end
-`;
-
-test("[test-suite] coroutine: testing yields inside hooks", function (t) {
-    let luaCode = `
-        local A, B = 0, 0
-
-        local x = coroutine.create(function ()
-          T.sethook("yield 0", "", 2)
-          A = fact("A", 6)
-        end)
-
-        local y = coroutine.create(function ()
-          T.sethook("yield 0", "", 3)
-          B = fact("B", 7)
-        end)
-
-        while A==0 or B==0 do    -- A ~= 0 when 'x' finishes (similar for 'B','y')
-          if A==0 then turn = "A"; assert(T.resume(x)) end
-          if B==0 then turn = "B"; assert(T.resume(y)) end
-        end
-
-        assert(B // A == 7)    -- fact(7) // fact(6)
-    `, L;
-    
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        ltests.luaopen_tests(L);
-
-        lauxlib.luaL_loadstring(L, lua.to_luastring(jsprefix + luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-});
-
-
 test("[test-suite] coroutine: leaving a pending coroutine open", function (t) {
     let luaCode = `
         _X = coroutine.wrap(function ()
@@ -972,6 +917,107 @@ test("[test-suite] coroutine: testing yields inside 'for' iterators", function (
 
     }, "Lua program ran without error");
 
+});
+
+
+const jsprefix = `
+    T = require('T')
+
+    function fact (t, x)
+      assert(turn == t)
+      if x == 0 then return 1
+      else return x*fact(t, x-1)
+      end
+    end
+`;
+
+test("[test-suite] coroutine: testing yields inside hooks", function (t) {
+    let luaCode = `
+        local A, B = 0, 0
+
+        local x = coroutine.create(function ()
+          T.sethook("yield 0", "", 2)
+          A = fact("A", 6)
+        end)
+
+        local y = coroutine.create(function ()
+          T.sethook("yield 0", "", 3)
+          B = fact("B", 7)
+        end)
+
+        while A==0 or B==0 do    -- A ~= 0 when 'x' finishes (similar for 'B','y')
+          if A==0 then turn = "A"; assert(T.resume(x)) end
+          if B==0 then turn = "B"; assert(T.resume(y)) end
+        end
+
+        assert(B // A == 7)    -- fact(7) // fact(6)
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(jsprefix + luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+});
+
+
+test("[test-suite] coroutine: testing yields inside line hook", function (t) {
+    let luaCode = `
+        local line = debug.getinfo(1, "l").currentline + 2    -- get line number
+        local function foo ()
+          local x = 10    --<< this line is 'line'
+          x = x + 10
+          _G.XX = x
+        end
+
+        -- testing yields in line hook
+        local co = coroutine.wrap(function ()
+            T.sethook("setglobal X; yield 0", "l", 0)
+            foo()
+            return 10
+        end)
+
+        _G.XX = nil;
+        _G.X = nil; co(); assert(_G.X == line)
+        _G.X = nil; co(); assert(_G.X == line + 1)
+        _G.X = nil; co(); assert(_G.X == line + 2 and _G.XX == nil)
+        _G.X = nil; co(); assert(_G.X == line + 3 and _G.XX == 20)
+        assert(co() == 10)
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(jsprefix + luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
 });
 
 
