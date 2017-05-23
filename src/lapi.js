@@ -1046,7 +1046,7 @@ const lua_concat = function(L, n) {
     if (n >= 2)
         lvm.luaV_concat(L, n);
     else if (n === 0) {
-        lobject.setsvalue2s(L, L.top, lstring.luaS_newliteral(L, []));
+        lobject.setsvalue2s(L, L.top, lstring.luaS_bless(L, []));
         L.top++;
         assert(L.top <= L.ci.top, "stack overflow");
     }
