@@ -27,7 +27,8 @@ const luaS_eqlngstr = function(a, b) {
     return a == b || (a.realstring.length == b.realstring.length && a.realstring.join() == b.realstring.join());
 };
 
-/* converts strings (arrays) to a consistent map key */
+/* converts strings (arrays) to a consistent map key
+   make sure this doesn't conflict with any of the anti-collision strategies in ltable */
 const luaS_hash = function(str) {
     assert(Array.isArray(str));
     return str.map(e => `${e}|`).join('');
