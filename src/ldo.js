@@ -415,7 +415,7 @@ const unroll = function(L, ud) {
 
     while (L.ci !== L.base_ci) {  /* something in the stack */
         if (!(L.ci.callstatus & lstate.CIST_LUA))  /* C function? */
-            finishCcall(L, lstate.LUA_YIELD);  /* complete its execution */
+            finishCcall(L, TS.LUA_YIELD);  /* complete its execution */
         else {  /* Lua function */
             lvm.luaV_finishOp(L);  /* finish interrupted instruction */
             lvm.luaV_execute(L);  /* execute down to higher C 'boundary' */
