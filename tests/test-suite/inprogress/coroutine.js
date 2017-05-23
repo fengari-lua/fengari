@@ -9,6 +9,54 @@ const lauxlib = require('../../../src/lauxlib.js');
 const lualib  = require('../../../src/lualib.js');
 
 
+const prefix = `
+    mt = {
+      __eq = function(a,b) coroutine.yield(nil, "eq"); return a.x == b.x end,
+      __lt = function(a,b) coroutine.yield(nil, "lt"); return a.x < b.x end,
+      __le = function(a,b) coroutine.yield(nil, "le"); return a - b <= 0 end,
+      __add = function(a,b) coroutine.yield(nil, "add"); return a.x + b.x end,
+      __sub = function(a,b) coroutine.yield(nil, "sub"); return a.x - b.x end,
+      __mod = function(a,b) coroutine.yield(nil, "mod"); return a.x % b.x end,
+      __unm = function(a,b) coroutine.yield(nil, "unm"); return -a.x end,
+      __bnot = function(a,b) coroutine.yield(nil, "bnot"); return ~a.x end,
+      __shl = function(a,b) coroutine.yield(nil, "shl"); return a.x << b.x end,
+      __shr = function(a,b) coroutine.yield(nil, "shr"); return a.x >> b.x end,
+      __band = function(a,b)
+                 a = type(a) == "table" and a.x or a
+                 b = type(b) == "table" and b.x or b
+                 coroutine.yield(nil, "band")
+                 return a & b
+               end,
+      __bor = function(a,b) coroutine.yield(nil, "bor"); return a.x | b.x end,
+      __bxor = function(a,b) coroutine.yield(nil, "bxor"); return a.x ~ b.x end,
+
+      __concat = function(a,b)
+                   coroutine.yield(nil, "concat");
+                   a = type(a) == "table" and a.x or a
+                   b = type(b) == "table" and b.x or b
+                   return a .. b
+                 end,
+      __index = function (t,k) coroutine.yield(nil, "idx"); return t.k[k] end,
+      __newindex = function (t,k,v) coroutine.yield(nil, "nidx"); t.k[k] = v end,
+    }
+
+
+    local function new (x)
+      return setmetatable({x = x, k = {}}, mt)
+    end
+
+    local function run (f, t)
+      local i = 1
+      local c = coroutine.wrap(f)
+      while true do
+        local res, stat = c()
+        if res then assert(t[i] == nil); return res, t end
+        assert(stat == t[i])
+        i = i + 1
+      end
+    end
+`;
+
 test("[test-suite] coroutine: is main thread", function (t) {
     let luaCode = `
         local main, ismain = coroutine.running()
@@ -689,57 +737,9 @@ test("[test-suite] coroutine: stack overflow", { skip: true }, function (t) {
 
 test("[test-suite] coroutine: testing yields inside metamethods", function (t) {
     let luaCode = `
-        mt = {
-          __eq = function(a,b) coroutine.yield(nil, "eq"); return a.x == b.x end,
-          __lt = function(a,b) coroutine.yield(nil, "lt"); return a.x < b.x end,
-          __le = function(a,b) coroutine.yield(nil, "le"); return a - b <= 0 end,
-          __add = function(a,b) coroutine.yield(nil, "add"); return a.x + b.x end,
-          __sub = function(a,b) coroutine.yield(nil, "sub"); return a.x - b.x end,
-          __mod = function(a,b) coroutine.yield(nil, "mod"); return a.x % b.x end,
-          __unm = function(a,b) coroutine.yield(nil, "unm"); return -a.x end,
-          __bnot = function(a,b) coroutine.yield(nil, "bnot"); return ~a.x end,
-          __shl = function(a,b) coroutine.yield(nil, "shl"); return a.x << b.x end,
-          __shr = function(a,b) coroutine.yield(nil, "shr"); return a.x >> b.x end,
-          __band = function(a,b)
-                     a = type(a) == "table" and a.x or a
-                     b = type(b) == "table" and b.x or b
-                     coroutine.yield(nil, "band")
-                     return a & b
-                   end,
-          __bor = function(a,b) coroutine.yield(nil, "bor"); return a.x | b.x end,
-          __bxor = function(a,b) coroutine.yield(nil, "bxor"); return a.x ~ b.x end,
-
-          __concat = function(a,b)
-                       coroutine.yield(nil, "concat");
-                       a = type(a) == "table" and a.x or a
-                       b = type(b) == "table" and b.x or b
-                       return a .. b
-                     end,
-          __index = function (t,k) coroutine.yield(nil, "idx"); return t.k[k] end,
-          __newindex = function (t,k,v) coroutine.yield(nil, "nidx"); t.k[k] = v end,
-        }
-
-
-        local function new (x)
-          return setmetatable({x = x, k = {}}, mt)
-        end
-
-
         local a = new(10)
         local b = new(12)
         local c = new"hello"
-
-        local function run (f, t)
-          local i = 1
-          local c = coroutine.wrap(f)
-          while true do
-            local res, stat = c()
-            if res then assert(t[i] == nil); return res, t end
-            assert(stat == t[i])
-            i = i + 1
-          end
-        end
-
 
         assert(run(function () if (a>=b) then return '>=' else return '<' end end,
                {"le", "sub"}) == "<")
@@ -782,7 +782,7 @@ test("[test-suite] coroutine: testing yields inside metamethods", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -878,7 +878,7 @@ test("[test-suite] coroutine: getuptable & setuptable", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -913,7 +913,7 @@ test("[test-suite] coroutine: testing yields inside 'for' iterators", function (
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
