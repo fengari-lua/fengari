@@ -185,6 +185,11 @@ class TValue {
 
 }
 
+/* from stack to (same) stack */
+const setobjs2s = function(L, newidx, oldidx) {
+    L.stack[newidx] = L.stack[oldidx];
+};
+
 const luaO_nilobject = new TValue(CT.LUA_TNIL, null);
 Object.freeze(luaO_nilobject);
 module.exports.luaO_nilobject = luaO_nilobject;
@@ -667,3 +672,4 @@ module.exports.luaO_tostring     = luaO_tostring;
 module.exports.luaO_utf8desc     = luaO_utf8desc;
 module.exports.luaO_utf8esc      = luaO_utf8esc;
 module.exports.numarith          = numarith;
+module.exports.setobjs2s         = setobjs2s;

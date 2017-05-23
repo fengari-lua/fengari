@@ -155,7 +155,7 @@ const lua_setlocal = function(L, ar, n) {
     let name = local.name;
     let pos = local.pos;
     if (name) {
-        L.stack[pos] = L.stack[L.top - 1];
+        lobject.setobjs2s(L, pos, L.top - 1);
         delete L.stack[--L.top];  /* pop value */
     }
     swapextra(L);
@@ -280,7 +280,8 @@ const lua_getinfo = function(L, what, ar) {
     cl = func.ttisclosure() ? func.value : null;
     status = auxgetinfo(L, what, ar, cl, ci);
     if (what.indexOf('f'.charCodeAt(0)) >= 0) {
-        L.stack[L.top++] = func;
+        lobject.setobjs2s(L, L.top, funcOff);
+        L.top++;
         assert(L.top <= L.ci.top, "stack overflow");
     }
 
@@ -590,8 +591,8 @@ const luaG_runerror = function(L, fmt, ...argp) {
 const luaG_errormsg = function(L) {
     if (L.errfunc !== 0) {  /* is there an error handling function? */
         let errfunc = L.errfunc;
-        L.stack[L.top] = L.stack[L.top - 1];
-        L.stack[L.top - 1] = L.stack[errfunc];
+        lobject.setobjs2s(L, L.top, L.top - 1); /* move argument */
+        lobject.setobjs2s(L, L.top - 1, errfunc); /* push function */
         L.top++;
         ldo.luaD_callnoyield(L, L.top - 2, 1);
     }

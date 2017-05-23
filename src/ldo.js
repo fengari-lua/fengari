@@ -32,7 +32,7 @@ const seterrorobj = function(L, errcode, oldtop) {
             break;
         }
         default: {
-            L.stack[oldtop] = L.stack[L.top - 1];
+            lobject.setobjs2s(L, oldtop, L.top - 1);
         }
     }
 
@@ -186,12 +186,12 @@ const moveresults = function(L, firstResult, res, nres, wanted) {
         case 1: {
             if (nres === 0)
                 L.stack[firstResult] = lobject.luaO_nilobject;
-            L.stack[res] = L.stack[firstResult];
+            lobject.setobjs2s(L, res, firstResult); /* move it to proper place */
             break;
         }
         case defs.LUA_MULTRET: {
             for (let i = 0; i < nres; i++)
-                L.stack[res + i] = L.stack[firstResult + i];
+                lobject.setobjs2s(L, res + i, firstResult + i);
             L.top = res + nres;
             return false;
         }
@@ -199,11 +199,11 @@ const moveresults = function(L, firstResult, res, nres, wanted) {
             let i;
             if (wanted <= nres) {
                 for (i = 0; i < wanted; i++) {
-                    L.stack[res + i] = L.stack[firstResult + i];
+                    lobject.setobjs2s(L, res + i, firstResult + i);
                 }
             } else {
                 for (i = 0; i < nres; i++)
-                    L.stack[res + i] = L.stack[firstResult + i];
+                    lobject.setobjs2s(L, res + i, firstResult + i);
                 for (; i < wanted; i++)
                     L.stack[res + i] = new lobject.TValue(CT.LUA_TNIL, null);
             }
@@ -252,7 +252,7 @@ const adjust_varargs = function(L, p, actual) {
 
     let i;
     for (i = 0; i < nfixargs && i < actual; i++) {
-        L.stack[L.top++] = L.stack[fixed + i];
+        lobject.setobjs2s(L, L.top++, fixed + i);
         L.stack[fixed + i] = new lobject.TValue(CT.LUA_TNIL, null);
     }
 
@@ -268,7 +268,7 @@ const tryfuncTM = function(L, off, func) {
         ldebug.luaG_typeerror(L, func, defs.to_luastring("call", true));
     /* Open a hole inside the stack at 'func' */
     for (let p = L.top; p > off; p--)
-        L.stack[p] = L.stack[p-1];
+        lobject.setobjs2s(L, p, p-1);
     L.top++; /* slot ensured by caller */
     L.stack[off] = new lobject.TValue(tm.type, tm.value); /* tag method is the new function to be called */
 };
@@ -351,8 +351,8 @@ const luaD_rawrunprotected = function(L, f, ud) {
                     /* copy of luaG_errormsg without the throw */
                     if (L.errfunc !== 0) {  /* is there an error handling function? */
                         let errfunc = L.errfunc;
-                        L.stack[L.top] = L.stack[L.top - 1];
-                        L.stack[L.top - 1] = L.stack[errfunc];
+                        lobject.setobjs2s(L, L.top, L.top - 1); /* move argument */
+                        lobject.setobjs2s(L, L.top - 1, errfunc); /* push function */
                         L.top++;
                         luaD_callnoyield(L, L.top - 2, 1);
                     }

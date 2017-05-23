@@ -163,7 +163,7 @@ const lua_pop = function(L, n) {
 const reverse = function(L, from, to) {
     for (; from < to; from++, to--) {
         let temp = L.stack[from];
-        L.stack[from] = L.stack[to];
+        lobject.setobjs2s(L, from, to);
         L.stack[to] = temp;
     }
 };
@@ -892,7 +892,8 @@ const lua_arith = function(L, op) {
         assert(2 < L.top - L.ci.funcOff, "not enough elements in the stack");  /* all other operations expect two operands */
     else {  /* for unary operations, add fake 2nd operand */
         assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
-        L.stack[L.top++] = L.stack[L.top - 1];
+        lobject.setobjs2s(L, L.top, L.top - 1);
+        L.top++;
     }
     /* first operand at top - 2, second at top - 1; result go to top - 2 */
     lobject.luaO_arith(L, op, L.stack[L.top - 2], L.stack[L.top - 1], L.stack[L.top - 2]);

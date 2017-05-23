@@ -108,7 +108,6 @@ const luaT_objtypename = function(L, o) {
 };
 
 const luaT_callTM = function(L, f, p1, p2, p3, hasres) {
-    let result = p3;
     let func = L.top;
 
     L.stack[L.top] = new lobject.TValue(f.type, f.value); /* push function (assume EXTRA_STACK) */
@@ -124,9 +123,8 @@ const luaT_callTM = function(L, f, p1, p2, p3, hasres) {
     else
         ldo.luaD_callnoyield(L, func, hasres);
 
-    if (hasres) {
-        assert(typeof result === "number");
-        L.stack[result] = L.stack[--L.top];
+    if (hasres) {  /* if has result, move it to its place */
+        lobject.setobjs2s(L, p3, --L.top);
     }
 };
 

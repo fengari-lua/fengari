@@ -34,7 +34,7 @@ const luaV_finishOp = function(L) {
         case OCi.OP_MOD: case OCi.OP_POW:
         case OCi.OP_UNM: case OCi.OP_BNOT: case OCi.OP_LEN:
         case OCi.OP_GETTABUP: case OCi.OP_GETTABLE: case OCi.OP_SELF: {
-            L.stack[base + inst.A] = L.stack[--L.top];
+            lobject.setobjs2s(L, base + inst.A, --L.top);
             break;
         }
         case OCi.OP_LE: case OCi.OP_LT: case OCi.OP_EQ: {
@@ -121,7 +121,7 @@ const luaV_execute = function(L) {
 
         switch (opcode) {
             case OCi.OP_MOVE: {
-                L.stack[ra] = L.stack[RB(L, base, i)];
+                lobject.setobjs2s(L, ra, RB(L, base, i));
                 break;
             }
             case OCi.OP_LOADK: {
@@ -197,12 +197,11 @@ const luaV_execute = function(L) {
                 break;
             }
             case OCi.OP_SELF: {
-                let table = L.stack[RB(L, base, i)];
-                let key = RKC(L, base, k, i);
+                let rb = RB(L, base, i);
+                let rc = RKC(L, base, k, i);
+                lobject.setobjs2s(L, ra + 1, rb);
 
-                L.stack[ra + 1] = table;
-
-                gettable(L, table, key, ra);
+                gettable(L, L.stack[rb], rc, ra);
                 break;
             }
             case OCi.OP_ADD: {
@@ -409,7 +408,7 @@ const luaV_execute = function(L) {
                 L.top = base + c + 1; /* mark the end of concat operands */
                 luaV_concat(L, c - b + 1);
                 let rb = base + b;
-                L.stack[ra] = L.stack[rb];
+                lobject.setobjs2s(L, ra, rb);
                 L.top = ci.top; /* restore top */
                 break;
             }
@@ -446,11 +445,12 @@ const luaV_execute = function(L) {
                 break;
             }
             case OCi.OP_TESTSET: {
-                let rb = L.stack[RB(L, base, i)];
+                let rbIdx = RB(L, base, i);
+                let rb = L.stack[rbIdx];
                 if (i.C ? rb.l_isfalse() : !rb.l_isfalse())
                     ci.l_savedpc++;
                 else {
-                    L.stack[ra] = rb;
+                    lobject.setobjs2s(L, ra, rbIdx);
                     donextjump(L, ci);
                 }
                 break;
@@ -485,7 +485,7 @@ const luaV_execute = function(L) {
                     let lim = nci.l_base + nfunc.value.p.numparams;
                     if (cl.p.p.length > 0) lfunc.luaF_close(L, oci.l_base);
                     for (let aux = 0; nfuncOff + aux < lim; aux++)
-                        L.stack[ofuncOff + aux] = L.stack[nfuncOff + aux];
+                        lobject.setobjs2s(L, ofuncOff + aux, nfuncOff + aux);
                     oci.func = nci.func;
                     oci.l_base = ofuncOff + (nci.l_base - nfuncOff);
                     oci.top = L.top = ofuncOff + (L.top - nfuncOff);
@@ -565,9 +565,9 @@ const luaV_execute = function(L) {
             }
             case OCi.OP_TFORCALL: {
                 let cb = ra + 3; /* call base */
-                L.stack[cb + 2] = L.stack[ra + 2];
-                L.stack[cb + 1] = L.stack[ra + 1];
-                L.stack[cb]     = L.stack[ra];
+                lobject.setobjs2s(L, cb+2, ra+2);
+                lobject.setobjs2s(L, cb+1, ra+1);
+                lobject.setobjs2s(L, cb, ra);
                 L.top = cb + 3; /* func. + 2 args (state and index) */
                 ldo.luaD_call(L, cb, i.C);
                 /* go straight to OP_TFORLOOP */
@@ -579,7 +579,7 @@ const luaV_execute = function(L) {
             }
             case OCi.OP_TFORLOOP: {
                 if (!L.stack[ra + 1].ttisnil()) { /* continue loop? */
-                    L.stack[ra] = L.stack[ra + 1]; /* save control variable */
+                    lobject.setobjs2s(L, ra, ra + 1); /* save control variable */
                     ci.l_savedpc += i.sBx; /* jump back */
                 }
                 break;
@@ -625,7 +625,7 @@ const luaV_execute = function(L) {
                 }
 
                 for (j = 0; j < b && j < n; j++)
-                    L.stack[ra + j] = L.stack[base - n + j];
+                    lobject.setobjs2s(L, ra + j, base - n + j);
 
                 for (; j < b; j++) /* complete required results with nil */
                     L.stack[ra + j] = new lobject.TValue(CT.LUA_TNIL, null);
@@ -996,7 +996,7 @@ const luaV_concat = function(L, total) {
             tostring(L, top - 2);
             delete L.stack[top - 1];
         } else if (isemptystr(L.stack[top-2])) {
-            L.stack[top - 2] = L.stack[top - 1];
+            lobject.setobjs2s(L, top - 2, top - 1);
             delete L.stack[top - 1];
         } else {
             /* at least two non-empty string values; get as many as possible */
