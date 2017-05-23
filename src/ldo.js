@@ -230,6 +230,7 @@ const luaD_hook = function(L, event, line) {
         ar.event = event;
         ar.currentline = line;
         ar.i_ci = ci;
+        luaD_checkstack(L, defs.LUA_MINSTACK);  /* ensure minimum stack size */
         ci.top = L.top + defs.LUA_MINSTACK;
         assert(ci.top <= L.stack_last);
         L.allowhook = 0;  /* cannot call hooks inside a hook */
