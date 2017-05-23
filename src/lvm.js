@@ -126,13 +126,13 @@ const luaV_execute = function(L) {
             }
             case OCi.OP_LOADK: {
                 let konst = k[i.Bx];
-                L.stack[ra] = new lobject.TValue(konst.type, konst.value);
+                lobject.setobj2s(L, ra, konst);
                 break;
             }
             case OCi.OP_LOADKX: {
                 assert(ci.l_code[ci.l_savedpc].opcode === OCi.OP_EXTRAARG);
                 let konst = k[ci.l_code[ci.l_savedpc++].Ax];
-                L.stack[ra] = new lobject.TValue(konst.type, konst.value);
+                lobject.setobj2s(L, ra, konst);
                 break;
             }
             case OCi.OP_LOADBOOL: {
@@ -150,7 +150,7 @@ const luaV_execute = function(L) {
             }
             case OCi.OP_GETUPVAL: {
                 let o = cl.upvals[i.B].val();
-                L.stack[ra] = new lobject.TValue(o.type, o.value);
+                lobject.setobj2s(L, ra, o);
                 break;
             }
             case OCi.OP_SETUPVAL: {
@@ -1033,7 +1033,7 @@ const gettable = function(L, t, key, ra) {
         } else {
             let slot = ltable.luaH_get(L, t.value, key);
             if (!slot.ttisnil()) {
-                L.stack[ra] = new lobject.TValue(slot.type, slot.value);
+                lobject.setobj2s(L, ra, slot);
                 return;
             } else { /* 't' is a table */
                 tm = ltm.fasttm(L, t.value.metatable, ltm.TMS.TM_INDEX);  /* table's metamethod */

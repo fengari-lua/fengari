@@ -112,7 +112,7 @@ const lua_xmove = function(from, to, n) {
 
     from.top -= n;
     for (let i = 0; i < n; i++) {
-        to.stack[to.top] = from.stack[from.top + i];
+        lobject.setobj2s(to, to.top, from.stack[from.top + i]);
         to.top++;
     }
 };
@@ -135,8 +135,7 @@ const lua_gettop = function(L) {
 };
 
 const lua_pushvalue = function(L, idx) {
-    L.stack[L.top] = index2addr(L, idx);
-
+    lobject.setobj2s(L, L.top, index2addr(L, idx));
     L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
 };
@@ -164,7 +163,7 @@ const reverse = function(L, from, to) {
     for (; from < to; from++, to--) {
         let temp = L.stack[from];
         lobject.setobjs2s(L, from, to);
-        L.stack[to] = temp;
+        lobject.setobj2s(L, to, temp);
     }
 };
 
@@ -474,12 +473,10 @@ const auxgetstr = function(L, t, k) {
 
 const lua_rawgeti = function(L, idx, n) {
     let t = index2addr(L, idx);
-
     assert(t.ttistable(), "table expected");
-
-    L.stack[L.top++] = ltable.luaH_getint(t.value, n);
+    lobject.setobj2s(L, L.top, ltable.luaH_getint(t.value, n));
+    L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
-
     return L.stack[L.top - 1].ttnov();
 };
 
@@ -487,18 +484,16 @@ const lua_rawgetp = function(L, idx, p) {
     let t = index2addr(L, idx);
     assert(t.ttistable(), "table expected");
     let k = new TValue(CT.LUA_TLIGHTUSERDATA, p);
-    L.stack[L.top++] = ltable.luaH_get(L, t.value, k);
+    lobject.setobj2s(L, L.top, ltable.luaH_get(L, t.value, k));
+    L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
     return L.stack[L.top - 1].ttnov();
 };
 
 const lua_rawget = function(L, idx) {
     let t = index2addr(L, idx);
-
     assert(t.ttistable(t), "table expected");
-
-    L.stack[L.top - 1] = ltable.luaH_get(L, t.value, L.stack[L.top - 1]);
-
+    lobject.setobj2s(L, L.top - 1, ltable.luaH_get(L, t.value, L.stack[L.top - 1]));
     return L.stack[L.top - 1].ttnov();
 };
 
@@ -552,9 +547,9 @@ const lua_getupvalue = function(L, funcindex, n) {
     if (up) {
         let name = up.name;
         let val = up.val;
-
-        L.stack[L.top++] = new TValue(val.type, val.value);
-
+        lobject.setobj2s(L, L.top, val);
+        L.top++;
+        assert(L.top <= L.ci.top, "stack overflow");
         return name;
     }
     return null;

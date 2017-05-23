@@ -189,6 +189,10 @@ class TValue {
 const setobjs2s = function(L, newidx, oldidx) {
     L.stack[newidx] = L.stack[oldidx];
 };
+/* to stack (not from same stack) */
+const setobj2s = function(L, newidx, oldtv) {
+    L.stack[newidx] = new TValue(oldtv.type, oldtv.value);
+};
 
 const luaO_nilobject = new TValue(CT.LUA_TNIL, null);
 Object.freeze(luaO_nilobject);
@@ -673,3 +677,4 @@ module.exports.luaO_utf8desc     = luaO_utf8desc;
 module.exports.luaO_utf8esc      = luaO_utf8esc;
 module.exports.numarith          = numarith;
 module.exports.setobjs2s         = setobjs2s;
+module.exports.setobj2s          = setobj2s;

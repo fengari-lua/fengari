@@ -270,7 +270,7 @@ const tryfuncTM = function(L, off, func) {
     for (let p = L.top; p > off; p--)
         lobject.setobjs2s(L, p, p-1);
     L.top++; /* slot ensured by caller */
-    L.stack[off] = new lobject.TValue(tm.type, tm.value); /* tag method is the new function to be called */
+    lobject.setobj2s(L, off, tm); /* tag method is the new function to be called */
 };
 
 /*

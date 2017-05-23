@@ -110,13 +110,13 @@ const luaT_objtypename = function(L, o) {
 const luaT_callTM = function(L, f, p1, p2, p3, hasres) {
     let func = L.top;
 
-    L.stack[L.top] = new lobject.TValue(f.type, f.value); /* push function (assume EXTRA_STACK) */
-    L.stack[L.top + 1] = new lobject.TValue(p1.type, p1.value); /* 1st argument */
-    L.stack[L.top + 2] = new lobject.TValue(p2.type, p2.value); /* 2nd argument */
+    lobject.setobj2s(L, L.top, f); /* push function (assume EXTRA_STACK) */
+    lobject.setobj2s(L, L.top + 1, p1); /* 1st argument */
+    lobject.setobj2s(L, L.top + 2, p2); /* 2nd argument */
     L.top += 3;
 
     if (!hasres)  /* no result? 'p3' is third argument */
-        L.stack[L.top++] = new lobject.TValue(p3.type, p3.value);  /* 3rd argument */
+        lobject.setobj2s(L, L.top++, p3);  /* 3rd argument */
 
     if (L.ci.callstatus & lstate.CIST_LUA)
         ldo.luaD_call(L, func, hasres);
