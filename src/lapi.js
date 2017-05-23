@@ -255,6 +255,7 @@ const lua_pushstring = function (L, s) {
     else {
         let ts = lstring.luaS_new(L, s);
         lobject.setsvalue2s(L, L.top, ts);
+        s = ts.getstr(); /* internal copy */
     }
     L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
