@@ -7,7 +7,19 @@ const defs    = require('./defs.js');
 const ldebug  = require('./ldebug.js');
 const lobject = require('./lobject.js');
 const lstring = require('./lstring.js');
+const lstate  = require('./lstate.js');
 const CT      = defs.constant_types;
+
+/* used to prevent conflicts with lightuserdata keys */
+let lightuserdata_hashes = new WeakMap();
+const get_lightuserdata_hash = function(v) {
+    let hash = lightuserdata_hashes.get(v);
+    if (!hash) {
+        hash = Symbol("lightuserdata");
+        lightuserdata_hashes.set(v, hash);
+    }
+    return hash;
+};
 
 const table_hash = function(L, key) {
     switch(key.type) {
@@ -18,7 +30,6 @@ const table_hash = function(L, key) {
             return ldebug.luaG_runerror(L, defs.to_luastring("table index is NaN", true));
         /* fall through */
     case CT.LUA_TBOOLEAN:
-    case CT.LUA_TLIGHTUSERDATA: /* XXX: if user pushes conflicting lightuserdata then the table will do odd things */
     case CT.LUA_TNUMINT:
     case CT.LUA_TTABLE:
     case CT.LUA_TLCL:
@@ -30,6 +41,35 @@ const table_hash = function(L, key) {
     case CT.LUA_TSHRSTR:
     case CT.LUA_TLNGSTR:
         return lstring.luaS_hashlongstr(key.tsvalue());
+    case CT.LUA_TLIGHTUSERDATA:
+        let v = key.value;
+        switch(typeof v) {
+        case "string":
+            /* possible conflict with LUA_TSTRING.
+               prefix this string with "*" so they don't clash */
+            return "*" + v;
+        case "number":
+            /* possible conflict with LUA_TNUMBER.
+               turn into string and prefix with "#" to avoid clash with other strings */
+            return "#" + v;
+        case "boolean":
+            /* possible conflict with LUA_TBOOLEAN. use strings ?true and ?false instead */
+            return v?"?true":"?false";
+        case "function":
+            /* possible conflict with LUA_TLCF.
+               indirect via a weakmap */
+            return get_lightuserdata_hash(v);
+        case "object":
+            /* v shouldn't be a CClosure, LClosure, Table or Userdata from this state as they're never exposed
+               the only exposed internal type is a lua_State */
+            if (v instanceof lstate.lua_State && v.l_G === L.l_G) {
+                /* indirect via a weakmap */
+                return get_lightuserdata_hash(v);
+            }
+            /* fall through */
+        default:
+            return v;
+        }
     default:
         throw new Error("unknown key type: " + key.type);
     }
