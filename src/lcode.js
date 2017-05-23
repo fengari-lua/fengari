@@ -470,12 +470,10 @@ const luaK_stringK = function(fs, s) {
 /*
 ** Add an integer to list of constants and return its index.
 ** Integers use userdata as keys to avoid collision with floats with
-** same value; conversion to 'void*' is used only for hashing, so there
-** are no "precision" problems.
+** same value.
 */
 const luaK_intK = function(fs, n) {
-    /* FIXME: shouldn't use string as key. need to use pointer */
-    let k = new TValue(CT.LUA_TLNGSTR, lstring.luaS_bless(fs.L, defs.to_luastring(`${n}`)));
+    let k = new TValue(CT.LUA_TLIGHTUSERDATA, n);
     let o = new TValue(CT.LUA_TNUMINT, n);
     return addk(fs, k, o);
 };
