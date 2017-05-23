@@ -625,11 +625,11 @@ const luaG_traceexec = function(L) {
         ldo.luaD_hook(L, defs.LUA_HOOKCOUNT, -1);  /* call count hook */
     if (mask & defs.LUA_MASKLINE) {
         let p = ci.func.value.p;
-        let npc = ci.l_savedpc; // pcRel(ci.u.l.savedpc, p);
+        let npc = ci.l_savedpc - 1; // pcRel(ci.u.l.savedpc, p);
         let newline = p.lineinfo.length !== 0 ? p.lineinfo[npc] : -1;
         if (npc === 0 ||  /* call linehook when enter a new function, */
             ci.l_savedpc <= L.oldpc ||  /* when jump back (loop), or when */
-            newline !== p.lineinfo.length !== 0 ? p.lineinfo[L.oldpc] : -1)  /* enter a new line */
+            newline !== p.lineinfo.length !== 0 ? p.lineinfo[L.oldpc - 1] : -1)  /* enter a new line */
             ldo.luaD_hook(L, defs.LUA_HOOKLINE, newline);  /* call line hook */
     }
     L.oldpc = ci.l_savedpc;
@@ -638,7 +638,7 @@ const luaG_traceexec = function(L) {
             L.hookcount = 1;  /* undo decrement to zero */
         ci.l_savedpc--;  /* undo increment (resume will increment it again) */
         ci.callstatus |= lstate.CIST_HOOKYIELD;  /* mark that it yielded */
-        ci.func = L.top - 1;  /* protect stack below results */
+        ci.func = L.stack[L.top - 1];  /* protect stack below results */
         ldo.luaD_throw(L, TS.LUA_YIELD);
     }
 };
