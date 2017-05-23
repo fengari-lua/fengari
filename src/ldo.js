@@ -396,7 +396,8 @@ const finishCcall = function(L, status) {
     /* finish 'lua_callk'/'lua_pcall'; CIST_YPCALL and 'errfunc' already
        handled */
     if (ci.nresults === defs.LUA_MULTRET && L.ci.top < L.top) L.ci.top = L.top;
-    let n = ci.c_k(L, status, ci.c_ctx);  /* call continuation function */
+    let c_k = ci.c_k; /* don't want to call as method */
+    let n = c_k(L, status, ci.c_ctx);  /* call continuation function */
     assert(n < (L.top - L.ci.funcOff), "not enough elements in the stack");
     luaD_poscall(L, ci, L.top - n, n);  /* finish 'luaD_precall' */
 };
