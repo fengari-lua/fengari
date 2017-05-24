@@ -7,9 +7,7 @@ const llex     = require('./llex.js');
 const lobject  = require('./lobject.js');
 const lopcodes = require('./lopcodes.js');
 const lparser  = require('./lparser.js');
-const lstring  = require('./lstring.js');
 const ltable   = require('./ltable.js');
-const ltm      = require('./ltm.js');
 const lvm      = require('./lvm.js');
 
 const CT       = defs.CT;
