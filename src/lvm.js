@@ -522,18 +522,17 @@ const luaV_execute = function(L) {
                     if (0 < step ? idx <= limit : limit <= idx) {
                         ci.l_savedpc += i.sBx;
                         L.stack[ra].value = idx;
-                        L.stack[ra + 3] = new lobject.TValue(CT.LUA_TNUMINT, idx); // TODO: if tvalue already there, just update it
+                        L.stack[ra + 3] = new lobject.TValue(CT.LUA_TNUMINT, idx);
                     }
                 } else { /* floating loop */
                     let step = L.stack[ra + 2].value;
                     let idx = L.stack[ra].value + step;
                     let limit = L.stack[ra + 1].value;
 
-                    // TODO: luai_numlt, luai_numle
                     if (0 < step ? idx <= limit : limit <= idx) {
                         ci.l_savedpc += i.sBx;
                         L.stack[ra].value = idx;
-                        L.stack[ra + 3] = new lobject.TValue(CT.LUA_TNUMFLT, idx); // TODO: if tvalue already there, just update it
+                        L.stack[ra + 3] = new lobject.TValue(CT.LUA_TNUMFLT, idx);
                     }
                 }
                 break;
