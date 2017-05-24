@@ -520,7 +520,7 @@ const luaV_execute = function(L) {
 
                     if (0 < step ? idx <= limit : limit <= idx) {
                         ci.l_savedpc += i.sBx;
-                        L.stack[ra].value = idx;
+                        L.stack[ra].chgivalue(idx);  /* update internal index... */
                         L.stack[ra + 3] = new lobject.TValue(CT.LUA_TNUMINT, idx);
                     }
                 } else { /* floating loop */
@@ -530,7 +530,7 @@ const luaV_execute = function(L) {
 
                     if (0 < step ? idx <= limit : limit <= idx) {
                         ci.l_savedpc += i.sBx;
-                        L.stack[ra].value = idx;
+                        L.stack[ra].chgfltvalue(idx);  /* update internal index... */
                         L.stack[ra + 3] = new lobject.TValue(CT.LUA_TNUMFLT, idx);
                     }
                 }

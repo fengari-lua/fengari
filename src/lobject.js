@@ -126,8 +126,18 @@ class TValue {
         this.value = x;
     }
 
+    chgfltvalue(x) {
+        assert(this.type == CT.LUA_TNUMFLT);
+        this.value = x;
+    }
+
     setivalue(x) {
         this.type = CT.LUA_TNUMINT;
+        this.value = x;
+    }
+
+    chgivalue(x) {
+        assert(this.type == CT.LUA_TNUMINT);
         this.value = x;
     }
 
