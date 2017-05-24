@@ -610,9 +610,8 @@ const luaO_arith = function(L, op, p1, p2, res) {
         case defs.LUA_OPBAND: case defs.LUA_OPBOR: case defs.LUA_OPBXOR:
         case defs.LUA_OPSHL: case defs.LUA_OPSHR:
         case defs.LUA_OPBNOT: {  /* operate only on integers */
-            let i1 = lvm.tointeger(p1);
-            let i2 = lvm.tointeger(p2);
-            if (i1 !== false && i2 !== false) {
+            let i1, i2;
+            if ((i1 = lvm.tointeger(p1)) !== false && (i2 = lvm.tointeger(p2)) !== false) {
                 res.type  = CT.LUA_TNUMINT;
                 res.value = intarith(L, op, i1, i2);
                 return;
@@ -620,9 +619,8 @@ const luaO_arith = function(L, op, p1, p2, res) {
             else break;  /* go to the end */
         }
         case defs.LUA_OPDIV: case defs.LUA_OPPOW: {  /* operate only on floats */
-            let n1 = lvm.tonumber(p1);
-            let n2 = lvm.tonumber(p2);
-            if (n1 !== false && n2 !== false) {
+            let n1, n2;
+            if ((n1 = lvm.tonumber(p1)) !== false && (n2 = lvm.tonumber(p2)) !== false) {
                 res.type  = CT.LUA_TNUMFLT;
                 res.value = numarith(L, op, n1, n2);
                 return;
@@ -630,14 +628,13 @@ const luaO_arith = function(L, op, p1, p2, res) {
             else break;  /* go to the end */
         }
         default: {  /* other operations */
-            let n1 = lvm.tonumber(p1);
-            let n2 = lvm.tonumber(p2);
+            let n1, n2;
             if (p1.ttisinteger() && p2.ttisinteger()) {
                 res.type  = CT.LUA_TNUMINT;
                 res.value = intarith(L, op, p1.value, p2.value);
                 return;
             }
-            else if (n1 !== false && n2 !== false) {
+            else if ((n1 = lvm.tonumber(p1)) !== false && (n2 = lvm.tonumber(p2)) !== false) {
                 res.type  = CT.LUA_TNUMFLT;
                 res.value = numarith(L, op, n1, n2);
                 return;
