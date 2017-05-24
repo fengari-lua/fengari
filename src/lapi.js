@@ -511,13 +511,7 @@ const lua_createtable = function(L, narray, nrec) {
 };
 
 const luaS_newudata = function(L, size) {
-    return {
-        id: L.l_G.id_counter++,
-        metatable: null,
-        uservalue: new lobject.TValue(CT.LUA_TNIL, null),
-        len: size,
-        data: Object.create(null) // ignores size argument
-    };
+    return new lobject.Udata(L, size);
 };
 
 const lua_newuserdata = function(L, size) {

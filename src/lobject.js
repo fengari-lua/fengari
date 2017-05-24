@@ -214,6 +214,19 @@ class CClosure {
 
 }
 
+class Udata {
+
+    constructor(L, size) {
+        this.id = L.l_G.id_counter++;
+
+        this.metatable = null;
+        this.uservalue = new TValue(CT.LUA_TNIL, null);
+        this.len = size;
+        this.data = Object.create(null); // ignores size argument
+    }
+
+}
+
 /*
 ** Description of a local variable for function prototypes
 ** (used for debug information)
@@ -630,6 +643,7 @@ module.exports.LUA_TDEADKEY      = LUA_TDEADKEY;
 module.exports.LUA_TPROTO        = LUA_TPROTO;
 module.exports.LocVar            = LocVar;
 module.exports.TValue            = TValue;
+module.exports.Udata             = Udata;
 module.exports.UTF8BUFFSZ        = UTF8BUFFSZ;
 module.exports.luaO_arith        = luaO_arith;
 module.exports.luaO_chunkid      = luaO_chunkid;
