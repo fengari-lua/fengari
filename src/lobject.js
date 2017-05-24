@@ -161,6 +161,31 @@ class TValue {
         this.value = x;
     }
 
+    setsvalue(x) {
+        this.type = CT.LUA_TLNGSTR; /* LUA_TSHRSTR? */
+        this.value = x;
+    }
+
+    setuvalue(x) {
+        this.type = CT.LUA_TUSERDATA;
+        this.value = x;
+    }
+
+    setthvalue(x) {
+        this.type = CT.LUA_TTHREAD;
+        this.value = x;
+    }
+
+    setclLvalue(x) {
+        this.type = CT.LUA_TLCL;
+        this.value = x;
+    }
+
+    setclCvalue(x) {
+        this.type = CT.LUA_TCCL;
+        this.value = x;
+    }
+
     sethvalue(x) {
         this.type = CT.LUA_TTABLE;
         this.value = x;
