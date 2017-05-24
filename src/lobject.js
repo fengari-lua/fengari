@@ -7,7 +7,9 @@ const defs    = require('./defs.js');
 const ljstype = require('./ljstype.js');
 const ldebug  = require('./ldebug.js');
 const ldo     = require('./ldo.js');
+const lstate  = require('./lstate.js');
 const lstring = require('./lstring.js');
+const ltable  = require('./ltable.js');
 const luaconf = require('./luaconf.js');
 const lvm     = require('./lvm.js');
 const llimit  = require('./llimit.js');
@@ -514,7 +516,19 @@ const luaO_pushvfstring = function(L, fmt, argp) {
                 ldo.luaD_inctop(L);
                 L.stack[L.top-1] = luaO_tostring(L, new TValue(CT.LUA_TNUMFLT, argp[a++]));
                 break;
-            // case char['p']:
+            case char['p']:
+                let v = argp[a++];
+                if (v instanceof lstate.lua_State ||
+                    v instanceof ltable.Table ||
+                    v instanceof Udata ||
+                    v instanceof LClosure ||
+                    v instanceof CClosure) {
+                    pushstr(L, defs.to_luastring("0x"+v.id.toString(16)));
+                } else {
+                    /* user provided object. no id available */
+                    pushstr(L, defs.to_luastring("<id NYI>"));
+                }
+                break;
             case char['U']:
                 pushstr(L, defs.to_luastring(String.fromCodePoint(argp[a++])));
                 break;

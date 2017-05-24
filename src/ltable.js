@@ -276,3 +276,4 @@ module.exports.luaH_set     = luaH_set;
 module.exports.luaH_setint  = luaH_setint;
 module.exports.luaH_new     = luaH_new;
 module.exports.luaH_next    = luaH_next;
+module.exports.Table        = Table;

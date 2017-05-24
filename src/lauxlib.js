@@ -490,29 +490,7 @@ const luaL_tolstring = function(L, idx) {
             default:
                 let tt = luaL_getmetafield(L, idx, lua.to_luastring("__name", true));
                 let kind = tt === lua.LUA_TSTRING ? lua.lua_tostring(L, -1) : luaL_typename(L, idx);
-                let p = lua.lua_topointer(L, idx);
-                let id;
-                switch (t) {
-                case lua.LUA_TLIGHTUSERDATA:
-                    /* user provided object. no id available */
-                    id = "<id NYI>";
-                    break;
-                case lua.LUA_TFUNCTION:
-                    /* light C functions are returned from lua_topointer directly */
-                    if (typeof p == "function") {
-                        id = "<id NYI>";
-                        break;
-                    }
-                    /* fall through */
-                case lua.LUA_TTABLE:
-                case lua.LUA_TTHREAD:
-                case lua.LUA_TUSERDATA:
-                    id = `0x${p.id.toString(16)}`;
-                    break;
-                default:
-                    throw Error("unhandled type: "+t);
-                }
-                lua.lua_pushstring(L, lua.to_luastring(`${lua.to_jsstring(kind)}: ${id}`));
+                lua.lua_pushfstring(L, lua.to_luastring("%s: %p"), kind, lua.lua_topointer(L, idx));
                 if (tt !== lua.LUA_TNIL)
                     lua.lua_remove(L, -2);
                 break;
