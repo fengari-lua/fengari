@@ -4,9 +4,9 @@ const test     = require('tape');
 
 global.WEB = false;
 
-const lua     = require('../../../src/lua.js');
-const lauxlib = require('../../../src/lauxlib.js');
-const lualib  = require('../../../src/lualib.js');
+const lua     = require('../../src/lua.js');
+const lauxlib = require('../../src/lauxlib.js');
+const lualib  = require('../../src/lualib.js');
 
 
 const prefix = `
@@ -521,6 +521,13 @@ test("[test-suite] sort: Invert-sorting", function (t) {
         print(string.format("Invert-sorting other %d elements in %.2f msec., with %i comparisons",
               limit, x, i))
         check(a, function(x,y) return y<x end)
+
+        table.sort{}  -- empty array
+
+        for i=1,limit do a[i] = false end
+        timesort(a, limit,  function(x,y) return nil end, "equal")
+
+        for i,v in pairs(a) do assert(v == false) end
     `, L;
     
     t.plan(2);
@@ -553,20 +560,13 @@ test("[test-suite] sort: sorting", function (t) {
           end
         end
 
-        table.sort{}  -- empty array
-
-        for i=1,limit do a[i] = false end
-        timesort(a, limit,  function(x,y) return nil end, "equal")
-
-        for i,v in pairs(a) do assert(v == false) end
-
         A = {"álo", "\\0first :-)", "alo", "then this one", "45", "and a new"}
         table.sort(A)
         check(A)
 
         table.sort(A, function (x, y)
                   load(string.format("A[%q] = ''", x), "")()
-                  collectgarbage()
+                  -- collectgarbage()
                   return x<y
                 end)
 

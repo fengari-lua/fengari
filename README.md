@@ -64,14 +64,14 @@
     - [x] `locals.lua` (10/10)
     - [x] `math.lua` (68/68)
     - [x] `nextvar.lua` (44/44)
+    - [x] `sort.lua` (24/24)
     - [x] `strings.lua` (34/34)
     - [x] `vararg.lua` (8/8)
-    - [ ] `attrib.lua`
     - [ ] `coroutine.lua` (32/40)
     - [ ] `pm.lua` (27/38)
-    - [ ] `sort.lua` (21/24)
     - [ ] `tpack.lua` (20/32)
     - [ ] `utf8.lua` (14/20)
+    - [ ] `attrib.lua`
     - [ ] `api.lua`
     - [ ] `big.lua`
     - [ ] `code.lua`
