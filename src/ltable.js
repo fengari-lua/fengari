@@ -15,7 +15,9 @@ let lightuserdata_hashes = new WeakMap();
 const get_lightuserdata_hash = function(v) {
     let hash = lightuserdata_hashes.get(v);
     if (!hash) {
-        hash = Symbol("lightuserdata");
+        /* Hash should be something unique that is a valid WeakMap key
+           so that it ends up in dead_weak when removed from a table */
+        hash = {};
         lightuserdata_hashes.set(v, hash);
     }
     return hash;
