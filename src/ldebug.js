@@ -639,6 +639,7 @@ const luaG_traceexec = function(L) {
         ci.l_savedpc--;  /* undo increment (resume will increment it again) */
         ci.callstatus |= lstate.CIST_HOOKYIELD;  /* mark that it yielded */
         ci.func = L.stack[L.top - 1];  /* protect stack below results */
+        ci.funcOff = L.top - 1;
         ldo.luaD_throw(L, TS.LUA_YIELD);
     }
 };
