@@ -962,13 +962,13 @@ const validop = function(op, v1, v2) {
 ** Try to "constant-fold" an operation; return 1 iff successful.
 ** (In this case, 'e1' has the final result.)
 */
-const constfolding = function(fs, op, e1, e2) {
+const constfolding = function(op, e1, e2) {
     let ek = lparser.expkind;
     let v1, v2;
     if (!(v1 = tonumeral(e1, true)) || !(v2 = tonumeral(e2, true)) || !validop(op, v1, v2))
         return 0;  /* non-numeric operands or not safe to fold */
     let res = new TValue(); /* FIXME */
-    lobject.luaO_arith(fs.ls.L, op, v1, v2, res);  /* does operation */
+    lobject.luaO_arith(null, op, v1, v2, res);  /* does operation */
     if (res.ttisinteger()) {
         e1.k = ek.VKINT;
         e1.u.ival = res.value;
@@ -1063,7 +1063,7 @@ const luaK_prefix = function(fs, op, e, line) {
     ef.f = NO_JUMP;
     switch (op) {
         case UnOpr.OPR_MINUS: case UnOpr.OPR_BNOT:  /* use 'ef' as fake 2nd operand */
-            if (constfolding(fs, op + defs.LUA_OPUNM, e, ef))
+            if (constfolding(op + defs.LUA_OPUNM, e, ef))
                 break;
             /* FALLTHROUGH */
         case UnOpr.OPR_LEN:
@@ -1150,7 +1150,7 @@ const luaK_posfix = function(fs, op, e1, e2, line) {
         case BinOpr.OPR_IDIV: case BinOpr.OPR_MOD: case BinOpr.OPR_POW:
         case BinOpr.OPR_BAND: case BinOpr.OPR_BOR: case BinOpr.OPR_BXOR:
         case BinOpr.OPR_SHL: case BinOpr.OPR_SHR: {
-            if (!constfolding(fs, op + defs.LUA_OPADD, e1, e2))
+            if (!constfolding(op + defs.LUA_OPADD, e1, e2))
                 codebinexpval(fs, op + OpCodesI.OP_ADD, e1, e2, line);
             break;
         }
