@@ -183,12 +183,14 @@ const funcinfo = function(ar, cl) {
 
 const collectvalidlines = function(L, f) {
     if (f === null || f instanceof lobject.CClosure) {
-        L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
+        L.stack[L.top] = new lobject.TValue(CT.LUA_TNIL, null);
+        L.top++;
         assert(L.top <= L.ci.top, "stack overflow");
     } else {
         let lineinfo = f.l.p.lineinfo;
         let t = ltable.luaH_new(L);
-        L.stack[L.top++] = new lobject.TValue(CT.LUA_TTABLE, t);
+        L.stack[L.top] = new lobject.TValue(CT.LUA_TTABLE, t);
+        L.top++;
         assert(L.top <= L.ci.top, "stack overflow");
         let v = new lobject.TValue(CT.LUA_TBOOLEAN, true);
         for (let i = 0; i < f.l.p.length; i++)
