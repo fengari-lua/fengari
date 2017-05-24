@@ -943,7 +943,7 @@ const pushclosure = function(L, p, encup, base, ra) {
     let uv = p.upvalues;
     let ncl = new lobject.LClosure(L, nup);
     ncl.p = p;
-    L.stack[ra] = new lobject.TValue(CT.LUA_TLCL, ncl);
+    L.stack[ra].setclLvalue(ncl);
     for (let i = 0; i < nup; i++) {
         if (uv[i].instack)
             ncl.upvals[i] = lfunc.luaF_findupval(L, base + uv[i].idx);
