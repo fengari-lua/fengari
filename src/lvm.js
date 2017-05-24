@@ -155,7 +155,7 @@ const luaV_execute = function(L) {
             }
             case OCi.OP_SETUPVAL: {
                 let uv = cl.upvals[i.B];
-                if (uv.v !== null) {
+                if (uv.isopen()) {
                     uv.L.stack[uv.v] = L.stack[ra];
                 } else {
                     uv.value.setfrom(L.stack[ra]);
