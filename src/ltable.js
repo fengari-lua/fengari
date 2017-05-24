@@ -62,9 +62,12 @@ const table_hash = function(L, key) {
                indirect via a weakmap */
             return get_lightuserdata_hash(v);
         case "object":
-            /* v shouldn't be a CClosure, LClosure, Table or Userdata from this state as they're never exposed
-               the only exposed internal type is a lua_State */
-            if (v instanceof lstate.lua_State && v.l_G === L.l_G) {
+            /* v could be a lua_State, CClosure, LClosure, Table or Userdata from this state as returned by lua_topointer */
+            if ((v instanceof lstate.lua_State && v.l_G === L.l_G) ||
+                v instanceof Table ||
+                v instanceof lobject.Udata ||
+                v instanceof lobject.LClosure ||
+                v instanceof lobject.CClosure) {
                 /* indirect via a weakmap */
                 return get_lightuserdata_hash(v);
             }
