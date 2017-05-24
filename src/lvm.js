@@ -548,27 +548,16 @@ const luaV_execute = function(L) {
                     plimit.value = forlim.ilimit;
                     init.value = (initv - pstep.value)|0;
                 } else { /* try making all values floats */
-                    let ninit = tonumber(init);
-                    let nlimit = tonumber(plimit);
-                    let nstep = tonumber(pstep);
-
-                    if (nlimit === false)
+                    let nlimit, nstep, ninit;
+                    if ((nlimit = tonumber(plimit)) === false)
                         ldebug.luaG_runerror(L, defs.to_luastring("'for' limit must be a number", true));
-
-                    plimit.type = CT.LUA_TNUMFLT;
-                    plimit.value = nlimit;
-
-                    if (nstep === false)
+                    L.stack[ra + 1] = new lobject.TValue(CT.LUA_TNUMFLT, nlimit);
+                    if ((nstep = tonumber(pstep)) === false)
                         ldebug.luaG_runerror(L, defs.to_luastring("'for' step must be a number", true));
-
-                    pstep.type = CT.LUA_TNUMFLT;
-                    pstep.value = nstep;
-
-                    if (ninit === false)
+                    L.stack[ra + 2] = new lobject.TValue(CT.LUA_TNUMFLT, nstep);
+                    if ((ninit = tonumber(init)) === false)
                         ldebug.luaG_runerror(L, defs.to_luastring("'for' initial value must be a number", true));
-
-                    init.type = CT.LUA_TNUMFLT;
-                    init.value = ninit - nstep;
+                    L.stack[ra] = new lobject.TValue(CT.LUA_TNUMFLT, ninit - nstep);
                 }
 
                 ci.l_savedpc += i.sBx;
