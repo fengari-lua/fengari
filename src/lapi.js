@@ -272,16 +272,17 @@ const lua_pushfstring = function (L, fmt, ...argp) {
     return lobject.luaO_pushvfstring(L, fmt, argp);
 };
 
+/* Similar to lua_pushstring, but takes a JS string */
 const lua_pushliteral = function (L, s) {
     assert(typeof s === "string" || s === undefined || s === null, "lua_pushliteral expects a JS string");
 
     if (s === undefined || s === null)
         L.stack[L.top] = new TValue(CT.LUA_TNIL, null);
     else {
-        let ts = new TValue(CT.LUA_TLNGSTR, lstring.luaS_newliteral(L, s));
-        L.stack[L.top] = ts;
+        let ts = lstring.luaS_newliteral(L, s);
+        lobject.setsvalue2s(L, L.top, ts);
+        s = ts.getstr(); /* internal copy */
     }
-
     L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
 
