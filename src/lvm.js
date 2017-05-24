@@ -607,20 +607,7 @@ const luaV_execute = function(L) {
             }
             case OCi.OP_CLOSURE: {
                 let p = cl.p.p[i.Bx];
-                let nup = p.upvalues.length;
-                let uv = p.upvalues;
-                let ncl = new lobject.LClosure(L, nup);
-                ncl.p = p;
-
-                L.stack[ra] = new lobject.TValue(CT.LUA_TLCL, ncl);
-
-                for (let i = 0; i < nup; i++) {
-                    if (uv[i].instack)
-                        ncl.upvals[i] = lfunc.luaF_findupval(L, base + uv[i].idx);
-                    else
-                        ncl.upvals[i] = cl.upvals[uv[i].idx];
-                    ncl.upvals[i].refcount++;
-                }
+                pushclosure(L, p, cl.upvals, base, ra);  /* create a new one */
                 break;
             }
             case OCi.OP_VARARG: {
@@ -945,6 +932,25 @@ const luaV_shiftl = function(x, y) {
     else {  /* shift left */
         if (y >= NBITS) return 0;
         else return x << y;
+    }
+};
+
+/*
+** create a new Lua closure, push it in the stack, and initialize
+** its upvalues.
+*/
+const pushclosure = function(L, p, encup, base, ra) {
+    let nup = p.upvalues.length;
+    let uv = p.upvalues;
+    let ncl = new lobject.LClosure(L, nup);
+    ncl.p = p;
+    L.stack[ra] = new lobject.TValue(CT.LUA_TLCL, ncl);
+    for (let i = 0; i < nup; i++) {
+        if (uv[i].instack)
+            ncl.upvals[i] = lfunc.luaF_findupval(L, base + uv[i].idx);
+        else
+            ncl.upvals[i] = encup[uv[i].idx];
+        ncl.upvals[i].refcount++;
     }
 };
 
