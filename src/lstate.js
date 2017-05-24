@@ -44,8 +44,9 @@ class CallInfo {
 
 class lua_State {
 
-    constructor() {
-        this.id = null;
+    constructor(g) {
+        this.id = g.id_counter++;
+
         this.base_ci = new CallInfo(); // Will be populated later
         this.top = 0;
         this.ci = null;
@@ -63,10 +64,10 @@ class lua_State {
 
 class global_State {
 
-    constructor(L) {
+    constructor() {
         this.id_counter = 0; /* used to give objects unique ids */
 
-        this.mainthread = L;
+        this.mainthread = null;
         this.l_registry = new lobject.TValue(CT.LUA_TNIL, null);
         this.panic = null;
         this.atnativeerror = null;
@@ -135,7 +136,6 @@ const f_luaopen = function(L) {
 };
 
 const preinit_thread = function(L, g) {
-    L.id = g.id_counter++;
     L.l_G = g;
     L.stack = null;
     L.ci = null;
@@ -154,7 +154,7 @@ const preinit_thread = function(L, g) {
 
 const lua_newthread = function(L) {
     let g = L.l_G;
-    let L1 = new lua_State();
+    let L1 = new lua_State(g);
     L.stack[L.top++] = new lobject.TValue(CT.LUA_TTHREAD, L1);
     assert(L.top <= L.ci.top, "stack overflow");
     preinit_thread(L1, g);
@@ -172,10 +172,11 @@ const luaE_freethread = function(L, L1) {
 };
 
 const lua_newstate = function() {
-    let L = new lua_State();
-    let g = new global_State(L);
+    let g = new global_State();
+    let L = new lua_State(g);
 
     preinit_thread(L, g);
+    g.mainthread = L;
 
     if (ldo.luaD_rawrunprotected(L, f_luaopen, null) !== TS.LUA_OK) {
         L = null;
