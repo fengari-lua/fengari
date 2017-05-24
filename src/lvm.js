@@ -687,7 +687,11 @@ const luaV_execute = function(L) {
             }
             case OCi.OP_CLOSURE: {
                 let p = cl.p.p[i.Bx];
-                pushclosure(L, p, cl.upvals, base, ra);  /* create a new one */
+                let ncl = getcached(p, cl.upvals, L.stack, base);  /* cached closure */
+                if (ncl === null)  /* no match? */
+                    pushclosure(L, p, cl.upvals, base, ra);  /* create a new one */
+                else
+                    L.stack[ra].setclLvalue(ncl);
                 break;
             }
             case OCi.OP_VARARG: {
@@ -1024,6 +1028,25 @@ const luaV_shiftl = function(x, y) {
 };
 
 /*
+** check whether cached closure in prototype 'p' may be reused, that is,
+** whether there is a cached closure with the same upvalues needed by
+** new closure to be created.
+*/
+const getcached = function(p, encup, stack, base) {
+    let c = p.cache;
+    if (c !== null) {  /* is there a cached closure? */
+        let uv = p.upvalues;
+        let nup = uv.length;
+        for (let i = 0; i < nup; i++) {  /* check whether it has right upvalues */
+            let v = uv[i].instack ? stack[base + uv[i].idx] : encup[uv[i].idx].v;
+            if (c.upvals[i].v !== v)
+                return null;  /* wrong upvalue; cannot reuse closure */
+        }
+    }
+    return c;  /* return cached closure (or NULL if no cached closure) */
+};
+
+/*
 ** create a new Lua closure, push it in the stack, and initialize
 ** its upvalues.
 */
@@ -1040,6 +1063,7 @@ const pushclosure = function(L, p, encup, base, ra) {
             ncl.upvals[i] = encup[uv[i].idx];
         ncl.upvals[i].refcount++;
     }
+    p.cache = ncl;  /* save it on cache for reuse */
 };
 
 const cvt2str = function(o) {
