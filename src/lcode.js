@@ -63,24 +63,22 @@ const hasjumps = function(e) {
 };
 
 /*
-** If expression is a numeric constant, fills 'v' with its value
-** and returns true. Otherwise, returns false.
+** If expression is a numeric constant returns either true or a new TValue
+** (depending on 'make_tvalue'). Otherwise, returns false.
 */
-const tonumeral = function(e, v) {
+const tonumeral = function(e, make_tvalue) {
     let ek = lparser.expkind;
     if (hasjumps(e))
         return false;  /* not a numeral */
     switch (e.k) {
         case ek.VKINT:
-            if (v) {
-                v.type = CT.LUA_TNUMINT;
-                v.value = e.u.ival;
+            if (make_tvalue) {
+                return new TValue(CT.LUA_TNUMINT, e.u.ival);
             }
             return true;
         case ek.VKFLT:
-            if (v) {
-                v.type = CT.LUA_TNUMFLT;
-                v.value = e.u.nval;
+            if (make_tvalue) {
+                return new TValue(CT.LUA_TNUMFLT, e.u.nval);
             }
             return true;
         default: return false;
@@ -968,11 +966,10 @@ const validop = function(op, v1, v2) {
 */
 const constfolding = function(fs, op, e1, e2) {
     let ek = lparser.expkind;
-    let v1 = new TValue();
-    let v2 = new TValue();
-    let res = new TValue();
-    if (!tonumeral(e1, v1) || !tonumeral(e2, v2) || !validop(op, v1, v2))
+    let v1, v2;
+    if (!(v1 = tonumeral(e1, true)) || !(v2 = tonumeral(e2, true)) || !validop(op, v1, v2))
         return 0;  /* non-numeric operands or not safe to fold */
+    let res = new TValue(); /* FIXME */
     lobject.luaO_arith(fs.ls.L, op, v1, v2, res);  /* does operation */
     if (res.ttisinteger()) {
         e1.k = ek.VKINT;
@@ -1101,7 +1098,7 @@ const luaK_infix = function(fs, op, v) {
         case BinOpr.OPR_MOD: case BinOpr.OPR_POW:
         case BinOpr.OPR_BAND: case BinOpr.OPR_BOR: case BinOpr.OPR_BXOR:
         case BinOpr.OPR_SHL: case BinOpr.OPR_SHR: {
-            if (!tonumeral(v, null))
+            if (!tonumeral(v, false))
                 luaK_exp2RK(fs, v);
             /* else keep numeral, which may be folded with 2nd operand */
             break;
