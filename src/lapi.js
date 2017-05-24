@@ -567,11 +567,8 @@ const lua_setupvalue = function(L, funcindex, n) {
     if (aux) {
         let name = aux.name;
         let val = aux.val;
-
         L.top--;
-        val.type = L.stack[L.top].type;
-        val.value = L.stack[L.top].value;
-
+        val.setfrom(L.stack[L.top]);
         return name;
     }
     return null;
