@@ -47,16 +47,25 @@ class lua_State {
     constructor(g) {
         this.id = g.id_counter++;
 
-        this.base_ci = new CallInfo(); // Will be populated later
-        this.top = 0;
-        this.ci = null;
+        this.base_ci = new CallInfo(); /* CallInfo for first level (C calling Lua) */
+        this.top = NaN; /* first free slot in the stack */
+        this.stack_last = NaN; /* last free slot in the stack */
+        this.oldpc = NaN; /* last pc traced */
+
+        /* preinit_thread */
+        this.l_G = g;
         this.stack = null;
-        this.stack_last = NaN;
-        this.openupval = null;
-        this.status = TS.LUA_OK;
-        this.next = null;
+        this.ci = null;
         this.errorJmp = null;
+        this.nCcalls = 0;
+        this.hook = null;
+        this.hookmask = 0;
+        this.basehookcount = 0;
+        this.allowhook = 1;
+        this.hookcount = this.basehookcount;
+        this.openupval = null;
         this.nny = 1;
+        this.status = TS.LUA_OK;
         this.errfunc = 0;
     }
 
@@ -135,29 +144,11 @@ const f_luaopen = function(L) {
     g.version = lapi.lua_version(null);
 };
 
-const preinit_thread = function(L, g) {
-    L.l_G = g;
-    L.stack = null;
-    L.ci = null;
-    L.errorJmp = null;
-    L.nCcalls = 0;
-    L.hook = null;
-    L.hookmask = 0;
-    L.basehookcount = 0;
-    L.allowhook = 1;
-    L.hookcount = L.basehookcount;
-    L.openupval = null;
-    L.nny = 1;
-    L.status = TS.LUA_OK;
-    L.errfunc = 0;
-};
-
 const lua_newthread = function(L) {
     let g = L.l_G;
     let L1 = new lua_State(g);
     L.stack[L.top++] = new lobject.TValue(CT.LUA_TTHREAD, L1);
     assert(L.top <= L.ci.top, "stack overflow");
-    preinit_thread(L1, g);
     L1.hookmask = L.hookmask;
     L1.basehookcount = L.basehookcount;
     L1.hook = L.hook;
@@ -174,8 +165,6 @@ const luaE_freethread = function(L, L1) {
 const lua_newstate = function() {
     let g = new global_State();
     let L = new lua_State(g);
-
-    preinit_thread(L, g);
     g.mainthread = L;
 
     if (ldo.luaD_rawrunprotected(L, f_luaopen, null) !== TS.LUA_OK) {
