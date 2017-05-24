@@ -140,8 +140,7 @@ const lua_getlocal = function(L, ar, n) {
         let local = findlocal(L, ar.i_ci, n);
         if (local) {
             name = local.name;
-            lobject.setobj2s(L, L.top, L.stack[local.pos]);
-            L.top++;
+            lobject.pushobj2s(L, L.stack[local.pos]);
             assert(L.top <= L.ci.top, "stack overflow");
         } else {
             name = null;
@@ -265,27 +264,24 @@ const auxgetinfo = function(L, what, ar, f, ci) {
 };
 
 const lua_getinfo = function(L, what, ar) {
-    let status, cl, ci, func, funcOff;
+    let status, cl, ci, func;
     swapextra(L);
     if (what[0] === '>'.charCodeAt(0)) {
         ci = null;
-        funcOff = L.top - 1;
-        func = L.stack[funcOff];
+        func = L.stack[L.top - 1];
         assert(L, func.ttisfunction(), "function expected");
         what = what.slice(1);  /* skip the '>' */
         L.top--;  /* pop function */
     } else {
         ci = ar.i_ci;
         func = ci.func;
-        funcOff = ci.funcOff;
         assert(ci.func.ttisfunction());
     }
 
     cl = func.ttisclosure() ? func.value : null;
     status = auxgetinfo(L, what, ar, cl, ci);
     if (what.indexOf('f'.charCodeAt(0)) >= 0) {
-        lobject.setobjs2s(L, L.top, funcOff);
-        L.top++;
+        lobject.pushobj2s(L, func);
         assert(L.top <= L.ci.top, "stack overflow");
     }
 
@@ -595,9 +591,8 @@ const luaG_runerror = function(L, fmt, ...argp) {
 const luaG_errormsg = function(L) {
     if (L.errfunc !== 0) {  /* is there an error handling function? */
         let errfunc = L.errfunc;
-        lobject.setobjs2s(L, L.top, L.top - 1); /* move argument */
-        lobject.setobjs2s(L, L.top - 1, errfunc); /* push function */
-        L.top++;
+        lobject.pushobj2s(L, L.stack[L.top - 1]); /* move argument */
+        lobject.setobjs2s(L, L.top - 2, errfunc); /* push function */
         ldo.luaD_callnoyield(L, L.top - 2, 1);
     }
 
@@ -643,8 +638,8 @@ const luaG_traceexec = function(L) {
             L.hookcount = 1;  /* undo decrement to zero */
         ci.l_savedpc--;  /* undo increment (resume will increment it again) */
         ci.callstatus |= lstate.CIST_HOOKYIELD;  /* mark that it yielded */
-        ci.func = L.stack[L.top - 1];  /* protect stack below results */
-        ci.funcOff = L.top - 1;
+        ci.funcOff = L.top - 1;  /* protect stack below results */
+        ci.func = L.stack[ci.funcOff];
         ldo.luaD_throw(L, TS.LUA_YIELD);
     }
 };

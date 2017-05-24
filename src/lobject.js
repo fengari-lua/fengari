@@ -220,16 +220,22 @@ class TValue {
 
 }
 
+const pushobj2s = function(L, tv) {
+    L.stack[L.top++] = new TValue(tv.type, tv.value);
+};
+const pushsvalue2s = function(L, ts) {
+    L.stack[L.top++] = new TValue(CT.LUA_TLNGSTR, ts);
+};
 /* from stack to (same) stack */
 const setobjs2s = function(L, newidx, oldidx) {
-    L.stack[newidx] = L.stack[oldidx];
+    L.stack[newidx].setfrom(L.stack[oldidx]);
 };
 /* to stack (not from same stack) */
 const setobj2s = function(L, newidx, oldtv) {
-    L.stack[newidx] = new TValue(oldtv.type, oldtv.value);
+    L.stack[newidx].setfrom(oldtv);
 };
 const setsvalue2s = function(L, newidx, ts) {
-    L.stack[newidx] = new TValue(CT.LUA_TLNGSTR, ts);
+    L.stack[newidx].setsvalue(ts);
 };
 
 const luaO_nilobject = new TValue(CT.LUA_TNIL, null);
@@ -528,8 +534,8 @@ const luaO_tostring = function(L, obj) {
 };
 
 const pushstr = function(L, str) {
-    setsvalue2s(L, L.top, lstring.luaS_new(L, str));
     ldo.luaD_inctop(L);
+    setsvalue2s(L, L.top-1, lstring.luaS_new(L, str));
 };
 
 const luaO_pushvfstring = function(L, fmt, argp) {
@@ -659,8 +665,7 @@ const luaO_arith = function(L, op, p1, p2, res) {
         case defs.LUA_OPBNOT: {  /* operate only on integers */
             let i1, i2;
             if ((i1 = lvm.tointeger(p1)) !== false && (i2 = lvm.tointeger(p2)) !== false) {
-                res.type  = CT.LUA_TNUMINT;
-                res.value = intarith(L, op, i1, i2);
+                res.setivalue(intarith(L, op, i1, i2));
                 return;
             }
             else break;  /* go to the end */
@@ -668,8 +673,7 @@ const luaO_arith = function(L, op, p1, p2, res) {
         case defs.LUA_OPDIV: case defs.LUA_OPPOW: {  /* operate only on floats */
             let n1, n2;
             if ((n1 = lvm.tonumber(p1)) !== false && (n2 = lvm.tonumber(p2)) !== false) {
-                res.type  = CT.LUA_TNUMFLT;
-                res.value = numarith(L, op, n1, n2);
+                res.setfltvalue(numarith(L, op, n1, n2));
                 return;
             }
             else break;  /* go to the end */
@@ -677,13 +681,11 @@ const luaO_arith = function(L, op, p1, p2, res) {
         default: {  /* other operations */
             let n1, n2;
             if (p1.ttisinteger() && p2.ttisinteger()) {
-                res.type  = CT.LUA_TNUMINT;
-                res.value = intarith(L, op, p1.value, p2.value);
+                res.setivalue(intarith(L, op, p1.value, p2.value));
                 return;
             }
             else if ((n1 = lvm.tonumber(p1)) !== false && (n2 = lvm.tonumber(p2)) !== false) {
-                res.type  = CT.LUA_TNUMFLT;
-                res.value = numarith(L, op, n1, n2);
+                res.setfltvalue(numarith(L, op, n1, n2));
                 return;
             }
             else break;  /* go to the end */
@@ -714,6 +716,8 @@ module.exports.luaO_tostring     = luaO_tostring;
 module.exports.luaO_utf8desc     = luaO_utf8desc;
 module.exports.luaO_utf8esc      = luaO_utf8esc;
 module.exports.numarith          = numarith;
+module.exports.pushobj2s         = pushobj2s;
+module.exports.pushsvalue2s      = pushsvalue2s;
 module.exports.setobjs2s         = setobjs2s;
 module.exports.setobj2s          = setobj2s;
 module.exports.setsvalue2s       = setsvalue2s;

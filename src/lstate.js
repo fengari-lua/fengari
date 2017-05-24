@@ -109,8 +109,8 @@ const stack_init = function(L1, L) {
     let ci = L1.base_ci;
     ci.next = ci.previous = null;
     ci.callstatus = 0;
-    ci.func = L1.stack[L1.top];
     ci.funcOff = L1.top;
+    ci.func = L1.stack[L1.top];
     L1.stack[L1.top++] = new lobject.TValue(CT.LUA_TNIL, null);
     ci.top = L1.top + defs.LUA_MINSTACK;
     L1.ci = ci;
