@@ -516,7 +516,7 @@ const luaV_execute = function(L) {
             case OCi.OP_FORLOOP: {
                 if (L.stack[ra].ttisinteger()) { /* integer loop? */
                     let step = L.stack[ra + 2].value;
-                    let idx = L.stack[ra].value + step;
+                    let idx = (L.stack[ra].value + step)|0;
                     let limit = L.stack[ra + 1].value;
 
                     if (0 < step ? idx <= limit : limit <= idx) {
@@ -547,7 +547,7 @@ const luaV_execute = function(L) {
                 if (init.ttisinteger() && pstep.ttisinteger() && forlim.casted) { /* all values are integer */
                     let initv = forlim.stopnow ? 0 : init.value;
                     plimit.value = forlim.ilimit;
-                    init.value = initv - pstep.value;
+                    init.value = (initv - pstep.value)|0;
                 } else { /* try making all values floats */
                     let ninit = tonumber(init);
                     let nlimit = tonumber(plimit);
