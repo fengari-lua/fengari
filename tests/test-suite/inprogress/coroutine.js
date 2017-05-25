@@ -1348,5 +1348,154 @@ test("[test-suite] coroutine: using a main thread as a coroutine", function (t) 
 
 
 test("[test-suite] coroutine: tests for coroutine API", { skip: true }, function (t) {
-    t.comment("TODO");
+    let luaCode = `
+        local function apico (...)
+          local x = {...}
+          return coroutine.wrap(function ()
+            return T.testC(table.unpack(x))
+          end)
+        end
+
+        local a = {apico(
+        [[
+          pushstring errorcode
+          pcallk 1 0 2;
+          invalid command (should not arrive here)
+        ]],
+        [[return *]],
+        "stackmark",
+        error
+        )()}
+        assert(#a == 4 and
+               a[3] == "stackmark" and
+               a[4] == "errorcode" and
+               _G.status == "ERRRUN" and
+               _G.ctx == 2)       -- 'ctx' to pcallk
+
+        local co = apico(
+          "pushvalue 2; pushnum 10; pcallk 1 2 3; invalid command;",
+          coroutine.yield,
+          "getglobal status; getglobal ctx; pushvalue 2; pushstring a; pcallk 1 0 4; invalid command",
+          "getglobal status; getglobal ctx; return *")
+
+        assert(co() == 10)
+        assert(co(20, 30) == 'a')
+        a = {co()}
+        assert(#a == 10 and
+               a[2] == coroutine.yield and
+               a[5] == 20 and a[6] == 30 and
+               a[7] == "YIELD" and a[8] == 3 and
+               a[9] == "YIELD" and a[10] == 4)
+        assert(not pcall(co))   -- coroutine is dead now
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+});
+
+
+test("[test-suite] coroutine: tests for coroutine API", { skip: true }, function (t) {
+    let luaCode = `
+        f = T.makeCfunc("pushnum 3; pushnum 5; yield 1;")
+        co = coroutine.wrap(function ()
+          assert(f() == 23); assert(f() == 23); return 10
+        end)
+        assert(co(23,16) == 5)
+        assert(co(23,16) == 5)
+        assert(co(23,16) == 10)
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+});
+
+
+test("[test-suite] coroutine: testing coroutines with C bodies", { skip: true }, function (t) {
+    let luaCode = `
+        local function eqtab (t1, t2)
+          assert(#t1 == #t2)
+          for i = 1, #t1 do
+            local v = t1[i]
+            assert(t2[i] == v)
+          end
+        end
+
+        f = T.makeCfunc([[
+                pushnum 102
+            yieldk  1 U2
+            cannot be here!
+        ]],
+        [[      # continuation
+            pushvalue U3   # accessing upvalues inside a continuation
+                pushvalue U4
+            return *
+        ]], 23, "huu")
+
+        x = coroutine.wrap(f)
+        assert(x() == 102)
+        eqtab({x()}, {23, "huu"})
+
+
+        f = T.makeCfunc[[pushstring 'a'; pushnum 102; yield 2; ]]
+
+        a, b, c, d = T.testC([[newthread; pushvalue 2; xmove 0 3 1; resume 3 0;
+                               pushstatus; xmove 3 0 0;  resume 3 0; pushstatus;
+                               return 4; ]], f)
+
+        assert(a == 'YIELD' and b == 'a' and c == 102 and d == 'OK')
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
 });

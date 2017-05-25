@@ -492,12 +492,22 @@ const sethook = function(L) {
     return 0;
 };
 
+const Cfunc = function(L) {
+    return runJS(L, L, { script: lua.lua_tostring(L, lua.lua_upvalueindex(1)), offset: 0 });
+};
+
 const Cfunck = function(L, status, ctx) {
     pushcode(L, status);
-    lua.lua_setglobal(L, "status");
+    lua.lua_setglobal(L, lua.to_luastring("status", true));
     lua.lua_pushinteger(L, ctx);
-    lua.lua_setglobal(L, "ctx");
-    return runJS(L, L, lua.lua_tostring(L, ctx));
+    lua.lua_setglobal(L, lua.to_luastring("ctx", true));
+    return runJS(L, L, { script: lua.lua_tostring(L, ctx), offset: 0 });
+};
+
+const makeCfunc = function(L) {
+    lauxlib.luaL_checkstring(L, 1);
+    lua.lua_pushcclosure(L, Cfunc, lua.lua_gettop(L));
+    return 1;
 };
 
 const coresume = function(L) {
@@ -520,6 +530,7 @@ const tests_funcs = {
     "closestate": closestate,
     "doremote": doremote,
     "loadlib": loadlib,
+    "makeCfunc": makeCfunc,
     "newstate": newstate,
     "newuserdata": newuserdata,
     "resume": coresume,
