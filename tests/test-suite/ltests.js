@@ -105,98 +105,98 @@ const runJS = function(L, L1, pc) {
         let inst = lua.to_jsstring(getstring(L, buff, pc));
         if (inst.length === 0) return 0;
         else if (inst === "absindex") {
-            lua.lua_pushnumber(1, lua.lua_absindex(1, getindex(L, L1, pc)));
+            lua.lua_pushnumber(L1, lua.lua_absindex(L1, getindex(L, L1, pc)));
         } else if (inst === "append") {
             let t = getindex(L, L1, pc);
-            let i = lua.lua_rawlen(1, t);
-            lua.lua_rawseti(1, t, i + 1);
+            let i = lua.lua_rawlen(L1, t);
+            lua.lua_rawseti(L1, t, i + 1);
         } else if (inst === "arith") {
             let op;
             skip(pc);
             op = ops.indexOf(pc[0]);
-            lua.lua_arith(1, op);
+            lua.lua_arith(L1, op);
         } else if (inst === "call") {
             let narg = getnum(L, L1, pc);
             let nres = getnum(L, L1, pc);
-            lua.lua_call(1, narg, nres);
+            lua.lua_call(L1, narg, nres);
         } else if (inst === "callk") {
             let narg = getnum(L, L1, pc);
             let nres = getnum(L, L1, pc);
             let i = getindex(L, L1, pc);
-            lua.lua_callk(1, narg, nres, i, Cfunck);
+            lua.lua_callk(L1, narg, nres, i, Cfunck);
         } else if (inst === "checkstack") {
             let sz = getnum(L, L1, pc);
             let msg = getstring(L, buff, pc);
             if (msg.length === 0)
                 msg = null;  /* to test 'luaL_checkstack' with no message */
-            lauxlib.luaL_checkstack(1, sz, msg);
+            lauxlib.luaL_checkstack(L1, sz, msg);
         } else if (inst === "compare") {
             let opt = getstring(L, buff, pc);  /* EQ, LT, or LE */
             let op = (opt[0] === 'E'.charCodeAt(0)) ? lua.LUA_OPEQ
                                                     : (opt[1] === 'T'.charCodeAt(0)) ? lua.LUA_OPLT : lua.LUA_OPLE;
             let a = getindex(L, L1, pc);
             let b = getindex(L, L1, pc);
-            lua.lua_pushboolean(1, lua.lua_compare(1, a, b, op));
+            lua.lua_pushboolean(L1, lua.lua_compare(L1, a, b, op));
         } else if (inst === "concat") {
-            lua.lua_concat(1, getnum(L, L1, pc));
+            lua.lua_concat(L1, getnum(L, L1, pc));
         } else if (inst === "copy") {
             let f = getindex(L, L1, pc);
-            lua.lua_copy(1, f, getindex(L, L1, pc));
+            lua.lua_copy(L1, f, getindex(L, L1, pc));
         } else if (inst === "func2num") {
-            let func = lua.lua_tocfunction(1, getindex(L, L1, pc));
-            lua.lua_pushnumber(1, NaN); // TOODO
+            let func = lua.lua_tocfunction(L1, getindex(L, L1, pc));
+            lua.lua_pushnumber(L1, NaN); // TOODO
         } else if (inst === "getfield") {
             let t = getindex(L, L1, pc);
-            lua.lua_getfield(1, t, getstring(L, buff, pc));
+            lua.lua_getfield(L1, t, getstring(L, buff, pc));
         } else if (inst === "getglobal") {
-            lua.lua_getglobal(1, getstring(L, buff, pc));
+            lua.lua_getglobal(L1, getstring(L, buff, pc));
         } else if (inst === "getmetatable") {
-            if (lua.lua_getmetatable(1, getindex(L, L1, pc)) === 0)
-                lua.lua_pushnil(1);
+            if (lua.lua_getmetatable(L1, getindex(L, L1, pc)) === 0)
+                lua.lua_pushnil(L1);
         } else if (inst === "gettable") {
-            lua.lua_gettable(1, getindex(L, L1, pc));
+            lua.lua_gettable(L1, getindex(L, L1, pc));
         } else if (inst === "gettop") {
-            lua.lua_pushinteger(1, lua.lua_gettop(1));
+            lua.lua_pushinteger(L1, lua.lua_gettop(L1));
         } else if (inst === "gsub") {
             let a = getnum(L, L1, pc);
             let b = getnum(L, L1, pc);
             let c = getnum(L, L1, pc);
-            lauxlib.luaL_gsub(1, lua.lua_tostring(1, a), lua.lua_tostring(1, b), lua.lua_tostring(1, c));
+            lauxlib.luaL_gsub(L1, lua.lua_tostring(L1, a), lua.lua_tostring(L1, b), lua.lua_tostring(L1, c));
         } else if (inst === "insert") {
-            lua.lua_insert(1, getnum(L, L1, pc));
+            lua.lua_insert(L1, getnum(L, L1, pc));
         } else if (inst === "iscfunction") {
-            lua.lua_pushboolean(1, lua.lua_iscfunction(1, getindex(L, L1, pc)));
+            lua.lua_pushboolean(L1, lua.lua_iscfunction(L1, getindex(L, L1, pc)));
         } else if (inst === "isfunction") {
-            lua.lua_pushboolean(1, lua.lua_isfunction(1, getindex(L, L1, pc)));
+            lua.lua_pushboolean(L1, lua.lua_isfunction(L1, getindex(L, L1, pc)));
         } else if (inst === "isnil") {
-            lua.lua_pushboolean(1, lua.lua_isnil(1, getindex(L, L1, pc)));
+            lua.lua_pushboolean(L1, lua.lua_isnil(L1, getindex(L, L1, pc)));
         } else if (inst === "isnull") {
-            lua.lua_pushboolean(1, lua.lua_isnone(1, getindex(L, L1, pc)));
+            lua.lua_pushboolean(L1, lua.lua_isnone(L1, getindex(L, L1, pc)));
         } else if (inst === "isnumber") {
-            lua.lua_pushboolean(1, lua.lua_isnumber(1, getindex(L, L1, pc)));
+            lua.lua_pushboolean(L1, lua.lua_isnumber(L1, getindex(L, L1, pc)));
         } else if (inst === "isstring") {
-            lua.lua_pushboolean(1, lua.lua_isstring(1, getindex(L, L1, pc)));
+            lua.lua_pushboolean(L1, lua.lua_isstring(L1, getindex(L, L1, pc)));
         } else if (inst === "istable") {
-            lua.lua_pushboolean(1, lua.lua_istable(1, getindex(L, L1, pc)));
+            lua.lua_pushboolean(L1, lua.lua_istable(L1, getindex(L, L1, pc)));
         } else if (inst === "isudataval") {
-            lua.lua_pushboolean(1, lua.lua_islightuserdata(1, getindex(L, L1, pc)));
+            lua.lua_pushboolean(L1, lua.lua_islightuserdata(L1, getindex(L, L1, pc)));
         } else if (inst === "isuserdata") {
-            lua.lua_pushboolean(1, lua.lua_isuserdata(1, getindex(L, L1, pc)));
+            lua.lua_pushboolean(L1, lua.lua_isuserdata(L1, getindex(L, L1, pc)));
         } else if (inst === "len") {
-            lua.lua_len(1, getindex(L, L1, pc));
+            lua.lua_len(L1, getindex(L, L1, pc));
         } else if (inst === "Llen") {
-            lua.lua_pushinteger(1, lauxlib.luaL_len(1, getindex(L, L1, pc)));
+            lua.lua_pushinteger(L1, lauxlib.luaL_len(L1, getindex(L, L1, pc)));
         } else if (inst === "loadfile") {
-          lauxlib.luaL_loadfile(1, lauxlib.luaL_checkstring(1, getnum(L, L1, pc)));
+          lauxlib.luaL_loadfile(L1, lauxlib.luaL_checkstring(L1, getnum(L, L1, pc)));
         } else if (inst === "loadstring") {
-          let s = lauxlib.luaL_checkstring(1, getnum(L, L1, pc));
-          lauxlib.luaL_loadstring(1, s);
+          let s = lauxlib.luaL_checkstring(L1, getnum(L, L1, pc));
+          lauxlib.luaL_loadstring(L1, s);
         } else if (inst === "newmetatable") {
-            lua.lua_pushboolean(1, lauxlib.luaL_newmetatable(1, getstring(L, buff, pc)));
+            lua.lua_pushboolean(L1, lauxlib.luaL_newmetatable(L1, getstring(L, buff, pc)));
         } else if (inst === "newtable") {
-            lua.lua_newtable(1);
+            lua.lua_newtable(L1);
         } else if (inst === "newthread") {
-            lua.lua_newthread(1);
+            lua.lua_newthread(L1);
         } else if (inst === "newuserdata") {
             lua.lua_newuserdata(L1, getnum(L, L1, pc));
         } else if (inst === "next") {

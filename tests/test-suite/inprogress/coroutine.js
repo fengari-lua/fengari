@@ -1197,6 +1197,100 @@ test("[test-suite] coroutine: testing debug library on last function in a suspen
 });
 
 
+test("[test-suite] coroutine: reusing a thread", function (t) {
+    let luaCode = `
+        assert(T.testC([[
+          newthread           # create thread
+          pushvalue 2         # push body
+          pushstring 'a a a'  # push argument
+          xmove 0 3 2         # move values to new thread
+          resume -1, 1        # call it first time
+          pushstatus
+          xmove 3 0 0         # move results back to stack
+          setglobal X         # result
+          setglobal Y         # status
+          pushvalue 2         # push body (to call it again)
+          pushstring 'b b b'
+          xmove 0 3 2
+          resume -1, 1        # call it again
+          pushstatus
+          xmove 3 0 0
+          return 1            # return result
+        ]], function (...) return ... end) == 'b b b')
+
+        assert(X == 'a a a' and Y == 'OK')
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+});
+
+
+test("[test-suite] coroutine: resuming running coroutine", function (t) {
+    let luaCode = `
+        C = coroutine.create(function ()
+              return T.testC([[
+                       pushnum 10;
+                       pushnum 20;
+                       resume -3 2;
+                       pushstatus
+                       gettop;
+                       return 3]], C)
+            end)
+        local a, b, c, d = coroutine.resume(C)
+        assert(a == true and string.find(b, "non%-suspended") and
+               c == "ERRRUN" and d == 4)
+
+        a, b, c, d = T.testC([[
+          rawgeti R 1    # get main thread
+          pushnum 10;
+          pushnum 20;
+          resume -3 2;
+          pushstatus
+          gettop;
+          return 4]])
+        assert(a == coroutine.running() and string.find(b, "non%-suspended") and
+               c == "ERRRUN" and d == 4)
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+});
+
 test("[test-suite] coroutine: tests for coroutine API", { skip: true }, function (t) {
     t.comment("TODO");
 });
