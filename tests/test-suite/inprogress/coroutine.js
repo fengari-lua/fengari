@@ -986,10 +986,7 @@ test("[test-suite] coroutine: testing yields inside line hook", function (t) {
 
         -- testing yields in line hook
         local co = coroutine.wrap(function ()
-            T.sethook("setglobal X; yield 0", "l", 0)
-            foo()
-            return 10
-        end)
+          T.sethook("setglobal X; yield 0", "l", 0); foo(); return 10 end)
 
         _G.XX = nil;
         _G.X = nil; co(); assert(_G.X == line)

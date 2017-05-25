@@ -629,7 +629,7 @@ const luaG_traceexec = function(L) {
         let newline = p.lineinfo.length !== 0 ? p.lineinfo[npc] : -1;
         if (npc === 0 ||  /* call linehook when enter a new function, */
             ci.l_savedpc <= L.oldpc ||  /* when jump back (loop), or when */
-            newline !== p.lineinfo.length !== 0 ? p.lineinfo[L.oldpc - 1] : -1)  /* enter a new line */
+            newline !== (p.lineinfo.length !== 0 ? p.lineinfo[L.oldpc - 1] : -1))  /* enter a new line */
             ldo.luaD_hook(L, defs.LUA_HOOKLINE, newline);  /* call line hook */
     }
     L.oldpc = ci.l_savedpc;
