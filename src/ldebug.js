@@ -167,7 +167,7 @@ const funcinfo = function(ar, cl) {
         ar.source = defs.to_luastring("=[JS]", true);
         ar.linedefined = -1;
         ar.lastlinedefined = -1;
-        ar.what = "J";
+        ar.what = ["J".charCodeAt(0)];
     } else {
         let p = cl.p;
         ar.source = p.source ? p.source.getstr() : defs.to_luastring("=?", true);

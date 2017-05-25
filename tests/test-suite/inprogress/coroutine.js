@@ -1161,6 +1161,42 @@ test("[test-suite] coroutine: testing debug library on a coroutine suspended ins
 });
 
 
+test("[test-suite] coroutine: testing debug library on last function in a suspended coroutine", function (t) {
+    let luaCode = `
+        do
+          -- testing debug library on last function in a suspended coroutine
+          -- (bug in 5.2/5.3)
+          local c = coroutine.create(function () T.testC("yield 1", 10, 20) end)
+          local a, b = coroutine.resume(c)
+          assert(a and b == 20)
+          assert(debug.getinfo(c, 0).linedefined == -1)
+          a, b = debug.getlocal(c, 0, 2)
+          assert(b == 10)
+        end
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+});
+
+
 test("[test-suite] coroutine: tests for coroutine API", { skip: true }, function (t) {
     t.comment("TODO");
 });
