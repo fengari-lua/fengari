@@ -68,11 +68,11 @@
     - [x] `sort.lua` (24/24)
     - [x] `strings.lua` (34/34)
     - [x] `vararg.lua` (8/8)
+    - [ ] `api.lua` (18/59)
     - [ ] `pm.lua` (27/38)
     - [ ] `tpack.lua` (20/32)
     - [ ] `utf8.lua` (14/20)
     - [ ] `attrib.lua`
-    - [ ] `api.lua`
     - [ ] `big.lua`
     - [ ] `code.lua`
     - [ ] `db.lua`

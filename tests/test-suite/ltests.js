@@ -344,6 +344,43 @@ const testJS = function(L) {
     return runJS(L, L1, { script: pc, offset: 0 });
 };
 
+const upvalue = function(L) {
+    let n = lauxlib.checkinteger(L, 2);
+    lauxlib.checktype(L, 1, lua.LUA_TFUNCTION);
+    if (lua.lua_isnone(L, 3)) {
+        let name = lua.lua_getupvalue(L, 1, n);
+        if (name === null) return 0;
+        lua.lua_pushstring(L, name);
+        return 2;
+    }
+    else {
+        let name = lua.lua_setupvalue(L, 1, n);
+        lua.lua_pushstring(L, name);
+        return 1;
+    }
+};
+
+const pushuserdata = function(L) {
+    let u = lauxlib.luaL_checkinteger(L, 1);
+    lua.lua_pushlightuserdata(L, u);
+    return 1;
+};
+
+const udataval = function(L) {
+    lua.lua_pushinteger(L, lua.lua_touserdata(L, 1));
+    return 1;
+};
+
+const d2s = function(L) {
+    let d = lauxlib.luaL_checknumber(L, 1);
+    lua.lua_pushlstring(L, [d], 1);
+};
+
+const s2d = function(L) {
+    lua.lua_pushnumber(L, lauxlib.luaL_checkstring(L, 1));
+    return 1;
+};
+
 const newstate = function(L) {
     let L1 = lua.lua_newstate();
     if (L1) {
@@ -453,6 +490,51 @@ const Chook = function(L, ar) {
     runJS(L, L, { script: scpt, offset: 0 });  /* run script from C_HOOK[L] */
 };
 
+class Aux { 
+    constructor() {
+        this.jb = null;
+        this.paniccode = null;
+        this.L = null; 
+    }
+}
+
+/*
+** does a long-jump back to "main program".
+*/
+const panicback = function(L) {
+    let b = Aux();
+    lua.lua_checkstack(L, 1);    /* open space for 'Aux' struct */
+    lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, lua.to_luastring("_jmpbuf", true));    /* get 'Aux' struct */
+    b = lua.lua_touserdata(L, -1);
+    lua.lua_pop(L, 1);    /* remove 'Aux' struct */
+    runJS(b.L, L, b.paniccode);    /* run optional panic code */
+    longjmp(b.jb, 1); // TODO ?
+    return 1;    /* to avoid warnings */
+};
+
+const checkpanic = function(L) {
+    let b = new Aux();
+    let code = lauxlib.luaL_checkstring(L, 1);
+    b.paniccode = lauxlib.luaL_optstring(L, 2, "");
+    b.L = L;
+    let L1 = lua.lua_newstate();    /* create new state */
+    if (L1 === null) {    /* error? */
+        lua.lua_pushnil(L);
+        return 1;
+    }
+    lua.lua_atpanic(L1, panicback);    /* set its panic function */
+    lua.lua_pushlightuserdata(L1, b);
+    lua.lua_setfield(L1, lua.LUA_REGISTRYINDEX, lua.to_luastring("_jmpbuf", true));    /* store 'Aux' struct */
+    if (setjmp(b.jb) === 0) {    /* set jump buffer */ // TODO ?
+        runJS(L, L1, code);    /* run code unprotected */
+        lua.lua_pushliteral(L, "no errors");
+    } else {    /* error handling */
+        /* move error message to original state */
+        lua.lua_pushstring(L, lua.lua_tostring(L1, -1));
+    }
+    lua.lua_close(L1);
+    return 1;
+};
 
 /*
 ** sets 'registry.C_HOOK[L] = scpt' and sets 'Chook' as a hook
@@ -527,16 +609,22 @@ const coresume = function(L) {
 };
 
 const tests_funcs = {
+    "checkpanic": checkpanic,
     "closestate": closestate,
+    "d2s": d2s,
     "doremote": doremote,
     "loadlib": loadlib,
     "makeCfunc": makeCfunc,
     "newstate": newstate,
     "newuserdata": newuserdata,
+    "pushuserdata": pushuserdata,
     "resume": coresume,
+    "s2d": s2d,
     "sethook": sethook,
     "testC": testJS,
-    "testJS": testJS
+    "testJS": testJS,
+    "udataval": udataval,
+    "upvalue": upvalue
 };
 
 const luaB_opentests = function(L) {
