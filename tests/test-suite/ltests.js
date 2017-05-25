@@ -224,7 +224,7 @@ const runJS = function(L, L1, pc) {
         } else if (inst === "pushbool") {
             lua.lua_pushboolean(L1, getnum(L, L1, pc));
         } else if (inst === "pushcclosure") {
-            lua.lua_pushcclosure(L1, testC, getnum(L, L1, pc));
+            lua.lua_pushcclosure(L1, testJS, getnum(L, L1, pc));
         } else if (inst === "pushint") {
             lua.lua_pushinteger(L1, getnum(L, L1, pc));
         } else if (inst === "pushnil") {
@@ -323,6 +323,32 @@ const runJS = function(L, L1, pc) {
       return 0;
 };
 
+
+const testJS = function(L) {
+    let L1;
+    let pc;
+    if (lua.lua_isuserdata(L, 1)) {
+        L1 = getstate(L);
+        pc = lauxlib.luaL_checkstring(L, 2);
+    }
+    else if (lua.lua_isthread(L, 1)) {
+        L1 = lua.lua_tothread(L, 1);
+        pc = lauxlib.luaL_checkstring(L, 2);
+    }
+    else {
+        L1 = L;
+        pc = lauxlib.luaL_checkstring(L, 1);
+    }
+    return runJS(L, L1, { script: pc, offset: 0 });
+};
+
+const getstate = function(L) {
+    let L1 = lua.lua_touserdata(L, 1);
+    lauxlib.luaL_argcheck(L, L1 !== null, 1, lua.to_luastring("state expected", true));
+    return L1;
+};
+
+
 const tpanic = function(L) {
     console.error(`PANIC: unprotected error in call to Lua API (${lua.lua_tojsstring(L, -1)})\n`);
     return process.exit(1);  /* do not return to Lua */
@@ -415,7 +441,9 @@ const coresume = function(L) {
 const tests_funcs = {
     "newuserdata": newuserdata,
     "resume": coresume,
-    "sethook": sethook
+    "sethook": sethook,
+    "testJS": testJS,
+    "testC": testJS
 };
 
 const luaB_opentests = function(L) {
