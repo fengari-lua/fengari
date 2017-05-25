@@ -1018,6 +1018,149 @@ test("[test-suite] coroutine: testing yields inside line hook", function (t) {
 });
 
 
+test("[test-suite] coroutine: testing yields in count hook", function (t) {
+    let luaCode = `
+        local line = debug.getinfo(1, "l").currentline + 2    -- get line number
+        local function foo ()
+          local x = 10    --<< this line is 'line'
+          x = x + 10
+          _G.XX = x
+        end
+
+        -- testing yields in count hook
+        co = coroutine.wrap(function ()
+          T.sethook("yield 0", "", 1); foo(); return 10 end)
+
+        _G.XX = nil;
+        local c = 0
+        repeat c = c + 1; local a = co() until a == 10
+        assert(_G.XX == 20 and c >= 5)
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(jsprefix + luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+});
+
+
+test("[test-suite] coroutine: testing yields inside line hook", function (t) {
+    let luaCode = `
+        local line = debug.getinfo(1, "l").currentline + 2    -- get line number
+        local function foo ()
+          local x = 10    --<< this line is 'line'
+          x = x + 10
+          _G.XX = x
+        end
+
+        -- testing yields in count hook
+        co = coroutine.wrap(function ()
+          T.sethook("yield 0", "", 1); foo(); return 10 end)
+
+        _G.XX = nil;
+        local c = 0
+        repeat c = c + 1; local a = co() until a == 10
+        assert(_G.XX == 20 and c >= 5)
+
+        co = coroutine.wrap(function ()
+          T.sethook("yield 0", "", 2); foo(); return 10 end)
+
+        _G.XX = nil;
+        local c = 0
+        repeat c = c + 1; local a = co() until a == 10
+        assert(_G.XX == 20 and c >= 5)
+        _G.X = nil; _G.XX = nil
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(jsprefix + luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+});
+
+
+test("[test-suite] coroutine: testing debug library on a coroutine suspended inside a hook", function (t) {
+    let luaCode = `
+        do
+          -- testing debug library on a coroutine suspended inside a hook
+          -- (bug in 5.2/5.3)
+          c = coroutine.create(function (a, ...)
+            T.sethook("yield 0", "l")   -- will yield on next two lines
+            assert(a == 10)
+            return ...
+          end)
+
+          assert(coroutine.resume(c, 1, 2, 3))   -- start coroutine
+          local n,v = debug.getlocal(c, 0, 1)    -- check its local
+          assert(n == "a" and v == 1)
+          n,v = debug.getlocal(c, 0, -1)         -- check varargs
+          assert(v == 2)
+          n,v = debug.getlocal(c, 0, -2)
+          assert(v == 3)
+          assert(debug.setlocal(c, 0, 1, 10))     -- test 'setlocal'
+          assert(debug.setlocal(c, 0, -2, 20))
+          local t = debug.getinfo(c, 0)        -- test 'getinfo'
+          assert(t.currentline == t.linedefined + 1)
+          assert(not debug.getinfo(c, 1))      -- no other level
+          assert(coroutine.resume(c))          -- run next line
+          v = {coroutine.resume(c)}         -- finish coroutine
+          assert(v[1] == true and v[2] == 2 and v[3] == 20 and v[4] == nil)
+          assert(not coroutine.resume(c))
+        end
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+});
+
+
 test("[test-suite] coroutine: tests for coroutine API", { skip: true }, function (t) {
     t.comment("TODO");
 });
