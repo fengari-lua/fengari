@@ -1291,6 +1291,62 @@ test("[test-suite] coroutine: resuming running coroutine", function (t) {
     }, "Lua program ran without error");
 });
 
+test("[test-suite] coroutine: using a main thread as a coroutine", function (t) {
+    let luaCode = `
+        local state = T.newstate()
+        T.loadlib(state)
+
+        assert(T.doremote(state, [[
+          coroutine = require'coroutine';
+          X = function (x) coroutine.yield(x, 'BB'); return 'CC' end;
+          return 'ok']]))
+
+        t = table.pack(T.testC(state, [[
+          rawgeti R 1     # get main thread
+          pushstring 'XX'
+          getglobal X    # get function for body
+          pushstring AA      # arg
+          resume 1 1      # 'resume' shadows previous stack!
+          gettop
+          setglobal T    # top
+          setglobal B    # second yielded value
+          setglobal A    # fist yielded value
+          rawgeti R 1     # get main thread
+          pushnum 5       # arg (noise)
+          resume 1 1      # after coroutine ends, previous stack is back
+          pushstatus
+          return *
+        ]]))
+        assert(t.n == 4 and t[2] == 'XX' and t[3] == 'CC' and t[4] == 'OK')
+        assert(T.doremote(state, "return T") == '2')
+        assert(T.doremote(state, "return A") == 'AA')
+        assert(T.doremote(state, "return B") == 'BB')
+
+        T.closestate(state)
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+});
+
+
 test("[test-suite] coroutine: tests for coroutine API", { skip: true }, function (t) {
     t.comment("TODO");
 });

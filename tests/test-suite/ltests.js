@@ -2,6 +2,8 @@
 
 global.WEB = false;
 
+const assert  = require("assert");
+
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const ljstype = require('../../src/ljstype.js');
@@ -342,12 +344,88 @@ const testJS = function(L) {
     return runJS(L, L1, { script: pc, offset: 0 });
 };
 
+const newstate = function(L) {
+    let L1 = lua.lua_newstate();
+    if (L1) {
+        lua.lua_atpanic(L1, tpanic);
+        lua.lua_pushlightuserdata(L, L1);
+    }
+    else
+        lua.lua_pushnil(L);
+    return 1;
+};
+
 const getstate = function(L) {
     let L1 = lua.lua_touserdata(L, 1);
     lauxlib.luaL_argcheck(L, L1 !== null, 1, lua.to_luastring("state expected", true));
     return L1;
 };
 
+const luaopen_base      = require("../../src/lbaselib.js").luaopen_base;
+const luaopen_coroutine = require("../../src/lcorolib.js").luaopen_coroutine;
+const luaopen_debug     = require("../../src/ldblib.js").luaopen_debug;
+const luaopen_io        = require("../../src/liolib.js").luaopen_io;
+const luaopen_os        = require("../../src/loslib.js").luaopen_os;
+const luaopen_math      = require("../../src/lmathlib.js").luaopen_math;
+const luaopen_string    = require("../../src/lstrlib.js").luaopen_string;
+const luaopen_table     = require("../../src/ltablib.js").luaopen_table;
+const luaopen_package   = require("../../src/loadlib.js").luaopen_package;
+
+const loadlib = function(L) {
+    let libs = {
+        "_G": luaopen_base,
+        "coroutine": luaopen_coroutine,
+        "debug": luaopen_debug,
+        "io": luaopen_io,
+        "os": luaopen_os,
+        "math": luaopen_math,
+        "string": luaopen_string,
+        "table": luaopen_table
+    };
+    let L1 = getstate(L);
+    lauxlib.luaL_requiref(L1, lua.to_luastring("package", true), luaopen_package, 0);
+    assert(lua.lua_type(L1, -1) == lua.LUA_TTABLE);
+    /* 'requiref' should not reload module already loaded... */
+    lauxlib.luaL_requiref(L1, lua.to_luastring("package", true), null, 1);    /* seg. fault if it reloads */
+    /* ...but should return the same module */
+    assert(lua.lua_compare(L1, -1, -2, lua.LUA_OPEQ));
+    lauxlib.luaL_getsubtable(L1, lua.LUA_REGISTRYINDEX, lua.to_luastring(lauxlib.LUA_PRELOAD_TABLE, true));
+    for (let name in libs) {
+        lua.lua_pushcfunction(L1, libs[name]);
+        lua.lua_setfield(L1, -2, lua.to_luastring(name, true));
+    }
+    return 0;
+};
+
+const closestate = function(L) {
+    let L1 = getstate(L);
+    lua.lua_close(L1);
+    return 0;
+};
+
+const doremote = function(L) {
+    let L1 = getstate(L);
+    let lcode;
+    let code = lauxlib.luaL_checklstring(L, 2, lcode);
+    let status;
+    lua.lua_settop(L1, 0);
+    status = lauxlib.luaL_loadbuffer(L1, code, lcode, code);
+    if (status === lua.LUA_OK)
+        status = lua.lua_pcall(L1, 0, lua.LUA_MULTRET, 0);
+    if (status !== lua.LUA_OK) {
+        lua.lua_pushnil(L);
+        lua.lua_pushstring(L, lua.lua_tostring(L1, -1));
+        lua.lua_pushinteger(L, status);
+        return 3;
+    }
+    else {
+        let i = 0;
+        while (!lua.lua_isnone(L1, ++i))
+            lua.lua_pushstring(L, lua.lua_tostring(L1, i));
+        lua.lua_pop(L1, i-1);
+        return i-1;
+    }
+};
 
 const tpanic = function(L) {
     console.error(`PANIC: unprotected error in call to Lua API (${lua.lua_tojsstring(L, -1)})\n`);
@@ -439,11 +517,15 @@ const coresume = function(L) {
 };
 
 const tests_funcs = {
+    "closestate": closestate,
+    "doremote": doremote,
+    "loadlib": loadlib,
+    "newstate": newstate,
     "newuserdata": newuserdata,
     "resume": coresume,
     "sethook": sethook,
-    "testJS": testJS,
-    "testC": testJS
+    "testC": testJS,
+    "testJS": testJS
 };
 
 const luaB_opentests = function(L) {
