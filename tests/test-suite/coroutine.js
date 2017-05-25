@@ -4,11 +4,11 @@ const test     = require('tape');
 
 global.WEB = false;
 
-const lua     = require('../../../src/lua.js');
-const lauxlib = require('../../../src/lauxlib.js');
-const lualib  = require('../../../src/lualib.js');
+const lua     = require('../../src/lua.js');
+const lauxlib = require('../../src/lauxlib.js');
+const lualib  = require('../../src/lualib.js');
 
-const ltests  = require('../ltests.js');
+const ltests  = require('./ltests.js');
 
 const prefix = `
     mt = {
@@ -1347,7 +1347,7 @@ test("[test-suite] coroutine: using a main thread as a coroutine", function (t) 
 });
 
 
-test("[test-suite] coroutine: tests for coroutine API", { skip: true }, function (t) {
+test("[test-suite] coroutine: tests for coroutine API", function (t) {
     let luaCode = `
         local function apico (...)
           local x = {...}
@@ -1411,7 +1411,7 @@ test("[test-suite] coroutine: tests for coroutine API", { skip: true }, function
 });
 
 
-test("[test-suite] coroutine: tests for coroutine API", { skip: true }, function (t) {
+test("[test-suite] coroutine: tests for coroutine API", function (t) {
     let luaCode = `
         f = T.makeCfunc("pushnum 3; pushnum 5; yield 1;")
         co = coroutine.wrap(function ()
@@ -1444,7 +1444,7 @@ test("[test-suite] coroutine: tests for coroutine API", { skip: true }, function
 });
 
 
-test("[test-suite] coroutine: testing coroutines with C bodies", { skip: true }, function (t) {
+test("[test-suite] coroutine: testing coroutines with C bodies", function (t) {
     let luaCode = `
         local function eqtab (t1, t2)
           assert(#t1 == #t2)
@@ -1477,6 +1477,171 @@ test("[test-suite] coroutine: testing coroutines with C bodies", { skip: true },
                                return 4; ]], f)
 
         assert(a == 'YIELD' and b == 'a' and c == 102 and d == 'OK')
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+});
+
+
+test("[test-suite] coroutine: testing chain of suspendable C calls", function (t) {
+    let luaCode = `
+        local count = 3   -- number of levels
+
+        f = T.makeCfunc([[
+          remove 1;             # remove argument
+          pushvalue U3;         # get selection function
+          call 0 1;             # call it  (result is 'f' or 'yield')
+          pushstring hello      # single argument for selected function
+          pushupvalueindex 2;   # index of continuation program
+          callk 1 -1 .;     # call selected function
+          errorerror        # should never arrive here
+        ]],
+        [[
+          # continuation program
+          pushnum 34    # return value
+          return *     # return all results
+        ]],
+        function ()     -- selection function
+          count = count - 1
+          if count == 0 then return coroutine.yield
+          else return f
+          end
+        end
+        )
+
+        co = coroutine.wrap(function () return f(nil) end)
+        assert(co() == "hello")   -- argument to 'yield'
+        a = {co()}
+        -- three '34's (one from each pending C call)
+        assert(#a == 3 and a[1] == a[2] and a[2] == a[3] and a[3] == 34)
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+});
+
+
+test("[test-suite] coroutine: testing yields with continuations", function (t) {
+    let luaCode = `
+        co = coroutine.wrap(function (...) return
+               T.testC([[ # initial function
+                  yieldk 1 2
+                  cannot be here!
+               ]],
+               [[  # 1st continuation
+                 yieldk 0 3 
+                 cannot be here!
+               ]],
+               [[  # 2nd continuation
+                 yieldk 0 4 
+                 cannot be here!
+               ]],
+               [[  # 3th continuation
+                  pushvalue 6   # function which is last arg. to 'testC' here
+                  pushnum 10; pushnum 20;
+                  pcall 2 0 0   # call should throw an error and return to next line
+                  pop 1     # remove error message
+                  pushvalue 6
+                  getglobal status; getglobal ctx
+                  pcallk 2 2 5  # call should throw an error and jump to continuation
+                  cannot be here!
+               ]],
+               [[  # 4th (and last) continuation
+                 return *
+               ]],
+               -- function called by 3th continuation
+               function (a,b) x=a; y=b; error("errmsg") end,
+               ...
+        )
+        end)
+
+        local a = {co(3,4,6)}
+        assert(a[1] == 6 and a[2] == nil)
+        a = {co()}; assert(a[1] == nil and _G.status == "YIELD" and _G.ctx == 2)
+        a = {co()}; assert(a[1] == nil and _G.status == "YIELD" and _G.ctx == 3)
+        a = {co(7,8)};
+        -- original arguments
+        assert(type(a[1]) == 'string' and type(a[2]) == 'string' and
+             type(a[3]) == 'string' and type(a[4]) == 'string' and
+             type(a[5]) == 'string' and type(a[6]) == 'function')
+        -- arguments left from fist resume
+        assert(a[7] == 3 and a[8] == 4)
+        -- arguments to last resume
+        assert(a[9] == 7 and a[10] == 8)
+        -- error message and nothing more
+        assert(a[11]:find("errmsg") and #a == 11)
+        -- check arguments to pcallk
+        assert(x == "YIELD" and y == 4)
+
+        assert(not pcall(co))   -- coroutine should be dead
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+});
+
+
+test("[test-suite] coroutine: bug in nCcalls", function (t) {
+    let luaCode = `
+        local co = coroutine.wrap(function ()
+          local a = {pcall(pcall,pcall,pcall,pcall,pcall,pcall,pcall,error,"hi")}
+          return pcall(assert, table.unpack(a))
+        end)
+
+        local a = {co()}
+        assert(a[10] == "hi")
     `, L;
     
     t.plan(2);
