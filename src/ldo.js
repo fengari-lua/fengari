@@ -693,8 +693,6 @@ const luaD_protectedparser = function(L, z, name, mode) {
     return status;
 };
 
-module.exports.SParser              = SParser;
-module.exports.adjust_varargs       = adjust_varargs;
 module.exports.luaD_call            = luaD_call;
 module.exports.luaD_callnoyield     = luaD_callnoyield;
 module.exports.luaD_checkstack      = luaD_checkstack;
@@ -712,6 +710,3 @@ module.exports.lua_isyieldable      = lua_isyieldable;
 module.exports.lua_resume           = lua_resume;
 module.exports.lua_yield            = lua_yield;
 module.exports.lua_yieldk           = lua_yieldk;
-module.exports.moveresults          = moveresults;
-module.exports.stackerror           = stackerror;
-module.exports.tryfuncTM            = tryfuncTM;
