@@ -22,6 +22,12 @@ const CT = defs.constant_types;
 const TS = defs.thread_status;
 
 const seterrorobj = function(L, errcode, oldtop) {
+    let current_top = L.top;
+
+    /* extend stack so that L.stack[oldtop] is sure to exist */
+    while (L.top < oldtop + 1)
+        L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
+
     switch (errcode) {
         case TS.LUA_ERRMEM: {
             lobject.setsvalue2s(L, oldtop, lstring.luaS_newliteral(L, "not enough memory"));
@@ -32,17 +38,12 @@ const seterrorobj = function(L, errcode, oldtop) {
             break;
         }
         default: {
-            lobject.setobjs2s(L, oldtop, L.top - 1);
+            lobject.setobjs2s(L, oldtop, current_top - 1);
         }
     }
 
-    if (L.top < oldtop + 1) {
-        while (L.top < oldtop + 1)
-            L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
-    } else {
-        while (L.top > oldtop + 1)
-            delete L.stack[--L.top];
-    }
+    while (L.top > oldtop + 1)
+        delete L.stack[--L.top];
 };
 
 const ERRORSTACKSIZE = luaconf.LUAI_MAXSTACK + 200;
