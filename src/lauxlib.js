@@ -654,6 +654,7 @@ if (!WEB) {
             this.f = null;  /* file being read */
             this.buff = new Buffer(1024);  /* area for reading file */
             this.pos = 0;  /* current position in file */
+            this.err = void 0;
         }
     }
 
@@ -665,7 +666,12 @@ if (!WEB) {
             lf.n = 0;  /* no more pre-read characters */
         } else {  /* read a block from file */
             lf.buff.fill(0);
-            bytes = fs.readSync(lf.f, lf.buff, 0, lf.buff.length, lf.pos); /* read block */
+            try {
+                bytes = fs.readSync(lf.f, lf.buff, 0, lf.buff.length, lf.pos); /* read block */
+            } catch(e) {
+                lf.err = e;
+                bytes = 0;
+            }
             lf.pos += bytes;
         }
         if (bytes > 0)
@@ -743,25 +749,24 @@ if (!WEB) {
                 return errfile(L, "open", fnameindex, e);
             }
         }
-
-        try {
-            let com = skipcomment(lf);
-            /* check for signature first, as we don't want to add line number corrections in binary case */
-            if (com.c === lua.LUA_SIGNATURE.charCodeAt(0) && filename) {  /* binary file? */
-                /* no need to re-open in node.js */
-            } else if (com.skipped) { /* read initial portion */
-                lf.buff[lf.n++] = '\n'.charCodeAt(0);  /* add line to correct line numbers */
-            }
-            if (com.c !== null)
-                lf.buff[lf.n++] = com.c; /* 'c' is the first character of the stream */
-            let status = lua.lua_load(L, getF, lf, lua.lua_tostring(L, -1), mode);
-            if (filename) fs.closeSync(lf.f);  /* close file (even in case of errors) */
-            lua.lua_remove(L, fnameindex);
-            return status;
-        } catch (err) {
-            lua.lua_settop(L, fnameindex);  /* ignore results from 'lua_load' */
-            return errfile(L, "read", fnameindex, err);
+        let com = skipcomment(lf);
+        /* check for signature first, as we don't want to add line number corrections in binary case */
+        if (com.c === lua.LUA_SIGNATURE.charCodeAt(0) && filename) {  /* binary file? */
+            /* no need to re-open in node.js */
+        } else if (com.skipped) { /* read initial portion */
+            lf.buff[lf.n++] = '\n'.charCodeAt(0);  /* add line to correct line numbers */
         }
+        if (com.c !== null)
+            lf.buff[lf.n++] = com.c; /* 'c' is the first character of the stream */
+        let status = lua.lua_load(L, getF, lf, lua.lua_tostring(L, -1), mode);
+        let readstatus = lf.err;
+        if (filename) try { fs.closeSync(lf.f); } catch(e) {}  /* close file (even in case of errors) */
+        if (readstatus) {
+            lua.lua_settop(L, fnameindex);  /* ignore results from 'lua_load' */
+            return errfile(L, "read", fnameindex, readstatus);
+        }
+        lua.lua_remove(L, fnameindex);
+        return status;
     };
 
     const luaL_loadfile = function(L, filename) {
