@@ -1060,8 +1060,9 @@ const lua_concat = function(L, n) {
 
 const lua_len = function(L, idx) {
     let t = index2addr(L, idx);
-    L.stack[L.top] = new TValue();
-    lvm.luaV_objlen(L, L.stack[L.top], t);
+    let tv = new TValue();
+    lvm.luaV_objlen(L, tv, t);
+    L.stack[L.top] = tv;
     L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
 };
