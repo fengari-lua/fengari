@@ -159,11 +159,11 @@ const luaT_trybinTM = function(L, p1, p2, res, event) {
 };
 
 const luaT_callorderTM = function(L, p1, p2, event) {
-    let res = new lobject.TValue(CT.LUA_TNIL, null);
+    let res = new lobject.TValue();
     if (!luaT_callbinTM(L, p1, p2, res, event))
-        return -1;
+        return null;
     else
-        return res.l_isfalse() ? 0 : 1;
+        return !res.l_isfalse();
 };
 
 const fasttm = function(l, et, e) {

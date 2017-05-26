@@ -752,31 +752,29 @@ const luaV_lessthan = function(L, l, r) {
         return l_strcmp(l.tsvalue(), r.tsvalue()) < 0 ? 1 : 0;
     else {
         let res = ltm.luaT_callorderTM(L, l, r, ltm.TMS.TM_LT);
-        if (res < 0)
+        if (res === null)
             ldebug.luaG_ordererror(L, l, r);
         return res ? 1 : 0;
     }
 };
 
 const luaV_lessequal = function(L, l, r) {
-    let res;
-
     if (l.ttisnumber() && r.ttisnumber())
         return LEnum(l, r) ? 1 : 0;
     else if (l.ttisstring() && r.ttisstring())
         return l_strcmp(l.tsvalue(), r.tsvalue()) <= 0 ? 1 : 0;
     else {
-        res = ltm.luaT_callorderTM(L, l, r, ltm.TMS.TM_LE);
-        if (res >= 0)
+        let res = ltm.luaT_callorderTM(L, l, r, ltm.TMS.TM_LE);
+        if (res !== null)
             return res ? 1 : 0;
     }
     /* try 'lt': */
     L.ci.callstatus |= lstate.CIST_LEQ; /* mark it is doing 'lt' for 'le' */
-    res = ltm.luaT_callorderTM(L, r, l, ltm.TMS.TM_LT);
+    let res = ltm.luaT_callorderTM(L, r, l, ltm.TMS.TM_LT);
     L.ci.callstatus ^= lstate.CIST_LEQ; /* clear mark */
-    if (res < 0)
+    if (res === null)
         ldebug.luaG_ordererror(L, l, r);
-    return res !== 1 ? 1 : 0; /* result is negated */
+    return res ? 0 : 1; /* result is negated */
 };
 
 const luaV_equalobj = function(L, t1, t2) {
