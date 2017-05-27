@@ -213,4 +213,4 @@ module.exports.lua_version             = lapi.lua_version;
 module.exports.lua_xmove               = lapi.lua_xmove;
 module.exports.lua_yield               = ldo.lua_yield;
 module.exports.lua_yieldk              = ldo.lua_yieldk;
-module.exports.lua_tocfunctoin         = ldo.lua_tocfunctoin;
+module.exports.lua_tocfunction         = lapi.lua_tocfunction;
