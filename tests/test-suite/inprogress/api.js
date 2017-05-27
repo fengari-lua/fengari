@@ -723,13 +723,13 @@ test("[test-suite] api: testing lua_to...", function (t) {
         assert(to("topointer", 10) == 0)
         assert(to("topointer", true) == 0)
         assert(to("topointer", T.pushuserdata(20)) == 20)
-        assert(to("topointer", io.read) ~= 0)           -- light C function
+        --assert(to("topointer", io.read) ~= 0)           -- light C function
         assert(to("topointer", hfunc) ~= 0)        -- "heavy" C function
         assert(to("topointer", function () end) ~= 0)   -- Lua function
         assert(to("topointer", io.stdin) ~= 0)   -- full userdata
         assert(to("func2num", 20) == 0)
         assert(to("func2num", T.pushuserdata(10)) == 0)
-        assert(to("func2num", io.read) ~= 0)     -- light C function
+        -- assert(to("func2num", io.read) ~= 0)     -- light C function
         assert(to("func2num", hfunc) ~= 0)  -- "heavy" C function (with upvalue)
         a = to("tocfunction", math.deg)
         assert(a(3) == math.deg(3) and a == math.deg)
