@@ -714,7 +714,8 @@ const lua_tointeger = function(L, idx) {
 };
 
 const lua_tonumber = function(L, idx) {
-    return lvm.tonumber(index2addr(L, idx));
+    let n = lvm.tonumber(index2addr(L, idx));
+    return n === false ? 0 : n;
 };
 
 const lua_touserdata = function(L, idx) {
