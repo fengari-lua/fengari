@@ -440,7 +440,8 @@ const runJS = function(L, L1, pc) {
             break;
         }
         case "topointer": {
-            lua.lua_pushnumber(L1, lua.lua_topointer(L1, getindex(L, L1, pc)));
+            let p = lua.lua_topointer(L1, getindex(L, L1, pc));
+            lua.lua_pushnumber(L1, p !== null ? p : 0);  /* in ltests.c, p is casted to a size_t so NULL gives 0 */
             break;
         }
         case "tostring": {
