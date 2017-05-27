@@ -695,7 +695,7 @@ const lua_rawlen = function(L, idx) {
         case CT.LUA_TLNGSTR:
             return o.vslen();
         case CT.LUA_TUSERDATA:
-            return o.len;
+            return o.value.len;
         case CT.LUA_TTABLE:
             return ltable.luaH_getn(o.value);
         default:
