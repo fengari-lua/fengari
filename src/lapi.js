@@ -895,7 +895,7 @@ const lua_arith = function(L, op) {
         L.stack[L.top++] = L.stack[L.top - 1];
     }
     /* first operand at top - 2, second at top - 1; result go to top - 2 */
-    lobject.luaO_arith(L, op, L.stack[L.top - 2], L.stack[L.top - 1], L.stack[L.top - 2]);
+    lobject.luaO_arith(L, op, L.stack[L.top - 2], L.stack[L.top - 1], L.top - 2);
     L.top--;  /* remove second operand */
 };
 

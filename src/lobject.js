@@ -605,7 +605,9 @@ const numarith = function(L, op, v1, v2) {
     }
 };
 
-const luaO_arith = function(L, op, p1, p2, res) {
+const luaO_arith = function(L, op, p1, p2, p3) {
+    let res = (typeof p3 === "number") ? L.stack[p3] : p3;  /* FIXME */
+
     switch (op) {
         case defs.LUA_OPBAND: case defs.LUA_OPBOR: case defs.LUA_OPBXOR:
         case defs.LUA_OPSHL: case defs.LUA_OPSHR:
@@ -644,7 +646,7 @@ const luaO_arith = function(L, op, p1, p2, res) {
     }
     /* could not perform raw operation; try metamethod */
     assert(L !== null);  /* should not fail when folding (compile time) */
-    ltm.luaT_trybinTM(L, p1, p2, res, (op - defs.LUA_OPADD) + ltm.TMS.TM_ADD);
+    ltm.luaT_trybinTM(L, p1, p2, p3, (op - defs.LUA_OPADD) + ltm.TMS.TM_ADD);
 };
 
 
