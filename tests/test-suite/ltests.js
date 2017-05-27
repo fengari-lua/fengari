@@ -441,7 +441,9 @@ const runJS = function(L, L1, pc) {
         }
         case "topointer": {
             let p = lua.lua_topointer(L1, getindex(L, L1, pc));
-            lua.lua_pushnumber(L1, p !== null ? p : 0);  /* in ltests.c, p is casted to a size_t so NULL gives 0 */
+            if (p === null) p = 0;
+            else if (p.id) p = p.id; 
+            lua.lua_pushnumber(L1, p);  /* in ltests.c, p is casted to a size_t so NULL gives 0 */
             break;
         }
         case "tostring": {
@@ -466,7 +468,6 @@ const runJS = function(L, L1, pc) {
         }
         case "yield": {
             return lua.lua_yield(L1, getnum(L, L1, pc));
-            break;
         }
         case "yieldk": {
             let nres = getnum(L, L1, pc);
