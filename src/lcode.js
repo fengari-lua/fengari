@@ -950,7 +950,7 @@ const validop = function(op, v1, v2) {
     switch (op) {
         case defs.LUA_OPBAND: case defs.LUA_OPBOR: case defs.LUA_OPBXOR:
         case defs.LUA_OPSHL: case defs.LUA_OPSHR: case defs.LUA_OPBNOT: {  /* conversion errors */
-            return (lvm.tointeger(v1) && lvm.tointeger(v2));
+            return (lvm.tointeger(v1) !== false && lvm.tointeger(v2) !== false);
         }
         case defs.LUA_OPDIV: case defs.LUA_OPIDIV: case defs.LUA_OPMOD:  /* division by 0 */
             return (v2.value !== 0);
