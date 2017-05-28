@@ -16,7 +16,7 @@ install:
 
 script:
     - yarn build
-    - yarn test
+    - travis_wait yarn test
 
 notifications:
     email: false
