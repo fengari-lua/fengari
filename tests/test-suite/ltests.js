@@ -7,6 +7,7 @@ const assert  = require("assert");
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const ljstype = require('../../src/ljstype.js');
+const lobject = require('../../src/lobject.js');
 
 const delimits = [" ", "\t", "\n", ",", ";"].map(e => e.charCodeAt(0));
 
@@ -779,11 +780,34 @@ const coresume = function(L) {
     }
 };
 
+const obj_at = function(L, k) {
+    return L.stack[L.ci.funcOff + k].value.p;
+};
+
+const pushobject = function(L, o){
+    L.stack[L.top++] = o;
+    assert(L.top <= L.ci.top, "stack overflow");
+};
+
+const listk = function(L) {
+    lauxlib.luaL_argcheck(L,
+        lua.lua_isfunction(L, 1) && !lua.lua_iscfunction(L, 1),
+        1, lua.to_luastring("Lua function expected"), true);
+    let p = obj_at(L, 1);
+    lua.lua_createtable(L, p.k.length, 0);
+    for (let i = 0; i < p.k.length; i++) {
+        pushobject(L, p.k[i]);
+        lua.lua_rawseti(L, -2, i + 1);
+    }
+    return 1;
+};
+
 const tests_funcs = {
     "checkpanic": checkpanic,
     "closestate": closestate,
     "d2s": d2s,
     "doremote": doremote,
+    "listk": listk,
     "loadlib": loadlib,
     "makeCfunc": makeCfunc,
     "newstate": newstate,
