@@ -1219,11 +1219,11 @@ test("[test-suite] api: testing get/setuservalue", function (t) {
         assert(debug.getuservalue(4) == nil)
 
         debug.setuservalue(b, function () return 10 end)
-        collectgarbage()   -- function should not be collected
+        -- collectgarbage()   -- function should not be collected
         assert(debug.getuservalue(b)() == 10)
 
         debug.setuservalue(b, 134)
-        collectgarbage()   -- number should not be a problem for collector
+        -- collectgarbage()   -- number should not be a problem for collector
         assert(debug.getuservalue(b) == 134)
     `, L;
     
@@ -1287,7 +1287,7 @@ test("[test-suite] api: long chain of userdata", { skip: true }, function (t) {
           debug.setuservalue(bb, b)
           b = bb
         end
-        collectgarbage()     -- nothing should not be collected
+        -- collectgarbage()     -- nothing should not be collected
         for i = 1, 1000 do
           b = debug.getuservalue(b)
         end
@@ -1362,7 +1362,7 @@ test("[test-suite] api: reuse of references", { skip: true }, function (t) {
 
         a = T.ref({})
 
-        collectgarbage()
+        -- collectgarbage()
 
         assert(type(T.getref(a)) == 'table')
     `, L;

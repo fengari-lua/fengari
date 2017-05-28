@@ -501,8 +501,8 @@ const testJS = function(L) {
 };
 
 const upvalue = function(L) {
-    let n = lauxlib.checkinteger(L, 2);
-    lauxlib.checktype(L, 1, lua.LUA_TFUNCTION);
+    let n = lauxlib.luaL_checkinteger(L, 2);
+    lauxlib.luaL_checktype(L, 1, lua.LUA_TFUNCTION);
     if (lua.lua_isnone(L, 3)) {
         let name = lua.lua_getupvalue(L, 1, n);
         if (name === null) return 0;
