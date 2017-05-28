@@ -328,29 +328,29 @@ const filterpc = function(pc, jmptarget) {
 const findsetreg = function(p, lastpc, reg) {
     let setreg = -1;  /* keep last instruction that changed 'reg' */
     let jmptarget = 0;  /* any code before this address is conditional */
+    let OCi = lopcodes.OpCodesI;
     for (let pc = 0; pc < lastpc; pc++) {
         let i = p.code[pc];
-        let op = lopcodes.OpCodes[i.opcode];
         let a = i.A;
-        switch (op) {
-            case 'OP_LOADNIL': {
+        switch (i.opcode) {
+            case OCi.OP_LOADNIL: {
                 let b = i.B;
                 if (a <= reg && reg <= a + b)  /* set registers from 'a' to 'a+b' */
                     setreg = filterpc(pc, jmptarget);
                 break;
             }
-            case 'OP_TFORCALL': {
+            case OCi.OP_TFORCALL: {
                 if (reg >= a + 2)  /* affect all regs above its base */
                     setreg = filterpc(pc, jmptarget);
                 break;
             }
-            case 'OP_CALL':
-            case 'OP_TAILCALL': {
+            case OCi.OP_CALL:
+            case OCi.OP_TAILCALL: {
                 if (reg >= a)  /* affect all registers above base */
                     setreg = filterpc(pc, jmptarget);
                 break;
             }
-            case 'OP_JMP': {
+            case OCi.OP_JMP: {
                 let b = i.sBx;
                 let dest = pc + 1 + b;
                 /* jump is forward and do not skip 'lastpc'? */
@@ -384,33 +384,33 @@ const getobjname = function(p, lastpc, reg) {
 
     /* else try symbolic execution */
     let pc = findsetreg(p, lastpc, reg);
+    let OCi = lopcodes.OpCodesI;
     if (pc !== -1) {  /* could find instruction? */
         let i = p.code[pc];
-        let op = lopcodes.OpCodes[i.opcode];
-        switch (op) {
-            case 'OP_MOVE': {
+        switch (i.opcode) {
+            case OCi.OP_MOVE: {
                 let b = i.B;  /* move from 'b' to 'a' */
                 if (b < i.A)
                     return getobjname(p, pc, b);  /* get name for 'b' */
                 break;
             }
-            case 'OP_GETTABUP':
-            case 'OP_GETTABLE': {
+            case OCi.OP_GETTABUP:
+            case OCi.OP_GETTABLE: {
                 let k = i.C;  /* key index */
                 let t = i.B;  /* table index */
-                let vn = op === 'OP_GETTABLE' ? lfunc.luaF_getlocalname(p, t + 1, pc) : upvalname(p, t);
+                let vn = i.opcode === OCi.OP_GETTABLE ? lfunc.luaF_getlocalname(p, t + 1, pc) : upvalname(p, t);
                 r.name = kname(p, pc, k).name;
                 r.funcname = vn && defs.to_jsstring(vn) === "_ENV" ? defs.to_luastring("global", true) : defs.to_luastring("field", true);
                 return r;
             }
-            case 'OP_GETUPVAL': {
+            case OCi.OP_GETUPVAL: {
                 r.name = upvalname(p, i.B);
                 r.funcname = defs.to_luastring("upvalue", true);
                 return r;
             }
-            case 'OP_LOADK':
-            case 'OP_LOADKX': {
-                let b = op === 'OP_LOADK' ? i.Bx : p.code[pc + 1].Ax;
+            case OCi.OP_LOADK:
+            case OCi.OP_LOADKX: {
+                let b = i.opcode === OCi.OP_LOADK ? i.Bx : p.code[pc + 1].Ax;
                 if (p.k[b].ttisstring()) {
                     r.name = p.k[b].svalue();
                     r.funcname = defs.to_luastring("constant", true);
@@ -418,7 +418,7 @@ const getobjname = function(p, lastpc, reg) {
                 }
                 break;
             }
-            case 'OP_SELF': {
+            case OCi.OP_SELF: {
                 let k = i.C;
                 r.name = kname(p, pc, k).name;
                 r.funcname = defs.to_luastring("method", true);
@@ -447,6 +447,7 @@ const funcnamefromcode = function(L, ci) {
     let p = ci.func.value.p;  /* calling function */
     let pc = currentpc(ci);  /* calling instruction index */
     let i = p.code[pc];  /* calling instruction */
+    let OCi = lopcodes.OpCodesI;
 
     if (ci.callstatus & lstate.CIST_HOOKED) {
         r.name = [defs.char["?"]];
@@ -454,43 +455,43 @@ const funcnamefromcode = function(L, ci) {
         return r;
     }
 
-    switch (lopcodes.OpCodes[i.opcode]) {
-        case 'OP_CALL':
-        case 'OP_TAILCALL':
+    switch (i.opcode) {
+        case OCi.OP_CALL:
+        case OCi.OP_TAILCALL:
             return getobjname(p, pc, i.A);  /* get function name */
-        case 'OP_TFORCALL':
+        case OCi.OP_TFORCALL:
             r.name = defs.to_luastring("for iterator", true);
             r.funcname = defs.to_luastring("for iterator", true);
             return r;
         /* other instructions can do calls through metamethods */
-        case 'OP_SELF':
-        case 'OP_GETTABUP':
-        case 'OP_GETTABLE':
+        case OCi.OP_SELF:
+        case OCi.OP_GETTABUP:
+        case OCi.OP_GETTABLE:
             tm = ltm.TMS.TM_INDEX;
             break;
-        case 'OP_SETTABUP':
-        case 'OP_SETTABLE':
+        case OCi.OP_SETTABUP:
+        case OCi.OP_SETTABLE:
             tm = ltm.TMS.TM_NEWINDEX;
             break;
-        case 'OP_ADD':    tm = ltm.TMS.OP_ADD;    break;
-        case 'OP_SUB':    tm = ltm.TMS.OP_SUB;    break;
-        case 'OP_MUL':    tm = ltm.TMS.OP_MUL;    break;
-        case 'OP_MOD':    tm = ltm.TMS.OP_MOD;    break;
-        case 'OP_POW':    tm = ltm.TMS.OP_POW;    break;
-        case 'OP_DIV':    tm = ltm.TMS.OP_DIV;    break;
-        case 'OP_IDIV':   tm = ltm.TMS.OP_IDI;    break;
-        case 'OP_BAND':   tm = ltm.TMS.OP_BAN;    break;
-        case 'OP_BOR':    tm = ltm.TMS.OP_BOR;    break;
-        case 'OP_BXOR':   tm = ltm.TMS.OP_BXO;    break;
-        case 'OP_SHL':    tm = ltm.TMS.OP_SHL;    break;
-        case 'OP_SHR':    tm = ltm.TMS.OP_SHR;    break;
-        case 'OP_UNM':    tm = ltm.TMS.TM_UNM;    break;
-        case 'OP_BNOT':   tm = ltm.TMS.TM_BNOT;   break;
-        case 'OP_LEN':    tm = ltm.TMS.TM_LEN;    break;
-        case 'OP_CONCAT': tm = ltm.TMS.TM_CONCAT; break;
-        case 'OP_EQ':     tm = ltm.TMS.TM_EQ;     break;
-        case 'OP_LT':     tm = ltm.TMS.TM_LT;     break;
-        case 'OP_LE':     tm = ltm.TMS.TM_LE;     break;
+        case OCi.OP_ADD:    tm = ltm.TMS.OP_ADD;    break;
+        case OCi.OP_SUB:    tm = ltm.TMS.OP_SUB;    break;
+        case OCi.OP_MUL:    tm = ltm.TMS.OP_MUL;    break;
+        case OCi.OP_MOD:    tm = ltm.TMS.OP_MOD;    break;
+        case OCi.OP_POW:    tm = ltm.TMS.OP_POW;    break;
+        case OCi.OP_DIV:    tm = ltm.TMS.OP_DIV;    break;
+        case OCi.OP_IDIV:   tm = ltm.TMS.OP_IDI;    break;
+        case OCi.OP_BAND:   tm = ltm.TMS.OP_BAN;    break;
+        case OCi.OP_BOR:    tm = ltm.TMS.OP_BOR;    break;
+        case OCi.OP_BXOR:   tm = ltm.TMS.OP_BXO;    break;
+        case OCi.OP_SHL:    tm = ltm.TMS.OP_SHL;    break;
+        case OCi.OP_SHR:    tm = ltm.TMS.OP_SHR;    break;
+        case OCi.OP_UNM:    tm = ltm.TMS.TM_UNM;    break;
+        case OCi.OP_BNOT:   tm = ltm.TMS.TM_BNOT;   break;
+        case OCi.OP_LEN:    tm = ltm.TMS.TM_LEN;    break;
+        case OCi.OP_CONCAT: tm = ltm.TMS.TM_CONCAT; break;
+        case OCi.OP_EQ:     tm = ltm.TMS.TM_EQ;     break;
+        case OCi.OP_LT:     tm = ltm.TMS.TM_LT;     break;
+        case OCi.OP_LE:     tm = ltm.TMS.TM_LE;     break;
         default:
             return null;  /* cannot find a reasonable name */
     }
