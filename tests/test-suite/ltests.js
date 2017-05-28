@@ -166,7 +166,9 @@ const runJS = function(L, L1, pc) {
         }
         case "func2num": {
             let func = lua.lua_tocfunction(L1, getindex(L, L1, pc));
-            lua.lua_pushnumber(L1, NaN); // TOODO
+            if (func === null) func = 0;
+            else if (func.id) func = func.id;
+            lua.lua_pushnumber(L1, func);
             break;
         }
         case "getfield": {
@@ -442,7 +444,7 @@ const runJS = function(L, L1, pc) {
         case "topointer": {
             let p = lua.lua_topointer(L1, getindex(L, L1, pc));
             if (p === null) p = 0;
-            else if (p.id) p = p.id; 
+            else if (p.id) p = p.id;
             lua.lua_pushnumber(L1, p);  /* in ltests.c, p is casted to a size_t so NULL gives 0 */
             break;
         }
