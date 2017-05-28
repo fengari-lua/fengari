@@ -1029,7 +1029,7 @@ const match = function(ms, s, p) {
                         case 'b'.charCodeAt(0): {  /* balanced string? */
                             s = matchbalance(ms, s, p + 2);
                             if (s !== null) {
-                                p = p.slice(4);
+                                p += 4;
                                 gotoinit = true;
                             }
                             break;
