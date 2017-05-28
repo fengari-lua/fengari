@@ -2,12 +2,13 @@
 
 global.WEB = false;
 
-const assert  = require("assert");
+const assert   = require("assert");
 
-const lua     = require('../../src/lua.js');
-const lauxlib = require('../../src/lauxlib.js');
-const ljstype = require('../../src/ljstype.js');
-const lobject = require('../../src/lobject.js');
+const lua      = require('../../src/lua.js');
+const lauxlib  = require('../../src/lauxlib.js');
+const ljstype  = require('../../src/ljstype.js');
+const lopcodes = require('../../src/lopcodes.js');
+const sprintf  = require('sprintf-js').sprintf;
 
 const delimits = [" ", "\t", "\n", ",", ";"].map(e => e.charCodeAt(0));
 
@@ -784,9 +785,54 @@ const obj_at = function(L, k) {
     return L.stack[L.ci.funcOff + k].value.p;
 };
 
+const setnameval = function(L, name, val) {
+    lua.lua_pushstring(L, name);
+    lua.lua_pushinteger(L, val);
+    lua.lua_settable(L, -3);
+};
+
 const pushobject = function(L, o){
     L.stack[L.top++] = o;
     assert(L.top <= L.ci.top, "stack overflow");
+};
+
+const buildop = function(p, pc) {
+    let i = p.code[pc];
+    let o = lopcodes.GET_OPCODE(i);
+    let name = lopcodes.OpCodes[o];
+    let line = p.lineinfo.length !== 0 ? p.lineinfo[pc] : -1;
+    let result = sprintf("(%4d) %4d - ", line, pc); //`(${line}) ${pc} - `;
+    switch (lopcodes.getOpMode(o)) {
+        case lopcodes.iABC:
+            result += sprintf("%-12s%4d %4d %4d", name, lopcodes.GETARG_A(i), lopcodes.GETARG_B(i), lopcodes.GETARG_C(i)); // `${name} ${lopcodes.GETARG_A(i)} ${lopcodes.GETARG_B(i)} ${lopcodes.GETARG_C(i)}`;
+            break;
+        case lopcodes.iABx:
+            result += sprintf("%-12s%4d %4d", name, lopcodes.GETARG_A(i), lopcodes.GETARG_Bx(i)); // `${name} ${lopcodes.GETARG_A(i)} ${lopcodes.GETARG_Bx(i)}`;
+            break;
+        case lopcodes.iAsBx:
+            result += sprintf("%-12s%4d %4d", name, lopcodes.GETARG_A(i), lopcodes.GETARG_sBx(i)); // `${name} ${lopcodes.GETARG_A(i)} ${lopcodes.GETARG_sBx(i)}`;
+            break;
+        case lopcodes.iAx:
+            result += sprintf("%-12s%4d", name, lopcodes.GETARG_Ax(i)); // `${name} ${lopcodes.GETARG_Ax(i)}`;
+            break;
+    }
+
+    return lua.to_luastring(result);
+};
+
+const listcode = function(L) {
+    lauxlib.luaL_argcheck(L, lua.lua_isfunction(L, 1) && !lua.lua_iscfunction(L, 1),
+                                 1, lua.to_luastring("Lua function expected", true));
+    let p = obj_at(L, 1);
+    lua.lua_newtable(L);
+    setnameval(L, lua.to_luastring("maxstack", true), p.maxstacksize);
+    setnameval(L, lua.to_luastring("numparams", true), p.numparams);
+    for (let pc = 0; pc < p.code.length; pc++) {
+        lua.lua_pushinteger(L, pc+1);
+        lua.lua_pushstring(L, buildop(p, pc));
+        lua.lua_settable(L, -3);
+    }
+    return 1;
 };
 
 const listk = function(L) {
@@ -803,23 +849,24 @@ const listk = function(L) {
 };
 
 const tests_funcs = {
-    "checkpanic": checkpanic,
-    "closestate": closestate,
-    "d2s": d2s,
-    "doremote": doremote,
-    "listk": listk,
-    "loadlib": loadlib,
-    "makeCfunc": makeCfunc,
-    "newstate": newstate,
-    "newuserdata": newuserdata,
+    "checkpanic":   checkpanic,
+    "closestate":   closestate,
+    "d2s":          d2s,
+    "doremote":     doremote,
+    "listcode":     listcode,
+    "listk":        listk,
+    "loadlib":      loadlib,
+    "makeCfunc":    makeCfunc,
+    "newstate":     newstate,
+    "newuserdata":  newuserdata,
     "pushuserdata": pushuserdata,
-    "resume": coresume,
-    "s2d": s2d,
-    "sethook": sethook,
-    "testC": testJS,
-    "testJS": testJS,
-    "udataval": udataval,
-    "upvalue": upvalue
+    "resume":       coresume,
+    "s2d":          s2d,
+    "sethook":      sethook,
+    "testC":        testJS,
+    "testJS":       testJS,
+    "udataval":     udataval,
+    "upvalue":      upvalue
 };
 
 const luaB_opentests = function(L) {

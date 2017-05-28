@@ -54,3 +54,55 @@ test("[test-suite] api: testing reuse in constant table", function (t) {
 
     }, "Lua program ran without error");
 });
+
+
+const prefix = `
+    function check (f, ...)
+      local arg = {...}
+      local c = T.listcode(f)
+      for i=1, #arg do
+        print(arg[i], c[i])
+        assert(string.find(c[i], '- '..arg[i]..' *%d'))
+      end
+      assert(c[#arg+2] == nil)
+    end
+
+
+    function checkequal (a, b)
+      a = T.listcode(a)
+      b = T.listcode(b)
+      for i = 1, #a do
+        a[i] = string.gsub(a[i], '%b()', '')   -- remove line number
+        b[i] = string.gsub(b[i], '%b()', '')   -- remove line number
+        assert(a[i] == b[i])
+      end
+    end
+`;
+
+test("[test-suite] api: some basic instructions", function (t) {
+    let luaCode = `
+        check(function ()
+          (function () end){f()}
+        end, 'CLOSURE', 'NEWTABLE', 'GETTABUP', 'CALL', 'SETLIST', 'CALL', 'RETURN')
+    `, L;
+    
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+});
