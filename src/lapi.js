@@ -720,6 +720,10 @@ const lua_tonumber = function(L, idx) {
     return n === false ? 0 : n;
 };
 
+const lua_tonumberx = function(L, idx) {
+    return lvm.tonumber(index2addr(L, idx));
+};
+
 const lua_touserdata = function(L, idx) {
     let o = index2addr(L, idx);
     switch (o.ttnov()) {
@@ -1224,6 +1228,7 @@ module.exports.lua_tojsstring        = lua_tojsstring;
 module.exports.lua_toljsstring       = lua_toljsstring;
 module.exports.lua_tolstring         = lua_tolstring;
 module.exports.lua_tonumber          = lua_tonumber;
+module.exports.lua_tonumberx         = lua_tonumberx;
 module.exports.lua_topointer         = lua_topointer;
 module.exports.lua_toproxy           = lua_toproxy;
 module.exports.lua_tostring          = lua_tostring;

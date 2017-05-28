@@ -200,6 +200,7 @@ module.exports.lua_tojsstring          = lapi.lua_tojsstring;
 module.exports.lua_toljsstring         = lapi.lua_toljsstring;
 module.exports.lua_tolstring           = lapi.lua_tolstring;
 module.exports.lua_tonumber            = lapi.lua_tonumber;
+module.exports.lua_tonumberx           = lapi.lua_tonumberx;
 module.exports.lua_topointer           = lapi.lua_topointer;
 module.exports.lua_toproxy             = lapi.lua_toproxy;
 module.exports.lua_tostring            = lapi.lua_tostring;

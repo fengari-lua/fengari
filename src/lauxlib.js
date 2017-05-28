@@ -333,7 +333,7 @@ const interror = function(L, arg) {
 };
 
 const luaL_checknumber = function(L, arg) {
-    let d = lua.lua_tonumber(L, arg);
+    let d = lua.lua_tonumberx(L, arg);
     if (d === false)
         tag_error(L, arg, lua.LUA_TNUMBER);
     return d;
