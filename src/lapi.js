@@ -194,7 +194,7 @@ const lua_rotate = function(L, idx, n) {
 
 const lua_copy = function(L, fromidx, toidx) {
     let from = index2addr(L, fromidx);
-    L.stack[index2addr_(L, toidx)].setfrom(from);
+    index2addr(L, toidx).setfrom(from);
 };
 
 const lua_remove = function(L, idx) {
