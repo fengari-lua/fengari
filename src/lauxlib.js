@@ -745,6 +745,8 @@ if (!WEB) {
             lua.lua_pushliteral(L, `@${jsfilename}`);
             try {
                 lf.f = fs.openSync(jsfilename, "r");
+                if (!fs.fstatSync(lf.f).isFile())
+                    throw new Error(`${jsfilename} is not a readable file`);
             } catch (e) {
                 return errfile(L, "open", fnameindex, e);
             }
