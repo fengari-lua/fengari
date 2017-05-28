@@ -4,11 +4,11 @@ const test     = require('tape');
 
 global.WEB = false;
 
-const lua     = require('../../../src/lua.js');
-const lauxlib = require('../../../src/lauxlib.js');
-const lualib  = require('../../../src/lualib.js');
+const lua     = require('../../src/lua.js');
+const lauxlib = require('../../src/lauxlib.js');
+const lualib  = require('../../src/lualib.js');
 
-const ltests  = require('../ltests.js');
+const ltests  = require('./ltests.js');
 
 // TODO: a lot of gc related tests are skipped
 // TODO: io.read is used in several tests, uncomment them when it's implemented
@@ -915,7 +915,7 @@ test("[test-suite] api: testing errors", function (t) {
 });
 
 
-test("[test-suite] api: test errors in non protected threads", function (t) {
+test("[test-suite] api: test errors in non protected threads", { skip: true }, function (t) {
     let luaCode = `
         function checkerrnopro (code, msg)
           local th = coroutine.create(function () end)  -- create new thread
@@ -2190,32 +2190,7 @@ test("[test-suite] api: testing luaL_newmetatable", function (t) {
         y = T.newuserdata(0);
         T.testC("pushstring xuxu; gettable R; setmetatable 2", x)
         assert(getmetatable(x) == mt_xuxu)
-    `, L;
-    
-    t.plan(2);
 
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        ltests.luaopen_tests(L);
-
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-});
-
-
-test("[test-suite] api: testing luaL_testudata", function (t) {
-    let luaCode = `
         -- correct metatable
         local res1, res2, top = T.testC([[testudata -1 xuxu
                           testudata 2 xuxu
