@@ -108,25 +108,24 @@ const luaT_objtypename = function(L, o) {
 };
 
 const luaT_callTM = function(L, f, p1, p2, p3, hasres) {
-    let result = p3;
     let func = L.top;
 
-    L.stack[L.top] = new lobject.TValue(f.type, f.value); /* push function (assume EXTRA_STACK) */
-    L.stack[L.top + 1] = new lobject.TValue(p1.type, p1.value); /* 1st argument */
-    L.stack[L.top + 2] = new lobject.TValue(p2.type, p2.value); /* 2nd argument */
-    L.top += 3;
+    lobject.pushobj2s(L, f); /* push function (assume EXTRA_STACK) */
+    lobject.pushobj2s(L, p1); /* 1st argument */
+    lobject.pushobj2s(L, p2); /* 2nd argument */
 
     if (!hasres)  /* no result? 'p3' is third argument */
-        L.stack[L.top++] = new lobject.TValue(p3.type, p3.value);  /* 3rd argument */
+        lobject.pushobj2s(L, p3); /* 3rd argument */
 
     if (L.ci.callstatus & lstate.CIST_LUA)
         ldo.luaD_call(L, func, hasres);
     else
         ldo.luaD_callnoyield(L, func, hasres);
 
-    if (hasres) {
-        assert(typeof result === "number");
-        L.stack[result] = L.stack[--L.top];
+    if (hasres) {  /* if has result, move it to its place */
+        let tv = L.stack[L.top-1];
+        delete L.stack[--L.top];
+        p3.setfrom(tv);
     }
 };
 
@@ -160,10 +159,11 @@ const luaT_trybinTM = function(L, p1, p2, res, event) {
 };
 
 const luaT_callorderTM = function(L, p1, p2, event) {
-    if (!luaT_callbinTM(L, p1, p2, L.top, event))
-        return -1;
+    let res = new lobject.TValue();
+    if (!luaT_callbinTM(L, p1, p2, res, event))
+        return null;
     else
-        return !L.stack[L.top].l_isfalse() ? 1 : 0;
+        return !res.l_isfalse();
 };
 
 const fasttm = function(l, et, e) {

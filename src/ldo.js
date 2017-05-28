@@ -22,21 +22,28 @@ const CT = defs.constant_types;
 const TS = defs.thread_status;
 
 const seterrorobj = function(L, errcode, oldtop) {
+    let current_top = L.top;
+
+    /* extend stack so that L.stack[oldtop] is sure to exist */
+    while (L.top < oldtop + 1)
+        L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
+
     switch (errcode) {
         case TS.LUA_ERRMEM: {
-            L.stack[oldtop] = new lobject.TValue(CT.LUA_TLNGSTR, lstring.luaS_newliteral(L, "not enough memory"));
+            lobject.setsvalue2s(L, oldtop, lstring.luaS_newliteral(L, "not enough memory"));
             break;
         }
         case TS.LUA_ERRERR: {
-            L.stack[oldtop] = new lobject.TValue(CT.LUA_TLNGSTR, lstring.luaS_newliteral(L, "error in error handling"));
+            lobject.setsvalue2s(L, oldtop, lstring.luaS_newliteral(L, "error in error handling"));
             break;
         }
         default: {
-            L.stack[oldtop] = L.stack[L.top - 1];
+            lobject.setobjs2s(L, oldtop, current_top - 1);
         }
     }
 
-    L.top = oldtop + 1;
+    while (L.top > oldtop + 1)
+        delete L.stack[--L.top];
 };
 
 const ERRORSTACKSIZE = luaconf.LUAI_MAXSTACK + 200;
@@ -94,8 +101,8 @@ const luaD_shrinkstack = function(L) {
 };
 
 const luaD_inctop = function(L) {
-  luaD_checkstack(L, 1);
-  L.top++;
+    luaD_checkstack(L, 1);
+    L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
 };
 
 /*
@@ -151,7 +158,14 @@ const luaD_precall = function(L, off, nresults) {
             ci.nresults = nresults;
             ci.func = func;
             ci.l_base = base;
-            L.top = ci.top = base + fsize;
+            ci.top = base + fsize;
+            if (L.top < ci.top) {
+                while (L.top < ci.top)
+                    L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
+            } else {
+                while (L.top > ci.top)
+                    delete L.stack[--L.top];
+            }
             ci.l_code = p.code;
             ci.l_savedpc = 0;
             ci.callstatus = lstate.CIST_LUA;
@@ -159,6 +173,7 @@ const luaD_precall = function(L, off, nresults) {
             return false;
         }
         default:
+            luaD_checkstack(L, 1);
             tryfuncTM(L, off, func);
             return luaD_precall(L, off, nresults);
     }
@@ -185,33 +200,42 @@ const moveresults = function(L, firstResult, res, nres, wanted) {
             break;
         case 1: {
             if (nres === 0)
-                L.stack[firstResult] = lobject.luaO_nilobject;
-            L.stack[res] = L.stack[firstResult];
+                L.stack[res].setnilvalue();
+            else {
+                lobject.setobjs2s(L, res, firstResult); /* move it to proper place */
+            }
             break;
         }
         case defs.LUA_MULTRET: {
             for (let i = 0; i < nres; i++)
-                L.stack[res + i] = L.stack[firstResult + i];
+                lobject.setobjs2s(L, res + i, firstResult + i);
+            for (let i=L.top; i>=(res + nres); i--)
+                delete L.stack[i];
             L.top = res + nres;
             return false;
         }
         default: {
             let i;
             if (wanted <= nres) {
-                for (i = 0; i < wanted; i++) {
-                    L.stack[res + i] = L.stack[firstResult + i];
-                }
+                for (i = 0; i < wanted; i++)
+                    lobject.setobjs2s(L, res + i, firstResult + i);
             } else {
                 for (i = 0; i < nres; i++)
-                    L.stack[res + i] = L.stack[firstResult + i];
-                for (; i < wanted; i++)
-                    L.stack[res + i] = new lobject.TValue(CT.LUA_TNIL, null);
+                    lobject.setobjs2s(L, res + i, firstResult + i);
+                for (; i < wanted; i++) {
+                    if (res+i >= L.top)
+                        L.stack[res + i] = new lobject.TValue(CT.LUAT_NIL, null);
+                    else
+                        L.stack[res + i].setnilvalue();
+                }
             }
             break;
         }
     }
-
-    L.top = res + wanted; /* top points after the last result */
+    let newtop = res + wanted; /* top points after the last result */
+    for (let i=L.top; i>=newtop; i--)
+        delete L.stack[i];
+    L.top = newtop;
     return true;
 };
 
@@ -239,7 +263,13 @@ const luaD_hook = function(L, event, line) {
         assert(!L.allowhook);
         L.allowhook = 1;
         ci.top = ci_top;
-        L.top = top;
+        if (L.top < top) {
+            while (L.top < top)
+                L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
+        } else {
+            while (L.top > top)
+                delete L.stack[--L.top];
+        }
         ci.callstatus &= ~lstate.CIST_HOOKED;
     }
 };
@@ -252,8 +282,8 @@ const adjust_varargs = function(L, p, actual) {
 
     let i;
     for (i = 0; i < nfixargs && i < actual; i++) {
-        L.stack[L.top++] = L.stack[fixed + i];
-        L.stack[fixed + i] = new lobject.TValue(CT.LUA_TNIL, null);
+        lobject.pushobj2s(L, L.stack[fixed + i]);
+        L.stack[fixed + i].setnilvalue();
     }
 
     for (; i < nfixargs; i++)
@@ -267,10 +297,10 @@ const tryfuncTM = function(L, off, func) {
     if (!tm.ttisfunction(tm))
         ldebug.luaG_typeerror(L, func, defs.to_luastring("call", true));
     /* Open a hole inside the stack at 'func' */
-    for (let p = L.top; p > off; p--)
-        L.stack[p] = L.stack[p-1];
-    L.top++; /* slot ensured by caller */
-    L.stack[off] = new lobject.TValue(tm.type, tm.value); /* tag method is the new function to be called */
+    lobject.pushobj2s(L, L.stack[L.top-1]); /* push top of stack again */
+    for (let p = L.top-2; p > off; p--)
+        lobject.setobjs2s(L, p, p-1); /* move other items up one */
+    lobject.setobj2s(L, off, tm); /* tag method is the new function to be called */
 };
 
 /*
@@ -351,8 +381,8 @@ const luaD_rawrunprotected = function(L, f, ud) {
                     /* copy of luaG_errormsg without the throw */
                     if (L.errfunc !== 0) {  /* is there an error handling function? */
                         let errfunc = L.errfunc;
-                        L.stack[L.top] = L.stack[L.top - 1];
-                        L.stack[L.top - 1] = L.stack[errfunc];
+                        lobject.setobjs2s(L, L.top, L.top - 1); /* move argument */
+                        lobject.setobjs2s(L, L.top - 1, errfunc); /* push function */
                         L.top++;
                         luaD_callnoyield(L, L.top - 2, 1);
                     }
@@ -464,9 +494,16 @@ const recover = function(L, status) {
 ** coroutine error handler and should not kill the coroutine.)
 */
 const resume_error = function(L, msg, narg) {
-    L.top -= narg;  /* remove args from the stack */
-    L.stack[L.top++] = new lobject.TValue(CT.LUA_TLNGSTR, lstring.luaS_newliteral(L, msg));  /* push error message */
-    assert(L.top <= L.ci.top, "stack overflow");
+    let ts = lstring.luaS_newliteral(L, msg);
+    if (narg === 0) {
+        lobject.pushsvalue2s(L, ts);
+        assert(L.top <= L.ci.top, "stack overflow");
+    } else {
+        /* remove args from the stack */
+        for (let i=1; i<narg; i++)
+            delete L.stack[--L.top];
+        lobject.setsvalue2s(L, L.top-1, ts);  /* push error message */
+    }
     return TS.LUA_ERRRUN;
 };
 
@@ -657,8 +694,6 @@ const luaD_protectedparser = function(L, z, name, mode) {
     return status;
 };
 
-module.exports.SParser              = SParser;
-module.exports.adjust_varargs       = adjust_varargs;
 module.exports.luaD_call            = luaD_call;
 module.exports.luaD_callnoyield     = luaD_callnoyield;
 module.exports.luaD_checkstack      = luaD_checkstack;
@@ -676,6 +711,3 @@ module.exports.lua_isyieldable      = lua_isyieldable;
 module.exports.lua_resume           = lua_resume;
 module.exports.lua_yield            = lua_yield;
 module.exports.lua_yieldk           = lua_yieldk;
-module.exports.moveresults          = moveresults;
-module.exports.stackerror           = stackerror;
-module.exports.tryfuncTM            = tryfuncTM;

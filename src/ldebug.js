@@ -140,7 +140,8 @@ const lua_getlocal = function(L, ar, n) {
         let local = findlocal(L, ar.i_ci, n);
         if (local) {
             name = local.name;
-            L.stack[L.top++] = L.stack[local.pos];
+            lobject.pushobj2s(L, L.stack[local.pos]);
+            assert(L.top <= L.ci.top, "stack overflow");
         } else {
             name = null;
         }
@@ -155,7 +156,7 @@ const lua_setlocal = function(L, ar, n) {
     let name = local.name;
     let pos = local.pos;
     if (name) {
-        L.stack[pos] = L.stack[L.top - 1];
+        lobject.setobjs2s(L, pos, L.top - 1);
         delete L.stack[--L.top];  /* pop value */
     }
     swapextra(L);
@@ -181,12 +182,14 @@ const funcinfo = function(ar, cl) {
 
 const collectvalidlines = function(L, f) {
     if (f === null || f instanceof lobject.CClosure) {
-        L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
+        L.stack[L.top] = new lobject.TValue(CT.LUA_TNIL, null);
+        L.top++;
         assert(L.top <= L.ci.top, "stack overflow");
     } else {
         let lineinfo = f.l.p.lineinfo;
         let t = ltable.luaH_new(L);
-        L.stack[L.top++] = new lobject.TValue(CT.LUA_TTABLE, t);
+        L.stack[L.top] = new lobject.TValue(CT.LUA_TTABLE, t);
+        L.top++;
         assert(L.top <= L.ci.top, "stack overflow");
         let v = new lobject.TValue(CT.LUA_TBOOLEAN, true);
         for (let i = 0; i < f.l.p.length; i++)
@@ -261,26 +264,24 @@ const auxgetinfo = function(L, what, ar, f, ci) {
 };
 
 const lua_getinfo = function(L, what, ar) {
-    let status, cl, ci, func, funcOff;
+    let status, cl, ci, func;
     swapextra(L);
     if (what[0] === '>'.charCodeAt(0)) {
         ci = null;
-        funcOff = L.top - 1;
-        func = L.stack[funcOff];
+        func = L.stack[L.top - 1];
         assert(L, func.ttisfunction(), "function expected");
         what = what.slice(1);  /* skip the '>' */
         L.top--;  /* pop function */
     } else {
         ci = ar.i_ci;
         func = ci.func;
-        funcOff = ci.funcOff;
         assert(ci.func.ttisfunction());
     }
 
     cl = func.ttisclosure() ? func.value : null;
     status = auxgetinfo(L, what, ar, cl, ci);
     if (what.indexOf('f'.charCodeAt(0)) >= 0) {
-        L.stack[L.top++] = func;
+        lobject.pushobj2s(L, func);
         assert(L.top <= L.ci.top, "stack overflow");
     }
 
@@ -590,9 +591,8 @@ const luaG_runerror = function(L, fmt, ...argp) {
 const luaG_errormsg = function(L) {
     if (L.errfunc !== 0) {  /* is there an error handling function? */
         let errfunc = L.errfunc;
-        L.stack[L.top] = L.stack[L.top - 1];
-        L.stack[L.top - 1] = L.stack[errfunc];
-        L.top++;
+        lobject.pushobj2s(L, L.stack[L.top - 1]); /* move argument */
+        lobject.setobjs2s(L, L.top - 2, errfunc); /* push function */
         ldo.luaD_callnoyield(L, L.top - 2, 1);
     }
 
@@ -638,8 +638,8 @@ const luaG_traceexec = function(L) {
             L.hookcount = 1;  /* undo decrement to zero */
         ci.l_savedpc--;  /* undo increment (resume will increment it again) */
         ci.callstatus |= lstate.CIST_HOOKYIELD;  /* mark that it yielded */
-        ci.func = L.stack[L.top - 1];  /* protect stack below results */
-        ci.funcOff = L.top - 1;
+        ci.funcOff = L.top - 1;  /* protect stack below results */
+        ci.func = L.stack[ci.funcOff];
         ldo.luaD_throw(L, TS.LUA_YIELD);
     }
 };

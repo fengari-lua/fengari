@@ -261,8 +261,8 @@ const luaH_next = function(L, table, keyI) {
             } while (entry.key.ttisdeadkey());
         }
     }
-    L.stack[keyI] = new lobject.TValue(entry.key.type, entry.key.value);
-    L.stack[keyI+1] = new lobject.TValue(entry.value.type, entry.value.value);
+    lobject.setobj2s(L, keyI, entry.key);
+    lobject.setobj2s(L, keyI+1, entry.value);
     return true;
 };
 

@@ -1565,10 +1565,10 @@ const luaY_parser = function(L, z, buff, dyd, name, firstchar) {
     let funcstate = new FuncState();
     let cl = lfunc.luaF_newLclosure(L, 1);  /* create main closure */
     ldo.luaD_inctop(L);
-    L.stack[L.top-1] = new TValue(defs.CT.LUA_TLCL, cl);
+    L.stack[L.top-1].setclLvalue(cl);
     lexstate.h = ltable.luaH_new(L);  /* create table for scanner */
     ldo.luaD_inctop(L);
-    L.stack[L.top-1] = new TValue(defs.CT.LUA_TTABLE, lexstate.h);
+    L.stack[L.top-1].sethvalue(lexstate.h);
     funcstate.f = cl.p = new Proto(L);
     funcstate.f.source = lstring.luaS_new(L, name);
     lexstate.buff = buff;
@@ -1579,7 +1579,7 @@ const luaY_parser = function(L, z, buff, dyd, name, firstchar) {
     assert(!funcstate.prev && funcstate.nups === 1 && !lexstate.fs);
     /* all scopes should be correctly finished */
     assert(dyd.actvar.n === 0 && dyd.gt.n === 0 && dyd.label.n === 0);
-    L.top--;  /* remove scanner's table */
+    delete L.stack[--L.top];  /* remove scanner's table */
     return cl;  /* closure is on the stack, too */
 };
 

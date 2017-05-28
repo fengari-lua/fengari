@@ -126,8 +126,18 @@ class TValue {
         this.value = x;
     }
 
+    chgfltvalue(x) {
+        assert(this.type == CT.LUA_TNUMFLT);
+        this.value = x;
+    }
+
     setivalue(x) {
         this.type = CT.LUA_TNUMINT;
+        this.value = x;
+    }
+
+    chgivalue(x) {
+        assert(this.type == CT.LUA_TNUMINT);
         this.value = x;
     }
 
@@ -148,6 +158,31 @@ class TValue {
 
     setbvalue(x) {
         this.type = CT.LUA_TBOOLEAN;
+        this.value = x;
+    }
+
+    setsvalue(x) {
+        this.type = CT.LUA_TLNGSTR; /* LUA_TSHRSTR? */
+        this.value = x;
+    }
+
+    setuvalue(x) {
+        this.type = CT.LUA_TUSERDATA;
+        this.value = x;
+    }
+
+    setthvalue(x) {
+        this.type = CT.LUA_TTHREAD;
+        this.value = x;
+    }
+
+    setclLvalue(x) {
+        this.type = CT.LUA_TLCL;
+        this.value = x;
+    }
+
+    setclCvalue(x) {
+        this.type = CT.LUA_TCCL;
         this.value = x;
     }
 
@@ -184,6 +219,24 @@ class TValue {
     }
 
 }
+
+const pushobj2s = function(L, tv) {
+    L.stack[L.top++] = new TValue(tv.type, tv.value);
+};
+const pushsvalue2s = function(L, ts) {
+    L.stack[L.top++] = new TValue(CT.LUA_TLNGSTR, ts);
+};
+/* from stack to (same) stack */
+const setobjs2s = function(L, newidx, oldidx) {
+    L.stack[newidx].setfrom(L.stack[oldidx]);
+};
+/* to stack (not from same stack) */
+const setobj2s = function(L, newidx, oldtv) {
+    L.stack[newidx].setfrom(oldtv);
+};
+const setsvalue2s = function(L, newidx, ts) {
+    L.stack[newidx].setsvalue(ts);
+};
 
 const luaO_nilobject = new TValue(CT.LUA_TNIL, null);
 Object.freeze(luaO_nilobject);
@@ -477,12 +530,12 @@ const luaO_tostring = function(L, obj) {
             buff.push(char['0']);  /* adds '.0' to result */
         }
     }
-    return new TValue(CT.LUA_TLNGSTR, lstring.luaS_bless(L, buff));
+    return lstring.luaS_bless(L, buff);
 };
 
 const pushstr = function(L, str) {
     ldo.luaD_inctop(L);
-    L.stack[L.top-1] = new TValue(CT.LUA_TLNGSTR, lstring.luaS_new(L, str));
+    setsvalue2s(L, L.top-1, lstring.luaS_new(L, str));
 };
 
 const luaO_pushvfstring = function(L, fmt, argp) {
@@ -510,11 +563,11 @@ const luaO_pushvfstring = function(L, fmt, argp) {
             case char['d']:
             case char['I']:
                 ldo.luaD_inctop(L);
-                L.stack[L.top-1] = luaO_tostring(L, new TValue(CT.LUA_TNUMINT, argp[a++]));
+                setsvalue2s(L, L.top-1, luaO_tostring(L, new TValue(CT.LUA_TNUMINT, argp[a++])));
                 break;
             case char['f']:
                 ldo.luaD_inctop(L);
-                L.stack[L.top-1] = luaO_tostring(L, new TValue(CT.LUA_TNUMFLT, argp[a++]));
+                setsvalue2s(L, L.top-1, luaO_tostring(L, new TValue(CT.LUA_TNUMFLT, argp[a++])));
                 break;
             case char['p']:
                 let v = argp[a++];
@@ -614,8 +667,7 @@ const luaO_arith = function(L, op, p1, p2, p3) {
         case defs.LUA_OPBNOT: {  /* operate only on integers */
             let i1, i2;
             if ((i1 = lvm.tointeger(p1)) !== false && (i2 = lvm.tointeger(p2)) !== false) {
-                res.type  = CT.LUA_TNUMINT;
-                res.value = intarith(L, op, i1, i2);
+                res.setivalue(intarith(L, op, i1, i2));
                 return;
             }
             else break;  /* go to the end */
@@ -623,8 +675,7 @@ const luaO_arith = function(L, op, p1, p2, p3) {
         case defs.LUA_OPDIV: case defs.LUA_OPPOW: {  /* operate only on floats */
             let n1, n2;
             if ((n1 = lvm.tonumber(p1)) !== false && (n2 = lvm.tonumber(p2)) !== false) {
-                res.type  = CT.LUA_TNUMFLT;
-                res.value = numarith(L, op, n1, n2);
+                res.setfltvalue(numarith(L, op, n1, n2));
                 return;
             }
             else break;  /* go to the end */
@@ -632,13 +683,11 @@ const luaO_arith = function(L, op, p1, p2, p3) {
         default: {  /* other operations */
             let n1, n2;
             if (p1.ttisinteger() && p2.ttisinteger()) {
-                res.type  = CT.LUA_TNUMINT;
-                res.value = intarith(L, op, p1.value, p2.value);
+                res.setivalue(intarith(L, op, p1.value, p2.value));
                 return;
             }
             else if ((n1 = lvm.tonumber(p1)) !== false && (n2 = lvm.tonumber(p2)) !== false) {
-                res.type  = CT.LUA_TNUMFLT;
-                res.value = numarith(L, op, n1, n2);
+                res.setfltvalue(numarith(L, op, n1, n2));
                 return;
             }
             else break;  /* go to the end */
@@ -669,3 +718,8 @@ module.exports.luaO_tostring     = luaO_tostring;
 module.exports.luaO_utf8desc     = luaO_utf8desc;
 module.exports.luaO_utf8esc      = luaO_utf8esc;
 module.exports.numarith          = numarith;
+module.exports.pushobj2s         = pushobj2s;
+module.exports.pushsvalue2s      = pushsvalue2s;
+module.exports.setobjs2s         = setobjs2s;
+module.exports.setobj2s          = setobj2s;
+module.exports.setsvalue2s       = setsvalue2s;

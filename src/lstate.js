@@ -109,8 +109,8 @@ const stack_init = function(L1, L) {
     let ci = L1.base_ci;
     ci.next = ci.previous = null;
     ci.callstatus = 0;
-    ci.func = L1.stack[L1.top];
     ci.funcOff = L1.top;
+    ci.func = L1.stack[L1.top];
     L1.stack[L1.top++] = new lobject.TValue(CT.LUA_TNIL, null);
     ci.top = L1.top + defs.LUA_MINSTACK;
     L1.ci = ci;
@@ -147,7 +147,8 @@ const f_luaopen = function(L) {
 const lua_newthread = function(L) {
     let g = L.l_G;
     let L1 = new lua_State(g);
-    L.stack[L.top++] = new lobject.TValue(CT.LUA_TTHREAD, L1);
+    L.stack[L.top] = new lobject.TValue(CT.LUA_TTHREAD, L1);
+    L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
     L1.hookmask = L.hookmask;
     L1.basehookcount = L.basehookcount;

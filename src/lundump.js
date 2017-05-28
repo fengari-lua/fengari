@@ -266,7 +266,7 @@ const luaU_undump = function(L, Z, name) {
     S.checkHeader();
     let cl = lfunc.luaF_newLclosure(L, S.readByte());
     ldo.luaD_inctop(L);
-    L.stack[L.top-1] = new lobject.TValue(defs.CT.LUA_TLCL, cl);
+    L.stack[L.top-1].setclLvalue(cl);
     cl.p = new lfunc.Proto(L);
     S.readFunction(cl.p, null);
     assert(cl.nupvalues === cl.p.upvalues.length);
