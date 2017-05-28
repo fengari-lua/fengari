@@ -4,11 +4,11 @@ const test     = require('tape');
 
 global.WEB = false;
 
-const lua     = require('../../../src/lua.js');
-const lauxlib = require('../../../src/lauxlib.js');
-const lualib  = require('../../../src/lualib.js');
+const lua     = require('../../src/lua.js');
+const lauxlib = require('../../src/lauxlib.js');
+const lualib  = require('../../src/lualib.js');
 
-const ltests  = require('../ltests.js');
+const ltests  = require('./ltests.js');
 
 
 test("[test-suite] code: testing reuse in constant table", function (t) {
@@ -476,7 +476,7 @@ test("[test-suite] code: x == nil , x ~= nil", function (t) {
                    function () if (a==9) then a=1 end; if a~=9 then a=1 end end)
 
         check(function () if a==nil then a='a' end end,
-        'GETTABUP', 'EQ', 'JMP', 'SETTABUP', 'RETURN')
+            'GETTABUP', 'EQ', 'JMP', 'SETTABUP', 'RETURN')
 
         checkequal(function () local a; if not (a or b) then b=a end end,
            function () local a; if (not a and not b) then b=a end end)

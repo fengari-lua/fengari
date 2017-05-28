@@ -57,6 +57,7 @@
     - [x] `bitwise.lua` (16/16)
     - [x] `calls.lua` (32/32)
     - [x] `closure.lua` (16/16)
+    - [x] `code.lua` (28/28)
     - [x] `constructs.lua` (`_soft`) (10/10)
     - [x] `coroutine.lua` (70/70)
     - [x] `errors.lua` (64/64)
@@ -74,7 +75,6 @@
     - [ ] `utf8.lua` (14/20)
     - [ ] `attrib.lua`
     - [ ] `big.lua`
-    - [ ] `code.lua`
     - [ ] `db.lua`
     - [ ] `verybig.lua`
 - [ ] DOM API binding: [https://github.com/fengari-lua/fengari-interop](https://github.com/fengari-lua/fengari-interop)
