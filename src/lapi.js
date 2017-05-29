@@ -255,7 +255,7 @@ const lua_pushstring = function (L, s) {
     assert(Array.isArray(s) || s === undefined || s === null, "lua_pushstring expects array of byte");
 
     if (s === undefined || s === null) {
-        L.stack[L.top] = new TValue(CT.LUA_TNIL, null)
+        L.stack[L.top] = new TValue(CT.LUA_TNIL, null);
         L.top++;
     } else {
         let ts = lstring.luaS_new(L, s);

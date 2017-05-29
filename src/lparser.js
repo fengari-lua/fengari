@@ -16,7 +16,6 @@ const BinOpr   = lcode.BinOpr;
 const OpCodesI = lopcodes.OpCodesI;
 const Proto    = lfunc.Proto;
 const R        = llex.RESERVED;
-const TValue   = lobject.TValue;
 const UnOpr    = lcode.UnOpr;
 const char     = defs.char;
 

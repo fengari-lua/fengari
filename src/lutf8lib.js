@@ -21,7 +21,7 @@ const u_posrelat = function(pos, len) {
 /*
 ** Decode one UTF-8 sequence, returning NULL if byte sequence is invalid.
 */
-const utf8_decode = function(s, val) {
+const utf8_decode = function(s) {
     let limits = [0xFF, 0x7F, 0x7FF, 0xFFFF];
     let c = s[0];
     let res = 0;  /* final result */

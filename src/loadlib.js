@@ -374,7 +374,7 @@ const ll_require_cont = function(L, status, ctx) {
     let name = ctx;
     lua.lua_pushstring(L, name);  /* pass name as argument to module loader */
     lua.lua_insert(L, -2);  /* name is 1st argument (before search data) */
-    lua.lua_callk(L, 2, 1, ctx, ll_require_cont2)
+    lua.lua_callk(L, 2, 1, ctx, ll_require_cont2);
     return ll_require_cont2(L, lua.LUA_OK, ctx);  /* run loader to load module */
 };
 
