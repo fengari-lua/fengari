@@ -381,9 +381,8 @@ const luaD_rawrunprotected = function(L, f, ud) {
                     /* copy of luaG_errormsg without the throw */
                     if (L.errfunc !== 0) {  /* is there an error handling function? */
                         let errfunc = L.errfunc;
-                        lobject.setobjs2s(L, L.top, L.top - 1); /* move argument */
+                        lobject.pushobj2s(L, L.stack[L.top - 1]); /* move argument */
                         lobject.setobjs2s(L, L.top - 1, errfunc); /* push function */
-                        L.top++;
                         luaD_callnoyield(L, L.top - 2, 1);
                     }
 
