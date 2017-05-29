@@ -1110,7 +1110,7 @@ const push_onecapture = function(ms, i, s, e) {
         let l = ms.capture[i].len;
         if (l === CAP_UNFINISHED) lauxlib.luaL_error(ms.L, lua.to_luastring("unfinished capture", true));
         if (l === CAP_POSITION)
-            lua.lua_pushinteger(ms.L, ms.src_init + 1);
+            lua.lua_pushinteger(ms.L, ms.capture[i].init - ms.src_init + 1);
         else
             lua.lua_pushlstring(ms.L, ms.src.slice(ms.capture[i].init), l);
     }
