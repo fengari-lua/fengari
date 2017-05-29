@@ -80,7 +80,7 @@ const utflen = function(L) {
 const pushutfchar = function(L, arg) {
     let code = lauxlib.luaL_checkinteger(L, arg);
     lauxlib.luaL_argcheck(L, 0 <= code && code <= MAXUNICODE, arg, lua.to_luastring("value out of range", true));
-    lua.lua_pushstring(L, lua.to_luastring(String.fromCharCode(code)));
+    lua.lua_pushstring(L, lua.to_luastring(String.fromCodePoint(code)));
 };
 
 /*
