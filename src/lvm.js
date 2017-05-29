@@ -186,6 +186,12 @@ const luaV_execute = function(L) {
                 gettable(L, upval, rc, ra);
                 break;
             }
+            case OCi.OP_GETTABLE: {
+                let rb = L.stack[RB(L, base, i)];
+                let rc = RKC(L, base, k, i);
+                gettable(L, rb, rc, ra);
+                break;
+            }
             case OCi.OP_SETTABUP: {
                 let upval = cl.upvals[i.A].v;
                 let rb = RKB(L, base, k, i);
@@ -193,12 +199,6 @@ const luaV_execute = function(L) {
                 settable(L, upval, rb, rc);
                 break;
             }
-            case OCi.OP_GETTABLE: {
-                let table = RKB(L, base, k, i);
-                let key = RKC(L, base, k, i);
-
-                gettable(L, table, key, ra);
-                break;
             }
             case OCi.OP_SETTABLE: {
                 let table = L.stack[ra];
