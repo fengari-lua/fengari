@@ -10,7 +10,8 @@ const sprintf = require('sprintf-js').sprintf;
 ** its only purpose is to stop Lua from consuming unlimited stack
 ** space (and to reserve some numbers for pseudo-indices).
 */
-const LUAI_MAXSTACK = 1000000;
+/* TODO: put back to 1000000. Node would go out of memory in some cases (e.g. travis) */
+const LUAI_MAXSTACK = 100000;
 
 /*
 @@ LUA_IDSIZE gives the maximum size for the description of the source
