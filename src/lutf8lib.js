@@ -217,11 +217,11 @@ const funcs = {
 };
 
 /* pattern to match a single UTF-8 character */
-const UTF8PATT = "[\0-\x7F\xC2-\xF4][\x80-\xBF]*";
+const UTF8PATT = [ 91, 0, 45, 127, 194, 45, 244, 93, 91, 128, 45, 191, 93, 42 ];
 
 const luaopen_utf8 = function(L) {
     lauxlib.luaL_newlib(L, funcs);
-    lua.lua_pushstring(L, lua.to_luastring(UTF8PATT));
+    lua.lua_pushstring(L, UTF8PATT);
     lua.lua_setfield(L, -2, lua.to_luastring("charpattern", true));
     return 1;
 };
