@@ -29,7 +29,8 @@ class Proto {
 
 class UpVal {
 
-    constructor() {
+    constructor(L) {
+        this.id = L.l_G.id_counter++;
         this.v = void 0; /* if open: reference to TValue on stack. if closed: TValue */
         this.vOff = void 0; /* if open: index on stack. if closed: undefined */
         this.refcount = 0;
@@ -59,7 +60,7 @@ const luaF_findupval = function(L, level) {
         p = p.open_next;
     }
     /* not found: create a new upvalue */
-    let uv = new UpVal();
+    let uv = new UpVal(L);
     /* link it to list of open upvalues */
     uv.open_next = p;
     if (prevp)

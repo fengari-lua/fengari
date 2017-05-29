@@ -7,6 +7,7 @@ const defs    = require('./defs.js');
 const ljstype = require('./ljstype.js');
 const ldebug  = require('./ldebug.js');
 const ldo     = require('./ldo.js');
+const lfunc   = require('./lfunc.js');
 const lstate  = require('./lstate.js');
 const lstring = require('./lstring.js');
 const ltable  = require('./ltable.js');
@@ -577,7 +578,8 @@ const luaO_pushvfstring = function(L, fmt, argp) {
                     v instanceof ltable.Table ||
                     v instanceof Udata ||
                     v instanceof LClosure ||
-                    v instanceof CClosure) {
+                    v instanceof CClosure ||
+                    v instanceof lfunc.UpVal) {
                     pushstr(L, defs.to_luastring("0x"+v.id.toString(16)));
                 } else {
                     /* user provided object. no id available */
