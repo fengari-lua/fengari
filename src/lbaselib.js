@@ -15,7 +15,7 @@ const luaB_print = function(L) {
         let s = lua.lua_tolstring(L, -1);
         if (s === null)
             return lauxlib.luaL_error(L, lua.to_luastring("'tostring' must return a string to 'print'", true));
-        if (i > 1) s = ["\t".charCodeAt(0)].concat(s);
+        if (i > 1) str.push("\t".charCodeAt(0));
         str = str.concat(s);
         lua.lua_pop(L, 1);
     }
