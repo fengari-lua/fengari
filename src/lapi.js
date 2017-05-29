@@ -1070,7 +1070,7 @@ const lua_len = function(L, idx) {
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
-const getupvalref = function(L, fidx, n, pf) {
+const getupvalref = function(L, fidx, n) {
     let fi = index2addr(L, fidx);
     assert(fi.ttisLclosure(), "Lua function expected");
     let f = fi.value;
@@ -1086,7 +1086,7 @@ const lua_upvalueid = function(L, fidx, n) {
     let fi = index2addr(L, fidx);
     switch (fi.ttype()) {
         case CT.LUA_TLCL: {  /* lua closure */
-            return getupvalref(L, fidx, n, null).upval;
+            return getupvalref(L, fidx, n).upval;
         }
         case CT.LUA_TCCL: {  /* C closure */
             let f = fi.value;
@@ -1103,10 +1103,12 @@ const lua_upvalueid = function(L, fidx, n) {
 const lua_upvaluejoin = function(L, fidx1, n1, fidx2, n2) {
     let ref1 = getupvalref(L, fidx1, n1);
     let ref2 = getupvalref(L, fidx2, n2);
-    let up1 = ref1.upvalOff;
+    let up1 = ref1.upval;
     let up2 = ref2.upval;
     let f1 = ref1.closure;
-    f1.upvals[up1] = up2;
+    assert(up1.refcount > 0);
+    up1.refcount--;
+    f1.upvals[ref1.upvalOff] = up2;
     up2.refcount++;
 };
 
