@@ -1113,8 +1113,8 @@ const luaV_concat = function(L, total) {
             toconcat[total-1] = L.stack[top-1].svalue();
             for (n = 1; n < total; n++) {
                 if (!tostring(L, top - n - 1)) {
-                        toconcat = toconcat.slice(total-n);
-                        break;
+                    toconcat = toconcat.slice(total-n);
+                    break;
                 }
                 toconcat[total-n-1] = L.stack[top - n - 1].svalue();
             }
