@@ -180,7 +180,7 @@ const to_jsstring = function(value, from, to) {
 
 const to_luastring_cache = {};
 
-const to_luastring = function(str, cache, maxBytesToWrite) {
+const to_luastring = function(str, cache) {
     assert(typeof str === "string", "to_luastring expect a js string");
 
     if (cache) {
@@ -188,46 +188,34 @@ const to_luastring = function(str, cache, maxBytesToWrite) {
         if (Array.isArray(cached)) return cached;
     }
 
-    maxBytesToWrite = maxBytesToWrite !== undefined ? maxBytesToWrite : llimit.MAX_INT;
     let outU8Array = [];
-
-    if (!(maxBytesToWrite > 0)) // Parameter maxBytesToWrite is not optional. Negative values, 0, null, undefined and false each don't write out any bytes.
-      return 0;
-
     let outIdx = 0;
-    let endIdx = maxBytesToWrite - 1; // -1 for string null terminator.
     for (let i = 0; i < str.length; ++i) {
         // See http://unicode.org/faq/utf_bom.html#utf16-3
         // For UTF8 byte structure, see http://en.wikipedia.org/wiki/UTF-8#Description and https://www.ietf.org/rfc/rfc2279.txt and https://tools.ietf.org/html/rfc3629
         let u = str.codePointAt(i);
         if (u >= 0xD800) i++; // If it was a surrogate pair it used up two bytes
         if (u <= 0x7F) {
-            if (outIdx >= endIdx) break;
             outU8Array[outIdx++] = u;
         } else if (u <= 0x7FF) {
-            if (outIdx + 1 >= endIdx) break;
             outU8Array[outIdx++] = 0xC0 | (u >> 6);
             outU8Array[outIdx++] = 0x80 | (u & 63);
         } else if (u <= 0xFFFF) {
-            if (outIdx + 2 >= endIdx) break;
             outU8Array[outIdx++] = 0xE0 | (u >> 12);
             outU8Array[outIdx++] = 0x80 | ((u >> 6) & 63);
             outU8Array[outIdx++] = 0x80 | (u & 63);
         } else if (u <= 0x1FFFFF) {
-            if (outIdx + 3 >= endIdx) break;
             outU8Array[outIdx++] = 0xF0 | (u >> 18);
             outU8Array[outIdx++] = 0x80 | ((u >> 12) & 63);
             outU8Array[outIdx++] = 0x80 | ((u >> 6) & 63);
             outU8Array[outIdx++] = 0x80 | (u & 63);
         } else if (u <= 0x3FFFFFF) {
-            if (outIdx + 4 >= endIdx) break;
             outU8Array[outIdx++] = 0xF8 | (u >> 24);
             outU8Array[outIdx++] = 0x80 | ((u >> 18) & 63);
             outU8Array[outIdx++] = 0x80 | ((u >> 12) & 63);
             outU8Array[outIdx++] = 0x80 | ((u >> 6) & 63);
             outU8Array[outIdx++] = 0x80 | (u & 63);
         } else {
-            if (outIdx + 5 >= endIdx) break;
             outU8Array[outIdx++] = 0xFC | (u >> 30);
             outU8Array[outIdx++] = 0x80 | ((u >> 24) & 63);
             outU8Array[outIdx++] = 0x80 | ((u >> 18) & 63);
