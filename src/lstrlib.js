@@ -623,7 +623,7 @@ const str_pack = function(L) {
                 totalsize += len + 1;
                 break;
             }
-            case KOption.Kpadding: b.push(LUAL_PACKPADBYTE);
+            case KOption.Kpadding: b.push(LUAL_PACKPADBYTE); /* fall through */
             case KOption.Kpaddalign: case KOption.Knop:
                 arg--;  /* undo increment */
                 break;
@@ -705,6 +705,7 @@ const str_packsize = function(L) {
             case KOption.Kstring:  /* strings with length count */
             case KOption.Kzstr:    /* zero-terminated string */
                 lauxlib.luaL_argerror(L, 1, lua.to_luastring("variable-length format", true));
+                /* call never return, but to avoid warnings: *//* fall through */
             default:  break;
         }
     }
@@ -1081,6 +1082,7 @@ const match = function(ms, s, p) {
                             }
                             case '+'.charCodeAt(0):  /* 1 or more repetitions */
                                 s++;  /* 1 match already done */
+                                /* fall through */
                             case '*'.charCodeAt(0):  /* 0 or more repetitions */
                                 s = max_expand(ms, s, p, ep);
                                 break;
