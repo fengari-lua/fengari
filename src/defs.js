@@ -278,7 +278,26 @@ module.exports.LUA_EXEC_DIR = LUA_EXEC_DIR;
 const LUA_VDIR = LUA_VERSION_MAJOR + "." + LUA_VERSION_MINOR;
 module.exports.LUA_VDIR = LUA_VDIR;
 
-if (!WEB && (require('os')).platform() === 'win32') {
+if (WEB) {
+    const LUA_DIRSEP = "/";
+    module.exports.LUA_DIRSEP = LUA_DIRSEP;
+
+    const LUA_LDIR = "./lua/" + LUA_VDIR + "/";
+    module.exports.LUA_LDIR = LUA_LDIR;
+
+    const LUA_CDIR = "./lua/" + LUA_VDIR + "/";
+    module.exports.LUA_CDIR = LUA_CDIR;
+
+    const LUA_PATH_DEFAULT =
+        LUA_LDIR + "?.lua;" + LUA_LDIR + "?/init.lua;" +
+        LUA_CDIR + "?.lua;" + LUA_CDIR + "?/init.lua;" +
+        "./?.lua;./?/init.lua";
+    module.exports.LUA_PATH_DEFAULT = LUA_PATH_DEFAULT;
+
+    const LUA_CPATH_DEFAULT =
+        LUA_CDIR + "?.js;" + LUA_CDIR + "loadall.js;./?.js";
+    module.exports.LUA_CPATH_DEFAULT = LUA_CPATH_DEFAULT;
+} else if (require('os').platform() === 'win32') {
     const LUA_DIRSEP = "\\";
     module.exports.LUA_DIRSEP = LUA_DIRSEP;
 
@@ -313,19 +332,19 @@ if (!WEB && (require('os')).platform() === 'win32') {
 
     const LUA_ROOT = "/usr/local/";
     module.exports.LUA_ROOT = LUA_ROOT;
-    
+
     const LUA_LDIR = LUA_ROOT + "share/lua/" + LUA_VDIR + "/";
     module.exports.LUA_LDIR = LUA_LDIR;
-    
+
     const LUA_CDIR = LUA_ROOT + "lib/lua/" + LUA_VDIR + "/";
     module.exports.LUA_CDIR = LUA_CDIR;
-    
+
     const LUA_PATH_DEFAULT =
         LUA_LDIR + "?.lua;" + LUA_LDIR + "?/init.lua;" +
         LUA_CDIR + "?.lua;" + LUA_CDIR + "?/init.lua;" +
         "./?.lua;./?/init.lua";
     module.exports.LUA_PATH_DEFAULT = LUA_PATH_DEFAULT;
-    
+
     const LUA_CPATH_DEFAULT =
         LUA_CDIR + "?.so;" + LUA_CDIR + "loadall.so;./?.so";
     module.exports.LUA_CPATH_DEFAULT = LUA_CPATH_DEFAULT;
