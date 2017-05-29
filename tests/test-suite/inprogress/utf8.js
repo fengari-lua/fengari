@@ -355,30 +355,8 @@ test("[test-suite] utf8: minimum and maximum values for each sequence size", fun
 
         x = "日本語a-4\\0éó"
         check(x, {26085, 26412, 35486, 97, 45, 52, 0, 233, 243})
-    `, L;
-    
-    t.plan(2);
 
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-});
-
-
-test("[test-suite] utf8: Supplementary Characters", function (t) {
-    let luaCode = `
+        -- Supplementary Characters
         check("𣲷𠜎𠱓𡁻𠵼ab𠺢",
               {0x23CB7, 0x2070E, 0x20C53, 0x2107B, 0x20D7C, 0x61, 0x62, 0x20EA2,})
 
@@ -397,7 +375,7 @@ test("[test-suite] utf8: Supplementary Characters", function (t) {
           end
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
