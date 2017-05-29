@@ -654,8 +654,7 @@ const lua_tolstring = function(L, idx) {
         if (!lvm.cvt2str(o)) {  /* not convertible? */
             return null;
         }
-        /* TODO: this should modify number on the stack */
-        return lobject.luaO_tostring(L, o).getstr();
+        lobject.luaO_tostring(L, o);
     }
     return o.svalue();
 };
@@ -669,8 +668,7 @@ const lua_toljsstring = function(L, idx) {
         if (!lvm.cvt2str(o)) {  /* not convertible? */
             return null;
         }
-        /* TODO: this should modify number on the stack */
-        return defs.to_jsstring(lobject.luaO_tostring(L, o).getstr());
+        lobject.luaO_tostring(L, o);
     }
     return o.jsstring();
 };

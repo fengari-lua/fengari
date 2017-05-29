@@ -530,7 +530,7 @@ const luaO_tostring = function(L, obj) {
             buff.push(char['0']);  /* adds '.0' to result */
         }
     }
-    return lstring.luaS_bless(L, buff);
+    obj.setsvalue(lstring.luaS_bless(L, buff));
 };
 
 const pushstr = function(L, str) {
@@ -563,11 +563,13 @@ const luaO_pushvfstring = function(L, fmt, argp) {
             case char['d']:
             case char['I']:
                 ldo.luaD_inctop(L);
-                setsvalue2s(L, L.top-1, luaO_tostring(L, new TValue(CT.LUA_TNUMINT, argp[a++])));
+                L.stack[L.top-1].setivalue(argp[a++]);
+                luaO_tostring(L, L.stack[L.top-1]);
                 break;
             case char['f']:
                 ldo.luaD_inctop(L);
-                setsvalue2s(L, L.top-1, luaO_tostring(L, new TValue(CT.LUA_TNUMFLT, argp[a++])));
+                L.stack[L.top-1].setfltvalue(argp[a++]);
+                luaO_tostring(L, L.stack[L.top-1]);
                 break;
             case char['p']:
                 let v = argp[a++];

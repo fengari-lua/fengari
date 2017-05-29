@@ -1080,7 +1080,7 @@ const tostring = function(L, i) {
     if (o.ttisstring()) return true;
 
     if (cvt2str(o)) {
-        lobject.setsvalue2s(L, i, lobject.luaO_tostring(L, o));
+        lobject.luaO_tostring(L, o);
         return true;
     }
 
