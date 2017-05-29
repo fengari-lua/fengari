@@ -21,18 +21,17 @@ const u_posrelat = function(pos, len) {
 /*
 ** Decode one UTF-8 sequence, returning NULL if byte sequence is invalid.
 */
-const utf8_decode = function(s) {
-    let limits = [0xFF, 0x7F, 0x7FF, 0xFFFF];
-    let c = s[0];
+const limits = [0xFF, 0x7F, 0x7FF, 0xFFFF];
+const utf8_decode = function(s, pos) {
+    let c = s[pos];
     let res = 0;  /* final result */
-    let pos = 0;
     if (c < 0x80)  /* ascii? */
         res = c;
     else {
         let count = 0;  /* to count number of continuation bytes */
         while (c & 0x40) {  /* still have continuation bytes? */
-            let cc = s[++count];  /* read next byte */
-            if ((cc & 0xC0) != 0x80)  /* not a continuation byte? */
+            let cc = s[pos + (++count)];  /* read next byte */
+            if ((cc & 0xC0) !== 0x80)  /* not a continuation byte? */
                 return null;  /* invalid byte sequence */
             res = (res << 6) | (cc & 0x3F);  /* add lower 6 bits from cont. byte */
             c <<= 1;  /* to test next bit */
@@ -40,12 +39,10 @@ const utf8_decode = function(s) {
         res |= ((c & 0x7F) << (count * 5));  /* add first byte */
         if (count > 3 || res > MAXUNICODE || res <= limits[count])
             return null;  /* invalid byte sequence */
-        s = s.slice(count);  /* skip continuation bytes read */
-        pos += count;
+        pos += count;  /* skip continuation bytes read */
     }
 
     return {
-        string: s.slice(1),  /* +1 to include first byte */
         code: res,
         pos: pos + 1
     };
@@ -63,19 +60,17 @@ const utflen = function(L) {
     let posi = u_posrelat(lauxlib.luaL_optinteger(L, 2, 1), len);
     let posj = u_posrelat(lauxlib.luaL_optinteger(L, 3, -1), len);
 
-    lauxlib.luaL_argcheck(L, 1 <= posi && --posi <= len, 2, "initial position out of string");
-    lauxlib.luaL_argcheck(L, --posj < len, 3, "final position out of string");
+    lauxlib.luaL_argcheck(L, 1 <= posi && --posi <= len, 2, lua.to_luastring("initial position out of string"));
+    lauxlib.luaL_argcheck(L, --posj < len, 3, lua.to_luastring("final position out of string"));
 
     while (posi <= posj) {
-        let dec = utf8_decode(s.slice(posi));
-        let s1 = dec ? dec.string : null;
-        if (s1 === null) {
-            /* conversion error? */
+        let dec = utf8_decode(s, posi);
+        if (dec === null) { /* conversion error? */
             lua.lua_pushnil(L);  /* return nil ... */
             lua.lua_pushinteger(L, posi + 1);  /* ... and current position */
             return 2;
         }
-        posi = s.length - s1.length;
+        posi = dec.pos;
         n++;
     }
     lua.lua_pushinteger(L, n);
@@ -170,13 +165,12 @@ const codepoint = function(L) {
     let n = (pose - posi) + 1;
     lauxlib.luaL_checkstack(L, n, lua.to_luastring("string slice too long", true));
     n = 0;
-    for (s = s.slice(posi - 1); n < pose - posi;) {
-        let dec = utf8_decode(s);
+    for (posi -= 1; posi < pose;) {
+        let dec = utf8_decode(s, posi);
         if (dec === null)
             return lauxlib.luaL_error(L, lua.to_luastring("invalid UTF-8 code", true));
-        s = dec.string;
-        let code = dec.code;
-        lua.lua_pushinteger(L, code);
+        lua.lua_pushinteger(L, dec.code);
+        posi = dec.pos;
         n++;
     }
     return n;
@@ -197,13 +191,11 @@ const iter_aux = function(L) {
     if (n >= len)
         return 0;  /* no more codepoints */
     else {
-        let dec = utf8_decode(s.slice(n));
-        let code = dec ? dec.code : null;
-        let next = dec ? dec.string : null;
-        if (next === null || iscont(next[0]))
+        let dec = utf8_decode(s, n);
+        if (dec === null || iscont(s[dec.pos]))
             return lauxlib.luaL_error(L, lua.to_luastring("invalid UTF-8 code", true));
         lua.lua_pushinteger(L, n + 1);
-        lua.lua_pushinteger(L, code);
+        lua.lua_pushinteger(L, dec.code);
         return 2;
     }
 };
