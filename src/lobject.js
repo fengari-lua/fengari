@@ -313,7 +313,7 @@ const luaO_chunkid = function(source, bufflen) {
             out = source.slice(1);
         else {  /* add '...' before rest of name */
             bufflen -= RETS.length;
-            out = RETS.concat(source.slice(1, l - bufflen));
+            out = RETS.concat(source.slice(1 + l - bufflen));
         }
     } else {  /* string; format as [string "source"] */
         let nli = source.indexOf(char['\n']);  /* find first new line (if any) */
