@@ -1342,7 +1342,7 @@ const test_then_block = function(ls, escapelist) {
         lcode.luaK_goiffalse(ls.fs, v);  /* will jump to label if condition is true */
         enterblock(fs, bl, false);  /* must enter block before 'goto' */
         gotostat(ls, v.t);   /* handle goto/break */
-        skipnoopstat(ls);  /* skip other no-op statements */
+        while (testnext(ls, char[';'])) {}  /* skip colons */
         if (block_follow(ls, 0)) {  /* 'goto' is the entire block? */
             leaveblock(fs);
             return escapelist;  /* and that is it */
