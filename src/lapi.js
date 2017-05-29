@@ -1108,8 +1108,8 @@ const lua_upvaluejoin = function(L, fidx1, n1, fidx2, n2) {
     let up1 = ref1.upvalOff;
     let up2 = ref2.upval;
     let f1 = ref1.closure;
-
     f1.upvals[up1] = up2;
+    up2.refcount++;
 };
 
 // This functions are only there for compatibility purposes
