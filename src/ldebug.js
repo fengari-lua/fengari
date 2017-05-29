@@ -186,13 +186,13 @@ const collectvalidlines = function(L, f) {
         L.top++;
         assert(L.top <= L.ci.top, "stack overflow");
     } else {
-        let lineinfo = f.l.p.lineinfo;
+        let lineinfo = f.p.lineinfo;
         let t = ltable.luaH_new(L);
         L.stack[L.top] = new lobject.TValue(CT.LUA_TTABLE, t);
         L.top++;
         assert(L.top <= L.ci.top, "stack overflow");
         let v = new lobject.TValue(CT.LUA_TBOOLEAN, true);
-        for (let i = 0; i < f.l.p.length; i++)
+        for (let i = 0; i < lineinfo.length; i++)
             ltable.luaH_setint(t, lineinfo[i], v);
     }
 };
