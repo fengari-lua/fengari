@@ -71,11 +71,11 @@
     - [x] `strings.lua` (34/34)
     - [x] `utf8.lua` (18/18)
     - [x] `vararg.lua` (8/8)
+    - [ ] `db.lua` (46/54)
     - [ ] `pm.lua` (27/38)
     - [ ] `tpack.lua` (20/32)
     - [ ] `attrib.lua`
     - [ ] `big.lua`
-    - [ ] `db.lua`
     - [ ] `verybig.lua`
 - [ ] DOM API binding: [https://github.com/fengari-lua/fengari-interop](https://github.com/fengari-lua/fengari-interop)
 
