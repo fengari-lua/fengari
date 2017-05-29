@@ -69,10 +69,10 @@
     - [x] `nextvar.lua` (44/44)
     - [x] `sort.lua` (24/24)
     - [x] `strings.lua` (34/34)
+    - [x] `utf8.lua` (18/18)
     - [x] `vararg.lua` (8/8)
     - [ ] `pm.lua` (27/38)
     - [ ] `tpack.lua` (20/32)
-    - [ ] `utf8.lua` (14/20)
     - [ ] `attrib.lua`
     - [ ] `big.lua`
     - [ ] `db.lua`
