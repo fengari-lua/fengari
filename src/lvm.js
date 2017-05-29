@@ -175,11 +175,6 @@ const luaV_execute = function(L) {
                 lobject.setobj2s(L, ra, cl.upvals[b].v);
                 break;
             }
-            case OCi.OP_SETUPVAL: {
-                let uv = cl.upvals[i.B];
-                uv.v.setfrom(L.stack[ra]);
-                break;
-            }
             case OCi.OP_GETTABUP: {
                 let upval = cl.upvals[i.B].v;
                 let rc = RKC(L, base, k, i);
@@ -199,6 +194,10 @@ const luaV_execute = function(L) {
                 settable(L, upval, rb, rc);
                 break;
             }
+            case OCi.OP_SETUPVAL: {
+                let uv = cl.upvals[i.B];
+                uv.v.setfrom(L.stack[ra]);
+                break;
             }
             case OCi.OP_SETTABLE: {
                 let table = L.stack[ra];
