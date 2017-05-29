@@ -359,8 +359,6 @@ const base_funcs = {
 // Only with Node
 if (!WEB) {
 
-    const fs = require('fs');
-
     const luaB_loadfile = function(L) {
         let fname = lauxlib.luaL_optstring(L, 1, null);
         let mode = lauxlib.luaL_optstring(L, 2, null);

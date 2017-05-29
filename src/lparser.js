@@ -578,11 +578,10 @@ const leaveblock = function(fs) {
 };
 
 const close_func = function(ls) {
-    let L = ls.L;
     let fs = ls.fs;
-    let f = fs.f;
     lcode.luaK_ret(fs, 0, 0);  /* final return */
     leaveblock(fs);
+    assert(fs.bl === null);
     ls.fs = fs.prev;
 };
 

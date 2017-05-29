@@ -193,9 +193,8 @@ const to_luastring = function(str, cache, maxBytesToWrite) {
 
     if (!(maxBytesToWrite > 0)) // Parameter maxBytesToWrite is not optional. Negative values, 0, null, undefined and false each don't write out any bytes.
       return 0;
-  
+
     let outIdx = 0;
-    let startIdx = 0;
     let endIdx = maxBytesToWrite - 1; // -1 for string null terminator.
     for (let i = 0; i < str.length; ++i) {
         // Gotcha: charCodeAt returns a 16-bit word that is a UTF-16 encoded code unit, not a Unicode code point of the character! So decode UTF16->UTF32->UTF8.

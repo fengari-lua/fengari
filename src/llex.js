@@ -413,7 +413,7 @@ const read_string = function(ls, del, seminfo) {
                 let will;
                 let c;
                 switch(ls.current) {
-                    case char['a']: c = char['\a']; will = 'read_save'; break;
+                    case char['a']: c = 7 /* \a isn't valid JS */; will = 'read_save'; break;
                     case char['b']: c = char['\b']; will = 'read_save'; break;
                     case char['f']: c = char['\f']; will = 'read_save'; break;
                     case char['n']: c = char['\n']; will = 'read_save'; break;

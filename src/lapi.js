@@ -954,7 +954,7 @@ const lua_callk = function(L, nargs, nresults, ctx, k) {
     assert(k === null || !(L.ci.callstatus & lstate.CIST_LUA), "cannot use continuations inside hooks");
     assert(nargs + 1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     assert(L.status === TS.LUA_OK, "cannot do calls on non-normal thread");
-    assert(nargs === defs.LUA_MULTRET || (L.ci.top - L.top >= nargs - nresults, "results from function overflow current stack size"));
+    assert(nargs === defs.LUA_MULTRET || (L.ci.top - L.top >= nargs - nresults), "results from function overflow current stack size");
 
     let func = L.top - (nargs + 1);
     if (k !== null && L.nny === 0) { /* need to prepare continuation? */
@@ -976,7 +976,7 @@ const lua_call = function(L, n, r) {
 const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
     assert(nargs + 1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     assert(L.status === TS.LUA_OK, "cannot do calls on non-normal thread");
-    assert(nargs === defs.LUA_MULTRET || (L.ci.top - L.top >= nargs - nresults, "results from function overflow current stack size"));
+    assert(nargs === defs.LUA_MULTRET || (L.ci.top - L.top >= nargs - nresults), "results from function overflow current stack size");
 
     let c = {
         func: null,
