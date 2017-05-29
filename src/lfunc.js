@@ -30,19 +30,14 @@ class Proto {
 class UpVal {
 
     constructor() {
-        this.L = null; /* Keep track of the thread it comes from */
-        this.v = null; /* if open: stack index. if closed: null (find it in this.value) */
-        this.open_next = null; /* linked list (when open) */
+        this.v = void 0; /* if open: reference to TValue on stack. if closed: TValue */
+        this.vOff = void 0; /* if open: index on stack. if closed: undefined */
         this.refcount = 0;
-        this.value = null; /* the TValue (when closed) */
-    }
-
-    val() {
-        return this.v !== null ? this.L.stack[this.v] : this.value;
+        this.open_next = null; /* linked list (when open) */
     }
 
     isopen() {
-        return this.v !== null;
+        return this.vOff !== void 0;
     }
 
 }
@@ -56,9 +51,9 @@ const luaF_newLclosure = function(L, n) {
 const luaF_findupval = function(L, level) {
     let prevp;
     let p = L.openupval;
-    while (p !== null && p.v >= level) {
+    while (p !== null && p.vOff >= level) {
         assert(p.isopen());
-        if (p.v === level) /* found a corresponding upvalue? */
+        if (p.vOff === level) /* found a corresponding upvalue? */
             return p; /* return it */
         prevp = p;
         p = p.open_next;
@@ -71,23 +66,25 @@ const luaF_findupval = function(L, level) {
         prevp.open_next = uv;
     else
         L.openupval = uv;
-    /* current value lives in the stack */
-    uv.L = L;
-    uv.v = level;
+    uv.v = L.stack[level]; /* current value lives in the stack */
+    uv.vOff = level;
     return uv;
 };
 
 const luaF_close = function(L, level) {
-    while (L.openupval !== null && L.openupval.v >= level) {
+    while (L.openupval !== null && L.openupval.vOff >= level) {
         let uv = L.openupval;
         assert(uv.isopen());
         L.openupval = uv.open_next; /* remove from 'open' list */
-        if (uv.refcount > 0) {
-            let from = uv.L.stack[uv.v];
-            uv.L = null;
-            uv.v = null;
-            uv.value = new lobject.TValue(from.type, from.value);
+        if (uv.refcount === 0) { /* no references? */
+            /* free upvalue */
+            uv.v = void 0;
+            uv.open_next = null;
+        } else {
+            let from = uv.v;
+            uv.v = new lobject.TValue(from.type, from.value);
         }
+        uv.vOff = void 0;
     }
 };
 
@@ -98,7 +95,7 @@ const luaF_initupvals = function(L, cl) {
     for (let i = 0; i < cl.nupvalues; i++) {
         let uv = new UpVal(L);
         uv.refcount = 1;
-        uv.value = new lobject.TValue(CT.LUA_TNIL, null);
+        uv.v = new lobject.TValue(CT.LUA_TNIL, null);
         cl.upvals[i] = uv;
     }
 };

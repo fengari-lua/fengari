@@ -538,7 +538,7 @@ const aux_upvalue = function(L, fi, n) {
             let name = p.upvalues[n-1].name;
             return {
                 name: name ? name.getstr() : defs.to_luastring("(*no name)", true),
-                val: f.upvals[n-1].val()
+                val: f.upvals[n-1].v
             };
         }
         default: return null;  /* not a closure */
@@ -926,7 +926,7 @@ const lua_load = function(L, reader, data, chunkname, mode) {
             /* get global table from registry */
             let gt = ltable.luaH_getint(L.l_G.l_registry.value, defs.LUA_RIDX_GLOBALS);
             /* set global table as 1st upvalue of 'f' (may be LUA_ENV) */
-            f.upvals[0].value.setfrom(gt);
+            f.upvals[0].v.setfrom(gt);
         }
     }
     return status;

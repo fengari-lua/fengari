@@ -171,32 +171,26 @@ const luaV_execute = function(L) {
                 break;
             }
             case OCi.OP_GETUPVAL: {
-                let o = cl.upvals[i.B].val();
-                lobject.setobj2s(L, ra, o);
+                let b = i.B;
+                lobject.setobj2s(L, ra, cl.upvals[b].v);
                 break;
             }
             case OCi.OP_SETUPVAL: {
                 let uv = cl.upvals[i.B];
-                if (uv.isopen()) {
-                    uv.L.stack[uv.v].setfrom(L.stack[ra]);
-                } else {
-                    uv.value.setfrom(L.stack[ra]);
-                }
+                uv.v.setfrom(L.stack[ra]);
                 break;
             }
             case OCi.OP_GETTABUP: {
-                let table = cl.upvals[i.B].val();
-                let key = RKC(L, base, k, i);
-
-                gettable(L, table, key, ra);
+                let upval = cl.upvals[i.B].v;
+                let rc = RKC(L, base, k, i);
+                gettable(L, upval, rc, ra);
                 break;
             }
             case OCi.OP_SETTABUP: {
-                let table = cl.upvals[i.A].val();
-                let key = RKB(L, base, k, i);
-                let v = RKC(L, base, k, i);
-
-                settable(L, table, key, v);
+                let upval = cl.upvals[i.A].v;
+                let rb = RKB(L, base, k, i);
+                let rc = RKC(L, base, k, i);
+                settable(L, upval, rb, rc);
                 break;
             }
             case OCi.OP_GETTABLE: {
