@@ -151,13 +151,15 @@ const lua_getlocal = function(L, ar, n) {
 };
 
 const lua_setlocal = function(L, ar, n) {
+    let name;
     swapextra(L);
     let local = findlocal(L, ar.i_ci, n);
-    let name = local.name;
-    let pos = local.pos;
-    if (name) {
-        lobject.setobjs2s(L, pos, L.top - 1);
+    if (local) {
+        name = local.name;
+        lobject.setobjs2s(L, local.pos, L.top - 1);
         delete L.stack[--L.top];  /* pop value */
+    } else {
+        name = null;
     }
     swapextra(L);
     return name;
