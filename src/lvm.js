@@ -710,11 +710,11 @@ const luaV_execute = function(L) {
                     ldo.luaD_checkstack(L, n);
                     if (L.top >= ra+n) {
                         while (L.top > ra+n)
-                                delete L.stack[--L.top];
+                            delete L.stack[--L.top];
                     } else {
                         while (L.top < ra+n) {
-                                L.stack[L.top] = new lobject.TValue();
-                                L.top++;
+                            L.stack[L.top] = new lobject.TValue();
+                            L.top++;
                         }
                     }
                     assert(L.top == ra + n);
