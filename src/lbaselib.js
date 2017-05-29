@@ -21,8 +21,10 @@ const luaB_print = function(L) {
     }
 
     // Don't use console.log if Node
-    if (process.stdout) process.stdout.write(lua.to_jsstring(str) + "\n");
-    else console.log(lua.to_jsstring(str));
+    if (process.stdout) {
+        str.push("\n".charCodeAt(0));
+        process.stdout.write(Buffer.from(str));
+    } else console.log(lua.to_jsstring(str));
     return 0;
 };
 
