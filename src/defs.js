@@ -197,11 +197,10 @@ const to_luastring = function(str, cache, maxBytesToWrite) {
     let outIdx = 0;
     let endIdx = maxBytesToWrite - 1; // -1 for string null terminator.
     for (let i = 0; i < str.length; ++i) {
-        // Gotcha: charCodeAt returns a 16-bit word that is a UTF-16 encoded code unit, not a Unicode code point of the character! So decode UTF16->UTF32->UTF8.
         // See http://unicode.org/faq/utf_bom.html#utf16-3
         // For UTF8 byte structure, see http://en.wikipedia.org/wiki/UTF-8#Description and https://www.ietf.org/rfc/rfc2279.txt and https://tools.ietf.org/html/rfc3629
-        let u = str.charCodeAt(i); // possibly a lead surrogate
-        if (u >= 0xD800 && u <= 0xDFFF) u = 0x10000 + ((u & 0x3FF) << 10) | (str.charCodeAt(++i) & 0x3FF);
+        let u = str.codePointAt(i);
+        if (u >= 0xD800) i++; // If it was a surrogate pair it used up two bytes
         if (u <= 0x7F) {
             if (outIdx >= endIdx) break;
             outU8Array[outIdx++] = u;
