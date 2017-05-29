@@ -544,7 +544,7 @@ const varinfo = function(L, o) {
 
 const luaG_typeerror = function(L, o, op) {
     let t = ltm.luaT_objtypename(L, o);
-    luaG_runerror(L, defs.to_luastring(`attempt to ${defs.to_jsstring(op)} a ${defs.to_jsstring(t)} value${defs.to_jsstring(varinfo(L, o))}`));
+    luaG_runerror(L, defs.to_luastring("attempt to %s a %s value%s", true), op, t, varinfo(L, o));
 };
 
 const luaG_concaterror = function(L, p1, p2) {
@@ -565,9 +565,9 @@ const luaG_ordererror = function(L, p1, p2) {
     let t1 = ltm.luaT_objtypename(L, p1);
     let t2 = ltm.luaT_objtypename(L, p2);
     if (t1.join() === t2.join())
-        luaG_runerror(L, defs.to_luastring(`attempt to compare two ${defs.to_jsstring(t1)} values`));
+        luaG_runerror(L, defs.to_luastring("attempt to compare two %s values", true), t1);
     else
-        luaG_runerror(L, defs.to_luastring(`attempt to compare ${defs.to_jsstring(t1)} with ${defs.to_jsstring(t2)}`));
+        luaG_runerror(L, defs.to_luastring("attempt to compare %s with %s", true), t1, t2);
 };
 
 /* add src:line information to 'msg' */
@@ -607,7 +607,7 @@ const luaG_tointerror = function(L, p1, p2) {
     let temp = lvm.tointeger(p1);
     if (temp === false)
         p2 = p1;
-    luaG_runerror(L, defs.to_luastring(`number${defs.to_jsstring(varinfo(L, p2))} has no integer representation`));
+    luaG_runerror(L, defs.to_luastring("number%s has no integer representation", true), varinfo(L, p2));
 };
 
 const luaG_traceexec = function(L) {

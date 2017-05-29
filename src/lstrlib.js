@@ -1107,7 +1107,7 @@ const push_onecapture = function(ms, i, s, e) {
         if (i === 0)
             lua.lua_pushlstring(ms.L, ms.src.slice(s), e - s);  /* add whole match */
         else
-            lauxlib.luaL_error(ms.L, lua.to_luastring(`invalid capture index %${i + 1}`));
+            lauxlib.luaL_error(ms.L, lua.to_luastring("invalid capture index %%%d"), i + 1);
     } else {
         let l = ms.capture[i].len;
         if (l === CAP_UNFINISHED) lauxlib.luaL_error(ms.L, lua.to_luastring("unfinished capture", true));
