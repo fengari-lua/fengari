@@ -92,7 +92,7 @@ const opts = ["stop", "restart", "collect",
 "isrunning"].map((e) => lua.to_luastring(e));
 const luaB_collectgarbage = function(L) {
     lauxlib.luaL_checkoption(L, 1, lua.to_luastring("collect"), opts);
-    lauxlib.luaL_checkinteger(L, 2);
+    lauxlib.luaL_optinteger(L, 2, 0);
     lauxlib.luaL_error(L, lua.to_luastring("lua_gc not implemented"));
 };
 
