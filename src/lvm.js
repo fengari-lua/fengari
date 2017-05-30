@@ -627,7 +627,7 @@ const luaV_execute = function(L) {
                 break;
             }
             case OCi.OP_EXTRAARG: {
-                break;
+                throw Error("invalid opcode");
             }
         }
     }
