@@ -404,7 +404,8 @@ const lua_settable = function(L, idx) {
 
     let t = index2addr(L, idx);
     lvm.settable(L, t, L.stack[L.top - 2], L.stack[L.top - 1]);
-    L.top -= 2;
+    delete L.stack[--L.top];
+    delete L.stack[--L.top];
 };
 
 const lua_setfield = function(L, idx, k) {
