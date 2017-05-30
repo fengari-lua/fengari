@@ -3,7 +3,6 @@
 
 const assert  = require('assert');
 const luaconf = require('./luaconf.js');
-const llimit  = require('./llimit.js');
 
 // To avoid charCodeAt everywhere
 const char = [];
@@ -174,8 +173,6 @@ const to_jsstring = function(value, from, to) {
             str += String.fromCharCode(0xD800 | (ch >> 10), 0xDC00 | (ch & 0x3FF));
         }
     }
-
-    return str;
 };
 
 const to_luastring_cache = {};
