@@ -151,13 +151,7 @@ const lua_settop = function(L, idx) {
         assert(-(idx + 1) <= L.top - (func + 1), "invalid new top");
         newtop = L.top + idx + 1; /* 'subtract' index (index is negative) */
     }
-    if (L.top < newtop) {
-        while (L.top < newtop)
-            L.stack[L.top++] = new TValue(CT.LUA_TNIL, null);
-    } else {
-        while (L.top > newtop)
-            delete L.stack[--L.top];
-    }
+    ldo.adjust_top(L, newtop);
 };
 
 const lua_pop = function(L, n) {

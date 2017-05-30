@@ -21,6 +21,16 @@ const lzio    = require('./lzio.js');
 const CT = defs.constant_types;
 const TS = defs.thread_status;
 
+const adjust_top = function(L, newtop) {
+    if (L.top < newtop) {
+        while (L.top < newtop)
+            L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
+    } else {
+        while (L.top > newtop)
+            delete L.stack[--L.top];
+    }
+};
+
 const seterrorobj = function(L, errcode, oldtop) {
     let current_top = L.top;
 
@@ -159,13 +169,7 @@ const luaD_precall = function(L, off, nresults) {
             ci.func = func;
             ci.l_base = base;
             ci.top = base + fsize;
-            if (L.top < ci.top) {
-                while (L.top < ci.top)
-                    L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
-            } else {
-                while (L.top > ci.top)
-                    delete L.stack[--L.top];
-            }
+            adjust_top(L, ci.top);
             ci.l_code = p.code;
             ci.l_savedpc = 0;
             ci.callstatus = lstate.CIST_LUA;
@@ -263,13 +267,7 @@ const luaD_hook = function(L, event, line) {
         assert(!L.allowhook);
         L.allowhook = 1;
         ci.top = ci_top;
-        if (L.top < top) {
-            while (L.top < top)
-                L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
-        } else {
-            while (L.top > top)
-                delete L.stack[--L.top];
-        }
+        adjust_top(L, top);
         ci.callstatus &= ~lstate.CIST_HOOKED;
     }
 };
@@ -693,6 +691,7 @@ const luaD_protectedparser = function(L, z, name, mode) {
     return status;
 };
 
+module.exports.adjust_top           = adjust_top;
 module.exports.luaD_call            = luaD_call;
 module.exports.luaD_callnoyield     = luaD_callnoyield;
 module.exports.luaD_checkstack      = luaD_checkstack;

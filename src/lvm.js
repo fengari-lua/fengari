@@ -62,39 +62,17 @@ const luaV_finishOp = function(L) {
             }
             /* move final result to final position */
             lobject.setobjs2s(L, ci.l_base + inst.A, L.top - 1);
-            /* restore top */
-            if (L.top < ci.top) {
-                while (L.top < ci.top)
-                    L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
-            } else {
-                while (L.top > ci.top)
-                    delete L.stack[--L.top];
-            }
+            ldo.adjust_top(L, ci.top);  /* restore top */
             break;
         }
         case OCi.OP_TFORCALL: {
             assert(ci.l_code[ci.l_savedpc].opcode === OCi.OP_TFORLOOP);
-            /* correct top */
-            if (L.top < ci.top) {
-                while (L.top < ci.top)
-                    L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
-            } else {
-                while (L.top > ci.top)
-                    delete L.stack[--L.top];
-            }
+            ldo.adjust_top(L, ci.top);  /* correct top */
             break;
         }
         case OCi.OP_CALL: {
-            if (inst.C - 1 >= 0) { /* nresults >= 0? */
-                /* adjust results */
-                if (L.top < ci.top) {
-                    while (L.top < ci.top)
-                        L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
-                } else {
-                    while (L.top > ci.top)
-                        delete L.stack[--L.top];
-                }
-            }
+            if (inst.C - 1 >= 0)  /* nresults >= 0? */
+                ldo.adjust_top(L, ci.top);  /* adjust results */
             break;
         }
     }
@@ -424,14 +402,7 @@ const luaV_execute = function(L) {
                 luaV_concat(L, c - b + 1);
                 let rb = base + b;
                 lobject.setobjs2s(L, ra, rb);
-                /* restore top */
-                if (L.top < ci.top) {
-                    while (L.top < ci.top)
-                        L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
-                } else {
-                    while (L.top > ci.top)
-                        delete L.stack[--L.top];
-                }
+                ldo.adjust_top(L, ci.top); /* restore top */
                 break;
             }
             case OCi.OP_JMP: {
@@ -480,27 +451,10 @@ const luaV_execute = function(L) {
             case OCi.OP_CALL: {
                 let b = i.B;
                 let nresults = i.C - 1;
-
-                if (b !== 0) {
-                    if (L.top < ra+b) {
-                        while (L.top < ra+b)
-                            L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
-                    } else {
-                        while (L.top > ra+b)
-                            delete L.stack[--L.top];
-                    }
-                }
-
+                if (b !== 0) ldo.adjust_top(L, ra+b);  /* else previous instruction set top */
                 if (ldo.luaD_precall(L, ra, nresults)) {
-                    if (nresults >= 0) {
-                        if (L.top < ci.top) {
-                            while (L.top < ci.top)
-                                L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
-                        } else {
-                            while (L.top > ci.top)
-                                delete L.stack[--L.top];
-                        }
-                    }
+                    if (nresults >= 0)
+                        ldo.adjust_top(L, ci.top);  /* adjust results */
                 } else {
                     ci = L.ci;
                     continue newframe;
@@ -510,15 +464,7 @@ const luaV_execute = function(L) {
             }
             case OCi.OP_TAILCALL: {
                 let b = i.B;
-                if (b !== 0) {
-                    if (L.top < ra+b) {
-                        while (L.top < ra+b)
-                            L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
-                    } else {
-                        while (L.top > ra+b)
-                            delete L.stack[--L.top];
-                    }
-                } /* else previous instruction set top */
+                if (b !== 0) ldo.adjust_top(L, ra+b);  /* else previous instruction set top */
                 if (ldo.luaD_precall(L, ra, LUA_MULTRET)) { // JS function
                 } else {
                     /* tail call: put called frame (n) in place of caller one (o) */
@@ -533,13 +479,7 @@ const luaV_execute = function(L) {
                         lobject.setobjs2s(L, ofuncOff + aux, nfuncOff + aux);
                     oci.l_base = ofuncOff + (nci.l_base - nfuncOff);
                     oci.top = ofuncOff + (L.top - nfuncOff);
-                    if (L.top < nci.top) {
-                        while (L.top < oci.top)
-                            L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
-                    } else {
-                        while (L.top > oci.top)
-                            delete L.stack[--L.top];
-                    }
+                    ldo.adjust_top(L, oci.top);  /* correct top */
                     oci.l_code = nci.l_code;
                     oci.l_savedpc = nci.l_savedpc;
                     oci.callstatus |= lstate.CIST_TAIL;
@@ -560,15 +500,7 @@ const luaV_execute = function(L) {
                     return; /* external invocation: return */
                 /* invocation via reentry: continue execution */
                 ci = L.ci;
-                if (b) {
-                    if (L.top < ci.top) {
-                        while (L.top < ci.top)
-                            L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
-                    } else {
-                        while (L.top > ci.top)
-                            delete L.stack[--L.top];
-                    }
-                }
+                if (b) ldo.adjust_top(L, ci.top);
                 assert(ci.callstatus & lstate.CIST_LUA);
                 assert(ci.l_code[ci.l_savedpc - 1].opcode === OCi.OP_CALL);
                 continue newframe;
@@ -628,22 +560,9 @@ const luaV_execute = function(L) {
                 lobject.setobjs2s(L, cb+2, ra+2);
                 lobject.setobjs2s(L, cb+1, ra+1);
                 lobject.setobjs2s(L, cb, ra);
-                /* func. + 2 args (state and index) */
-                if (L.top < cb + 3) {
-                    while (L.top < cb + 3)
-                        L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
-                } else {
-                    while (L.top > cb + 3)
-                        delete L.stack[--L.top];
-                }
+                ldo.adjust_top(L, cb+3);  /* func. + 2 args (state and index) */
                 ldo.luaD_call(L, cb, i.C);
-                if (L.top < ci.top) {
-                    while (L.top < ci.top)
-                        L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
-                } else {
-                    while (L.top > ci.top)
-                        delete L.stack[--L.top];
-                }
+                ldo.adjust_top(L, ci.top);
                 /* go straight to OP_TFORLOOP */
                 i = ci.l_code[ci.l_savedpc++];
                 ra = RA(L, base, i);
@@ -674,15 +593,7 @@ const luaV_execute = function(L) {
                 for (; n > 0; n--) {
                     ltable.luaH_setint(h, last--, L.stack[ra + n]);
                 }
-
-                /* correct top (in case of previous open call) */
-                if (L.top < ci.top) {
-                    while (L.top < ci.top)
-                        L.stack[L.top++] = new lobject.TValue(CT.LUA_TNIL, null);
-                } else {
-                    while (L.top > ci.top)
-                        delete L.stack[--L.top];
-                }
+                ldo.adjust_top(L, ci.top);  /* correct top (in case of previous open call) */
                 break;
             }
             case OCi.OP_CLOSURE: {
@@ -705,16 +616,7 @@ const luaV_execute = function(L) {
                 if (b < 0) {
                     b = n;  /* get all var. arguments */
                     ldo.luaD_checkstack(L, n);
-                    if (L.top >= ra+n) {
-                        while (L.top > ra+n)
-                            delete L.stack[--L.top];
-                    } else {
-                        while (L.top < ra+n) {
-                            L.stack[L.top] = new lobject.TValue();
-                            L.top++;
-                        }
-                    }
-                    assert(L.top == ra + n);
+                    ldo.adjust_top(L, ra + n);
                 }
 
                 for (j = 0; j < b && j < n; j++)
