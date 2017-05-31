@@ -97,7 +97,6 @@ const LUA_OPEQ = 0;
 const LUA_OPLT = 1;
 const LUA_OPLE = 2;
 
-const LUA_NUMTAGS = 9;
 const LUA_MINSTACK = 20;
 
 const LUA_REGISTRYINDEX = -luaconf.LUAI_MAXSTACK - 1000;
@@ -371,7 +370,6 @@ module.exports.LUA_MASKLINE            = LUA_MASKLINE;
 module.exports.LUA_MASKRET             = LUA_MASKRET;
 module.exports.LUA_MINSTACK            = LUA_MINSTACK;
 module.exports.LUA_MULTRET             = -1;
-module.exports.LUA_NUMTAGS             = LUA_NUMTAGS;
 module.exports.LUA_OPADD               = LUA_OPADD;
 module.exports.LUA_OPBAND              = LUA_OPBAND;
 module.exports.LUA_OPBNOT              = LUA_OPBNOT;

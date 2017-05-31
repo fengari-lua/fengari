@@ -12,7 +12,7 @@ const lfunc                = require('./lfunc.js');
 const ltm                  = require('./ltm.js');
 const CT                   = defs.constant_types;
 const TS                   = defs.thread_status;
-const LUA_NUMTAGS          = defs.LUA_NUMTAGS;
+const LUA_NUMTAGS          = CT.LUA_NUMTAGS;
 
 const EXTRA_STACK = 5;
 
