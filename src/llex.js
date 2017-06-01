@@ -463,7 +463,8 @@ const read_string = function(ls, del, seminfo) {
 };
 
 const isreserved = function(w) {
-    return luaX_tokens.slice(0, 22).indexOf(w) >= 0;
+    let kidx = luaX_tokens.indexOf(w);
+    return kidx >= 0 && kidx <= 22;
 };
 
 const llex = function(ls, seminfo) {
@@ -573,8 +574,8 @@ const llex = function(ls, seminfo) {
 
                     let ts = luaX_newstring(ls, ls.buff.buffer);
                     seminfo.ts = ts;
-                    let kidx = luaX_tokens.slice(0, 22).indexOf(defs.to_jsstring(ts.getstr()));
-                    if (kidx >= 0)  /* reserved word? */
+                    let kidx = luaX_tokens.indexOf(defs.to_jsstring(ts.getstr()));
+                    if (kidx >= 0 && kidx <= 22)  /* reserved word? */
                         return kidx + FIRST_RESERVED;
                     else
                         return R.TK_NAME;
