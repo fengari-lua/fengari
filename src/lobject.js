@@ -446,36 +446,32 @@ const MAXBY10  = Math.floor(llimit.MAX_INT / 10);
 const MAXLASTD = llimit.MAX_INT % 10;
 
 const l_str2int = function(s) {
+    let i = 0;
     let a = 0;
     let empty = true;
     let neg;
 
-    while (ljstype.lisspace(s[0])) s = s.slice(1);  /* skip initial spaces */
-    neg = s[0] === char['-'];
+    while (ljstype.lisspace(s[i])) i++;  /* skip initial spaces */
+    if ((neg = (s[i] === char['-']))) i++;
+    else if (s[i] === char['+']) i++;
+    if (s[i] === char['0'] && (s[i+1] === char['x'] || s[i+1] === char['X'])) {  /* hex? */
+        i += 2;  /* skip '0x' */
 
-    if (neg || s[0] === char['+'])
-        s = s.slice(1);
-
-    if (s[0] === char['0'] && (s[1] === char['x'] || s[1] === char['X'])) {  /* hex? */
-        s = s.slice(2);  /* skip '0x' */
-
-        for (; ljstype.lisxdigit(s[0]); s = s.slice(1)) {
-            a = (a * 16 + luaO_hexavalue(s[0]))|0;
+        for (; ljstype.lisxdigit(s[i]); i++) {
+            a = (a * 16 + luaO_hexavalue(s[i]))|0;
             empty = false;
         }
     } else {  /* decimal */
-        for (; ljstype.lisdigit(s[0]); s = s.slice(1)) {
-            let d = s[0] - char['0'];
+        for (; ljstype.lisdigit(s[i]); i++) {
+            let d = s[i] - char['0'];
             if (a >= MAXBY10 && (a > MAXBY10 || d > MAXLASTD + neg))  /* overflow? */
                 return null;  /* do not accept it (as integer) */
             a = (a * 10 + d)|0;
             empty = false;
         }
     }
-
-    while (ljstype.lisspace(s[0])) s = s.slice(1);  /* skip trailing spaces */
-
-    if (empty || (s.length !== 0)) return null;  /* something wrong in the numeral */
+    while (ljstype.lisspace(s[i])) i++;  /* skip trailing spaces */
+    if (empty || (i !== s.length)) return null;  /* something wrong in the numeral */
     else {
         return (neg ? -a : a)|0;
     }
