@@ -694,16 +694,17 @@ if (!WEB) {
         return bytes > 0 ? b.readUInt8() : null;
     };
 
+    const utf8_bom = [0XEF, 0XBB, 0XBF];  /* UTF-8 BOM mark */
     const skipBOM = function(lf) {
-        let p = [0XEF, 0XBB, 0XBF];  /* UTF-8 BOM mark */
         lf.n = 0;
         let c;
+        let p = 0;
         do {
             c = getc(lf);
-            if (c === null || c !== p[0]) return c;
-            p = p.slice(1);
+            if (c === null || c !== utf8_bom[p]) return c;
+            p++;
             lf.buff[lf.n++] = c;  /* to be read by the parser */
-        } while (p.length > 0);
+        } while (p < utf8_bom.length);
         lf.n = 0;  /* prefix matched; discard it */
         return getc(lf);  /* return next character */
     };
