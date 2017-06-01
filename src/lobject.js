@@ -363,6 +363,7 @@ const MAXSIGDIG = 30;
 ** C99 specification for 'strtod'
 */
 const lua_strx2number = function(s) {
+    let i = 0;
     let dot = char[luaconf.lua_getlocaledecpoint()];
     let r = 0.0;  /* result (accumulator) */
     let sigdig = 0;  /* number of significant digits */
@@ -370,23 +371,20 @@ const lua_strx2number = function(s) {
     let e = 0;  /* exponent correction */
     let neg;  /* 1 if number is negative */
     let hasdot = false;  /* true after seen a dot */
-
-    while (ljstype.lisspace(s[0])) s = s.slice(1);  /* skip initial spaces */
-
-    neg = s[0] === char['-'];  /* check signal */
-    s = neg || s[0] === char['+'] ? s.slice(1) : s;  /* skip sign if one */
-    if (!(s[0] === char['0'] && (s[1] === char['x'] || s[1] === char['X'])))  /* check '0x' */
+    while (ljstype.lisspace(s[i])) i++;  /* skip initial spaces */
+    if ((neg = (s[i] === char['-']))) i++;  /* check signal */
+    else if (s[i] === char['+']) i++;
+    if (!(s[i] === char['0'] && (s[i+1] === char['x'] || s[i+1] === char['X'])))  /* check '0x' */
         return null;  /* invalid format (no '0x') */
-
-    for (s = s.slice(2); ; s = s.slice(1)) {  /* skip '0x' and read numeral */
-        if (s[0] === dot) {
+    for (i += 2; ; i++) {  /* skip '0x' and read numeral */
+        if (s[i] === dot) {
             if (hasdot) break;  /* second dot? stop loop */
             else hasdot = true;
-        } else if (ljstype.lisxdigit(s[0])) {
-            if (sigdig === 0 && s[0] === char['0'])  /* non-significant digit (zero)? */
+        } else if (ljstype.lisxdigit(s[i])) {
+            if (sigdig === 0 && s[i] === char['0'])  /* non-significant digit (zero)? */
                 nosigdig++;
             else if (++sigdig <= MAXSIGDIG)  /* can read it without overflow? */
-                r = (r * 16) + luaO_hexavalue(s[0]);
+                r = (r * 16) + luaO_hexavalue(s[i]);
             else e++; /* too many digits; ignore, but still count for exponent */
             if (hasdot) e--;  /* decimal digit? correct exponent */
         } else break;  /* neither a dot nor a digit */
@@ -395,24 +393,22 @@ const lua_strx2number = function(s) {
     if (nosigdig + sigdig === 0)  /* no digits? */
         return null;  /* invalid format */
     e *= 4;  /* each digit multiplies/divides value by 2^4 */
-    if (s[0] === char['p'] || s[0] === char['P']) {  /* exponent part? */
+    if (s[i] === char['p'] || s[i] === char['P']) {  /* exponent part? */
         let exp1 = 0;  /* exponent value */
         let neg1;  /* exponent signal */
-        s = s.slice(1);  /* skip 'p' */
-        neg1 = s[0] === char['-'];  /* check signal */
-        s = neg1 || s[0] === char['+'] ? s.slice(1) : s;  /* skip sign if one */
-        if (!ljstype.lisdigit(s[0]))
+        i++;  /* skip 'p' */
+        if ((neg1 = (s[i] === char['-']))) i++;  /* signal */
+        else if (s[i] === char['+']) i++;
+        if (!ljstype.lisdigit(s[i]))
             return null;  /* invalid; must have at least one digit */
-        while (ljstype.lisdigit(s[0])) {  /* read exponent */
-            exp1 = exp1 * 10 + s[0] - char['0'];
-            s = s.slice(1);
-        }
+        while (ljstype.lisdigit(s[i]))  /* read exponent */
+            exp1 = exp1 * 10 + s[i++] - char['0'];
         if (neg1) exp1 = -exp1;
         e += exp1;
     }
     if (neg) r = -r;
-    while (ljstype.lisspace(s[0])) s = s.slice(1);  /* skip trailing spaces */
-    return s.length === 0 ? luaconf.ldexp(r, e) : null;  /* Only valid if nothing left is s*/
+    while (ljstype.lisspace(s[i])) i++;  /* skip trailing spaces */
+    return i === s.length ? luaconf.ldexp(r, e) : null;  /* Only valid if nothing left is s*/
 };
 
 const lua_str2number = function(s) {
