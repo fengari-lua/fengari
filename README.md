@@ -54,6 +54,7 @@
 - [x] Auxiliary library
 - [ ] Run [Lua test suite](https://github.com/lua/tests)
     - [x] `api.lua` (64/64)
+    - [x] `attrib.lua` (12/12)
     - [x] `bitwise.lua` (16/16)
     - [x] `calls.lua` (32/32)
     - [x] `closure.lua` (16/16)
@@ -74,7 +75,6 @@
     - [ ] `db.lua` (46/54)
     - [ ] `pm.lua` (27/38)
     - [ ] `tpack.lua` (20/32)
-    - [ ] `attrib.lua`
     - [ ] `big.lua`
     - [ ] `verybig.lua`
 - [ ] DOM API binding: [https://github.com/fengari-lua/fengari-interop](https://github.com/fengari-lua/fengari-interop)
