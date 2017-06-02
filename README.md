@@ -77,7 +77,7 @@
     - [ ] `tpack.lua` (20/32)
     - [ ] `big.lua`
     - [ ] `verybig.lua`
-- [ ] DOM API binding: [https://github.com/fengari-lua/fengari-interop](https://github.com/fengari-lua/fengari-interop)
+- [x] Full JS interoperability: [https://github.com/fengari-lua/fengari-interop](https://github.com/fengari-lua/fengari-interop)
 
 
 ## Extensions
