@@ -1,6 +1,6 @@
 const webpack = require('webpack');
 const path = require('path');
-const BabiliPlugin = require("babili-webpack-plugin");
+const ClosureCompilerPlugin = require('closure-compiler-webpack-plugin');
 
 module.exports = [
     {
@@ -35,7 +35,9 @@ module.exports = [
             new webpack.DefinePlugin({
                 WEB: JSON.stringify(true),
             }),
-            new BabiliPlugin()
+            new ClosureCompilerPlugin({
+                compilation_level: 'ADVANCED'
+            })
         ]
     }
 ];
