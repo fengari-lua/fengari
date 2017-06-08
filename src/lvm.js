@@ -533,9 +533,10 @@ const luaV_execute = function(L) {
                 let init = L.stack[ra];
                 let plimit = L.stack[ra + 1];
                 let pstep = L.stack[ra + 2];
-                let forlim = forlimit(plimit, pstep.value);
+                let forlim;
 
-                if (init.ttisinteger() && pstep.ttisinteger() && forlim.casted) { /* all values are integer */
+                if (init.ttisinteger() && pstep.ttisinteger() && (forlim = forlimit(plimit, pstep.value))) {
+                    /* all values are integer */
                     let initv = forlim.stopnow ? 0 : init.value;
                     plimit.value = forlim.ilimit;
                     init.value = (initv - pstep.value)|0;
@@ -746,7 +747,6 @@ const forlimit = function(obj, step) {
     }
 
     return {
-        casted: true,
         stopnow: stopnow,
         ilimit: ilimit
     };
@@ -1061,7 +1061,6 @@ module.exports.cvt2str           = cvt2str;
 module.exports.cvt2num           = cvt2num;
 module.exports.dojump            = dojump;
 module.exports.donextjump        = donextjump;
-module.exports.forlimit          = forlimit;
 module.exports.gettable          = gettable;
 module.exports.luaV_concat       = luaV_concat;
 module.exports.luaV_div          = luaV_div;
