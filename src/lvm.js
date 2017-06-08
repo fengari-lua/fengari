@@ -799,46 +799,20 @@ const tonumber = function(o) {
     return false;
 };
 
+/*
+** Return 'l < r', for numbers.
+** As fengari uses javascript numbers for both floats and integers and has
+** correct semantics, we can just compare values.
+*/
 const LTnum = function(l, r) {
-    if (l.ttisinteger()) {
-        if (r.ttisinteger())
-            return l.value < r.value ? 1 : 0;
-        else
-            return LTintfloat(l.value, r.value);
-    } else {
-        if (r.ttisfloat())
-            return l.value < r.value ? 1 : 0;
-        else if (isNaN(l.value))
-            return 0;
-        else
-            return !LEintfloat(r.value, l.value);
-    }
+    return l.value < r.value;
 };
 
+/*
+** Return 'l <= r', for numbers.
+*/
 const LEnum = function(l, r) {
-    if (l.ttisinteger()) {
-        if (r.ttisinteger())
-            return l.value <= r.value ? 1 : 0;
-        else
-            return LEintfloat(l.value, r.value);
-    } else {
-        if (r.ttisfloat())
-            return l.value <= r.value ? 1 : 0;
-        else if (isNaN(l.value))
-            return false;
-        else
-            return !LTintfloat(r.value, l.value);
-    }
-};
-
-const LEintfloat = function(l, r) {
-    // TODO: LEintfloat
-    return l <= r ? 1 : 0;
-};
-
-const LTintfloat = function(l, r) {
-    // TODO: LTintfloat
-    return l < r ? 1 : 0;
+    return l.value <= r.value;
 };
 
 /*
@@ -1096,10 +1070,6 @@ const settable = function(L, t, key, val) {
 };
 
 
-module.exports.LEintfloat        = LEintfloat;
-module.exports.LEnum             = LEnum;
-module.exports.LTintfloat        = LTintfloat;
-module.exports.LTnum             = LTnum;
 module.exports.RA                = RA;
 module.exports.RB                = RB;
 module.exports.RC                = RC;
