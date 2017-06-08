@@ -1,7 +1,7 @@
 /*jshint esversion: 6 */
 "use strict";
 
-const assert         = require('assert');
+const assert = require('assert');
 
 const defs        = require('./defs.js');
 const lopcodes    = require('./lopcodes.js');
@@ -1052,21 +1052,21 @@ const settable = function(L, t, key, val) {
 };
 
 
-module.exports.cvt2str           = cvt2str;
-module.exports.cvt2num           = cvt2num;
-module.exports.gettable          = gettable;
-module.exports.luaV_concat       = luaV_concat;
-module.exports.luaV_div          = luaV_div;
-module.exports.luaV_equalobj     = luaV_equalobj;
-module.exports.luaV_execute      = luaV_execute;
-module.exports.luaV_finishOp     = luaV_finishOp;
-module.exports.luaV_lessequal    = luaV_lessequal;
-module.exports.luaV_lessthan     = luaV_lessthan;
-module.exports.luaV_mod          = luaV_mod;
-module.exports.luaV_objlen       = luaV_objlen;
+module.exports.cvt2str          = cvt2str;
+module.exports.cvt2num          = cvt2num;
+module.exports.gettable         = gettable;
+module.exports.luaV_concat      = luaV_concat;
+module.exports.luaV_div         = luaV_div;
+module.exports.luaV_equalobj    = luaV_equalobj;
+module.exports.luaV_execute     = luaV_execute;
+module.exports.luaV_finishOp    = luaV_finishOp;
+module.exports.luaV_lessequal   = luaV_lessequal;
+module.exports.luaV_lessthan    = luaV_lessthan;
+module.exports.luaV_mod         = luaV_mod;
+module.exports.luaV_objlen      = luaV_objlen;
 module.exports.luaV_rawequalobj = luaV_rawequalobj;
-module.exports.luaV_shiftl       = luaV_shiftl;
-module.exports.luaV_tointeger    = luaV_tointeger;
-module.exports.settable          = settable;
-module.exports.tointeger         = tointeger;
-module.exports.tonumber          = tonumber;
+module.exports.luaV_shiftl      = luaV_shiftl;
+module.exports.luaV_tointeger   = luaV_tointeger;
+module.exports.settable         = settable;
+module.exports.tointeger        = tointeger;
+module.exports.tonumber         = tonumber;
