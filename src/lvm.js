@@ -1052,15 +1052,8 @@ const settable = function(L, t, key, val) {
 };
 
 
-module.exports.RA                = RA;
-module.exports.RB                = RB;
-module.exports.RC                = RC;
-module.exports.RKB               = RKB;
-module.exports.RKC               = RKC;
 module.exports.cvt2str           = cvt2str;
 module.exports.cvt2num           = cvt2num;
-module.exports.dojump            = dojump;
-module.exports.donextjump        = donextjump;
 module.exports.gettable          = gettable;
 module.exports.luaV_concat       = luaV_concat;
 module.exports.luaV_div          = luaV_div;
