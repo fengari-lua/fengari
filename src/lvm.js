@@ -818,35 +818,17 @@ const LEnum = function(l, r) {
 /*
 ** Compare two strings 'ls' x 'rs', returning an integer smaller-equal-
 ** -larger than zero if 'ls' is smaller-equal-larger than 'rs'.
-** The code is a little tricky because it allows '\0' in the strings.
 */
 const l_strcmp = function(ls, rs) {
-    let l = ls.getstr();
-    let ll = ls.tsslen();
-    let jl = defs.to_jsstring(l);
-    let r = rs.getstr();
-    let lr = rs.tsslen();
-    let jr = defs.to_jsstring(r);
-    for (;;) {
-        let temp = jl === jr; // TODO: strcoll ?
-        if (!temp)  /* not equal? */
-            return jl < jr ? -1 : 1;  /* done */
-        else {  /* strings are equal up to a '\0' */
-            let len = jl.length;  /* index of first '\0' in both strings */
-            if (len === lr)  /* 'rs' is finished? */
-                return len === ll ? 0 : 1;  /* check 'ls' */
-            else if (len === ll)  /* 'ls' is finished? */
-                return -1;  /* 'ls' is smaller than 'rs' ('rs' is not finished) */
-            /* both strings longer than 'len'; go on comparing after the '\0' */
-            len++;
-            l = l.slice(len);
-            ll -= len;
-            r = r.slice(len);
-            lr -= len;
-            jl = defs.to_jsstring(l);
-            jr = defs.to_jsstring(r);
-        }
-    }
+    let l = lstring.luaS_hashlongstr(ls);
+    let r = lstring.luaS_hashlongstr(rs);
+    /* In fengari we assume string hash has same collation as byte values */
+    if (l === r)
+        return 0;
+    else if (l < r)
+        return -1;
+    else
+        return 1;
 };
 
 /*
@@ -1081,7 +1063,6 @@ module.exports.dojump            = dojump;
 module.exports.donextjump        = donextjump;
 module.exports.forlimit          = forlimit;
 module.exports.gettable          = gettable;
-module.exports.l_strcmp          = l_strcmp;
 module.exports.luaV_concat       = luaV_concat;
 module.exports.luaV_div          = luaV_div;
 module.exports.luaV_equalobj     = luaV_equalobj;
