@@ -65,7 +65,6 @@ const str_char = function(L) {
 };
 
 const writer = function(L, b, size, B) {
-    assert(Array.isArray(b));
     B.push(...b.slice(0, size));
     return 0;
 };

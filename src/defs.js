@@ -132,8 +132,12 @@ class lua_Debug {
 
 }
 
+const is_luastring = function(s) {
+    return Array.isArray(s);
+};
+
 const to_jsstring = function(value, from, to) {
-    assert(Array.isArray(value), "jsstring expect a array of bytes");
+    assert(is_luastring(value), "jsstring expect a array of bytes");
 
     let u0, u1, u2, u3, u4, u5;
     let idx = 0;
@@ -181,7 +185,7 @@ const to_luastring = function(str, cache) {
 
     if (cache) {
         let cached = to_luastring_cache[str];
-        if (Array.isArray(cached)) return cached;
+        if (is_luastring(cached)) return cached;
     }
 
     let outU8Array = [];
@@ -403,5 +407,6 @@ module.exports.constant_types          = constant_types;
 module.exports.lua_Debug               = lua_Debug;
 module.exports.lua_upvalueindex        = lua_upvalueindex;
 module.exports.thread_status           = thread_status;
+module.exports.is_luastring            = is_luastring;
 module.exports.to_jsstring             = to_jsstring;
 module.exports.to_luastring            = to_luastring;

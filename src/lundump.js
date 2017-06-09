@@ -23,7 +23,7 @@ class BytecodeParser {
         this.numberSize = 8;
 
         assert(Z instanceof lzio.ZIO, "BytecodeParser only operates on a ZIO");
-        assert(Array.isArray(name));
+        assert(defs.is_luastring(name));
 
         if (name[0] == defs.char["@"] || name[0] == defs.char["="])
             this.name = name.slice(1);

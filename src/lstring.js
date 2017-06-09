@@ -30,7 +30,7 @@ const luaS_eqlngstr = function(a, b) {
 /* converts strings (arrays) to a consistent map key
    make sure this doesn't conflict with any of the anti-collision strategies in ltable */
 const luaS_hash = function(str) {
-    assert(Array.isArray(str));
+    assert(defs.is_luastring(str));
     return str.map(e => `${e}|`).join('');
 };
 

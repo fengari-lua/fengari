@@ -236,7 +236,7 @@ const lua_pushlstring = function(L, s, len) {
     if (len === 0) {
         ts = lstring.luaS_bless(L, []);
     } else {
-        assert(Array.isArray(s), "lua_pushlstring expects array of byte");
+        assert(defs.is_luastring(s), "lua_pushlstring expects array of byte");
         ts = lstring.luaS_bless(L, s.slice(0, len));
     }
     lobject.pushsvalue2s(L, ts);
@@ -246,7 +246,7 @@ const lua_pushlstring = function(L, s, len) {
 };
 
 const lua_pushstring = function (L, s) {
-    assert(Array.isArray(s) || s === undefined || s === null, "lua_pushstring expects array of byte");
+    assert(defs.is_luastring(s) || s === undefined || s === null, "lua_pushstring expects array of byte");
 
     if (s === undefined || s === null) {
         L.stack[L.top] = new TValue(CT.LUA_TNIL, null);
@@ -262,12 +262,12 @@ const lua_pushstring = function (L, s) {
 };
 
 const lua_pushvfstring = function (L, fmt, argp) {
-    assert(Array.isArray(fmt));
+    assert(defs.is_luastring(fmt));
     return lobject.luaO_pushvfstring(L, fmt, argp);
 };
 
 const lua_pushfstring = function (L, fmt, ...argp) {
-    assert(Array.isArray(fmt));
+    assert(defs.is_luastring(fmt));
     return lobject.luaO_pushvfstring(L, fmt, argp);
 };
 
@@ -350,7 +350,7 @@ const lua_pushglobaltable = function(L) {
 ** t[k] = value at the top of the stack (where 'k' is a string)
 */
 const auxsetstr = function(L, t, k) {
-    assert(Array.isArray(k), "key must be an array of bytes");
+    assert(defs.is_luastring(k), "key must be an array of bytes");
 
     let str = lstring.luaS_new(L, k);
     assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
@@ -464,7 +464,7 @@ const lua_rawsetp = function(L, idx, p) {
 */
 
 const auxgetstr = function(L, t, k) {
-    assert(Array.isArray(k), "key must be an array of bytes");
+    assert(defs.is_luastring(k), "key must be an array of bytes");
     let str = lstring.luaS_new(L, k);
     lobject.pushsvalue2s(L, str);
     assert(L.top <= L.ci.top, "stack overflow");
@@ -908,8 +908,8 @@ const lua_arith = function(L, op) {
 */
 
 const lua_load = function(L, reader, data, chunkname, mode) {
-    assert(Array.isArray(chunkname), "lua_load expect an array of byte as chunkname");
-    assert(mode ? Array.isArray(mode) : true, "lua_load expect an array of byte as mode");
+    assert(defs.is_luastring(chunkname), "lua_load expect an array of byte as chunkname");
+    assert(mode ? defs.is_luastring(mode) : true, "lua_load expect an array of byte as mode");
     if (!chunkname) chunkname = [defs.char["?"]];
     let z = new lzio.ZIO(L, reader, data);
     let status = ldo.luaD_protectedparser(L, z, chunkname, mode);
