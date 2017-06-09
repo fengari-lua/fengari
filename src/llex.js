@@ -120,7 +120,7 @@ const luaX_token2str = function(ls, token) {
     } else {
         let s = luaX_tokens[token - FIRST_RESERVED];
         if (token < R.TK_EOS)  /* fixed format (symbols and reserved words)? */
-            return defs.to_luastring(`'${s}'`);
+            return lobject.luaO_pushfstring(ls.L, defs.to_luastring("'%s'", true), defs.to_luastring(s));
         else  /* names, strings, and numerals */
             return defs.to_luastring(s);
     }
@@ -260,7 +260,7 @@ const txtToken = function(ls, token) {
         case R.TK_NAME: case R.TK_STRING:
         case R.TK_FLT: case R.TK_INT:
             // save(ls, 0);
-            return defs.to_luastring(`'${defs.to_jsstring(ls.buff.buffer)}'`);
+            return lobject.luaO_pushfstring(ls.L, defs.to_luastring("'%s'", true), ls.buff.buffer);
         default:
             return luaX_token2str(ls, token);
     }
