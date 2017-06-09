@@ -123,7 +123,7 @@ const db_getinfo = function(L) {
     let options = lauxlib.luaL_optstring(L, arg + 2, lua.to_luastring("flnStu", true));
     checkstack(L, L1, 3);
     if (lua.lua_isfunction(L, arg + 1)) {  /* info about a function? */
-        options = ['>'.charCodeAt(0)].concat(options);  /* add '>' to 'options' */
+        options = lua.lua_pushfstring(L, lua.to_luastring(">%s"), options);  /* add '>' to 'options' */
         lua.lua_pushvalue(L, arg + 1);  /* move function to 'L1' stack */
         lua.lua_xmove(L, L1, 1);
     } else {  /* stack level */

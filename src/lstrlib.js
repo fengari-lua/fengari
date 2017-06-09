@@ -103,10 +103,10 @@ const num2straux = function(x) {
         return lua.to_luastring('nan', true).slice(0);
     else if (x === 0) {  /* can be -0... */
         /* create "0" or "-0" followed by exponent */
-        let zero = sprintf(luaconf.LUA_NUMBER_FMT + "x0p+0", x).split('').map(e => e.charCodeAt(0));
+        let zero = sprintf(luaconf.LUA_NUMBER_FMT + "x0p+0", x);
         if (Object.is(x, -0))
-            return ['-'.charCodeAt(0)].concat(zero);
-        return zero;
+            zero = "-" + zero;
+        return lua.to_luastring(zero);
     } else {
         let buff = [];
         let fe = luaconf.frexp(x);  /* 'x' fraction and exponent */

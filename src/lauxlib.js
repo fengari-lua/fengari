@@ -110,7 +110,7 @@ const luaL_traceback = function(L, L1, msg, level) {
     let last = lastlevel(L1);
     let n1 = last - level > LEVELS1 + LEVELS2 ? LEVELS1 : -1;
     if (msg)
-        lua.lua_pushstring(L, msg.concat('\n'.charCodeAt(0)));
+        lua.lua_pushfstring(L, lua.to_luastring("%s\n"), msg);
     luaL_checkstack(L, 10, null);
     lua.lua_pushliteral(L, "stack traceback:");
     while (lua.lua_getstack(L1, level++, ar)) {
@@ -119,7 +119,7 @@ const luaL_traceback = function(L, L1, msg, level) {
             level = last - LEVELS2 + 1;  /* and skip to last ones */
         } else {
             lua.lua_getinfo(L1, lua.to_luastring("Slnt", true), ar);
-            lua.lua_pushstring(L, ['\n'.charCodeAt(0), '\t'.charCodeAt(0)].concat(ar.short_src).concat([':'.charCodeAt(0)]));
+            lua.lua_pushfstring(L, lua.to_luastring("\n\t%s:"), ar.short_src);
             if (ar.currentline > 0)
                 lua.lua_pushliteral(L, `${ar.currentline}:`);
             lua.lua_pushliteral(L, " in ");
