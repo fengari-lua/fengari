@@ -324,7 +324,8 @@ const searcher_preload = function(L) {
 };
 
 const findloader = function(L, name, ctx, k) {
-    let msg = [];  /* to build error message */
+    let msg = new lauxlib.luaL_Buffer();  /* to build error message */
+    lauxlib.luaL_buffinit(L, msg);
     /* push 'package.searchers' to index 3 in the stack */
     if (lua.lua_getfield(L, lua.lua_upvalueindex(1), lua.to_luastring("searchers", true)) !== lua.LUA_TTABLE)
         lauxlib.luaL_error(L, lua.to_luastring("'package.searchers' must be a table"));
@@ -338,7 +339,7 @@ const findloader_cont = function(L, status, ctx) {
         if (status === lua.LUA_OK) {
             if (lua.lua_rawgeti(L, 3, ctx.i) === lua.LUA_TNIL) {  /* no more searchers? */
                 lua.lua_pop(L, 1);  /* remove nil */
-                lua.lua_pushstring(L, ctx.msg);  /* create error message */
+                lauxlib.luaL_pushresult(ctx.msg);  /* create error message */
                 lauxlib.luaL_error(L, lua.to_luastring("module '%s' not found:%s"), ctx.name, lua.lua_tostring(L, -1));
             }
             lua.lua_pushstring(L, ctx.name);
@@ -350,8 +351,7 @@ const findloader_cont = function(L, status, ctx) {
             break;  /* module loader found */
         else if (lua.lua_isstring(L, -2)) {  /* searcher returned error message? */
             lua.lua_pop(L, 1);  /* remove extra return */
-            ctx.msg.push(...lua.lua_tostring(L, -1));
-            lua.lua_remove(L, -1);  /* concatenate error message */
+            lauxlib.luaL_addvalue(ctx.msg);  /* concatenate error message */
         }
         else
             lua.lua_pop(L, 2);  /* remove both returns */
