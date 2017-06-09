@@ -670,12 +670,15 @@ const lua_toljsstring = function(L, idx) {
 
 const lua_tojsstring =  lua_toljsstring;
 
-// Convert a string on the stack to a dataview, because lua_tostring will perform utf-8 to utf-16 conversion
 const lua_todataview = function(L, idx) {
     let o = index2addr(L, idx);
 
-    if (!o.ttisstring() && !o.ttisnumber())
-        return null;
+    if (!o.ttisstring()) {
+        if (!lvm.cvt2str(o)) {  /* not convertible? */
+            return null;
+        }
+        lobject.luaO_tostring(L, o);
+    }
 
     let dv = new DataView(new ArrayBuffer(o.vslen()));
     o.svalue().forEach((e, i) => dv.setUint8(i, e, true));
