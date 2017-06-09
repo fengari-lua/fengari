@@ -351,7 +351,7 @@ const gethexa = function(ls) {
 const readhexaesc = function(ls) {
     let r = gethexa(ls);
     r = (r << 4) + gethexa(ls);
-    ls.buff.n -= 2;  /* remove saved chars from buffer */
+    lzio.luaZ_buffremove(ls.buff, 2);  /* remove saved chars from buffer */
     return r;
 };
 
@@ -370,7 +370,7 @@ const readutf8desc = function(ls) {
     }
     esccheck(ls, ls.current === char['}'], defs.to_luastring("missing '}'", true));
     next(ls);  /* skip '}' */
-    ls.buff.n -= i;  /* remove saved chars from buffer */
+    lzio.luaZ_buffremove(ls.buff, i);  /* remove saved chars from buffer */
     return r;
 };
 
@@ -389,7 +389,7 @@ const readdecesc = function(ls) {
         save_and_next(ls);
     }
     esccheck(ls, r <= 255, defs.to_luastring("decimal escape too large", true));
-    ls.buff.n -= i;  /* remove read digits from buffer */
+    lzio.luaZ_buffremove(ls.buff, i);  /* remove read digits from buffer */
     return r;
 };
 
@@ -425,7 +425,7 @@ const read_string = function(ls, del, seminfo) {
                         c = ls.current; will = 'read_save'; break;
                     case lzio.EOZ: will = 'no_save'; break;  /* will raise an error next loop */
                     case char['z']: {  /* zap following span of spaces */
-                        ls.buff.n -= 1;  /* remove '\\' */
+                        lzio.luaZ_buffremove(ls.buff, 1);  /* remove '\\' */
                         next(ls);  /* skip the 'z' */
                         while (ljstype.lisspace(ls.current)) {
                             if (currIsNewline(ls)) inclinenumber(ls);
@@ -444,7 +444,7 @@ const read_string = function(ls, del, seminfo) {
                     next(ls);
 
                 if (will === 'read_save' || will === 'only_save') {
-                    ls.buff.n -= 1;  /* remove '\\' */
+                    lzio.luaZ_buffremove(ls.buff, 1);  /* remove '\\' */
                     save(ls, c);
                 }
 

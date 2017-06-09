@@ -10,6 +10,10 @@ class MBuffer {
     }
 }
 
+const luaZ_buffremove = function(buff, i) {
+    buff.n -= i;
+};
+
 const luaZ_resetbuffer = function(buff) {
     buff.n = 0;
     buff.buffer = [];
@@ -80,6 +84,7 @@ const luaZ_read = function(z, b, b_offset, n) {
 };
 
 module.exports.EOZ              = EOZ;
+module.exports.luaZ_buffremove  = luaZ_buffremove;
 module.exports.luaZ_fill        = luaZ_fill;
 module.exports.luaZ_read        = luaZ_read;
 module.exports.luaZ_resetbuffer = luaZ_resetbuffer;
