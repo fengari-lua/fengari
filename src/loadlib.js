@@ -208,7 +208,8 @@ const pushnexttemplate = function(L, path) {
 };
 
 const searchpath = function(L, name, path, sep, dirsep) {
-    let msg = [];  /* to build error message */
+    let msg = new lauxlib.luaL_Buffer();  /* to build error message */
+    lauxlib.luaL_buffinit(L, msg);
     if (sep[0] !== 0)  /* non-empty separator? */
         name = lauxlib.luaL_gsub(L, name, sep, dirsep);  /* replace it by 'dirsep' */
     while ((path = pushnexttemplate(L, path)) !== null) {
@@ -216,10 +217,11 @@ const searchpath = function(L, name, path, sep, dirsep) {
         lua.lua_remove(L, -2);  /* remove path template */
         if (readable(filename))  /* does file exist and is readable? */
             return filename;  /* return that file name */
-        lua.lua_remove(L, -1);  /* remove file name */
-        msg.push(...lua.to_luastring(`\n\tno file '${lua.to_jsstring(filename)}'`));
+        lua.lua_pushfstring(L, lua.to_luastring("\n\tno file '%s'"), filename);
+        lua.lua_remove(L, -2);  /* remove file name */
+        lauxlib.luaL_addvalue(msg);
     }
-    lua.lua_pushstring(L, msg);  /* create error message */
+    lauxlib.luaL_pushresult(msg);  /* create error message */
     return null;  /* not found */
 };
 
