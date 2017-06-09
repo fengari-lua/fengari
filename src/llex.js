@@ -320,10 +320,7 @@ const read_long_string = function(ls, seminfo, sep) {
             case char['\n']: case char['\r']: {
                 save(ls, char['\n']);
                 inclinenumber(ls);
-                if (!seminfo) {
-                    ls.buff.n = 0;
-                    ls.buff.buffer = [];
-                }
+                if (!seminfo) lzio.luaZ_resetbuffer(ls.buff);
                 break;
             }
             default: {
@@ -468,9 +465,7 @@ const isreserved = function(w) {
 };
 
 const llex = function(ls, seminfo) {
-    ls.buff.n = 0;
-    ls.buff.buffer = [];
-
+    lzio.luaZ_resetbuffer(ls.buff);
     for (;;) {
         assert(typeof ls.current == "number");
         switch (ls.current) {
@@ -489,12 +484,10 @@ const llex = function(ls, seminfo) {
                 next(ls);
                 if (ls.current === char['[']) {  /* long comment? */
                     let sep = skip_sep(ls);
-                    ls.buff.n = 0;  /* 'skip_sep' may dirty the buffer */
-                    ls.buff.buffer = [];
+                    lzio.luaZ_resetbuffer(ls.buff);  /* 'skip_sep' may dirty the buffer */
                     if (sep >= 0) {
                         read_long_string(ls, null, sep);  /* skip long comment */
-                        ls.buff.n = 0;  /* previous call may dirty the buff. */
-                        ls.buff.buffer = [];
+                        lzio.luaZ_resetbuffer(ls.buff);  /* previous call may dirty the buff. */
                         break;
                     }
                 }

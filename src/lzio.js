@@ -10,6 +10,11 @@ class MBuffer {
     }
 }
 
+const luaZ_resetbuffer = function(buff) {
+    buff.n = 0;
+    buff.buffer = [];
+};
+
 class ZIO {
     constructor(L, reader, data) {
         this.L = L;           /* Lua state (for reader) */
@@ -74,8 +79,9 @@ const luaZ_read = function(z, b, b_offset, n) {
     return 0;
 };
 
-module.exports.EOZ       = EOZ;
-module.exports.luaZ_fill = luaZ_fill;
-module.exports.luaZ_read = luaZ_read;
-module.exports.MBuffer   = MBuffer;
-module.exports.ZIO       = ZIO;
+module.exports.EOZ              = EOZ;
+module.exports.luaZ_fill        = luaZ_fill;
+module.exports.luaZ_read        = luaZ_read;
+module.exports.luaZ_resetbuffer = luaZ_resetbuffer;
+module.exports.MBuffer          = MBuffer;
+module.exports.ZIO              = ZIO;
