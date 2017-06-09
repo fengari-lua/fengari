@@ -459,9 +459,12 @@ const read_string = function(ls, del, seminfo) {
     seminfo.ts = luaX_newstring(ls, ls.buff.buffer.slice(1, ls.buff.n-1));
 };
 
+const token_to_index = Object.create(null); /* don't want to return true for e.g. 'hasOwnProperty' */
+luaX_tokens.forEach((e, i)=>token_to_index[lstring.luaS_hash(defs.to_luastring(e))] = i);
+
 const isreserved = function(w) {
-    let kidx = luaX_tokens.indexOf(w);
-    return kidx >= 0 && kidx <= 22;
+    let kidx = token_to_index[lstring.luaS_hashlongstr(w)];
+    return kidx !== void 0 && kidx <= 22;
 };
 
 const llex = function(ls, seminfo) {
@@ -567,8 +570,8 @@ const llex = function(ls, seminfo) {
 
                     let ts = luaX_newstring(ls, ls.buff.buffer);
                     seminfo.ts = ts;
-                    let kidx = luaX_tokens.indexOf(defs.to_jsstring(ts.getstr()));
-                    if (kidx >= 0 && kidx <= 22)  /* reserved word? */
+                    let kidx = token_to_index[lstring.luaS_hashlongstr(ts)];
+                    if (kidx !== void 0 && kidx <= 22)  /* reserved word? */
                         return kidx + FIRST_RESERVED;
                     else
                         return R.TK_NAME;
