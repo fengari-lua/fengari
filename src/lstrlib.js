@@ -1036,10 +1036,10 @@ const match = function(ms, s, p) {
                         }
                         case 'f'.charCodeAt(0): {
                             p += 2;
-                            if (ms.p[p] !== '[')
+                            if (ms.p[p] !== '['.charCodeAt(0))
                                 lauxlib.luaL_error(ms.L, lua.to_luastring("missing '[' after '%%f' in pattern"));
                             let ep = classend(ms, p);  /* points to what is next */
-                            let previous = s === ms.src_init ? 0 : ms.s[s-1];
+                            let previous = s === ms.src_init ? 0 : ms.src[s-1];
                             if (!matchbracketclass(ms, previous, p, ep - 1) && matchbracketclass(ms, ms.src[s], p, ep - 1)) {
                                 p = ep; gotoinit = true; break;
                             }
