@@ -934,7 +934,7 @@ const matchbalance = function(ms, s, p) {
             if (ms.src[s] === e) {
                 if (--cont === 0) return s + 1;
             }
-            else if (s === b) cont++;
+            else if (ms.src[s] === b) cont++;
         }
     }
     return null;  /* string ends out of balance */
