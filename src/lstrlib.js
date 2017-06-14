@@ -1312,7 +1312,7 @@ const add_value = function(ms, b, s, e, tr) {
     }
     if (!lua.lua_toboolean(L, -1)) {  /* nil or false? */
         lua.lua_pop(L, 1);
-        lua.lua_pushlstring(L, s, e - s);  /* keep original text */
+        lua.lua_pushlstring(L, ms.src.slice(s, e), e - s);  /* keep original text */
     } else if (!lua.lua_isstring(L, -1))
         lauxlib.luaL_error(L, lua.to_luastring("invalid replacement value (a %s)"), lauxlib.luaL_typename(L, -1));
         lauxlib.luaL_addvalue(b);  /* add result to accumulator */
