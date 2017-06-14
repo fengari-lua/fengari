@@ -1287,7 +1287,7 @@ const add_s = function(ms, b, s, e) {
             i++;  /* skip ESC */
             if (!isdigit(news[i])) {
                 if (news[i] !== L_ESC)
-                    lauxlib.luaL_error(L, lua.to_luastring("invalid use of '%c' in replacement string"), sL_ESC);
+                    lauxlib.luaL_error(L, lua.to_luastring("invalid use of '%c' in replacement string"), L_ESC);
                 lauxlib.luaL_addchar(b, news[i]);
             } else if (news[i] === '0'.charCodeAt(0))
                 lauxlib.luaL_addlstring(b, ms.src.slice(s), e - s);
