@@ -165,8 +165,8 @@ const isalpha = e => ('a'.charCodeAt(0) <= e && e <= 'z'.charCodeAt(0)) || (e >=
 const isdigit = e => '0'.charCodeAt(0) <= e && e <= '9'.charCodeAt(0);
 const iscntrl = e => (0x00 <= e && e <= 0x1f) || e === 0x7f;
 const isgraph = e => e > 32 && e < 127; // TODO: Will only work for ASCII
-const islower = e => /^(?![A-Z]).*$/.test(String.fromCharCode(e));
-const isupper = e => /^(?![a-z]).*$/.test(String.fromCharCode(e));
+const islower = e => /^[a-z]$/.test(String.fromCharCode(e));
+const isupper = e => /^[A-Z]$/.test(String.fromCharCode(e));
 const isalnum = e => /^[a-zA-Z0-9]$/.test(String.fromCharCode(e));
 const ispunct = e => isgraph(e) && !isalnum(e);
 const isspace = e => /^\s$/.test(String.fromCharCode(e));
