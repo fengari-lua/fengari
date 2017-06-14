@@ -402,6 +402,11 @@ test("[test-suite] pm: gsub isbalanced", function (t) {
 
 test("[test-suite] pm: capture", function (t) {
     let luaCode = `
+        local function checkerror (msg, f, ...)
+          local s, err = pcall(f, ...)
+          assert(not s and string.find(err, msg))
+        end
+
         local t = {"apple", "orange", "lime"; n=0}
         assert(string.gsub("x and x and x", "x", function () t.n=t.n+1; return t[t.n] end)
                 == "apple and orange and lime")
