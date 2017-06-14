@@ -986,10 +986,20 @@ const end_capture = function(ms, s, p) {
     return res;
 };
 
+/* Compare the elements of arrays 'a' and 'b' to see if they contain the same elements */
+const array_cmp = function(a, ai, b, bi, len) {
+    let aj = ai+len;
+    for (; ai < aj; ai++, bi++) {
+        if (a[ai] !== b[bi])
+            return false;
+    }
+    return true;
+};
+
 const match_capture = function(ms, s, l) {
     l = check_capture(ms, l);
     let len = ms.capture[l].len;
-    if (ms.src_end >= len && ms.src.slice(ms.capture[l].init, ms.capture[l].init + len) === ms.src.slice(s, s + len))
+    if ((ms.src_end-s) >= len && array_cmp(ms.src, ms.capture[l].init, ms.src, s, len))
         return s+len;
     else return null;
 };
