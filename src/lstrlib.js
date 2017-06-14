@@ -1239,7 +1239,7 @@ class GMatchState {
 const gmatch_aux = function(L) {
     let gm = lua.lua_touserdata(L, lua.lua_upvalueindex(3));
     gm.ms.L = L;
-    for (let src = gm.src; src < gm.ms.src_end; src++) {
+    for (let src = gm.src; src <= gm.ms.src_end; src++) {
         reprepstate(gm.ms);
         let e;
         if ((e = match(gm.ms, src, gm.p)) !== null && e !== gm.lastmatch) {
