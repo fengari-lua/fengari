@@ -160,31 +160,7 @@ test("[test-suite] pm: range", function (t) {
         local abc = string.char(range(0, 255));
 
         assert(string.len(abc) == 256)
-    `, L;
-    
-    t.plan(2);
 
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
-});
-
-
-test("[test-suite] pm: range (strset)", function (t) {
-    let luaCode = `
         function strset (p)
           local res = {s=''}
           string.gsub(abc, p, function (c) res.s = res.s .. c end)
