@@ -73,7 +73,7 @@
     - [x] `utf8.lua` (18/18)
     - [x] `vararg.lua` (8/8)
     - [ ] `db.lua` (46/54)
-    - [ ] `pm.lua` (27/38)
+    - [ ] `pm.lua` (34/36)
     - [ ] `tpack.lua` (20/32)
     - [ ] `big.lua`
     - [ ] `verybig.lua`
