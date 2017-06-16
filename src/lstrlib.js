@@ -599,7 +599,7 @@ const str_pack = function(L) {
             case KOption.Kchar: {  /* fixed-size string */
                 let s = lauxlib.luaL_checkstring(L, arg);
                 let len = s.length;
-                lauxlib.luaL_argcheck(L, len <= size, arg, lua.to_luastring("string long than given size", true));
+                lauxlib.luaL_argcheck(L, len <= size, arg, lua.to_luastring("string longer than given size", true));
                 b.push(...s);  /* add string */
                 while (len++ < size)  /* pad extra space */
                     b.push(LUAL_PACKPADBYTE);
