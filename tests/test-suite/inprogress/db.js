@@ -1259,42 +1259,39 @@ test("[test-suite] db: testing for-iterator name", function (t) {
 
 test("[test-suite] db: testing traceback sizes", function (t) {
     let luaCode = `
-        do
-          local function countlines (s)
-            return select(2, string.gsub(s, "\n", ""))
-          end
+        local function countlines (s)
+          return select(2, string.gsub(s, "\\n", ""))
+        end
 
-          local function deep (lvl, n)
-            if lvl == 0 then
-              return (debug.traceback("message", n))
-            else
-              return (deep(lvl-1, n))
-            end
+        local function deep (lvl, n)
+          if lvl == 0 then
+            return (debug.traceback("message", n))
+          else
+            return (deep(lvl-1, n))
           end
+        end
 
-          local function checkdeep (total, start)
-            local s = deep(total, start)
-            local rest = string.match(s, "^message\nstack traceback:\n(.*)$")
-            local cl = countlines(rest)
-            -- at most 10 lines in first part, 11 in second, plus '...'
-            assert(cl <= 10 + 11 + 1)
-            local brk = string.find(rest, "%.%.%.")
-            if brk then   -- does message have '...'?
-              local rest1 = string.sub(rest, 1, brk)
-              local rest2 = string.sub(rest, brk, #rest)
-              assert(countlines(rest1) == 10 and countlines(rest2) == 11)
-            else
-              assert(cl == total - start + 2)
-            end
+        local function checkdeep (total, start)
+          local s = deep(total, start)
+          local rest = string.match(s, "^message\\nstack traceback:\\n(.*)$")
+          local cl = countlines(rest)
+          -- at most 10 lines in first part, 11 in second, plus '...'
+          assert(cl <= 10 + 11 + 1)
+          local brk = string.find(rest, "%.%.%.")
+          if brk then   -- does message have '...'?
+            local rest1 = string.sub(rest, 1, brk)
+            local rest2 = string.sub(rest, brk, #rest)
+            assert(countlines(rest1) == 10 and countlines(rest2) == 11)
+          else
+            assert(cl == total - start + 2)
           end
+        end
 
-          for d = 1, 51, 10 do
-            for l = 1, d do
-              -- use coroutines to ensure complete control of the stack
-              coroutine.wrap(checkdeep)(d, l)
-            end
+        for d = 1, 51, 10 do
+          for l = 1, d do
+            -- use coroutines to ensure complete control of the stack
+            coroutine.wrap(checkdeep)(d, l)
           end
-
         end
     `, L;
 
