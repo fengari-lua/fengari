@@ -474,7 +474,6 @@ test("[test-suite] db: test hook presence in debug info", function (t) {
 
         g()
 
-        print(a[f], a[g], a[assert], a[debug.getlocal], a[print])
         assert(a[f] and a[g] and a[assert] and a[debug.getlocal] and not a[print])
     `, L;
 
