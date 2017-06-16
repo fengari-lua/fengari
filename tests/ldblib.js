@@ -44,7 +44,7 @@ test('debug.sethook', function (t) {
 
     t.strictEqual(
         lua.lua_tojsstring(L, -1),
-        "return count line count line count line count line return count line count line count line return count line count line count line return count line ",
+        "return count line count line count line call count line return count line count line call count line return count line count line call count line return count line ",
         "Correct element(s) on the stack"
     );
 

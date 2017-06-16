@@ -9,6 +9,7 @@ const ldebug  = require('./ldebug.js');
 const lfunc   = require('./lfunc.js');
 const llimit  = require('./llimit.js');
 const lobject = require('./lobject.js');
+const lopcodes= require('./lopcodes.js');
 const lparser = require('./lparser.js');
 const lstate  = require('./lstate.js');
 const lstring = require('./lstring.js');
@@ -173,7 +174,8 @@ const luaD_precall = function(L, off, nresults) {
             ci.l_code = p.code;
             ci.l_savedpc = 0;
             ci.callstatus = lstate.CIST_LUA;
-
+            if (L.hookmask & defs.LUA_MASKCALL)
+                callhook(L, ci);
             return false;
         }
         default:
@@ -270,6 +272,18 @@ const luaD_hook = function(L, event, line) {
         adjust_top(L, top);
         ci.callstatus &= ~lstate.CIST_HOOKED;
     }
+};
+
+const callhook = function(L, ci) {
+    let hook = defs.LUA_HOOKCALL;
+    ci.l_savedpc++;  /* hooks assume 'pc' is already incremented */
+    if ((ci.previous.callstatus & lstate.CIST_LUA) &&
+      ci.previous.l_code[ci.previous.l_savedpc - 1].opcode == lopcodes.OpCodesI.OP_TAILCALL) {
+        ci.callstatus |= lstate.CIST_TAIL;
+        hook = defs.LUA_HOOKTAILCALL;
+    }
+    luaD_hook(L, hook, -1);
+    ci.l_savedpc--;  /* correct 'pc' */
 };
 
 const adjust_varargs = function(L, p, actual) {
