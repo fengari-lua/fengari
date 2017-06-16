@@ -733,7 +733,7 @@ const unpackint = function(L, str, islittle, size, issigned) {
             res = ((res ^ mask) - mask);  /* do sign extension */
         }
     } else if (size > SZINT) {  /* must check unread bytes */
-        let mask = issigned || res >= 0 ? 0 : MC;
+        let mask = !issigned || res >= 0 ? 0 : MC;
         for (let i = limit; i < size; i++) {
             if (str[islittle ? i : size - 1 - i] !== mask)
                 lauxlib.luaL_error(L, lua.to_luastring("%d-byte integer does not fit into Lua Integer"), size);
