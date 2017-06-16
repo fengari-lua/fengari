@@ -400,9 +400,8 @@ test("[test-suite] tpack: overflow in packing)", function (t) {
 });
 
 
-test("[test-suite] tpack: Lua integer size)", function (t) {
+test("[test-suite] tpack: Lua integer size", function (t) {
     let luaCode = `
-        for i = 1, sizeLI - 1 do
         assert(unpack(">j", pack(">j", math.maxinteger)) == math.maxinteger)
         assert(unpack("<j", pack("<j", math.mininteger)) == math.mininteger)
         assert(unpack("<J", pack("<j", -1)) == -1)   -- maximum unsigned integer

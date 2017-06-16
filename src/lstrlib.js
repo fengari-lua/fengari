@@ -548,9 +548,10 @@ const packint = function(b, n, islittle, size, neg) {
 
 const packnum = function(b, n, islittle, size) {
     let dv = new DataView(new ArrayBuffer(size));
-    dv.setFloat64(0, n, islittle);
+    if (size === 4) dv.setFloat32(0, n, islittle);
+    else dv.setFloat64(0, n, islittle);
 
-    for (let i = 0; i < 8; i++)
+    for (let i = 0; i < size; i++)
         b.push(dv.getUint8(i, islittle));
 };
 
