@@ -749,7 +749,8 @@ const unpacknum = function(L, b, islittle, size) {
     let dv = new DataView(new ArrayBuffer(size));
     b.forEach((e, i) => dv.setUint8(i, e, islittle));
 
-    return dv.getFloat64(0, islittle);
+    if (size == 4) return dv.getFloat32(0, islittle);
+    else return dv.getFloat64(0, islittle);
 };
 
 const str_unpack = function(L) {
