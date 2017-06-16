@@ -116,7 +116,7 @@ const findlocal = function(L, ci, n) {
         base = ci.funcOff + 1;
 
     if (name === null) {  /* no 'standard' name? */
-        let limit = ci === L.ci ? L.top : ci.next.func;
+        let limit = ci === L.ci ? L.top : ci.next.funcOff;
         if (limit - base >= n && n > 0)  /* is 'n' inside 'ci' stack? */
             name = defs.to_luastring("(*temporary)", true);  /* generic name for any valid slot */
         else
