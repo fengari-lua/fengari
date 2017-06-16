@@ -764,7 +764,7 @@ const str_unpack = function(L) {
     let ld = data.length;
     let pos = posrelat(lauxlib.luaL_optinteger(L, 3, 1), ld) - 1;
     let n = 0;  /* number of results */
-    lauxlib.luaL_argcheck(L, pos <= ld, 3, lua.to_luastring("initial position out of string", true));
+    lauxlib.luaL_argcheck(L, pos <= ld && pos >= 0, 3, lua.to_luastring("initial position out of string", true));
     while (fmt.off < fmt.s.length) {
         let details = getdetails(h, pos, fmt);
         let opt = details.opt;
