@@ -617,7 +617,7 @@ const str_pack = function(L) {
             case KOption.Kzstr: {  /* zero-terminated string */
                 let s = lauxlib.luaL_checkstring(L, arg);
                 let len = s.length;
-                lauxlib.luaL_argcheck(L, s.length === String.fromCharCode(...s).length, arg, lua.to_luastring("strings contains zeros", true));
+                lauxlib.luaL_argcheck(L, s.indexOf(0) < 0, arg, lua.to_luastring("strings contains zeros", true));
                 b.push(...s);
                 b.push(0);  /* add zero at the end */
                 totalsize += len + 1;
