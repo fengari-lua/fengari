@@ -699,7 +699,7 @@ const str_packsize = function(L) {
         let size = details.size;
         let ntoalign = details.ntoalign;
         size += ntoalign;  /* total space used by option */
-        lauxlib.luaL_argcheck(L, totalsize <= MAXSIZE - size - 1, lua.to_luastring("format result too large", true));
+        lauxlib.luaL_argcheck(L, totalsize <= MAXSIZE - size, 1, lua.to_luastring("format result too large", true));
         totalsize += size;
         switch (opt) {
             case KOption.Kstring:  /* strings with length count */
