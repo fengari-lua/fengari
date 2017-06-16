@@ -452,7 +452,7 @@ const getoption = function(h, fmt) {
         case 'l'.charCodeAt(0): r.size = 8; r.opt = KOption.Kint;   return r; // sizeof(long): 8
         case 'L'.charCodeAt(0): r.size = 8; r.opt = KOption.Kuint;  return r;
         case 'j'.charCodeAt(0): r.size = 4; r.opt = KOption.Kint;   return r; // sizeof(lua_Integer): 4
-        case 'J'.charCodeAt(0): r.size = 8; r.opt = KOption.Kuint;  return r;
+        case 'J'.charCodeAt(0): r.size = 4; r.opt = KOption.Kuint;  return r;
         case 'T'.charCodeAt(0): r.size = 8; r.opt = KOption.Kuint;  return r; // sizeof(size_t): 8
         case 'f'.charCodeAt(0): r.size = 4; r.opt = KOption.Kfloat; return r; // sizeof(float): 4
         case 'd'.charCodeAt(0): r.size = 8; r.opt = KOption.Kfloat; return r; // sizeof(double): 8
@@ -548,9 +548,10 @@ const packint = function(b, n, islittle, size, neg) {
 
 const packnum = function(b, n, islittle, size) {
     let dv = new DataView(new ArrayBuffer(size));
-    dv.setFloat64(0, n, islittle);
+    if (size === 4) dv.setFloat32(0, n, islittle);
+    else dv.setFloat64(0, n, islittle);
 
-    for (let i = 0; i < 8; i++)
+    for (let i = 0; i < size; i++)
         b.push(dv.getUint8(i, islittle));
 };
 
@@ -598,7 +599,7 @@ const str_pack = function(L) {
             case KOption.Kchar: {  /* fixed-size string */
                 let s = lauxlib.luaL_checkstring(L, arg);
                 let len = s.length;
-                lauxlib.luaL_argcheck(L, len <= size, arg, lua.to_luastring("string long than given size", true));
+                lauxlib.luaL_argcheck(L, len <= size, arg, lua.to_luastring("string longer than given size", true));
                 b.push(...s);  /* add string */
                 while (len++ < size)  /* pad extra space */
                     b.push(LUAL_PACKPADBYTE);
@@ -616,7 +617,7 @@ const str_pack = function(L) {
             case KOption.Kzstr: {  /* zero-terminated string */
                 let s = lauxlib.luaL_checkstring(L, arg);
                 let len = s.length;
-                lauxlib.luaL_argcheck(L, s.length === String.fromCharCode(...s).length, arg, lua.to_luastring("strings contains zeros", true));
+                lauxlib.luaL_argcheck(L, s.indexOf(0) < 0, arg, lua.to_luastring("strings contains zeros", true));
                 b.push(...s);
                 b.push(0);  /* add zero at the end */
                 totalsize += len + 1;
@@ -733,7 +734,7 @@ const unpackint = function(L, str, islittle, size, issigned) {
             res = ((res ^ mask) - mask);  /* do sign extension */
         }
     } else if (size > SZINT) {  /* must check unread bytes */
-        let mask = issigned || res >= 0 ? 0 : MC;
+        let mask = !issigned || res >= 0 ? 0 : MC;
         for (let i = limit; i < size; i++) {
             if (str[islittle ? i : size - 1 - i] !== mask)
                 lauxlib.luaL_error(L, lua.to_luastring("%d-byte integer does not fit into Lua Integer"), size);
@@ -746,9 +747,11 @@ const unpacknum = function(L, b, islittle, size) {
     assert(b.length >= size);
 
     let dv = new DataView(new ArrayBuffer(size));
-    b.forEach((e, i) => dv.setUint8(i, e, islittle));
+    for (let i = 0; i < size; i++)
+        dv.setUint8(i, b[i], islittle);
 
-    return dv.getFloat64(0, islittle);
+    if (size == 4) return dv.getFloat32(0, islittle);
+    else return dv.getFloat64(0, islittle);
 };
 
 const str_unpack = function(L) {
@@ -761,7 +764,7 @@ const str_unpack = function(L) {
     let ld = data.length;
     let pos = posrelat(lauxlib.luaL_optinteger(L, 3, 1), ld) - 1;
     let n = 0;  /* number of results */
-    lauxlib.luaL_argcheck(L, pos <= ld, 3, lua.to_luastring("initial position out of string", true));
+    lauxlib.luaL_argcheck(L, pos <= ld && pos >= 0, 3, lua.to_luastring("initial position out of string", true));
     while (fmt.off < fmt.s.length) {
         let details = getdetails(h, pos, fmt);
         let opt = details.opt;
