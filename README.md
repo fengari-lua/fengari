@@ -68,12 +68,12 @@
     - [x] `locals.lua` (10/10)
     - [x] `math.lua` (68/68)
     - [x] `nextvar.lua` (44/44)
+    - [x] `pm.lua` (36/36)
     - [x] `sort.lua` (24/24)
     - [x] `strings.lua` (34/34)
     - [x] `utf8.lua` (18/18)
     - [x] `vararg.lua` (8/8)
     - [ ] `db.lua` (46/54)
-    - [ ] `pm.lua` (34/36)
     - [ ] `tpack.lua` (20/32)
     - [ ] `big.lua`
     - [ ] `verybig.lua`
