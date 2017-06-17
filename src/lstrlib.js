@@ -587,8 +587,8 @@ const str_pack = function(L) {
             case KOption.Kuint: {  /* unsigned integers */
                 let n = lauxlib.luaL_checkinteger(L, arg);
                 if (size < SZINT)
-                    lauxlib.luaL_argcheck(L, n < (1 << (size * NB)), arg, lua.to_luastring("unsigned overflow", true));
-                packint(b, n, h.islittle, size, false);
+                    lauxlib.luaL_argcheck(L, (n>>>0) < (1 << (size * NB)), arg, lua.to_luastring("unsigned overflow", true));
+                packint(b, n>>>0, h.islittle, size, false);
                 break;
             }
             case KOption.Kfloat: {  /* floating-point options */

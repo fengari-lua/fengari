@@ -364,9 +364,8 @@ test("[test-suite] tpack: overflow in packing", function (t) {
           local umax = (1 << (i * 8)) - 1
           local max = umax >> 1
           local min = ~max
-          -- TODO: unsigned overflow
-          -- checkerror("overflow", pack, "<I" .. i, -1)
-          -- checkerror("overflow", pack, "<I" .. i, min)
+          checkerror("overflow", pack, "<I" .. i, -1)
+          checkerror("overflow", pack, "<I" .. i, min)
           checkerror("overflow", pack, ">I" .. i, umax + 1)
 
           checkerror("overflow", pack, ">i" .. i, umax)
