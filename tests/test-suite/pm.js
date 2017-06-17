@@ -202,11 +202,8 @@ test("[test-suite] pm: range", function (t) {
 
 // Can't be represented by JS string, testing from actual lua file
 test("[test-suite] pm: classes", function (t) {
-    let luaCode = `
-        local f = loadfile("tests/test-suite/pm-classes.lua")
-        return f()
-    `, L;
-    
+    let L;
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -215,7 +212,7 @@ test("[test-suite] pm: classes", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadfile(L, lua.to_luastring("tests/test-suite/pm-classes.lua"));
 
     }, "Lua program loaded without error");
 
@@ -229,11 +226,8 @@ test("[test-suite] pm: classes", function (t) {
 
 // Can't be represented by JS string, testing from actual lua file
 test("[test-suite] pm: gsub", function (t) {
-    let luaCode = `
-        local f = loadfile("tests/test-suite/pm-gsub.lua")
-        return f()
-    `, L;
-    
+    let L;
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -242,7 +236,7 @@ test("[test-suite] pm: gsub", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadfile(L, lua.to_luastring("tests/test-suite/pm-gsub.lua"));
 
     }, "Lua program loaded without error");
 
