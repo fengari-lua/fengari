@@ -449,8 +449,8 @@ const getoption = function(h, fmt) {
         case 'B'.charCodeAt(0): r.size = 1; r.opt = KOption.Kuint;  return r;
         case 'h'.charCodeAt(0): r.size = 2; r.opt = KOption.Kint;   return r; // sizeof(short): 2
         case 'H'.charCodeAt(0): r.size = 2; r.opt = KOption.Kuint;  return r;
-        case 'l'.charCodeAt(0): r.size = 8; r.opt = KOption.Kint;   return r; // sizeof(long): 8
-        case 'L'.charCodeAt(0): r.size = 8; r.opt = KOption.Kuint;  return r;
+        case 'l'.charCodeAt(0): r.size = 4; r.opt = KOption.Kint;   return r; // sizeof(long): 4
+        case 'L'.charCodeAt(0): r.size = 4; r.opt = KOption.Kuint;  return r;
         case 'j'.charCodeAt(0): r.size = 4; r.opt = KOption.Kint;   return r; // sizeof(lua_Integer): 4
         case 'J'.charCodeAt(0): r.size = 4; r.opt = KOption.Kuint;  return r;
         case 'T'.charCodeAt(0): r.size = 8; r.opt = KOption.Kuint;  return r; // sizeof(size_t): 8

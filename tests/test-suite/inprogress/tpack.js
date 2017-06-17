@@ -80,12 +80,11 @@ test("[test-suite] tpack: minimum behavior for integer formats", function (t) {
         assert(unpack("h", pack("h", 0x7fff)) == 0x7fff)
         assert(unpack("h", pack("h", -0x8000)) == -0x8000)
 
-        -- TODO: JS mask will force a value between 0 and 255
-        -- assert(unpack("L", pack("L", 0xffffffff)) == 0xffffffff)
+        assert(unpack("L", pack("L", 0xffffffff)) == 0xffffffff)
         assert(unpack("l", pack("l", 0x7fffffff)) == 0x7fffffff)
         assert(unpack("l", pack("l", -0x80000000)) == -0x80000000)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
