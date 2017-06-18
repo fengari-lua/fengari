@@ -24,8 +24,11 @@ const toByteCode = function (luaCode) {
 
 const getState = function(luaCode) {
     let L = lauxlib.luaL_newstate();
+    if (!L)
+        throw Error("unable to create lua_State");
 
-    lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+    if (lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode)) !== lua.LUA_OK)
+        return Error(lua.lua_tojsstring(L, -1));
 
     return L;
 };
