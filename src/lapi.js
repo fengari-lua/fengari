@@ -236,7 +236,7 @@ const lua_pushlstring = function(L, s, len) {
     if (len === 0) {
         ts = lstring.luaS_bless(L, []);
     } else {
-        assert(defs.is_luastring(s), "lua_pushlstring expects array of byte");
+        assert(defs.is_luastring(s) && s.length >= len, "lua_pushlstring expects array of byte");
         ts = lstring.luaS_bless(L, s.slice(0, len));
     }
     lobject.pushsvalue2s(L, ts);
