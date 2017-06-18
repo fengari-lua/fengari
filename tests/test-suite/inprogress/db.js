@@ -973,12 +973,11 @@ test("[test-suite] db: testing debugging of coroutines", function (t) {
 
         local co = coroutine.create(f)
         coroutine.resume(co, 3)
-        -- TODO: will fail because of filename not being db.lua
-        -- checktraceback(co, {"yield", "db.lua", "db.lua", "db.lua", "db.lua"})
-        -- checktraceback(co, {"db.lua", "db.lua", "db.lua", "db.lua"}, 1)
-        -- checktraceback(co, {"db.lua", "db.lua", "db.lua"}, 2)
-        -- checktraceback(co, {"db.lua"}, 4)
-        -- checktraceback(co, {}, 40)
+        checktraceback(co, {"yield", "db.lua", "db.lua", "db.lua", "db.lua"})
+        checktraceback(co, {"db.lua", "db.lua", "db.lua", "db.lua"}, 1)
+        checktraceback(co, {"db.lua", "db.lua", "db.lua"}, 2)
+        checktraceback(co, {"db.lua"}, 4)
+        checktraceback(co, {}, 40)
 
 
         co = coroutine.create(function (x)
@@ -1031,7 +1030,9 @@ test("[test-suite] db: testing debugging of coroutines", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        let b = lua.to_luastring(luaCode);
+        if (lauxlib.luaL_loadbuffer(L, b, b.length, lua.to_luastring("@db.lua")) !== lua.LUA_OK)
+          throw Error(lua.lua_tojsstring(L, -1));
 
     }, "Lua program loaded without error");
 
@@ -1303,7 +1304,9 @@ test("[test-suite] db: testing traceback sizes", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        let b = lua.to_luastring(luaCode);
+        if (lauxlib.luaL_loadbuffer(L, b, b.length, lua.to_luastring("@db.lua")) !== lua.LUA_OK)
+          throw Error(lua.lua_tojsstring(L, -1));
 
     }, "Lua program loaded without error");
 
