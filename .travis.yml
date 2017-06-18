@@ -3,9 +3,6 @@ language: node
 cache: yarn
 
 before_install:
-    - pip install --user hererocks
-    - hererocks lua53 -l5.3 -rlatest --cflags="-DLUA_INT_TYPE=LUA_INT_INT"
-    - source lua53/bin/activate
     - nvm install node
     - export NODE=$(nvm which node)
     - export NPM=${NODE%node}npm
