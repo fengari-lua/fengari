@@ -662,11 +662,10 @@ const Chook = function(L, ar) {
     runJS(L, L, { script: scpt, offset: 0 });  /* run script from C_HOOK[L] */
 };
 
-class Aux { 
+class Aux {
     constructor() {
-        this.jb = null;
         this.paniccode = null;
-        this.L = null; 
+        this.L = null;
     }
 }
 
@@ -674,20 +673,19 @@ class Aux {
 ** does a long-jump back to "main program".
 */
 const panicback = function(L) {
-    let b = Aux();
+    let b = new Aux();
     lua.lua_checkstack(L, 1);    /* open space for 'Aux' struct */
     lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, lua.to_luastring("_jmpbuf", true));    /* get 'Aux' struct */
     b = lua.lua_touserdata(L, -1);
     lua.lua_pop(L, 1);    /* remove 'Aux' struct */
-    runJS(b.L, L, b.paniccode);    /* run optional panic code */
-    longjmp(b.jb, 1); // TODO ?
-    return 1;    /* to avoid warnings */
+    runJS(b.L, L, { script: b.paniccode, offset: 0 });    /* run optional panic code */
+    throw 1;
 };
 
 const checkpanic = function(L) {
     let b = new Aux();
     let code = lauxlib.luaL_checkstring(L, 1);
-    b.paniccode = lauxlib.luaL_optstring(L, 2, "");
+    b.paniccode = lauxlib.luaL_optstring(L, 2, lua.to_luastring("", true));
     b.L = L;
     let L1 = lua.lua_newstate();    /* create new state */
     if (L1 === null) {    /* error? */
@@ -697,10 +695,10 @@ const checkpanic = function(L) {
     lua.lua_atpanic(L1, panicback);    /* set its panic function */
     lua.lua_pushlightuserdata(L1, b);
     lua.lua_setfield(L1, lua.LUA_REGISTRYINDEX, lua.to_luastring("_jmpbuf", true));    /* store 'Aux' struct */
-    if (setjmp(b.jb) === 0) {    /* set jump buffer */ // TODO ?
-        runJS(L, L1, code);    /* run code unprotected */
+    try {    /* set jump buffer */
+        runJS(L, L1, { script: code, offset: 0 });    /* run code unprotected */
         lua.lua_pushliteral(L, "no errors");
-    } else {    /* error handling */
+    } catch (e) {    /* error handling */
         /* move error message to original state */
         lua.lua_pushstring(L, lua.lua_tostring(L1, -1));
     }

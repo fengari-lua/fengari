@@ -757,8 +757,7 @@ test("[test-suite] api: testing lua_to...", function (t) {
     }, "Lua program ran without error");
 });
 
-// TODO: longjmp ?
-test("[test-suite] api: testing panic function", { skip: true }, function (t) {
+test("[test-suite] api: testing panic function", function (t) {
     let luaCode = `
         do
           -- trivial error
@@ -776,10 +775,12 @@ test("[test-suite] api: testing panic function", { skip: true }, function (t) {
               "bad argument #4 (string expected, got no value)")
           
 
+          --[[ TODO: T.totalmem
           -- memory error
           T.totalmem(T.totalmem()+10000)   -- set low memory limit (+10k)
           assert(T.checkpanic("newuserdata 20000") == "not enough memory")
           T.totalmem(0)          -- restore high limit
+          ]]
 
           -- stack error
           if not _soft then
@@ -804,7 +805,7 @@ test("[test-suite] api: testing panic function", { skip: true }, function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
