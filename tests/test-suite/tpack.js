@@ -4,9 +4,9 @@ const test     = require('tape');
 
 global.WEB = false;
 
-const lua     = require('../../../src/lua.js');
-const lauxlib = require('../../../src/lauxlib.js');
-const lualib  = require('../../../src/lualib.js');
+const lua     = require('../../src/lua.js');
+const lauxlib = require('../../src/lauxlib.js');
+const lualib  = require('../../src/lualib.js');
 
 
 const prefix = `
@@ -48,7 +48,7 @@ test("[test-suite] tpack: maximum size for integers", function (t) {
         print("\\t" .. (little and "little" or "big") .. " endian")
         print("\\talignment: " .. align)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -123,7 +123,7 @@ test("[test-suite] tpack: minimum behavior for integer formats", function (t) {
           assert(unpack(">I" .. i, s:reverse()) == 0xAA)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -168,7 +168,7 @@ test("[test-suite] tpack: minimum behavior for integer formats", function (t) {
           end
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -202,7 +202,7 @@ test("[test-suite] tpack: minimum behavior for integer formats", function (t) {
           assert(unpack(">i" .. i, s:reverse()) == n)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -235,7 +235,7 @@ test("[test-suite] tpack: sign extension", function (t) {
           end
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -266,7 +266,7 @@ test("[test-suite] tpack: mixed endianness", function (t) {
           assert(pack("=i4", 2001) == pack("i4", 2001))
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -301,7 +301,7 @@ test("[test-suite] tpack: testing invalid formats", function (t) {
         checkerror("variable%-length format", packsize, "s")
         checkerror("variable%-length format", packsize, "z")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -336,7 +336,7 @@ test("[test-suite] tpack: overflow in option size (error will be in digit after 
           assert(packsize(s) == 0x7fffffff)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -377,7 +377,7 @@ test("[test-suite] tpack: overflow in packing", function (t) {
           assert(unpack(">I" .. i, pack(">I" .. i, umax)) == umax)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -411,7 +411,7 @@ test("[test-suite] tpack: Lua integer size", function (t) {
           assert(pack("f", 24) == pack(">f", 24))
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -451,7 +451,7 @@ test("[test-suite] tpack: testing pack/unpack of floating-point numbers", functi
           assert(unpack(">d", pack(">d", n)) == n)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -517,7 +517,7 @@ test("[test-suite] tpack: testing pack/unpack of strings", function (t) {
           checkerror("longer than", pack, "c3", "1234")
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -549,7 +549,7 @@ test("[test-suite] tpack: testing multiple types and sequence", function (t) {
                  g == 7 and h == 8) 
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -615,7 +615,7 @@ test("[test-suite] tpack: testing alignment", function (t) {
           checkerror("invalid next option", pack, "Xc1")
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -670,7 +670,7 @@ test("[test-suite] tpack: testing initial position", function (t) {
          
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {

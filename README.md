@@ -71,10 +71,10 @@
     - [x] `pm.lua` (36/36)
     - [x] `sort.lua` (24/24)
     - [x] `strings.lua` (34/34)
+    - [x] `tpack.lua` (32/32)
     - [x] `utf8.lua` (18/18)
     - [x] `vararg.lua` (8/8)
     - [ ] `db.lua` (46/54)
-    - [ ] `tpack.lua` (20/32)
     - [ ] `big.lua`
     - [ ] `verybig.lua`
 - [x] Full JS interoperability: [https://github.com/fengari-lua/fengari-interop](https://github.com/fengari-lua/fengari-interop)
