@@ -1119,7 +1119,7 @@ const match = function(ms, s, p) {
 const push_onecapture = function(ms, i, s, e) {
     if (i >= ms.level) {
         if (i === 0)
-            lua.lua_pushlstring(ms.L, ms.src.slice(s), e - s);  /* add whole match */
+            lua.lua_pushlstring(ms.L, ms.src.slice(s, e), e - s);  /* add whole match */
         else
             lauxlib.luaL_error(ms.L, lua.to_luastring("invalid capture index %%%d"), i + 1);
     } else {
