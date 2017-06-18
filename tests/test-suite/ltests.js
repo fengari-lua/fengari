@@ -103,9 +103,8 @@ const ops = "+-*%^/\\&|~<>_!".split('').map(e => e.charCodeAt(0));
 
 const runJS = function(L, L1, pc) {
     let buff = [];
-    let status = 0;  
-    assert(pc.script);
-    if (!pc || pc.script.length === 0) return lauxlib.luaL_error(L, "attempt to runJS empty script");
+    let status = 0;
+    if (!pc || !pc.script) return lauxlib.luaL_error(L, lua.to_luastring("attempt to runJS null script"));
     for (;;) {
         let inst = lua.to_jsstring(getstring(L, buff, pc));
         if (inst.length === 0) return 0;
