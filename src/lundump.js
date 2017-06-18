@@ -17,7 +17,7 @@ class BytecodeParser {
 
     constructor(L, Z, name) {
         this.intSize = 4;
-        this.size_tSize = 8;
+        this.size_tSize = 4;
         this.instructionSize = 4;
         this.integerSize = 4;
         this.numberSize = 8;
@@ -237,7 +237,7 @@ class BytecodeParser {
         this.numberSize      = this.readByte();
 
         this.checksize(this.intSize, 4, "int");
-        this.checksize(this.size_tSize, 8, "size_t");
+        this.checksize(this.size_tSize, 4, "size_t");
         this.checksize(this.instructionSize, 4, "instruction");
         this.checksize(this.integerSize, 4, "integer");
         this.checksize(this.numberSize, 8, "number");

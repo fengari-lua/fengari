@@ -487,11 +487,10 @@ test("[test-suite] tpack: testing pack/unpack of strings", function (t) {
 
           checkerror("contains zeros", pack, "z", "alo\\0");
 
-          -- TODO: << overflow in JS vs C
-          -- for i = 2, NB do
-          --   local s1 = pack("s" .. i, s)
-          --   assert(unpack("s" .. i, s1) == s and #s1 == #s + i)
-          -- end
+          for i = 2, NB do
+            local s1 = pack("s" .. i, s)
+            assert(unpack("s" .. i, s1) == s and #s1 == #s + i)
+          end
         end
 
         do

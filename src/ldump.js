@@ -170,7 +170,7 @@ const DumpHeader = function(D) {
   let cdata = LUAC_DATA.split('').map(e => e.charCodeAt(0));
   DumpBlock(cdata, cdata.length, D);
   DumpByte(4, D); // intSize
-  DumpByte(8, D); // size_tSize
+  DumpByte(4, D); // size_tSize
   DumpByte(4, D); // instructionSize
   DumpByte(4, D); // integerSize
   DumpByte(8, D); // numberSize

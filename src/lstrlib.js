@@ -453,13 +453,13 @@ const getoption = function(h, fmt) {
         case 'L'.charCodeAt(0): r.size = 4; r.opt = KOption.Kuint;  return r;
         case 'j'.charCodeAt(0): r.size = 4; r.opt = KOption.Kint;   return r; // sizeof(lua_Integer): 4
         case 'J'.charCodeAt(0): r.size = 4; r.opt = KOption.Kuint;  return r;
-        case 'T'.charCodeAt(0): r.size = 8; r.opt = KOption.Kuint;  return r; // sizeof(size_t): 8
+        case 'T'.charCodeAt(0): r.size = 4; r.opt = KOption.Kuint;  return r; // sizeof(size_t): 4
         case 'f'.charCodeAt(0): r.size = 4; r.opt = KOption.Kfloat; return r; // sizeof(float): 4
         case 'd'.charCodeAt(0): r.size = 8; r.opt = KOption.Kfloat; return r; // sizeof(double): 8
         case 'n'.charCodeAt(0): r.size = 8; r.opt = KOption.Kfloat; return r; // sizeof(lua_Number): 8
         case 'i'.charCodeAt(0): r.size = getnumlimit(h, fmt, 4); r.opt = KOption.Kint;    return r; // sizeof(int): 4
         case 'I'.charCodeAt(0): r.size = getnumlimit(h, fmt, 4); r.opt = KOption.Kuint;   return r;
-        case 's'.charCodeAt(0): r.size = getnumlimit(h, fmt, 8); r.opt = KOption.Kstring; return r;
+        case 's'.charCodeAt(0): r.size = getnumlimit(h, fmt, 4); r.opt = KOption.Kstring; return r;
         case 'c'.charCodeAt(0): {
             r.size = getnum(fmt, -1);
             if (r.size === -1)
@@ -608,7 +608,7 @@ const str_pack = function(L) {
             case KOption.Kstring: {  /* strings with length count */
                 let s = lauxlib.luaL_checkstring(L, arg);
                 let len = s.length;
-                lauxlib.luaL_argcheck(L, size >= 8 /* sizeof(size_t) */ ||
+                lauxlib.luaL_argcheck(L, size >= 4 /* sizeof(size_t) */ ||
                     len < (1 << (size * NB)),
                     arg, lua.to_luastring("string length does not fit in given size", true));
                 packint(b, len, h.islittle, size, 0);  /* pack length */
