@@ -200,12 +200,11 @@ const luaV_execute = function(L) {
             case OCi.OP_ADD: {
                 let op1 = RKB(L, base, k, i);
                 let op2 = RKC(L, base, k, i);
-                let numberop1 = tonumber(op1);
-                let numberop2 = tonumber(op2);
+                let numberop1, numberop2;
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
                     L.stack[ra].setivalue((op1.value + op2.value)|0);
-                } else if (numberop1 !== false && numberop2 !== false) {
+                } else if ((numberop1 = tonumber(op1)) !== false && (numberop2 = tonumber(op2)) !== false) {
                     L.stack[ra].setfltvalue(numberop1 + numberop2);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, L.stack[ra], ltm.TMS.TM_ADD);
@@ -215,12 +214,11 @@ const luaV_execute = function(L) {
             case OCi.OP_SUB: {
                 let op1 = RKB(L, base, k, i);
                 let op2 = RKC(L, base, k, i);
-                let numberop1 = tonumber(op1);
-                let numberop2 = tonumber(op2);
+                let numberop1, numberop2;
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
                     L.stack[ra].setivalue((op1.value - op2.value)|0);
-                } else if (numberop1 !== false && numberop2 !== false) {
+                } else if ((numberop1 = tonumber(op1)) !== false && (numberop2 = tonumber(op2)) !== false) {
                     L.stack[ra].setfltvalue(numberop1 - numberop2);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, L.stack[ra], ltm.TMS.TM_SUB);
@@ -230,12 +228,11 @@ const luaV_execute = function(L) {
             case OCi.OP_MUL: {
                 let op1 = RKB(L, base, k, i);
                 let op2 = RKC(L, base, k, i);
-                let numberop1 = tonumber(op1);
-                let numberop2 = tonumber(op2);
+                let numberop1, numberop2;
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
                     L.stack[ra].setivalue(Math.imul(op1.value, op2.value));
-                } else if (numberop1 !== false && numberop2 !== false) {
+                } else if ((numberop1 = tonumber(op1)) !== false && (numberop2 = tonumber(op2)) !== false) {
                     L.stack[ra].setfltvalue(numberop1 * numberop2);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, L.stack[ra], ltm.TMS.TM_MUL);
@@ -245,12 +242,11 @@ const luaV_execute = function(L) {
             case OCi.OP_MOD: {
                 let op1 = RKB(L, base, k, i);
                 let op2 = RKC(L, base, k, i);
-                let numberop1 = tonumber(op1);
-                let numberop2 = tonumber(op2);
+                let numberop1, numberop2;
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
                     L.stack[ra].setivalue(luaV_mod(L, op1.value, op2.value));
-                } else if (numberop1 !== false && numberop2 !== false) {
+                } else if ((numberop1 = tonumber(op1)) !== false && (numberop2 = tonumber(op2)) !== false) {
                     L.stack[ra].setfltvalue(llimit.luai_nummod(L, numberop1, numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, L.stack[ra], ltm.TMS.TM_MOD);
@@ -260,10 +256,9 @@ const luaV_execute = function(L) {
             case OCi.OP_POW: {
                 let op1 = RKB(L, base, k, i);
                 let op2 = RKC(L, base, k, i);
-                let numberop1 = tonumber(op1);
-                let numberop2 = tonumber(op2);
+                let numberop1, numberop2;
 
-                if (numberop1 !== false && numberop2 !== false) {
+                if ((numberop1 = tonumber(op1)) !== false && (numberop2 = tonumber(op2)) !== false) {
                     L.stack[ra].setfltvalue(Math.pow(numberop1, numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, L.stack[ra], ltm.TMS.TM_POW);
@@ -273,10 +268,9 @@ const luaV_execute = function(L) {
             case OCi.OP_DIV: {
                 let op1 = RKB(L, base, k, i);
                 let op2 = RKC(L, base, k, i);
-                let numberop1 = tonumber(op1);
-                let numberop2 = tonumber(op2);
+                let numberop1, numberop2;
 
-                if (numberop1 !== false && numberop2 !== false) {
+                if ((numberop1 = tonumber(op1)) !== false && (numberop2 = tonumber(op2)) !== false) {
                     L.stack[ra].setfltvalue(numberop1 / numberop2);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, L.stack[ra], ltm.TMS.TM_DIV);
@@ -286,12 +280,11 @@ const luaV_execute = function(L) {
             case OCi.OP_IDIV: {
                 let op1 = RKB(L, base, k, i);
                 let op2 = RKC(L, base, k, i);
-                let numberop1 = tonumber(op1);
-                let numberop2 = tonumber(op2);
+                let numberop1, numberop2;
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
                     L.stack[ra].setivalue(luaV_div(L, op1.value, op2.value));
-                } else if (numberop1 !== false && numberop2 !== false) {
+                } else if ((numberop1 = tonumber(op1)) !== false && (numberop2 = tonumber(op2)) !== false) {
                     L.stack[ra].setfltvalue(Math.floor(numberop1 / numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, L.stack[ra], ltm.TMS.TM_IDIV);
@@ -301,10 +294,9 @@ const luaV_execute = function(L) {
             case OCi.OP_BAND: {
                 let op1 = RKB(L, base, k, i);
                 let op2 = RKC(L, base, k, i);
-                let numberop1 = tointeger(op1);
-                let numberop2 = tointeger(op2);
+                let numberop1, numberop2;
 
-                if (numberop1 !== false && numberop2 !== false) {
+                if ((numberop1 = tointeger(op1)) !== false && (numberop2 = tointeger(op2)) !== false) {
                     L.stack[ra].setivalue(numberop1 & numberop2);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, L.stack[ra], ltm.TMS.TM_BAND);
@@ -314,10 +306,9 @@ const luaV_execute = function(L) {
             case OCi.OP_BOR: {
                 let op1 = RKB(L, base, k, i);
                 let op2 = RKC(L, base, k, i);
-                let numberop1 = tointeger(op1);
-                let numberop2 = tointeger(op2);
+                let numberop1, numberop2;
 
-                if (numberop1 !== false && numberop2 !== false) {
+                if ((numberop1 = tointeger(op1)) !== false && (numberop2 = tointeger(op2)) !== false) {
                     L.stack[ra].setivalue(numberop1 | numberop2);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, L.stack[ra], ltm.TMS.TM_BOR);
@@ -327,10 +318,9 @@ const luaV_execute = function(L) {
             case OCi.OP_BXOR: {
                 let op1 = RKB(L, base, k, i);
                 let op2 = RKC(L, base, k, i);
-                let numberop1 = tointeger(op1);
-                let numberop2 = tointeger(op2);
+                let numberop1, numberop2;
 
-                if (numberop1 !== false && numberop2 !== false) {
+                if ((numberop1 = tointeger(op1)) !== false && (numberop2 = tointeger(op2)) !== false) {
                     L.stack[ra].setivalue(numberop1 ^ numberop2);
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, L.stack[ra], ltm.TMS.TM_BXOR);
@@ -340,10 +330,9 @@ const luaV_execute = function(L) {
             case OCi.OP_SHL: {
                 let op1 = RKB(L, base, k, i);
                 let op2 = RKC(L, base, k, i);
-                let numberop1 = tointeger(op1);
-                let numberop2 = tointeger(op2);
+                let numberop1, numberop2;
 
-                if (numberop1 !== false && numberop2 !== false) {
+                if ((numberop1 = tointeger(op1)) !== false && (numberop2 = tointeger(op2)) !== false) {
                     L.stack[ra].setivalue(luaV_shiftl(numberop1, numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, L.stack[ra], ltm.TMS.TM_SHL);
@@ -353,10 +342,9 @@ const luaV_execute = function(L) {
             case OCi.OP_SHR: {
                 let op1 = RKB(L, base, k, i);
                 let op2 = RKC(L, base, k, i);
-                let numberop1 = tointeger(op1);
-                let numberop2 = tointeger(op2);
+                let numberop1, numberop2;
 
-                if (numberop1 !== false && numberop2 !== false) {
+                if ((numberop1 = tointeger(op1)) !== false && (numberop2 = tointeger(op2)) !== false) {
                     L.stack[ra].setivalue(luaV_shiftl(numberop1, -numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, L.stack[ra], ltm.TMS.TM_SHR);
@@ -365,11 +353,11 @@ const luaV_execute = function(L) {
             }
             case OCi.OP_UNM: {
                 let op = L.stack[RB(L, base, i)];
-                let numberop = tonumber(op);
+                let numberop;
 
                 if (op.ttisinteger()) {
                     L.stack[ra].setivalue((-op.value)|0);
-                } else if (numberop !== false) {
+                } else if ((numberop = tonumber(op)) !== false) {
                     L.stack[ra].setfltvalue(-numberop);
                 } else {
                     ltm.luaT_trybinTM(L, op, op, L.stack[ra], ltm.TMS.TM_UNM);
