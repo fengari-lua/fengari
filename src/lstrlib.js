@@ -608,7 +608,9 @@ const str_pack = function(L) {
             case KOption.Kstring: {  /* strings with length count */
                 let s = lauxlib.luaL_checkstring(L, arg);
                 let len = s.length;
-                lauxlib.luaL_argcheck(L, size >= NB || len < (1 << size * NB), arg, lua.to_luastring("string length does not fit in given size", true));
+                lauxlib.luaL_argcheck(L, size >= 8 /* sizeof(size_t) */ ||
+                    len < (1 << (size * NB)),
+                    arg, lua.to_luastring("string length does not fit in given size", true));
                 packint(b, len, h.islittle, size, 0);  /* pack length */
                 b.push(...s);
                 totalsize += len;
