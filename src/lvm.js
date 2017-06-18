@@ -156,13 +156,13 @@ const luaV_execute = function(L) {
             case OCi.OP_GETTABUP: {
                 let upval = cl.upvals[i.B].v;
                 let rc = RKC(L, base, k, i);
-                gettable(L, upval, rc, ra);
+                luaV_gettable(L, upval, rc, ra);
                 break;
             }
             case OCi.OP_GETTABLE: {
                 let rb = L.stack[RB(L, base, i)];
                 let rc = RKC(L, base, k, i);
-                gettable(L, rb, rc, ra);
+                luaV_gettable(L, rb, rc, ra);
                 break;
             }
             case OCi.OP_SETTABUP: {
@@ -193,8 +193,7 @@ const luaV_execute = function(L) {
                 let rb = RB(L, base, i);
                 let rc = RKC(L, base, k, i);
                 lobject.setobjs2s(L, ra + 1, rb);
-
-                gettable(L, L.stack[rb], rc, ra);
+                luaV_gettable(L, L.stack[rb], rc, ra);
                 break;
             }
             case OCi.OP_ADD: {
@@ -976,7 +975,7 @@ const luaV_concat = function(L, total) {
 
 const MAXTAGLOOP = 2000;
 
-const gettable = function(L, t, key, ra) {
+const luaV_gettable = function(L, t, key, ra) {
     for (let loop = 0; loop < MAXTAGLOOP; loop++) {
         let tm;
 
@@ -1042,7 +1041,7 @@ const settable = function(L, t, key, val) {
 
 module.exports.cvt2str          = cvt2str;
 module.exports.cvt2num          = cvt2num;
-module.exports.gettable         = gettable;
+module.exports.luaV_gettable    = luaV_gettable;
 module.exports.luaV_concat      = luaV_concat;
 module.exports.luaV_div         = luaV_div;
 module.exports.luaV_equalobj    = luaV_equalobj;

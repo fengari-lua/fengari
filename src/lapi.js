@@ -468,7 +468,7 @@ const auxgetstr = function(L, t, k) {
     let str = lstring.luaS_new(L, k);
     lobject.pushsvalue2s(L, str);
     assert(L.top <= L.ci.top, "stack overflow");
-    lvm.gettable(L, t, L.stack[L.top - 1], L.top - 1);
+    lvm.luaV_gettable(L, t, L.stack[L.top - 1], L.top - 1);
     return L.stack[L.top - 1].ttnov();
 };
 
@@ -611,7 +611,7 @@ const lua_getuservalue = function(L, idx) {
 
 const lua_gettable = function(L, idx) {
     let t = index2addr(L, idx);
-    lvm.gettable(L, t, L.stack[L.top - 1], L.top - 1);
+    lvm.luaV_gettable(L, t, L.stack[L.top - 1], L.top - 1);
     return L.stack[L.top - 1].ttnov();
 };
 
@@ -625,7 +625,7 @@ const lua_geti = function(L, idx, n) {
     L.stack[L.top] = new TValue(CT.LUA_TNUMINT, n);
     L.top++;
     assert(L.top <= L.ci.top, "stack overflow");
-    lvm.gettable(L, t, L.stack[L.top - 1], L.top - 1);
+    lvm.luaV_gettable(L, t, L.stack[L.top - 1], L.top - 1);
     return L.stack[L.top - 1].ttnov();
 };
 
