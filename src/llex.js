@@ -176,21 +176,13 @@ const inclinenumber = function(ls) {
 const luaX_setinput = function(L, ls, z, source, firstchar) {
     ls.t = {
         token: 0,
-        seminfo: {
-            i: NaN,
-            r: NaN,
-            ts: null
-        }
+        seminfo: new SemInfo()
     };
     ls.L = L;
     ls.current = firstchar;
     ls.lookahead = {
         token: R.TK_EOS,
-        seminfo: {
-            i: NaN,
-            r: NaN,
-            ts: null
-        }
+        seminfo: new SemInfo()
     };
     ls.z = z;
     ls.fs = null;
