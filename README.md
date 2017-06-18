@@ -61,6 +61,7 @@
     - [x] `code.lua` (28/28)
     - [x] `constructs.lua` (`_soft`) (10/10)
     - [x] `coroutine.lua` (70/70)
+    - [x] `db.lua` (54/54)
     - [x] `errors.lua` (64/64)
     - [x] `events.lua` (26/26)
     - [x] `goto.lua` (18/18)
@@ -74,7 +75,6 @@
     - [x] `tpack.lua` (32/32)
     - [x] `utf8.lua` (18/18)
     - [x] `vararg.lua` (8/8)
-    - [ ] `db.lua` (46/54)
     - [ ] `big.lua`
     - [ ] `verybig.lua`
 - [x] Full JS interoperability: [https://github.com/fengari-lua/fengari-interop](https://github.com/fengari-lua/fengari-interop)
