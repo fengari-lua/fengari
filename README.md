@@ -36,6 +36,7 @@ To address that issue, Lua strings are represented by an array of bytes in Fenga
     - `os.rename`
     - `os.tmpname`
     - `os.execute`
+- [Weak tables](http://www.lua.org/manual/5.3/manual.html#2.5.2)
 
 ## Extensions
 
