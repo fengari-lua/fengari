@@ -24,7 +24,7 @@ To address that issue, Lua strings are represented by an array of bytes in Fenga
 
 ### _Missing_ features
 
-- `lua_gc/collectgarbage`: Fengari relies on the JS garbage collector and does not implement its own.
+- `lua_gc`/`collectgarbage`: Fengari relies on the JS garbage collector and does not implement its own.
 - The following functions are only available in Node:
     - `luaL_dofile`
     - `luaL_loadfilex`
@@ -37,6 +37,7 @@ To address that issue, Lua strings are represented by an array of bytes in Fenga
     - `os.tmpname`
     - `os.execute`
 
+## Extensions
 
 ### `dv = lua_todataview(L, idx)`
 
