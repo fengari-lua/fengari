@@ -7,94 +7,40 @@
 </p>
 
 
-# fengari
+# Fengari
 
 🐺 φεγγάρι - The Lua VM written in JS ES6 for Node and the browser
 
-## So far
+## Semantics
 
-- [x] Lexing/Parsing
-- [x] Parse bytecode
-- [x] Opcodes
-- [x] Basic types representation:
-- [x] Tag Methods
-- [ ] Standard library
-    - [x] Base lib
-    - [x] Coroutine
-    - [x] Debug
-    - [x] Math
-    - [x] String
-    - [x] Table
-    - [x] utf8
-    - [x] os (~~`os.setlocale()`~~)
-    - [x] Package
-    - [ ] io
-        - [x] `file:__tostring()`
-        - [x] `file:flush()`
-        - [x] `file:write()`
-        - [x] `io.close()`
-        - [x] `io.stderr`
-        - [x] `io.stdin`
-        - [x] `io.stdout`
-        - [x] `io.type()`
-        - [x] `io.write()`
-        - [x] `io.flush()`
-        - [ ] `io.input()`: partially implemented
-        - [ ] `io.lines()`
-        - [ ] `io.open()`
-        - [ ] `io.output()`: partially implemented
-        - [ ] `io.popen()`
-        - [ ] `io.read()`
-        - [ ] `io.tmpfile()`
-        - [ ] `file:lines()`
-        - [ ] `file:read()`
-        - [ ] `file:setvbuf()`
-        - [ ] `file:__gc()`
-- [x] C API
-- [x] Auxiliary library
-- [ ] Run [Lua test suite](https://github.com/lua/tests)
-    - [x] `api.lua` (64/64)
-    - [x] `attrib.lua` (12/12)
-    - [x] `bitwise.lua` (16/16)
-    - [x] `calls.lua` (32/32)
-    - [x] `closure.lua` (16/16)
-    - [x] `code.lua` (28/28)
-    - [x] `constructs.lua` (`_soft`) (10/10)
-    - [x] `coroutine.lua` (70/70)
-    - [x] `db.lua` (54/54)
-    - [x] `errors.lua` (64/64)
-    - [x] `events.lua` (26/26)
-    - [x] `goto.lua` (18/18)
-    - [x] `literals.lua` (30/30)
-    - [x] `locals.lua` (10/10)
-    - [x] `math.lua` (68/68)
-    - [x] `nextvar.lua` (44/44)
-    - [x] `pm.lua` (36/36)
-    - [x] `sort.lua` (24/24)
-    - [x] `strings.lua` (34/34)
-    - [x] `tpack.lua` (32/32)
-    - [x] `utf8.lua` (18/18)
-    - [x] `vararg.lua` (8/8)
-    - [ ] `big.lua`
-    - [ ] `verybig.lua`
-- [x] Full JS interoperability: [https://github.com/fengari-lua/fengari-interop](https://github.com/fengari-lua/fengari-interop)
+Fengari implements Lua 5.3 semantics and will hopefully follow future Lua releases. If you find any noticeable difference between Fengari and Lua's behaviours, please [report it](https://github.com/fengari-lua/fengari/issues).
+
+### Strings
+
+Lua strings are 8-bits clean and can embed `\0`. Which means that invalid UTF-8/16 strings are valid Lua strings. Lua functions like `string.dump` even use strings as a way of storing binary data.
+
+To address that issue, Lua strings are represented by an array of bytes in Fengari. To push a JS string on the stack you can use `lua_pushliteral`. To get a Lua string on the stack as a JS string you can use `lua_tojsstring`.
 
 
-## Extensions
+### _Missing_ features
+
+- `lua_gc/collectgarbage`: Fengari relies on the JS garbage collector and does not implement its own.
+- The following functions are only available in Node:
+    - `luaL_dofile`
+    - `luaL_loadfilex`
+    - `luaL_loadfile`
+    - `loadfile`
+    - `dofile`
+    - The entire `io` lib
+    - `os.remove`
+    - `os.rename`
+    - `os.tmpname`
+    - `os.execute`
+
 
 ### `dv = lua_todataview(L, idx)`
 
 Equivalent to `lua_tolstring` but returns a [`DataView`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView) instead of a string.
-
-
-### `str = lua_toljsstring(L, idx)`
-
-Equivalent to `lua_tolstring` but returns the string as a JavaScript string (as if `to_jsstring()` was called on the result).
-
-
-### `lua_tojsstring(L, idx)`
-
-Alias for `lua_toljsstring`.
 
 
 ### `lua_pushjsfunction(L, func)`
@@ -132,6 +78,19 @@ var p = lua_toproxy(L, 1);
 p(L);
 ````
 
+## NYI
+
+- `io.input()`: partially implemented
+- `io.lines()`
+- `io.open()`
+- `io.output()`: partially implemented
+- `io.popen()`
+- `io.read()`
+- `io.tmpfile()`
+- `file:lines()`
+- `file:read()`
+- `file:setvbuf()`
+- `file:__gc()`
 
 ## References
 
