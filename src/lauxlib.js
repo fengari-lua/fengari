@@ -788,9 +788,9 @@ if (!WEB) {
 
     const getF = function(L, ud) {
         let lf = ud;
-        let dv = lf.f instanceof Uint8Array ? new DataView(new ArrayBuffer(lf.f)) : null;
+        let f = lf.f;
         lf.f = null;
-        return dv;
+        return f;
     };
 
     getc = function(lf) {
@@ -813,7 +813,7 @@ if (!WEB) {
 
             if (xhr.status >= 200 && xhr.status <= 299) {
                 /* TODO: Synchronous xhr alway return a js string */
-                lf.f = new Uint8Array(lua.to_luastring(xhr.response));
+                lf.f = lua.to_luastring(xhr.response);
             } else {
                 lf.err = xhr.status;
                 return errfile(L, "open", fnameindex, xhr.status);
