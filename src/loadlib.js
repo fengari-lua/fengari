@@ -95,6 +95,17 @@ if (!WEB) {
 
         return true;
     };
+} else {
+    /* TODO: use async/await ? */
+    readable = function(filename) {
+        /* TODO: do a GET and store it somewhere to avoid doing two roundtrips ? */
+        let xhr = new XMLHttpRequest();
+        xhr.open("HEAD", filename, false);
+        xhr.send();
+        /* TODO: subresource integrity check? */
+
+        return xhr.status >= 200 && xhr.status <= 299;
+    };
 }
 
 

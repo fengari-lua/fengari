@@ -644,7 +644,60 @@ const luaL_unref = function(L, t, ref) {
     }
 };
 
-// Only with Node
+
+const errfile = function(L, what, fnameindex, error) {
+    let serr = error.message;
+    let filename = lua.lua_tostring(L, fnameindex).slice(1);
+    lua.lua_pushstring(L, lua.to_luastring(`cannot ${what} ${lua.to_jsstring(filename)}: ${serr}`));
+    lua.lua_remove(L, fnameindex);
+    return lua.LUA_ERRFILE;
+};
+
+let getc;
+
+const utf8_bom = [0XEF, 0XBB, 0XBF];  /* UTF-8 BOM mark */
+const skipBOM = function(lf) {
+    lf.n = 0;
+    let c;
+    let p = 0;
+    do {
+        c = getc(lf);
+        if (c === null || c !== utf8_bom[p]) return c;
+        p++;
+        lf.buff[lf.n++] = c;  /* to be read by the parser */
+    } while (p < utf8_bom.length);
+    lf.n = 0;  /* prefix matched; discard it */
+    return getc(lf);  /* return next character */
+};
+
+/*
+** reads the first character of file 'f' and skips an optional BOM mark
+** in its beginning plus its first line if it starts with '#'. Returns
+** true if it skipped the first line.  In any case, '*cp' has the
+** first "valid" character of the file (after the optional BOM and
+** a first-line comment).
+*/
+const skipcomment = function(lf) {
+    let c = skipBOM(lf);
+    if (c === '#'.charCodeAt(0)) {  /* first line is a comment (Unix exec. file)? */
+        do {  /* skip first line */
+            c = getc(lf);
+        } while (c && c !== '\n'.charCodeAt(0));
+
+        return {
+            skipped: true,
+            c: getc(lf)  /* skip end-of-line, if present */
+        };
+    } else {
+        return {
+            skipped: false,
+            c: c
+        };
+    }
+};
+
+let luaL_loadfilex;
+
 if (!WEB) {
     const fs = require('fs');
 
@@ -679,63 +732,14 @@ if (!WEB) {
         else return null;
     };
 
-    const errfile = function(L, what, fnameindex, error) {
-        let serr = error.message;
-        let filename = lua.lua_tostring(L, fnameindex).slice(1);
-        lua.lua_pushstring(L, lua.to_luastring(`cannot ${what} ${lua.to_jsstring(filename)}: ${serr}`));
-        lua.lua_remove(L, fnameindex);
-        return lua.LUA_ERRFILE;
-    };
-
-    const getc = function(lf) {
+    getc = function(lf) {
         let b = new Buffer(1);
         let bytes = fs.readSync(lf.f, b, 0, 1, lf.pos);
         lf.pos += bytes;
         return bytes > 0 ? b.readUInt8() : null;
     };
 
-    const utf8_bom = [0XEF, 0XBB, 0XBF];  /* UTF-8 BOM mark */
-    const skipBOM = function(lf) {
-        lf.n = 0;
-        let c;
-        let p = 0;
-        do {
-            c = getc(lf);
-            if (c === null || c !== utf8_bom[p]) return c;
-            p++;
-            lf.buff[lf.n++] = c;  /* to be read by the parser */
-        } while (p < utf8_bom.length);
-        lf.n = 0;  /* prefix matched; discard it */
-        return getc(lf);  /* return next character */
-    };
-
-    /*
-    ** reads the first character of file 'f' and skips an optional BOM mark
-    ** in its beginning plus its first line if it starts with '#'. Returns
-    ** true if it skipped the first line.  In any case, '*cp' has the
-    ** first "valid" character of the file (after the optional BOM and
-    ** a first-line comment).
-    */
-    const skipcomment = function(lf) {
-        let c = skipBOM(lf);
-        if (c === '#'.charCodeAt(0)) {  /* first line is a comment (Unix exec. file)? */
-            do {  /* skip first line */
-                c = getc(lf);
-            } while (c && c !== '\n'.charCodeAt(0));
-
-            return {
-                skipped: true,
-                c: getc(lf)  /* skip end-of-line, if present */
-            };
-        } else {
-            return {
-                skipped: false,
-                c: c
-            };
-        }
-    };
-
-    const luaL_loadfilex = function(L, filename, mode) {
+    luaL_loadfilex = function(L, filename, mode) {
         let lf = new LoadF();
         let fnameindex = lua.lua_gettop(L) + 1;  /* index of filename on the stack */
         if (filename === null) {
@@ -743,7 +747,7 @@ if (!WEB) {
             lf.f = process.stdin.fd;
         } else {
             let jsfilename = lua.to_jsstring(filename);
-            lua.lua_pushliteral(L, `@${jsfilename}`);
+            lua.lua_pushfstring(L, "@%s", filename);
             try {
                 lf.f = fs.openSync(jsfilename, "r");
                 if (!fs.fstatSync(lf.f).isFile())
@@ -771,19 +775,80 @@ if (!WEB) {
         lua.lua_remove(L, fnameindex);
         return status;
     };
+} else {
+    class LoadF {
+        constructor() {
+            this.n = NaN;  /* number of pre-read characters */
+            this.f = null;  /* file being read */
+            this.buff = new Buffer(1024);  /* area for reading file */
+            this.pos = 0;  /* current position in file */
+            this.err = void 0;
+        }
+    }
 
-    const luaL_loadfile = function(L, filename) {
-        return luaL_loadfilex(L, filename, null);
+    const getF = function(L, ud) {
+        let lf = ud;
+        let dv = lf.f instanceof Uint8Array ? new DataView(new ArrayBuffer(lf.f)) : null;
+        lf.f = null;
+        return dv;
     };
 
-    const luaL_dofile = function(L, filename) {
-        return (luaL_loadfile(L, filename) || lua.lua_pcall(L, 0, lua.LUA_MULTRET, 0));
+    getc = function(lf) {
+        return lf.pos < lf.f.length ? lf.f[lf.pos++] : null;
     };
 
-    module.exports.luaL_dofile    = luaL_dofile;
-    module.exports.luaL_loadfilex = luaL_loadfilex;
-    module.exports.luaL_loadfile  = luaL_loadfile;
+    luaL_loadfilex = function(L, filename, mode) {
+        let lf = new LoadF();
+        let fnameindex = lua.lua_gettop(L) + 1;  /* index of filename on the stack */
+        if (filename === null) {
+            throw new Error("Can't read stdin in the browser");
+        } else {
+            let jsfilename = lua.to_jsstring(filename);
+            lua.lua_pushliteral(L, `@${jsfilename}`);
+
+            let xhr = new XMLHttpRequest();
+            xhr.open("GET", jsfilename, false);
+            xhr.responseType = "arraybuffer";
+            xhr.send();
+
+            if (xhr.status >= 200 && xhr.status <= 299) {
+                lf.f = new Uint8Array(xhr.response);
+            } else {
+                lf.err = xhr.status;
+                return errfile(L, "open", fnameindex, xhr.status);
+            }
+        }
+        let com = skipcomment(lf);
+        /* check for signature first, as we don't want to add line number corrections in binary case */
+        if (com.c === lua.LUA_SIGNATURE.charCodeAt(0) && filename) {  /* binary file? */
+            /* no need to re-open in node.js */
+        } else if (com.skipped) { /* read initial portion */
+            lf.buff[lf.n++] = '\n'.charCodeAt(0);  /* add line to correct line numbers */
+        }
+        if (com.c !== null)
+            lf.buff[lf.n++] = com.c; /* 'c' is the first character of the stream */
+        let status = lua.lua_load(L, getF, lf, lua.lua_tostring(L, -1), mode);
+        let readstatus = lf.err;
+        if (readstatus) {
+            lua.lua_settop(L, fnameindex);  /* ignore results from 'lua_load' */
+            return errfile(L, "read", fnameindex, readstatus);
+        }
+        lua.lua_remove(L, fnameindex);
+        return status;
+    };
 }
+
+const luaL_loadfile = function(L, filename) {
+    return luaL_loadfilex(L, filename, null);
+};
+
+const luaL_dofile = function(L, filename) {
+    return (luaL_loadfile(L, filename) || lua.lua_pcall(L, 0, lua.LUA_MULTRET, 0));
+};
+
+module.exports.luaL_dofile    = luaL_dofile;
+module.exports.luaL_loadfilex = luaL_loadfilex;
+module.exports.luaL_loadfile  = luaL_loadfile;
 
 const lua_writestringerror = function(s) {
     if (process.stderr) process.stderr.write(s);
