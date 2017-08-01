@@ -100,7 +100,7 @@ if (!WEB) {
     readable = function(filename) {
         /* TODO: do a GET and store it somewhere to avoid doing two roundtrips ? */
         let xhr = new XMLHttpRequest();
-        xhr.open("HEAD", filename, false);
+        xhr.open("HEAD", lua.to_jsstring(filename), false);
         xhr.send();
         /* TODO: subresource integrity check? */
 

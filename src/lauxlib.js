@@ -808,11 +808,12 @@ if (!WEB) {
 
             let xhr = new XMLHttpRequest();
             xhr.open("GET", jsfilename, false);
-            xhr.responseType = "arraybuffer";
+            // TODO: find a way to load bytes instead of js string
             xhr.send();
 
             if (xhr.status >= 200 && xhr.status <= 299) {
-                lf.f = new Uint8Array(xhr.response);
+                /* TODO: Synchronous xhr alway return a js string */
+                lf.f = new Uint8Array(lua.to_luastring(xhr.response));
             } else {
                 lf.err = xhr.status;
                 return errfile(L, "open", fnameindex, xhr.status);
