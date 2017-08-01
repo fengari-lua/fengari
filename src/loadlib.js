@@ -75,7 +75,7 @@ const noenv = function(L) {
     return b;
 };
 
-let readable = function(filename) {
+let readable = function() {
     return false;
 };
 // Only with Node
@@ -98,9 +98,9 @@ if (!WEB) {
 } else {
     /* TODO: use async/await ? */
     readable = function(filename) {
-        /* TODO: do a GET and store it somewhere to avoid doing two roundtrips ? */
         let xhr = new XMLHttpRequest();
-        xhr.open("HEAD", lua.to_jsstring(filename), false);
+        /* Following GET request done by searcher_Web will be cached */
+        xhr.open("GET", lua.to_jsstring(filename), false);
         xhr.send();
         /* TODO: subresource integrity check? */
 
