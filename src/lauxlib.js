@@ -698,18 +698,70 @@ const skipcomment = function(lf) {
 
 let luaL_loadfilex;
 
-if (!WEB) {
-    const fs = require('fs');
-
-    class LoadF {
-        constructor() {
-            this.n = NaN;  /* number of pre-read characters */
-            this.f = null;  /* file being read */
-            this.buff = new Buffer(1024);  /* area for reading file */
-            this.pos = 0;  /* current position in file */
-            this.err = void 0;
-        }
+class LoadF {
+    constructor() {
+        this.n = NaN;  /* number of pre-read characters */
+        this.f = null;  /* file being read */
+        this.buff = new Buffer(1024);  /* area for reading file */
+        this.pos = 0;  /* current position in file */
+        this.err = void 0;
     }
+}
+
+if (WEB) {
+    const getF = function(L, ud) {
+        let lf = ud;
+        let f = lf.f;
+        lf.f = null;
+        return f;
+    };
+
+    getc = function(lf) {
+        return lf.pos < lf.f.length ? lf.f[lf.pos++] : null;
+    };
+
+    luaL_loadfilex = function(L, filename, mode) {
+        let lf = new LoadF();
+        let fnameindex = lua.lua_gettop(L) + 1;  /* index of filename on the stack */
+        if (filename === null) {
+            throw new Error("Can't read stdin in the browser");
+        } else {
+            let jsfilename = lua.to_jsstring(filename);
+            lua.lua_pushfstring(L, "@%s", filename);
+
+            let xhr = new XMLHttpRequest();
+            xhr.open("GET", jsfilename, false);
+            // TODO: find a way to load bytes instead of js string
+            xhr.send();
+
+            if (xhr.status >= 200 && xhr.status <= 299) {
+                /* TODO: Synchronous xhr alway return a js string */
+                lf.f = lua.to_luastring(xhr.response);
+            } else {
+                lf.err = xhr.status;
+                return errfile(L, "open", fnameindex, { message: `${xhr.status}: ${xhr.statusText}` });
+            }
+        }
+        let com = skipcomment(lf);
+        /* check for signature first, as we don't want to add line number corrections in binary case */
+        if (com.c === lua.LUA_SIGNATURE.charCodeAt(0) && filename) {  /* binary file? */
+            /* no need to re-open in node.js */
+        } else if (com.skipped) { /* read initial portion */
+            lf.buff[lf.n++] = '\n'.charCodeAt(0);  /* add line to correct line numbers */
+        }
+        if (com.c !== null)
+            lf.buff[lf.n++] = com.c; /* 'c' is the first character of the stream */
+        let status = lua.lua_load(L, getF, lf, lua.lua_tostring(L, -1), mode);
+        let readstatus = lf.err;
+        if (readstatus) {
+            lua.lua_settop(L, fnameindex);  /* ignore results from 'lua_load' */
+            return errfile(L, "read", fnameindex, readstatus);
+        }
+        lua.lua_remove(L, fnameindex);
+        return status;
+    };
+} else {
+    const fs = require('fs');
 
     const getF = function(L, ud) {
         let lf = ud;
@@ -775,68 +827,6 @@ if (!WEB) {
         lua.lua_remove(L, fnameindex);
         return status;
     };
-} else {
-    class LoadF {
-        constructor() {
-            this.n = NaN;  /* number of pre-read characters */
-            this.f = null;  /* file being read */
-            this.buff = new Buffer(1024);  /* area for reading file */
-            this.pos = 0;  /* current position in file */
-            this.err = void 0;
-        }
-    }
-
-    const getF = function(L, ud) {
-        let lf = ud;
-        let f = lf.f;
-        lf.f = null;
-        return f;
-    };
-
-    getc = function(lf) {
-        return lf.pos < lf.f.length ? lf.f[lf.pos++] : null;
-    };
-
-    luaL_loadfilex = function(L, filename, mode) {
-        let lf = new LoadF();
-        let fnameindex = lua.lua_gettop(L) + 1;  /* index of filename on the stack */
-        if (filename === null) {
-            throw new Error("Can't read stdin in the browser");
-        } else {
-            let jsfilename = lua.to_jsstring(filename);
-            lua.lua_pushliteral(L, `@${jsfilename}`);
-
-            let xhr = new XMLHttpRequest();
-            xhr.open("GET", jsfilename, false);
-            // TODO: find a way to load bytes instead of js string
-            xhr.send();
-
-            if (xhr.status >= 200 && xhr.status <= 299) {
-                /* TODO: Synchronous xhr alway return a js string */
-                lf.f = lua.to_luastring(xhr.response);
-            } else {
-                lf.err = xhr.status;
-                return errfile(L, "open", fnameindex, { message: `${xhr.status}: ${xhr.statusText}` });
-            }
-        }
-        let com = skipcomment(lf);
-        /* check for signature first, as we don't want to add line number corrections in binary case */
-        if (com.c === lua.LUA_SIGNATURE.charCodeAt(0) && filename) {  /* binary file? */
-            /* no need to re-open in node.js */
-        } else if (com.skipped) { /* read initial portion */
-            lf.buff[lf.n++] = '\n'.charCodeAt(0);  /* add line to correct line numbers */
-        }
-        if (com.c !== null)
-            lf.buff[lf.n++] = com.c; /* 'c' is the first character of the stream */
-        let status = lua.lua_load(L, getF, lf, lua.lua_tostring(L, -1), mode);
-        let readstatus = lf.err;
-        if (readstatus) {
-            lua.lua_settop(L, fnameindex);  /* ignore results from 'lua_load' */
-            return errfile(L, "read", fnameindex, readstatus);
-        }
-        lua.lua_remove(L, fnameindex);
-        return status;
-    };
 }
 
 const luaL_loadfile = function(L, filename) {
@@ -846,10 +836,6 @@ const luaL_loadfile = function(L, filename) {
 const luaL_dofile = function(L, filename) {
     return (luaL_loadfile(L, filename) || lua.lua_pcall(L, 0, lua.LUA_MULTRET, 0));
 };
-
-module.exports.luaL_dofile    = luaL_dofile;
-module.exports.luaL_loadfilex = luaL_loadfilex;
-module.exports.luaL_loadfile  = luaL_loadfile;
 
 const lua_writestringerror = function(s) {
     if (process.stderr) process.stderr.write(s);
@@ -895,6 +881,7 @@ module.exports.luaL_checkstring     = luaL_checkstring;
 module.exports.luaL_checktype       = luaL_checktype;
 module.exports.luaL_checkudata      = luaL_checkudata;
 module.exports.luaL_checkversion    = luaL_checkversion;
+module.exports.luaL_dofile          = luaL_dofile;
 module.exports.luaL_dostring        = luaL_dostring;
 module.exports.luaL_error           = luaL_error;
 module.exports.luaL_execresult      = luaL_execresult;
@@ -906,6 +893,8 @@ module.exports.luaL_gsub            = luaL_gsub;
 module.exports.luaL_len             = luaL_len;
 module.exports.luaL_loadbuffer      = luaL_loadbuffer;
 module.exports.luaL_loadbufferx     = luaL_loadbufferx;
+module.exports.luaL_loadfile        = luaL_loadfile;
+module.exports.luaL_loadfilex       = luaL_loadfilex;
 module.exports.luaL_loadstring      = luaL_loadstring;
 module.exports.luaL_newlib          = luaL_newlib;
 module.exports.luaL_newlibtable     = luaL_newlibtable;

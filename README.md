@@ -24,7 +24,7 @@ To address that issue, Lua strings are represented by an array of bytes in Fenga
 
 ### `require` and `package.loadlib`
 
-In the browser `require` and `package.loadlib` try to find a file by making XHR requests.
+In the browser `require` and `package.loadlib` try to find a file by making synchronous XHR requests.
 
 ### _Missing_ features
 

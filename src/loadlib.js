@@ -34,20 +34,36 @@ const AUXMARK       = [1];
 ** Returns the library; in case of error, returns NULL plus an
 ** error string in the stack.
 */
-let lsys_load = function(L, path) {
-    try {
-        path = lua.to_jsstring(path);
+let lsys_load;
+if (WEB) {
+    lsys_load = function(L, path) {
+        let xhr = new XMLHttpRequest();
+        xhr.open("GET", lua.to_jsstring(path), false);
+        xhr.send();
 
-        // Relative path ?
-        if (path.startsWith('.'))
-            path = `${process.env.PWD}/${path}`;
+        if (xhr.status >= 200 && xhr.status <= 299) {
+            return eval(xhr.response);
+        } else {
+            lua.lua_pushstring(L, lua.to_luastring(`${xhr.status}: ${xhr.statusText}`));
+            return null;
+        }
+    };
+} else {
+    lsys_load = function(L, path) {
+        try {
+            path = lua.to_jsstring(path);
 
-        return require(path);
-    } catch (e) {
-        lua.lua_pushstring(L, lua.to_luastring(e.message));
-        return null;
-    }
-};
+            // Relative path ?
+            if (path.startsWith('.'))
+                path = `${process.env.PWD}/${path}`;
+
+            return require(path);
+        } catch (e) {
+            lua.lua_pushstring(L, lua.to_luastring(e.message));
+            return null;
+        }
+    };
+}
 
 /*
 ** Try to find a function named 'sym' in library 'lib'.
@@ -65,22 +81,6 @@ const lsys_sym = function(L, lib, sym) {
     }
 };
 
-if (WEB) {
-    lsys_load = function(L, path) {
-        let xhr = new XMLHttpRequest();
-        xhr.open("GET", lua.to_jsstring(path), false);
-        xhr.send();
-        /* TODO: subresource integrity check? */
-
-        if (xhr.status === 200) {
-            return eval(xhr.response);
-        } else {
-            lua.lua_pushstring(L, lua.to_luastring(`${xhr.status}: ${xhr.statusText}`));
-            return null;
-        }
-    };
-}
-
 /*
 ** return registry.LUA_NOENV as a boolean
 */
@@ -91,9 +91,7 @@ const noenv = function(L) {
     return b;
 };
 
-let readable = function() {
-    return false;
-};
+let readable;
 // Only with Node
 if (!WEB) {
 
@@ -118,7 +116,6 @@ if (!WEB) {
         /* Following GET request done by searcher_Web will be cached */
         xhr.open("GET", lua.to_jsstring(filename), false);
         xhr.send();
-        /* TODO: subresource integrity check? */
 
         return xhr.status >= 200 && xhr.status <= 299;
     };
