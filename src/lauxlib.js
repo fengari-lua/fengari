@@ -702,7 +702,7 @@ class LoadF {
     constructor() {
         this.n = NaN;  /* number of pre-read characters */
         this.f = null;  /* file being read */
-        this.buff = new Buffer(1024);  /* area for reading file */
+        this.buff = WEB ? new Array(1024) : new Buffer(1024);  /* area for reading file */
         this.pos = 0;  /* current position in file */
         this.err = void 0;
     }
@@ -711,6 +711,14 @@ class LoadF {
 if (WEB) {
     const getF = function(L, ud) {
         let lf = ud;
+
+        if (lf.f !== null && lf.n > 0) {  /* are there pre-read characters to be read? */
+            let bytes = lf.n; /* return them (chars already in buffer) */
+            lf.n = 0;  /* no more pre-read characters */
+            lf.f = lf.f.slice(lf.pos);  /* we won't use lf.buff anymore */
+            return lf.buff.slice(0, bytes);
+        }
+
         let f = lf.f;
         lf.f = null;
         return f;
@@ -726,9 +734,9 @@ if (WEB) {
         if (filename === null) {
             throw new Error("Can't read stdin in the browser");
         } else {
-            let jsfilename = lua.to_jsstring(filename);
-            lua.lua_pushfstring(L, "@%s", filename);
+            lua.lua_pushfstring(L, lua.to_luastring("@%s"), filename);
 
+            let jsfilename = lua.to_jsstring(filename);
             let xhr = new XMLHttpRequest();
             xhr.open("GET", jsfilename, false);
             // TODO: find a way to load bytes instead of js string
@@ -798,9 +806,9 @@ if (WEB) {
             lua.lua_pushliteral(L, "=stdin");
             lf.f = process.stdin.fd;
         } else {
-            let jsfilename = lua.to_jsstring(filename);
-            lua.lua_pushfstring(L, "@%s", filename);
+            lua.lua_pushfstring(L, lua.to_luastring("@%s"), filename);
             try {
+                let jsfilename = lua.to_jsstring(filename);
                 lf.f = fs.openSync(jsfilename, "r");
                 if (!fs.fstatSync(lf.f).isFile())
                     throw new Error(`${jsfilename} is not a readable file`);
