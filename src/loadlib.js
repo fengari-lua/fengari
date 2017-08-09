@@ -34,7 +34,7 @@ const AUXMARK       = [1];
 ** Returns the library; in case of error, returns NULL plus an
 ** error string in the stack.
 */
-const lsys_load = function(L, path) {
+let lsys_load = function(L, path) {
     try {
         path = lua.to_jsstring(path);
 
@@ -64,6 +64,22 @@ const lsys_sym = function(L, lib, sym) {
         return null;
     }
 };
+
+if (WEB) {
+    lsys_load = function(L, path) {
+        let xhr = new XMLHttpRequest();
+        xhr.open("GET", lua.to_jsstring(path), false);
+        xhr.send();
+        /* TODO: subresource integrity check? */
+
+        if (xhr.status === 200) {
+            return eval(xhr.response);
+        } else {
+            lua.lua_pushstring(L, lua.to_luastring(`${xhr.status}: ${xhr.statusText}`));
+            return null;
+        }
+    };
+}
 
 /*
 ** return registry.LUA_NOENV as a boolean

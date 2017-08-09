@@ -22,6 +22,10 @@ Lua strings are 8-bits clean and can embed `\0`. Which means that invalid UTF-8/
 To address that issue, Lua strings are represented by an array of bytes in Fengari. To push a JS string on the stack you can use `lua_pushliteral` which will convert it to an array of bytes before pushing it. To get a Lua string on the stack as a JS string you can use `lua_tojsstring` which will attempt to convert it to a UTF-16 JS string. The latter won't give you what you expect if the Lua string is not a valid UTF-16 sequence. You can also convert strings with `lua.to_luastring` and `lua.to_jsstring`.
 
 
+### `require` and `package.loadlib`
+
+In the browser `require` and `package.loadlib` try to find a file by making XHR requests.
+
 ### _Missing_ features
 
 - `lua_gc`/`collectgarbage`: Fengari relies on the JS garbage collector and does not implement its own.

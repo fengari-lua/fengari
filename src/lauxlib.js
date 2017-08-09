@@ -816,7 +816,7 @@ if (!WEB) {
                 lf.f = lua.to_luastring(xhr.response);
             } else {
                 lf.err = xhr.status;
-                return errfile(L, "open", fnameindex, xhr.status);
+                return errfile(L, "open", fnameindex, { message: `${xhr.status}: ${xhr.statusText}` });
             }
         }
         let com = skipcomment(lf);
