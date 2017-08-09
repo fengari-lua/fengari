@@ -30,11 +30,6 @@ In the browser `require` and `package.loadlib` try to find a file by making sync
 
 - `lua_gc`/`collectgarbage`: Fengari relies on the JS garbage collector and does not implement its own.
 - The following functions are only available in Node:
-    - `luaL_dofile`
-    - `luaL_loadfilex`
-    - `luaL_loadfile`
-    - `loadfile`
-    - `dofile`
     - The entire `io` lib
     - `os.remove`
     - `os.rename`
