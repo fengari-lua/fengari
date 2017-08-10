@@ -49,7 +49,7 @@ const DumpInteger = function(x, D) {
     let t = [];
     for (let i = 0; i < 4; i++)
         t.push(dv.getUint8(i, true));
-    DumpBlock(t, 8, D);
+    DumpBlock(t, 4, D);
 };
 
 const DumpNumber = function(x, D) {
