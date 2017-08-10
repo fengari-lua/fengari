@@ -21,6 +21,9 @@ Lua strings are 8-bits clean and can embed `\0`. Which means that invalid UTF-8/
 
 To address that issue, Lua strings are represented by an array of bytes in Fengari. To push a JS string on the stack you can use `lua_pushliteral` which will convert it to an array of bytes before pushing it. To get a Lua string on the stack as a JS string you can use `lua_tojsstring` which will attempt to convert it to a UTF-16 JS string. The latter won't give you what you expect if the Lua string is not a valid UTF-16 sequence. You can also convert strings with `lua.to_luastring` and `lua.to_jsstring`.
 
+### Integers
+
+The JS number type is always a double, and hence cannot accurately represent integers with more than 53 bits. As such, we've taken the route of a rarely used define (`LUA_INT_TYPE=LUA_INT_LONG`) in the PUC-Rio sources, where floats are doubles, but integers are 32 bits.
 
 ### `require` and `package.loadlib`
 
