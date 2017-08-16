@@ -3,10 +3,27 @@
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
 
+let lua_writestring;
+let lua_writeline;
+if (WEB) {
+    let buff = [];
+    lua_writestring = function(s) {
+        buff = buff.concat(s);
+    };
+    lua_writeline = function() {
+        console.log(lua.to_jsstring(buff));
+        buff = [];
+    };
+} else {
+    lua_writestring = function(s) {
+        process.stdout.write(Buffer.from(s));
+    };
+    lua_writeline = function() {
+        process.stdout.write("\n");
+    };
+}
 const luaB_print = function(L) {
     let n = lua.lua_gettop(L); /* number of arguments */
-    let str = [];
-
     lua.lua_getglobal(L, lua.to_luastring("tostring", true));
     for (let i = 1; i <= n; i++) {
         lua.lua_pushvalue(L, -1);  /* function to be called */
@@ -15,16 +32,11 @@ const luaB_print = function(L) {
         let s = lua.lua_tolstring(L, -1);
         if (s === null)
             return lauxlib.luaL_error(L, lua.to_luastring("'tostring' must return a string to 'print'", true));
-        if (i > 1) str.push("\t".charCodeAt(0));
-        str = str.concat(s);
+        if (i > 1) lua_writestring(["\t".charCodeAt(0)]);
+        lua_writestring(s);
         lua.lua_pop(L, 1);
     }
-
-    // Don't use console.log if Node
-    if (process.stdout) {
-        str.push("\n".charCodeAt(0));
-        process.stdout.write(Buffer.from(str));
-    } else console.log(lua.to_jsstring(str));
+    lua_writeline();
     return 0;
 };
 
