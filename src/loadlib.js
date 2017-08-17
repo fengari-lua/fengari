@@ -171,15 +171,22 @@ const ll_loadlib = function(L) {
     }
 };
 
+let env;
+if (WEB) {
+    env = window;
+} else {
+    env = process.env;
+}
+
 /*
 ** Set a path
 */
 const setpath = function(L, fieldname, envname, dft) {
     let nver = `${envname}${lua.LUA_VERSUFFIX}`;
     lua.lua_pushstring(L, lua.to_luastring(nver));
-    let path = process.env[nver];  /* use versioned name */
+    let path = env[nver];  /* use versioned name */
     if (path === undefined)  /* no environment variable? */
-        path = process.env[envname];  /* try unversioned name */
+        path = env[envname];  /* try unversioned name */
     if (path === undefined || noenv(L))  /* no environment variable? */
         lua.lua_pushstring(L, lua.to_luastring(dft, true));  /* use default */
     else {
