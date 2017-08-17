@@ -151,7 +151,11 @@ const syslib = {
 
 // Only with Node
 if (!WEB) {
-    const os_exit = function(L) {
+    const fs = require('fs');
+    const tmp = require('tmp');
+    const child_process = require('child_process');
+
+    syslib.exit = function(L) {
         let status;
         if (lua.lua_isboolean(L, 1))
             status = (lua.lua_toboolean(L, 1) ? 0 : 1);
@@ -163,35 +167,22 @@ if (!WEB) {
         return 0;
     };
 
-    const os_getenv = function(L) {
+    syslib.getenv = function(L) {
         lua.lua_pushliteral(L, process.env[lua.to_jsstring(lauxlib.luaL_checkstring(L, 1))]);  /* if NULL push nil */
         return 1;
     };
 
-    const os_clock = function(L) {
+    syslib.clock = function(L) {
         lua.lua_pushnumber(L, process.uptime());
         return 1;
     };
-
-    syslib.clock = os_clock;
-    syslib.exit = os_exit;
-    syslib.getenv = os_getenv;
-}
-
-
-// Only with Node
-if (!WEB) {
-
-    const fs = require('fs');
-    const tmp = require('tmp');
-    const child_process = require('child_process');
 
     // TODO: on POSIX system, should create the file
     const lua_tmpname = function() {
         return tmp.tmpNameSync();
     };
 
-    const os_remove = function(L) {
+    syslib.remove = function(L) {
         let filename = lauxlib.luaL_checkstring(L, 1);
         try {
             if (fs.lstatSync(lua.to_jsstring(filename)).isDirectory()) {
@@ -205,7 +196,7 @@ if (!WEB) {
         return lauxlib.luaL_fileresult(L, true);
     };
 
-    const os_rename = function(L) {
+    syslib.rename = function(L) {
         let fromname = lua.to_jsstring(lauxlib.luaL_checkstring(L, 1));
         let toname = lua.to_jsstring(lauxlib.luaL_checkstring(L, 2));
         try {
@@ -216,7 +207,7 @@ if (!WEB) {
         return lauxlib.luaL_fileresult(L, true);
     };
 
-    const os_tmpname = function(L) {
+    syslib.tmpname = function(L) {
         let name = lua_tmpname();
         if (!name)
             return lauxlib.luaL_error(L, lua.to_luastring("unable to generate a unique filename"));
@@ -224,11 +215,7 @@ if (!WEB) {
         return 1;
     };
 
-    syslib.remove = os_remove;
-    syslib.rename = os_rename;
-    syslib.tmpname = os_tmpname;
-
-    const os_execute = function(L) {
+    syslib.execute = function(L) {
         let cmd = lauxlib.luaL_optstring(L, 1, null);
         if (cmd !== null) {
             try {
@@ -259,9 +246,6 @@ if (!WEB) {
             return 1;
         }
     };
-
-    syslib.execute = os_execute;
-
 }
 
 const luaopen_os = function(L) {
