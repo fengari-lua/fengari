@@ -150,7 +150,7 @@ const syslib = {
 };
 
 // Only with Node
-if (process && process.exit && process.env && process.uptime) {
+if (!WEB) {
     const os_exit = function(L) {
         let status;
         if (lua.lua_isboolean(L, 1))
