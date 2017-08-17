@@ -175,7 +175,8 @@ const ll_loadlib = function(L) {
 ** Set a path
 */
 const setpath = function(L, fieldname, envname, dft) {
-    let nver = lua.lua_pushstring(L, lua.to_luastring(`${envname}${lua.LUA_VERSUFFIX}`, true));
+    let nver = `${envname}${lua.LUA_VERSUFFIX}`;
+    lua.lua_pushstring(L, lua.to_luastring(nver));
     let path = process.env[nver];  /* use versioned name */
     if (path === undefined)  /* no environment variable? */
         path = process.env[envname];  /* try unversioned name */
