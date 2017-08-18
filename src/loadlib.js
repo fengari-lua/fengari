@@ -49,14 +49,12 @@ if (WEB) {
         }
     };
 } else {
+    const pathlib = require('path');
     lsys_load = function(L, path) {
+        path = lua.to_jsstring(path);
+        /* relative paths should be relative to cwd, not this js file */
+        path = pathlib.resolve(process.cwd(), path);
         try {
-            path = lua.to_jsstring(path);
-
-            // Relative path ?
-            if (path.startsWith('.'))
-                path = `${process.env.PWD}/${path}`;
-
             return require(path);
         } catch (e) {
             lua.lua_pushstring(L, lua.to_luastring(e.message));
