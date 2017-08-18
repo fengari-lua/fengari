@@ -1,22 +1,13 @@
 "use strict";
 
-const seedrandom = require('seedrandom');
-
-const lua        = require('./lua.js');
-const lauxlib    = require('./lauxlib.js');
-const llimit     = require('./llimit.js');
-const luaconf    = require('./luaconf.js');
-
-var RNG          = seedrandom();
-
-const math_randomseed = function(L) {
-    RNG = seedrandom(Math.abs(lauxlib.luaL_checknumber(L, 1)));
-    return 0;
-};
+const lua     = require('./lua.js');
+const lauxlib = require('./lauxlib.js');
+const llimit  = require('./llimit.js');
+const luaconf = require('./luaconf.js');
 
 const math_random = function(L) {
     let low, up;
-    let r = RNG();
+    let r = Math.random();
     switch (lua.lua_gettop(L)) {  /* check number of arguments */
         case 0:
             lua.lua_pushnumber(L, r);  /* Number between 0 and 1 */
@@ -252,7 +243,6 @@ const mathlib = {
     "modf":       math_modf,
     "rad":        math_rad,
     "random":     math_random,
-    "randomseed": math_randomseed,
     "sin":        math_sin,
     "sqrt":       math_sqrt,
     "tan":        math_tan,

@@ -36,7 +36,6 @@
   },
   "dependencies": {
     "readline-sync": "^1.4.7",
-    "seedrandom": "^2.4.2",
     "sprintf-js": "^1.1.1",
     "strftime": "^0.10.0",
     "tmp": "0.0.31"

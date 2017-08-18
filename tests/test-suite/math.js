@@ -1395,8 +1395,6 @@ test("[test-suite] math: testing -0 and NaN", function (t) {
 
 test("[test-suite] math: test random for floats", function (t) {
     let luaCode = `
-        math.randomseed(0)
-
         do   -- test random for floats
           local max = -math.huge
           local min = math.huge
@@ -1438,8 +1436,6 @@ test("[test-suite] math: test random for floats", function (t) {
 
 test("[test-suite] math: test random for small intervals", function (t) {
     let luaCode = `
-        math.randomseed(0)
-
         do
           local function aux (p, lim)   -- test random for small intervals
             local x1, x2
@@ -1496,8 +1492,6 @@ test("[test-suite] math: test random for small intervals", function (t) {
 
 test("[test-suite] math: test random for large intervals", function (t) {
     let luaCode = `
-        math.randomseed(0)
-
         do
           local function aux(p1, p2)       -- test random for large intervals
             local max = minint
@@ -1556,8 +1550,6 @@ test("[test-suite] math: test random for large intervals", function (t) {
 
 test("[test-suite] math: test random for empty interval", function (t) {
     let luaCode = `
-        math.randomseed(0)
-
         assert(not pcall(math.random, minint + 1, minint))
         assert(not pcall(math.random, maxint, maxint - 1))
         assert(not pcall(math.random, maxint, minint))
@@ -1586,8 +1578,6 @@ test("[test-suite] math: test random for empty interval", function (t) {
 
 test("[test-suite] math: interval too large", function (t) {
     let luaCode = `
-        math.randomseed(0)
-
         assert(not pcall(math.random, minint, 0))
         assert(not pcall(math.random, -1, maxint))
         assert(not pcall(math.random, minint // 2, maxint // 2 + 1))
