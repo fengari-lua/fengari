@@ -846,10 +846,12 @@ const luaL_dofile = function(L, filename) {
 };
 
 const lua_writestringerror = function(s) {
-    if (process.stderr) process.stderr.write(s);
-    else console.error(s);
+    if (WEB) {
+        process.stderr.write(s);
+    } else {
+        console.error(s);
+    }
 };
-
 
 const luaL_checkversion = function(L) {
     let ver = lua.LUA_VERSION_NUM;
