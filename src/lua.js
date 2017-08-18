@@ -1,4 +1,3 @@
-/*jshint esversion: 6 */
 "use strict";
 
 const defs   = require("./defs.js");

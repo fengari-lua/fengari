@@ -40,5 +40,12 @@
     "sprintf-js": "^1.1.1",
     "strftime": "^0.10.0",
     "tmp": "0.0.31"
+  },
+  "jshintConfig": {
+    "node": true,
+    "esversion": 6,
+    "indent": false,
+    "unused": true,
+    "white": false
   }
 }

@@ -1,5 +1,5 @@
-/*jshint esversion: 6 */
 "use strict";
+
 const assert  = require('assert');
 
 const defs    = require('./defs.js');
