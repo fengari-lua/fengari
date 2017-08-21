@@ -82,7 +82,7 @@ const pushfuncname = function(L, ar) {
         lua.lua_pushfstring(L, lua.to_luastring("%s '%s'"), ar.namewhat, ar.name);  /* use it */
     else if (ar.what && ar.what[0] === 'm'.charCodeAt(0))  /* main? */
         lua.lua_pushliteral(L, "main chunk");
-    else if (ar.what && ar.what[0] != 'C'.charCodeAt(0))  /* for Lua functions, use <file:line> */
+    else if (ar.what && ar.what[0] === 'L'.charCodeAt(0))  /* for Lua functions, use <file:line> */
         lua.lua_pushfstring(L, lua.to_luastring("function <%s:%d>"), ar.short_src, ar.linedefined);
     else  /* nothing left... */
         lua.lua_pushliteral(L, "?");
