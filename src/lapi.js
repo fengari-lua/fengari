@@ -437,7 +437,7 @@ const lua_rawset = function(L, idx) {
 };
 
 const lua_rawseti = function(L, idx, n) {
-    assert(2 < L.top - L.ci.funcOff, "not enough elements in the stack");
+    assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     let o = index2addr(L, idx);
     assert(o.ttistable(), "table expected");
     ltable.luaH_setint(o.value, n, L.stack[L.top - 1]);
