@@ -145,7 +145,7 @@ test('os.date', function (t) {
 
 test('os.getenv', function (t) {
     let luaCode = `
-        return os.getenv('HOME')
+        return os.getenv('PATH')
     `, L;
     
     t.plan(3);
