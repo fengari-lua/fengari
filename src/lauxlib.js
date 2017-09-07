@@ -343,7 +343,7 @@ const luaL_optnumber = function(L, arg, def) {
 };
 
 const luaL_checkinteger = function(L, arg) {
-    let d = lua.lua_tointeger(L, arg);
+    let d = lua.lua_tointegerx(L, arg);
     if (d === false)
         interror(L, arg);
     return d;

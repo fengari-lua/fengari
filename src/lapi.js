@@ -708,11 +708,16 @@ const lua_tocfunction = function(L, idx) {
 };
 
 const lua_tointeger = function(L, idx) {
+    let n = lua_tointegerx(L, idx);
+    return n === false ? 0 : n;
+};
+
+const lua_tointegerx = function(L, idx) {
     return lvm.tointeger(index2addr(L, idx));
 };
 
 const lua_tonumber = function(L, idx) {
-    let n = lvm.tonumber(index2addr(L, idx));
+    let n = lua_tonumberx(L, idx);
     return n === false ? 0 : n;
 };
 
@@ -812,10 +817,6 @@ const lua_stringtonumber = function(L, s) {
         return s.length+1;
     }
     return 0;
-};
-
-const lua_tointegerx = function(L, idx) {
-    return lvm.tointeger(index2addr(L, idx));
 };
 
 const f_call = function(L, ud) {

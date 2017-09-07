@@ -40,6 +40,12 @@ In the browser `require` and `package.loadlib` try to find a file by making sync
     - `os.execute`
 - [Weak tables](http://www.lua.org/manual/5.3/manual.html#2.5.2)
 
+
+### _Differences_ from C API
+
+- `lua_tointegerx` and `lua_tonumberx` do not have out-parameters indicating conversion success. Instead, ``false`` is returned when conversion fails.
+
+
 ## Extensions
 
 ### `dv = lua_todataview(L, idx)`
