@@ -11,6 +11,10 @@
 
 🐺 φεγγάρι - The Lua VM written in JS ES6 for Node and the browser
 
+## Getting started in the browser
+
+Fengari is not released yet but you can experiment with it in the browser by following the instructions of the [fengari-web](https://github.com/fengari-lua/fengari-web) repository.
+
 ## Semantics
 
 Fengari implements Lua 5.3 semantics and will hopefully follow future Lua releases. If you find any noticeable difference between Fengari and Lua's behaviours, please [report it](https://github.com/fengari-lua/fengari/issues).
