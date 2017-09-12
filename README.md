@@ -11,9 +11,31 @@
 
 🐺 φεγγάρι - The Lua VM written in JS ES6 for Node and the browser
 
-## Getting started in the browser
+This repository contains the core fengari code (which is a port of the Lua C library) which includes parser, virtual machine and base libraries.
+However it is rare to use this repository directly.
 
-Fengari is not released yet but you can experiment with it in the browser by following the instructions of the [fengari-web](https://github.com/fengari-lua/fengari-web) repository.
+- To use fengari in a web browser as easily as you might use JavaScript, see [fengari-web](https://github.com/fengari-lua/fengari-web)
+- [fengari-interop](https://github.com/fengari-lua/fengari-interop) is a lua library that makes interoperating with JavaScript objects simple, it is already included in fengari-web.
+- For a clone of the `lua` command line tool, but running under node.js, see [fengari-node-cli](https://github.com/fengari-lua/fengari-node-cli)
+
+### The JS API
+
+Once you've loaded fengari, you can use the JS API:
+
+```javascript
+const lua      = fengari.lua;
+const lauxlib  = fengari.lauxlib;
+const lualib   = fengari.lualib;
+
+const L = lauxlib.luaL_newstate();
+
+lualib.luaL_openlibs(L);
+
+lua.lua_pushliteral(L, "hello world!");
+```
+
+The JS API is exactly the same as the C API so `fengari.lua` exposes the same constants and functions as `lua.h`, `fengari.lauxlib` the same as `lauxlib.h` and `fengari.lualib` the same as `lualib.h`. If you're unfamiliar with the C API, you can take a look at [the manual](http://www.lua.org/manual/5.3/manual.html#4).
+
 
 ## Semantics
 
