@@ -32,15 +32,15 @@
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.1",
     "babel-preset-env": "^1.6.0",
-    "faucet": "0.0.1",
-    "tape": "^2.0.1",
+    "faucet": "^0.0.1",
+    "tape": "^4.8.0",
     "webpack": "^3.5.5"
   },
   "dependencies": {
     "readline-sync": "^1.4.7",
     "sprintf-js": "^1.1.1",
     "strftime": "^0.10.0",
-    "tmp": "0.0.31"
+    "tmp": "^0.0.33"
   },
   "jshintConfig": {
     "node": true,
