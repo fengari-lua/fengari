@@ -38,14 +38,19 @@ const AUXMARK       = [1];
 let lsys_load;
 if (WEB) {
     lsys_load = function(L, path, seeglb) {
+        path = lua.to_jsstring(path);
         let xhr = new XMLHttpRequest();
-        xhr.open("GET", lua.to_jsstring(path), false);
+        xhr.open("GET", path, false);
         xhr.send();
 
         if (xhr.status >= 200 && xhr.status <= 299) {
+            let code = xhr.response;
+            /* Add sourceURL comment to get path in debugger+tracebacks */
+            if (!/\/\/[#@] sourceURL=/.test(code))
+                code += " //# sourceURL=" + path;
             let func;
             try {
-                func = Function("fengari", xhr.response);
+                func = Function("fengari", code);
             } catch (e) {
                 lua.lua_pushstring(L, lua.to_luastring(`${e.name}: ${e.message}`));
                 return null;
