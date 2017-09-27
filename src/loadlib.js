@@ -1,5 +1,6 @@
 "use strict";
 
+const fengari  = require('./fengari.js');
 const lua      = require('./lua.js');
 const lauxlib  = require('./lauxlib.js');
 
@@ -44,12 +45,12 @@ if (WEB) {
         if (xhr.status >= 200 && xhr.status <= 299) {
             let func;
             try {
-                func = Function(xhr.response);
+                func = Function("fengari", xhr.response);
             } catch (e) {
                 lua.lua_pushstring(L, lua.to_luastring(`${e.name}: ${e.message}`));
                 return null;
             }
-            let res = func();
+            let res = func(fengari);
             return res;
         } else {
             lua.lua_pushstring(L, lua.to_luastring(`${xhr.status}: ${xhr.statusText}`));
