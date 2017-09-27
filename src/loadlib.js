@@ -43,29 +43,29 @@ if (WEB) {
         xhr.open("GET", path, false);
         xhr.send();
 
-        if (xhr.status >= 200 && xhr.status <= 299) {
-            let code = xhr.response;
-            /* Add sourceURL comment to get path in debugger+tracebacks */
-            if (!/\/\/[#@] sourceURL=/.test(code))
-                code += " //# sourceURL=" + path;
-            let func;
-            try {
-                func = Function("fengari", code);
-            } catch (e) {
-                lua.lua_pushstring(L, lua.to_luastring(`${e.name}: ${e.message}`));
-                return null;
-            }
-            let res = func(fengari);
-            if (typeof res === "function" || (typeof res === "object" && res !== null)) {
-                return res;
-            } else if (res === void 0) { /* assume library added symbols to global environment */
-                return window;
-            } else {
-                lua.lua_pushstring(L, lua.to_luastring(`library returned unexpected type (${typeof res})`));
-                return null;
-            }
-        } else {
+        if (xhr.status < 200 || xhr.status >= 300) {
             lua.lua_pushstring(L, lua.to_luastring(`${xhr.status}: ${xhr.statusText}`));
+            return null;
+        }
+
+        let code = xhr.response;
+        /* Add sourceURL comment to get path in debugger+tracebacks */
+        if (!/\/\/[#@] sourceURL=/.test(code))
+            code += " //# sourceURL=" + path;
+        let func;
+        try {
+            func = Function("fengari", code);
+        } catch (e) {
+            lua.lua_pushstring(L, lua.to_luastring(`${e.name}: ${e.message}`));
+            return null;
+        }
+        let res = func(fengari);
+        if (typeof res === "function" || (typeof res === "object" && res !== null)) {
+            return res;
+        } else if (res === void 0) { /* assume library added symbols to global environment */
+            return window;
+        } else {
+            lua.lua_pushstring(L, lua.to_luastring(`library returned unexpected type (${typeof res})`));
             return null;
         }
     };
