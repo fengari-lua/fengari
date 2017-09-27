@@ -210,7 +210,7 @@ const setpath = function(L, fieldname, envname, dft) {
     if (path === undefined)  /* no environment variable? */
         path = env[envname];  /* try unversioned name */
     if (path === undefined || noenv(L))  /* no environment variable? */
-        lua.lua_pushstring(L, lua.to_luastring(dft, true));  /* use default */
+        lua.lua_pushstring(L, lua.to_luastring(dft));  /* use default */
     else {
         /* replace ";;" by ";AUXMARK;" and then AUXMARK by default path */
         path = lauxlib.luaL_gsub(
@@ -361,7 +361,7 @@ const searcher_Croot = function(L) {
         if (stat != ERRFUNC)
             return checkload(L, 0, filename);  /* real error */
         else {  /* open function not found */
-          lua.lua_pushstring(L, lua.to_luastring(`\n\tno module '${lua.to_jsstring(name)}' in file '${lua.to_jsstring(filename)}'`));
+            lua.lua_pushstring(L, lua.to_luastring("\n\tno module '%s' in file '%s'"), name, filename);
             return 1;
         }
     }
@@ -373,7 +373,7 @@ const searcher_preload = function(L) {
     let name = lauxlib.luaL_checkstring(L, 1);
     lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, lua.to_luastring(lauxlib.LUA_PRELOAD_TABLE, true));
     if (lua.lua_getfield(L, -1, name) === lua.LUA_TNIL)  /* not found? */
-        lua.lua_pushliteral(L, `\n\tno field package.preload['${lua.to_jsstring(name)}']`);
+        lua.lua_pushfstring(L, lua.to_luastring("\n\tno field package.preload['%s']"), name);
     return 1;
 };
 
