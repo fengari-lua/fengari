@@ -36,7 +36,7 @@ const AUXMARK       = [1];
 */
 let lsys_load;
 if (WEB) {
-    lsys_load = function(L, path) {
+    lsys_load = function(L, path, seeglb) {
         let xhr = new XMLHttpRequest();
         xhr.open("GET", lua.to_jsstring(path), false);
         xhr.send();
@@ -58,7 +58,7 @@ if (WEB) {
     };
 } else {
     const pathlib = require('path');
-    lsys_load = function(L, path) {
+    lsys_load = function(L, path, seeglb) {
         path = lua.to_jsstring(path);
         /* relative paths should be relative to cwd, not this js file */
         path = pathlib.resolve(process.cwd(), path);
