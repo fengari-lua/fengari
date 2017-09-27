@@ -419,7 +419,7 @@ const ll_require = function(L) {
     lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, lua.to_luastring(lauxlib.LUA_LOADED_TABLE, true));
     lua.lua_getfield(L, 2, name);  /* LOADED[name] */
     if (lua.lua_toboolean(L, -1))  /* is it there? */
-      return 1;  /* package is already loaded */
+        return 1;  /* package is already loaded */
     /* else must load package */
     lua.lua_pop(L, 1);  /* remove 'getfield' result */
     let ctx = name;
@@ -437,11 +437,11 @@ const ll_require_cont = function(L, status, ctx) {
 const ll_require_cont2 = function(L, status, ctx) {
     let name = ctx;
     if (!lua.lua_isnil(L, -1))  /* non-nil return? */
-      lua.lua_setfield(L, 2, name);  /* LOADED[name] = returned value */
+        lua.lua_setfield(L, 2, name);  /* LOADED[name] = returned value */
     if (lua.lua_getfield(L, 2, name) == lua.LUA_TNIL) {   /* module set no value? */
-      lua.lua_pushboolean(L, 1);  /* use true as result */
-      lua.lua_pushvalue(L, -1);  /* extra copy to be returned */
-      lua.lua_setfield(L, 2, name);  /* LOADED[name] = true */
+        lua.lua_pushboolean(L, 1);  /* use true as result */
+        lua.lua_pushvalue(L, -1);  /* extra copy to be returned */
+        lua.lua_setfield(L, 2, name);  /* LOADED[name] = true */
     }
     return 1;
 };
@@ -461,9 +461,9 @@ const createsearcherstable = function(L) {
     lua.lua_createtable(L);
     /* fill it with predefined searchers */
     for (let i = 0; searchers[i]; i++) {
-      lua.lua_pushvalue(L, -2);  /* set 'package' as upvalue for all searchers */
-      lua.lua_pushcclosure(L, searchers[i], 1);
-      lua.lua_rawseti(L, -2, i+1);
+        lua.lua_pushvalue(L, -2);  /* set 'package' as upvalue for all searchers */
+        lua.lua_pushcclosure(L, searchers[i], 1);
+        lua.lua_rawseti(L, -2, i+1);
     }
     lua.lua_setfield(L, -2, lua.to_luastring("searchers", true));  /* put it in field 'searchers' */
 };
