@@ -56,7 +56,12 @@ if (WEB) {
                 return null;
             }
             let res = func(fengari);
-            return res;
+            if (typeof res === "function" || (typeof res === "object" && res !== null)) {
+                return res;
+            } else {
+                lua.lua_pushstring(L, lua.to_luastring(`library returned unexpected type (${typeof res})`));
+                return null;
+            }
         } else {
             lua.lua_pushstring(L, lua.to_luastring(`${xhr.status}: ${xhr.statusText}`));
             return null;
