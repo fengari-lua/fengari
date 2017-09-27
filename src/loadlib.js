@@ -42,7 +42,15 @@ if (WEB) {
         xhr.send();
 
         if (xhr.status >= 200 && xhr.status <= 299) {
-            return eval(xhr.response);
+            let func;
+            try {
+                func = Function(xhr.response);
+            } catch (e) {
+                lua.lua_pushstring(L, lua.to_luastring(`${e.name}: ${e.message}`));
+                return null;
+            }
+            let res = func();
+            return res;
         } else {
             lua.lua_pushstring(L, lua.to_luastring(`${xhr.status}: ${xhr.statusText}`));
             return null;
