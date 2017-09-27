@@ -58,6 +58,8 @@ if (WEB) {
             let res = func(fengari);
             if (typeof res === "function" || (typeof res === "object" && res !== null)) {
                 return res;
+            } else if (res === void 0) { /* assume library added symbols to global environment */
+                return window;
             } else {
                 lua.lua_pushstring(L, lua.to_luastring(`library returned unexpected type (${typeof res})`));
                 return null;
