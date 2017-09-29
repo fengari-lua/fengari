@@ -48,6 +48,5 @@ help
 
 .gdb_history
 
-dist
-
 .tern-port
+.idea

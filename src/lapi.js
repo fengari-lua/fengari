@@ -774,7 +774,7 @@ const lua_isproxy = function(p, L) {
 /* Use 'create_proxy' helper function so that 'L' is not in scope */
 const create_proxy = function(G, type, value) {
     let proxy = function(L) {
-        assert(L instanceof lstate.lua_State && G === L.l_G, "must be from same global state");
+        assert(G === L.l_G, "must be from same global state");
         L.stack[L.top] = new TValue(type, value);
         L.top++;
         assert(L.top <= L.ci.top, "stack overflow");
