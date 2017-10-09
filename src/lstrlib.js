@@ -6,7 +6,6 @@ const sprintf = require('sprintf-js').sprintf;
 const lauxlib = require('./lauxlib.js');
 const lua     = require('./lua.js');
 const luaconf = require('./luaconf.js');
-const llimit  = require('./llimit.js');
 
 const sL_ESC  = '%';
 const L_ESC   = sL_ESC.charCodeAt(0);
@@ -224,7 +223,7 @@ const addliteral = function(L, b, arg) {
                 checkdp(b);  /* ensure it uses a dot */
             } else {  /* integers */
                 let n = lua.lua_tointeger(L, arg);
-                let format = (n === llimit.LUA_MININTEGER)  /* corner case? */
+                let format = (n === luaconf.LUA_MININTEGER)  /* corner case? */
                     ? "0x%" + luaconf.LUA_INTEGER_FRMLEN + "x"  /* use hexa */
                     : luaconf.LUA_INTEGER_FMT;  /* else use default format */
                 concat(b, lua.to_luastring(sprintf(format, n)));
@@ -678,7 +677,7 @@ const str_byte = function(L) {
     if (posi < 1) posi = 1;
     if (pose > l) pose = l;
     if (posi > pose) return 0;  /* empty interval; return no values */
-    if (pose - posi >= llimit.MAX_INT)  /* arithmetic overflow? */
+    if (pose - posi >= Number.MAX_SAFE_INTEGER)  /* arithmetic overflow? */
         return lauxlib.luaL_error(L, lua.to_luastring("string slice too long", true));
 
     let n = (pose - posi) + 1;

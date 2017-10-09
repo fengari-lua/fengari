@@ -4,7 +4,7 @@ const assert  = require('assert');
 
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
-const llimit  = require('./llimit.js');
+const luaconf = require('./luaconf.js');
 
 
 /*
@@ -107,9 +107,9 @@ const tmove = function(L) {
     checktab(L, 1, TAB_R);
     checktab(L, tt, TAB_W);
     if (e >= f) {  /* otherwise, nothing to move */
-        lauxlib.luaL_argcheck(L, f > 0 || e < llimit.LUA_MAXINTEGER + f, 3, lua.to_luastring("too many elements to move", true));
+        lauxlib.luaL_argcheck(L, f > 0 || e < luaconf.LUA_MAXINTEGER + f, 3, lua.to_luastring("too many elements to move", true));
         let n = e - f + 1;  /* number of elements to move */
-        lauxlib.luaL_argcheck(L, t <= llimit.LUA_MAXINTEGER - n + 1, 4, lua.to_luastring("destination wrap around", true));
+        lauxlib.luaL_argcheck(L, t <= luaconf.LUA_MAXINTEGER - n + 1, 4, lua.to_luastring("destination wrap around", true));
 
         if (t > e || t <= f || (tt !== 1 && lua.lua_compare(L, 1, tt, lua.LUA_OPEQ) !== 1)) {
             for (let i = 0; i < n; i++) {
@@ -166,7 +166,7 @@ const unpack = function(L) {
     let e = lauxlib.luaL_opt(L, lauxlib.luaL_checkinteger, 3, lauxlib.luaL_len(L, 1));
     if (i > e) return 0;  /* empty range */
     let n = e - i;  /* number of elements minus 1 (avoid overflows) */
-    if (n >= llimit.MAX_INT || !lua.lua_checkstack(L, ++n))
+    if (n >= Number.MAX_SAFE_INTEGER || !lua.lua_checkstack(L, ++n))
         return lauxlib.luaL_error(L, lua.to_luastring("too many results to unpack", true));
     for (; i < e; i++)  /* push arg[i..e - 1] (to avoid overflows) */
         lua.lua_geti(L, 1, i);
@@ -291,7 +291,7 @@ const auxsort = function(L, lo, up, rnd) {
 const sort = function(L) {
     let n = aux_getn(L, 1, TAB_RW);
     if (n > 1) {  /* non-trivial interval? */
-        lauxlib.luaL_argcheck(L, n < llimit.MAX_INT, 1, lua.to_luastring("array too big", true));
+        lauxlib.luaL_argcheck(L, n < Number.MAX_SAFE_INTEGER, 1, lua.to_luastring("array too big", true));
         if (!lua.lua_isnoneornil(L, 2))  /* is there a 2nd argument? */
             lauxlib.luaL_checktype(L, 2, lua.LUA_TFUNCTION);  /* must be a function */
         lua.lua_settop(L, 2);  /* make sure there are two arguments */

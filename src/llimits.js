@@ -2,10 +2,6 @@
 
 const LUAI_MAXCCALLS = 200;
 module.exports.LUAI_MAXCCALLS = LUAI_MAXCCALLS;
-const LUA_MAXINTEGER = 2147483647;
-module.exports.LUA_MAXINTEGER = LUA_MAXINTEGER;
-const LUA_MININTEGER = -2147483648;
-module.exports.LUA_MININTEGER = LUA_MININTEGER;
 
 const luai_nummod = function(L, a, b) {
     let m = a % b;

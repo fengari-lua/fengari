@@ -2,7 +2,6 @@
 
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
-const llimit  = require('./llimit.js');
 const luaconf = require('./luaconf.js');
 
 const math_random = function(L) {
@@ -27,7 +26,7 @@ const math_random = function(L) {
 
     /* random integer in the interval [low, up] */
     lauxlib.luaL_argcheck(L, low <= up, 1, lua.to_luastring("interval is empty", true));
-    lauxlib.luaL_argcheck(L, low >= 0 || up <= llimit.MAX_INT + low, 1,
+    lauxlib.luaL_argcheck(L, low >= 0 || up <= luaconf.LUA_MAXINTEGER + low, 1,
             lua.to_luastring("interval too large", true));
 
     r *= (up - low) + 1;
@@ -257,9 +256,9 @@ const luaopen_math = function(L) {
     lua.lua_setfield(L, -2, lua.to_luastring("pi", true));
     lua.lua_pushnumber(L, Infinity);
     lua.lua_setfield(L, -2, lua.to_luastring("huge", true));
-    lua.lua_pushinteger(L, llimit.MAX_INT);
+    lua.lua_pushinteger(L, luaconf.LUA_MAXINTEGER);
     lua.lua_setfield(L, -2, lua.to_luastring("maxinteger", true));
-    lua.lua_pushinteger(L, llimit.MIN_INT);
+    lua.lua_pushinteger(L, luaconf.LUA_MININTEGER);
     lua.lua_setfield(L, -2, lua.to_luastring("mininteger", true));
     return 1;
 };

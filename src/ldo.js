@@ -2,21 +2,21 @@
 
 const assert = require('assert');
 
-const defs    = require('./defs.js');
-const lapi    = require('./lapi.js');
-const ldebug  = require('./ldebug.js');
-const lfunc   = require('./lfunc.js');
-const llimit  = require('./llimit.js');
-const lobject = require('./lobject.js');
-const lopcodes= require('./lopcodes.js');
-const lparser = require('./lparser.js');
-const lstate  = require('./lstate.js');
-const lstring = require('./lstring.js');
-const ltm     = require('./ltm.js');
-const luaconf = require('./luaconf.js');
-const lundump = require('./lundump.js');
-const lvm     = require('./lvm.js');
-const lzio    = require('./lzio.js');
+const defs     = require('./defs.js');
+const lapi     = require('./lapi.js');
+const ldebug   = require('./ldebug.js');
+const lfunc    = require('./lfunc.js');
+const llimits  = require('./llimits.js');
+const lobject  = require('./lobject.js');
+const lopcodes = require('./lopcodes.js');
+const lparser  = require('./lparser.js');
+const lstate   = require('./lstate.js');
+const lstring  = require('./lstring.js');
+const ltm      = require('./ltm.js');
+const luaconf  = require('./luaconf.js');
+const lundump  = require('./lundump.js');
+const lvm      = require('./lvm.js');
+const lzio     = require('./lzio.js');
 
 const CT = defs.constant_types;
 const TS = defs.thread_status;
@@ -322,9 +322,9 @@ const tryfuncTM = function(L, off, func) {
 ** allow overflow handling to work)
 */
 const stackerror = function(L) {
-    if (L.nCcalls === llimit.LUAI_MAXCCALLS)
+    if (L.nCcalls === llimits.LUAI_MAXCCALLS)
         ldebug.luaG_runerror(L, defs.to_luastring("JS stack overflow", true));
-    else if (L.nCcalls >= llimit.LUAI_MAXCCALLS + (llimit.LUAI_MAXCCALLS >> 3))
+    else if (L.nCcalls >= llimits.LUAI_MAXCCALLS + (llimits.LUAI_MAXCCALLS >> 3))
         luaD_throw(L, TS.LUA_ERRERR);  /* error while handing stack error */
 };
 
@@ -335,7 +335,7 @@ const stackerror = function(L) {
 ** function position.
 */
 const luaD_call = function(L, off, nResults) {
-    if (++L.nCcalls >= llimit.LUAI_MAXCCALLS)
+    if (++L.nCcalls >= llimits.LUAI_MAXCCALLS)
         stackerror(L);
     if (!luaD_precall(L, off, nResults))
         lvm.luaV_execute(L);
@@ -562,7 +562,7 @@ const lua_resume = function(L, from, nargs) {
         return resume_error(L, "cannot resume dead coroutine", nargs);
 
     L.nCcalls = from ? from.nCcalls + 1 : 1;
-    if (L.nCcalls >= llimit.LUAI_MAXCCALLS)
+    if (L.nCcalls >= llimits.LUAI_MAXCCALLS)
         return resume_error(L, "JS stack overflow", nargs);
 
     L.nny = 0;  /* allow yields */

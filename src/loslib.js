@@ -2,7 +2,6 @@
 
 const lua      = require('./lua.js');
 const lauxlib  = require('./lauxlib.js');
-const llimit   = require('./llimit.js');
 
 const strftime = require('strftime');
 
@@ -37,7 +36,7 @@ const setallfields = function(L, time, utc) {
     // setboolfield(L, "isdst", time.get);
 };
 
-const L_MAXDATEFIELD = (llimit.MAX_INT / 2);
+const L_MAXDATEFIELD = (Number.MAX_SAFE_INTEGER / 2);
 
 const getfield = function(L, key, d, delta) {
     let t = lua.lua_getfield(L, -1, lua.to_luastring(key, true));  /* get field and its type */

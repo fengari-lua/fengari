@@ -9,7 +9,7 @@ const lobject     = require('./lobject.js');
 const lfunc       = require('./lfunc.js');
 const lstate      = require('./lstate.js');
 const lstring     = require('./lstring.js');
-const llimit      = require('./llimit.js');
+const llimits     = require('./llimits.js');
 const ldo         = require('./ldo.js');
 const ltm         = require('./ltm.js');
 const ltable      = require('./ltable.js');
@@ -245,7 +245,7 @@ const luaV_execute = function(L) {
                 if (op1.ttisinteger() && op2.ttisinteger()) {
                     L.stack[ra].setivalue(luaV_mod(L, op1.value, op2.value));
                 } else if ((numberop1 = tonumber(op1)) !== false && (numberop2 = tonumber(op2)) !== false) {
-                    L.stack[ra].setfltvalue(llimit.luai_nummod(L, numberop1, numberop2));
+                    L.stack[ra].setfltvalue(llimits.luai_nummod(L, numberop1, numberop2));
                 } else {
                     ltm.luaT_trybinTM(L, op1, op2, L.stack[ra], ltm.TMS.TM_MOD);
                 }
@@ -726,10 +726,10 @@ const forlimit = function(obj, step) {
             return false;
 
         if (0 < n) {
-            ilimit = llimit.LUA_MAXINTEGER;
+            ilimit = luaconf.LUA_MAXINTEGER;
             if (step < 0) stopnow = true;
         } else {
-            ilimit = llimit.LUA_MININTEGER;
+            ilimit = luaconf.LUA_MININTEGER;
             if (step >= 0) stopnow = true;
         }
     }

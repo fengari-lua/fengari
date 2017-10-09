@@ -2,7 +2,6 @@
 
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
-const llimit  = require('./llimit.js');
 
 const MAXUNICODE = 0x10FFFF;
 
@@ -160,7 +159,7 @@ const codepoint = function(L) {
     lauxlib.luaL_argcheck(L, pose <= s.length, 3, lua.to_luastring("out of range", true));
 
     if (posi > pose) return 0;  /* empty interval; return no values */
-    if (pose - posi >= llimit.MAX_INT)
+    if (pose - posi >= Number.MAX_SAFE_INTEGER)
         return lauxlib.luaL_error(L, lua.to_luastring("string slice too long", true));
     let n = (pose - posi) + 1;
     lauxlib.luaL_checkstack(L, n, lua.to_luastring("string slice too long", true));
