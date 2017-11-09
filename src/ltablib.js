@@ -291,7 +291,7 @@ const auxsort = function(L, lo, up, rnd) {
 const sort = function(L) {
     let n = aux_getn(L, 1, TAB_RW);
     if (n > 1) {  /* non-trivial interval? */
-        lauxlib.luaL_argcheck(L, n < Number.MAX_SAFE_INTEGER, 1, lua.to_luastring("array too big", true));
+        lauxlib.luaL_argcheck(L, n < luaconf.LUA_MAXINTEGER, 1, lua.to_luastring("array too big", true));
         if (!lua.lua_isnoneornil(L, 2))  /* is there a 2nd argument? */
             lauxlib.luaL_checktype(L, 2, lua.LUA_TFUNCTION);  /* must be a function */
         lua.lua_settop(L, 2);  /* make sure there are two arguments */
