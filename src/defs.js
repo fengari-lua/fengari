@@ -136,12 +136,16 @@ const is_luastring = function(s) {
 };
 
 const to_jsstring = function(value, from, to) {
-    assert(is_luastring(value), "jsstring expect a array of bytes");
+    assert(is_luastring(value), "jsstring expects an array of bytes");
 
-    value = value.slice(from ? from : 0, to);
+    if (to === void 0) {
+        to = value.length;
+    } else {
+        to = Math.min(value.length, to);
+    }
 
     let str = "";
-    for (let i = 0; i < value.length;) {
+    for (let i = (from!==void 0?from:0); i < to;) {
         let u;
         let u0 = value[i++];
         if (u0 < 0x80) {
@@ -151,18 +155,18 @@ const to_jsstring = function(value, from, to) {
             throw RangeError("cannot convert invalid utf8 to javascript string");
         } else if (u0 <= 0xDF) {
             /* two byte sequence */
-            if (i >= value.length) throw RangeError("cannot convert invalid utf8 to javascript string");
+            if (i >= to) throw RangeError("cannot convert invalid utf8 to javascript string");
             let u1 = value[i++];
             u = ((u0 & 0x1F) << 6) + (u1 & 0x3F);
         } else if (u0 <= 0xEF) {
             /* three byte sequence */
-            if (i+1 >= value.length) throw RangeError("cannot convert invalid utf8 to javascript string");
+            if (i+1 >= to) throw RangeError("cannot convert invalid utf8 to javascript string");
             let u1 = value[i++];
             let u2 = value[i++];
             u = ((u0 & 0x0F) << 12) + ((u1 & 0x3F) << 6) + (u2 & 0x3F);
         } else {
             /* four byte sequence */
-            if (i+2 >= value.length) throw RangeError("cannot convert invalid utf8 to javascript string");
+            if (i+2 >= to) throw RangeError("cannot convert invalid utf8 to javascript string");
             let u1 = value[i++];
             let u2 = value[i++];
             let u3 = value[i++];
