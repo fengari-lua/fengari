@@ -176,7 +176,9 @@ if (!WEB) {
     };
 
     syslib.getenv = function(L) {
-        lua.lua_pushliteral(L, process.env[lua.to_jsstring(lauxlib.luaL_checkstring(L, 1))]);  /* if NULL push nil */
+        let key = lauxlib.luaL_checkstring(L, 1);
+        key = lua.to_jsstring(key); /* https://github.com/nodejs/node/issues/16961 */
+        lua.lua_pushliteral(L, process.env[key]);  /* if NULL push nil */
         return 1;
     };
 
@@ -193,10 +195,11 @@ if (!WEB) {
     syslib.remove = function(L) {
         let filename = lauxlib.luaL_checkstring(L, 1);
         try {
-            if (fs.lstatSync(lua.to_jsstring(filename)).isDirectory()) {
-                fs.rmdirSync(lua.to_jsstring(filename));
+            filename = Uint8Array.from(filename);
+            if (fs.lstatSync(filename).isDirectory()) {
+                fs.rmdirSync(filename);
             } else {
-                fs.unlinkSync(lua.to_jsstring(filename));
+                fs.unlinkSync(filename);
             }
         } catch (e) {
             return lauxlib.luaL_fileresult(L, false, filename, e);
@@ -205,9 +208,11 @@ if (!WEB) {
     };
 
     syslib.rename = function(L) {
-        let fromname = lua.to_jsstring(lauxlib.luaL_checkstring(L, 1));
-        let toname = lua.to_jsstring(lauxlib.luaL_checkstring(L, 2));
+        let fromname = lauxlib.luaL_checkstring(L, 1);
+        let toname = lauxlib.luaL_checkstring(L, 2);
         try {
+            fromname = Uint8Array.from(fromname);
+            toname = Uint8Array.from(toname);
             fs.renameSync(fromname, toname);
         } catch (e) {
             return lauxlib.luaL_fileresult(L, false, false, e);
@@ -228,7 +233,7 @@ if (!WEB) {
         if (cmd !== null) {
             try {
                 child_process.execSync(
-                    lua.to_jsstring(cmd),
+                    Uint8Array.from(cmd),
                     {
                         stdio: [process.stdin, process.stdout, process.stderr]
                     }
@@ -241,7 +246,7 @@ if (!WEB) {
         } else {
             try {
                 child_process.execSync(
-                    lua.to_jsstring(cmd),
+                    Uint8Array.from(cmd),
                     {
                         stdio: [process.stdin, process.stdout, process.stderr]
                     }
