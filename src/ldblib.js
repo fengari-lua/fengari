@@ -416,7 +416,7 @@ if (!WEB) {
             let buffer = lua.to_luastring(input);
             if (lauxlib.luaL_loadbuffer(L, buffer, buffer.length, lua.to_luastring("=(debug command)", true))
                 || lua.lua_pcall(L, 0, 0, 0)) {
-                lauxlib.lua_writestringerror(`${lua.lua_tojsstring(L, -1)}\n`);
+                lauxlib.lua_writestringerror(lua.lua_toluastring(L, -1), "\n");
             }
             lua.lua_settop(L, 0);  /* remove eventual returns */
         }

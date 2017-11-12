@@ -853,11 +853,18 @@ const luaL_dofile = function(L, filename) {
     return (luaL_loadfile(L, filename) || lua.lua_pcall(L, 0, lua.LUA_MULTRET, 0));
 };
 
-const lua_writestringerror = function(s) {
-    if (WEB) {
-        process.stderr.write(s);
-    } else {
-        console.error(s);
+const lua_writestringerror = function() {
+    for (let i=0; i<arguments.length; i++) {
+        let a = arguments[i];
+        if (WEB) {
+            if (typeof a !== "string")
+                a = lua.to_jsstring(a);
+            console.error(a);
+        } else {
+            if (typeof a !== "string")
+                a = Uint8Array.from(a);
+            process.stderr.write(a);
+        }
     }
 };
 
