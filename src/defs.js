@@ -186,7 +186,7 @@ const to_jsstring = function(value, from, to) {
 const to_luastring_cache = {};
 
 const to_luastring = function(str, cache) {
-    assert(typeof str === "string", "to_luastring expect a js string");
+    assert(typeof str === "string", "to_luastring expects a javascript string");
 
     if (cache) {
         let cached = to_luastring_cache[str];
@@ -196,8 +196,6 @@ const to_luastring = function(str, cache) {
     let outU8Array = Array(str.length); /* array is at *least* going to be length of string */
     let outIdx = 0;
     for (let i = 0; i < str.length; ++i) {
-        // See http://unicode.org/faq/utf_bom.html#utf16-3
-        // For UTF8 byte structure, see http://en.wikipedia.org/wiki/UTF-8#Description and https://www.ietf.org/rfc/rfc2279.txt and https://tools.ietf.org/html/rfc3629
         let u = str.codePointAt(i);
         if (u <= 0x7F) {
             outU8Array[outIdx++] = u;
@@ -216,10 +214,9 @@ const to_luastring = function(str, cache) {
             outU8Array[outIdx++] = 0x80 | (u & 63);
         }
     }
-    // Null-terminate the pointer to the buffer.
-    // outU8Array[outIdx] = 0;
 
     if (cache) to_luastring_cache[str] = outU8Array;
+
     return outU8Array;
 };
 
