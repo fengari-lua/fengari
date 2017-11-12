@@ -740,9 +740,10 @@ if (WEB) {
         } else {
             lua.lua_pushfstring(L, lua.to_luastring("@%s"), filename);
 
-            let jsfilename = lua.to_jsstring(filename);
+            let path = lua.to_jsstring(filename);
+            path = encodeURI(path);
             let xhr = new XMLHttpRequest();
-            xhr.open("GET", jsfilename, false);
+            xhr.open("GET", path, false);
             // TODO: find a way to load bytes instead of js string
             xhr.send();
 
