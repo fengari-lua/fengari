@@ -193,7 +193,7 @@ const to_luastring = function(str, cache) {
         // See http://unicode.org/faq/utf_bom.html#utf16-3
         // For UTF8 byte structure, see http://en.wikipedia.org/wiki/UTF-8#Description and https://www.ietf.org/rfc/rfc2279.txt and https://tools.ietf.org/html/rfc3629
         let u = str.codePointAt(i);
-        if (u >= 0xD800) i++; // If it was a surrogate pair it used up two bytes
+        if (u >= 0x10000) i++; // It was a surrogate pair and hence used up two bytes
         if (u <= 0x7F) {
             outU8Array[outIdx++] = u;
         } else if (u <= 0x7FF) {
