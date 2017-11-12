@@ -38,8 +38,7 @@ const AUXMARK       = [1];
 let lsys_load;
 if (WEB) {
     lsys_load = function(L, path, seeglb) {
-        path = lua.to_jsstring(path);
-        path = encodeURI(path);
+        path = lua.to_uristring(path);
         let xhr = new XMLHttpRequest();
         xhr.open("GET", path, false);
         xhr.send();
@@ -129,8 +128,7 @@ if (!WEB) {
 } else {
     /* TODO: use async/await ? */
     readable = function(path) {
-        path = lua.to_jsstring(path);
-        path = encodeURI(path);
+        path = lua.to_uristring(path);
         let xhr = new XMLHttpRequest();
         /* Following GET request done by searcher_Web will be cached */
         xhr.open("GET", path, false);

@@ -188,6 +188,25 @@ const to_jsstring = function(value, from, to) {
     return str;
 };
 
+const uri_allowed = {}; /* bytes allowed unescaped in a uri */
+for (let c of ";,/?:@&=+$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,-_.!~*'()#") {
+    uri_allowed[c.charCodeAt(0)] = true;
+}
+
+/* utility function to convert a lua string to a js string with uri escaping */
+const to_uristring = function(a) {
+    let s = "";
+    for (let i=0; i<a.length; i++) {
+        let v = a[i];
+        if (uri_allowed[v]) {
+            s += String.fromCharCode(v);
+        } else {
+            s += "%" + (v<0x10?"0":"") + v.toString(16);
+        }
+    }
+    return s;
+};
+
 const to_luastring_cache = {};
 
 const to_luastring = function(str, cache) {
@@ -405,3 +424,4 @@ module.exports.is_luastring            = is_luastring;
 module.exports.luastring_cmp           = luastring_cmp;
 module.exports.to_jsstring             = to_jsstring;
 module.exports.to_luastring            = to_luastring;
+module.exports.to_uristring            = to_uristring;
