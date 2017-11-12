@@ -640,14 +640,16 @@ const str_reverse = function(L) {
 };
 
 const str_lower = function(L) {
+    let s = lauxlib.luaL_checkstring(L, 1);
     // TODO: will fail on invalid UTF-8
-    lua.lua_pushstring(L, lua.to_luastring(lua.to_jsstring(lauxlib.luaL_checkstring(L, 1)).toLowerCase()));
+    lua.lua_pushstring(L, lua.to_luastring(lua.to_jsstring(s).toLowerCase()));
     return 1;
 };
 
 const str_upper = function(L) {
+    let s = lauxlib.luaL_checkstring(L, 1);
     // TODO: will fail on invalid UTF-8
-    lua.lua_pushstring(L, lua.to_luastring(lua.to_jsstring(lauxlib.luaL_checkstring(L, 1)).toUpperCase()));
+    lua.lua_pushstring(L, lua.to_luastring(lua.to_jsstring(s).toUpperCase()));
     return 1;
 };
 
