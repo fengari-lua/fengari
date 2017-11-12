@@ -5,6 +5,7 @@ const assert = require('assert');
 const defs     = require('./defs.js');
 const ldo      = require('./ldo.js');
 const lfunc    = require('./lfunc.js');
+const llex     = require('./llex.js');
 const lobject  = require('./lobject.js');
 const lopcodes = require('./lopcodes.js');
 const lstate   = require('./lstate.js');
@@ -401,7 +402,7 @@ const getobjname = function(p, lastpc, reg) {
                 let t = i.B;  /* table index */
                 let vn = i.opcode === OCi.OP_GETTABLE ? lfunc.luaF_getlocalname(p, t + 1, pc) : upvalname(p, t);
                 r.name = kname(p, pc, k).name;
-                r.funcname = vn && defs.to_jsstring(vn) === "_ENV" ? defs.to_luastring("global", true) : defs.to_luastring("field", true);
+                r.funcname = (vn && defs.luastring_cmp(vn, llex.LUA_ENV)) ? defs.to_luastring("global", true) : defs.to_luastring("field", true);
                 return r;
             }
             case OCi.OP_GETUPVAL: {
