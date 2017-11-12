@@ -118,15 +118,12 @@ if (!WEB) {
     const fs = require('fs');
 
     readable = function(filename) {
-        let fd = false;
-
         try {
-            fd = fs.openSync(lua.to_jsstring(filename), 'r');
+            let fd = fs.openSync(Uint8Array.from(filename), 'r');
             fs.closeSync(fd);
         } catch (e) {
             return false;
         }
-
         return true;
     };
 } else {
