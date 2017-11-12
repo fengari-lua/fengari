@@ -16,6 +16,8 @@ const char     = defs.char;
 
 const FIRST_RESERVED = 257;
 
+const LUA_ENV = defs.to_luastring("_ENV", true);
+
 const RESERVED = {
     /* terminal symbols denoted by reserved words */
     TK_AND:      FIRST_RESERVED,
@@ -189,7 +191,7 @@ const luaX_setinput = function(L, ls, z, source, firstchar) {
     ls.linenumber = 1;
     ls.lastline = 1;
     ls.source = source;
-    ls.envn = lstring.luaS_newliteral(L, "_ENV");
+    ls.envn = lstring.luaS_bless(L, LUA_ENV);
 };
 
 const check_next1 = function(ls, c) {
@@ -596,6 +598,7 @@ const luaX_lookahead = function(ls) {
 };
 
 module.exports.FIRST_RESERVED   = FIRST_RESERVED;
+module.exports.LUA_ENV          = LUA_ENV;
 module.exports.LexState         = LexState;
 module.exports.RESERVED         = RESERVED;
 module.exports.isreserved       = isreserved;
