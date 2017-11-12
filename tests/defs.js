@@ -56,3 +56,11 @@ test('to_jsstring', function (t) {
 		t.deepEqual(defs.to_jsstring(v.byte_array), v.literal, v.description);
 	});
 });
+
+test('to_jsstring fails on invalid unicode', function (t) {
+	t.plan(1);
+
+	t.throws(function() {
+		defs.to_jsstring([165]);
+	}, "non-utf8 char");
+});
