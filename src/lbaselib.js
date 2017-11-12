@@ -169,7 +169,12 @@ const luaB_ipairs = function(L) {
 };
 
 const b_str2int = function(s, base) {
-    let r = /^[\t\v\f \n\r]*([\+\-]?)0*([0-9A-Za-z]+)[\t\v\f \n\r]*$/.exec(lua.to_jsstring(s));
+    try {
+        s = lua.to_jsstring(s);
+    } catch (e) {
+        return null;
+    }
+    let r = /^[\t\v\f \n\r]*([\+\-]?)0*([0-9A-Za-z]+)[\t\v\f \n\r]*$/.exec(s);
     if (!r) return null;
     let neg = r[1] === "-";
     let digits = r[2];
