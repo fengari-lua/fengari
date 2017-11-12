@@ -58,9 +58,33 @@ test('to_jsstring', function (t) {
 });
 
 test('to_jsstring fails on invalid unicode', function (t) {
-	t.plan(1);
+	t.plan(7);
 
 	t.throws(function() {
 		defs.to_jsstring([165]);
 	}, "non-utf8 char");
+
+	t.throws(function() {
+		defs.to_jsstring([208, 60]);
+	}, "invalid continuation byte");
+
+	t.throws(function() {
+		defs.to_jsstring([225, 60, 145]);
+	}, "invalid continuation byte");
+
+	t.throws(function() {
+		defs.to_jsstring([225, 145, 60]);
+	}, "invalid continuation byte");
+
+	t.throws(function() {
+		defs.to_jsstring([242, 60, 145, 145]);
+	}, "invalid continuation byte");
+
+	t.throws(function() {
+		defs.to_jsstring([242, 145, 60, 145]);
+	}, "invalid continuation byte");
+
+	t.throws(function() {
+		defs.to_jsstring([242, 145, 145, 60]);
+	}, "invalid continuation byte");
 });

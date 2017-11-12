@@ -157,19 +157,25 @@ const to_jsstring = function(value, from, to) {
             /* two byte sequence */
             if (i >= to) throw RangeError("cannot convert invalid utf8 to javascript string");
             let u1 = value[i++];
+            if ((u1&0xC0) !== 0x80) throw RangeError("cannot convert invalid utf8 to javascript string");
             u = ((u0 & 0x1F) << 6) + (u1 & 0x3F);
         } else if (u0 <= 0xEF) {
             /* three byte sequence */
             if (i+1 >= to) throw RangeError("cannot convert invalid utf8 to javascript string");
             let u1 = value[i++];
+            if ((u1&0xC0) !== 0x80) throw RangeError("cannot convert invalid utf8 to javascript string");
             let u2 = value[i++];
+            if ((u2&0xC0) !== 0x80) throw RangeError("cannot convert invalid utf8 to javascript string");
             u = ((u0 & 0x0F) << 12) + ((u1 & 0x3F) << 6) + (u2 & 0x3F);
         } else {
             /* four byte sequence */
             if (i+2 >= to) throw RangeError("cannot convert invalid utf8 to javascript string");
             let u1 = value[i++];
+            if ((u1&0xC0) !== 0x80) throw RangeError("cannot convert invalid utf8 to javascript string");
             let u2 = value[i++];
+            if ((u2&0xC0) !== 0x80) throw RangeError("cannot convert invalid utf8 to javascript string");
             let u3 = value[i++];
+            if ((u3&0xC0) !== 0x80) throw RangeError("cannot convert invalid utf8 to javascript string");
             u = ((u0 & 0x07) << 18) + ((u1 & 0x3F) << 12) + ((u2 & 0x3F) << 6) + (u3 & 0x3F);
         }
         str += String.fromCodePoint(u);
