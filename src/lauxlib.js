@@ -60,7 +60,7 @@ const pushglobalfuncname = function(L, ar) {
     lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, lua.to_luastring(LUA_LOADED_TABLE, true));
     if (findfield(L, top + 1, 2)) {
         let name = lua.lua_tostring(L, -1);
-        if (lua.to_jsstring(name).startsWith("_G.")) {  /* name start with '_G.'? */
+        if (name[0] === "_".charCodeAt(0) && name[1] === "G".charCodeAt(0) && name[2] === ".".charCodeAt(0)) {  /* name start with '_G.'? */
             lua.lua_pushstring(L, name.slice(3));  /* push name without prefix */
             lua.lua_remove(L, -2);  /* remove original name */
         }
@@ -132,7 +132,12 @@ const luaL_traceback = function(L, L1, msg, level) {
 };
 
 const panic = function(L) {
-    throw new Error(`PANIC: unprotected error in call to Lua API (${lua.lua_tojsstring(L, -1)})`);
+    let msg = "PANIC: unprotected error in call to Lua API";
+    try {
+        msg += " (" + lua.lua_tojsstring(L, -1) + ")";
+    } catch (e) {
+    }
+    throw new Error(msg);
 };
 
 const luaL_argerror = function(L, arg, extramsg) {
@@ -143,7 +148,7 @@ const luaL_argerror = function(L, arg, extramsg) {
 
     lua.lua_getinfo(L, ['n'.charCodeAt(0)], ar);
 
-    if (lua.to_jsstring(ar.namewhat) === "method") {
+    if (ar.namewhat.join() === lua.to_luastring("method").join()) {
         arg--;  /* do not count 'self' */
         if (arg === 0)  /* error is in the self argument itself? */
             return luaL_error(L, lua.to_luastring("calling '%s' on bad self (%s)"), ar.name, extramsg);
@@ -195,7 +200,7 @@ const luaL_fileresult = function(L, stat, fname, e) {
     } else {
         lua.lua_pushnil(L);
         if (fname)
-            lua.lua_pushstring(L, lua.to_luastring(`${lua.to_jsstring(fname)}: ${e.message}`));
+            lua.lua_pushfstring(L, lua.to_luastring("%s: %s"), fname, lua.to_luastring(e.message));
         else
             lua.lua_pushstring(L, lua.to_luastring(e.message));
         lua.lua_pushinteger(L, -e.errno);
@@ -647,7 +652,7 @@ const luaL_unref = function(L, t, ref) {
 const errfile = function(L, what, fnameindex, error) {
     let serr = error.message;
     let filename = lua.lua_tostring(L, fnameindex).slice(1);
-    lua.lua_pushstring(L, lua.to_luastring(`cannot ${what} ${lua.to_jsstring(filename)}: ${serr}`));
+    lua.lua_pushfstring(L, lua.to_luastring("cannot %s %s: %s"), lua.to_luastring(what), filename, lua.to_luastring(serr));
     lua.lua_remove(L, fnameindex);
     return lua.LUA_ERRFILE;
 };
@@ -813,7 +818,7 @@ if (WEB) {
         } else {
             lua.lua_pushfstring(L, lua.to_luastring("@%s"), filename);
             try {
-                let jsfilename = lua.to_jsstring(filename);
+                let jsfilename = Uint8Array.from(filename);
                 lf.f = fs.openSync(jsfilename, "r");
             } catch (e) {
                 return errfile(L, "open", fnameindex, e);
