@@ -565,7 +565,7 @@ const luaG_opinterror = function(L, p1, p2, msg) {
 const luaG_ordererror = function(L, p1, p2) {
     let t1 = ltm.luaT_objtypename(L, p1);
     let t2 = ltm.luaT_objtypename(L, p2);
-    if (t1.join() === t2.join())
+    if (defs.luastring_cmp(t1, t2))
         luaG_runerror(L, defs.to_luastring("attempt to compare two %s values", true), t1);
     else
         luaG_runerror(L, defs.to_luastring("attempt to compare %s with %s", true), t1, t2);

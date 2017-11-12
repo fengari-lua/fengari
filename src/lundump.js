@@ -214,7 +214,7 @@ class BytecodeParser {
 
     checkliteral(s, msg) {
         let buff = this.read(s.length);
-        if (buff.join() !== s.join())
+        if (!defs.luastring_cmp(buff, s))
             this.error(msg);
     }
 
