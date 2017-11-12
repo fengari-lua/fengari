@@ -178,7 +178,11 @@ if (!WEB) {
     syslib.getenv = function(L) {
         let key = lauxlib.luaL_checkstring(L, 1);
         key = lua.to_jsstring(key); /* https://github.com/nodejs/node/issues/16961 */
-        lua.lua_pushliteral(L, process.env[key]);  /* if NULL push nil */
+        if (Object.prototype.hasOwnProperty.call(process.env, key)) {
+            lua.lua_pushliteral(L, process.env[key]);
+        } else {
+            lua.lua_pushnil(L);
+        }
         return 1;
     };
 
