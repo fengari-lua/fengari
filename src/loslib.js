@@ -6,17 +6,17 @@ const lauxlib  = require('./lauxlib.js');
 const strftime = require('strftime');
 
 /* options for ANSI C 89 (only 1-char options) */
-const L_STRFTIMEC89 = lua.to_luastring("aAbBcdHIjmMpSUwWxXyYZ%", true);
+const L_STRFTIMEC89 = lua.to_luastring("aAbBcdHIjmMpSUwWxXyYZ%");
+const LUA_STRFTIMEOPTIONS = L_STRFTIMEC89;
 
 /* options for ISO C 99 and POSIX */
-const L_STRFTIMEC99 = lua.to_luastring("aAbBcCdDeFgGhHIjmMnprRStTuUVwWxXyYzZ%||EcECExEXEyEYOdOeOHOIOmOMOSOuOUOVOwOWOy", true);  /* two-char options */
+// const L_STRFTIMEC99 = lua.to_luastring("aAbBcCdDeFgGhHIjmMnprRStTuUVwWxXyYzZ%||EcECExEXEyEYOdOeOHOIOmOMOSOuOUOVOwOWOy");  /* two-char options */
+// const LUA_STRFTIMEOPTIONS = L_STRFTIMEC99;
 
 /* options for Windows */
-const L_STRFTIMEWIN = lua.to_luastring("aAbBcdHIjmMpSUwWxXyYzZ%||#c#x#d#H#I#j#m#M#S#U#w#W#y#Y", true);  /* two-char options */
-
+// const L_STRFTIMEWIN = lua.to_luastring("aAbBcdHIjmMpSUwWxXyYzZ%||#c#x#d#H#I#j#m#M#S#U#w#W#y#Y");  /* two-char options */
 // const LUA_STRFTIMEOPTIONS = L_STRFTIMEWIN;
-const LUA_STRFTIMEOPTIONS = L_STRFTIMEC89;
-// const LUA_STRFTIMEOPTIONS = L_STRFTIMEC99;
+
 
 const setfield = function(L, key, value) {
     lua.lua_pushinteger(L, value);
@@ -57,18 +57,28 @@ const getfield = function(L, key, d, delta) {
     return res;
 };
 
-const checkoption = function(L, conv, buff) {
+const array_cmp = function(a, ai, b, bi, len) {
+    for (let i=0; i<len; i++) {
+        if (a[ai+i] !== b[bi+i])
+            return false;
+    }
+    return true;
+};
+
+const checkoption = function(L, conv, i, buff) {
     let option = LUA_STRFTIMEOPTIONS;
+    let o = 0;
     let oplen = 1;  /* length of options being checked */
-    for (; option.length > 0 && oplen <= conv.length; option = option.slice(oplen)) {
-        if (option[0] === '|'.charCodeAt(0))  /* next block? */
+    for (; o < option.length && oplen <= (conv.length - i); o += oplen) {
+        if (option[o] === '|'.charCodeAt(0))  /* next block? */
             oplen++;  /* will check options with next length (+1) */
-        else if (lua.to_jsstring(conv.slice(0, oplen)) === lua.to_jsstring(option.slice(0, oplen))) {  /* match? */
-            buff.push(...conv.slice(0, oplen)); /* copy valid option to buffer */
-            return conv.slice(oplen);  /* return next item */
+        else if (array_cmp(conv, i, option, o, oplen)) {  /* match? */
+            buff.push(...conv.slice(i, i+oplen)); /* copy valid option to buffer */
+            return i + oplen;  /* return next item */
         }
     }
-    lauxlib.luaL_argerror(L, 1, lua.lua_pushliteral(L, `invalid conversion specifier '%${conv}'`, conv));
+    lauxlib.luaL_argerror(L, 1,
+        lua.lua_pushfstring(L, lua.to_luastring("invalid conversion specifier '%%%s'"), conv));
 };
 
 /* maximum size for an individual 'strftime' item */
@@ -76,37 +86,36 @@ const SIZETIMEFMT = 250;
 
 
 const os_date = function(L) {
-    let s = lauxlib.luaL_optlstring(L, 1, "%c");
+    let s = lauxlib.luaL_optlstring(L, 1, lua.to_luastring("%c"));
     let t = lauxlib.luaL_opt(L, l_checktime, 2, new Date().getTime() / 1000) * 1000;
     let stm = new Date(t);
     let utc = false;
-    if (s[0] === '!'.charCodeAt(0)) {  /* UTC? */
+    let i = 0;
+    if (s[i] === '!'.charCodeAt(0)) {  /* UTC? */
         utc = true;
-        s = s.slice(1);  /* skip '!' */
+        i++;  /* skip '!' */
     }
 
     if (stm === null)  /* invalid date? */
         lauxlib.luaL_error(L, lua.to_luastring("time result cannot be represented in this installation", true));
-
-    if (lua.to_jsstring(s) === "*t") {
+    if (s[i] === "*".charCodeAt(0) && s[i+1] === "t".charCodeAt(0)) {
         lua.lua_createtable(L, 0, 9);  /* 9 = number of fields */
         setallfields(L, stm, utc);
     } else {
-        let cc;  /* buffer for individual conversion specifiers */
-        let b = [];
-        while (s.length > 0) {
-            cc = ['%'.charCodeAt(0)];
-
-            if (s[0] !== '%'.charCodeAt(0)) {  /* not a conversion specifier? */
-                b.push(s[0]);
-                s = s.slice(1);
+        let b = new lauxlib.luaL_Buffer();
+        lauxlib.luaL_buffinit(L, b);
+        while (i < s.length) {
+            if (s[i] !== '%'.charCodeAt(0)) {  /* not a conversion specifier? */
+                lauxlib.luaL_addchar(b, s[i++]);
             } else {
-                s = s.slice(1);  /* skip '%' */
-                s = checkoption(L, s, cc);  /* copy specifier to 'cc' */
-                b.push(...(lua.to_luastring(strftime(lua.to_jsstring(cc), stm))));
+                i++;  /* skip '%' */
+                let cc = ["%".charCodeAt(0)];
+                i = checkoption(L, s, i, cc);  /* copy specifier to 'cc' */
+                let buff = strftime(lua.to_jsstring(cc), stm);
+                lauxlib.luaL_addstring(b, lua.to_luastring(buff));
             }
         }
-        lua.lua_pushstring(L, b);
+        lauxlib.luaL_pushresult(b);
     }
     return 1;
 };
