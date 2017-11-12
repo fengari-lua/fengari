@@ -187,13 +187,12 @@ const to_luastring = function(str, cache) {
         if (is_luastring(cached)) return cached;
     }
 
-    let outU8Array = [];
+    let outU8Array = Array(str.length); /* array is at *least* going to be length of string */
     let outIdx = 0;
     for (let i = 0; i < str.length; ++i) {
         // See http://unicode.org/faq/utf_bom.html#utf16-3
         // For UTF8 byte structure, see http://en.wikipedia.org/wiki/UTF-8#Description and https://www.ietf.org/rfc/rfc2279.txt and https://tools.ietf.org/html/rfc3629
         let u = str.codePointAt(i);
-        if (u >= 0x10000) i++; // It was a surrogate pair and hence used up two bytes
         if (u <= 0x7F) {
             outU8Array[outIdx++] = u;
         } else if (u <= 0x7FF) {
@@ -204,6 +203,7 @@ const to_luastring = function(str, cache) {
             outU8Array[outIdx++] = 0x80 | ((u >> 6) & 63);
             outU8Array[outIdx++] = 0x80 | (u & 63);
         } else {
+            i++; /* It was a surrogate pair and hence used up two javascript chars */
             outU8Array[outIdx++] = 0xF0 | (u >> 18);
             outU8Array[outIdx++] = 0x80 | ((u >> 12) & 63);
             outU8Array[outIdx++] = 0x80 | ((u >> 6) & 63);
