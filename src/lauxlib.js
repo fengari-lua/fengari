@@ -793,7 +793,13 @@ if (WEB) {
 
     getc = function(lf) {
         let b = new Buffer(1);
-        let bytes = fs.readSync(lf.f, b, 0, 1, lf.pos);
+        let bytes;
+        try {
+            bytes = fs.readSync(lf.f, b, 0, 1, lf.pos);
+        } catch(e) {
+            lf.err = e;
+            return null;
+        }
         lf.pos += bytes;
         return bytes > 0 ? b.readUInt8() : null;
     };
@@ -809,8 +815,6 @@ if (WEB) {
             try {
                 let jsfilename = lua.to_jsstring(filename);
                 lf.f = fs.openSync(jsfilename, "r");
-                if (!fs.fstatSync(lf.f).isFile())
-                    throw new Error(`${jsfilename} is not a readable file`);
             } catch (e) {
                 return errfile(L, "open", fnameindex, e);
             }
