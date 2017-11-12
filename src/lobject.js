@@ -411,11 +411,15 @@ const lua_strx2number = function(s) {
 };
 
 const lua_str2number = function(s) {
-    /* parseFloat ignores trailing junk, validate with regex first */
-    let str = defs.to_jsstring(s);
-    if (!/^[\t\v\f \n\r]*[\+\-]?([0-9]+\.?[0-9]*|\.[0-9]*)([eE][\+\-]?[0-9]+)?[\t\v\f \n\r]*$/.test(str))
+    try {
+        s = defs.to_jsstring(s);
+    } catch (e) {
         return null;
-    let flt = parseFloat(str);
+    }
+    /* parseFloat ignores trailing junk, validate with regex first */
+    if (!/^[\t\v\f \n\r]*[\+\-]?([0-9]+\.?[0-9]*|\.[0-9]*)([eE][\+\-]?[0-9]+)?[\t\v\f \n\r]*$/.test(s))
+        return null;
+    let flt = parseFloat(s);
     return !isNaN(flt) ? flt : null;
 };
 
