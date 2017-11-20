@@ -361,6 +361,26 @@ test('lua_pop', function (t) {
 });
 
 
+test('lua_load with no chunkname', function (t) {
+    let L;
+
+    t.plan(2);
+
+    t.doesNotThrow(function () {
+        L = lauxlib.luaL_newstate();
+
+        lua.lua_load(L, function(L, s) { let r = s.code; s.code = null; return r; }, {code: lua.to_luastring("return 'hello'")}, null, null);
+
+        lua.lua_call(L, 0, 1);
+    }, "JS Lua program ran without error");
+
+    t.strictEqual(
+        lua.lua_tojsstring(L, -1),
+        "hello",
+        "Correct element(s) on the stack"
+    );
+});
+
 test('lua_load and lua_call it', function (t) {
     let luaCode = `
         local a = "JS > Lua > JS \o/"

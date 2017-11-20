@@ -912,9 +912,9 @@ const lua_arith = function(L, op) {
 */
 
 const lua_load = function(L, reader, data, chunkname, mode) {
-    assert(defs.is_luastring(chunkname), "lua_load expect an array of byte as chunkname");
-    assert(mode ? defs.is_luastring(mode) : true, "lua_load expect an array of byte as mode");
     if (!chunkname) chunkname = [defs.char["?"]];
+    else assert(defs.is_luastring(chunkname), "lua_load expect an array of byte as chunkname");
+    assert(mode ? defs.is_luastring(mode) : true, "lua_load expect an array of byte as mode");
     let z = new lzio.ZIO(L, reader, data);
     let status = ldo.luaD_protectedparser(L, z, chunkname, mode);
     if (status === TS.LUA_OK) {  /* no errors? */
