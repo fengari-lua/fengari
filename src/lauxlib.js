@@ -437,14 +437,16 @@ const luaL_dostring = function(L, s) {
 };
 
 const luaL_getmetafield = function(L, obj, event) {
-    if (!lua.lua_getmetatable(L, obj))
+    if (!lua.lua_getmetatable(L, obj))  /* no metatable? */
         return lua.LUA_TNIL;
     else {
         lua.lua_pushstring(L, event);
         let tt = lua.lua_rawget(L, -2);
-        if (tt === lua.LUA_TNIL)
-            lua.lua_pop(L, 2);
-        return tt;
+        if (tt === lua.LUA_TNIL)  /* is metafield nil? */
+            lua.lua_pop(L, 2);  /* remove metatable and metafield */
+        else
+            lua.lua_remove(L, -2);  /* remove only metatable */
+        return tt;  /* return metafield type */
     }
 };
 
