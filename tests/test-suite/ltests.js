@@ -598,7 +598,7 @@ const loadlib = function(L) {
     lauxlib.luaL_requiref(L1, lua.to_luastring("package", true), null, 1);    /* seg. fault if it reloads */
     /* ...but should return the same module */
     assert(lua.lua_compare(L1, -1, -2, lua.LUA_OPEQ));
-    lauxlib.luaL_getsubtable(L1, lua.LUA_REGISTRYINDEX, lua.to_luastring(lauxlib.LUA_PRELOAD_TABLE, true));
+    lauxlib.luaL_getsubtable(L1, lua.LUA_REGISTRYINDEX, lauxlib.LUA_PRELOAD_TABLE);
     for (let name in libs) {
         lua.lua_pushcfunction(L1, libs[name]);
         lua.lua_setfield(L1, -2, lua.to_luastring(name, true));

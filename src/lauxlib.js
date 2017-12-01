@@ -3,12 +3,12 @@
 const lua     = require('./lua.js');
 
 /* key, in the registry, for table of loaded modules */
-const LUA_LOADED_TABLE = "_LOADED";
+const LUA_LOADED_TABLE = lua.to_luastring("_LOADED");
 
 /* key, in the registry, for table of preloaded loaders */
-const LUA_PRELOAD_TABLE = "_PRELOAD";
+const LUA_PRELOAD_TABLE = lua.to_luastring("_PRELOAD");
 
-const LUA_FILEHANDLE = lua.to_luastring("FILE*", true);
+const LUA_FILEHANDLE = lua.to_luastring("FILE*");
 
 const LUAL_NUMSIZES  = 4*16 + 8;
 
@@ -57,7 +57,7 @@ const findfield = function(L, objidx, level) {
 const pushglobalfuncname = function(L, ar) {
     let top = lua.lua_gettop(L);
     lua.lua_getinfo(L, ['f'.charCodeAt(0)], ar);  /* push function */
-    lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, lua.to_luastring(LUA_LOADED_TABLE, true));
+    lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
     if (findfield(L, top + 1, 2)) {
         let name = lua.lua_tostring(L, -1);
         if (name[0] === "_".charCodeAt(0) && name[1] === "G".charCodeAt(0) && name[2] === ".".charCodeAt(0)) {  /* name start with '_G.'? */
@@ -513,7 +513,7 @@ const luaL_tolstring = function(L, idx) {
 ** Leaves resulting module on the top.
 */
 const luaL_requiref = function(L, modname, openf, glb) {
-    luaL_getsubtable(L, lua.LUA_REGISTRYINDEX, lua.to_luastring(LUA_LOADED_TABLE));
+    luaL_getsubtable(L, lua.LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
     lua.lua_getfield(L, -1, modname); /* LOADED[modname] */
     if (!lua.lua_toboolean(L, -1)) {  /* package not already loaded? */
         lua.lua_pop(L, 1);  /* remove field */

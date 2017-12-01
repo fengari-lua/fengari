@@ -366,7 +366,7 @@ const searcher_Croot = function(L) {
 
 const searcher_preload = function(L) {
     let name = lauxlib.luaL_checkstring(L, 1);
-    lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, lua.to_luastring(lauxlib.LUA_PRELOAD_TABLE, true));
+    lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, lauxlib.LUA_PRELOAD_TABLE);
     if (lua.lua_getfield(L, -1, name) === lua.LUA_TNIL)  /* not found? */
         lua.lua_pushfstring(L, lua.to_luastring("\n\tno field package.preload['%s']"), name);
     return 1;
@@ -411,7 +411,7 @@ const findloader_cont = function(L, status, ctx) {
 const ll_require = function(L) {
     let name = lauxlib.luaL_checkstring(L, 1);
     lua.lua_settop(L, 1);  /* LOADED table will be at index 2 */
-    lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, lua.to_luastring(lauxlib.LUA_LOADED_TABLE, true));
+    lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, lauxlib.LUA_LOADED_TABLE);
     lua.lua_getfield(L, 2, name);  /* LOADED[name] */
     if (lua.lua_toboolean(L, -1))  /* is it there? */
         return 1;  /* package is already loaded */
@@ -486,10 +486,10 @@ const luaopen_package = function(L) {
                         lua.LUA_EXEC_DIR + "\n" + LUA_IGMARK + "\n");
     lua.lua_setfield(L, -2, lua.to_luastring("config", true));
     /* set field 'loaded' */
-    lauxlib.luaL_getsubtable(L, lua.LUA_REGISTRYINDEX, lua.to_luastring(lauxlib.LUA_LOADED_TABLE, true));
+    lauxlib.luaL_getsubtable(L, lua.LUA_REGISTRYINDEX, lauxlib.LUA_LOADED_TABLE);
     lua.lua_setfield(L, -2, lua.to_luastring("loaded", true));
     /* set field 'preload' */
-    lauxlib.luaL_getsubtable(L, lua.LUA_REGISTRYINDEX, lua.to_luastring(lauxlib.LUA_PRELOAD_TABLE, true));
+    lauxlib.luaL_getsubtable(L, lua.LUA_REGISTRYINDEX, lauxlib.LUA_PRELOAD_TABLE);
     lua.lua_setfield(L, -2, lua.to_luastring("preload", true));
     lua.lua_pushglobaltable(L);
     lua.lua_pushvalue(L, -2);  /* set 'package' as upvalue for next lib */
