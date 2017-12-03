@@ -157,8 +157,13 @@ const syslib = {
     "time": os_time
 };
 
-// Only with Node
-if (!WEB) {
+if (WEB) {
+    syslib.clock = function(L) {
+        lua.lua_pushnumber(L, performance.now()/1000);
+        return 1;
+    };
+} else {
+    /* Only with Node */
     const fs = require('fs');
     const tmp = require('tmp');
     const child_process = require('child_process');
