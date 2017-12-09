@@ -148,7 +148,7 @@ const lua_number2strx = function(L, fmt, x) {
 ** is maximum exponent + 1). (99+3+1 then rounded to 120 for "extra
 ** expenses", such as locale-dependent stuff)
 */
-const MAX_ITEM   = 120;// TODO: + l_mathlim(MAX_10_EXP);
+// const MAX_ITEM   = 120;// TODO: + l_mathlim(MAX_10_EXP);
 
 
 /* valid flags in a format specification */
@@ -157,7 +157,7 @@ const FLAGS      = ["-".charCodeAt(0), "+".charCodeAt(0), " ".charCodeAt(0), "#"
 /*
 ** maximum size of each format specification (such as "%-099.99d")
 */
-const MAX_FORMAT = 32;
+// const MAX_FORMAT = 32;
 
 // TODO: locale ? and do it better
 const isalpha = e => ('a'.charCodeAt(0) <= e && e <= 'z'.charCodeAt(0)) || (e >= 'A'.charCodeAt(0) && e <= 'Z'.charCodeAt(0));

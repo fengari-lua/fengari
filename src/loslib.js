@@ -82,7 +82,7 @@ const checkoption = function(L, conv, i, buff) {
 };
 
 /* maximum size for an individual 'strftime' item */
-const SIZETIMEFMT = 250;
+// const SIZETIMEFMT = 250;
 
 
 const os_date = function(L) {

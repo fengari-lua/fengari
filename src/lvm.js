@@ -85,9 +85,9 @@ const RB = function(L, base, i) {
     return base + i.B;
 };
 
-const RC = function(L, base, i) {
-    return base + i.C;
-};
+// const RC = function(L, base, i) {
+//     return base + i.C;
+// };
 
 const RKB = function(L, base, k, i) {
     return lopcodes.ISK(i.B) ? k[lopcodes.INDEXK(i.B)] : L.stack[base + i.B];
