@@ -585,6 +585,8 @@ const luaO_pushvfstring = function(L, fmt, argp) {
                         L.l_G.ids.set(v, id);
                     }
                     pushstr(L, defs.to_luastring("0x"+id.toString(16)));
+                } else if (v === void 0) {
+                    pushstr(L, defs.to_luastring("undefined"));
                 } else if (typeof v === "number") { /* before check object as null is an object */
                     pushstr(L, defs.to_luastring("Number("+v+")"));
                 } else if (typeof v === "string") { /* before check object as null is an object */
