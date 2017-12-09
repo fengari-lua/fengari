@@ -351,7 +351,7 @@ const singlevar = function(ls, vr) {
     let varname = str_checkname(ls);
     let fs = ls.fs;
     singlevaraux(fs, varname, vr, 1);
-    if (vr.k === expkind.VVOID) {  /* global name? */
+    if (vr.k === expkind.VVOID) {  /* is global name? */
         let key = new expdesc();
         singlevaraux(fs, ls.envn, vr, 1);  /* get environment variable */
         assert(vr.k !== expkind.VVOID);  /* this one must exist */
