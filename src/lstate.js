@@ -74,6 +74,7 @@ class global_State {
 
     constructor() {
         this.id_counter = 0; /* used to give objects unique ids */
+        this.ids = new WeakMap();
 
         this.mainthread = null;
         this.l_registry = new lobject.TValue(CT.LUA_TNIL, null);

@@ -576,6 +576,15 @@ const luaO_pushvfstring = function(L, fmt, argp) {
                     v instanceof CClosure ||
                     v instanceof lfunc.UpVal) {
                     pushstr(L, defs.to_luastring("0x"+v.id.toString(16)));
+                } else if (v === null) { /* handle null before checking for typeof == object */
+                    pushstr(L, defs.to_luastring("null"));
+                } else if (typeof v === "function" || typeof v === "object") {
+                    let id = L.l_G.ids.get(v);
+                    if (!id) {
+                        id = L.l_G.id_counter++;
+                        L.l_G.ids.set(v, id);
+                    }
+                    pushstr(L, defs.to_luastring("0x"+id.toString(16)));
                 } else if (typeof v === "number") { /* before check object as null is an object */
                     pushstr(L, defs.to_luastring("Number("+v+")"));
                 } else if (typeof v === "string") { /* before check object as null is an object */
