@@ -145,24 +145,24 @@ class BytecodeParser {
             let t = this.readByte();
 
             switch (t) {
-            case defs.CT.LUA_TNIL:
-                f.k.push(new lobject.TValue(defs.CT.LUA_TNIL, null));
-                break;
-            case defs.CT.LUA_TBOOLEAN:
-                f.k.push(new lobject.TValue(defs.CT.LUA_TBOOLEAN, this.readByte() !== 0));
-                break;
-            case defs.CT.LUA_TNUMFLT:
-                f.k.push(new lobject.TValue(defs.CT.LUA_TNUMFLT, this.readNumber()));
-                break;
-            case defs.CT.LUA_TNUMINT:
-                f.k.push(new lobject.TValue(defs.CT.LUA_TNUMINT, this.readInteger()));
-                break;
-            case defs.CT.LUA_TSHRSTR:
-            case defs.CT.LUA_TLNGSTR:
-                f.k.push(new lobject.TValue(defs.CT.LUA_TLNGSTR, this.readString()));
-                break;
-            default:
-                this.error(`unrecognized constant '${t}'`);
+                case defs.CT.LUA_TNIL:
+                    f.k.push(new lobject.TValue(defs.CT.LUA_TNIL, null));
+                    break;
+                case defs.CT.LUA_TBOOLEAN:
+                    f.k.push(new lobject.TValue(defs.CT.LUA_TBOOLEAN, this.readByte() !== 0));
+                    break;
+                case defs.CT.LUA_TNUMFLT:
+                    f.k.push(new lobject.TValue(defs.CT.LUA_TNUMFLT, this.readNumber()));
+                    break;
+                case defs.CT.LUA_TNUMINT:
+                    f.k.push(new lobject.TValue(defs.CT.LUA_TNUMINT, this.readInteger()));
+                    break;
+                case defs.CT.LUA_TSHRSTR:
+                case defs.CT.LUA_TLNGSTR:
+                    f.k.push(new lobject.TValue(defs.CT.LUA_TLNGSTR, this.readString()));
+                    break;
+                default:
+                    this.error(`unrecognized constant '${t}'`);
             }
         }
     }

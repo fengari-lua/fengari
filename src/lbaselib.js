@@ -99,9 +99,11 @@ const luaB_rawset = function(L) {
     return 1;
 };
 
-const opts = ["stop", "restart", "collect",
-"count", "step", "setpause", "setstepmul",
-"isrunning"].map((e) => lua.to_luastring(e));
+const opts = [
+    "stop", "restart", "collect",
+    "count", "step", "setpause", "setstepmul",
+    "isrunning"
+].map((e) => lua.to_luastring(e));
 const luaB_collectgarbage = function(L) {
     lauxlib.luaL_checkoption(L, 1, lua.to_luastring("collect"), opts);
     lauxlib.luaL_optinteger(L, 2, 0);
@@ -174,14 +176,15 @@ const b_str2int = function(s, base) {
     } catch (e) {
         return null;
     }
-    let r = /^[\t\v\f \n\r]*([\+\-]?)0*([0-9A-Za-z]+)[\t\v\f \n\r]*$/.exec(s);
+    let r = /^[\t\v\f \n\r]*([+-]?)0*([0-9A-Za-z]+)[\t\v\f \n\r]*$/.exec(s);
     if (!r) return null;
     let neg = r[1] === "-";
     let digits = r[2];
     let n = 0;
     for (let si=0; si<digits.length; si++) {
-        let digit = /\d/.test(digits[si]) ? (digits.charCodeAt(si) - '0'.charCodeAt(0))
-                       : (digits[si].toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0) + 10);
+        let digit = /\d/.test(digits[si])
+            ? (digits.charCodeAt(si) - '0'.charCodeAt(0))
+            : (digits[si].toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0) + 10);
         if (digit >= base) return null;  /* invalid numeral */
         n = ((n * base)|0) + digit;
     }

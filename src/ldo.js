@@ -656,9 +656,9 @@ const luaD_pcall = function(L, func, u, old_top, ef) {
 ** Similar to 'luaD_call', but does not allow yields during the call
 */
 const luaD_callnoyield = function(L, off, nResults) {
-  L.nny++;
-  luaD_call(L, off, nResults);
-  L.nny--;
+    L.nny++;
+    luaD_call(L, off, nResults);
+    L.nny--;
 };
 
 /*

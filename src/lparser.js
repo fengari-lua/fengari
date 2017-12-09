@@ -118,7 +118,7 @@ class FuncState {
     }
 }
 
-    /* description of active local variable */
+/* description of active local variable */
 class Vardesc {
     constructor() {
         this.idx = NaN;  /* variable index in stack */
@@ -214,7 +214,7 @@ const check_match = function(ls, what, who, where) {
         else
             llex.luaX_syntaxerror(ls, lobject.luaO_pushfstring(ls.L,
                 defs.to_luastring("%s expected (to close %s at line %d)"),
-                    llex.luaX_token2str(ls, what), llex.luaX_token2str(ls, who), where));
+                llex.luaX_token2str(ls, what), llex.luaX_token2str(ls, who), where));
     }
 };
 
@@ -504,8 +504,8 @@ const breaklabel = function(ls) {
 */
 const undefgoto = function(ls, gt) {
     let msg = llex.isreserved(gt.name)
-              ? "<%s> at line %d not inside a loop"
-              : "no visible label '%s' for <goto> at line %d";
+        ? "<%s> at line %d not inside a loop"
+        : "no visible label '%s' for <goto> at line %d";
     msg = lobject.luaO_pushfstring(ls.L, defs.to_luastring(msg), gt.name.getstr(), gt.line);
     semerror(ls, msg);
 };
@@ -1166,8 +1166,8 @@ const checkrepeated = function(fs, ll, label) {
     for (let i = fs.bl.firstlabel; i < ll.n; i++) {
         if (eqstr(label, ll.arr[i].name)) {
             let msg = lobject.luaO_pushfstring(fs.ls.L,
-                    defs.to_luastring("label '%s' already defined on line %d", true),
-                    label.getstr(), ll.arr[i].line);
+                defs.to_luastring("label '%s' already defined on line %d", true),
+                label.getstr(), ll.arr[i].line);
             semerror(fs.ls, msg);
         }
     }

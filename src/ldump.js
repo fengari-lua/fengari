@@ -164,18 +164,18 @@ const DumpFunction = function(f, psource, D) {
 };
 
 const DumpHeader = function(D) {
-  DumpLiteral(defs.LUA_SIGNATURE, D);
-  DumpByte(LUAC_VERSION, D);
-  DumpByte(LUAC_FORMAT, D);
-  let cdata = LUAC_DATA.split('').map(e => e.charCodeAt(0));
-  DumpBlock(cdata, cdata.length, D);
-  DumpByte(4, D); // intSize
-  DumpByte(4, D); // size_tSize
-  DumpByte(4, D); // instructionSize
-  DumpByte(4, D); // integerSize
-  DumpByte(8, D); // numberSize
-  DumpInteger(LUAC_INT, D);
-  DumpNumber(LUAC_NUM, D);
+    DumpLiteral(defs.LUA_SIGNATURE, D);
+    DumpByte(LUAC_VERSION, D);
+    DumpByte(LUAC_FORMAT, D);
+    let cdata = LUAC_DATA.split('').map(e => e.charCodeAt(0));
+    DumpBlock(cdata, cdata.length, D);
+    DumpByte(4, D); // intSize
+    DumpByte(4, D); // size_tSize
+    DumpByte(4, D); // instructionSize
+    DumpByte(4, D); // integerSize
+    DumpByte(8, D); // numberSize
+    DumpInteger(LUAC_INT, D);
+    DumpNumber(LUAC_NUM, D);
 };
 
 /*

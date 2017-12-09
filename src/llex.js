@@ -415,7 +415,7 @@ const read_string = function(ls, del, seminfo) {
                     case char['u']: utf8esc(ls); will = 'no_save'; break;
                     case char['\n']: case char['\r']:
                         inclinenumber(ls); c = char['\n']; will = 'only_save'; break;
-                    case char['\\']: case char['\"']: case char['\'']:
+                    case char['\\']: case char['"']: case char['\'']:
                         c = ls.current; will = 'read_save'; break;
                     case lzio.EOZ: will = 'no_save'; break;  /* will raise an error next loop */
                     case char['z']: {  /* zap following span of spaces */

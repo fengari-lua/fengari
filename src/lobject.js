@@ -417,7 +417,7 @@ const lua_str2number = function(s) {
         return null;
     }
     /* parseFloat ignores trailing junk, validate with regex first */
-    if (!/^[\t\v\f \n\r]*[\+\-]?([0-9]+\.?[0-9]*|\.[0-9]*)([eE][\+\-]?[0-9]+)?[\t\v\f \n\r]*$/.test(s))
+    if (!/^[\t\v\f \n\r]*[+-]?([0-9]+\.?[0-9]*|\.[0-9]*)([eE][+-]?[0-9]+)?[\t\v\f \n\r]*$/.test(s))
         return null;
     let flt = parseFloat(s);
     return !isNaN(flt) ? flt : null;
@@ -539,23 +539,25 @@ const luaO_pushvfstring = function(L, fmt, argp) {
     let i = 0;
     let a = 0;
     let e;
-    while (1) {
+    for (;;) {
         e = fmt.indexOf(char['%'], i);
         if (e == -1) break;
         pushstr(L, fmt.slice(i, e));
         switch(fmt[e+1]) {
-            case char['s']:
+            case char['s']: {
                 let s = argp[a++];
                 if (s === null) s = defs.to_luastring("(null)", true);
                 pushstr(L, s);
                 break;
-            case char['c']:
+            }
+            case char['c']: {
                 let buff = argp[a++];
                 if (ljstype.lisprint(buff))
                     pushstr(L, [buff]);
                 else
                     luaO_pushfstring(L, defs.to_luastring("<\\%d>", true), buff);
                 break;
+            }
             case char['d']:
             case char['I']:
                 ldo.luaD_inctop(L);
@@ -567,7 +569,7 @@ const luaO_pushvfstring = function(L, fmt, argp) {
                 L.stack[L.top-1].setfltvalue(argp[a++]);
                 luaO_tostring(L, L.stack[L.top-1]);
                 break;
-            case char['p']:
+            case char['p']: {
                 let v = argp[a++];
                 if (v instanceof lstate.lua_State ||
                     v instanceof ltable.Table ||
@@ -581,15 +583,15 @@ const luaO_pushvfstring = function(L, fmt, argp) {
                     pushstr(L, defs.to_luastring("<id NYI>"));
                 }
                 break;
+            }
             case char['U']:
                 pushstr(L, defs.to_luastring(String.fromCodePoint(argp[a++])));
                 break;
             case char['%']:
                 pushstr(L, [char['%']]);
                 break;
-            default: {
+            default:
                 ldebug.luaG_runerror(L, defs.to_luastring("invalid option '%%%c' to 'lua_pushfstring'"), fmt[e + 1]);
-            }
         }
         n += 2;
         i = e + 2;

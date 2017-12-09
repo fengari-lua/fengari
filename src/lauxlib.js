@@ -493,13 +493,14 @@ const luaL_tolstring = function(L, idx) {
             case lua.LUA_TNIL:
                 lua.lua_pushliteral(L, "nil");
                 break;
-            default:
+            default: {
                 let tt = luaL_getmetafield(L, idx, lua.to_luastring("__name", true));
                 let kind = tt === lua.LUA_TSTRING ? lua.lua_tostring(L, -1) : luaL_typename(L, idx);
                 lua.lua_pushfstring(L, lua.to_luastring("%s: %p"), kind, lua.lua_topointer(L, idx));
                 if (tt !== lua.LUA_TNIL)
                     lua.lua_remove(L, -2);
                 break;
+            }
         }
     }
 

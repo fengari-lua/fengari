@@ -78,15 +78,15 @@ const luaV_finishOp = function(L) {
 };
 
 const RA = function(L, base, i) {
-   return base + i.A;
+    return base + i.A;
 };
 
 const RB = function(L, base, i) {
-   return base + i.B;
+    return base + i.B;
 };
 
 const RC = function(L, base, i) {
-   return base + i.C;
+    return base + i.C;
 };
 
 const RKB = function(L, base, k, i) {

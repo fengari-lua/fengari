@@ -27,7 +27,7 @@ const math_random = function(L) {
     /* random integer in the interval [low, up] */
     lauxlib.luaL_argcheck(L, low <= up, 1, lua.to_luastring("interval is empty", true));
     lauxlib.luaL_argcheck(L, low >= 0 || up <= luaconf.LUA_MAXINTEGER + low, 1,
-            lua.to_luastring("interval too large", true));
+        lua.to_luastring("interval too large", true));
 
     r *= (up - low) + 1;
     lua.lua_pushinteger(L, Math.floor(r) + low);

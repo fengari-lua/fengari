@@ -128,8 +128,8 @@ const lua_xmove = function(from, to, n) {
 */
 const lua_absindex = function(L, idx) {
     return (idx > 0 || idx <= defs.LUA_REGISTRYINDEX)
-         ? idx
-         : (L.top - L.ci.funcOff) + idx;
+        ? idx
+        : (L.top - L.ci.funcOff) + idx;
 };
 
 const lua_gettop = function(L) {

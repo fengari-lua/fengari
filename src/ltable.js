@@ -24,58 +24,59 @@ const get_lightuserdata_hash = function(v) {
 
 const table_hash = function(L, key) {
     switch(key.type) {
-    case CT.LUA_TNIL:
-        return ldebug.luaG_runerror(L, defs.to_luastring("table index is nil", true));
-    case CT.LUA_TNUMFLT:
-        if (isNaN(key.value))
-            return ldebug.luaG_runerror(L, defs.to_luastring("table index is NaN", true));
-        /* fall through */
-    case CT.LUA_TNUMINT: /* takes advantage of floats and integers being same in JS */
-    case CT.LUA_TBOOLEAN:
-    case CT.LUA_TTABLE:
-    case CT.LUA_TLCL:
-    case CT.LUA_TLCF:
-    case CT.LUA_TCCL:
-    case CT.LUA_TUSERDATA:
-    case CT.LUA_TTHREAD:
-        return key.value;
-    case CT.LUA_TSHRSTR:
-    case CT.LUA_TLNGSTR:
-        return lstring.luaS_hashlongstr(key.tsvalue());
-    case CT.LUA_TLIGHTUSERDATA:
-        let v = key.value;
-        switch(typeof v) {
-        case "string":
-            /* possible conflict with LUA_TSTRING.
-               prefix this string with "*" so they don't clash */
-            return "*" + v;
-        case "number":
-            /* possible conflict with LUA_TNUMBER.
-               turn into string and prefix with "#" to avoid clash with other strings */
-            return "#" + v;
-        case "boolean":
-            /* possible conflict with LUA_TBOOLEAN. use strings ?true and ?false instead */
-            return v?"?true":"?false";
-        case "function":
-            /* possible conflict with LUA_TLCF.
-               indirect via a weakmap */
-            return get_lightuserdata_hash(v);
-        case "object":
-            /* v could be a lua_State, CClosure, LClosure, Table or Userdata from this state as returned by lua_topointer */
-            if ((v instanceof lstate.lua_State && v.l_G === L.l_G) ||
-                v instanceof Table ||
-                v instanceof lobject.Udata ||
-                v instanceof lobject.LClosure ||
-                v instanceof lobject.CClosure) {
-                /* indirect via a weakmap */
-                return get_lightuserdata_hash(v);
-            }
+        case CT.LUA_TNIL:
+            return ldebug.luaG_runerror(L, defs.to_luastring("table index is nil", true));
+        case CT.LUA_TNUMFLT:
+            if (isNaN(key.value))
+                return ldebug.luaG_runerror(L, defs.to_luastring("table index is NaN", true));
             /* fall through */
-        default:
-            return v;
+        case CT.LUA_TNUMINT: /* takes advantage of floats and integers being same in JS */
+        case CT.LUA_TBOOLEAN:
+        case CT.LUA_TTABLE:
+        case CT.LUA_TLCL:
+        case CT.LUA_TLCF:
+        case CT.LUA_TCCL:
+        case CT.LUA_TUSERDATA:
+        case CT.LUA_TTHREAD:
+            return key.value;
+        case CT.LUA_TSHRSTR:
+        case CT.LUA_TLNGSTR:
+            return lstring.luaS_hashlongstr(key.tsvalue());
+        case CT.LUA_TLIGHTUSERDATA: {
+            let v = key.value;
+            switch(typeof v) {
+                case "string":
+                    /* possible conflict with LUA_TSTRING.
+                       prefix this string with "*" so they don't clash */
+                    return "*" + v;
+                case "number":
+                    /* possible conflict with LUA_TNUMBER.
+                       turn into string and prefix with "#" to avoid clash with other strings */
+                    return "#" + v;
+                case "boolean":
+                    /* possible conflict with LUA_TBOOLEAN. use strings ?true and ?false instead */
+                    return v?"?true":"?false";
+                case "function":
+                    /* possible conflict with LUA_TLCF.
+                       indirect via a weakmap */
+                    return get_lightuserdata_hash(v);
+                case "object":
+                    /* v could be a lua_State, CClosure, LClosure, Table or Userdata from this state as returned by lua_topointer */
+                    if ((v instanceof lstate.lua_State && v.l_G === L.l_G) ||
+                        v instanceof Table ||
+                        v instanceof lobject.Udata ||
+                        v instanceof lobject.LClosure ||
+                        v instanceof lobject.CClosure) {
+                        /* indirect via a weakmap */
+                        return get_lightuserdata_hash(v);
+                    }
+                    /* fall through */
+                default:
+                    return v;
+            }
         }
-    default:
-        throw new Error("unknown key type: " + key.type);
+        default:
+            throw new Error("unknown key type: " + key.type);
     }
 };
 

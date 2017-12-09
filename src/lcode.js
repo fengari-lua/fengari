@@ -189,8 +189,8 @@ const luaK_ret = function(fs, first, nret) {
 ** followed by a jump. Return jump position.
 */
 const condjump = function(fs, op, A, B, C) {
-   luaK_codeABC(fs, op, A, B, C);
-   return luaK_jump(fs);
+    luaK_codeABC(fs, op, A, B, C);
+    return luaK_jump(fs);
 };
 
 /*
@@ -389,8 +389,8 @@ const luaK_checkstack = function(fs, n) {
 ** Reserve 'n' registers in register stack
 */
 const luaK_reserveregs = function(fs, n) {
-   luaK_checkstack(fs, n);
-   fs.freereg += n;
+    luaK_checkstack(fs, n);
+    fs.freereg += n;
 };
 
 /*
@@ -785,7 +785,7 @@ const luaK_storevar = function(fs, vr, ex) {
         case ek.VUPVAL: {
             let e = luaK_exp2anyreg(fs, ex);
             luaK_codeABC(fs, OpCodesI.OP_SETUPVAL, e, vr.u.info, 0);
-          break;
+            break;
         }
         case ek.VINDEXED: {
             let op = (vr.u.ind.vt === ek.VLOCAL) ? OpCodesI.OP_SETTABLE : OpCodesI.OP_SETTABUP;
@@ -850,17 +850,17 @@ const luaK_goiftrue = function(fs, e) {
     luaK_dischargevars(fs, e);
     switch (e.k) {
         case ek.VJMP: {  /* condition? */
-           negatecondition(fs, e);  /* jump when it is false */
-           pc = e.u.info;  /* save jump position */
-           break;
+            negatecondition(fs, e);  /* jump when it is false */
+            pc = e.u.info;  /* save jump position */
+            break;
         }
         case ek.VK: case ek.VKFLT: case ek.VKINT: case ek.VTRUE: {
-           pc = NO_JUMP;  /* always true; do nothing */
-           break;
+            pc = NO_JUMP;  /* always true; do nothing */
+            break;
         }
         default: {
-           pc = jumponcond(fs, e, 0);  /* jump when false */
-           break;
+            pc = jumponcond(fs, e, 0);  /* jump when false */
+            break;
         }
     }
     e.f = luaK_concat(fs, e.f, pc);  /* insert new jump in false list */
@@ -989,11 +989,11 @@ const constfolding = function(op, e1, e2) {
 ** Expression to produce final result will be encoded in 'e'.
 */
 const codeunexpval = function(fs, op, e, line) {
-   let r = luaK_exp2anyreg(fs, e);  /* opcodes operate only on registers */
-   freeexp(fs, e);
-   e.u.info = luaK_codeABC(fs, op, 0, r, 0);  /* generate opcode */
-   e.k = lparser.expkind.VRELOCABLE;  /* all those operations are relocatable */
-   luaK_fixline(fs, line);
+    let r = luaK_exp2anyreg(fs, e);  /* opcodes operate only on registers */
+    freeexp(fs, e);
+    e.u.info = luaK_codeABC(fs, op, 0, r, 0);  /* generate opcode */
+    e.k = lparser.expkind.VRELOCABLE;  /* all those operations are relocatable */
+    luaK_fixline(fs, line);
 };
 
 /*

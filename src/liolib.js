@@ -95,11 +95,11 @@ const g_iofile = function(L, f, mode) {
 };
 
 const io_input = function(L) {
-  return g_iofile(L, IO_INPUT, "r");
+    return g_iofile(L, IO_INPUT, "r");
 };
 
 const io_output = function(L) {
-  return g_iofile(L, IO_OUTPUT, "w");
+    return g_iofile(L, IO_OUTPUT, "w");
 };
 
 const g_write = function(L, f, arg) {

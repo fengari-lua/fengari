@@ -607,8 +607,8 @@ const str_pack = function(L) {
             case KOption.Kstring: {  /* strings with length count */
                 let s = lauxlib.luaL_checkstring(L, arg);
                 let len = s.length;
-                lauxlib.luaL_argcheck(L, size >= 4 /* sizeof(size_t) */ ||
-                    len < (1 << (size * NB)),
+                lauxlib.luaL_argcheck(L,
+                    size >= 4 /* sizeof(size_t) */ || len < (1 << (size * NB)),
                     arg, lua.to_luastring("string length does not fit in given size", true));
                 packint(b, len, h.islittle, size, 0);  /* pack length */
                 b.push(...s);
@@ -1331,7 +1331,7 @@ const add_value = function(ms, b, s, e, tr) {
         lua.lua_pushlstring(L, ms.src.slice(s, e), e - s);  /* keep original text */
     } else if (!lua.lua_isstring(L, -1))
         lauxlib.luaL_error(L, lua.to_luastring("invalid replacement value (a %s)"), lauxlib.luaL_typename(L, -1));
-        lauxlib.luaL_addvalue(b);  /* add result to accumulator */
+    lauxlib.luaL_addvalue(b);  /* add result to accumulator */
 };
 
 const str_gsub = function(L) {

@@ -46,11 +46,11 @@ const db_getuservalue = function(L) {
 
 
 const db_setuservalue = function(L) {
-   lauxlib.luaL_checktype(L, 1, lua.LUA_TUSERDATA);
-   lauxlib.luaL_checkany(L, 2);
-   lua.lua_settop(L, 2);
-   lua.lua_setuservalue(L, 1);
-   return 1;
+    lauxlib.luaL_checktype(L, 1, lua.LUA_TUSERDATA);
+    lauxlib.luaL_checkany(L, 2);
+    lua.lua_settop(L, 2);
+    lua.lua_setuservalue(L, 1);
+    return 1;
 };
 
 /*
@@ -247,9 +247,9 @@ const checkupval = function(L, argf, argnup) {
 };
 
 const db_upvalueid = function(L) {
-   let n = checkupval(L, 1, 2);
-   lua.lua_pushlightuserdata(L, lua.lua_upvalueid(L, 1, n));
-   return 1;
+    let n = checkupval(L, 1, 2);
+    lua.lua_pushlightuserdata(L, lua.lua_upvalueid(L, 1, n));
+    return 1;
 };
 
 const db_upvaluejoin = function(L) {
