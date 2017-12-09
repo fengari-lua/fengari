@@ -1,6 +1,5 @@
 const test = require('tape');
 
-global.WEB = false;
 const defs = require('../src/defs.js');
 
 const unicode_tests = [

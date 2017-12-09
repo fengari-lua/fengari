@@ -1,7 +1,5 @@
 "use strict";
 
-global.WEB = false;
-
 const lua     = require("../src/lua.js");
 const lauxlib = require("../src/lauxlib.js");
 

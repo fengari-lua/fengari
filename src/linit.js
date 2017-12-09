@@ -26,7 +26,7 @@ const luaL_openlibs = function(L) {
         "_G":                     lbaselib.luaopen_base
     };
 
-    if (!WEB) loadedlibs[lualib.LUA_IOLIBNAME] = require('./liolib.js').luaopen_io;
+    if (typeof process !== "undefined") loadedlibs[lualib.LUA_IOLIBNAME] = require('./liolib.js').luaopen_io;
 
     /* "require" functions from 'loadedlibs' and set results to global table */
     for (let lib in loadedlibs) {

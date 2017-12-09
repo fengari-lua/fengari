@@ -395,8 +395,7 @@ const dblib = {
     "upvaluejoin":  db_upvaluejoin
 };
 
-// Only with Node
-if (!WEB) {
+if (typeof process !== "undefined") { // Only with Node
     const readlineSync = require('readline-sync');
     readlineSync.setDefaultOptions({
         prompt: 'lua_debug> '

@@ -1,7 +1,5 @@
 "use strict";
 
-global.WEB = false;
-
 const assert   = require("assert");
 
 const lua      = require('../../src/lua.js');

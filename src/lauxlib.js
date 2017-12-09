@@ -708,13 +708,13 @@ class LoadF {
     constructor() {
         this.n = NaN;  /* number of pre-read characters */
         this.f = null;  /* file being read */
-        this.buff = WEB ? new Array(1024) : new Buffer(1024);  /* area for reading file */
+        this.buff = typeof process === "undefined" ? new Array(1024) : new Buffer(1024);  /* area for reading file */
         this.pos = 0;  /* current position in file */
         this.err = void 0;
     }
 }
 
-if (WEB) {
+if (typeof process === "undefined") {
     const getF = function(L, ud) {
         let lf = ud;
 
@@ -858,7 +858,7 @@ const luaL_dofile = function(L, filename) {
 const lua_writestringerror = function() {
     for (let i=0; i<arguments.length; i++) {
         let a = arguments[i];
-        if (WEB) {
+        if (typeof process === "undefined") {
             if (typeof a !== "string")
                 a = lua.to_jsstring(a);
             console.error(a);

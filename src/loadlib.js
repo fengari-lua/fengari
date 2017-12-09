@@ -36,7 +36,7 @@ const AUXMARK       = [1];
 ** error string in the stack.
 */
 let lsys_load;
-if (WEB) {
+if (typeof process === "undefined") {
     lsys_load = function(L, path, seeglb) {
         path = lua.to_uristring(path);
         let xhr = new XMLHttpRequest();
@@ -111,9 +111,7 @@ const noenv = function(L) {
 };
 
 let readable;
-// Only with Node
-if (!WEB) {
-
+if (typeof process !== "undefined") { // Only with Node
     const fs = require('fs');
 
     readable = function(filename) {
@@ -189,7 +187,7 @@ const ll_loadlib = function(L) {
 };
 
 let env;
-if (WEB) {
+if (typeof process === "undefined") {
     env = window;
 } else {
     env = process.env;

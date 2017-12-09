@@ -5,7 +5,7 @@ const lauxlib = require('./lauxlib.js');
 
 let lua_writestring;
 let lua_writeline;
-if (WEB) {
+if (typeof process === "undefined") {
     let buff = [];
     lua_writestring = function(s) {
         buff = buff.concat(s);

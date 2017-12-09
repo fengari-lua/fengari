@@ -30,7 +30,7 @@ module.exports = [
         },
         plugins: [
             new webpack.DefinePlugin({
-                WEB: JSON.stringify(true),
+                "typeof process": JSON.stringify("undefined")
             })
         ]
     }

@@ -157,7 +157,7 @@ const syslib = {
     "time": os_time
 };
 
-if (WEB) {
+if (typeof process === "undefined") {
     syslib.clock = function(L) {
         lua.lua_pushnumber(L, performance.now()/1000);
         return 1;

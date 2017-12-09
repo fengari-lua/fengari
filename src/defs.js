@@ -291,7 +291,7 @@ module.exports.LUA_EXEC_DIR = LUA_EXEC_DIR;
 const LUA_VDIR = LUA_VERSION_MAJOR + "." + LUA_VERSION_MINOR;
 module.exports.LUA_VDIR = LUA_VDIR;
 
-if (WEB) {
+if (typeof process === "undefined") {
     const LUA_DIRSEP = "/";
     module.exports.LUA_DIRSEP = LUA_DIRSEP;
 
