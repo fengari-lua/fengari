@@ -141,18 +141,18 @@ const luaT_trybinTM = function(L, p1, p2, res, event) {
     if (!luaT_callbinTM(L, p1, p2, res, event)) {
         switch (event) {
             case TMS.TM_CONCAT:
-                ldebug.luaG_concaterror(L, p1, p2);
+                return ldebug.luaG_concaterror(L, p1, p2);
             case TMS.TM_BAND: case TMS.TM_BOR: case TMS.TM_BXOR:
             case TMS.TM_SHL: case TMS.TM_SHR: case TMS.TM_BNOT: {
                 let n1 = lvm.tonumber(p1);
                 let n2 = lvm.tonumber(p2);
                 if (n1 !== false && n2 !== false)
-                    ldebug.luaG_tointerror(L, p1, p2);
+                    return ldebug.luaG_tointerror(L, p1, p2);
                 else
-                    ldebug.luaG_opinterror(L, p1, p2, defs.to_luastring("perform bitwise operation on", true));
+                    return ldebug.luaG_opinterror(L, p1, p2, defs.to_luastring("perform bitwise operation on", true));
             }
             default:
-                ldebug.luaG_opinterror(L, p1, p2, defs.to_luastring("perform arithmetic on", true));
+                return ldebug.luaG_opinterror(L, p1, p2, defs.to_luastring("perform arithmetic on", true));
         }
     }
 };
