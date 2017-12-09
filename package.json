@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "webpack",
+    "lint": "eslint src/",
     "test": "tape tests/*.js tests/test-suite/*.js | faucet",
     "test-inprogress": "tape tests/test-suite/inprogress/*.js | faucet"
   },
@@ -32,6 +33,7 @@
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.1",
     "babel-preset-env": "^1.6.0",
+    "eslint": "^4.13.0",
     "faucet": "^0.0.1",
     "tape": "^4.8.0",
     "webpack": "^3.5.5"
@@ -42,11 +44,36 @@
     "strftime": "^0.10.0",
     "tmp": "^0.0.33"
   },
-  "jshintConfig": {
-    "node": true,
-    "esversion": 6,
-    "indent": false,
-    "unused": true,
-    "white": false
+  "eslintConfig": {
+    "env": {
+        "browser": true,
+        "es6": true,
+        "node": true
+    },
+    "extends": "eslint:recommended",
+    "rules": {
+      "indent": [
+        "error",
+        4,
+        {"SwitchCase": 1}
+      ],
+      "linebreak-style": [
+        "error",
+        "unix"
+      ],
+      "no-console": 0,
+      "no-empty": [
+        2,
+        { "allowEmptyCatch": true }
+      ],
+      "no-unused-vars": [
+        2,
+        { "args": "none" }
+      ],
+      "semi": [
+        "error",
+        "always"
+      ]
+    }
   }
 }
