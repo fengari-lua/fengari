@@ -576,6 +576,12 @@ const luaO_pushvfstring = function(L, fmt, argp) {
                     v instanceof CClosure ||
                     v instanceof lfunc.UpVal) {
                     pushstr(L, defs.to_luastring("0x"+v.id.toString(16)));
+                } else if (typeof v === "number") { /* before check object as null is an object */
+                    pushstr(L, defs.to_luastring("Number("+v+")"));
+                } else if (typeof v === "string") { /* before check object as null is an object */
+                    pushstr(L, defs.to_luastring("String("+JSON.stringify(v)+")"));
+                } else if (typeof v === "boolean") { /* before check object as null is an object */
+                    pushstr(L, defs.to_luastring(v?"Boolean(true)":"Boolean(false)"));
                 } else {
                     /* user provided object. no id available */
                     pushstr(L, defs.to_luastring("<id NYI>"));
