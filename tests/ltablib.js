@@ -22,7 +22,7 @@ test('table.concat', function (t) {
     let luaCode = `
         return table.concat({1, 2, 3, 4, 5, 6, 7}, ",", 3, 5)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -49,7 +49,7 @@ test('table.pack', function (t) {
     let luaCode = `
         return table.pack(1, 2, 3)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -78,7 +78,7 @@ test('table.unpack', function (t) {
     let luaCode = `
         return table.unpack({1, 2, 3, 4, 5}, 2, 4)
     `, L;
-    
+
     t.plan(4);
 
     t.doesNotThrow(function () {
@@ -120,7 +120,7 @@ test('table.insert', function (t) {
         table.insert(t, 2, 2)
         return t
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -152,7 +152,7 @@ test('table.remove', function (t) {
         table.remove(t, 3)
         return t
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -183,7 +183,7 @@ test('table.move', function (t) {
         local t2 = {1, 2, nil, nil, nil, 6}
         return table.move(t1, 1, #t1, 3, t2)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -214,7 +214,7 @@ test('table.sort (<)', function (t) {
         table.sort(t)
         return t
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -245,7 +245,7 @@ test('table.sort with cmp function', function (t) {
         end)
         return t
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {

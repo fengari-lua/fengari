@@ -11,7 +11,7 @@ test('print', function (t) {
     let luaCode = `
         print("hello", "world", 123)
     `, L;
-    
+
     t.plan(1);
 
     t.doesNotThrow(function () {
@@ -43,7 +43,7 @@ test('setmetatable, getmetatable', function (t) {
 
         return t[1], getmetatable(t)
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -86,7 +86,7 @@ test('rawequal', function (t) {
 
         return rawequal(t1, t2), t1 == t2
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -130,7 +130,7 @@ test('rawset, rawget', function (t) {
 
         return rawget(t, "yo"), t["yo"], rawget(t, "yoyo"), t["yoyo"]
     `, L;
-    
+
     t.plan(5);
 
     t.doesNotThrow(function () {
@@ -175,7 +175,7 @@ test('type', function (t) {
     let luaCode = `
         return type(1), type(true), type("hello"), type({}), type(nil)
     `, L;
-    
+
     t.plan(6);
 
     t.doesNotThrow(function () {
@@ -226,7 +226,7 @@ test('error', function (t) {
     let luaCode = `
         error("you fucked up")
     `, L;
-    
+
     t.plan(1);
 
     t.throws(function () {
@@ -247,7 +247,7 @@ test('error, protected', function (t) {
     let luaCode = `
         error("you fucked up")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -277,7 +277,7 @@ test('pcall', function (t) {
 
         return pcall(willFail)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -311,7 +311,7 @@ test('xpcall', function (t) {
 
         return xpcall(willFail, msgh)
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -349,7 +349,7 @@ test('ipairs', function (t) {
 
         return sum
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -376,7 +376,7 @@ test('select', function (t) {
     let luaCode = `
         return {select('#', 1, 2, 3)}, {select(2, 1, 2, 3)}, {select(-2, 1, 2, 3)}
     `, L;
-    
+
     t.plan(4);
 
     t.doesNotThrow(function () {
@@ -469,7 +469,7 @@ test('assert', function (t) {
     let luaCode = `
         assert(1 < 0, "this doesn't makes sense")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -495,7 +495,7 @@ test('rawlen', function (t) {
     let luaCode = `
         return rawlen({1, 2, 3}), rawlen('hello')
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -540,7 +540,7 @@ test('next', function (t) {
 
         return total
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -579,7 +579,7 @@ test('pairs', function (t) {
 
         return total
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -627,7 +627,7 @@ test('pairs with __pairs', function (t) {
 
         return total
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {

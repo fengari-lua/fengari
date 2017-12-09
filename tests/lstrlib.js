@@ -12,7 +12,7 @@ test('string.len', function (t) {
         local a = "world"
         return string.len("hello"), a:len()
     `, L;
-    
+
     t.plan(4);
 
     t.doesNotThrow(function () {
@@ -50,7 +50,7 @@ test('string.char', function (t) {
     let luaCode = `
         return string.char(104, 101, 108, 108, 111)
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -81,7 +81,7 @@ test('string.upper, string.lower', function (t) {
     let luaCode = `
         return string.upper("hello"), string.lower("HELLO")
     `, L;
-    
+
     t.plan(4);
 
     t.doesNotThrow(function () {
@@ -118,7 +118,7 @@ test('string.rep', function (t) {
     let luaCode = `
         return string.rep("hello", 3, ", ")
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -149,7 +149,7 @@ test('string.reverse', function (t) {
     let luaCode = `
         return string.reverse("olleh")
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -180,7 +180,7 @@ test('string.byte', function (t) {
     let luaCode = `
         return string.byte("hello", 2, 4)
     `, L;
-    
+
     t.plan(5);
 
     t.doesNotThrow(function () {
@@ -223,7 +223,7 @@ test('string.format', function (t) {
     let luaCode = `
         return string.format("%%%d %010d", 10, 23)
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -254,7 +254,7 @@ test('string.format', function (t) {
     let luaCode = `
         return string.format("%07X", 0xFFFFFFF)
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -285,7 +285,7 @@ test('string.format', function (t) {
     let luaCode = `
         return string.format("%q", 'a string with "quotes" and \\n new line')
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -326,7 +326,7 @@ test('string.sub', function (t) {
             string.sub("123456789",-4),      -- "6789"
             string.sub("123456789",-6, -4)   -- "456"
     `, L;
-    
+
     t.plan(13);
 
     t.doesNotThrow(function () {
@@ -359,7 +359,7 @@ test('string.sub', function (t) {
 
     t.strictEqual(
         lua.lua_tojsstring(L, -9),
-         "",
+        "",
         "Correct element(s) on the stack"
     );
 
@@ -371,7 +371,7 @@ test('string.sub', function (t) {
 
     t.strictEqual(
         lua.lua_tojsstring(L, -7),
-         "",
+        "",
         "Correct element(s) on the stack"
     );
 
@@ -389,7 +389,7 @@ test('string.sub', function (t) {
 
     t.strictEqual(
         lua.lua_tojsstring(L, -4),
-         "",
+        "",
         "Correct element(s) on the stack"
     );
 
@@ -425,8 +425,8 @@ test('string.dump', function (t) {
             end
 
             return string.dump(todump)
-        `, L, bytes = [];
-    
+        `, L;
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -465,7 +465,7 @@ test('string.pack/unpack/packsize', function (t) {
         local us1, un, us2 = string.unpack("c5jc3", packed)
         return string.packsize("c5jc3"), s1 == us1 and n == un and s2 == us2
     `, L;
-    
+
     t.plan(4);
 
     t.doesNotThrow(function () {
@@ -501,7 +501,7 @@ test('string.find without pattern', function (t) {
     let luaCode = `
         return string.find("hello to you", " to ")
     `, L;
-    
+
     t.plan(4);
 
     t.doesNotThrow(function () {
@@ -538,7 +538,7 @@ test('string.match', function (t) {
     let luaCode = `
         return string.match("foo: 123 bar: 456", "(%a+):%s*(%d+)")
     `, L;
-    
+
     t.plan(4);
 
     t.doesNotThrow(function () {
@@ -575,7 +575,7 @@ test('string.find', function (t) {
     let luaCode = `
         return string.find("foo: 123 bar: 456", "(%a+):%s*(%d+)")
     `, L;
-    
+
     t.plan(6);
 
     t.doesNotThrow(function () {
@@ -631,7 +631,7 @@ test('string.gmatch', function (t) {
 
         return table.unpack(t)
     `, L;
-    
+
     t.plan(6);
 
     t.doesNotThrow(function () {
@@ -680,7 +680,7 @@ test('string.gsub', function (t) {
     let luaCode = `
         return string.gsub("hello world", "(%w+)", "%1 %1")
     `, L;
-    
+
     t.plan(4);
 
     t.doesNotThrow(function () {
@@ -717,7 +717,7 @@ test('string.gsub (number)', function (t) {
     let luaCode = `
         return string.gsub("hello world", "%w+", "%0 %0", 1)
     `, L;
-    
+
     t.plan(4);
 
     t.doesNotThrow(function () {
@@ -754,7 +754,7 @@ test('string.gsub (pattern)', function (t) {
     let luaCode = `
         return string.gsub("hello world from Lua", "(%w+)%s*(%w+)", "%2 %1")
     `, L;
-    
+
     t.plan(4);
 
     t.doesNotThrow(function () {
@@ -793,7 +793,7 @@ test('string.gsub (function)', function (t) {
             return load(s)()
         end)
     `, L;
-    
+
     t.plan(4);
 
     t.doesNotThrow(function () {
@@ -832,7 +832,7 @@ test('string.gsub (table)', function (t) {
         local t = {name="lua", version="5.3"}
         return string.gsub("$name-$version.tar.gz", "%$(%w+)", t)
     `, L;
-    
+
     t.plan(4);
 
     t.doesNotThrow(function () {

@@ -12,7 +12,7 @@ test('math.abs, math.sin, math.cos, math.tan, math.asin, math.acos, math.atan', 
         return math.abs(-10), math.abs(-10.5), math.cos(10), math.tan(10),
                math.asin(1), math.acos(0.5), math.atan(10)
     `, L;
-    
+
     t.plan(8);
 
     t.doesNotThrow(function () {
@@ -75,7 +75,7 @@ test('math.ceil, math.floor', function (t) {
     let luaCode = `
         return math.ceil(10.5), math.floor(10.5)
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -101,7 +101,6 @@ test('math.ceil, math.floor', function (t) {
         10,
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -109,7 +108,7 @@ test('math.deg, math.rad', function (t) {
     let luaCode = `
         return math.deg(10), math.rad(10)
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -135,7 +134,6 @@ test('math.deg, math.rad', function (t) {
         0.17453292519943295,
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -143,7 +141,7 @@ test('math.log', function (t) {
     let luaCode = `
         return math.log(10), math.log(10, 2), math.log(10, 10)
     `, L;
-    
+
     t.plan(4);
 
     t.doesNotThrow(function () {
@@ -175,7 +173,6 @@ test('math.log', function (t) {
         1,
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -183,7 +180,7 @@ test('math.exp', function (t) {
     let luaCode = `
         return math.exp(10)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -203,7 +200,6 @@ test('math.exp', function (t) {
         22026.465794806718,
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -211,7 +207,7 @@ test('math.min, math.max', function (t) {
     let luaCode = `
         return math.max(10, 5, 23), math.min(10, 5, 23)
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -237,7 +233,6 @@ test('math.min, math.max', function (t) {
         5,
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -245,7 +240,7 @@ test('math.random', function (t) {
     let luaCode = `
         return math.random(), math.random(10, 15)
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -269,7 +264,6 @@ test('math.random', function (t) {
         10 <= lua.lua_tonumber(L, -1) <= 15,
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -277,7 +271,7 @@ test('math.sqrt', function (t) {
     let luaCode = `
         return math.sqrt(10)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -297,7 +291,6 @@ test('math.sqrt', function (t) {
         3.1622776601683795,
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -305,7 +298,7 @@ test('math.tointeger', function (t) {
     let luaCode = `
         return math.tointeger('10')
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -325,7 +318,6 @@ test('math.tointeger', function (t) {
         10,
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -333,7 +325,7 @@ test('math.type', function (t) {
     let luaCode = `
         return math.type(10), math.type(10.5), math.type('hello')
     `, L;
-    
+
     t.plan(4);
 
     t.doesNotThrow(function () {
@@ -365,7 +357,6 @@ test('math.type', function (t) {
         null,
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -373,7 +364,7 @@ test('math.ult', function (t) {
     let luaCode = `
         return math.tointeger('10')
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -393,7 +384,6 @@ test('math.ult', function (t) {
         true,
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -401,7 +391,7 @@ test('math.fmod', function (t) {
     let luaCode = `
         return math.fmod(2,5)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -421,7 +411,6 @@ test('math.fmod', function (t) {
         2,
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -429,7 +418,7 @@ test('math.modf', function (t) {
     let luaCode = `
         return math.modf(3.4, 0.6)
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -455,5 +444,4 @@ test('math.modf', function (t) {
         0.3999999999999999,
         "Correct element(s) on the stack"
     );
-
 });

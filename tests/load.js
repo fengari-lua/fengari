@@ -15,7 +15,7 @@ test('luaL_loadstring', function (t) {
         local a = "hello world"
         return a
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -39,7 +39,6 @@ test('luaL_loadstring', function (t) {
         "hello world",
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -48,7 +47,7 @@ test('load', function (t) {
         local f = load("return 'js running lua running lua'")
         return f()
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -72,7 +71,6 @@ test('load', function (t) {
         "js running lua running lua",
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -81,7 +79,7 @@ test('luaL_loadbuffer', function (t) {
         local a = "hello world"
         return a
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -107,7 +105,6 @@ test('luaL_loadbuffer', function (t) {
         "hello world",
         "Correct element(s) on the stack"
     );
-
 });
 
 // TODO: test stdin
@@ -116,7 +113,7 @@ test('loadfile', function (t) {
         local f = loadfile("tests/loadfile-test.lua")
         return f()
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -140,7 +137,6 @@ test('loadfile', function (t) {
         "hello world",
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -149,7 +145,7 @@ test('loadfile (binary)', function (t) {
         local f = loadfile("tests/loadfile-test.bc")
         return f()
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -173,7 +169,6 @@ test('loadfile (binary)', function (t) {
         "hello world",
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -181,7 +176,7 @@ test('dofile', function (t) {
     let luaCode = `
         return dofile("tests/loadfile-test.lua")
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -205,5 +200,4 @@ test('dofile', function (t) {
         "hello world",
         "Correct element(s) on the stack"
     );
-
 });

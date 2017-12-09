@@ -9,85 +9,80 @@ const lapi    = require('../src/lapi.js');
 
 
 // TODO: remove
-if (false) {
-    test('locals.lua', function (t) {
-        let luaCode = `
-            _soft = true
-            require = function(lib) return _G[lib] end  -- NYI
-            return dofile("tests/lua-tests/locals.lua")
-        `, L;
-        
-        t.plan(2);
+test.skip('locals.lua', function (t) {
+    let luaCode = `
+        _soft = true
+        require = function(lib) return _G[lib] end  -- NYI
+        return dofile("tests/lua-tests/locals.lua")
+    `, L;
 
-        t.doesNotThrow(function () {
+    t.plan(2);
 
-            L = lauxlib.luaL_newstate();
+    t.doesNotThrow(function () {
 
-            lualib.luaL_openlibs(L);
+        L = lauxlib.luaL_newstate();
 
-            lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lualib.luaL_openlibs(L);
 
-        }, "Lua program loaded without error");
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
-        t.doesNotThrow(function () {
+    }, "Lua program loaded without error");
 
-            lapi.lua_call(L, 0, -1);
+    t.doesNotThrow(function () {
 
-        }, "Lua program ran without error");
+        lapi.lua_call(L, 0, -1);
 
-    });
+    }, "Lua program ran without error");
+});
 
 
-    test('constructs.lua', function (t) {
-        let luaCode = `
-            _soft = true
-            require = function(lib) return _G[lib] end  -- NYI
-            return dofile("tests/lua-tests/constructs.lua")
-        `, L;
-        
-        t.plan(2);
+test.skip('constructs.lua', function (t) {
+    let luaCode = `
+        _soft = true
+        require = function(lib) return _G[lib] end  -- NYI
+        return dofile("tests/lua-tests/constructs.lua")
+    `, L;
 
-        t.doesNotThrow(function () {
+    t.plan(2);
 
-            L = lauxlib.luaL_newstate();
+    t.doesNotThrow(function () {
 
-            lualib.luaL_openlibs(L);
+        L = lauxlib.luaL_newstate();
 
-            lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lualib.luaL_openlibs(L);
 
-        }, "Lua program loaded without error");
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
-        t.doesNotThrow(function () {
+    }, "Lua program loaded without error");
 
-            lapi.lua_call(L, 0, -1);
+    t.doesNotThrow(function () {
 
-        }, "Lua program ran without error");
+        lapi.lua_call(L, 0, -1);
 
-    });
+    }, "Lua program ran without error");
+});
 
 
-    test('strings.lua', function (t) {
-        let luaCode = `
-            return dofile("tests/lua-tests/strings.lua")
-        `, L;
-        
-        t.plan(2);
+test.skip('strings.lua', function (t) {
+    let luaCode = `
+        return dofile("tests/lua-tests/strings.lua")
+    `, L;
 
-        t.doesNotThrow(function () {
+    t.plan(2);
 
-            L = lauxlib.luaL_newstate();
+    t.doesNotThrow(function () {
 
-            lualib.luaL_openlibs(L);
+        L = lauxlib.luaL_newstate();
 
-            lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lualib.luaL_openlibs(L);
 
-        }, "Lua program loaded without error");
+        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
 
-        t.doesNotThrow(function () {
+    }, "Lua program loaded without error");
 
-            lapi.lua_call(L, 0, -1);
+    t.doesNotThrow(function () {
 
-        }, "Lua program ran without error");
+        lapi.lua_call(L, 0, -1);
 
-    });
-}
+    }, "Lua program ran without error");
+});

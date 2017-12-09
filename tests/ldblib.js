@@ -23,7 +23,7 @@ test('debug.sethook', function (t) {
 
         return result
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -47,7 +47,6 @@ test('debug.sethook', function (t) {
         "return count line count line count line call count line return count line count line call count line return count line count line call count line return count line ",
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -67,7 +66,7 @@ test('debug.gethook', function (t) {
 
         return debug.gethook()
     `, L;
-    
+
     t.plan(5);
 
     t.doesNotThrow(function () {
@@ -103,7 +102,6 @@ test('debug.gethook', function (t) {
         1,
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -127,7 +125,7 @@ test('debug.getlocal', function (t) {
 
         return result
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -151,7 +149,6 @@ test('debug.getlocal', function (t) {
         "alocal alocalanother anotherinfunction infunctionanotherin anotherin",
         "Correct element(s) on the stack"
     );
-
 });
 
 test('debug.setlocal', function (t) {
@@ -175,7 +172,7 @@ test('debug.setlocal', function (t) {
 
         return alocal, another, a, b
     `, L;
-    
+
     t.plan(6);
 
     t.doesNotThrow(function () {
@@ -217,7 +214,6 @@ test('debug.setlocal', function (t) {
         4,
         "Correct element(s) on the stack"
     );
-
 });
 
 test('debug.upvalueid', function (t) {
@@ -230,7 +226,7 @@ test('debug.upvalueid', function (t) {
 
         return debug.upvalueid(l, 1)
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -253,7 +249,6 @@ test('debug.upvalueid', function (t) {
         lua.lua_touserdata(L, -1),
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -274,7 +269,7 @@ test('debug.upvaluejoin', function (t) {
 
         return l1()
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -298,7 +293,6 @@ test('debug.upvaluejoin', function (t) {
         "upvalue2",
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -319,7 +313,7 @@ test('debug.traceback (with a global)', function (t) {
 
         return trace
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -340,8 +334,7 @@ test('debug.traceback (with a global)', function (t) {
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lua.lua_tojsstring(L, -1),
-`stack traceback:
+        lua.lua_tojsstring(L, -1), `stack traceback:
 \t[string "traceback-test"]:9: in function 'rec'
 \t[string "traceback-test"]:7: in function 'rec'
 \t[string "traceback-test"]:7: in function 'rec'
@@ -356,7 +349,6 @@ test('debug.traceback (with a global)', function (t) {
 \t[string "traceback-test"]:13: in main chunk`,
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -378,7 +370,7 @@ test('debug.traceback (with a upvalue)', function (t) {
 
         return trace
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -399,8 +391,7 @@ test('debug.traceback (with a upvalue)', function (t) {
     }, "Lua program ran without error");
 
     t.strictEqual(
-        lua.lua_tojsstring(L, -1),
-`stack traceback:
+        lua.lua_tojsstring(L, -1), `stack traceback:
 \t[string "traceback-test"]:10: in upvalue 'rec'
 \t[string "traceback-test"]:8: in upvalue 'rec'
 \t[string "traceback-test"]:8: in upvalue 'rec'
@@ -415,7 +406,6 @@ test('debug.traceback (with a upvalue)', function (t) {
 \t[string "traceback-test"]:14: in main chunk`,
         "Correct element(s) on the stack"
     );
-
 });
 
 test('debug.getinfo', function (t) {
@@ -432,7 +422,7 @@ test('debug.getinfo', function (t) {
         return d1.short_src, d1.nups, d1.what, d1.nparams,
                d2.short_src, d2.nups, d2.what, d2.nparams
     `, L;
-    
+
     t.plan(10);
 
     t.doesNotThrow(function () {
@@ -499,5 +489,4 @@ test('debug.getinfo', function (t) {
         0,
         "Correct element(s) on the stack"
     );
-
 });

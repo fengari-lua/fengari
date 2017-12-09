@@ -58,7 +58,7 @@ const getstring = function(L, buff, pc) {
         pc.offset++;
     } else {
         while (pc.script[pc.offset] !== 0 && pc.offset < pc.script.length && delimits.indexOf(pc.script[pc.offset]) < 0)
-          buff[i++] = pc.script[pc.offset++];
+            buff[i++] = pc.script[pc.offset++];
     }
     buff.length = i;
     return buff;
@@ -107,379 +107,378 @@ const runJS = function(L, L1, pc) {
         let inst = lua.to_jsstring(getstring(L, buff, pc));
         if (inst.length === 0) return 0;
         switch (inst) {
-        case "absindex": {
-            lua.lua_pushnumber(L1, lua.lua_absindex(L1, getindex(L, L1, pc)));
-            break;
-        }
-        case "append": {
-            let t = getindex(L, L1, pc);
-            let i = lua.lua_rawlen(L1, t);
-            lua.lua_rawseti(L1, t, i + 1);
-            break;
-        }
-        case "arith": {
-            let op;
-            skip(pc);
-            op = ops.indexOf(pc.script[pc.offset++]);
-            lua.lua_arith(L1, op);
-            break;
-        }
-        case "call": {
-            let narg = getnum(L, L1, pc);
-            let nres = getnum(L, L1, pc);
-            lua.lua_call(L1, narg, nres);
-            break;
-        }
-        case "callk": {
-            let narg = getnum(L, L1, pc);
-            let nres = getnum(L, L1, pc);
-            let i = getindex(L, L1, pc);
-            lua.lua_callk(L1, narg, nres, i, Cfunck);
-            break;
-        }
-        case "checkstack": {
-            let sz = getnum(L, L1, pc);
-            let msg = getstring(L, buff, pc);
-            if (msg.length === 0)
-                msg = null;  /* to test 'luaL_checkstack' with no message */
-            lauxlib.luaL_checkstack(L1, sz, msg);
-            break;
-        }
-        case "compare": {
-            let opt = getstring(L, buff, pc);  /* EQ, LT, or LE */
-            let op = (opt[0] === 'E'.charCodeAt(0)) ? lua.LUA_OPEQ
-                                                    : (opt[1] === 'T'.charCodeAt(0)) ? lua.LUA_OPLT : lua.LUA_OPLE;
-            let a = getindex(L, L1, pc);
-            let b = getindex(L, L1, pc);
-            lua.lua_pushboolean(L1, lua.lua_compare(L1, a, b, op));
-            break;
-        }
-        case "concat": {
-            lua.lua_concat(L1, getnum(L, L1, pc));
-            break;
-        }
-        case "copy": {
-            let f = getindex(L, L1, pc);
-            lua.lua_copy(L1, f, getindex(L, L1, pc));
-            break;
-        }
-        case "func2num": {
-            let func = lua.lua_tocfunction(L1, getindex(L, L1, pc));
-            if (func === null) func = 0;
-            else if (func.id) func = func.id;
-            lua.lua_pushnumber(L1, func);
-            break;
-        }
-        case "getfield": {
-            let t = getindex(L, L1, pc);
-            lua.lua_getfield(L1, t, getstring(L, buff, pc));
-            break;
-        }
-        case "getglobal": {
-            lua.lua_getglobal(L1, getstring(L, buff, pc));
-            break;
-        }
-        case "getmetatable": {
-            if (lua.lua_getmetatable(L1, getindex(L, L1, pc)) === 0)
+            case "absindex": {
+                lua.lua_pushnumber(L1, lua.lua_absindex(L1, getindex(L, L1, pc)));
+                break;
+            }
+            case "append": {
+                let t = getindex(L, L1, pc);
+                let i = lua.lua_rawlen(L1, t);
+                lua.lua_rawseti(L1, t, i + 1);
+                break;
+            }
+            case "arith": {
+                let op;
+                skip(pc);
+                op = ops.indexOf(pc.script[pc.offset++]);
+                lua.lua_arith(L1, op);
+                break;
+            }
+            case "call": {
+                let narg = getnum(L, L1, pc);
+                let nres = getnum(L, L1, pc);
+                lua.lua_call(L1, narg, nres);
+                break;
+            }
+            case "callk": {
+                let narg = getnum(L, L1, pc);
+                let nres = getnum(L, L1, pc);
+                let i = getindex(L, L1, pc);
+                lua.lua_callk(L1, narg, nres, i, Cfunck);
+                break;
+            }
+            case "checkstack": {
+                let sz = getnum(L, L1, pc);
+                let msg = getstring(L, buff, pc);
+                if (msg.length === 0)
+                    msg = null;  /* to test 'luaL_checkstack' with no message */
+                lauxlib.luaL_checkstack(L1, sz, msg);
+                break;
+            }
+            case "compare": {
+                let opt = getstring(L, buff, pc);  /* EQ, LT, or LE */
+                let op = (opt[0] === 'E'.charCodeAt(0))
+                    ? lua.LUA_OPEQ
+                    : (opt[1] === 'T'.charCodeAt(0)) ? lua.LUA_OPLT : lua.LUA_OPLE;
+                let a = getindex(L, L1, pc);
+                let b = getindex(L, L1, pc);
+                lua.lua_pushboolean(L1, lua.lua_compare(L1, a, b, op));
+                break;
+            }
+            case "concat": {
+                lua.lua_concat(L1, getnum(L, L1, pc));
+                break;
+            }
+            case "copy": {
+                let f = getindex(L, L1, pc);
+                lua.lua_copy(L1, f, getindex(L, L1, pc));
+                break;
+            }
+            case "func2num": {
+                let func = lua.lua_tocfunction(L1, getindex(L, L1, pc));
+                if (func === null) func = 0;
+                else if (func.id) func = func.id;
+                lua.lua_pushnumber(L1, func);
+                break;
+            }
+            case "getfield": {
+                let t = getindex(L, L1, pc);
+                lua.lua_getfield(L1, t, getstring(L, buff, pc));
+                break;
+            }
+            case "getglobal": {
+                lua.lua_getglobal(L1, getstring(L, buff, pc));
+                break;
+            }
+            case "getmetatable": {
+                if (lua.lua_getmetatable(L1, getindex(L, L1, pc)) === 0)
+                    lua.lua_pushnil(L1);
+                break;
+            }
+            case "gettable": {
+                lua.lua_gettable(L1, getindex(L, L1, pc));
+                break;
+            }
+            case "gettop": {
+                lua.lua_pushinteger(L1, lua.lua_gettop(L1));
+                break;
+            }
+            case "gsub": {
+                let a = getnum(L, L1, pc);
+                let b = getnum(L, L1, pc);
+                let c = getnum(L, L1, pc);
+                lauxlib.luaL_gsub(L1, lua.lua_tostring(L1, a), lua.lua_tostring(L1, b), lua.lua_tostring(L1, c));
+                break;
+            }
+            case "insert": {
+                lua.lua_insert(L1, getnum(L, L1, pc));
+                break;
+            }
+            case "iscfunction": {
+                lua.lua_pushboolean(L1, lua.lua_iscfunction(L1, getindex(L, L1, pc)));
+                break;
+            }
+            case "isfunction": {
+                lua.lua_pushboolean(L1, lua.lua_isfunction(L1, getindex(L, L1, pc)));
+                break;
+            }
+            case "isnil": {
+                lua.lua_pushboolean(L1, lua.lua_isnil(L1, getindex(L, L1, pc)));
+                break;
+            }
+            case "isnull": {
+                lua.lua_pushboolean(L1, lua.lua_isnone(L1, getindex(L, L1, pc)));
+                break;
+            }
+            case "isnumber": {
+                lua.lua_pushboolean(L1, lua.lua_isnumber(L1, getindex(L, L1, pc)));
+                break;
+            }
+            case "isstring": {
+                lua.lua_pushboolean(L1, lua.lua_isstring(L1, getindex(L, L1, pc)));
+                break;
+            }
+            case "istable": {
+                lua.lua_pushboolean(L1, lua.lua_istable(L1, getindex(L, L1, pc)));
+                break;
+            }
+            case "isudataval": {
+                lua.lua_pushboolean(L1, lua.lua_islightuserdata(L1, getindex(L, L1, pc)));
+                break;
+            }
+            case "isuserdata": {
+                lua.lua_pushboolean(L1, lua.lua_isuserdata(L1, getindex(L, L1, pc)));
+                break;
+            }
+            case "len": {
+                lua.lua_len(L1, getindex(L, L1, pc));
+                break;
+            }
+            case "Llen": {
+                lua.lua_pushinteger(L1, lauxlib.luaL_len(L1, getindex(L, L1, pc)));
+                break;
+            }
+            case "loadfile": {
+                lauxlib.luaL_loadfile(L1, lauxlib.luaL_checkstring(L1, getnum(L, L1, pc)));
+                break;
+            }
+            case "loadstring": {
+                let s = lauxlib.luaL_checkstring(L1, getnum(L, L1, pc));
+                lauxlib.luaL_loadstring(L1, s);
+                break;
+            }
+            case "newmetatable": {
+                lua.lua_pushboolean(L1, lauxlib.luaL_newmetatable(L1, getstring(L, buff, pc)));
+                break;
+            }
+            case "newtable": {
+                lua.lua_newtable(L1);
+                break;
+            }
+            case "newthread": {
+                lua.lua_newthread(L1);
+                break;
+            }
+            case "newuserdata": {
+                lua.lua_newuserdata(L1, getnum(L, L1, pc));
+                break;
+            }
+            case "next": {
+                lua.lua_next(L1, -2);
+                break;
+            }
+            case "objsize": {
+                lua.lua_pushinteger(L1, lua.lua_rawlen(L1, getindex(L, L1, pc)));
+                break;
+            }
+            case "pcall": {
+                let narg = getnum(L, L1, pc);
+                let nres = getnum(L, L1, pc);
+                status = lua.lua_pcall(L1, narg, nres, getnum(L, L1, pc));
+                break;
+            }
+            case "pcallk": {
+                let narg = getnum(L, L1, pc);
+                let nres = getnum(L, L1, pc);
+                let i = getindex(L, L1, pc);
+                status = lua.lua_pcallk(L1, narg, nres, 0, i, Cfunck);
+                break;
+            }
+            case "pop": {
+                lua.lua_pop(L1, getnum(L, L1, pc));
+                break;
+            }
+            case "print": {
+                let n = getnum(L, L1, pc);
+                if (n !== 0) {
+                    console.log(`${lauxlib.luaL_tojsstring(L1, n, null)}\n`);
+                    lua.lua_pop(L1, 1);
+                }
+                else printstack(L1);
+                break;
+            }
+            case "pushbool": {
+                lua.lua_pushboolean(L1, getnum(L, L1, pc));
+                break;
+            }
+            case "pushcclosure": {
+                lua.lua_pushcclosure(L1, testJS, getnum(L, L1, pc));
+                break;
+            }
+            case "pushint": {
+                lua.lua_pushinteger(L1, getnum(L, L1, pc));
+                break;
+            }
+            case "pushnil": {
                 lua.lua_pushnil(L1);
-            break;
-        }
-        case "gettable": {
-            lua.lua_gettable(L1, getindex(L, L1, pc));
-            break;
-        }
-        case "gettop": {
-            lua.lua_pushinteger(L1, lua.lua_gettop(L1));
-            break;
-        }
-        case "gsub": {
-            let a = getnum(L, L1, pc);
-            let b = getnum(L, L1, pc);
-            let c = getnum(L, L1, pc);
-            lauxlib.luaL_gsub(L1, lua.lua_tostring(L1, a), lua.lua_tostring(L1, b), lua.lua_tostring(L1, c));
-            break;
-        }
-        case "insert": {
-            lua.lua_insert(L1, getnum(L, L1, pc));
-            break;
-        }
-        case "iscfunction": {
-            lua.lua_pushboolean(L1, lua.lua_iscfunction(L1, getindex(L, L1, pc)));
-            break;
-        }
-        case "isfunction": {
-            lua.lua_pushboolean(L1, lua.lua_isfunction(L1, getindex(L, L1, pc)));
-            break;
-        }
-        case "isnil": {
-            lua.lua_pushboolean(L1, lua.lua_isnil(L1, getindex(L, L1, pc)));
-            break;
-        }
-        case "isnull": {
-            lua.lua_pushboolean(L1, lua.lua_isnone(L1, getindex(L, L1, pc)));
-            break;
-        }
-        case "isnumber": {
-            lua.lua_pushboolean(L1, lua.lua_isnumber(L1, getindex(L, L1, pc)));
-            break;
-        }
-        case "isstring": {
-            lua.lua_pushboolean(L1, lua.lua_isstring(L1, getindex(L, L1, pc)));
-            break;
-        }
-        case "istable": {
-            lua.lua_pushboolean(L1, lua.lua_istable(L1, getindex(L, L1, pc)));
-            break;
-        }
-        case "isudataval": {
-            lua.lua_pushboolean(L1, lua.lua_islightuserdata(L1, getindex(L, L1, pc)));
-            break;
-        }
-        case "isuserdata": {
-            lua.lua_pushboolean(L1, lua.lua_isuserdata(L1, getindex(L, L1, pc)));
-            break;
-        }
-        case "len": {
-            lua.lua_len(L1, getindex(L, L1, pc));
-            break;
-        }
-        case "Llen": {
-            lua.lua_pushinteger(L1, lauxlib.luaL_len(L1, getindex(L, L1, pc)));
-            break;
-        }
-        case "loadfile": {
-          lauxlib.luaL_loadfile(L1, lauxlib.luaL_checkstring(L1, getnum(L, L1, pc)));
-            break;
-        }
-        case "loadstring": {
-          let s = lauxlib.luaL_checkstring(L1, getnum(L, L1, pc));
-          lauxlib.luaL_loadstring(L1, s);
-            break;
-        }
-        case "newmetatable": {
-            lua.lua_pushboolean(L1, lauxlib.luaL_newmetatable(L1, getstring(L, buff, pc)));
-            break;
-        }
-        case "newtable": {
-            lua.lua_newtable(L1);
-            break;
-        }
-        case "newthread": {
-            lua.lua_newthread(L1);
-            break;
-        }
-        case "newuserdata": {
-            lua.lua_newuserdata(L1, getnum(L, L1, pc));
-            break;
-        }
-        case "next": {
-            lua.lua_next(L1, -2);
-            break;
-        }
-        case "objsize": {
-            lua.lua_pushinteger(L1, lua.lua_rawlen(L1, getindex(L, L1, pc)));
-            break;
-        }
-        case "pcall": {
-            let narg = getnum(L, L1, pc);
-            let nres = getnum(L, L1, pc);
-            status = lua.lua_pcall(L1, narg, nres, getnum(L, L1, pc));
-            break;
-        }
-        case "pcallk": {
-            let narg = getnum(L, L1, pc);
-            let nres = getnum(L, L1, pc);
-            let i = getindex(L, L1, pc);
-            status = lua.lua_pcallk(L1, narg, nres, 0, i, Cfunck);
-            break;
-        }
-        case "pop": {
-            lua.lua_pop(L1, getnum(L, L1, pc));
-            break;
-        }
-        case "print": {
-            let n = getnum(L, L1, pc);
-            if (n !== 0) {
-                console.log(`${lauxlib.luaL_tojsstring(L1, n, null)}\n`);
-                lua.lua_pop(L1, 1);
+                break;
             }
-            else printstack(L1);
-            break;
-        }
-        case "pushbool": {
-            lua.lua_pushboolean(L1, getnum(L, L1, pc));
-            break;
-        }
-        case "pushcclosure": {
-            lua.lua_pushcclosure(L1, testJS, getnum(L, L1, pc));
-            break;
-        }
-        case "pushint": {
-            lua.lua_pushinteger(L1, getnum(L, L1, pc));
-            break;
-        }
-        case "pushnil": {
-            lua.lua_pushnil(L1);
-            break;
-        }
-        case "pushnum": {
-            lua.lua_pushnumber(L1, getnum(L, L1, pc));
-            break;
-        }
-        case "pushstatus": {
-          pushcode(L1, status);
-            break;
-        }
-        case "pushstring": {
-            lua.lua_pushstring(L1, getstring(L, buff, pc));
-            break;
-        }
-        case "pushupvalueindex": {
-            lua.lua_pushinteger(L1, lua.lua_upvalueindex(getnum(L, L1, pc)));
-            break;
-        }
-        case "pushvalue": {
-            lua.lua_pushvalue(L1, getindex(L, L1, pc));
-            break;
-        }
-        case "rawgeti": {
-          let t = getindex(L, L1, pc);
-            lua.lua_rawgeti(L1, t, getnum(L, L1, pc));
-            break;
-        }
-        case "rawgetp": {
-          let t = getindex(L, L1, pc);
-            lua.lua_rawgetp(L1, t, getnum(L, L1, pc));
-            break;
-        }
-        case "rawsetp": {
-          let t = getindex(L, L1, pc);
-            lua.lua_rawsetp(L1, t, getnum(L, L1, pc));
-            break;
-        }
-        case "remove": {
-            lua.lua_remove(L1, getnum(L, L1, pc));
-            break;
-        }
-        case "replace": {
-            lua.lua_replace(L1, getindex(L, L1, pc));
-            break;
-        }
-        case "resume": {
-            let i = getindex(L, L1, pc);
-            status = lua.lua_resume(lua.lua_tothread(L1, i), L, getnum(L, L1, pc));
-            break;
-        }
-        case "return": {
-            let n = getnum(L, L1, pc);
-            if (L1 != L) {
-                let i;
-                for (i = 0; i < n; i++)
-                  lua.lua_pushstring(L, lua.lua_tostring(L1, -(n - i)));
+            case "pushnum": {
+                lua.lua_pushnumber(L1, getnum(L, L1, pc));
+                break;
             }
-            return n;
+            case "pushstatus": {
+                pushcode(L1, status);
+                break;
+            }
+            case "pushstring": {
+                lua.lua_pushstring(L1, getstring(L, buff, pc));
+                break;
+            }
+            case "pushupvalueindex": {
+                lua.lua_pushinteger(L1, lua.lua_upvalueindex(getnum(L, L1, pc)));
+                break;
+            }
+            case "pushvalue": {
+                lua.lua_pushvalue(L1, getindex(L, L1, pc));
+                break;
+            }
+            case "rawgeti": {
+                let t = getindex(L, L1, pc);
+                lua.lua_rawgeti(L1, t, getnum(L, L1, pc));
+                break;
+            }
+            case "rawgetp": {
+                let t = getindex(L, L1, pc);
+                lua.lua_rawgetp(L1, t, getnum(L, L1, pc));
+                break;
+            }
+            case "rawsetp": {
+                let t = getindex(L, L1, pc);
+                lua.lua_rawsetp(L1, t, getnum(L, L1, pc));
+                break;
+            }
+            case "remove": {
+                lua.lua_remove(L1, getnum(L, L1, pc));
+                break;
+            }
+            case "replace": {
+                lua.lua_replace(L1, getindex(L, L1, pc));
+                break;
+            }
+            case "resume": {
+                let i = getindex(L, L1, pc);
+                status = lua.lua_resume(lua.lua_tothread(L1, i), L, getnum(L, L1, pc));
+                break;
+            }
+            case "return": {
+                let n = getnum(L, L1, pc);
+                if (L1 != L) {
+                    let i;
+                    for (i = 0; i < n; i++)
+                        lua.lua_pushstring(L, lua.lua_tostring(L1, -(n - i)));
+                }
+                return n;
+            }
+            case "rotate": {
+                let i = getindex(L, L1, pc);
+                lua.lua_rotate(L1, i, getnum(L, L1, pc));
+                break;
+            }
+            case "setfield": {
+                let t = getindex(L, L1, pc);
+                lua.lua_setfield(L1, t, getstring(L, buff, pc));
+                break;
+            }
+            case "setglobal": {
+                lua.lua_setglobal(L1, getstring(L, buff, pc));
+                break;
+            }
+            case "sethook": {
+                let mask = getnum(L, L1, pc);
+                let count = getnum(L, L1, pc);
+                sethookaux(L1, mask, count, getstring(L, buff, pc));
+                break;
+            }
+            case "setmetatable": {
+                lua.lua_setmetatable(L1, getindex(L, L1, pc));
+                break;
+            }
+            case "settable": {
+                lua.lua_settable(L1, getindex(L, L1, pc));
+                break;
+            }
+            case "settop": {
+                lua.lua_settop(L1, getnum(L, L1, pc));
+                break;
+            }
+            case "testudata": {
+                let i = getindex(L, L1, pc);
+                lua.lua_pushboolean(L1, lauxlib.luaL_testudata(L1, i, getstring(L, buff, pc)) !== null);
+                break;
+            }
+            case "error": {
+                lua.lua_error(L1);
+                break;
+            }
+            case "throw": {
+                throw new Error();
+            }
+            case "tobool": {
+                lua.lua_pushboolean(L1, lua.lua_toboolean(L1, getindex(L, L1, pc)));
+                break;
+            }
+            case "tocfunction": {
+                lua.lua_pushcfunction(L1, lua.lua_tocfunction(L1, getindex(L, L1, pc)));
+                break;
+            }
+            case "tointeger": {
+                lua.lua_pushinteger(L1, lua.lua_tointeger(L1, getindex(L, L1, pc)));
+                break;
+            }
+            case "tonumber": {
+                lua.lua_pushnumber(L1, lua.lua_tonumber(L1, getindex(L, L1, pc)));
+                break;
+            }
+            case "topointer": {
+                let p = lua.lua_topointer(L1, getindex(L, L1, pc));
+                if (p === null) p = 0;
+                else if (p.id) p = p.id;
+                lua.lua_pushnumber(L1, p);  /* in ltests.c, p is casted to a size_t so NULL gives 0 */
+                break;
+            }
+            case "tostring": {
+                let s = lua.lua_tostring(L1, getindex(L, L1, pc));
+                let s1 = lua.lua_pushstring(L1, s);
+                assert((s === null && s1 === null) || s.join('|') === s1.join('|'));
+                break;
+            }
+            case "type": {
+                lua.lua_pushstring(L1, lauxlib.luaL_typename(L1, getnum(L, L1, pc)));
+                break;
+            }
+            case "xmove": {
+                let f = getindex(L, L1, pc);
+                let t = getindex(L, L1, pc);
+                let fs = (f === 0) ? L1 : lua.lua_tothread(L1, f);
+                let ts = (t === 0) ? L1 : lua.lua_tothread(L1, t);
+                let n = getnum(L, L1, pc);
+                if (n === 0) n = lua.lua_gettop(fs);
+                lua.lua_xmove(fs, ts, n);
+                break;
+            }
+            case "yield": {
+                return lua.lua_yield(L1, getnum(L, L1, pc));
+            }
+            case "yieldk": {
+                let nres = getnum(L, L1, pc);
+                let i = getindex(L, L1, pc);
+                return lua.lua_yieldk(L1, nres, i, Cfunck);
+            }
+            default:
+                lauxlib.luaL_error(L, lua.to_luastring("unknown instruction %s"), buff);
         }
-        case "rotate": {
-            let i = getindex(L, L1, pc);
-            lua.lua_rotate(L1, i, getnum(L, L1, pc));
-            break;
-        }
-        case "setfield": {
-            let t = getindex(L, L1, pc);
-            lua.lua_setfield(L1, t, getstring(L, buff, pc));
-            break;
-        }
-        case "setglobal": {
-            lua.lua_setglobal(L1, getstring(L, buff, pc));
-            break;
-        }
-        case "sethook": {
-            let mask = getnum(L, L1, pc);
-            let count = getnum(L, L1, pc);
-            sethookaux(L1, mask, count, getstring(L, buff, pc));
-            break;
-        }
-        case "setmetatable": {
-            lua.lua_setmetatable(L1, getindex(L, L1, pc));
-            break;
-        }
-        case "settable": {
-            lua.lua_settable(L1, getindex(L, L1, pc));
-            break;
-        }
-        case "settop": {
-            lua.lua_settop(L1, getnum(L, L1, pc));
-            break;
-        }
-        case "testudata": {
-          let i = getindex(L, L1, pc);
-            lua.lua_pushboolean(L1, lauxlib.luaL_testudata(L1, i, getstring(L, buff, pc)) !== null);
-            break;
-        }
-        case "error": {
-            lua.lua_error(L1);
-            break;
-        }
-        case "throw": {
-            throw new Error();
-            break;
-        }
-        case "tobool": {
-            lua.lua_pushboolean(L1, lua.lua_toboolean(L1, getindex(L, L1, pc)));
-            break;
-        }
-        case "tocfunction": {
-            lua.lua_pushcfunction(L1, lua.lua_tocfunction(L1, getindex(L, L1, pc)));
-            break;
-        }
-        case "tointeger": {
-            lua.lua_pushinteger(L1, lua.lua_tointeger(L1, getindex(L, L1, pc)));
-            break;
-        }
-        case "tonumber": {
-            lua.lua_pushnumber(L1, lua.lua_tonumber(L1, getindex(L, L1, pc)));
-            break;
-        }
-        case "topointer": {
-            let p = lua.lua_topointer(L1, getindex(L, L1, pc));
-            if (p === null) p = 0;
-            else if (p.id) p = p.id;
-            lua.lua_pushnumber(L1, p);  /* in ltests.c, p is casted to a size_t so NULL gives 0 */
-            break;
-        }
-        case "tostring": {
-            let s = lua.lua_tostring(L1, getindex(L, L1, pc));
-            let s1 = lua.lua_pushstring(L1, s);
-            assert((s === null && s1 === null) || s.join('|') === s1.join('|'));
-            break;
-        }
-        case "type": {
-            lua.lua_pushstring(L1, lauxlib.luaL_typename(L1, getnum(L, L1, pc)));
-            break;
-        }
-        case "xmove": {
-            let f = getindex(L, L1, pc);
-            let t = getindex(L, L1, pc);
-            let fs = (f === 0) ? L1 : lua.lua_tothread(L1, f);
-            let ts = (t === 0) ? L1 : lua.lua_tothread(L1, t);
-            let n = getnum(L, L1, pc);
-            if (n === 0) n = lua.lua_gettop(fs);
-            lua.lua_xmove(fs, ts, n);
-            break;
-        }
-        case "yield": {
-            return lua.lua_yield(L1, getnum(L, L1, pc));
-        }
-        case "yieldk": {
-            let nres = getnum(L, L1, pc);
-            let i = getindex(L, L1, pc);
-            return lua.lua_yieldk(L1, nres, i, Cfunck);
-        }
-        default:
-            lauxlib.luaL_error(L, lua.to_luastring("unknown instruction %s"), buff);
-        }
-      }
-      return 0;
+    }
 };
 
 
@@ -817,7 +816,7 @@ const buildop = function(p, pc) {
 
 const listcode = function(L) {
     lauxlib.luaL_argcheck(L, lua.lua_isfunction(L, 1) && !lua.lua_iscfunction(L, 1),
-                                 1, lua.to_luastring("Lua function expected", true));
+        1, lua.to_luastring("Lua function expected", true));
     let p = obj_at(L, 1);
     lua.lua_newtable(L);
     setnameval(L, lua.to_luastring("maxstack", true), p.maxstacksize);

@@ -2,9 +2,6 @@
 
 const test       = require('tape');
 
-const tests      = require("./tests.js");
-const toByteCode = tests.toByteCode;
-
 const lua     = require('../src/lua.js');
 const lauxlib = require('../src/lauxlib.js');
 const lualib  = require('../src/lualib.js');
@@ -17,7 +14,7 @@ test('LOADK, RETURN', function (t) {
         local a = "hello world"
         return a
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -57,7 +54,7 @@ test('MOVE', function (t) {
         local b = a
         return b
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -97,7 +94,7 @@ test('Binary op', function (t) {
         local b = 10
         return a + b, a - b, a * b, a / b, a % b, a^b, a // b, a & b, a | b, a ~ b, a << b, a >> b
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -137,7 +134,7 @@ test('Unary op, LOADBOOL', function (t) {
         local b = false
         return -a, not b, ~a
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -175,7 +172,7 @@ test('NEWTABLE', function (t) {
         local a = {}
         return a
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -217,7 +214,7 @@ test('CALL', function (t) {
 
         return c
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -263,7 +260,7 @@ test('Multiple return', function (t) {
 
         return c, d, e
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -304,7 +301,7 @@ test('TAILCALL', function (t) {
 
         return f(1,2)
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -345,7 +342,7 @@ test('VARARG', function (t) {
 
         return f(1,2,3)
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -384,7 +381,7 @@ test('LE, JMP', function (t) {
 
         return a >= b
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -423,7 +420,7 @@ test('LT', function (t) {
 
         return a > b
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -462,7 +459,7 @@ test('EQ', function (t) {
 
         return a == b
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -502,7 +499,7 @@ test('TESTSET (and)', function (t) {
 
         return a and b
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -542,7 +539,7 @@ test('TESTSET (or)', function (t) {
 
         return a or b
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -586,7 +583,7 @@ test('TEST (false)', function (t) {
 
         return "goodbye"
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -629,7 +626,7 @@ test('FORPREP, FORLOOP (int)', function (t) {
 
         return total
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -672,7 +669,7 @@ test('FORPREP, FORLOOP (float)', function (t) {
 
         return total
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -714,7 +711,7 @@ test('SETTABLE, GETTABLE', function (t) {
 
         return t
     `, L;
-    
+
     t.plan(4);
 
     t.doesNotThrow(function () {
@@ -765,7 +762,7 @@ test('SETUPVAL, GETUPVAL', function (t) {
 
         return f()
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -807,7 +804,7 @@ test('SETTABUP, GETTABUP', function (t) {
 
         return t
     `, L;
-    
+
     t.plan(4);
 
     t.doesNotThrow(function () {
@@ -857,7 +854,7 @@ test('SELF', function (t) {
 
         return t:get()
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -896,7 +893,7 @@ test('SETLIST', function (t) {
 
         return t
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -939,7 +936,7 @@ test('Variable SETLIST', function (t) {
 
         return t
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -977,7 +974,7 @@ test('Long SETLIST', function (t) {
 
         return t
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -1032,7 +1029,7 @@ test('TFORCALL, TFORLOOP', function (t) {
 
         return r
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -1073,7 +1070,7 @@ test('LEN', function (t) {
 
         return #t, #t2, #s
     `, L;
-    
+
     t.plan(5);
 
     t.doesNotThrow(function () {
@@ -1122,7 +1119,7 @@ test('CONCAT', function (t) {
     let luaCode = `
         return "hello " .. 2 .. " you"
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {

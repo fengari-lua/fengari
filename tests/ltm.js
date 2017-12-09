@@ -12,7 +12,7 @@ test('__index, __newindex: with actual table', function (t) {
         local t = {yo=1}
         return t.yo, t.lo
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -42,7 +42,7 @@ test('__newindex: with non table', function (t) {
         local t = "a string"
         t.yo = "hello"
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -73,7 +73,7 @@ test('__index function in metatable', function (t) {
 
         return t.yo
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -113,7 +113,7 @@ test('__newindex function in metatable', function (t) {
 
         return t.yo
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -151,7 +151,7 @@ test('__index table in metatable', function (t) {
 
         return t.yo
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -192,7 +192,7 @@ test('__newindex table in metatable', function (t) {
 
         return t.yo, mmt.yo
     `, L;
-    
+
     t.plan(4);
 
     t.doesNotThrow(function () {
@@ -244,7 +244,7 @@ test('__index table with own metatable', function (t) {
 
         return t.yo
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -295,7 +295,7 @@ test('__newindex table with own metatable', function (t) {
 
         return t.yo, up
     `, L;
-    
+
     t.plan(4);
 
     t.doesNotThrow(function () {
@@ -394,7 +394,7 @@ test('binary __xxx functions in metatable', function (t) {
             t << 1,
             t >> 1
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -444,7 +444,7 @@ test('__eq', function (t) {
 
         return t == {}
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -480,7 +480,7 @@ test('__lt', function (t) {
 
         return t < {}
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -516,7 +516,7 @@ test('__le', function (t) {
 
         return t <= {}
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -552,7 +552,7 @@ test('__le that uses __lt', function (t) {
 
         return {} <= t
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -592,7 +592,7 @@ test('__unm, __bnot', function (t) {
 
         return -t, ~t
     `, L;
-    
+
     t.plan(4);
 
     t.doesNotThrow(function () {
@@ -635,7 +635,7 @@ test('__len', function (t) {
 
         return #t
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -672,7 +672,7 @@ test('__concat', function (t) {
 
         return t .. " world"
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -709,7 +709,7 @@ test('__call', function (t) {
 
         return t("world","wow")
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {

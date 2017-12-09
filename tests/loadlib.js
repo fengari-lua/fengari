@@ -11,7 +11,7 @@ test('require an existing module', function (t) {
     let luaCode = `
         return require('os')
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -34,7 +34,6 @@ test('require an existing module', function (t) {
         lua.lua_istable(L, -1),
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -42,7 +41,7 @@ test('require a file', function (t) {
     let luaCode = `
         return require('tests/module-hello')()
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -66,7 +65,6 @@ test('require a file', function (t) {
         "hello from module",
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -74,7 +72,7 @@ test('package.loadlib', function (t) {
     let luaCode = `
         return package.loadlib('./tests/lib-hello.js.mod', 'hello')()
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -98,7 +96,6 @@ test('package.loadlib', function (t) {
         "hello from js lib",
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -106,7 +103,7 @@ test('package.searchpath', function (t) {
     let luaCode = `
         return package.searchpath('module-hello', './?.lua;./tests/?.lua')
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -130,5 +127,4 @@ test('package.searchpath', function (t) {
         "./tests/module-hello.lua",
         "Correct element(s) on the stack"
     );
-
 });

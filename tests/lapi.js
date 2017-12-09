@@ -10,7 +10,7 @@ const lua        = require('../src/lua.js');
 
 test('luaL_newstate, lua_pushnil, luaL_typename', function (t) {
     let L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -31,7 +31,7 @@ test('luaL_newstate, lua_pushnil, luaL_typename', function (t) {
 
 test('lua_pushnumber', function (t) {
     let L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -58,7 +58,7 @@ test('lua_pushnumber', function (t) {
 
 test('lua_pushinteger', function (t) {
     let L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -85,7 +85,7 @@ test('lua_pushinteger', function (t) {
 
 test('lua_pushliteral', function (t) {
     let L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -112,7 +112,7 @@ test('lua_pushliteral', function (t) {
 
 test('lua_pushboolean', function (t) {
     let L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -139,7 +139,7 @@ test('lua_pushboolean', function (t) {
 
 test('lua_pushvalue', function (t) {
     let L;
-    
+
     t.plan(5);
 
     t.doesNotThrow(function () {
@@ -180,7 +180,7 @@ test('lua_pushvalue', function (t) {
 
 test('lua_pushjsclosure', function (t) {
     let L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -206,7 +206,7 @@ test('lua_pushjsclosure', function (t) {
 
 test('lua_pushjsfunction', function (t) {
     let L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -231,7 +231,7 @@ test('lua_pushjsfunction', function (t) {
 
 test('lua_call (calling a light JS function)', function (t) {
     let L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -259,7 +259,7 @@ test('lua_call (calling a light JS function)', function (t) {
 
 test('lua_call (calling a JS closure)', function (t) {
     let L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -288,7 +288,7 @@ test('lua_call (calling a JS closure)', function (t) {
 
 test('lua_pcall (calling a light JS function)', function (t) {
     let L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -316,7 +316,7 @@ test('lua_pcall (calling a light JS function)', function (t) {
 
 test('lua_pcall that breaks', function (t) {
     let L;
-    
+
     t.plan(1);
 
     t.doesNotThrow(function () {
@@ -339,7 +339,7 @@ test('lua_pcall that breaks', function (t) {
 
 test('lua_pop', function (t) {
     let L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -383,10 +383,10 @@ test('lua_load with no chunkname', function (t) {
 
 test('lua_load and lua_call it', function (t) {
     let luaCode = `
-        local a = "JS > Lua > JS \o/"
+        local a = "JS > Lua > JS \\o/"
         return a
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -403,7 +403,7 @@ test('lua_load and lua_call it', function (t) {
 
     t.strictEqual(
         lua.lua_tojsstring(L, -1),
-        "JS > Lua > JS \o/",
+        "JS > Lua > JS \\o/",
         "Correct element(s) on the stack"
     );
 });
@@ -413,7 +413,7 @@ test('lua script reads js upvalues', function (t) {
     let luaCode = `
         return js .. " world"
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -439,7 +439,7 @@ test('lua script reads js upvalues', function (t) {
 
 test('lua_createtable', function (t) {
     let L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -458,7 +458,7 @@ test('lua_createtable', function (t) {
 
 test('lua_newtable', function (t) {
     let L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -477,7 +477,7 @@ test('lua_newtable', function (t) {
 
 test('lua_settable, lua_gettable', function (t) {
     let L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {

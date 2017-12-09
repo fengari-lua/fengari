@@ -36,7 +36,7 @@ test('[test-suite] strings: string comparisons', function (t) {
         assert('\\0\\0\\0' >= '\\0\\0\\0')
         assert(not ('\\0\\0b' < '\\0\\0a\\0'))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -78,7 +78,7 @@ test('[test-suite] strings: string.sub', function (t) {
         assert('\\0\\0\\0' >= '\\0\\0\\0')
         assert(not ('\\0\\0b' < '\\0\\0a\\0'))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -116,7 +116,7 @@ test('[test-suite] strings: string.find', function (t) {
         assert(string.find('', 'aaa', 1) == nil)
         assert(('alo(.)alo'):find('(.)', 1, 1) == 4)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -148,7 +148,7 @@ test('[test-suite] strings: string.len and #', function (t) {
         assert(#"\\0\\0\\0" == 3)
         assert(#"1234567890" == 10)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -205,7 +205,7 @@ test('[test-suite] strings: string.byte/string.char', function (t) {
           checkerror("too large", string.rep, 'a', (1 << 30), ',')
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -242,7 +242,7 @@ test('[test-suite] strings: repetitions with separator', function (t) {
 
         for i=0,30 do assert(string.len(string.rep('a', i)) == i) end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -294,7 +294,7 @@ test('[test-suite] strings: tostring', function (t) {
           assert(tostring(-1203 + 0.0) == "-1203")
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -341,7 +341,7 @@ test('[test-suite] strings: string.format', function (t) {
         assert(string.format('"-%20s.20s"', string.rep("%", 2000)) ==
                string.format("%q", "-"..string.rep("%", 2000)..".20s"))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -382,7 +382,7 @@ test('[test-suite] strings: %q', function (t) {
           checkerror("no literal", string.format, "%q", {})
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -409,7 +409,7 @@ test('[test-suite] strings: embedded zeros error', function (t) {
         assert(string.format("\\0%s\\0", "\\0\\0\\1") == "\\0\\0\\0\\1\\0")
         checkerror("contains zeros", string.format, "%10s", "\\0")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -452,7 +452,7 @@ test('[test-suite] strings: format x tostring', function (t) {
         assert(string.format("%+08d", 31501) == "+0031501")
         assert(string.format("%+08d", -30927) == "-0030927")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -489,7 +489,7 @@ test('[test-suite] strings: longest number that can be formatted', function (t) 
           assert(tonumber(s) == -(10^i))
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -538,7 +538,7 @@ test('[test-suite] strings: large numbers for format', function (t) {
           end
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -586,7 +586,7 @@ test("[test-suite] strings: 'format %a %A'", function (t) {
             assert(string.find(string.format("%a", 0/0), "^%-?nan"))
             assert(string.find(string.format("%a", -0.0), "^%-0x0"))
           end
-          
+
           if not pcall(string.format, "%.3a", 0) then
             (Message or print)("\\n >>> modifiers for format '%a' not available <<<\\n")
           else
@@ -595,7 +595,7 @@ test("[test-suite] strings: 'format %a %A'", function (t) {
           end
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -635,7 +635,7 @@ test("[test-suite] strings: errors in format", function (t) {
 
         assert(load("return 1\\n--comment without ending EOL")() == 1)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -686,7 +686,7 @@ test("[test-suite] strings: table.concat", function (t) {
         assert(table.concat(a, ",", 3) == "c")
         assert(table.concat(a, ",", 4) == "")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -709,61 +709,59 @@ test("[test-suite] strings: table.concat", function (t) {
 
 
 // TODO: os.setlocale NYI
-if (false) {
-    test("[test-suite] strings: locale", function (t) {
-        let luaCode = `
-            if not _port then
+test.skip("[test-suite] strings: locale", function (t) {
+    let luaCode = `
+        if not _port then
 
-              local locales = { "ptb", "pt_BR.iso88591", "ISO-8859-1" }
-              local function trylocale (w)
-                for i = 1, #locales do
-                  if os.setlocale(locales[i], w) then
-                    print(string.format("'%s' locale set to '%s'", w, locales[i]))
-                    return locales[i]
-                  end
-                end
-                print(string.format("'%s' locale not found", w))
-                return false
+          local locales = { "ptb", "pt_BR.iso88591", "ISO-8859-1" }
+          local function trylocale (w)
+            for i = 1, #locales do
+              if os.setlocale(locales[i], w) then
+                print(string.format("'%s' locale set to '%s'", w, locales[i]))
+                return locales[i]
               end
-
-              if trylocale("collate")  then
-                assert("alo" < "álo" and "álo" < "amo")
-              end
-
-              if trylocale("ctype") then
-                assert(string.gsub("áéíóú", "%a", "x") == "xxxxx")
-                assert(string.gsub("áÁéÉ", "%l", "x") == "xÁxÉ")
-                assert(string.gsub("áÁéÉ", "%u", "x") == "áxéx")
-                assert(string.upper"áÁé{xuxu}ção" == "ÁÁÉ{XUXU}ÇÃO")
-              end
-
-              os.setlocale("C")
-              assert(os.setlocale() == 'C')
-              assert(os.setlocale(nil, "numeric") == 'C')
-
             end
-        `, L;
-        
-        t.plan(2);
+            print(string.format("'%s' locale not found", w))
+            return false
+          end
 
-        t.doesNotThrow(function () {
+          if trylocale("collate")  then
+            assert("alo" < "álo" and "álo" < "amo")
+          end
 
-            L = lauxlib.luaL_newstate();
+          if trylocale("ctype") then
+            assert(string.gsub("áéíóú", "%a", "x") == "xxxxx")
+            assert(string.gsub("áÁéÉ", "%l", "x") == "xÁxÉ")
+            assert(string.gsub("áÁéÉ", "%u", "x") == "áxéx")
+            assert(string.upper"áÁé{xuxu}ção" == "ÁÁÉ{XUXU}ÇÃO")
+          end
 
-            lualib.luaL_openlibs(L);
+          os.setlocale("C")
+          assert(os.setlocale() == 'C')
+          assert(os.setlocale(nil, "numeric") == 'C')
 
-            lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
+        end
+    `, L;
 
-        }, "Lua program loaded without error");
+    t.plan(2);
 
-        t.doesNotThrow(function () {
+    t.doesNotThrow(function () {
 
-            lua.lua_call(L, 0, -1);
+        L = lauxlib.luaL_newstate();
 
-        }, "Lua program ran without error");
+        lualib.luaL_openlibs(L);
 
-    });
-}
+        lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+
+});
 
 
 test("[test-suite] strings: bug in Lua 5.3.2: 'gmatch' iterator does not work across coroutines", function (t) {
@@ -775,7 +773,7 @@ test("[test-suite] strings: bug in Lua 5.3.2: 'gmatch' iterator does not work ac
           assert(co() == "2")
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {

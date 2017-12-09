@@ -11,7 +11,7 @@ test('os.time', function (t) {
     let luaCode = `
         return os.time()
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -34,7 +34,6 @@ test('os.time', function (t) {
         lua.lua_isinteger(L, -1),
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -46,7 +45,7 @@ test('os.time (with format)', function (t) {
             year = 2015
         })
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -70,7 +69,6 @@ test('os.time (with format)', function (t) {
         new Date(2015, 1, 8, 12, 0, 0, 0).getTime() / 1000,
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -80,7 +78,7 @@ test('os.difftime', function (t) {
         local t2 = os.time()
         return os.difftime(t2, t1)
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -103,7 +101,6 @@ test('os.difftime', function (t) {
         lua.lua_isnumber(L, -1),
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -115,7 +112,7 @@ test('os.date', function (t) {
             year = 2015
         }))
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -139,7 +136,6 @@ test('os.date', function (t) {
         "2015-02-08",
         "Correct element(s) on the stack"
     );
-
 });
 
 
@@ -147,7 +143,7 @@ test('os.getenv', function (t) {
     let luaCode = `
         return os.getenv('PATH')
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -170,5 +166,4 @@ test('os.getenv', function (t) {
         lua.lua_isstring(L, -1),
         "Correct element(s) on the stack"
     );
-
 });

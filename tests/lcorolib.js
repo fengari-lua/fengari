@@ -20,7 +20,7 @@ test('coroutine.create, coroutine.yield, coroutine.resume', function (t) {
 
         return pow
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -61,7 +61,7 @@ test('coroutine.status', function (t) {
 
         return s1, s2
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -100,7 +100,7 @@ test('coroutine.isyieldable', function (t) {
 
         return yieldable, coroutine.isyieldable()
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -139,7 +139,7 @@ test('coroutine.running', function (t) {
 
         return running, ismain
     `, L;
-    
+
     t.plan(3);
 
     t.doesNotThrow(function () {
@@ -178,7 +178,7 @@ test('coroutine.wrap', function (t) {
 
         return pow
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {

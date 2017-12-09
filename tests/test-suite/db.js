@@ -515,7 +515,7 @@ test("[test-suite] db: tests for manipulating non-registered locals (C and Lua t
         function g(a,b) return (a+1) + f() end
 
         assert(g(0,0) == 30)
-         
+
 
         debug.sethook(nil);
         assert(debug.gethook() == nil)
@@ -565,7 +565,7 @@ test("[test-suite] db: testing access to function arguments", function (t) {
           dostring("XX = 12")  -- test dostring inside hooks
           -- testing errors inside hooks
           assert(not pcall(load("a='joao'+1")))
-          debug.sethook(function (e, l) 
+          debug.sethook(function (e, l)
             assert(debug.getinfo(2, "l").currentline == l)
             local f,m,c = debug.gethook()
             assert(e == "line")
@@ -690,7 +690,7 @@ test("[test-suite] db: testing upvalue access", function (t) {
         assert(debug.setupvalue(foo1, 1, "xuxu") == "b")
         assert(({debug.getupvalue(foo2, 3)})[2] == "xuxu")
         -- upvalues of C functions are allways "called" "" (the empty string)
-        assert(debug.getupvalue(string.gmatch("x", "x"), 1) == "")  
+        assert(debug.getupvalue(string.gmatch("x", "x"), 1) == "")
     `, L;
 
     t.plan(2);
@@ -1030,7 +1030,7 @@ test("[test-suite] db: testing debugging of coroutines", function (t) {
 
         let b = lua.to_luastring(luaCode);
         if (lauxlib.luaL_loadbuffer(L, b, b.length, lua.to_luastring("@db.lua")) !== lua.LUA_OK)
-          throw Error(lua.lua_tojsstring(L, -1));
+            throw Error(lua.lua_tojsstring(L, -1));
 
     }, "Lua program loaded without error");
 
@@ -1304,7 +1304,7 @@ test("[test-suite] db: testing traceback sizes", function (t) {
 
         let b = lua.to_luastring(luaCode);
         if (lauxlib.luaL_loadbuffer(L, b, b.length, lua.to_luastring("@db.lua")) !== lua.LUA_OK)
-          throw Error(lua.lua_tojsstring(L, -1));
+            throw Error(lua.lua_tojsstring(L, -1));
 
     }, "Lua program loaded without error");
 
@@ -1389,7 +1389,7 @@ test("[test-suite] db: tests for 'source' in binary dumps", function (t) {
         do
           local prog = [[
             return function (x)
-              return function (y) 
+              return function (y)
                 return x + y
               end
             end
@@ -1404,7 +1404,7 @@ test("[test-suite] db: tests for 'source' in binary dumps", function (t) {
           local h = g(3)
           assert(h(5) == 8)
           assert(debug.getinfo(f).source == name and   -- all functions have 'source'
-                 debug.getinfo(g).source == name and 
+                 debug.getinfo(g).source == name and
                  debug.getinfo(h).source == name)
           -- again, without debug info
           local c = string.dump(p, true)
@@ -1414,7 +1414,7 @@ test("[test-suite] db: tests for 'source' in binary dumps", function (t) {
           local h = g(30)
           assert(h(50) == 80)
           assert(debug.getinfo(f).source == '=?' and   -- no function has 'source'
-                 debug.getinfo(g).source == '=?' and 
+                 debug.getinfo(g).source == '=?' and
                  debug.getinfo(h).source == '=?')
         end
     `, L;

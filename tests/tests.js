@@ -7,9 +7,9 @@ const toByteCode = function(luaCode) {
     let L = getState(luaCode);
     let b = [];
     if (lua.lua_dump(L, function(L, b, size, B) {
-	    B.push(...b.slice(0, size));
-	    return 0;
-	}, b, false) !== 0)
+        B.push(...b.slice(0, size));
+        return 0;
+    }, b, false) !== 0)
         throw Error("unable to dump given function");
     return new DataView(Uint8Array.from(b).buffer);
 };

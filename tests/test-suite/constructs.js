@@ -19,7 +19,7 @@ test('[test-suite] constructs: testing semicolons', function (t) {
         ; do ; a = 3; assert(a == 3) end;
         ;
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -45,7 +45,7 @@ test('[test-suite] constructs: invalid operations should not raise errors when n
     let luaCode = `
         if false then a = 3 // 0; a = 0 % 0 end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -110,7 +110,7 @@ test('[test-suite] constructs: testing priorities', function (t) {
 
         assert(1234567890 == tonumber('1234567890') and 1234567890+1 == 1234567891)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -296,7 +296,7 @@ test('[test-suite] constructs: silly loops', function (t) {
         a,b = F(1)~=nil; assert(a == true and b == nil);
         a,b = F(nil)==nil; assert(a == true and b == nil)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -317,94 +317,92 @@ test('[test-suite] constructs: silly loops', function (t) {
 
 });
 
-if (false) {
-    test('[test-suite] constructs: huge loops, upvalue', function (t) {
-        let luaCode = `
-            -- sometimes will be 0, sometimes will not...
-            _ENV.GLOB1 = math.floor(os.time()) % 2
+test.skip('[test-suite] constructs: huge loops, upvalue', function (t) {
+    let luaCode = `
+        -- sometimes will be 0, sometimes will not...
+        _ENV.GLOB1 = math.floor(os.time()) % 2
 
-            -- basic expressions with their respective values
-            local basiccases = {
-              {"nil", nil},
-              {"false", false},
-              {"true", true},
-              {"10", 10},
-              {"(0==_ENV.GLOB1)", 0 == _ENV.GLOB1},
-            }
+        -- basic expressions with their respective values
+        local basiccases = {
+          {"nil", nil},
+          {"false", false},
+          {"true", true},
+          {"10", 10},
+          {"(0==_ENV.GLOB1)", 0 == _ENV.GLOB1},
+        }
 
-            print('testing short-circuit optimizations (' .. _ENV.GLOB1 .. ')')
+        print('testing short-circuit optimizations (' .. _ENV.GLOB1 .. ')')
 
 
-            -- operators with their respective values
-            local binops = {
-              {" and ", function (a,b) if not a then return a else return b end end},
-              {" or ", function (a,b) if a then return a else return b end end},
-            }
+        -- operators with their respective values
+        local binops = {
+          {" and ", function (a,b) if not a then return a else return b end end},
+          {" or ", function (a,b) if a then return a else return b end end},
+        }
 
-            local cases = {}
+        local cases = {}
 
-            -- creates all combinations of '(cases[i] op cases[n-i])' plus
-            -- 'not(cases[i] op cases[n-i])' (syntax + value)
-            local function createcases (n)
-              local res = {}
-              for i = 1, n - 1 do
-                for _, v1 in ipairs(cases[i]) do
-                  for _, v2 in ipairs(cases[n - i]) do
-                    for _, op in ipairs(binops) do
-                        local t = {
-                          "(" .. v1[1] .. op[1] .. v2[1] .. ")",
-                          op[2](v1[2], v2[2])
-                        }
-                        res[#res + 1] = t
-                        res[#res + 1] = {"not" .. t[1], not t[2]}
-                    end
-                  end
+        -- creates all combinations of '(cases[i] op cases[n-i])' plus
+        -- 'not(cases[i] op cases[n-i])' (syntax + value)
+        local function createcases (n)
+          local res = {}
+          for i = 1, n - 1 do
+            for _, v1 in ipairs(cases[i]) do
+              for _, v2 in ipairs(cases[n - i]) do
+                for _, op in ipairs(binops) do
+                    local t = {
+                      "(" .. v1[1] .. op[1] .. v2[1] .. ")",
+                      op[2](v1[2], v2[2])
+                    }
+                    res[#res + 1] = t
+                    res[#res + 1] = {"not" .. t[1], not t[2]}
                 end
               end
-              return res
             end
+          end
+          return res
+        end
 
-            -- do not do too many combinations for soft tests
-            local level = _soft and 3 or 4
+        -- do not do too many combinations for soft tests
+        local level = _soft and 3 or 4
 
-            cases[1] = basiccases
-            for i = 2, level do cases[i] = createcases(i) end
+        cases[1] = basiccases
+        for i = 2, level do cases[i] = createcases(i) end
 
-            local prog = [[if %s then IX = true end; return %s]]
+        local prog = [[if %s then IX = true end; return %s]]
 
-            local i = 0
-            for n = 1, level do
-              for _, v in pairs(cases[n]) do
-                local s = v[1]
-                local p = load(string.format(prog, s, s), "")
-                IX = false
-                assert(p() == v[2] and IX == not not v[2])
-                i = i + 1
-                if i % 60000 == 0 then print('+') end
-              end
-            end
-        `, L;
-        
-        t.plan(2);
+        local i = 0
+        for n = 1, level do
+          for _, v in pairs(cases[n]) do
+            local s = v[1]
+            local p = load(string.format(prog, s, s), "")
+            IX = false
+            assert(p() == v[2] and IX == not not v[2])
+            i = i + 1
+            if i % 60000 == 0 then print('+') end
+          end
+        end
+    `, L;
 
-        t.doesNotThrow(function () {
+    t.plan(2);
 
-            L = lauxlib.luaL_newstate();
+    t.doesNotThrow(function () {
 
-            lualib.luaL_openlibs(L);
+        L = lauxlib.luaL_newstate();
 
-            lauxlib.luaL_loadstring(L, lua.to_luastring(checkload + luaCode));
+        lualib.luaL_openlibs(L);
 
-        }, "Lua program loaded without error");
+        lauxlib.luaL_loadstring(L, lua.to_luastring(checkload + luaCode));
 
-        t.doesNotThrow(function () {
+    }, "Lua program loaded without error");
 
-            lua.lua_call(L, 0, -1);
+    t.doesNotThrow(function () {
 
-        }, "Lua program ran without error");
+        lua.lua_call(L, 0, -1);
 
-    });
-}
+    }, "Lua program ran without error");
+
+});
 
 
 test("[test-suite] constructs: testing some syntax errors (chosen through 'gcov')", function (t) {
@@ -421,7 +419,7 @@ test("[test-suite] constructs: testing some syntax errors (chosen through 'gcov'
           checkload(s, "too long")
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
