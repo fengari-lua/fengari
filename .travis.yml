@@ -12,6 +12,7 @@ install:
     - yarn
 
 script:
+    - yarn lint
     - yarn build
     - travis_wait yarn test
 
