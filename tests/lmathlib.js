@@ -362,7 +362,7 @@ test('math.type', function (t) {
 
 test('math.ult', function (t) {
     let luaCode = `
-        return math.tointeger('10')
+        return math.ult(5, 200)
     `, L;
 
     t.plan(2);
