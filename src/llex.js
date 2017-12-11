@@ -369,9 +369,9 @@ const readutf8desc = function(ls) {
 };
 
 const utf8esc = function(ls) {
-    let u = lobject.luaO_utf8esc(readutf8desc(ls));
-    let buff = u.buff;
-    for (let n = u.n; n > 0; n--)  /* add 'buff' to string */
+    let buff = new Array(lobject.UTF8BUFFSZ);
+    let n = lobject.luaO_utf8esc(buff, readutf8desc(ls));
+    for (; n > 0; n--)  /* add 'buff' to string */
         save(ls, buff[lobject.UTF8BUFFSZ - n]);
 };
 

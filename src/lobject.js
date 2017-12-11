@@ -336,7 +336,7 @@ const luaO_hexavalue = function(c) {
 
 const UTF8BUFFSZ = 8;
 
-const luaO_utf8desc = function(buff, x) {
+const luaO_utf8esc = function(buff, x) {
     let n = 1;  /* number of bytes put in buffer (backwards) */
     assert(x <= 0x10FFFF);
     if (x < 0x80)  /* ascii? */
@@ -489,27 +489,6 @@ const luaO_str2num = function(s) {
         } else
             return false;  /* conversion failed */
     }
-};
-
-const luaO_utf8esc = function(x) {
-    let buff = [];
-    let n = 1;  /* number of bytes put in buffer (backwards) */
-    assert(x <= 0x10ffff);
-    if (x < 0x80)  /* ascii? */
-        buff[UTF8BUFFSZ - 1] = x;
-    else {  /* need continuation bytes */
-        let mfb = 0x3f;  /* maximum that fits in first byte */
-        do {  /* add continuation bytes */
-            buff[UTF8BUFFSZ - (n++)] = 0x80 | (x & 0x3f);
-            x >>= 6;  /* remove added bits */
-            mfb >>= 1;  /* now there is one less bit available in first byte */
-        } while (x > mfb);  /* still needs continuation byte? */
-        buff[UTF8BUFFSZ - n] = (~mfb << 1) | x;  /* add first byte */
-    }
-    return {
-        buff: buff,
-        n: n
-    };
 };
 
 /* this currently returns new TValue instead of modifying */
@@ -733,7 +712,6 @@ module.exports.luaO_pushfstring  = luaO_pushfstring;
 module.exports.luaO_pushvfstring = luaO_pushvfstring;
 module.exports.luaO_str2num      = luaO_str2num;
 module.exports.luaO_tostring     = luaO_tostring;
-module.exports.luaO_utf8desc     = luaO_utf8desc;
 module.exports.luaO_utf8esc      = luaO_utf8esc;
 module.exports.numarith          = numarith;
 module.exports.pushobj2s         = pushobj2s;
