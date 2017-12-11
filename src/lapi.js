@@ -914,8 +914,9 @@ const lua_arith = function(L, op) {
 ** 'load' and 'call' functions (run Lua code)
 */
 
+const default_chunkname = defs.to_luastring("?");
 const lua_load = function(L, reader, data, chunkname, mode) {
-    if (!chunkname) chunkname = [defs.char["?"]];
+    if (!chunkname) chunkname = default_chunkname;
     else assert(defs.is_luastring(chunkname), "lua_load expect an array of byte as chunkname");
     assert(mode ? defs.is_luastring(mode) : true, "lua_load expect an array of byte as mode");
     let z = new lzio.ZIO(L, reader, data);
