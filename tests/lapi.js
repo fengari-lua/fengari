@@ -383,7 +383,7 @@ test('lua_load with no chunkname', function (t) {
 
 test('lua_load and lua_call it', function (t) {
     let luaCode = `
-        local a = "JS > Lua > JS \\o/"
+        local a = "JS > Lua > JS \\\\o/"
         return a
     `, L;
 
