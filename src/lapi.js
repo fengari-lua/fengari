@@ -230,15 +230,18 @@ const lua_pushinteger = function(L, n) {
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
+const emptystring = [];
+
 const lua_pushlstring = function(L, s, len) {
     assert(typeof len === "number");
     let ts;
     if (len === 0) {
-        ts = lstring.luaS_bless(L, []);
+        s = emptystring;
     } else {
         assert(defs.is_luastring(s) && s.length >= len, "lua_pushlstring expects array of byte");
-        ts = lstring.luaS_bless(L, s.slice(0, len));
+        s = s.slice(0, len);
     }
+    ts = lstring.luaS_bless(L, s);
     lobject.pushsvalue2s(L, ts);
     assert(L.top <= L.ci.top, "stack overflow");
 
@@ -1055,7 +1058,7 @@ const lua_concat = function(L, n) {
     if (n >= 2)
         lvm.luaV_concat(L, n);
     else if (n === 0) {
-        lobject.pushsvalue2s(L, lstring.luaS_bless(L, []));
+        lobject.pushsvalue2s(L, lstring.luaS_bless(L, emptystring));
         assert(L.top <= L.ci.top, "stack overflow");
     }
 };
