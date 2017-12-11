@@ -4,11 +4,11 @@ const fengari  = require('./fengari.js');
 const lua      = require('./lua.js');
 const lauxlib  = require('./lauxlib.js');
 
-const LUA_IGMARK    = ["-".charCodeAt(0)];
-
 const CLIBS         = lua.to_luastring("__CLIBS__", true);
 const LUA_PATH_VAR  = "LUA_PATH";
 const LUA_CPATH_VAR = "LUA_CPATH";
+
+const LUA_IGMARK    = "-";
 
 /*
 ** LUA_CSUBSEP is the character that replaces dots in submodule names
@@ -323,7 +323,7 @@ const searcher_Lua = function(L) {
 const loadfunc = function(L, filename, modname) {
     let openfunc;
     modname = lauxlib.luaL_gsub(L, modname, [".".charCodeAt(0)], LUA_OFSEP);
-    let mark = modname.indexOf(LUA_IGMARK[0]);
+    let mark = modname.indexOf(LUA_IGMARK.charCodeAt(0));
     if (mark >= 0) {
         openfunc = lua.lua_pushlstring(L, modname, mark);
         openfunc = lua.lua_pushfstring(L, lua.to_luastring("%s%s"), LUA_POF, openfunc);
