@@ -762,8 +762,8 @@ const luaV_tointeger = function(obj, mode) {
     } else if (obj.ttisinteger()) {
         return obj.value;
     } else if (cvt2num(obj)) {
-        let v = lobject.luaO_str2num(obj.svalue());
-        if (v !== false)
+        let v = new lobject.TValue();
+        if (lobject.luaO_str2num(obj.svalue(), v) === (obj.vslen() + 1))
             return luaV_tointeger(v, mode);
     }
 
@@ -778,9 +778,9 @@ const tonumber = function(o) {
     if (o.ttnov() === CT.LUA_TNUMBER)
         return o.value;
 
-    if (cvt2num(o)) { /* string convertible to number? */
-        let v = lobject.luaO_str2num(o.svalue());
-        if (v !== false)
+    if (cvt2num(o)) {  /* string convertible to number? */
+        let v = new lobject.TValue();
+        if (lobject.luaO_str2num(o.svalue(), v) === (o.vslen() + 1))
             return v.value;
     }
 

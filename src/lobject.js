@@ -406,8 +406,10 @@ const lua_strx2number = function(s) {
         e += exp1;
     }
     if (neg) r = -r;
-    while (ljstype.lisspace(s[i])) i++;  /* skip trailing spaces */
-    return i === s.length ? luaconf.ldexp(r, e) : null;  /* Only valid if nothing left is s*/
+    return {
+        n: luaconf.ldexp(r, e),
+        i: i
+    };
 };
 
 const lua_str2number = function(s) {
@@ -416,15 +418,20 @@ const lua_str2number = function(s) {
     } catch (e) {
         return null;
     }
-    /* parseFloat ignores trailing junk, validate with regex first */
-    if (!/^[\t\v\f \n\r]*[+-]?([0-9]+\.?[0-9]*|\.[0-9]*)([eE][+-]?[0-9]+)?[\t\v\f \n\r]*$/.test(s))
+    /* use a regex to validate number and also to get length
+       parseFloat ignores trailing junk */
+    let r = /^[\t\v\f \n\r]*[+-]?(?:[0-9]+\.?[0-9]*|\.[0-9]*)(?:[eE][+-]?[0-9]+)?/.exec(s);
+    if (!r)
         return null;
-    let flt = parseFloat(s);
-    return !isNaN(flt) ? flt : null;
+    let flt = parseFloat(r[0]);
+    return !isNaN(flt) ? { n: flt, i: r[0].length } : null;
 };
 
 const l_str2dloc = function(s, mode) {
-    return mode === 'x' ? lua_strx2number(s) : lua_str2number(s);
+    let result = mode === 'x' ? lua_strx2number(s) : lua_str2number(s); /* try to convert */
+    if (result === null) return null;
+    while (ljstype.lisspace(s[result.i])) result.i++;  /* skip trailing spaces */
+    return (result.i === s.length || s[result.i] === 0) ? result : null;  /* OK if no trailing characters */
 };
 
 const l_str2d = function(s) {
@@ -470,24 +477,27 @@ const l_str2int = function(s) {
         }
     }
     while (ljstype.lisspace(s[i])) i++;  /* skip trailing spaces */
-    if (empty || (i !== s.length)) return null;  /* something wrong in the numeral */
+    if (empty || (i !== s.length && s[i] !== 0)) return null;  /* something wrong in the numeral */
     else {
-        return (neg ? -a : a)|0;
+        return {
+            n: (neg ? -a : a)|0,
+            i: i
+        };
     }
 };
 
-const luaO_str2num = function(s) {
+const luaO_str2num = function(s, o) {
     let s2i = l_str2int(s);
-
     if (s2i !== null) {   /* try as an integer */
-        return new TValue(CT.LUA_TNUMINT, s2i);
+        o.setivalue(s2i.n);
+        return s2i.i+1;
     } else {   /* else try as a float */
         s2i = l_str2d(s);
-
         if (s2i !== null) {
-            return new TValue(CT.LUA_TNUMFLT, s2i);
+            o.setfltvalue(s2i.n);
+            return s2i.i+1;
         } else
-            return false;  /* conversion failed */
+            return 0;  /* conversion failed */
     }
 };
 

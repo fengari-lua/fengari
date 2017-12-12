@@ -236,8 +236,8 @@ const read_numeral = function(ls, seminfo) {
 
     // save(ls, 0);
 
-    let obj = lobject.luaO_str2num(ls.buff.buffer);
-    if (obj === false)  /* format error? */
+    let obj = new lobject.TValue();
+    if (lobject.luaO_str2num(ls.buff.buffer, obj) === 0)  /* format error? */
         lexerror(ls, defs.to_luastring("malformed number", true), R.TK_FLT);
     if (obj.ttisinteger()) {
         seminfo.i = obj.value;

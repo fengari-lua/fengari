@@ -812,14 +812,14 @@ const lua_compare = function(L, index1, index2, op) {
 };
 
 const lua_stringtonumber = function(L, s) {
-    let tv = lobject.luaO_str2num(s);
-    if (tv) {
+    let tv = new TValue();
+    let sz = lobject.luaO_str2num(s, tv);
+    if (sz !== 0) {
         L.stack[L.top] = tv;
         L.top++;
         assert(L.top <= L.ci.top, "stack overflow");
-        return s.length+1;
     }
-    return 0;
+    return sz;
 };
 
 const f_call = function(L, ud) {
