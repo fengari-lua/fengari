@@ -281,7 +281,7 @@ const hookf = function(L, ar) {
         if (ar.currentline >= 0)
             lua.lua_pushinteger(L, ar.currentline);  /* push current line */
         else lua.lua_pushnil(L);
-        assert(lua.lua_getinfo(L, ["l".charCodeAt(0), "S".charCodeAt(0)], ar));
+        assert(lua.lua_getinfo(L, lua.to_luastring("lS"), ar));
         lua.lua_call(L, 2, 0);  /* call hook function */
     }
 };
@@ -328,7 +328,7 @@ const db_sethook = function(L) {
         lua.lua_createtable(L, 0, 2);  /* create a hook table */
         lua.lua_pushvalue(L, -1);
         lua.lua_rawsetp(L, lua.LUA_REGISTRYINDEX, HOOKKEY);  /* set it in position */
-        lua.lua_pushstring(L, ["k".charCodeAt(0)]);
+        lua.lua_pushstring(L, lua.to_luastring("k"));
         lua.lua_setfield(L, -2, lua.to_luastring("__mode", true));  /** hooktable.__mode = "k" */
         lua.lua_pushvalue(L, -1);
         lua.lua_setmetatable(L, -2);  /* setmetatable(hooktable) = hooktable */

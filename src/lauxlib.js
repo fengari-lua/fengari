@@ -56,7 +56,7 @@ const findfield = function(L, objidx, level) {
 */
 const pushglobalfuncname = function(L, ar) {
     let top = lua.lua_gettop(L);
-    lua.lua_getinfo(L, ['f'.charCodeAt(0)], ar);  /* push function */
+    lua.lua_getinfo(L, lua.to_luastring("f"), ar);  /* push function */
     lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
     if (findfield(L, top + 1, 2)) {
         let name = lua.lua_tostring(L, -1);
@@ -146,7 +146,7 @@ const luaL_argerror = function(L, arg, extramsg) {
     if (!lua.lua_getstack(L, 0, ar))  /* no stack frame? */
         return luaL_error(L, lua.to_luastring("bad argument #%d (%s)"), arg, extramsg);
 
-    lua.lua_getinfo(L, ['n'.charCodeAt(0)], ar);
+    lua.lua_getinfo(L, lua.to_luastring("n"), ar);
 
     if (ar.namewhat.join() === lua.to_luastring("method").join()) {
         arg--;  /* do not count 'self' */
@@ -155,7 +155,7 @@ const luaL_argerror = function(L, arg, extramsg) {
     }
 
     if (ar.name === null)
-        ar.name = pushglobalfuncname(L, ar) ? lua.lua_tostring(L, -1) : ["?".charCodeAt(0)];
+        ar.name = pushglobalfuncname(L, ar) ? lua.lua_tostring(L, -1) : lua.to_luastring("?");
 
     return luaL_error(L, lua.to_luastring("bad argument #%d to '%s' (%s)"), arg, ar.name, extramsg);
 };
@@ -182,7 +182,7 @@ const luaL_where = function(L, level) {
             return;
         }
     }
-    lua.lua_pushstring(L, []);
+    lua.lua_pushstring(L, lua.to_luastring(""));
 };
 
 const luaL_error = function(L, fmt, ...argp) {

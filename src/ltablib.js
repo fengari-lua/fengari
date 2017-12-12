@@ -130,7 +130,7 @@ const tmove = function(L) {
 
 const tconcat = function(L) {
     let last = aux_getn(L, 1, TAB_R);
-    let sep = lauxlib.luaL_optlstring(L, 2, []);
+    let sep = lauxlib.luaL_optlstring(L, 2, lua.to_luastring(""));
     let i = lauxlib.luaL_optinteger(L, 3, 1);
     last = lauxlib.luaL_optinteger(L, 4, last);
 
@@ -157,7 +157,7 @@ const pack = function(L) {
     for (let i = n; i >= 1; i--)  /* assign elements */
         lua.lua_seti(L, 1, i);
     lua.lua_pushinteger(L, n);
-    lua.lua_setfield(L, 1, ["n".charCodeAt(0)]);  /* t.n = number of elements */
+    lua.lua_setfield(L, 1, lua.to_luastring("n"));  /* t.n = number of elements */
     return 1;  /* return table */
 };
 

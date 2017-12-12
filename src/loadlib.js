@@ -26,7 +26,7 @@ const LUA_POF       = lua.to_luastring("luaopen_");
 const LUA_OFSEP     = lua.to_luastring("_");
 const LIB_FAIL      = "open";
 
-const AUXMARK       = [1];
+const AUXMARK       = lua.to_luastring("\x01");
 
 
 /*
@@ -277,8 +277,8 @@ const ll_searchpath = function(L) {
         L,
         lauxlib.luaL_checkstring(L, 1),
         lauxlib.luaL_checkstring(L, 2),
-        lauxlib.luaL_optstring(L, 3, [".".charCodeAt(0)]),
-        lauxlib.luaL_optstring(L, 4, [lua.LUA_DIRSEP.charCodeAt(0)])
+        lauxlib.luaL_optstring(L, 3, lua.to_luastring(".")),
+        lauxlib.luaL_optstring(L, 4, lua.to_luastring(lua.LUA_DIRSEP))
     );
     if (f !== null) return 1;
     else {  /* error message is on top of the stack */
@@ -293,7 +293,7 @@ const findfile = function(L, name, pname, dirsep) {
     let path = lua.lua_tostring(L, -1);
     if (path === null)
         lauxlib.luaL_error(L, lua.to_luastring("'package.%s' must be a string"), pname);
-    return searchpath(L, name, path, ['.'.charCodeAt(0)], dirsep);
+    return searchpath(L, name, path, lua.to_luastring("."), dirsep);
 };
 
 const checkload = function(L, stat, filename) {
@@ -322,7 +322,7 @@ const searcher_Lua = function(L) {
 */
 const loadfunc = function(L, filename, modname) {
     let openfunc;
-    modname = lauxlib.luaL_gsub(L, modname, [".".charCodeAt(0)], LUA_OFSEP);
+    modname = lauxlib.luaL_gsub(L, modname, lua.to_luastring("."), LUA_OFSEP);
     let mark = modname.indexOf(LUA_IGMARK.charCodeAt(0));
     if (mark >= 0) {
         openfunc = lua.lua_pushlstring(L, modname, mark);

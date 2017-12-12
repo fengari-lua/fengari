@@ -86,7 +86,7 @@ const lua_getstack = function(L, level, ar) {
 const upvalname = function(p, uv) {
     assert(uv < p.upvalues.length);
     let s = p.upvalues[uv].name;
-    if (s === null) return ["?".charCodeAt(0)];
+    if (s === null) return defs.to_luastring("?", true);
     return s.getstr();
 };
 
@@ -170,7 +170,7 @@ const funcinfo = function(ar, cl) {
         ar.source = defs.to_luastring("=[JS]", true);
         ar.linedefined = -1;
         ar.lastlinedefined = -1;
-        ar.what = ["J".charCodeAt(0)];
+        ar.what = defs.to_luastring("J", true);
     } else {
         let p = cl.p;
         ar.source = p.source ? p.source.getstr() : defs.to_luastring("=?", true);
@@ -247,7 +247,7 @@ const auxgetinfo = function(L, what, ar, f, ci) {
             case 'n': {
                 let r = getfuncname(L, ci);
                 if (r === null) {
-                    ar.namewhat = [];
+                    ar.namewhat = defs.to_luastring("");
                     ar.name = null;
                 } else {
                     ar.namewhat = r.funcname;
@@ -314,7 +314,7 @@ const kname = function(p, pc, c) {
         }
         /* else no reasonable name found */
     }
-    r.name = [defs.char["?"]];
+    r.name = defs.to_luastring("?", true);
     return r;  /* no reasonable name found */
 };
 
@@ -452,7 +452,7 @@ const funcnamefromcode = function(L, ci) {
     let OCi = lopcodes.OpCodesI;
 
     if (ci.callstatus & lstate.CIST_HOOKED) {
-        r.name = [defs.char["?"]];
+        r.name = defs.to_luastring("?", true);
         r.funcname = defs.to_luastring("hook", true);
         return r;
     }
@@ -578,7 +578,7 @@ const luaG_addinfo = function(L, msg, src, line) {
     if (src)
         buff = lobject.luaO_chunkid(src.getstr(), luaconf.LUA_IDSIZE);
     else
-        buff = ['?'.charCodeAt(0)];
+        buff = defs.to_luastring("?", true);
 
     return lobject.luaO_pushfstring(L, defs.to_luastring("%s:%d: %s", true), buff, line, msg);
 };

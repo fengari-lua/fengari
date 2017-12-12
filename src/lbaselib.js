@@ -32,7 +32,7 @@ const luaB_print = function(L) {
         let s = lua.lua_tolstring(L, -1);
         if (s === null)
             return lauxlib.luaL_error(L, lua.to_luastring("'tostring' must return a string to 'print'", true));
-        if (i > 1) lua_writestring(["\t".charCodeAt(0)]);
+        if (i > 1) lua_writestring(lua.to_luastring("\t"));
         lua_writestring(s);
         lua.lua_pop(L, 1);
     }

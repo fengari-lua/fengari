@@ -230,7 +230,7 @@ const lua_pushinteger = function(L, n) {
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
-const emptystring = [];
+const emptystring = defs.to_luastring("");
 
 const lua_pushlstring = function(L, s, len) {
     assert(typeof len === "number");
