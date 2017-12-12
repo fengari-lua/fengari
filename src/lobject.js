@@ -526,6 +526,12 @@ const luaO_pushvfstring = function(L, fmt, argp) {
             case char['s']: {
                 let s = argp[a++];
                 if (s === null) s = defs.to_luastring("(null)", true);
+                else {
+                    /* respect null terminator */
+                    let i = s.indexOf(0);
+                    if (i !== -1)
+                        s = s.slice(0, i);
+                }
                 pushstr(L, s);
                 break;
             }
