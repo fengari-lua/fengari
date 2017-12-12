@@ -210,9 +210,7 @@ const setpath = function(L, fieldname, envname, dft) {
             L,
             lua.to_luastring(path),
             lua.to_luastring(lua.LUA_PATH_SEP + lua.LUA_PATH_SEP, true),
-            lua.to_luastring(lua.LUA_PATH_SEP, true)
-                .concat(AUXMARK)
-                .concat(lua.to_luastring(lua.LUA_PATH_SEP, true))
+            lua.to_luastring(lua.LUA_PATH_SEP + lua.to_jsstring(AUXMARK) + lua.LUA_PATH_SEP, true)
         );
         lauxlib.luaL_gsub(L, path, AUXMARK, lua.to_luastring(dft));
         lua.lua_remove(L, -2); /* remove result from 1st 'gsub' */
