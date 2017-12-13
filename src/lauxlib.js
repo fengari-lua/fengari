@@ -16,6 +16,7 @@ class luaL_Buffer {
     constructor() {
         this.b = null;
         this.L = null;
+        this.initb = null;
     }
 }
 
@@ -359,7 +360,8 @@ const luaL_optinteger = function(L, arg, def) {
 };
 
 const luaL_prepbuffsize = function(B, sz) {
-    return B;
+    B.initb = new Uint8Array(sz);
+    return B.initb;
 };
 
 const luaL_buffinit = function(L, B) {
@@ -369,7 +371,7 @@ const luaL_buffinit = function(L, B) {
 
 const luaL_buffinitsize = function(L, B, sz) {
     luaL_buffinit(L, B);
-    return B;
+    return luaL_prepbuffsize(B, sz);
 };
 
 const LUAL_BUFFERSIZE = 8192;
@@ -394,7 +396,9 @@ const luaL_addchar = function(B, c) {
 };
 
 const luaL_addsize = function(B, s) {
+    B.b = B.b.concat(Array.from(B.initb.subarray(0, s)));
     B.n += s;
+    B.initb = null;
 };
 
 const luaL_pushresultsize = function(B, sz) {
