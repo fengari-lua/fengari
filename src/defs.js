@@ -131,6 +131,8 @@ class lua_Debug {
 
 }
 
+const string_of = Array.of;
+
 const is_luastring = function(s) {
     return Array.isArray(s);
 };
@@ -422,6 +424,7 @@ module.exports.lua_upvalueindex        = lua_upvalueindex;
 module.exports.thread_status           = thread_status;
 module.exports.is_luastring            = is_luastring;
 module.exports.luastring_cmp           = luastring_cmp;
+module.exports.string_of               = string_of;
 module.exports.to_jsstring             = to_jsstring;
 module.exports.to_luastring            = to_luastring;
 module.exports.to_uristring            = to_uristring;

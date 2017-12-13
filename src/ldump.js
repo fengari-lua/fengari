@@ -3,7 +3,7 @@
 const defs    = require('./defs.js');
 const CT      = defs.constant_types;
 
-const LUAC_DATA    = [25, 147, 13, 10, 26, 10];
+const LUAC_DATA    = defs.string_of(25, 147, 13, 10, 26, 10);
 const LUAC_INT     = 0x5678;
 const LUAC_NUM     = 370.5;
 const LUAC_VERSION = Number.parseInt(defs.LUA_VERSION_MAJOR) * 16 + Number.parseInt(defs.LUA_VERSION_MINOR);
@@ -30,7 +30,7 @@ const DumpLiteral = function(s, D) {
 };
 
 const DumpByte = function(y, D) {
-    DumpBlock([y], 1, D);
+    DumpBlock(defs.string_of(y), 1, D);
 };
 
 const DumpInt = function(x, D) {
