@@ -247,7 +247,7 @@ const auxgetinfo = function(L, what, ar, f, ci) {
             case 'n': {
                 let r = getfuncname(L, ci);
                 if (r === null) {
-                    ar.namewhat = defs.to_luastring("");
+                    ar.namewhat = defs.to_luastring("", true);
                     ar.name = null;
                 } else {
                     ar.namewhat = r.funcname;

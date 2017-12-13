@@ -230,13 +230,11 @@ const lua_pushinteger = function(L, n) {
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
-const emptystring = defs.to_luastring("");
-
 const lua_pushlstring = function(L, s, len) {
     assert(typeof len === "number");
     let ts;
     if (len === 0) {
-        s = emptystring;
+        s = defs.to_luastring("", true);
     } else {
         assert(defs.is_luastring(s) && s.length >= len, "lua_pushlstring expects array of byte");
         s = s.slice(0, len);
@@ -525,7 +523,7 @@ const aux_upvalue = function(L, fi, n) {
             let f = fi.value;
             if (!(1 <= n && n <= f.nupvalues)) return null;
             return {
-                name: [],
+                name: defs.to_luastring("", true),
                 val: f.upvalue[n-1]
             };
         }
@@ -1059,7 +1057,7 @@ const lua_concat = function(L, n) {
     if (n >= 2)
         lvm.luaV_concat(L, n);
     else if (n === 0) {
-        lobject.pushsvalue2s(L, lstring.luaS_bless(L, emptystring));
+        lobject.pushsvalue2s(L, lstring.luaS_bless(L, defs.to_luastring("", true)));
         assert(L.top <= L.ci.top, "stack overflow");
     }
 };
