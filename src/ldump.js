@@ -34,31 +34,26 @@ const DumpByte = function(y, D) {
 };
 
 const DumpInt = function(x, D) {
-    let dv = new DataView(new ArrayBuffer(4));
+    let ab = new ArrayBuffer(4);
+    let dv = new DataView(ab);
     dv.setInt32(0, x, true);
-    let t = [];
-    for (let i = 0; i < 4; i++)
-        t.push(dv.getUint8(i, true));
-
+    let t = new Uint8Array(ab);
     DumpBlock(t, 4, D);
 };
 
 const DumpInteger = function(x, D) {
-    let dv = new DataView(new ArrayBuffer(4));
+    let ab = new ArrayBuffer(4);
+    let dv = new DataView(ab);
     dv.setInt32(0, x, true);
-    let t = [];
-    for (let i = 0; i < 4; i++)
-        t.push(dv.getUint8(i, true));
+    let t = new Uint8Array(ab);
     DumpBlock(t, 4, D);
 };
 
 const DumpNumber = function(x, D) {
-    let dv = new DataView(new ArrayBuffer(8));
+    let ab = new ArrayBuffer(8);
+    let dv = new DataView(ab);
     dv.setFloat64(0, x, true);
-    let t = [];
-    for (let i = 0; i < 8; i++)
-        t.push(dv.getUint8(i, true));
-
+    let t = new Uint8Array(ab);
     DumpBlock(t, 8, D);
 };
 

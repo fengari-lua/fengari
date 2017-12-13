@@ -381,14 +381,14 @@ const luaL_prepbuffer = function(B) {
 };
 
 const luaL_addlstring = function(B, s, l) {
-    B.b = B.b.concat(s.slice(0, l));
+    B.b = B.b.concat(Array.from(s.subarray(0, l)));
 };
 
 const luaL_addstring = luaL_addlstring;
 
 const luaL_pushresult = function(B) {
     let L = B.L;
-    lua.lua_pushstring(L, B.b);
+    lua.lua_pushstring(L, Uint8Array.from(B.b));
 };
 
 const luaL_addchar = function(B, c) {
@@ -558,7 +558,7 @@ const luaL_gsub = function(L, s, p, r) {
         s = s.slice(wild + p.length);  /* continue after 'p' */
     }
     b.push(...s);  /* push last suffix */
-    lua.lua_pushstring(L, b);
+    lua.lua_pushstring(L, Uint8Array.from(b));
     return lua.lua_tostring(L, -1);
 };
 

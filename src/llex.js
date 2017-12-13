@@ -112,6 +112,8 @@ const save = function(ls, c) {
     if (b.n + 1 > b.buffer.length) {
         if (b.buffer.length >= llimits.MAX_INT/2)
             lexerror(ls, defs.to_luastring("lexical element too long", true), 0);
+        let newsize = b.buffer.length*2;
+        lzio.luaZ_resizebuffer(ls.L, b, newsize);
     }
     b.buffer[b.n++] = c < 0 ? 255 + c + 1 : c;
 };
@@ -192,6 +194,7 @@ const luaX_setinput = function(L, ls, z, source, firstchar) {
     ls.lastline = 1;
     ls.source = source;
     ls.envn = lstring.luaS_bless(L, LUA_ENV);
+    lzio.luaZ_resizebuffer(L, ls.buff, llimits.LUA_MINBUFFER);  /* initialize buffer */
 };
 
 const check_next1 = function(ls, c) {
@@ -369,7 +372,7 @@ const readutf8desc = function(ls) {
 };
 
 const utf8esc = function(ls) {
-    let buff = new Array(lobject.UTF8BUFFSZ);
+    let buff = new Uint8Array(lobject.UTF8BUFFSZ);
     let n = lobject.luaO_utf8esc(buff, readutf8desc(ls));
     for (; n > 0; n--)  /* add 'buff' to string */
         save(ls, buff[lobject.UTF8BUFFSZ - n]);

@@ -131,10 +131,10 @@ class lua_Debug {
 
 }
 
-const string_of = Array.of;
+const string_of = Uint8Array.of.bind(Uint8Array);
 
 const is_luastring = function(s) {
-    return Array.isArray(s);
+    return s instanceof Uint8Array;
 };
 
 /* test two lua strings for equality */
@@ -143,7 +143,7 @@ const luastring_cmp = function(a, b) {
 };
 
 const to_jsstring = function(value, from, to) {
-    assert(is_luastring(value), "jsstring expects an array of bytes");
+    assert(is_luastring(value), "jsstring expects a Uint8Array");
 
     if (to === void 0) {
         to = value.length;
@@ -240,6 +240,7 @@ const to_luastring = function(str, cache) {
             outU8Array[outIdx++] = 0x80 | (u & 63);
         }
     }
+    outU8Array = Uint8Array.from(outU8Array);
 
     if (cache) to_luastring_cache[str] = outU8Array;
 

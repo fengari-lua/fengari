@@ -73,7 +73,7 @@ const checkoption = function(L, conv, i, buff) {
         if (option[o] === '|'.charCodeAt(0))  /* next block? */
             oplen++;  /* will check options with next length (+1) */
         else if (array_cmp(conv, i, option, o, oplen)) {  /* match? */
-            buff.push(...conv.slice(i, i+oplen)); /* copy valid option to buffer */
+            buff.set(conv.slice(i, i+oplen)); /* copy valid option to buffer */
             return i + oplen;  /* return next item */
         }
     }
@@ -102,6 +102,8 @@ const os_date = function(L) {
         lua.lua_createtable(L, 0, 9);  /* 9 = number of fields */
         setallfields(L, stm, utc);
     } else {
+        let cc = new Uint8Array(4);
+        cc[0] = "%".charCodeAt(0);
         let b = new lauxlib.luaL_Buffer();
         lauxlib.luaL_buffinit(L, b);
         while (i < s.length) {
@@ -109,8 +111,10 @@ const os_date = function(L) {
                 lauxlib.luaL_addchar(b, s[i++]);
             } else {
                 i++;  /* skip '%' */
-                let cc = ["%".charCodeAt(0)];
-                i = checkoption(L, s, i, cc);  /* copy specifier to 'cc' */
+                i = checkoption(L, s, i, cc.subarray(1));  /* copy specifier to 'cc' */
+                let len = cc.indexOf(0);
+                if (len !== -1)
+                    cc = cc.subarray(0, len);
                 let buff = strftime(lua.to_jsstring(cc), stm);
                 lauxlib.luaL_addstring(b, lua.to_luastring(buff));
             }

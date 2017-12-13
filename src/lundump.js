@@ -46,7 +46,7 @@ class BytecodeParser {
         let u8 = new Uint8Array(size);
         if(lzio.luaZ_read(this.Z, u8, 0, size) !== 0)
             this.error("truncated");
-        return Array.from(u8);
+        return u8;
     }
 
     readByte() {
