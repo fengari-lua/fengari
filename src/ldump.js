@@ -3,7 +3,7 @@
 const defs    = require('./defs.js');
 const CT      = defs.constant_types;
 
-const LUAC_DATA    = "\x19\x93\r\n\x1a\n";
+const LUAC_DATA    = [25, 147, 13, 10, 26, 10];
 const LUAC_INT     = 0x5678;
 const LUAC_NUM     = 370.5;
 const LUAC_VERSION = Number.parseInt(defs.LUA_VERSION_MAJOR) * 16 + Number.parseInt(defs.LUA_VERSION_MINOR);
@@ -167,8 +167,7 @@ const DumpHeader = function(D) {
     DumpLiteral(defs.LUA_SIGNATURE, D);
     DumpByte(LUAC_VERSION, D);
     DumpByte(LUAC_FORMAT, D);
-    let cdata = LUAC_DATA.split('').map(e => e.charCodeAt(0));
-    DumpBlock(cdata, cdata.length, D);
+    DumpBlock(LUAC_DATA, LUAC_DATA.length, D);
     DumpByte(4, D); // intSize
     DumpByte(4, D); // size_tSize
     DumpByte(4, D); // instructionSize
