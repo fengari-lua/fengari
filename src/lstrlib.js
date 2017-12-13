@@ -85,15 +85,6 @@ const SIZELENMOD = luaconf.LUA_NUMBER_FRMLEN.length + 1;
 
 const L_NBFD = 1;
 
-/*
-** Add integer part of 'x' to buffer and return new 'x'
-*/
-const adddigit = function(buff, n, x) {
-    let d = Math.floor(x);  /* get integer part from 'x' */
-    buff[n] = d < 10 ? d + '0'.charCodeAt(0) : d - 10 + 'a'.charCodeAt(0);  /* add to buffer */
-    return x - d;  /* return what is left */
-};
-
 const num2straux = function(x) {
     /* if 'inf' or 'NaN', format it like '%g' */
     if (Object.is(x, Infinity))
@@ -109,27 +100,19 @@ const num2straux = function(x) {
             zero = "-" + zero;
         return lua.to_luastring(zero);
     } else {
-        let buff = [];
+        let buff = "";
         let fe = luaconf.frexp(x);  /* 'x' fraction and exponent */
         let m = fe[0];
         let e = fe[1];
-        let n = 0;  /* character count */
         if (m < 0) {  /* is number negative? */
-            buff[n++] = '-'.charCodeAt(0);  /* add signal */
+            buff += '-';  /* add signal */
             m = -m;  /* make it positive */
         }
-        buff[n++] = '0'.charCodeAt(0);
-        buff[n++] = 'x'.charCodeAt(0);  /* add "0x" */
-        m = adddigit(buff, n++, m * (1 << L_NBFD));  /* add first digit */
+        buff += "0x";  /* add "0x" */
+        buff += (m * (1<<L_NBFD)).toString(16);
         e -= L_NBFD;  /* this digit goes before the radix point */
-        if (m > 0) {  /* more digits? */
-            buff[n++] = luaconf.lua_getlocaledecpoint().charCodeAt(0);   /* add radix point */
-            do {  /* add as many digits as needed */
-                m = adddigit(buff, n++, m * 16);
-            } while (m > 0);
-        }
-        let exp = lua.to_luastring(sprintf("p%+d", e));
-        return buff.concat(exp);
+        buff += sprintf("p%+d", e);  /* add exponent */
+        return lua.to_luastring(buff);
     }
 };
 
