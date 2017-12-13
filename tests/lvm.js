@@ -3,6 +3,7 @@
 const test           = require('tape');
 
 const lua            = require("../src/lua.js");
+const lstring        = require("../src/lstring.js");
 
 const getState       = require("./tests.js").getState;
 
@@ -458,7 +459,7 @@ test('SETTABLE, GETTABLE', function (t) {
     );
 
     t.deepEqual(
-        L.stack[L.top - 1].value.strong.get('116|119|111|').value.jsstring(), // "two"
+        L.stack[L.top - 1].value.strong.get(lstring.luaS_hash(lua.to_luastring("two"))).value.jsstring(), // "two"
         "world",
         "Program output is correct"
     );
@@ -517,7 +518,7 @@ test('SETTABUP, GETTABUP', function (t) {
     );
 
     t.deepEqual(
-        L.stack[L.top - 1].value.strong.get('116|119|111|').value.jsstring(), // "two"
+        L.stack[L.top - 1].value.strong.get(lstring.luaS_hash(lua.to_luastring("two"))).value.jsstring(), // "two"
         "world", // "world"
         "Program output is correct"
     );

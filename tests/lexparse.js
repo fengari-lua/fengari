@@ -6,6 +6,7 @@ const lua     = require('../src/lua.js');
 const lauxlib = require('../src/lauxlib.js');
 const lualib  = require('../src/lualib.js');
 const lapi    = require('../src/lapi.js');
+const lstring = require("../src/lstring.js");
 
 
 // Roughly the same tests as test/lvm.js to cover all opcodes
@@ -743,7 +744,7 @@ test('SETTABLE, GETTABLE', function (t) {
     );
 
     t.strictEqual(
-        lua.lua_topointer(L, -1).strong.get('116|119|111|').value.jsstring(),
+        lua.lua_topointer(L, -1).strong.get(lstring.luaS_hash(lua.to_luastring("two"))).value.jsstring(),
         "world",
         "Program output is correct"
     );
@@ -836,7 +837,7 @@ test('SETTABUP, GETTABUP', function (t) {
     );
 
     t.strictEqual(
-        lua.lua_topointer(L, -1).strong.get('116|119|111|').value.jsstring(),
+        lua.lua_topointer(L, -1).strong.get(lstring.luaS_hash(lua.to_luastring("two"))).value.jsstring(),
         "world",
         "Program output is correct"
     );
