@@ -237,7 +237,7 @@ const read_numeral = function(ls, seminfo) {
     // save(ls, 0);
 
     let obj = new lobject.TValue();
-    if (lobject.luaO_str2num(ls.buff.buffer, obj) === 0)  /* format error? */
+    if (lobject.luaO_str2num(lzio.luaZ_buffer(ls.buff), obj) === 0)  /* format error? */
         lexerror(ls, defs.to_luastring("malformed number", true), R.TK_FLT);
     if (obj.ttisinteger()) {
         seminfo.i = obj.value;
@@ -254,7 +254,7 @@ const txtToken = function(ls, token) {
         case R.TK_NAME: case R.TK_STRING:
         case R.TK_FLT: case R.TK_INT:
             // save(ls, 0);
-            return lobject.luaO_pushfstring(ls.L, defs.to_luastring("'%s'", true), ls.buff.buffer);
+            return lobject.luaO_pushfstring(ls.L, defs.to_luastring("'%s'", true), lzio.luaZ_buffer(ls.buff));
         default:
             return luaX_token2str(ls, token);
     }
@@ -561,8 +561,7 @@ const llex = function(ls, seminfo) {
                     do {
                         save_and_next(ls);
                     } while (ljstype.lislalnum(ls.current));
-
-                    let ts = luaX_newstring(ls, ls.buff.buffer);
+                    let ts = luaX_newstring(ls, lzio.luaZ_buffer(ls.buff));
                     seminfo.ts = ts;
                     let kidx = token_to_index[lstring.luaS_hashlongstr(ts)];
                     if (kidx !== void 0 && kidx <= 22)  /* reserved word? */
