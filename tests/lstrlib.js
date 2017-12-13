@@ -442,9 +442,9 @@ test('string.dump', function (t) {
 
         lua.lua_call(L, 0, -1);
 
-        let dv = lua.lua_todataview(L, -1);
+        let str = lua.lua_tostring(L, -1);
 
-        lua.lua_load(L, function(L, s) { let r = s.dv; s.dv = null; return r; }, {dv: dv}, lua.to_luastring("test"), lua.to_luastring("binary"));
+        lua.lua_load(L, function(L, s) { let r = s.str; s.str = null; return r; }, {str: str}, lua.to_luastring("test"), lua.to_luastring("binary"));
 
         lua.lua_call(L, 0, -1);
 

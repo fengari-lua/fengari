@@ -11,7 +11,7 @@ const toByteCode = function(luaCode) {
         return 0;
     }, b, false) !== 0)
         throw Error("unable to dump given function");
-    return new DataView(Uint8Array.from(b).buffer);
+    return Uint8Array.from(b);
 };
 
 const getState = function(luaCode) {

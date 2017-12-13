@@ -48,22 +48,15 @@ class ZIO {
 const EOZ = -1;
 
 const luaZ_fill = function(z) {
-    let size;
     let buff = z.reader(z.L, z.data);
     if (buff === null)
         return EOZ;
-    if (buff instanceof DataView) {
-        z.buffer = new Uint8Array(buff.buffer, buff.byteOffset, buff.byteLength);
-        z.off = 0;
-        size = buff.byteLength - buff.byteOffset;
-    } else {
-        assert(buff instanceof Uint8Array, "Should only load binary of array of bytes");
-        z.buffer = buff;
-        z.off = 0;
-        size = buff.length;
-    }
+    assert(buff instanceof Uint8Array, "Should only load binary of array of bytes");
+    let size = buff.length;
     if (size === 0)
         return EOZ;
+    z.buffer = buff;
+    z.off = 0;
     z.n = size - 1;
     return z.buffer[z.off++];
 };
