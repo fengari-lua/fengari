@@ -713,7 +713,7 @@ class LoadF {
     constructor() {
         this.n = NaN;  /* number of pre-read characters */
         this.f = null;  /* file being read */
-        this.buff = typeof process === "undefined" ? new Array(1024) : new Buffer(1024);  /* area for reading file */
+        this.buff = new Uint8Array(1024);  /* area for reading file */
         this.pos = 0;  /* current position in file */
         this.err = void 0;
     }
@@ -726,8 +726,8 @@ if (typeof process === "undefined") {
         if (lf.f !== null && lf.n > 0) {  /* are there pre-read characters to be read? */
             let bytes = lf.n; /* return them (chars already in buffer) */
             lf.n = 0;  /* no more pre-read characters */
-            lf.f = lf.f.slice(lf.pos);  /* we won't use lf.buff anymore */
-            return lf.buff.slice(0, bytes);
+            lf.f = lf.f.subarray(lf.pos);  /* we won't use lf.buff anymore */
+            return lf.buff.subarray(0, bytes);
         }
 
         let f = lf.f;
@@ -789,7 +789,6 @@ if (typeof process === "undefined") {
             bytes = lf.n; /* return them (chars already in buffer) */
             lf.n = 0;  /* no more pre-read characters */
         } else {  /* read a block from file */
-            lf.buff.fill(0);
             try {
                 bytes = fs.readSync(lf.f, lf.buff, 0, lf.buff.length, lf.pos); /* read block */
             } catch(e) {
@@ -799,7 +798,7 @@ if (typeof process === "undefined") {
             lf.pos += bytes;
         }
         if (bytes > 0)
-            return lf.buff.slice(0, bytes); /* slice on a node.js Buffer is 'free' */
+            return lf.buff.subarray(0, bytes); /* slice on a node.js Buffer is 'free' */
         else return null;
     };
 
