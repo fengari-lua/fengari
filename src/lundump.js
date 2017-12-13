@@ -25,7 +25,7 @@ class BytecodeParser {
         assert(defs.is_luastring(name));
 
         if (name[0] == defs.char["@"] || name[0] == defs.char["="])
-            this.name = name.slice(1);
+            this.name = name.subarray(1);
         else if (name[0] == defs.LUA_SIGNATURE.charCodeAt(0))
             this.name = defs.to_luastring("binary string", true);
         else

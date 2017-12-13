@@ -62,7 +62,7 @@ const pushglobalfuncname = function(L, ar) {
     if (findfield(L, top + 1, 2)) {
         let name = lua.lua_tostring(L, -1);
         if (name[0] === "_".charCodeAt(0) && name[1] === "G".charCodeAt(0) && name[2] === ".".charCodeAt(0)) {  /* name start with '_G.'? */
-            lua.lua_pushstring(L, name.slice(3));  /* push name without prefix */
+            lua.lua_pushstring(L, name.subarray(3));  /* push name without prefix */
             lua.lua_remove(L, -2);  /* remove original name */
         }
         lua.lua_copy(L, -1, top + 1);  /* move name to proper place */

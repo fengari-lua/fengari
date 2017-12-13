@@ -328,7 +328,7 @@ const read_long_string = function(ls, seminfo, sep) {
     }
 
     if (seminfo)
-        seminfo.ts = luaX_newstring(ls, ls.buff.buffer.slice(2 + sep, ls.buff.n - (2 + sep)));
+        seminfo.ts = luaX_newstring(ls, ls.buff.buffer.subarray(2 + sep, ls.buff.n - (2 + sep)));
 };
 
 const esccheck = function(ls, c, msg) {
@@ -453,7 +453,7 @@ const read_string = function(ls, del, seminfo) {
     }
     save_and_next(ls);  /* skip delimiter */
 
-    seminfo.ts = luaX_newstring(ls, ls.buff.buffer.slice(1, ls.buff.n-1));
+    seminfo.ts = luaX_newstring(ls, ls.buff.buffer.subarray(1, ls.buff.n-1));
 };
 
 const token_to_index = Object.create(null); /* don't want to return true for e.g. 'hasOwnProperty' */

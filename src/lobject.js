@@ -531,7 +531,7 @@ const luaO_pushvfstring = function(L, fmt, argp) {
     for (;;) {
         e = fmt.indexOf(char['%'], i);
         if (e == -1) break;
-        pushstr(L, fmt.slice(i, e));
+        pushstr(L, fmt.subarray(i, e));
         switch(fmt[e+1]) {
             case char['s']: {
                 let s = argp[a++];
@@ -540,7 +540,7 @@ const luaO_pushvfstring = function(L, fmt, argp) {
                     /* respect null terminator */
                     let i = s.indexOf(0);
                     if (i !== -1)
-                        s = s.slice(0, i);
+                        s = s.subarray(0, i);
                 }
                 pushstr(L, s);
                 break;
@@ -609,7 +609,7 @@ const luaO_pushvfstring = function(L, fmt, argp) {
         i = e + 2;
     }
     ldo.luaD_checkstack(L, 1);
-    pushstr(L, fmt.slice(i));
+    pushstr(L, fmt.subarray(i));
     if (n > 0) lvm.luaV_concat(L, n+1);
     return L.stack[L.top-1].svalue();
 };
