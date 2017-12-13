@@ -325,7 +325,7 @@ const read_long_string = function(ls, seminfo, sep) {
     }
 
     if (seminfo)
-        seminfo.ts = luaX_newstring(ls, ls.buff.buffer.slice(2 + sep, 2 + sep - 2 * (2 + sep)));
+        seminfo.ts = luaX_newstring(ls, ls.buff.buffer.slice(2 + sep, ls.buff.n - (2 + sep)));
 };
 
 const esccheck = function(ls, c, msg) {
