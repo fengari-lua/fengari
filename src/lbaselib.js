@@ -11,7 +11,7 @@ if (typeof process === "undefined") {
         buff = buff.concat(s);
     };
     lua_writeline = function() {
-        console.log(lua.to_jsstring(buff));
+        console.log(new TextDecoder("utf-8").decode(Uint8Array.from(buff)));
         buff = [];
     };
 } else {
