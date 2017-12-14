@@ -1113,22 +1113,11 @@ const push_captures = function(ms, s, e) {
 };
 
 const nospecials = function(p, l) {
-    let upto = 0;
-    do {
-        let special = false;
-        let supto = p.slice(upto);
-        for (let i = 0; i < SPECIALS.length; i++) {
-            if (supto.indexOf(SPECIALS[i]) > -1) {
-                special = true;
-                break;
-            }
-        }
-
-        if (special)
-            return false;  /* pattern has a special character */
-        upto = upto + 1;  /* may have more after \0 */
-    } while (upto <= l);
-    return true;  /* no special chars found */
+    for (let i=0; i<l; i++) {
+        if (SPECIALS.indexOf(p[i]) !== -1)
+            return false;
+    }
+    return true;
 };
 
 const prepstate = function(ms, L, s, ls, p, lp) {
