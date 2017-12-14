@@ -1148,13 +1148,20 @@ const reprepstate = function(ms) {
 
 const find_subarray = function(arr, subarr, from_index) {
     var i = from_index >>> 0,
-        sl = subarr.length,
-        l = arr.length + 1 - sl;
+        sl = subarr.length;
 
-    loop: for (; i < l; i++) {
-        for (let j = 0; j < sl; j++)
-            if (arr[i+j] !== subarr[j])
+    if (sl === 0)
+        return i;
+
+    loop: for (;;) {
+        i = arr.indexOf(subarr[0], i);
+        if (i === -1) break;
+        for (let j = 1; j < sl; j++) {
+            if (arr[i+j] !== subarr[j]) {
+                i++;
                 continue loop;
+            }
+        }
         return i;
     }
     return -1;
