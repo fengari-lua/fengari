@@ -1008,7 +1008,7 @@ const match = function(ms, s, p) {
                         gotodefault = true;  /* no; go to default */
                         break;
                     }
-                    s = ms.src.slice(s).length === 0 ? s : null;  /* check end of string */
+                    s = (ms.src.length - s) === 0 ? s : null;  /* check end of string */
                     break;
                 }
                 case L_ESC: {  /* escaped sequences not in the format class[*+?-]? */
