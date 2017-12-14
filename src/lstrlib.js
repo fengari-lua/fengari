@@ -965,12 +965,21 @@ const end_capture = function(ms, s, p) {
 
 /* Compare the elements of arrays 'a' and 'b' to see if they contain the same elements */
 const array_cmp = function(a, ai, b, bi, len) {
+    if (len === 0)
+        return true;
     let aj = ai+len;
-    for (; ai < aj; ai++, bi++) {
-        if (a[ai] !== b[bi])
+    loop: for (;;) {
+        ai = a.indexOf(b[bi], ai);
+        if (ai === -1 || ai >= aj)
             return false;
+        for (let j = 1; j < len; j++) {
+            if (a[ai+j] !== b[bi+j]) {
+                ai++;
+                continue loop;
+            }
+        }
+        return true;
     }
-    return true;
 };
 
 const match_capture = function(ms, s, l) {
