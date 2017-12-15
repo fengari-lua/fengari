@@ -672,19 +672,8 @@ const lua_toljsstring = function(L, idx) {
 const lua_tojsstring =  lua_toljsstring;
 
 const lua_todataview = function(L, idx) {
-    let o = index2addr(L, idx);
-
-    if (!o.ttisstring()) {
-        if (!lvm.cvt2str(o)) {  /* not convertible? */
-            return null;
-        }
-        lobject.luaO_tostring(L, o);
-    }
-
-    let dv = new DataView(new ArrayBuffer(o.vslen()));
-    o.svalue().forEach((e, i) => dv.setUint8(i, e, true));
-
-    return dv;
+    let u8 = lua_tolstring(L, idx);
+    return new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
 };
 
 const lua_rawlen = function(L, idx) {
