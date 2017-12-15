@@ -11,7 +11,7 @@ class MBuffer {
 }
 
 const luaZ_buffer = function(buff) {
-    return buff.buffer;
+    return buff.buffer.subarray(0, buff.n);
 };
 
 const luaZ_buffremove = function(buff, i) {
@@ -20,7 +20,13 @@ const luaZ_buffremove = function(buff, i) {
 
 const luaZ_resetbuffer = function(buff) {
     buff.n = 0;
-    buff.buffer = [];
+};
+
+const luaZ_resizebuffer = function(L, buff, size) {
+    let newbuff = new Uint8Array(size);
+    if (buff.buffer)
+        newbuff.set(buff.buffer);
+    buff.buffer = newbuff;
 };
 
 class ZIO {
@@ -42,22 +48,15 @@ class ZIO {
 const EOZ = -1;
 
 const luaZ_fill = function(z) {
-    let size;
     let buff = z.reader(z.L, z.data);
     if (buff === null)
         return EOZ;
-    if (buff instanceof DataView) {
-        z.buffer = new Uint8Array(buff.buffer, buff.byteOffset, buff.byteLength);
-        z.off = 0;
-        size = buff.byteLength - buff.byteOffset;
-    } else {
-        assert(typeof buff !== "string", "Should only load binary of array of bytes");
-        z.buffer = buff;
-        z.off = 0;
-        size = buff.length;
-    }
+    assert(buff instanceof Uint8Array, "Should only load binary of array of bytes");
+    let size = buff.length;
     if (size === 0)
         return EOZ;
+    z.buffer = buff;
+    z.off = 0;
     z.n = size - 1;
     return z.buffer[z.off++];
 };
@@ -87,11 +86,12 @@ const luaZ_read = function(z, b, b_offset, n) {
     return 0;
 };
 
-module.exports.EOZ              = EOZ;
-module.exports.luaZ_buffer      = luaZ_buffer;
-module.exports.luaZ_buffremove  = luaZ_buffremove;
-module.exports.luaZ_fill        = luaZ_fill;
-module.exports.luaZ_read        = luaZ_read;
-module.exports.luaZ_resetbuffer = luaZ_resetbuffer;
-module.exports.MBuffer          = MBuffer;
-module.exports.ZIO              = ZIO;
+module.exports.EOZ               = EOZ;
+module.exports.luaZ_buffer       = luaZ_buffer;
+module.exports.luaZ_buffremove   = luaZ_buffremove;
+module.exports.luaZ_fill         = luaZ_fill;
+module.exports.luaZ_read         = luaZ_read;
+module.exports.luaZ_resetbuffer  = luaZ_resetbuffer;
+module.exports.luaZ_resizebuffer = luaZ_resizebuffer;
+module.exports.MBuffer           = MBuffer;
+module.exports.ZIO               = ZIO;

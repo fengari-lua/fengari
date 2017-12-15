@@ -3,6 +3,10 @@
 const LUAI_MAXCCALLS = 200;
 module.exports.LUAI_MAXCCALLS = LUAI_MAXCCALLS;
 
+/* minimum size for string buffer */
+const LUA_MINBUFFER = 32;
+module.exports.LUA_MINBUFFER = LUA_MINBUFFER;
+
 const luai_nummod = function(L, a, b) {
     let m = a % b;
     if ((m*b) < 0)

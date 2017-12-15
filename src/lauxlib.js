@@ -62,7 +62,7 @@ const pushglobalfuncname = function(L, ar) {
     if (findfield(L, top + 1, 2)) {
         let name = lua.lua_tostring(L, -1);
         if (name[0] === "_".charCodeAt(0) && name[1] === "G".charCodeAt(0) && name[2] === ".".charCodeAt(0)) {  /* name start with '_G.'? */
-            lua.lua_pushstring(L, name.slice(3));  /* push name without prefix */
+            lua.lua_pushstring(L, name.subarray(3));  /* push name without prefix */
             lua.lua_remove(L, -2);  /* remove original name */
         }
         lua.lua_copy(L, -1, top + 1);  /* move name to proper place */
@@ -381,14 +381,14 @@ const luaL_prepbuffer = function(B) {
 };
 
 const luaL_addlstring = function(B, s, l) {
-    B.b = B.b.concat(s.slice(0, l));
+    B.b = B.b.concat(Array.from(s.subarray(0, l)));
 };
 
 const luaL_addstring = luaL_addlstring;
 
 const luaL_pushresult = function(B) {
     let L = B.L;
-    lua.lua_pushstring(L, B.b);
+    lua.lua_pushstring(L, Uint8Array.from(B.b));
 };
 
 const luaL_addchar = function(B, c) {
@@ -558,7 +558,7 @@ const luaL_gsub = function(L, s, p, r) {
         s = s.slice(wild + p.length);  /* continue after 'p' */
     }
     b.push(...s);  /* push last suffix */
-    lua.lua_pushstring(L, b);
+    lua.lua_pushstring(L, Uint8Array.from(b));
     return lua.lua_tostring(L, -1);
 };
 
@@ -713,7 +713,7 @@ class LoadF {
     constructor() {
         this.n = NaN;  /* number of pre-read characters */
         this.f = null;  /* file being read */
-        this.buff = typeof process === "undefined" ? new Array(1024) : new Buffer(1024);  /* area for reading file */
+        this.buff = new Uint8Array(1024);  /* area for reading file */
         this.pos = 0;  /* current position in file */
         this.err = void 0;
     }
@@ -726,8 +726,8 @@ if (typeof process === "undefined") {
         if (lf.f !== null && lf.n > 0) {  /* are there pre-read characters to be read? */
             let bytes = lf.n; /* return them (chars already in buffer) */
             lf.n = 0;  /* no more pre-read characters */
-            lf.f = lf.f.slice(lf.pos);  /* we won't use lf.buff anymore */
-            return lf.buff.slice(0, bytes);
+            lf.f = lf.f.subarray(lf.pos);  /* we won't use lf.buff anymore */
+            return lf.buff.subarray(0, bytes);
         }
 
         let f = lf.f;
@@ -789,7 +789,6 @@ if (typeof process === "undefined") {
             bytes = lf.n; /* return them (chars already in buffer) */
             lf.n = 0;  /* no more pre-read characters */
         } else {  /* read a block from file */
-            lf.buff.fill(0);
             try {
                 bytes = fs.readSync(lf.f, lf.buff, 0, lf.buff.length, lf.pos); /* read block */
             } catch(e) {
@@ -799,7 +798,7 @@ if (typeof process === "undefined") {
             lf.pos += bytes;
         }
         if (bytes > 0)
-            return lf.buff.slice(0, bytes); /* slice on a node.js Buffer is 'free' */
+            return lf.buff.subarray(0, bytes); /* slice on a node.js Buffer is 'free' */
         else return null;
     };
 

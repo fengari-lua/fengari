@@ -8,7 +8,7 @@ let lua_writeline;
 if (typeof process === "undefined") {
     let buff = [];
     lua_writestring = function(s) {
-        buff = buff.concat(s);
+        buff = buff.concat(Array.from(s));
     };
     lua_writeline = function() {
         console.log(new TextDecoder("utf-8").decode(Uint8Array.from(buff)));

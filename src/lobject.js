@@ -294,7 +294,7 @@ class LocVar {
     }
 }
 
-const RETS = defs.to_luastring("...", true);
+const RETS = defs.to_luastring("...");
 const PRE  = defs.to_luastring("[string \"");
 const POS  = defs.to_luastring("\"]");
 
@@ -305,26 +305,37 @@ const luaO_chunkid = function(source, bufflen) {
         if (l < bufflen)  /* small enough? */
             out = source.slice(1);
         else {  /* truncate it */
-            out = source.slice(1, bufflen);
+            out = source.slice(1, bufflen+1);
         }
     } else if (source[0] === char['@']) {  /* file name */
         if (l <= bufflen)  /* small enough? */
             out = source.slice(1);
         else {  /* add '...' before rest of name */
+            out = new Uint8Array(bufflen);
+            out.set(RETS);
             bufflen -= RETS.length;
-            out = RETS.concat(source.slice(1 + l - bufflen));
+            out.set(source.subarray(l - bufflen), RETS.length);
         }
     } else {  /* string; format as [string "source"] */
+        out = new Uint8Array(bufflen);
         let nli = source.indexOf(char['\n']);  /* find first new line (if any) */
-        out = PRE;  /* add prefix */
-        bufflen -= PRE.length + RETS.length + POS.length + 1;  /* save space for prefix+suffix+'\0' */
+        out.set(PRE);  /* add prefix */
+        let out_i = PRE.length;
+        bufflen -= PRE.length + RETS.length + POS.length;  /* save space for prefix+suffix */
         if (l < bufflen && nli === -1) {  /* small one-line source? */
-            out = out.concat(source, POS);  /* keep it */
+            out.set(source, out_i);  /* keep it */
+            out_i += source.length;
         } else {
             if (nli !== -1) l = nli;  /* stop at first newline */
             if (l > bufflen) l = bufflen;
-            out = out.concat(source.slice(0, l), RETS, POS);
+            out.set(source.subarray(0, l), out_i);
+            out_i += l;
+            out.set(RETS, out_i);
+            out_i += RETS.length;
         }
+        out.set(POS, out_i);
+        out_i += POS.length;
+        out = out.subarray(0, out_i);
     }
     return out;
 };
@@ -530,7 +541,7 @@ const luaO_pushvfstring = function(L, fmt, argp) {
     for (;;) {
         e = fmt.indexOf(char['%'], i);
         if (e == -1) break;
-        pushstr(L, fmt.slice(i, e));
+        pushstr(L, fmt.subarray(i, e));
         switch(fmt[e+1]) {
             case char['s']: {
                 let s = argp[a++];
@@ -539,7 +550,7 @@ const luaO_pushvfstring = function(L, fmt, argp) {
                     /* respect null terminator */
                     let i = s.indexOf(0);
                     if (i !== -1)
-                        s = s.slice(0, i);
+                        s = s.subarray(0, i);
                 }
                 pushstr(L, s);
                 break;
@@ -608,7 +619,7 @@ const luaO_pushvfstring = function(L, fmt, argp) {
         i = e + 2;
     }
     ldo.luaD_checkstack(L, 1);
-    pushstr(L, fmt.slice(i));
+    pushstr(L, fmt.subarray(i));
     if (n > 0) lvm.luaV_concat(L, n+1);
     return L.stack[L.top-1].svalue();
 };

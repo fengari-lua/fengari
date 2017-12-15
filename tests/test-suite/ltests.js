@@ -60,8 +60,7 @@ const getstring = function(L, buff, pc) {
         while (pc.script[pc.offset] !== 0 && pc.offset < pc.script.length && delimits.indexOf(pc.script[pc.offset]) < 0)
             buff[i++] = pc.script[pc.offset++];
     }
-    buff.length = i;
-    return buff;
+    return buff.subarray(0, i);
 };
 
 const getindex = function(L, L1, pc) {
@@ -100,7 +99,7 @@ const printstack = function(L) {
 const ops = "+-*%^/\\&|~<>_!".split('').map(e => e.charCodeAt(0));
 
 const runJS = function(L, L1, pc) {
-    let buff = [];
+    let buff = new Uint8Array(300);
     let status = 0;
     if (!pc || !pc.script) return lauxlib.luaL_error(L, lua.to_luastring("attempt to runJS null script"));
     for (;;) {
@@ -527,25 +526,15 @@ const udataval = function(L) {
 
 const d2s = function(L) {
     let d = lauxlib.luaL_checknumber(L, 1);
-
-    let dv = new DataView(new ArrayBuffer(8));
-    dv.setFloat64(0, d, true);
-
-    let b = [];
-    for (let i = 0; i < 8; i++)
-        b.push(dv.getUint8(i, true));
-
-    lua.lua_pushlstring(L, b, 8);
+    let b = new ArrayBuffer(8);
+    new DataView(b).setFloat64(0, d, true);
+    lua.lua_pushlstring(L, new Uint8Array(b), 8);
     return 1;
 };
 
 const s2d = function(L) {
     let b = lauxlib.luaL_checkstring(L, 1);
-
-    let dv = new DataView(new ArrayBuffer(8));
-    for (let i = 0; i < b.length; i++)
-        dv.setUint8(i, b[i], true);
-
+    let dv = new DataView(b.buffer);
     lua.lua_pushnumber(L, dv.getFloat64(0, true));
     return 1;
 };

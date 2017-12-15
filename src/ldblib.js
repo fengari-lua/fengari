@@ -306,7 +306,7 @@ const unmakemask = function(mask, smask) {
     if (mask & lua.LUA_MASKCALL) smask[i++] = "c".charCodeAt(0);
     if (mask & lua.LUA_MASKRET) smask[i++] = "r".charCodeAt(0);
     if (mask & lua.LUA_MASKLINE) smask[i++] = "l".charCodeAt(0);
-    return smask;
+    return smask.subarray(0, i);
 };
 
 const db_sethook = function(L) {
@@ -344,7 +344,7 @@ const db_sethook = function(L) {
 const db_gethook = function(L) {
     let thread = getthread(L);
     let L1 = thread.thread;
-    let buff = [];
+    let buff = new Uint8Array(5);
     let mask = lua.lua_gethookmask(L1);
     let hook = lua.lua_gethook(L1);
     if (hook === null)  /* no hook? */

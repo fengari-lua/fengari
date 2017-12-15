@@ -937,6 +937,18 @@ const isemptystr = function(o) {
     return o.ttisstring() && o.vslen() === 0;
 };
 
+/* copy strings in stack from top - n up to top - 1 to buffer */
+const copy2buff = function(L, top, n, buff) {
+    let tl = 0;  /* size already copied */
+    do {
+        let tv = L.stack[top-n];
+        let l = tv.vslen();  /* length of string being copied */
+        let s = tv.svalue();
+        buff.set(s, tl);
+        tl += l;
+    } while (--n > 0);
+};
+
 /*
 ** Main operation for concatenation: concat 'total' values in the stack,
 ** from 'L->top - total' up to 'L->top - 1'.
@@ -955,16 +967,15 @@ const luaV_concat = function(L, total) {
             lobject.setobjs2s(L, top - 2, top - 1);
         } else {
             /* at least two non-empty string values; get as many as possible */
-            let toconcat = new Array(total);
-            toconcat[total-1] = L.stack[top-1].svalue();
-            for (n = 1; n < total; n++) {
-                if (!tostring(L, top - n - 1)) {
-                    toconcat = toconcat.slice(total-n);
-                    break;
-                }
-                toconcat[total-n-1] = L.stack[top - n - 1].svalue();
+            let tl = L.stack[top-1].vslen();
+            /* collect total length and number of strings */
+            for (n = 1; n < total && tostring(L, top - n - 1); n++) {
+                let l = L.stack[top - n - 1].vslen();
+                tl += l;
             }
-            let ts = lstring.luaS_bless(L, Array.prototype.concat.apply([], toconcat));
+            let buff = new Uint8Array(tl);
+            copy2buff(L, top, n, buff);
+            let ts = lstring.luaS_bless(L, buff);
             lobject.setsvalue2s(L, top - n, ts);
         }
         total -= n - 1; /* got 'n' strings to create 1 new */

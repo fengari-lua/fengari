@@ -31,7 +31,7 @@ const luaS_eqlngstr = function(a, b) {
    make sure this doesn't conflict with any of the anti-collision strategies in ltable */
 const luaS_hash = function(str) {
     assert(defs.is_luastring(str));
-    return str.map(e => `${e}|`).join('');
+    return '|'+str.join('|');
 };
 
 const luaS_hashlongstr = function(ts) {
@@ -44,12 +44,13 @@ const luaS_hashlongstr = function(ts) {
 
 /* variant that takes ownership of array */
 const luaS_bless = function(L, str) {
+    assert(str instanceof Uint8Array);
     return new TString(L, str);
 };
 
 /* makes a copy */
 const luaS_new = function(L, str) {
-    return luaS_bless(L, str.slice(0));
+    return luaS_bless(L, Uint8Array.from(str));
 };
 
 /* takes a js string */

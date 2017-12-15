@@ -64,7 +64,7 @@ test("[test-suite] db: getinfo, ...line...", function (t) {
 });
 
 
-test("[test-suite] db: test file ad string names truncation", function (t) {
+test("[test-suite] db: test file and string names truncation", function (t) {
     let luaCode = `
         a = "function f () end"
         local function dostring (s, x) return load(s, x)() end
