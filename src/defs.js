@@ -248,7 +248,9 @@ const to_luastring = function(str, cache) {
 };
 
 const from_userstring = function(str) {
-    assert(is_luastring(str), "expects an array of bytes");
+    if (typeof str === "string")
+        return to_luastring(str);
+    assert(is_luastring(str), "expects an array of bytes or javascript string");
     return str;
 };
 
