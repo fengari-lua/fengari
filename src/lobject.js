@@ -294,7 +294,7 @@ class LocVar {
     }
 }
 
-const RETS = defs.to_luastring("...", true);
+const RETS = defs.to_luastring("...");
 const PRE  = defs.to_luastring("[string \"");
 const POS  = defs.to_luastring("\"]");
 
@@ -305,27 +305,37 @@ const luaO_chunkid = function(source, bufflen) {
         if (l < bufflen)  /* small enough? */
             out = source.slice(1);
         else {  /* truncate it */
-            out = source.slice(1, bufflen);
+            out = source.slice(1, bufflen+1);
         }
     } else if (source[0] === char['@']) {  /* file name */
         if (l <= bufflen)  /* small enough? */
             out = source.slice(1);
         else {  /* add '...' before rest of name */
+            out = new Uint8Array(bufflen);
+            out.set(RETS);
             bufflen -= RETS.length;
-            out = Uint8Array.from(Array.from(RETS).concat(Array.from(source.subarray(1 + l - bufflen))));
+            out.set(source.subarray(l - bufflen), RETS.length);
         }
     } else {  /* string; format as [string "source"] */
+        out = new Uint8Array(bufflen);
         let nli = source.indexOf(char['\n']);  /* find first new line (if any) */
-        out = Array.from(PRE);  /* add prefix */
-        bufflen -= PRE.length + RETS.length + POS.length + 1;  /* save space for prefix+suffix+'\0' */
+        out.set(PRE);  /* add prefix */
+        let out_i = PRE.length;
+        bufflen -= PRE.length + RETS.length + POS.length;  /* save space for prefix+suffix */
         if (l < bufflen && nli === -1) {  /* small one-line source? */
-            out = out.concat(Array.from(source), Array.from(POS));  /* keep it */
+            out.set(source, out_i);  /* keep it */
+            out_i += source.length;
         } else {
             if (nli !== -1) l = nli;  /* stop at first newline */
             if (l > bufflen) l = bufflen;
-            out = out.concat(Array.from(source.subarray(0, l)), Array.from(RETS), Array.from(POS));
+            out.set(source.subarray(0, l), out_i);
+            out_i += l;
+            out.set(RETS, out_i);
+            out_i += RETS.length;
         }
-        out = Uint8Array.from(out);
+        out.set(POS, out_i);
+        out_i += POS.length;
+        out = out.subarray(0, out_i);
     }
     return out;
 };
