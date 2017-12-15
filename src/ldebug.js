@@ -266,6 +266,7 @@ const auxgetinfo = function(L, what, ar, f, ci) {
 };
 
 const lua_getinfo = function(L, what, ar) {
+    what = defs.from_userstring(what);
     let status, cl, ci, func;
     swapextra(L);
     if (what[0] === '>'.charCodeAt(0)) {

@@ -547,6 +547,7 @@ const luaO_pushvfstring = function(L, fmt, argp) {
                 let s = argp[a++];
                 if (s === null) s = defs.to_luastring("(null)", true);
                 else {
+                    s = defs.from_userstring(s);
                     /* respect null terminator */
                     let i = s.indexOf(0);
                     if (i !== -1)

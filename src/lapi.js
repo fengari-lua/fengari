@@ -236,7 +236,8 @@ const lua_pushlstring = function(L, s, len) {
     if (len === 0) {
         s = defs.to_luastring("", true);
     } else {
-        assert(defs.is_luastring(s) && s.length >= len, "lua_pushlstring expects array of byte");
+        s = defs.from_userstring(s);
+        assert(s.length >= len, "invalid length to lua_pushlstring");
         s = s.slice(0, len);
     }
     ts = lstring.luaS_bless(L, s);
@@ -247,13 +248,11 @@ const lua_pushlstring = function(L, s, len) {
 };
 
 const lua_pushstring = function (L, s) {
-    assert(defs.is_luastring(s) || s === undefined || s === null, "lua_pushstring expects array of byte");
-
     if (s === undefined || s === null) {
         L.stack[L.top] = new TValue(CT.LUA_TNIL, null);
         L.top++;
     } else {
-        let ts = lstring.luaS_new(L, s);
+        let ts = lstring.luaS_new(L, defs.from_userstring(s));
         lobject.pushsvalue2s(L, ts);
         s = ts.getstr(); /* internal copy */
     }
@@ -263,23 +262,22 @@ const lua_pushstring = function (L, s) {
 };
 
 const lua_pushvfstring = function (L, fmt, argp) {
-    assert(defs.is_luastring(fmt));
+    fmt = defs.from_userstring(fmt);
     return lobject.luaO_pushvfstring(L, fmt, argp);
 };
 
 const lua_pushfstring = function (L, fmt, ...argp) {
-    assert(defs.is_luastring(fmt));
+    fmt = defs.from_userstring(fmt);
     return lobject.luaO_pushvfstring(L, fmt, argp);
 };
 
 /* Similar to lua_pushstring, but takes a JS string */
 const lua_pushliteral = function (L, s) {
-    assert(typeof s === "string" || s === undefined || s === null, "lua_pushliteral expects a JS string");
-
     if (s === undefined || s === null) {
         L.stack[L.top] = new TValue(CT.LUA_TNIL, null);
         L.top++;
     } else {
+        assert(typeof s === "string", "lua_pushliteral expects a JS string");
         let ts = lstring.luaS_newliteral(L, s);
         lobject.pushsvalue2s(L, ts);
         s = ts.getstr(); /* internal copy */
@@ -351,9 +349,7 @@ const lua_pushglobaltable = function(L) {
 ** t[k] = value at the top of the stack (where 'k' is a string)
 */
 const auxsetstr = function(L, t, k) {
-    assert(defs.is_luastring(k), "key must be an array of bytes");
-
-    let str = lstring.luaS_new(L, k);
+    let str = lstring.luaS_new(L, defs.from_userstring(k));
     assert(1 < L.top - L.ci.funcOff, "not enough elements in the stack");
     lobject.pushsvalue2s(L, str); /* push 'str' (to make it a TValue) */
     assert(L.top <= L.ci.top, "stack overflow");
@@ -465,8 +461,7 @@ const lua_rawsetp = function(L, idx, p) {
 */
 
 const auxgetstr = function(L, t, k) {
-    assert(defs.is_luastring(k), "key must be an array of bytes");
-    let str = lstring.luaS_new(L, k);
+    let str = lstring.luaS_new(L, defs.from_userstring(k));
     lobject.pushsvalue2s(L, str);
     assert(L.top <= L.ci.top, "stack overflow");
     lvm.luaV_gettable(L, t, L.stack[L.top - 1], L.top - 1);
@@ -904,8 +899,8 @@ const lua_arith = function(L, op) {
 const default_chunkname = defs.to_luastring("?");
 const lua_load = function(L, reader, data, chunkname, mode) {
     if (!chunkname) chunkname = default_chunkname;
-    else assert(defs.is_luastring(chunkname), "lua_load expect an array of byte as chunkname");
-    assert(mode ? defs.is_luastring(mode) : true, "lua_load expect an array of byte as mode");
+    else chunkname = defs.from_userstring(chunkname);
+    if (mode !== null) mode = defs.from_userstring(mode);
     let z = new lzio.ZIO(L, reader, data);
     let status = ldo.luaD_protectedparser(L, z, chunkname, mode);
     if (status === TS.LUA_OK) {  /* no errors? */

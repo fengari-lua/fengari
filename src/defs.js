@@ -247,6 +247,11 @@ const to_luastring = function(str, cache) {
     return outU8Array;
 };
 
+const from_userstring = function(str) {
+    assert(is_luastring(str), "expects an array of bytes");
+    return str;
+};
+
 /*
 ** Event codes
 */
@@ -429,3 +434,4 @@ module.exports.string_of               = string_of;
 module.exports.to_jsstring             = to_jsstring;
 module.exports.to_luastring            = to_luastring;
 module.exports.to_uristring            = to_uristring;
+module.exports.from_userstring         = from_userstring;
