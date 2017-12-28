@@ -108,7 +108,7 @@ const opts = [
     "isrunning"
 ].map((e) => lua.to_luastring(e));
 const luaB_collectgarbage = function(L) {
-    lauxlib.luaL_checkoption(L, 1, lua.to_luastring("collect"), opts);
+    lauxlib.luaL_checkoption(L, 1, "collect", opts);
     lauxlib.luaL_optinteger(L, 2, 0);
     lauxlib.luaL_error(L, lua.to_luastring("lua_gc not implemented"));
 };
@@ -341,14 +341,14 @@ const generic_reader = function(L, ud) {
 
 const luaB_load = function(L) {
     let s = lua.lua_tostring(L, 1);
-    let mode = lauxlib.luaL_optstring(L, 3, lua.to_luastring("bt", true));
+    let mode = lauxlib.luaL_optstring(L, 3, "bt");
     let env = !lua.lua_isnone(L, 4) ? 4 : 0;  /* 'env' index or 0 if no 'env' */
     let status;
     if (s !== null) {  /* loading a string? */
         let chunkname = lauxlib.luaL_optstring(L, 2, s);
         status = lauxlib.luaL_loadbufferx(L, s, s.length, chunkname, mode);
     } else {  /* loading from a reader function */
-        let chunkname = lauxlib.luaL_optstring(L, 2, lua.to_luastring("=(load)", true));
+        let chunkname = lauxlib.luaL_optstring(L, 2, "=(load)");
         lauxlib.luaL_checktype(L, 1, lua.LUA_TFUNCTION);
         lua.lua_settop(L, RESERVEDSLOT);  /* create reserved slot */
         status = lua.lua_load(L, generic_reader, null, chunkname, mode);

@@ -617,7 +617,7 @@ const str_rep = function(L) {
     let s = lauxlib.luaL_checkstring(L, 1);
     let l = s.length;
     let n = lauxlib.luaL_checkinteger(L, 2);
-    let sep = lauxlib.luaL_optstring(L, 3, lua.to_luastring(""));
+    let sep = lauxlib.luaL_optstring(L, 3, "");
     let lsep = sep.length;
     if (n <= 0) lua.lua_pushliteral(L, "");
     else if (l + lsep < l || l + lsep > MAXSIZE / n)  /* may overflow? */

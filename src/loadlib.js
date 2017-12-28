@@ -294,8 +294,8 @@ const ll_searchpath = function(L) {
         L,
         lauxlib.luaL_checkstring(L, 1),
         lauxlib.luaL_checkstring(L, 2),
-        lauxlib.luaL_optstring(L, 3, lua.to_luastring(".")),
-        lauxlib.luaL_optstring(L, 4, lua.to_luastring(lua.LUA_DIRSEP))
+        lauxlib.luaL_optstring(L, 3, "."),
+        lauxlib.luaL_optstring(L, 4, lua.LUA_DIRSEP)
     );
     if (f !== null) return 1;
     else {  /* error message is on top of the stack */

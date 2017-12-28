@@ -86,7 +86,7 @@ const checkoption = function(L, conv, i, buff) {
 
 
 const os_date = function(L) {
-    let s = lauxlib.luaL_optlstring(L, 1, lua.to_luastring("%c"));
+    let s = lauxlib.luaL_optlstring(L, 1, "%c");
     let t = lauxlib.luaL_opt(L, l_checktime, 2, new Date().getTime() / 1000) * 1000;
     let stm = new Date(t);
     let utc = false;

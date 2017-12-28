@@ -120,7 +120,7 @@ const db_getinfo = function(L) {
     let thread = getthread(L);
     let arg = thread.arg;
     let L1 = thread.thread;
-    let options = lauxlib.luaL_optstring(L, arg + 2, lua.to_luastring("flnStu", true));
+    let options = lauxlib.luaL_optstring(L, arg + 2, "flnStu");
     checkstack(L, L1, 3);
     if (lua.lua_isfunction(L, arg + 1)) {  /* info about a function? */
         options = lua.lua_pushfstring(L, lua.to_luastring(">%s"), options);  /* add '>' to 'options' */
