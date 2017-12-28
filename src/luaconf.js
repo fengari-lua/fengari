@@ -1,7 +1,5 @@
 "use strict";
 
-const sprintf = require('sprintf-js').sprintf;
-
 const LUA_MAXINTEGER = 2147483647;
 const LUA_MININTEGER = -2147483648;
 
@@ -22,11 +20,11 @@ const LUAI_MAXSTACK = 100000;
 const LUA_IDSIZE = 60-1; /* fengari uses 1 less than lua as we don't embed the null byte */
 
 const lua_integer2str = function(n) {
-    return sprintf(LUA_INTEGER_FMT, n);
+    return String(n); /* should match behaviour of LUA_INTEGER_FMT */
 };
 
 const lua_number2str = function(n) {
-    return sprintf(LUA_NUMBER_FMT, n);
+    return String(Number(n.toPrecision(n))); /* should match behaviour of LUA_NUMBER_FMT */
 };
 
 const lua_numbertointeger = function(n) {
