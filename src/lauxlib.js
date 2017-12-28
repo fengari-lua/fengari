@@ -325,6 +325,8 @@ const luaL_checkstring = luaL_checklstring;
 
 const luaL_optlstring = function(L, arg, def) {
     if (lua.lua_type(L, arg) <= 0) {
+        if (typeof str === "string")
+            def = lua.to_luastring(def);
         return def;
     } else return luaL_checklstring(L, arg);
 };
