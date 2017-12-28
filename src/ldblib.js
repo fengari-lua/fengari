@@ -30,7 +30,7 @@ const db_getmetatable = function(L) {
 
 const db_setmetatable = function(L) {
     const t = lua.lua_type(L, 2);
-    lauxlib.luaL_argcheck(L, t == lua.LUA_TNIL || t == lua.LUA_TTABLE, 2, lua.to_luastring("nil or table expected", true));
+    lauxlib.luaL_argcheck(L, t == lua.LUA_TNIL || t == lua.LUA_TTABLE, 2, "nil or table expected");
     lua.lua_settop(L, 2);
     lua.lua_setmetatable(L, 1);
     return 1;  /* return 1st argument */
@@ -134,7 +134,7 @@ const db_getinfo = function(L) {
     }
 
     if (!lua.lua_getinfo(L1, options, ar))
-        lauxlib.luaL_argerror(L, arg + 2, lua.to_luastring("invalid option", true));
+        lauxlib.luaL_argerror(L, arg + 2, "invalid option");
     lua.lua_newtable(L);  /* table to collect results */
     if (options.indexOf('S'.charCodeAt(0)) > -1) {
         settabss(L, lua.to_luastring("source", true), ar.source);
@@ -176,7 +176,7 @@ const db_getlocal = function(L) {
     } else {  /* stack-level argument */
         let level = lauxlib.luaL_checkinteger(L, arg + 1);
         if (!lua.lua_getstack(L1, level, ar))  /* out of range? */
-            return lauxlib.luaL_argerror(L, arg+1, lua.to_luastring("level out of range", true));
+            return lauxlib.luaL_argerror(L, arg+1, "level out of range");
         checkstack(L, L1, 1);
         let name = lua.lua_getlocal(L1, ar, nvar);
         if (name) {
@@ -200,7 +200,7 @@ const db_setlocal = function(L) {
     let level = lauxlib.luaL_checkinteger(L, arg + 1);
     let nvar = lauxlib.luaL_checkinteger(L, arg + 2);
     if (!lua.lua_getstack(L1, level, ar))  /* out of range? */
-        return lauxlib.luaL_argerror(L, arg + 1, lua.to_luastring("level out of range", true));
+        return lauxlib.luaL_argerror(L, arg + 1, "level out of range");
     lauxlib.luaL_checkany(L, arg + 3);
     lua.lua_settop(L, arg + 3);
     checkstack(L, L1, 1);
@@ -242,7 +242,7 @@ const db_setupvalue = function(L) {
 const checkupval = function(L, argf, argnup) {
     let nup = lauxlib.luaL_checkinteger(L, argnup);  /* upvalue index */
     lauxlib.luaL_checktype(L, argf, lua.LUA_TFUNCTION);  /* closure */
-    lauxlib.luaL_argcheck(L, (lua.lua_getupvalue(L, argf, nup) !== null), argnup, lua.to_luastring("invalid upvalue index", true));
+    lauxlib.luaL_argcheck(L, (lua.lua_getupvalue(L, argf, nup) !== null), argnup, "invalid upvalue index");
     return nup;
 };
 
@@ -255,8 +255,8 @@ const db_upvalueid = function(L) {
 const db_upvaluejoin = function(L) {
     let n1 = checkupval(L, 1, 2);
     let n2 = checkupval(L, 3, 4);
-    lauxlib.luaL_argcheck(L, !lua.lua_iscfunction(L, 1), 1, lua.to_luastring("Lua function expected", true));
-    lauxlib.luaL_argcheck(L, !lua.lua_iscfunction(L, 3), 3, lua.to_luastring("Lua function expected", true));
+    lauxlib.luaL_argcheck(L, !lua.lua_iscfunction(L, 1), 1, "Lua function expected");
+    lauxlib.luaL_argcheck(L, !lua.lua_iscfunction(L, 3), 3, "Lua function expected");
     lua.lua_upvaluejoin(L, 1, n1, 3, n2);
     return 0;
 };

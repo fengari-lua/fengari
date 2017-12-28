@@ -62,7 +62,7 @@ const tinsert = function(L) {
             break;
         case 3: {
             pos = lauxlib.luaL_checkinteger(L, 2);  /* 2nd argument is the position */
-            lauxlib.luaL_argcheck(L, 1 <= pos && pos <= e, 2, lua.to_luastring("position out of bounds", true));
+            lauxlib.luaL_argcheck(L, 1 <= pos && pos <= e, 2, "position out of bounds");
             for (let i = e; i > pos; i--) {  /* move up elements */
                 lua.lua_geti(L, 1, i - 1);
                 lua.lua_seti(L, 1, i);  /* t[i] = t[i - 1] */
@@ -70,7 +70,7 @@ const tinsert = function(L) {
             break;
         }
         default: {
-            return lauxlib.luaL_error(L, lua.to_luastring("wrong number of arguments to 'insert'", true));
+            return lauxlib.luaL_error(L, "wrong number of arguments to 'insert'");
         }
     }
 
@@ -82,7 +82,7 @@ const tremove = function(L) {
     let size = aux_getn(L, 1, TAB_RW);
     let pos = lauxlib.luaL_optinteger(L, 2, size);
     if (pos !== size)  /* validate 'pos' if given */
-        lauxlib.luaL_argcheck(L, 1 <= pos && pos <= size + 1, 1, lua.to_luastring("position out of bounds", true));
+        lauxlib.luaL_argcheck(L, 1 <= pos && pos <= size + 1, 1, "position out of bounds");
     lua.lua_geti(L, 1, pos);  /* result = t[pos] */
     for (; pos < size; pos++) {
         lua.lua_geti(L, 1, pos + 1);
@@ -107,9 +107,9 @@ const tmove = function(L) {
     checktab(L, 1, TAB_R);
     checktab(L, tt, TAB_W);
     if (e >= f) {  /* otherwise, nothing to move */
-        lauxlib.luaL_argcheck(L, f > 0 || e < luaconf.LUA_MAXINTEGER + f, 3, lua.to_luastring("too many elements to move", true));
+        lauxlib.luaL_argcheck(L, f > 0 || e < luaconf.LUA_MAXINTEGER + f, 3, "too many elements to move");
         let n = e - f + 1;  /* number of elements to move */
-        lauxlib.luaL_argcheck(L, t <= luaconf.LUA_MAXINTEGER - n + 1, 4, lua.to_luastring("destination wrap around", true));
+        lauxlib.luaL_argcheck(L, t <= luaconf.LUA_MAXINTEGER - n + 1, 4, "destination wrap around");
 
         if (t > e || t <= f || (tt !== 1 && lua.lua_compare(L, 1, tt, lua.LUA_OPEQ) !== 1)) {
             for (let i = 0; i < n; i++) {
@@ -291,7 +291,7 @@ const auxsort = function(L, lo, up, rnd) {
 const sort = function(L) {
     let n = aux_getn(L, 1, TAB_RW);
     if (n > 1) {  /* non-trivial interval? */
-        lauxlib.luaL_argcheck(L, n < luaconf.LUA_MAXINTEGER, 1, lua.to_luastring("array too big", true));
+        lauxlib.luaL_argcheck(L, n < luaconf.LUA_MAXINTEGER, 1, "array too big");
         if (!lua.lua_isnoneornil(L, 2))  /* is there a 2nd argument? */
             lauxlib.luaL_checktype(L, 2, lua.LUA_TFUNCTION);  /* must be a function */
         lua.lua_settop(L, 2);  /* make sure there are two arguments */

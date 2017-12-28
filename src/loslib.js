@@ -144,7 +144,7 @@ const os_time = function(L) {
 
 const l_checktime = function(L, arg) {
     let t = lauxlib.luaL_checkinteger(L, arg);
-    // lauxlib.luaL_argcheck(L, t, arg, lua.to_luastring("time out-of-bounds"));
+    // lauxlib.luaL_argcheck(L, t, arg, "time out-of-bounds");
     return t;
 };
 

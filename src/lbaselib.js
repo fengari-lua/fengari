@@ -63,7 +63,7 @@ const luaB_getmetatable = function(L) {
 const luaB_setmetatable = function(L) {
     let t = lua.lua_type(L, 2);
     lauxlib.luaL_checktype(L, 1, lua.LUA_TTABLE);
-    lauxlib.luaL_argcheck(L, t === lua.LUA_TNIL || t === lua.LUA_TTABLE, 2, lua.to_luastring("nil or table expected", true));
+    lauxlib.luaL_argcheck(L, t === lua.LUA_TNIL || t === lua.LUA_TTABLE, 2, "nil or table expected");
     if (lauxlib.luaL_getmetafield(L, 1, lua.to_luastring("__metatable", true)) !== lua.LUA_TNIL)
         return lauxlib.luaL_error(L, lua.to_luastring("cannot change a protected metatable", true));
     lua.lua_settop(L, 2);
@@ -80,7 +80,7 @@ const luaB_rawequal = function(L) {
 
 const luaB_rawlen = function(L) {
     let t = lua.lua_type(L, 1);
-    lauxlib.luaL_argcheck(L, t === lua.LUA_TTABLE || t === lua.LUA_TSTRING, 1, lua.to_luastring("table or string expected", true));
+    lauxlib.luaL_argcheck(L, t === lua.LUA_TTABLE || t === lua.LUA_TSTRING, 1, "table or string expected");
     lua.lua_pushinteger(L, lua.lua_rawlen(L, 1));
     return 1;
 };
@@ -115,7 +115,7 @@ const luaB_collectgarbage = function(L) {
 
 const luaB_type = function(L) {
     let t = lua.lua_type(L, 1);
-    lauxlib.luaL_argcheck(L, t !== lua.LUA_TNONE, 1, lua.to_luastring("value expected", true));
+    lauxlib.luaL_argcheck(L, t !== lua.LUA_TNONE, 1, "value expected");
     lua.lua_pushstring(L, lua.lua_typename(L, t));
     return 1;
 };
@@ -209,7 +209,7 @@ const luaB_tonumber = function(L) {
         let base = lauxlib.luaL_checkinteger(L, 2);
         lauxlib.luaL_checktype(L, 1, lua.LUA_TSTRING);  /* no numbers as strings */
         let s = lua.lua_tostring(L, 1);
-        lauxlib.luaL_argcheck(L, 2 <= base && base <= 36, 2, lua.to_luastring("base out of range", true));
+        lauxlib.luaL_argcheck(L, 2 <= base && base <= 36, 2, "base out of range");
         let n = b_str2int(s, base);
         if (n !== null) {
             lua.lua_pushinteger(L, n);
@@ -253,7 +253,7 @@ const luaB_select = function(L) {
         let i = lauxlib.luaL_checkinteger(L, 1);
         if (i < 0) i = n + i;
         else if (i > n) i = n;
-        lauxlib.luaL_argcheck(L, 1 <= i, 1, lua.to_luastring("index out of range", true));
+        lauxlib.luaL_argcheck(L, 1 <= i, 1, "index out of range");
         return n - i;
     }
 };

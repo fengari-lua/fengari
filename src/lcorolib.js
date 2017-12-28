@@ -5,7 +5,7 @@ const lauxlib = require('./lauxlib.js');
 
 const getco = function(L) {
     let co = lua.lua_tothread(L, 1);
-    lauxlib.luaL_argcheck(L, co, 1, lua.to_luastring("thread expected", true));
+    lauxlib.luaL_argcheck(L, co, 1, "thread expected");
     return co;
 };
 

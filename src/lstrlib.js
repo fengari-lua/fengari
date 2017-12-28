@@ -306,7 +306,7 @@ const str_format = function(L) {
                     if (form.length <= 2 || form[2] === 0) {  /* no modifiers? */
                         lauxlib.luaL_addvalue(b);  /* keep entire string */
                     } else {
-                        lauxlib.luaL_argcheck(L, s.length === strlen(s), arg, lua.to_luastring("string contains zeros", true));
+                        lauxlib.luaL_argcheck(L, s.length === strlen(s), arg, "string contains zeros");
                         if (form.indexOf('.'.charCodeAt(0)) < 0 && s.length >= 100) {
                             /* no precision and string is too long to be formatted */
                             lauxlib.luaL_addvalue(b);  /* keep entire string */
@@ -534,7 +534,7 @@ const str_pack = function(L) {
                 let n = lauxlib.luaL_checkinteger(L, arg);
                 if (size < SZINT) {  /* need overflow check? */
                     let lim = 1 << (size * 8) - 1;
-                    lauxlib.luaL_argcheck(L, -lim <= n && n < lim, arg, lua.to_luastring("integer overflow", true));
+                    lauxlib.luaL_argcheck(L, -lim <= n && n < lim, arg, "integer overflow");
                 }
                 packint(b, n, h.islittle, size, n < 0);
                 break;
@@ -542,7 +542,7 @@ const str_pack = function(L) {
             case KOption.Kuint: {  /* unsigned integers */
                 let n = lauxlib.luaL_checkinteger(L, arg);
                 if (size < SZINT)
-                    lauxlib.luaL_argcheck(L, (n>>>0) < (1 << (size * NB)), arg, lua.to_luastring("unsigned overflow", true));
+                    lauxlib.luaL_argcheck(L, (n>>>0) < (1 << (size * NB)), arg, "unsigned overflow");
                 packint(b, n>>>0, h.islittle, size, false);
                 break;
             }
@@ -558,7 +558,7 @@ const str_pack = function(L) {
             case KOption.Kchar: {  /* fixed-size string */
                 let s = lauxlib.luaL_checkstring(L, arg);
                 let len = s.length;
-                lauxlib.luaL_argcheck(L, len <= size, arg, lua.to_luastring("string longer than given size", true));
+                lauxlib.luaL_argcheck(L, len <= size, arg, "string longer than given size");
                 lauxlib.luaL_addlstring(b, s, len);  /* add string */
                 while (len++ < size)  /* pad extra space */
                     lauxlib.luaL_addchar(b, LUAL_PACKPADBYTE);
@@ -569,7 +569,7 @@ const str_pack = function(L) {
                 let len = s.length;
                 lauxlib.luaL_argcheck(L,
                     size >= 4 /* sizeof(size_t) */ || len < (1 << (size * NB)),
-                    arg, lua.to_luastring("string length does not fit in given size", true));
+                    arg, "string length does not fit in given size");
                 packint(b, len, h.islittle, size, 0);  /* pack length */
                 lauxlib.luaL_addlstring(b, s, len);
                 totalsize += len;
@@ -578,7 +578,7 @@ const str_pack = function(L) {
             case KOption.Kzstr: {  /* zero-terminated string */
                 let s = lauxlib.luaL_checkstring(L, arg);
                 let len = s.length;
-                lauxlib.luaL_argcheck(L, s.indexOf(0) < 0, arg, lua.to_luastring("strings contains zeros", true));
+                lauxlib.luaL_argcheck(L, s.indexOf(0) < 0, arg, "strings contains zeros");
                 lauxlib.luaL_addlstring(b, s, len);
                 lauxlib.luaL_addchar(b, 0);  /* add zero at the end */
                 totalsize += len + 1;
@@ -651,10 +651,10 @@ const str_byte = function(L) {
     if (pose > l) pose = l;
     if (posi > pose) return 0;  /* empty interval; return no values */
     if (pose - posi >= Number.MAX_SAFE_INTEGER)  /* arithmetic overflow? */
-        return lauxlib.luaL_error(L, lua.to_luastring("string slice too long", true));
+        return lauxlib.luaL_error(L, "string slice too long");
 
     let n = (pose - posi) + 1;
-    lauxlib.luaL_checkstack(L, n, lua.to_luastring("string slice too long", true));
+    lauxlib.luaL_checkstack(L, n, "string slice too long");
     for (let i = 0; i < n; i++)
         lua.lua_pushinteger(L, s[posi + i - 1]);
     return n;
@@ -673,12 +673,12 @@ const str_packsize = function(L) {
         let size = details.size;
         let ntoalign = details.ntoalign;
         size += ntoalign;  /* total space used by option */
-        lauxlib.luaL_argcheck(L, totalsize <= MAXSIZE - size, 1, lua.to_luastring("format result too large", true));
+        lauxlib.luaL_argcheck(L, totalsize <= MAXSIZE - size, 1, "format result too large");
         totalsize += size;
         switch (opt) {
             case KOption.Kstring:  /* strings with length count */
             case KOption.Kzstr:    /* zero-terminated string */
-                lauxlib.luaL_argerror(L, 1, lua.to_luastring("variable-length format", true));
+                lauxlib.luaL_argerror(L, 1, "variable-length format");
                 /* call never return, but to avoid warnings: *//* fall through */
             default:  break;
         }
@@ -738,7 +738,7 @@ const str_unpack = function(L) {
     let ld = data.length;
     let pos = posrelat(lauxlib.luaL_optinteger(L, 3, 1), ld) - 1;
     let n = 0;  /* number of results */
-    lauxlib.luaL_argcheck(L, pos <= ld && pos >= 0, 3, lua.to_luastring("initial position out of string", true));
+    lauxlib.luaL_argcheck(L, pos <= ld && pos >= 0, 3, "initial position out of string");
     while (fmt.off < fmt.s.length) {
         let details = getdetails(h, pos, fmt);
         let opt = details.opt;
@@ -768,7 +768,7 @@ const str_unpack = function(L) {
             }
             case KOption.Kstring: {
                 let len = unpackint(L, data.slice(pos), h.islittle, size, 0);
-                lauxlib.luaL_argcheck(L, pos + len + size <= ld, 2, lua.to_luastring("data string too short", true));
+                lauxlib.luaL_argcheck(L, pos + len + size <= ld, 2, "data string too short");
                 lua.lua_pushstring(L, data.slice(pos + size, pos + size + len));
                 pos += len;  /* skip string */
                 break;
@@ -1323,7 +1323,7 @@ const str_gsub = function(L) {
     let ms = new MatchState(L);
     let b = new lauxlib.luaL_Buffer();
     lauxlib.luaL_argcheck(L, tr === lua.LUA_TNUMBER || tr === lua.LUA_TSTRING || tr === lua.LUA_TFUNCTION || tr === lua.LUA_TTABLE, 3,
-        lua.to_luastring("string/function/table expected", true));
+        "string/function/table expected");
     lauxlib.luaL_buffinit(L, b);
     if (anchor) {
         p = p.slice(1); lp--;  /* skip anchor character */
