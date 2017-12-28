@@ -9,8 +9,7 @@
   "scripts": {
     "build": "webpack",
     "lint": "eslint src/ tests/",
-    "test": "tape tests/*.js tests/test-suite/*.js | faucet",
-    "test-inprogress": "tape tests/test-suite/inprogress/*.js | faucet"
+    "test": "tape tests/*.js tests/test-suite/*.js | faucet"
   },
   "repository": {
     "type": "git",
