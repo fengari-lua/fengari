@@ -315,15 +315,13 @@ const luaL_checktype = function(L, arg, t) {
         tag_error(L, arg, t);
 };
 
-const luaL_checkstring = function(L, n) {
-    return luaL_checklstring(L, n, null);
-};
-
 const luaL_checklstring = function(L, arg) {
     let s = lua.lua_tolstring(L, arg);
     if (s === null || s === undefined) tag_error(L, arg, lua.LUA_TSTRING);
     return s;
 };
+
+const luaL_checkstring = luaL_checklstring;
 
 const luaL_optlstring = function(L, arg, def) {
     if (lua.lua_type(L, arg) <= 0) {
