@@ -257,18 +257,11 @@ if (typeof process === "undefined") {
 
             return lauxlib.luaL_execresult(L, null);
         } else {
-            try {
-                child_process.execSync(
-                    Uint8Array.from(cmd),
-                    {
-                        stdio: [process.stdin, process.stdout, process.stderr]
-                    }
-                );
-                lua.lua_pushboolean(L, 1);
-            } catch (e) {
-                lua.lua_pushboolean(L, 0);
-            }
-
+            /* Assume a shell is available.
+               If it's good enough for musl it's good enough for us.
+               http://git.musl-libc.org/cgit/musl/tree/src/process/system.c?id=ac45692a53a1b8d2ede329d91652d43c1fb5dc8d#n22
+            */
+            lua.lua_pushboolean(L, 1);
             return 1;
         }
     };
