@@ -869,12 +869,8 @@ const lua_writestringerror = function() {
     for (let i=0; i<arguments.length; i++) {
         let a = arguments[i];
         if (typeof process === "undefined") {
-            if (typeof a !== "string")
-                a = lua.to_jsstring(a);
             console.error(a);
         } else {
-            if (typeof a !== "string")
-                a = Uint8Array.from(a);
             process.stderr.write(a);
         }
     }
