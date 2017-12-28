@@ -746,16 +746,22 @@ if (typeof process === "undefined") {
             throw new Error("Can't read stdin in the browser");
         } else {
             lua.lua_pushfstring(L, lua.to_luastring("@%s"), filename);
-
             let path = lua.to_uristring(filename);
             let xhr = new XMLHttpRequest();
             xhr.open("GET", path, false);
-            // TODO: find a way to load bytes instead of js string
+            /* XXX: Synchronous xhr in main thread always returns a js string
+                Additionally, some browsers make console noise if you even attempt to set responseType
+            */
+            if (typeof window === "undefined") {
+                xhr.responseType = "arraybuffer";
+            }
             xhr.send();
-
             if (xhr.status >= 200 && xhr.status <= 299) {
-                /* TODO: Synchronous xhr alway return a js string */
-                lf.f = lua.to_luastring(xhr.response);
+                if (typeof xhr.response === "string") {
+                    lf.f = lua.to_luastring(xhr.response);
+                } else {
+                    lf.f = new Uint8Array(xhr.response);
+                }
             } else {
                 lf.err = xhr.status;
                 return errfile(L, "open", fnameindex, { message: `${xhr.status}: ${xhr.statusText}` });
