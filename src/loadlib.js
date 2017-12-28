@@ -5,12 +5,16 @@ const lua      = require('./lua.js');
 const lauxlib  = require('./lauxlib.js');
 
 const global_env = (function() {
+    /* global WorkerGlobalScope */ /* see https://github.com/sindresorhus/globals/issues/127 */
     if (typeof process !== "undefined") {
         /* node */
         return global;
     } else if (typeof window !== "undefined") {
         /* browser window */
         return window;
+    } else if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
+        /* web worker */
+        return self;
     } else {
         /* unknown global env */
         return eval('this'); /* use non-strict mode to get global env */
