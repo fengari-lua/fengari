@@ -4,6 +4,19 @@ const fengari  = require('./fengari.js');
 const lua      = require('./lua.js');
 const lauxlib  = require('./lauxlib.js');
 
+const global_env = (function() {
+    if (typeof process !== "undefined") {
+        /* node */
+        return global;
+    } else if (typeof window !== "undefined") {
+        /* browser window */
+        return window;
+    } else {
+        /* unknown global env */
+        return eval('this'); /* use non-strict mode to get global env */
+    }
+})();
+
 const CLIBS         = lua.to_luastring("__CLIBS__", true);
 const LUA_PATH_VAR  = "LUA_PATH";
 const LUA_CPATH_VAR = "LUA_CPATH";
@@ -63,7 +76,7 @@ if (typeof process === "undefined") {
         if (typeof res === "function" || (typeof res === "object" && res !== null)) {
             return res;
         } else if (res === void 0) { /* assume library added symbols to global environment */
-            return window;
+            return global_env;
         } else {
             lua.lua_pushstring(L, lua.to_luastring(`library returned unexpected type (${typeof res})`));
             return null;
@@ -186,12 +199,14 @@ const ll_loadlib = function(L) {
     }
 };
 
-let env;
-if (typeof process === "undefined") {
-    env = window;
-} else {
-    env = process.env;
-}
+const env = (function() {
+    if (typeof process !== "undefined") {
+        /* node */
+        return process.env;
+    } else {
+        return global_env;
+    }
+})();
 
 /*
 ** Set a path
