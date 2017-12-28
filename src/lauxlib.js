@@ -869,7 +869,14 @@ const lua_writestringerror = function() {
     for (let i=0; i<arguments.length; i++) {
         let a = arguments[i];
         if (typeof process === "undefined") {
-            console.error(a);
+            /* split along new lines for separate console.error invocations */
+            do {
+                /* regexp uses [\d\D] to work around matching new lines
+                   the 's' flag is non-standard */
+                let r = /([^\n]*)\n?([\d\D]*)/.exec(a);
+                console.error(r[1]);
+                a = r[2];
+            } while (a !== "");
         } else {
             process.stderr.write(a);
         }
