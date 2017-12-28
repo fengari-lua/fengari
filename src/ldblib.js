@@ -200,7 +200,7 @@ const db_setlocal = function(L) {
     let level = lauxlib.luaL_checkinteger(L, arg + 1);
     let nvar = lauxlib.luaL_checkinteger(L, arg + 2);
     if (!lua.lua_getstack(L1, level, ar))  /* out of range? */
-        return lauxlib.luaL_argerror(L, arg + 1, "level out of range");
+        return lauxlib.luaL_argerror(L, arg + 1, lua.to_luastring("level out of range", true));
     lauxlib.luaL_checkany(L, arg + 3);
     lua.lua_settop(L, arg + 3);
     checkstack(L, L1, 1);
