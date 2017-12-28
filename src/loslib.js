@@ -208,7 +208,6 @@ if (typeof process === "undefined") {
     syslib.remove = function(L) {
         let filename = lauxlib.luaL_checkstring(L, 1);
         try {
-            filename = Uint8Array.from(filename);
             if (fs.lstatSync(filename).isDirectory()) {
                 fs.rmdirSync(filename);
             } else {
@@ -224,8 +223,6 @@ if (typeof process === "undefined") {
         let fromname = lauxlib.luaL_checkstring(L, 1);
         let toname = lauxlib.luaL_checkstring(L, 2);
         try {
-            fromname = Uint8Array.from(fromname);
-            toname = Uint8Array.from(toname);
             fs.renameSync(fromname, toname);
         } catch (e) {
             return lauxlib.luaL_fileresult(L, false, false, e);
@@ -246,7 +243,7 @@ if (typeof process === "undefined") {
         if (cmd !== null) {
             try {
                 child_process.execSync(
-                    Uint8Array.from(cmd),
+                    cmd,
                     {
                         stdio: [process.stdin, process.stdout, process.stderr]
                     }

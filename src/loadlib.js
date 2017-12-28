@@ -133,7 +133,7 @@ if (typeof process !== "undefined") { // Only with Node
 
     readable = function(filename) {
         try {
-            let fd = fs.openSync(Uint8Array.from(filename), 'r');
+            let fd = fs.openSync(filename, 'r');
             fs.closeSync(fd);
         } catch (e) {
             return false;
