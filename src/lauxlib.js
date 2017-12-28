@@ -12,6 +12,9 @@ const LUA_FILEHANDLE = lua.to_luastring("FILE*");
 
 const LUAL_NUMSIZES  = 4*16 + 8;
 
+const __name = lua.to_luastring("__name");
+const __tostring = lua.to_luastring("__tostring");
+
 class luaL_Buffer {
     constructor() {
         this.b = null;
@@ -163,7 +166,7 @@ const luaL_argerror = function(L, arg, extramsg) {
 
 const typeerror = function(L, arg, tname) {
     let typearg;
-    if (luaL_getmetafield(L, arg, lua.to_luastring("__name", true)) === lua.LUA_TSTRING)
+    if (luaL_getmetafield(L, arg, __name) === lua.LUA_TSTRING)
         typearg = lua.lua_tostring(L, -1);
     else if (lua.lua_type(L, arg) === lua.LUA_TLIGHTUSERDATA)
         typearg = lua.to_luastring("light userdata", true);
@@ -243,7 +246,7 @@ const luaL_newmetatable = function(L, tname) {
     lua.lua_pop(L, 1);
     lua.lua_createtable(L, 0, 2);  /* create metatable */
     lua.lua_pushstring(L, tname);
-    lua.lua_setfield(L, -2, lua.to_luastring("__name"));  /* metatable.__name = tname */
+    lua.lua_setfield(L, -2, __name);  /* metatable.__name = tname */
     lua.lua_pushvalue(L, -1);
     lua.lua_setfield(L, lua.LUA_REGISTRYINDEX, tname);  /* registry.name = metatable */
     return 1;
@@ -474,18 +477,20 @@ const luaL_len = function(L, idx) {
     return l;
 };
 
+const p_I = lua.to_luastring("%I");
+const p_f = lua.to_luastring("%f");
 const luaL_tolstring = function(L, idx) {
-    if (luaL_callmeta(L, idx, lua.to_luastring("__tostring", true))) {
+    if (luaL_callmeta(L, idx, __tostring)) {
         if (!lua.lua_isstring(L, -1))
-            luaL_error(L, lua.to_luastring("'__tostring' must return a string", true));
+            luaL_error(L, lua.to_luastring("'__tostring' must return a string"));
     } else {
         let t = lua.lua_type(L, idx);
         switch(t) {
             case lua.LUA_TNUMBER: {
                 if (lua.lua_isinteger(L, idx))
-                    lua.lua_pushfstring(L, lua.to_luastring("%I"), lua.lua_tointeger(L, idx));
+                    lua.lua_pushfstring(L, p_I, lua.lua_tointeger(L, idx));
                 else
-                    lua.lua_pushfstring(L, lua.to_luastring("%f"), lua.lua_tonumber(L, idx));
+                    lua.lua_pushfstring(L, p_f, lua.lua_tonumber(L, idx));
                 break;
             }
             case lua.LUA_TSTRING:
@@ -498,7 +503,7 @@ const luaL_tolstring = function(L, idx) {
                 lua.lua_pushliteral(L, "nil");
                 break;
             default: {
-                let tt = luaL_getmetafield(L, idx, lua.to_luastring("__name", true));
+                let tt = luaL_getmetafield(L, idx, __name);
                 let kind = tt === lua.LUA_TSTRING ? lua.lua_tostring(L, -1) : luaL_typename(L, idx);
                 lua.lua_pushfstring(L, lua.to_luastring("%s: %p"), kind, lua.lua_topointer(L, idx));
                 if (tt !== lua.LUA_TNIL)
