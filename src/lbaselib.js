@@ -6,13 +6,16 @@ const lauxlib = require('./lauxlib.js');
 let lua_writestring;
 let lua_writeline;
 if (typeof process === "undefined") {
-    let buff = [];
+    let buff = "";
+    let decoder = new TextDecoder("utf-8");
     lua_writestring = function(s) {
-        buff = buff.concat(Array.from(s));
+        buff += decoder.decode(s, {stream: true});
     };
+    let empty = new Uint8Array(0);
     lua_writeline = function() {
-        console.log(new TextDecoder("utf-8").decode(Uint8Array.from(buff)));
-        buff = [];
+        buff += decoder.decode(empty);
+        console.log(buff);
+        buff = "";
     };
 } else {
     lua_writestring = function(s) {
