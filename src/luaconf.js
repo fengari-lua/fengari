@@ -24,7 +24,7 @@ const lua_integer2str = function(n) {
 };
 
 const lua_number2str = function(n) {
-    return String(Number(n.toPrecision(n))); /* should match behaviour of LUA_NUMBER_FMT */
+    return String(Number(n.toPrecision(14))); /* should match behaviour of LUA_NUMBER_FMT */
 };
 
 const lua_numbertointeger = function(n) {
