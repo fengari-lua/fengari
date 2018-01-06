@@ -667,7 +667,7 @@ const intarith = function(L, op, v1, v2) {
     switch (op) {
         case defs.LUA_OPADD:  return (v1 + v2)|0;
         case defs.LUA_OPSUB:  return (v1 - v2)|0;
-        case defs.LUA_OPMUL:  return Math.imul(v1, v2);
+        case defs.LUA_OPMUL:  return lvm.luaV_imul(v1, v2);
         case defs.LUA_OPMOD:  return lvm.luaV_mod(L, v1, v2);
         case defs.LUA_OPIDIV: return lvm.luaV_div(L, v1, v2);
         case defs.LUA_OPBAND: return (v1 & v2);

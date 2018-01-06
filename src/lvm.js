@@ -229,7 +229,7 @@ const luaV_execute = function(L) {
                 let numberop1, numberop2;
 
                 if (op1.ttisinteger() && op2.ttisinteger()) {
-                    L.stack[ra].setivalue(Math.imul(op1.value, op2.value));
+                    L.stack[ra].setivalue(luaV_imul(op1.value, op2.value));
                 } else if ((numberop1 = tonumber(op1)) !== false && (numberop2 = tonumber(op2)) !== false) {
                     L.stack[ra].setfltvalue(numberop1 * numberop2);
                 } else {
@@ -847,6 +847,19 @@ const luaV_objlen = function(L, ra, rb) {
     ltm.luaT_callTM(L, tm, rb, rb, ra, 1);
 };
 
+/* Shim taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/imul */
+const luaV_imul = Math.imul || function(a, b) {
+    let aHi = (a >>> 16) & 0xffff;
+    let aLo = a & 0xffff;
+    let bHi = (b >>> 16) & 0xffff;
+    let bLo = b & 0xffff;
+    /*
+    ** the shift by 0 fixes the sign on the high part
+    ** the final |0 converts the unsigned value into a signed value
+    */
+    return ((aLo * bLo) + (((aHi * bLo + aLo * bHi) << 16) >>> 0) | 0);
+};
+
 const luaV_div = function(L, m, n) {
     if (n === 0)
         ldebug.luaG_runerror(L, defs.to_luastring("attempt to divide by zero"));
@@ -1059,6 +1072,7 @@ module.exports.luaV_div         = luaV_div;
 module.exports.luaV_equalobj    = luaV_equalobj;
 module.exports.luaV_execute     = luaV_execute;
 module.exports.luaV_finishOp    = luaV_finishOp;
+module.exports.luaV_imul        = luaV_imul;
 module.exports.luaV_lessequal   = luaV_lessequal;
 module.exports.luaV_lessthan    = luaV_lessthan;
 module.exports.luaV_mod         = luaV_mod;
