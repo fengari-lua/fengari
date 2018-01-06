@@ -595,7 +595,12 @@ const str_pack = function(L) {
 };
 
 const str_reverse = function(L) {
-    lua.lua_pushstring(L, lauxlib.luaL_checkstring(L, 1).slice(0).reverse());
+    let s = lauxlib.luaL_checkstring(L, 1);
+    let l = s.length;
+    let r = new Uint8Array(l);
+    for (let i=0; i<l; i++)
+        r[i] = s[l-1-i];
+    lua.lua_pushstring(L, r);
     return 1;
 };
 
