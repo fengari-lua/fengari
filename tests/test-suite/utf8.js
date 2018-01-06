@@ -30,7 +30,7 @@ const prefix = `
     end
     -- 't' is the list of codepoints of 's'
     local function check (s, t)
-      local l = utf8.len(s) 
+      local l = utf8.len(s)
       assert(#t == l and len(s) == l)
       assert(utf8.char(table.unpack(t)) == s)
 
@@ -49,7 +49,7 @@ const prefix = `
         assert(utf8.offset(s, -1, pi1) == pi)
         assert(utf8.offset(s, i - l - 1) == pi)
         assert(pi1 - pi == #utf8.char(utf8.codepoint(s, pi)))
-        for j = pi, pi1 - 1 do 
+        for j = pi, pi1 - 1 do
           assert(utf8.offset(s, 0, j) == pi)
         end
         for j = pi + 1, pi1 - 1 do
@@ -73,7 +73,7 @@ const prefix = `
       i = 0
       for p, c in utf8.codes(s) do
         i = i + 1
-        assert(c == t[i] and p == utf8.offset(s, i)) 
+        assert(c == t[i] and p == utf8.offset(s, i))
       end
       assert(i == #t)
 
@@ -97,33 +97,28 @@ const prefix = `
 `;
 
 test("[test-suite] utf8: offset", function (t) {
-    let luaCode = `
+    let luaCode = prefix + `
         assert(utf8.offset("alo", 5) == nil)
         assert(utf8.offset("alo", -4) == nil)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
-
         L = lauxlib.luaL_newstate();
-
         lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
-
+        if (lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+            throw new SyntaxError(lua.lua_tojsstring(L, -1));
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
-
     }, "Lua program ran without error");
 });
 
 
 test("[test-suite] utf8: error indication in utf8.len", function (t) {
-    let luaCode = `
+    let luaCode = prefix + `
         do
           local function check (s, p)
             local a, b = utf8.len(s)
@@ -135,29 +130,24 @@ test("[test-suite] utf8: error indication in utf8.len", function (t) {
           check("\\xF4\\x9F\\xBF\\xBF", 1)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
-
         L = lauxlib.luaL_newstate();
-
         lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
-
+        if (lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+            throw new SyntaxError(lua.lua_tojsstring(L, -1));
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
-
     }, "Lua program ran without error");
 });
 
 
 test("[test-suite] utf8: error in initial position for offset", function (t) {
-    let luaCode = `
+    let luaCode = prefix + `
         checkerror("position out of range", utf8.offset, "abc", 1, 5)
         checkerror("position out of range", utf8.offset, "abc", 1, -4)
         checkerror("position out of range", utf8.offset, "", 1, 2)
@@ -166,29 +156,24 @@ test("[test-suite] utf8: error in initial position for offset", function (t) {
         checkerror("continuation byte", utf8.offset, "𦧺", 1, 2)
         checkerror("continuation byte", utf8.offset, "\\x80", 1)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
-
         L = lauxlib.luaL_newstate();
-
         lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
-
+        if (lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+            throw new SyntaxError(lua.lua_tojsstring(L, -1));
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
-
     }, "Lua program ran without error");
 });
 
 
 test("[test-suite] utf8: codepoints", function (t) {
-    let luaCode = `
+    let luaCode = prefix + `
         local s = "hello World"
         local t = {string.byte(s, 1, -1)}
         for i = 1, utf8.len(s) do assert(t[i] == string.byte(s, i)) end
@@ -215,135 +200,110 @@ test("[test-suite] utf8: codepoints", function (t) {
 
         checkerror("value out of range", utf8.char, 0x10FFFF + 1)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
-
         L = lauxlib.luaL_newstate();
-
         lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
-
+        if (lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+            throw new SyntaxError(lua.lua_tojsstring(L, -1));
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
-
     }, "Lua program ran without error");
 });
 
 
 test("[test-suite] utf8: UTF-8 representation for 0x11ffff (value out of valid range)", function (t) {
-    let luaCode = `
+    let luaCode = prefix + `
         invalid("\\xF4\\x9F\\xBF\\xBF")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
-
         L = lauxlib.luaL_newstate();
-
         lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
-
+        if (lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+            throw new SyntaxError(lua.lua_tojsstring(L, -1));
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
-
     }, "Lua program ran without error");
 });
 
 
 test("[test-suite] utf8: overlong sequences", function (t) {
-    let luaCode = `
+    let luaCode = prefix + `
         invalid("\\xC0\\x80")          -- zero
         invalid("\\xC1\\xBF")          -- 0x7F (should be coded in 1 byte)
         invalid("\\xE0\\x9F\\xBF")      -- 0x7FF (should be coded in 2 bytes)
         invalid("\\xF0\\x8F\\xBF\\xBF")  -- 0xFFFF (should be coded in 3 bytes)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
-
         L = lauxlib.luaL_newstate();
-
         lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
-
+        if (lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+            throw new SyntaxError(lua.lua_tojsstring(L, -1));
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
-
     }, "Lua program ran without error");
 });
 
 
 test("[test-suite] utf8: invalid bytes", function (t) {
-    let luaCode = `
+    let luaCode = prefix + `
         invalid("\\x80")  -- continuation byte
         invalid("\\xBF")  -- continuation byte
         invalid("\\xFE")  -- invalid byte
         invalid("\\xFF")  -- invalid byte
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
-
         L = lauxlib.luaL_newstate();
-
         lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
-
+        if (lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+            throw new SyntaxError(lua.lua_tojsstring(L, -1));
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
-
     }, "Lua program ran without error");
 });
 
 
 test("[test-suite] utf8: empty strings", function (t) {
-    let luaCode = `
+    let luaCode = prefix + `
         check("", {})
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
-
         L = lauxlib.luaL_newstate();
-
         lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
-
+        if (lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+            throw new SyntaxError(lua.lua_tojsstring(L, -1));
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
-
     }, "Lua program ran without error");
 });
 
 
 test("[test-suite] utf8: minimum and maximum values for each sequence size", function (t) {
-    let luaCode = `
+    let luaCode = prefix + `
         s = "\\0 \\x7F\\z
              \\xC2\\x80 \\xDF\\xBF\\z
              \\xE0\\xA0\\x80 \\xEF\\xBF\\xBF\\z
@@ -377,18 +337,13 @@ test("[test-suite] utf8: minimum and maximum values for each sequence size", fun
     t.plan(2);
 
     t.doesNotThrow(function () {
-
         L = lauxlib.luaL_newstate();
-
         lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
-
+        if (lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+            throw new SyntaxError(lua.lua_tojsstring(L, -1));
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
-
     }, "Lua program ran without error");
 });
