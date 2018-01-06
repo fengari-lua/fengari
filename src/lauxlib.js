@@ -570,14 +570,15 @@ const find_subarray = function(arr, subarr, from_index) {
 
 const luaL_gsub = function(L, s, p, r) {
     let wild;
-    let b = [];
+    let b = new luaL_Buffer();
+    luaL_buffinit(L, b);
     while ((wild = find_subarray(s, p)) >= 0) {
-        b.push(...s.slice(0, wild)); /* push prefix */
-        b.push(...r);  /* push replacement in place of pattern */
-        s = s.slice(wild + p.length);  /* continue after 'p' */
+        luaL_addlstring(b, s, wild);  /* push prefix */
+        luaL_addstring(b, r);  /* push replacement in place of pattern */
+        s = s.subarray(wild + p.length);  /* continue after 'p' */
     }
-    b.push(...s);  /* push last suffix */
-    lua.lua_pushstring(L, Uint8Array.from(b));
+    luaL_addstring(b, s);  /* push last suffix */
+    luaL_pushresult(b);
     return lua.lua_tostring(L, -1);
 };
 
