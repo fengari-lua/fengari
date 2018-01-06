@@ -15,11 +15,13 @@ const LUAL_NUMSIZES  = 4*16 + 8;
 const __name = lua.to_luastring("__name");
 const __tostring = lua.to_luastring("__tostring");
 
+const empty = new Uint8Array(0);
+
 class luaL_Buffer {
     constructor() {
-        this.b = null;
         this.L = null;
-        this.initb = null;
+        this.b = empty;
+        this.n = 0;
     }
 }
 
@@ -363,13 +365,19 @@ const luaL_optinteger = function(L, arg, def) {
 };
 
 const luaL_prepbuffsize = function(B, sz) {
-    B.initb = new Uint8Array(sz);
-    return B.initb;
+    let newend = B.n + sz;
+    if (B.b.length < newend) {
+        let newsize = Math.max(B.b.length * 2, newend);  /* double buffer size */
+        let newbuff = new Uint8Array(newsize);  /* create larger buffer */
+        newbuff.set(B.b);  /* copy original content */
+        B.b = newbuff;
+    }
+    return B.b.subarray(B.n, newend);
 };
 
 const luaL_buffinit = function(L, B) {
     B.L = L;
-    B.b = [];
+    B.b = empty;
 };
 
 const luaL_buffinitsize = function(L, B, sz) {
@@ -384,24 +392,31 @@ const luaL_prepbuffer = function(B) {
 };
 
 const luaL_addlstring = function(B, s, l) {
-    B.b = B.b.concat(Array.from(s.subarray(0, l)));
+    if (l > 0) {
+        let b = luaL_prepbuffsize(B, l);
+        b.set(s.subarray(0, l));
+        luaL_addsize(B, l);
+    }
 };
 
-const luaL_addstring = luaL_addlstring;
+const luaL_addstring = function(B, s) {
+    luaL_addlstring(B, s, s.length);
+};
 
 const luaL_pushresult = function(B) {
-    let L = B.L;
-    lua.lua_pushstring(L, Uint8Array.from(B.b));
+    lua.lua_pushlstring(B.L, B.b, B.n);
+    /* delete old buffer */
+    B.n = 0;
+    B.b = empty;
 };
 
 const luaL_addchar = function(B, c) {
-    B.b.push(c);
+    luaL_prepbuffsize(B, 1);
+    B.b[B.n++] = c;
 };
 
 const luaL_addsize = function(B, s) {
-    B.b = B.b.concat(Array.from(B.initb.subarray(0, s)));
     B.n += s;
-    B.initb = null;
 };
 
 const luaL_pushresultsize = function(B, sz) {
@@ -412,9 +427,8 @@ const luaL_pushresultsize = function(B, sz) {
 const luaL_addvalue = function(B) {
     let L = B.L;
     let s = lua.lua_tostring(L, -1);
-    // TODO: buffonstack ? necessary ?
-    luaL_addstring(B, s);
-    lua.lua_remove(L, -1);
+    luaL_addlstring(B, s, s.length);
+    lua.lua_pop(L, 1);  /* remove value */
 };
 
 const luaL_opt = function(L, f, n, d) {
