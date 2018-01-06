@@ -158,7 +158,7 @@ const is_luastring = function(s) {
 };
 
 /* test two lua strings for equality */
-const luastring_cmp = function(a, b) {
+const luastring_eq = function(a, b) {
     return a === b || (a.length === b.length && a.join() === b.join());
 };
 
@@ -462,7 +462,7 @@ module.exports.lua_Debug               = lua_Debug;
 module.exports.lua_upvalueindex        = lua_upvalueindex;
 module.exports.thread_status           = thread_status;
 module.exports.is_luastring            = is_luastring;
-module.exports.luastring_cmp           = luastring_cmp;
+module.exports.luastring_eq            = luastring_eq;
 module.exports.luastring_from          = luastring_from;
 module.exports.luastring_of            = luastring_of;
 module.exports.to_jsstring             = to_jsstring;

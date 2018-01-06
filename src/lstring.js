@@ -24,7 +24,7 @@ class TString {
 const luaS_eqlngstr = function(a, b) {
     assert(a instanceof TString);
     assert(b instanceof TString);
-    return a == b || defs.luastring_cmp(a.realstring, b.realstring);
+    return a == b || defs.luastring_eq(a.realstring, b.realstring);
 };
 
 /* converts strings (arrays) to a consistent map key
