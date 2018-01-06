@@ -173,11 +173,10 @@ const to_jsstring = function(value, from, to) {
 
     let str = "";
     for (let i = (from!==void 0?from:0); i < to;) {
-        let u;
         let u0 = value[i++];
         if (u0 < 0x80) {
             /* single byte sequence */
-            u = u0;
+            str += String.fromCharCode(u0);
         } else if (u0 < 0xC2 || u0 > 0xF4) {
             throw RangeError("cannot convert invalid utf8 to javascript string");
         } else if (u0 <= 0xDF) {
@@ -185,7 +184,7 @@ const to_jsstring = function(value, from, to) {
             if (i >= to) throw RangeError("cannot convert invalid utf8 to javascript string");
             let u1 = value[i++];
             if ((u1&0xC0) !== 0x80) throw RangeError("cannot convert invalid utf8 to javascript string");
-            u = ((u0 & 0x1F) << 6) + (u1 & 0x3F);
+            str += String.fromCharCode(((u0 & 0x1F) << 6) + (u1 & 0x3F));
         } else if (u0 <= 0xEF) {
             /* three byte sequence */
             if (i+1 >= to) throw RangeError("cannot convert invalid utf8 to javascript string");
@@ -193,7 +192,15 @@ const to_jsstring = function(value, from, to) {
             if ((u1&0xC0) !== 0x80) throw RangeError("cannot convert invalid utf8 to javascript string");
             let u2 = value[i++];
             if ((u2&0xC0) !== 0x80) throw RangeError("cannot convert invalid utf8 to javascript string");
-            u = ((u0 & 0x0F) << 12) + ((u1 & 0x3F) << 6) + (u2 & 0x3F);
+            let u = ((u0 & 0x0F) << 12) + ((u1 & 0x3F) << 6) + (u2 & 0x3F);
+            if (u <= 0xFFFF) { /* BMP codepoint */
+                str += String.fromCharCode(u);
+            } else { /* Astral codepoint */
+                u -= 0x10000;
+                let s1 = (u >> 10) + 0xD800;
+                let s2 = (u % 0x400) + 0xDC00;
+                str += String.fromCharCode(s1, s2);
+            }
         } else {
             /* four byte sequence */
             if (i+2 >= to) throw RangeError("cannot convert invalid utf8 to javascript string");
@@ -203,9 +210,13 @@ const to_jsstring = function(value, from, to) {
             if ((u2&0xC0) !== 0x80) throw RangeError("cannot convert invalid utf8 to javascript string");
             let u3 = value[i++];
             if ((u3&0xC0) !== 0x80) throw RangeError("cannot convert invalid utf8 to javascript string");
-            u = ((u0 & 0x07) << 18) + ((u1 & 0x3F) << 12) + ((u2 & 0x3F) << 6) + (u3 & 0x3F);
+            /* Has to be astral codepoint */
+            let u = ((u0 & 0x07) << 18) + ((u1 & 0x3F) << 12) + ((u2 & 0x3F) << 6) + (u3 & 0x3F);
+            u -= 0x10000;
+            let s1 = (u >> 10) + 0xD800;
+            let s2 = (u % 0x400) + 0xDC00;
+            str += String.fromCharCode(s1, s2);
         }
-        str += String.fromCodePoint(u);
     }
     return str;
 };

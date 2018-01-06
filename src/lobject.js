@@ -607,9 +607,12 @@ const luaO_pushvfstring = function(L, fmt, argp) {
                 }
                 break;
             }
-            case char['U']:
-                pushstr(L, defs.to_luastring(String.fromCodePoint(argp[a++])));
+            case char['U']: {
+                let buff = new Uint8Array(UTF8BUFFSZ);
+                let l = luaO_utf8esc(buff, argp[a++]);
+                pushstr(L, buff.subarray(UTF8BUFFSZ - l));
                 break;
+            }
             case char['%']:
                 pushstr(L, defs.to_luastring("%", true));
                 break;
