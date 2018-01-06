@@ -549,7 +549,7 @@ const str_pack = function(L) {
             case KOption.Kfloat: {  /* floating-point options */
                 let buff = lauxlib.luaL_prepbuffsize(b, size);
                 let n = lauxlib.luaL_checknumber(L, arg);  /* get argument */
-                let dv = new DataView(buff.buffer);
+                let dv = new DataView(buff.buffer, buff.byteOffset, buff.byteLength);
                 if (size === 4) dv.setFloat32(0, n, h.islittle);
                 else dv.setFloat64(0, n, h.islittle);
                 lauxlib.luaL_addsize(b, size);
