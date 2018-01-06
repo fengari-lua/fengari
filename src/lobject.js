@@ -448,17 +448,25 @@ const l_str2dloc = function(s, mode) {
     return (result.i === s.length || s[result.i] === 0) ? result : null;  /* OK if no trailing characters */
 };
 
+const SIGILS = [char["."], char["x"], char["X"], char["n"], char["N"]];
+const modes = {[char["."]]: ".", [char["x"]]: "x", [char["X"]]: "x", [char["n"]]: "n", [char["N"]]: "n"};
 const l_str2d = function(s) {
-    let pidx = /[.xXnN]/g.exec(String.fromCharCode(...s));
-    pidx = pidx ? pidx.index : null;
-    let pmode = pidx ? s[pidx] : null;
-    let mode = pmode ? String.fromCharCode(pmode).toLowerCase() : 0;
+    let l = s.length;
+    let pmode = 0;
+    for (let i=0; i<l; i++) {
+        let v = s[i];
+        if (SIGILS.indexOf(v) !== -1) {
+            pmode = v;
+            break;
+        }
+    }
+    let mode = modes[pmode];
     if (mode === 'n')  /* reject 'inf' and 'nan' */
         return null;
     let end = l_str2dloc(s, mode);  /* try to convert */
-    if (end === null) {   /* failed? may be a different locale */
-        // throw new Error("Locale not available to handle number"); // TODO
-    }
+    // if (end === null) {   /* failed? may be a different locale */
+    //     throw new Error("Locale not available to handle number"); // TODO
+    // }
     return end;
 };
 
