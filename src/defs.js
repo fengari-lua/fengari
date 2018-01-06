@@ -131,7 +131,18 @@ class lua_Debug {
 
 }
 
-const luastring_of = Uint8Array.of.bind(Uint8Array);
+let luastring_of;
+if (typeof Uint8Array.of === "function") {
+    luastring_of = Uint8Array.of.bind(Uint8Array);
+} else {
+    luastring_of = function() {
+        let i = 0;
+        let len = arguments.length;
+        let r = new Uint8Array(len);
+        while (len > i) r[i] = arguments[i++];
+        return r;
+    };
+}
 
 const is_luastring = function(s) {
     return s instanceof Uint8Array;
