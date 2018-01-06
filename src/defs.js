@@ -240,25 +240,37 @@ const to_luastring = function(str, cache) {
         if (is_luastring(cached)) return cached;
     }
 
-    let outU8Array = Array(str.length); /* array is at *least* going to be length of string */
+    let len = str.length;
+    let outU8Array = Array(len); /* array is at *least* going to be length of string */
     let outIdx = 0;
-    for (let i = 0; i < str.length; ++i) {
-        let u = str.codePointAt(i);
+    for (let i = 0; i < len; ++i) {
+        let u = str.charCodeAt(i);
         if (u <= 0x7F) {
             outU8Array[outIdx++] = u;
         } else if (u <= 0x7FF) {
             outU8Array[outIdx++] = 0xC0 | (u >> 6);
             outU8Array[outIdx++] = 0x80 | (u & 63);
-        } else if (u <= 0xFFFF) {
-            outU8Array[outIdx++] = 0xE0 | (u >> 12);
-            outU8Array[outIdx++] = 0x80 | ((u >> 6) & 63);
-            outU8Array[outIdx++] = 0x80 | (u & 63);
         } else {
-            i++; /* It was a surrogate pair and hence used up two javascript chars */
-            outU8Array[outIdx++] = 0xF0 | (u >> 18);
-            outU8Array[outIdx++] = 0x80 | ((u >> 12) & 63);
-            outU8Array[outIdx++] = 0x80 | ((u >> 6) & 63);
-            outU8Array[outIdx++] = 0x80 | (u & 63);
+            /* This part is to work around possible lack of String.codePointAt */
+            if (u >= 0xD800 && u <= 0xDBFF && (i+1) < len) {
+                /* is first half of surrogate pair */
+                let v = str.charCodeAt(i+1);
+                if (v >= 0xDC00 && v <= 0xDFFF) {
+                    /* is valid low surrogate */
+                    i++;
+                    u = (u - 0xD800) * 0x400 + v + 0x2400;
+                }
+            }
+            if (u <= 0xFFFF) {
+                outU8Array[outIdx++] = 0xE0 | (u >> 12);
+                outU8Array[outIdx++] = 0x80 | ((u >> 6) & 63);
+                outU8Array[outIdx++] = 0x80 | (u & 63);
+            } else {
+                outU8Array[outIdx++] = 0xF0 | (u >> 18);
+                outU8Array[outIdx++] = 0x80 | ((u >> 12) & 63);
+                outU8Array[outIdx++] = 0x80 | ((u >> 6) & 63);
+                outU8Array[outIdx++] = 0x80 | (u & 63);
+            }
         }
     }
     outU8Array = luastring_from(outU8Array);
