@@ -1936,13 +1936,35 @@ test("[test-suite] api: testing memory errors when creating a new state", { skip
     }, "Lua program ran without error");
 });
 
-test("[test-suite] api: get main thread from registry (at index LUA_RIDX_MAINTHREAD == 1)", { skip: true }, function (t) {
+test("[test-suite] api: get main thread from registry (at index LUA_RIDX_MAINTHREAD == 1)", function (t) {
     let luaCode = `
         mt = T.testC("rawgeti R 1; return 1")
         assert(type(mt) == "thread" and coroutine.running() == mt)
+    `, L;
 
+    t.plan(2);
 
+    t.doesNotThrow(function () {
 
+        L = lauxlib.luaL_newstate();
+
+        lualib.luaL_openlibs(L);
+
+        ltests.luaopen_tests(L);
+
+        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + memprefix + luaCode));
+
+    }, "Lua program loaded without error");
+
+    t.doesNotThrow(function () {
+
+        lua.lua_call(L, 0, -1);
+
+    }, "Lua program ran without error");
+});
+
+test("[test-suite] api: test thread creation after stressing GC", { skip: true }, function (t) {
+    let luaCode = `
         function expand (n,s)
           if n==0 then return "" end
           local e = string.rep("=", n)
