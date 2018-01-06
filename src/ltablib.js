@@ -131,6 +131,7 @@ const tmove = function(L) {
 const tconcat = function(L) {
     let last = aux_getn(L, 1, TAB_R);
     let sep = lauxlib.luaL_optlstring(L, 2, lua.to_luastring(""));
+    let lsep = sep.length;
     let i = lauxlib.luaL_optinteger(L, 3, 1);
     last = lauxlib.luaL_optinteger(L, 4, last);
 
@@ -139,7 +140,7 @@ const tconcat = function(L) {
 
     for (; i < last; i++) {
         addfield(L, b, i);
-        lauxlib.luaL_addlstring(b, sep);
+        lauxlib.luaL_addlstring(b, sep, lsep);
     }
 
     if (i === last)
