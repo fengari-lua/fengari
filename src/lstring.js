@@ -50,7 +50,7 @@ const luaS_bless = function(L, str) {
 
 /* makes a copy */
 const luaS_new = function(L, str) {
-    return luaS_bless(L, Uint8Array.from(str));
+    return luaS_bless(L, defs.luastring_from(str));
 };
 
 /* takes a js string */

@@ -131,16 +131,25 @@ class lua_Debug {
 
 }
 
+let luastring_from;
+if (typeof Uint8Array.from === "function") {
+    luastring_from = Uint8Array.from.bind(Uint8Array);
+} else {
+    luastring_from = function(a) {
+        let i = 0;
+        let len = a.length;
+        let r = new Uint8Array(len);
+        while (len > i) r[i] = a[i++];
+        return r;
+    };
+}
+
 let luastring_of;
 if (typeof Uint8Array.of === "function") {
     luastring_of = Uint8Array.of.bind(Uint8Array);
 } else {
     luastring_of = function() {
-        let i = 0;
-        let len = arguments.length;
-        let r = new Uint8Array(len);
-        while (len > i) r[i] = arguments[i++];
-        return r;
+        return luastring_from(arguments);
     };
 }
 
@@ -252,7 +261,7 @@ const to_luastring = function(str, cache) {
             outU8Array[outIdx++] = 0x80 | (u & 63);
         }
     }
-    outU8Array = Uint8Array.from(outU8Array);
+    outU8Array = luastring_from(outU8Array);
 
     if (cache) to_luastring_cache[str] = outU8Array;
 
@@ -442,6 +451,7 @@ module.exports.lua_upvalueindex        = lua_upvalueindex;
 module.exports.thread_status           = thread_status;
 module.exports.is_luastring            = is_luastring;
 module.exports.luastring_cmp           = luastring_cmp;
+module.exports.luastring_from          = luastring_from;
 module.exports.luastring_of            = luastring_of;
 module.exports.to_jsstring             = to_jsstring;
 module.exports.to_luastring            = to_luastring;
