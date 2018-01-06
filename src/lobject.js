@@ -302,15 +302,18 @@ const luaO_chunkid = function(source, bufflen) {
     let l = source.length;
     let out;
     if (source[0] === char['=']) {  /* 'literal' source */
-        if (l < bufflen)  /* small enough? */
-            out = source.slice(1);
-        else {  /* truncate it */
-            out = source.slice(1, bufflen+1);
+        if (l < bufflen) {  /* small enough? */
+            out = new Uint8Array(l-1);
+            out.set(source.subarray(1));
+        } else {  /* truncate it */
+            out = new Uint8Array(bufflen);
+            out.set(source.subarray(1, bufflen+1));
         }
     } else if (source[0] === char['@']) {  /* file name */
-        if (l <= bufflen)  /* small enough? */
-            out = source.slice(1);
-        else {  /* add '...' before rest of name */
+        if (l <= bufflen) {  /* small enough? */
+            out = new Uint8Array(l-1);
+            out.set(source.subarray(1));
+        } else {  /* add '...' before rest of name */
             out = new Uint8Array(bufflen);
             out.set(RETS);
             bufflen -= RETS.length;

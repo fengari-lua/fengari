@@ -74,7 +74,7 @@ const getiofile = function(L, findex) {
     lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, findex);
     let p = lua.lua_touserdata(L, -1);
     if (isclosed(p))
-        lauxlib.luaL_error(L, lua.to_luastring("standard %s file is closed"), findex.slice(IOPREF_LEN));
+        lauxlib.luaL_error(L, lua.to_luastring("standard %s file is closed"), findex.subarray(IOPREF_LEN));
     return p.f;
 };
 

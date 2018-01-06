@@ -73,7 +73,7 @@ const checkoption = function(L, conv, i, buff) {
         if (option[o] === '|'.charCodeAt(0))  /* next block? */
             oplen++;  /* will check options with next length (+1) */
         else if (array_cmp(conv, i, option, o, oplen)) {  /* match? */
-            buff.set(conv.slice(i, i+oplen)); /* copy valid option to buffer */
+            buff.set(conv.subarray(i, i+oplen)); /* copy valid option to buffer */
             return i + oplen;  /* return next item */
         }
     }

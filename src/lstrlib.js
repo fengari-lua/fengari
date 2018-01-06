@@ -88,11 +88,11 @@ const L_NBFD = 1;
 const num2straux = function(x) {
     /* if 'inf' or 'NaN', format it like '%g' */
     if (Object.is(x, Infinity))
-        return lua.to_luastring('inf', true).slice(0);
+        return lua.to_luastring('inf');
     else if (Object.is(x, -Infinity))
-        return lua.to_luastring('-inf', true).slice(0);
+        return lua.to_luastring('-inf');
     else if (Number.isNaN(x))
-        return lua.to_luastring('nan', true).slice(0);
+        return lua.to_luastring('nan');
     else if (x === 0) {  /* can be -0... */
         /* create "0" or "-0" followed by exponent */
         let zero = sprintf(luaconf.LUA_NUMBER_FMT + "x0p+0", x);

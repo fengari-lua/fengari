@@ -235,12 +235,12 @@ const lua_pushlstring = function(L, s, len) {
     let ts;
     if (len === 0) {
         s = defs.to_luastring("", true);
+        ts = lstring.luaS_bless(L, s);
     } else {
         s = defs.from_userstring(s);
         assert(s.length >= len, "invalid length to lua_pushlstring");
-        s = s.slice(0, len);
+        ts = lstring.luaS_new(L, s.subarray(0, len));
     }
-    ts = lstring.luaS_bless(L, s);
     lobject.pushsvalue2s(L, ts);
     assert(L.top <= L.ci.top, "stack overflow");
 

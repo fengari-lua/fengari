@@ -678,7 +678,7 @@ const luaL_unref = function(L, t, ref) {
 
 const errfile = function(L, what, fnameindex, error) {
     let serr = error.message;
-    let filename = lua.lua_tostring(L, fnameindex).slice(1);
+    let filename = lua.lua_tostring(L, fnameindex).subarray(1);
     lua.lua_pushfstring(L, lua.to_luastring("cannot %s %s: %s"), lua.to_luastring(what), filename, lua.to_luastring(serr));
     lua.lua_remove(L, fnameindex);
     return lua.LUA_ERRFILE;
@@ -824,7 +824,7 @@ if (typeof process === "undefined") {
             lf.pos += bytes;
         }
         if (bytes > 0)
-            return lf.buff.subarray(0, bytes); /* slice on a node.js Buffer is 'free' */
+            return lf.buff.subarray(0, bytes);
         else return null;
     };
 

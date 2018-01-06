@@ -26,7 +26,9 @@ if (typeof process === "undefined") {
                 s = lua.to_jsstring(s);
             } catch(e) {
                 /* otherwise push copy of raw array */
-                s = s.slice(0);
+                let copy = new Uint8Array(s.length);
+                copy.set(s);
+                s = copy;
             }
             buff.push(s);
         };

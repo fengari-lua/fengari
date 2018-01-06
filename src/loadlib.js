@@ -263,12 +263,12 @@ const addtoclib = function(L, path, plib) {
 };
 
 const pushnexttemplate = function(L, path) {
-    while (path[0] === lua.LUA_PATH_SEP.charCodeAt(0)) path = path.slice(1);  /* skip separators */
+    while (path[0] === lua.LUA_PATH_SEP.charCodeAt(0)) path = path.subarray(1);  /* skip separators */
     if (path.length === 0) return null;  /* no more templates */
     let l = lua.luastring_indexOf(path, lua.LUA_PATH_SEP.charCodeAt(0));  /* find next separator */
     if (l < 0) l = path.length;
     lua.lua_pushlstring(L, path, l);  /* template */
-    return path.slice(l);
+    return path.subarray(l);
 };
 
 const searchpath = function(L, name, path, sep, dirsep) {

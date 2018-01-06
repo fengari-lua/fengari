@@ -14,6 +14,7 @@ const ltm      = require('./ltm.js');
 const luaconf  = require('./luaconf.js');
 const lvm      = require('./lvm.js');
 
+const char = defs.char;
 const CT = defs.constant_types;
 const TS = defs.thread_status;
 
@@ -219,17 +220,17 @@ const getfuncname = function(L, ci) {
 
 const auxgetinfo = function(L, what, ar, f, ci) {
     let status = 1;
-    for (; what.length > 0; what = what.slice(1)) {
-        switch (String.fromCharCode(what[0])) {
-            case 'S': {
+    for (; what.length > 0; what = what.subarray(1)) {
+        switch (what[0]) {
+            case char['S']: {
                 funcinfo(ar, f);
                 break;
             }
-            case 'l': {
+            case char['l']: {
                 ar.currentline = ci && ci.callstatus & lstate.CIST_LUA ? currentline(ci) : -1;
                 break;
             }
-            case 'u': {
+            case char['u']: {
                 ar.nups = f === null ? 0 : f.nupvalues;
                 if (f === null || f instanceof lobject.CClosure) {
                     ar.isvararg = true;
@@ -240,11 +241,11 @@ const auxgetinfo = function(L, what, ar, f, ci) {
                 }
                 break;
             }
-            case 't': {
+            case char['t']: {
                 ar.istailcall = ci ? ci.callstatus & lstate.CIST_TAIL : 0;
                 break;
             }
-            case 'n': {
+            case char['n']: {
                 let r = getfuncname(L, ci);
                 if (r === null) {
                     ar.namewhat = defs.to_luastring("", true);
@@ -255,8 +256,8 @@ const auxgetinfo = function(L, what, ar, f, ci) {
                 }
                 break;
             }
-            case 'L':
-            case 'f':  /* handled by lua_getinfo */
+            case char['L']:
+            case char['f']:  /* handled by lua_getinfo */
                 break;
             default: status = 0;  /* invalid option */
         }
@@ -269,11 +270,11 @@ const lua_getinfo = function(L, what, ar) {
     what = defs.from_userstring(what);
     let status, cl, ci, func;
     swapextra(L);
-    if (what[0] === '>'.charCodeAt(0)) {
+    if (what[0] === char['>']) {
         ci = null;
         func = L.stack[L.top - 1];
         assert(L, func.ttisfunction(), "function expected");
-        what = what.slice(1);  /* skip the '>' */
+        what = what.subarray(1);  /* skip the '>' */
         L.top--;  /* pop function */
     } else {
         ci = ar.i_ci;
@@ -283,13 +284,13 @@ const lua_getinfo = function(L, what, ar) {
 
     cl = func.ttisclosure() ? func.value : null;
     status = auxgetinfo(L, what, ar, cl, ci);
-    if (defs.luastring_indexOf(what, 'f'.charCodeAt(0)) >= 0) {
+    if (defs.luastring_indexOf(what, char['f']) >= 0) {
         lobject.pushobj2s(L, func);
         assert(L.top <= L.ci.top, "stack overflow");
     }
 
     swapextra(L);
-    if (defs.luastring_indexOf(what, 'L'.charCodeAt(0)) >= 0)
+    if (defs.luastring_indexOf(what, char['L']) >= 0)
         collectvalidlines(L, cl);
 
     return status;
@@ -310,7 +311,7 @@ const kname = function(p, pc, c) {
         /* else no reasonable name found */
     } else {  /* 'c' is a register */
         let what = getobjname(p, pc, c); /* search for 'c' */
-        if (what && what.funcname[0] === 'c'.charCodeAt(0)) {  /* found a constant name? */
+        if (what && what.funcname[0] === char['c']) {  /* found a constant name? */
             return what;  /* 'name' already filled */
         }
         /* else no reasonable name found */
