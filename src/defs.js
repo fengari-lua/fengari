@@ -190,10 +190,11 @@ const to_jsstring = function(value, from, to) {
     return str;
 };
 
-const uri_allowed = {}; /* bytes allowed unescaped in a uri */
-for (let c of ";,/?:@&=+$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,-_.!~*'()#") {
+/* bytes allowed unescaped in a uri */
+const uri_allowed = (";,/?:@&=+$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,-_.!~*'()#").split('').reduce(function(uri_allowed, c) {
     uri_allowed[c.charCodeAt(0)] = true;
-}
+    return uri_allowed;
+}, {});
 
 /* utility function to convert a lua string to a js string with uri escaping */
 const to_uristring = function(a) {
