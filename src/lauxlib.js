@@ -154,7 +154,7 @@ const luaL_argerror = function(L, arg, extramsg) {
 
     lua.lua_getinfo(L, lua.to_luastring("n"), ar);
 
-    if (ar.namewhat.join() === lua.to_luastring("method").join()) {
+    if (ar.namewhat.toString() === lua.to_luastring("method").toString()) { /* TODO: luastring_eq? */
         arg--;  /* do not count 'self' */
         if (arg === 0)  /* error is in the self argument itself? */
             return luaL_error(L, lua.to_luastring("calling '%s' on bad self (%s)"), ar.name, extramsg);
