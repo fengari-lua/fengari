@@ -835,8 +835,7 @@ if (typeof process === "undefined") {
         } else {
             lua.lua_pushfstring(L, lua.to_luastring("@%s"), filename);
             try {
-                let jsfilename = Uint8Array.from(filename);
-                lf.f = fs.openSync(jsfilename, "r");
+                lf.f = fs.openSync(filename, "r");
             } catch (e) {
                 return errfile(L, "open", fnameindex, e);
             }
