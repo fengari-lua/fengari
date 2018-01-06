@@ -159,7 +159,14 @@ const is_luastring = function(s) {
 
 /* test two lua strings for equality */
 const luastring_eq = function(a, b) {
-    return a === b || (a.length === b.length && a.toString() === b.toString());
+    if (a !== b) {
+        let len = a.length;
+        if (len !== b.length) return false;
+        /* XXX: Should this be a constant time algorithm? */
+        for (let i=0; i<len; i++)
+            if (a[i] !== b[i]) return false;
+    }
+    return true;
 };
 
 const to_jsstring = function(value, from, to) {

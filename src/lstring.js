@@ -31,7 +31,11 @@ const luaS_eqlngstr = function(a, b) {
    make sure this doesn't conflict with any of the anti-collision strategies in ltable */
 const luaS_hash = function(str) {
     assert(defs.is_luastring(str));
-    return '|'+str.toString();
+    let len = str.length;
+    let s = "|";
+    for (let i=0; i<len; i++)
+        s += str[i].toString(16);
+    return s;
 };
 
 const luaS_hashlongstr = function(ts) {
