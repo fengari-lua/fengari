@@ -131,7 +131,7 @@ class lua_Debug {
 
 }
 
-const string_of = Uint8Array.of.bind(Uint8Array);
+const luastring_of = Uint8Array.of.bind(Uint8Array);
 
 const is_luastring = function(s) {
     return s instanceof Uint8Array;
@@ -431,7 +431,7 @@ module.exports.lua_upvalueindex        = lua_upvalueindex;
 module.exports.thread_status           = thread_status;
 module.exports.is_luastring            = is_luastring;
 module.exports.luastring_cmp           = luastring_cmp;
-module.exports.string_of               = string_of;
+module.exports.luastring_of            = luastring_of;
 module.exports.to_jsstring             = to_jsstring;
 module.exports.to_luastring            = to_luastring;
 module.exports.to_uristring            = to_uristring;

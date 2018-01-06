@@ -216,7 +216,7 @@ const funcs = {
 };
 
 /* pattern to match a single UTF-8 character */
-const UTF8PATT = Uint8Array.of(91, 0, 45, 127, 194, 45, 244, 93, 91, 128, 45, 191, 93, 42);
+const UTF8PATT = lua.luastring_of(91, 0, 45, 127, 194, 45, 244, 93, 91, 128, 45, 191, 93, 42);
 
 const luaopen_utf8 = function(L) {
     lauxlib.luaL_newlib(L, funcs);

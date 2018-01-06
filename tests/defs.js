@@ -6,37 +6,37 @@ const unicode_tests = [
     {
         description: "Convert normal ascii string",
         literal: "foo",
-        byte_array: defs.string_of("f".charCodeAt(0), "o".charCodeAt(0), "o".charCodeAt(0))
+        byte_array: defs.luastring_of("f".charCodeAt(0), "o".charCodeAt(0), "o".charCodeAt(0))
     },
     {
         description: "Convert ascii string containing null byte",
         literal: "fo\0o",
-        byte_array: defs.string_of("f".charCodeAt(0), "o".charCodeAt(0), 0, "o".charCodeAt(0))
+        byte_array: defs.luastring_of("f".charCodeAt(0), "o".charCodeAt(0), 0, "o".charCodeAt(0))
     },
     {
         description: "Convert string with BMP unicode chars",
         literal: "Café",
-        byte_array: defs.string_of(67, 97, 102, 195, 169)
+        byte_array: defs.luastring_of(67, 97, 102, 195, 169)
     },
     {
         description: "Convert string with codepoint in PUA (U+E000 to U+F8FF)",
         literal: "",
-        byte_array: defs.string_of(239, 163, 191)
+        byte_array: defs.luastring_of(239, 163, 191)
     },
     {
         description: "Convert string with surrogate pair",
         literal: "❤️🍾",
-        byte_array: defs.string_of(226, 157, 164, 239, 184, 143, 240, 159, 141, 190)
+        byte_array: defs.luastring_of(226, 157, 164, 239, 184, 143, 240, 159, 141, 190)
     },
     {
         description: "Convert string with broken surrogate pair",
         literal: "\uD800a",
-        byte_array: defs.string_of(237, 160, 128, 97)
+        byte_array: defs.luastring_of(237, 160, 128, 97)
     },
     {
         description: "Convert string with broken surrogate pair at end of string",
         literal: "\uD823",
-        byte_array: defs.string_of(237, 160, 163)
+        byte_array: defs.luastring_of(237, 160, 163)
     }
 ];
 

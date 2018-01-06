@@ -559,7 +559,7 @@ const luaO_pushvfstring = function(L, fmt, argp) {
             case char['c']: {
                 let buff = argp[a++];
                 if (ljstype.lisprint(buff))
-                    pushstr(L, defs.string_of(buff));
+                    pushstr(L, defs.luastring_of(buff));
                 else
                     luaO_pushfstring(L, defs.to_luastring("<\\%d>", true), buff);
                 break;
