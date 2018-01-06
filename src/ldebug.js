@@ -283,13 +283,13 @@ const lua_getinfo = function(L, what, ar) {
 
     cl = func.ttisclosure() ? func.value : null;
     status = auxgetinfo(L, what, ar, cl, ci);
-    if (what.indexOf('f'.charCodeAt(0)) >= 0) {
+    if (defs.luastring_indexOf(what, 'f'.charCodeAt(0)) >= 0) {
         lobject.pushobj2s(L, func);
         assert(L.top <= L.ci.top, "stack overflow");
     }
 
     swapextra(L);
-    if (what.indexOf('L'.charCodeAt(0)) >= 0)
+    if (defs.luastring_indexOf(what, 'L'.charCodeAt(0)) >= 0)
         collectvalidlines(L, cl);
 
     return status;

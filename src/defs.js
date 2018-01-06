@@ -144,6 +144,20 @@ if (typeof Uint8Array.from === "function") {
     };
 }
 
+let luastring_indexOf;
+if (typeof (new Uint8Array().indexOf) === "function") {
+    luastring_indexOf = function(s, v, i) {
+        return s.indexOf(v, i);
+    };
+} else {
+    /* Browsers that don't support Uint8Array.indexOf seem to allow using Array.indexOf on Uint8Array objects e.g. IE11 */
+    let array_indexOf = [].indexOf;
+    if (array_indexOf.call(new Uint8Array(1), 0) !== 0) throw Error("missing .indexOf");
+    luastring_indexOf = function(s, v, i) {
+        return array_indexOf.call(s, v, i);
+    };
+}
+
 let luastring_of;
 if (typeof Uint8Array.of === "function") {
     luastring_of = Uint8Array.of.bind(Uint8Array);
@@ -482,6 +496,7 @@ module.exports.thread_status           = thread_status;
 module.exports.is_luastring            = is_luastring;
 module.exports.luastring_eq            = luastring_eq;
 module.exports.luastring_from          = luastring_from;
+module.exports.luastring_indexOf       = luastring_indexOf;
 module.exports.luastring_of            = luastring_of;
 module.exports.to_jsstring             = to_jsstring;
 module.exports.to_luastring            = to_luastring;

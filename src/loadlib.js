@@ -265,7 +265,7 @@ const addtoclib = function(L, path, plib) {
 const pushnexttemplate = function(L, path) {
     while (path[0] === lua.LUA_PATH_SEP.charCodeAt(0)) path = path.slice(1);  /* skip separators */
     if (path.length === 0) return null;  /* no more templates */
-    let l = path.indexOf(lua.LUA_PATH_SEP.charCodeAt(0));  /* find next separator */
+    let l = lua.luastring_indexOf(path, lua.LUA_PATH_SEP.charCodeAt(0));  /* find next separator */
     if (l < 0) l = path.length;
     lua.lua_pushlstring(L, path, l);  /* template */
     return path.slice(l);
@@ -340,7 +340,7 @@ const searcher_Lua = function(L) {
 const loadfunc = function(L, filename, modname) {
     let openfunc;
     modname = lauxlib.luaL_gsub(L, modname, lua.to_luastring("."), LUA_OFSEP);
-    let mark = modname.indexOf(LUA_IGMARK.charCodeAt(0));
+    let mark = lua.luastring_indexOf(modname, LUA_IGMARK.charCodeAt(0));
     if (mark >= 0) {
         openfunc = lua.lua_pushlstring(L, modname, mark);
         openfunc = lua.lua_pushfstring(L, lua.to_luastring("%s%s"), LUA_POF, openfunc);
@@ -361,7 +361,7 @@ const searcher_C = function(L) {
 
 const searcher_Croot = function(L) {
     let name = lauxlib.luaL_checkstring(L, 1);
-    let p = name.indexOf('.'.charCodeAt(0));
+    let p = lua.luastring_indexOf(name, '.'.charCodeAt(0));
     let stat;
     if (p < 0) return 0;  /* is root */
     lua.lua_pushlstring(L, name, p);

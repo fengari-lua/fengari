@@ -318,7 +318,7 @@ const luaO_chunkid = function(source, bufflen) {
         }
     } else {  /* string; format as [string "source"] */
         out = new Uint8Array(bufflen);
-        let nli = source.indexOf(char['\n']);  /* find first new line (if any) */
+        let nli = defs.luastring_indexOf(source, char['\n']);  /* find first new line (if any) */
         out.set(PRE);  /* add prefix */
         let out_i = PRE.length;
         bufflen -= PRE.length + RETS.length + POS.length;  /* save space for prefix+suffix */
@@ -539,7 +539,7 @@ const luaO_pushvfstring = function(L, fmt, argp) {
     let a = 0;
     let e;
     for (;;) {
-        e = fmt.indexOf(char['%'], i);
+        e = defs.luastring_indexOf(fmt, char['%'], i);
         if (e == -1) break;
         pushstr(L, fmt.subarray(i, e));
         switch(fmt[e+1]) {
@@ -549,7 +549,7 @@ const luaO_pushvfstring = function(L, fmt, argp) {
                 else {
                     s = defs.from_userstring(s);
                     /* respect null terminator */
-                    let i = s.indexOf(0);
+                    let i = defs.luastring_indexOf(s, 0);
                     if (i !== -1)
                         s = s.subarray(0, i);
                 }

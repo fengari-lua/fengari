@@ -22,7 +22,7 @@ const MAXSIZE = 2147483647;
 
 /* Give natural (i.e. strings end at the first \0) length of a string represented by an array of bytes */
 const strlen = function(s) {
-    let len = s.indexOf(0);
+    let len = lua.luastring_indexOf(s, 0);
     return len > -1 ? len : s.length;
 };
 
@@ -181,9 +181,9 @@ const addquoted = function(b, s, len) {
 ** Ensures the 'buff' string uses a dot as the radix character.
 */
 const checkdp = function(buff) {
-    if (buff.indexOf('.'.charCodeAt(0)) < 0) {  /* no dot? */
+    if (lua.luastring_indexOf(buff, '.'.charCodeAt(0)) < 0) {  /* no dot? */
         let point = luaconf.lua_getlocaledecpoint().charCodeAt(0);  /* try locale point */
-        let ppoint = buff.indexOf(point);
+        let ppoint = lua.luastring_indexOf(buff, point);
         if (ppoint) buff[ppoint] = '.';  /* change it to a dot */
     }
 };
@@ -224,7 +224,7 @@ const addliteral = function(L, b, arg) {
 
 const scanformat = function(L, strfrmt, i, form) {
     let p = i;
-    while (strfrmt[p] !== 0 && FLAGS.indexOf(strfrmt[p]) >= 0) p++;  /* skip flags */
+    while (strfrmt[p] !== 0 && lua.luastring_indexOf(FLAGS, strfrmt[p]) >= 0) p++;  /* skip flags */
     if (p - i >= FLAGS.length)
         lauxlib.luaL_error(L, lua.to_luastring("invalid format (repeated flags)", true));
     if (isdigit(strfrmt[p])) p++;  /* skip width */
@@ -307,7 +307,7 @@ const str_format = function(L) {
                         lauxlib.luaL_addvalue(b);  /* keep entire string */
                     } else {
                         lauxlib.luaL_argcheck(L, s.length === strlen(s), arg, lua.to_luastring("string contains zeros", true));
-                        if (form.indexOf('.'.charCodeAt(0)) < 0 && s.length >= 100) {
+                        if (lua.luastring_indexOf(form, '.'.charCodeAt(0)) < 0 && s.length >= 100) {
                             /* no precision and string is too long to be formatted */
                             lauxlib.luaL_addvalue(b);  /* keep entire string */
                         } else {  /* format the string into 'buff' */
@@ -578,7 +578,7 @@ const str_pack = function(L) {
             case KOption.Kzstr: {  /* zero-terminated string */
                 let s = lauxlib.luaL_checkstring(L, arg);
                 let len = s.length;
-                lauxlib.luaL_argcheck(L, s.indexOf(0) < 0, arg, lua.to_luastring("strings contains zeros", true));
+                lauxlib.luaL_argcheck(L, lua.luastring_indexOf(s, 0) < 0, arg, lua.to_luastring("strings contains zeros", true));
                 lauxlib.luaL_addlstring(b, s, len);
                 lauxlib.luaL_addchar(b, 0);  /* add zero at the end */
                 totalsize += len + 1;
@@ -774,7 +774,7 @@ const str_unpack = function(L) {
                 break;
             }
             case KOption.Kzstr: {
-                let len = data.slice(pos).indexOf(0);
+                let len = lua.luastring_indexOf(data.slice(pos), 0);
                 lua.lua_pushstring(L, data.slice(pos, pos + len));
                 pos += len + 1;  /* skip string plus final '\0' */
                 break;
@@ -969,7 +969,7 @@ const array_cmp = function(a, ai, b, bi, len) {
         return true;
     let aj = ai+len;
     loop: for (;;) {
-        ai = a.indexOf(b[bi], ai);
+        ai = lua.luastring_indexOf(a, b[bi], ai);
         if (ai === -1 || ai >= aj)
             return false;
         for (let j = 1; j < len; j++) {

@@ -721,9 +721,9 @@ const sethook = function(L) {
         const smask = lauxlib.luaL_checkstring(L, 2);
         let count = lauxlib.luaL_optinteger(L, 3, 0);
         let mask = 0;
-        if (smask.indexOf('c'.charCodeAt(0)) >= 0) mask |= lua.LUA_MASKCALL;
-        if (smask.indexOf('r'.charCodeAt(0)) >= 0) mask |= lua.LUA_MASKRET;
-        if (smask.indexOf('l'.charCodeAt(0)) >= 0) mask |= lua.LUA_MASKLINE;
+        if (lua.luastring_indexOf(smask, 'c'.charCodeAt(0)) >= 0) mask |= lua.LUA_MASKCALL;
+        if (lua.luastring_indexOf(smask, 'r'.charCodeAt(0)) >= 0) mask |= lua.LUA_MASKRET;
+        if (lua.luastring_indexOf(smask, 'l'.charCodeAt(0)) >= 0) mask |= lua.LUA_MASKLINE;
         if (count > 0) mask |= lua.LUA_MASKCOUNT;
         sethookaux(L, mask, count, scpt);
     }

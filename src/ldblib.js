@@ -136,29 +136,29 @@ const db_getinfo = function(L) {
     if (!lua.lua_getinfo(L1, options, ar))
         lauxlib.luaL_argerror(L, arg + 2, lua.to_luastring("invalid option", true));
     lua.lua_newtable(L);  /* table to collect results */
-    if (options.indexOf('S'.charCodeAt(0)) > -1) {
+    if (lua.luastring_indexOf(options, 'S'.charCodeAt(0)) > -1) {
         settabss(L, lua.to_luastring("source", true), ar.source);
         settabss(L, lua.to_luastring("short_src", true), ar.short_src);
         settabsi(L, lua.to_luastring("linedefined", true), ar.linedefined);
         settabsi(L, lua.to_luastring("lastlinedefined", true), ar.lastlinedefined);
         settabss(L, lua.to_luastring("what", true), ar.what);
     }
-    if (options.indexOf('l'.charCodeAt(0)) > -1)
+    if (lua.luastring_indexOf(options, 'l'.charCodeAt(0)) > -1)
         settabsi(L, lua.to_luastring("currentline", true), ar.currentline);
-    if (options.indexOf('u'.charCodeAt(0)) > -1) {
+    if (lua.luastring_indexOf(options, 'u'.charCodeAt(0)) > -1) {
         settabsi(L, lua.to_luastring("nups", true), ar.nups);
         settabsi(L, lua.to_luastring("nparams", true), ar.nparams);
         settabsb(L, lua.to_luastring("isvararg", true), ar.isvararg);
     }
-    if (options.indexOf('n'.charCodeAt(0)) > - 1) {
+    if (lua.luastring_indexOf(options, 'n'.charCodeAt(0)) > -1) {
         settabss(L, lua.to_luastring("name", true), ar.name);
         settabss(L, lua.to_luastring("namewhat", true), ar.namewhat);
     }
-    if (options.indexOf('t'.charCodeAt(0)) > - 1)
+    if (lua.luastring_indexOf(options, 't'.charCodeAt(0)) > -1)
         settabsb(L, lua.to_luastring("istailcall", true), ar.istailcall);
-    if (options.indexOf('L'.charCodeAt(0)) > - 1)
+    if (lua.luastring_indexOf(options, 'L'.charCodeAt(0)) > -1)
         treatstackoption(L, L1, lua.to_luastring("activelines", true));
-    if (options.indexOf('f'.charCodeAt(0)) > - 1)
+    if (lua.luastring_indexOf(options, 'f'.charCodeAt(0)) > -1)
         treatstackoption(L, L1, lua.to_luastring("func", true));
     return 1;  /* return table */
 };
@@ -291,9 +291,9 @@ const hookf = function(L, ar) {
 */
 const makemask = function(smask, count) {
     let mask = 0;
-    if (smask.indexOf("c".charCodeAt(0)) > -1) mask |= lua.LUA_MASKCALL;
-    if (smask.indexOf("r".charCodeAt(0)) > -1) mask |= lua.LUA_MASKRET;
-    if (smask.indexOf("l".charCodeAt(0)) > -1) mask |= lua.LUA_MASKLINE;
+    if (lua.luastring_indexOf(smask, "c".charCodeAt(0)) > -1) mask |= lua.LUA_MASKCALL;
+    if (lua.luastring_indexOf(smask, "r".charCodeAt(0)) > -1) mask |= lua.LUA_MASKRET;
+    if (lua.luastring_indexOf(smask, "l".charCodeAt(0)) > -1) mask |= lua.LUA_MASKLINE;
     if (count > 0) mask |= lua.LUA_MASKCOUNT;
     return mask;
 };

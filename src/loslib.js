@@ -112,7 +112,7 @@ const os_date = function(L) {
             } else {
                 i++;  /* skip '%' */
                 i = checkoption(L, s, i, cc.subarray(1));  /* copy specifier to 'cc' */
-                let len = cc.indexOf(0);
+                let len = lua.luastring_indexOf(cc, 0);
                 if (len !== -1)
                     cc = cc.subarray(0, len);
                 let buff = strftime(lua.to_jsstring(cc), stm);
