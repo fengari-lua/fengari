@@ -6,17 +6,35 @@ const lauxlib = require('./lauxlib.js');
 let lua_writestring;
 let lua_writeline;
 if (typeof process === "undefined") {
-    let buff = "";
-    let decoder = new TextDecoder("utf-8");
-    lua_writestring = function(s) {
-        buff += decoder.decode(s, {stream: true});
-    };
-    let empty = new Uint8Array(0);
-    lua_writeline = function() {
-        buff += decoder.decode(empty);
-        console.log(buff);
-        buff = "";
-    };
+    if (typeof TextDecoder === "function") { /* Older browsers don't have TextDecoder */
+        let buff = "";
+        let decoder = new TextDecoder("utf-8");
+        lua_writestring = function(s) {
+            buff += decoder.decode(s, {stream: true});
+        };
+        let empty = new Uint8Array(0);
+        lua_writeline = function() {
+            buff += decoder.decode(empty);
+            console.log(buff);
+            buff = "";
+        };
+    } else {
+        let buff = [];
+        lua_writestring = function(s) {
+            try {
+                /* If the string is valid utf8, then we can use to_jsstring */
+                s = lua.to_jsstring(s);
+            } catch(e) {
+                /* otherwise push copy of raw array */
+                s = s.slice(0);
+            }
+            buff.push(s);
+        };
+        lua_writeline = function() {
+            console.log.apply(console.log, buff);
+            buff = [];
+        };
+    }
 } else {
     lua_writestring = function(s) {
         process.stdout.write(Buffer.from(s));
