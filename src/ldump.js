@@ -6,7 +6,7 @@ const CT      = defs.constant_types;
 const LUAC_DATA    = defs.luastring_of(25, 147, 13, 10, 26, 10);
 const LUAC_INT     = 0x5678;
 const LUAC_NUM     = 370.5;
-const LUAC_VERSION = Number.parseInt(defs.LUA_VERSION_MAJOR) * 16 + Number.parseInt(defs.LUA_VERSION_MINOR);
+const LUAC_VERSION = Number(defs.LUA_VERSION_MAJOR) * 16 + Number(defs.LUA_VERSION_MINOR);
 const LUAC_FORMAT  = 0;   /* this is the official format */
 
 class DumpState {
