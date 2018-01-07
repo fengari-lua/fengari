@@ -2,6 +2,9 @@
 
 const lua     = require('./lua.js');
 
+/* extra error code for 'luaL_loadfilex' */
+const LUA_ERRFILE = lua.LUA_ERRERR+1;
+
 /* key, in the registry, for table of loaded modules */
 const LUA_LOADED_TABLE = lua.to_luastring("_LOADED");
 
@@ -681,7 +684,7 @@ const errfile = function(L, what, fnameindex, error) {
     let filename = lua.lua_tostring(L, fnameindex).subarray(1);
     lua.lua_pushfstring(L, lua.to_luastring("cannot %s %s: %s"), lua.to_luastring(what), filename, lua.to_luastring(serr));
     lua.lua_remove(L, fnameindex);
-    return lua.LUA_ERRFILE;
+    return LUA_ERRFILE;
 };
 
 let getc;
@@ -914,6 +917,7 @@ const luaL_checkversion = function(L) {
         luaL_error(L, lua.to_luastring("version mismatch: app. needs %f, Lua core provides %f"), ver, v);
 };
 
+module.exports.LUA_ERRFILE          = LUA_ERRFILE;
 module.exports.LUA_FILEHANDLE       = LUA_FILEHANDLE;
 module.exports.LUA_LOADED_TABLE     = LUA_LOADED_TABLE;
 module.exports.LUA_NOREF            = LUA_NOREF;
