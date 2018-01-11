@@ -61,8 +61,6 @@ constant_types.LUA_TLCL = constant_types.LUA_TFUNCTION | (0 << 4);  /* Lua closu
 constant_types.LUA_TLCF = constant_types.LUA_TFUNCTION | (1 << 4);  /* light C function */
 constant_types.LUA_TCCL = constant_types.LUA_TFUNCTION | (2 << 4);  /* C closure */
 
-const CT = constant_types;
-
 /*
 ** Comparison and arithmetic functions
 */
@@ -426,7 +424,6 @@ if (typeof process === "undefined") {
     module.exports.LUA_CPATH_DEFAULT = LUA_CPATH_DEFAULT;
 }
 
-module.exports.CT                      = CT;
 module.exports.LUA_AUTHORS             = LUA_AUTHORS;
 module.exports.LUA_COPYRIGHT           = LUA_COPYRIGHT;
 module.exports.LUA_HOOKCALL            = LUA_HOOKCALL;

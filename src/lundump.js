@@ -10,6 +10,15 @@ const lopcodes = require('./lopcodes.js');
 const lstring  = require('./lstring.js');
 const lzio     = require('./lzio.js');
 
+const {
+    LUA_TBOOLEAN,
+    LUA_TLNGSTR,
+    LUA_TNIL,
+    LUA_TNUMFLT,
+    LUA_TNUMINT,
+    LUA_TSHRSTR
+} = defs.constant_types;
+
 let LUAC_DATA = [0x19, 0x93, defs.char["\r"], defs.char["\n"], 0x1a, defs.char["\n"]];
 
 class BytecodeParser {
@@ -145,21 +154,21 @@ class BytecodeParser {
             let t = this.readByte();
 
             switch (t) {
-                case defs.CT.LUA_TNIL:
-                    f.k.push(new lobject.TValue(defs.CT.LUA_TNIL, null));
+                case LUA_TNIL:
+                    f.k.push(new lobject.TValue(LUA_TNIL, null));
                     break;
-                case defs.CT.LUA_TBOOLEAN:
-                    f.k.push(new lobject.TValue(defs.CT.LUA_TBOOLEAN, this.readByte() !== 0));
+                case LUA_TBOOLEAN:
+                    f.k.push(new lobject.TValue(LUA_TBOOLEAN, this.readByte() !== 0));
                     break;
-                case defs.CT.LUA_TNUMFLT:
-                    f.k.push(new lobject.TValue(defs.CT.LUA_TNUMFLT, this.readNumber()));
+                case LUA_TNUMFLT:
+                    f.k.push(new lobject.TValue(LUA_TNUMFLT, this.readNumber()));
                     break;
-                case defs.CT.LUA_TNUMINT:
-                    f.k.push(new lobject.TValue(defs.CT.LUA_TNUMINT, this.readInteger()));
+                case LUA_TNUMINT:
+                    f.k.push(new lobject.TValue(LUA_TNUMINT, this.readInteger()));
                     break;
-                case defs.CT.LUA_TSHRSTR:
-                case defs.CT.LUA_TLNGSTR:
-                    f.k.push(new lobject.TValue(defs.CT.LUA_TLNGSTR, this.readString()));
+                case LUA_TSHRSTR:
+                case LUA_TLNGSTR:
+                    f.k.push(new lobject.TValue(LUA_TLNGSTR, this.readString()));
                     break;
                 default:
                     this.error(`unrecognized constant '${t}'`);

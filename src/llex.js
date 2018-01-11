@@ -11,8 +11,10 @@ const lstring  = require('./lstring.js');
 const ltable   = require('./ltable.js');
 const llimits  = require('./llimits.js');
 const lzio     = require('./lzio.js');
-const TS       = defs.thread_status;
+
+const {LUA_TLNGSTR} = defs.constant_types;
 const char     = defs.char;
+const TS       = defs.thread_status;
 
 const FIRST_RESERVED = 257;
 
@@ -151,7 +153,7 @@ const save_and_next = function(ls) {
 const luaX_newstring = function(ls, str) {
     let L = ls.L;
     let ts = lstring.luaS_new(L, str);
-    let o = ltable.luaH_set(L, ls.h, new lobject.TValue(defs.CT.LUA_TLNGSTR, ts));
+    let o = ltable.luaH_set(L, ls.h, new lobject.TValue(LUA_TLNGSTR, ts));
     if (o.ttisnil()) { /* not in use yet? */
         o.setbvalue(true);
     } else { /* string already present */
