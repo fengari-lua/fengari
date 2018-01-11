@@ -5,7 +5,7 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
-
+const {to_luastring} = require("../../src/fengaricore.js");
 
 const prefix = `
     local minint = math.mininteger
@@ -59,7 +59,7 @@ test("[test-suite] math: int bits", function (t) {
         assert(minint == 1 << (intbits - 1))
         assert(maxint == minint - 1)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -68,7 +68,7 @@ test("[test-suite] math: int bits", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -98,7 +98,7 @@ test("[test-suite] math: number of bits in the mantissa of a floating-point numb
         assert(math.type(0) == "integer" and math.type(0.0) == "float"
                and math.type("10") == nil)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -107,7 +107,7 @@ test("[test-suite] math: number of bits in the mantissa of a floating-point numb
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -162,7 +162,7 @@ test("[test-suite] math: basic float notation", function (t) {
           assert(eqT(a, minint) and eqT(b, 0.0))
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -171,7 +171,7 @@ test("[test-suite] math: basic float notation", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -189,7 +189,7 @@ test("[test-suite] math: math.huge", function (t) {
         assert(math.huge > 10e30)
         assert(-math.huge < -10e30)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -198,7 +198,7 @@ test("[test-suite] math: math.huge", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -219,7 +219,7 @@ test("[test-suite] math: integer arithmetic", function (t) {
         assert(minint * minint == 0)
         assert(maxint * maxint * maxint == maxint)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -228,7 +228,7 @@ test("[test-suite] math: integer arithmetic", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -274,7 +274,7 @@ test("[test-suite] math: testing floor division and conversions", function (t) {
         assert(minint // -2 == 2^(intbits - 2))
         assert(maxint // -1 == -maxint)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -283,7 +283,7 @@ test("[test-suite] math: testing floor division and conversions", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -311,7 +311,7 @@ test("[test-suite] math: negative exponents", function (t) {
           end
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -320,7 +320,7 @@ test("[test-suite] math: negative exponents", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -351,7 +351,7 @@ test("[test-suite] math: comparison between floats and integers (border cases)",
         assert(minint + 0.0 == minint)
         assert(minint + 0.0 == -2.0^(intbits - 1))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -360,7 +360,7 @@ test("[test-suite] math: comparison between floats and integers (border cases)",
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -460,7 +460,7 @@ test("[test-suite] math: order between floats and integers", function (t) {
           assert(not (minint < NaN))
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -469,7 +469,7 @@ test("[test-suite] math: order between floats and integers", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -491,7 +491,7 @@ test("[test-suite] math: avoiding errors at compile time", function (t) {
         checkcompt(msgf2i, ("return 1 | 2.0^%d"):format(intbits - 1))
         checkcompt(msgf2i, "return 2.3 ~ '0.0'")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -500,7 +500,7 @@ test("[test-suite] math: avoiding errors at compile time", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -544,7 +544,7 @@ test("[test-suite] math: testing overflow errors when converting from float to i
         -- 'minint' should be representable as a float no matter the precision
         assert(f2i(minint + 0.0) == minint)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -553,7 +553,7 @@ test("[test-suite] math: testing overflow errors when converting from float to i
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -573,7 +573,7 @@ test("[test-suite] math: testing numeric strings", function (t) {
         assert(" -2 " + 1 == -1)
         assert(" -0xa " + 1 == -9)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -582,7 +582,7 @@ test("[test-suite] math: testing numeric strings", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -631,7 +631,7 @@ test("[test-suite] math: Literal integer Overflows (new behavior in 5.3.3)", fun
           assert(eqT(-10000000000000000000000.0, -10000000000000000000000))
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -640,7 +640,7 @@ test("[test-suite] math: Literal integer Overflows (new behavior in 5.3.3)", fun
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -660,7 +660,7 @@ test("[test-suite] math: 'tonumber' with numbers", function (t) {
         assert(eqT(tonumber(maxint), maxint) and eqT(tonumber(minint), minint))
         assert(tonumber(1/0) == 1/0)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -669,7 +669,7 @@ test("[test-suite] math: 'tonumber' with numbers", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -722,7 +722,7 @@ test("[test-suite] math: 'tonumber' with strings", function (t) {
           assert(tonumber('\\t10000000000\\t', i) == i10)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -731,7 +731,7 @@ test("[test-suite] math: 'tonumber' with strings", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -760,7 +760,7 @@ test("[test-suite] math: tests with very long numerals", function (t) {
         assert(tonumber('0xe03' .. string.rep('0', 1000) .. 'p-4000') == 3587.0)
         assert(tonumber('0x.' .. string.rep('0', 1000) .. '74p4004') == 0x7.4)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -769,7 +769,7 @@ test("[test-suite] math: tests with very long numerals", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -816,7 +816,7 @@ test("[test-suite] math: testing 'tonumber' for invalid formats", function (t) {
         assert(f(tonumber('e  1')) == nil)
         assert(f(tonumber(' 3.4.5 ')) == nil)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -825,7 +825,7 @@ test("[test-suite] math: testing 'tonumber' for invalid formats", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -853,7 +853,7 @@ test("[test-suite] math: testing 'tonumber' for invalid hexadecimal formats", fu
         assert(tonumber('0x0.51p') == nil)
         assert(tonumber('0x5p+-2') == nil)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -862,7 +862,7 @@ test("[test-suite] math: testing 'tonumber' for invalid hexadecimal formats", fu
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -887,7 +887,7 @@ test("[test-suite] math: testing hexadecimal numerals", function (t) {
         -- possible confusion with decimal exponent
         assert(0E+1 == 0 and 0xE+1 == 15 and 0xe-1 == 13)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -896,7 +896,7 @@ test("[test-suite] math: testing hexadecimal numerals", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -935,7 +935,7 @@ test("[test-suite] math: floating hexas", function (t) {
 
         assert(tonumber('+1.23E18') == 1.23*10.0^18)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -944,7 +944,7 @@ test("[test-suite] math: floating hexas", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -969,7 +969,7 @@ test("[test-suite] math: testing order operators", function (t) {
         assert(('a'>='a') and not('a'>='b') and ('b'>='a'))
         assert(1.3 < 1.4 and 1.3 <= 1.4 and not (1.3 < 1.3) and 1.3 <= 1.3)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -978,7 +978,7 @@ test("[test-suite] math: testing order operators", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1010,7 +1010,7 @@ test("[test-suite] math: testing mod operator", function (t) {
         assert(minint % -2 == 0)
         assert(maxint % -2 == -1)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1019,7 +1019,7 @@ test("[test-suite] math: testing mod operator", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1047,7 +1047,7 @@ test("[test-suite] math: non-portable tests because Windows C library cannot com
         assert(-1 % math.huge == math.huge)
         assert(-1 % -math.huge == -1)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1056,7 +1056,7 @@ test("[test-suite] math: non-portable tests because Windows C library cannot com
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1103,7 +1103,7 @@ test("[test-suite] math: testing unsigned comparisons", function (t) {
         assert(tonumber(' 1.3e-2 ') == 1.3e-2)
         assert(tonumber(' -1.00000000000001 ') == -1.00000000000001)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1112,7 +1112,7 @@ test("[test-suite] math: testing unsigned comparisons", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1131,7 +1131,7 @@ test("[test-suite] math: testing constant limits", function (t) {
         assert(8388608 + -8388608 == 0)
         assert(8388607 + -8388607 == 0)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1140,7 +1140,7 @@ test("[test-suite] math: testing constant limits", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1198,7 +1198,7 @@ test("[test-suite] math: testing floor & ceil", function (t) {
           assert(math.tointeger(0/0) == nil)    -- NaN
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1207,7 +1207,7 @@ test("[test-suite] math: testing floor & ceil", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1242,7 +1242,7 @@ test("[test-suite] math: testing fmod for integers", function (t) {
 
         checkerror("zero", math.fmod, 3, 0)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1251,7 +1251,7 @@ test("[test-suite] math: testing fmod for integers", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1282,7 +1282,7 @@ test("[test-suite] math: testing max/min", function (t) {
           assert(eqT(math.min(maxint - 2, maxint, maxint - 1), maxint - 2))
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1291,7 +1291,7 @@ test("[test-suite] math: testing max/min", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1310,7 +1310,7 @@ test("[test-suite] math: testing implicit convertions", function (t) {
         assert(a*b == 200 and a+b == 30 and a-b == -10 and a/b == 0.5 and -b == -20)
         assert(a == '10' and b == '20')
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1319,7 +1319,7 @@ test("[test-suite] math: testing implicit convertions", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1369,7 +1369,7 @@ test("[test-suite] math: testing -0 and NaN", function (t) {
           assert(a3 == a5)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1378,7 +1378,7 @@ test("[test-suite] math: testing -0 and NaN", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1410,7 +1410,7 @@ test("[test-suite] math: test random for floats", function (t) {
          ::ok::
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1419,7 +1419,7 @@ test("[test-suite] math: test random for floats", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1466,7 +1466,7 @@ test("[test-suite] math: test random for small intervals", function (t) {
           aux({maxint - 3, maxint})
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1475,7 +1475,7 @@ test("[test-suite] math: test random for small intervals", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1524,7 +1524,7 @@ test("[test-suite] math: test random for large intervals", function (t) {
 
         assert(not pcall(math.random, 1, 2, 3))    -- too many arguments
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1533,7 +1533,7 @@ test("[test-suite] math: test random for large intervals", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1552,7 +1552,7 @@ test("[test-suite] math: test random for empty interval", function (t) {
         assert(not pcall(math.random, maxint, maxint - 1))
         assert(not pcall(math.random, maxint, minint))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1561,7 +1561,7 @@ test("[test-suite] math: test random for empty interval", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1580,7 +1580,7 @@ test("[test-suite] math: interval too large", function (t) {
         assert(not pcall(math.random, -1, maxint))
         assert(not pcall(math.random, minint // 2, maxint // 2 + 1))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1589,7 +1589,7 @@ test("[test-suite] math: interval too large", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 

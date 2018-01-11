@@ -5,7 +5,7 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
-
+const {to_luastring} = require("../../src/fengaricore.js");
 
 const checkload = `
     local function checkload (s, msg)
@@ -28,7 +28,7 @@ test('[test-suite] constructs: testing semicolons', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkload + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkload + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -54,7 +54,7 @@ test('[test-suite] constructs: invalid operations should not raise errors when n
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkload + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkload + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -119,7 +119,7 @@ test('[test-suite] constructs: testing priorities', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkload + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkload + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -305,7 +305,7 @@ test('[test-suite] constructs: silly loops', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkload + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkload + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -392,7 +392,7 @@ test.skip('[test-suite] constructs: huge loops, upvalue', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkload + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkload + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -428,7 +428,7 @@ test("[test-suite] constructs: testing some syntax errors (chosen through 'gcov'
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkload + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkload + luaCode));
 
     }, "Lua program loaded without error");
 

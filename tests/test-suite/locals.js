@@ -5,7 +5,7 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
-
+const {to_luastring} = require("../../src/fengaricore.js");
 
 test('[test-suite] locals: bug in 5.1', function (t) {
     let luaCode = `
@@ -18,7 +18,7 @@ test('[test-suite] locals: bug in 5.1', function (t) {
         local function f(x) x = nil; local y; return x, y end
         assert(f(10) == nil and select(2, f(20)) == nil)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -27,7 +27,7 @@ test('[test-suite] locals: bug in 5.1', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -90,7 +90,7 @@ test('[test-suite] locals: local scope', function (t) {
         f(2)
         assert(type(f) == 'function')
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -99,7 +99,7 @@ test('[test-suite] locals: local scope', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -130,7 +130,7 @@ test('[test-suite] locals: test for global table of loaded chunks', function (t)
         f()
         assert(c.a == 3)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -139,7 +139,7 @@ test('[test-suite] locals: test for global table of loaded chunks', function (t)
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(getenv + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(getenv + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -173,7 +173,7 @@ test('[test-suite] locals: old test for limits for special instructions (now jus
           until p <= 0
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -182,7 +182,7 @@ test('[test-suite] locals: old test for limits for special instructions (now jus
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -202,7 +202,7 @@ test('[test-suite] locals: testing lexical environments', function (t) {
         do
           local dummy
           local _ENV = (function (...) return ... end)(_G, dummy)   -- {
-  
+
           do local _ENV = {assert=assert}; assert(true) end
           mt = {_G = _G}
           local foo,x
@@ -217,7 +217,7 @@ test('[test-suite] locals: testing lexical environments', function (t) {
           assert(getenv(foo) == mt)
           x = foo('hi'); assert(mt.A == 'hi' and A == 1000)
           assert(x('*') == mt.A .. '*')
-  
+
           do local _ENV = {assert=assert, A=10};
             do local _ENV = {assert=assert, A=20};
               assert(A==20);x=A
@@ -227,7 +227,7 @@ test('[test-suite] locals: testing lexical environments', function (t) {
           assert(x==20)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -236,7 +236,7 @@ test('[test-suite] locals: testing lexical environments', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(getenv + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(getenv + luaCode));
 
     }, "Lua program loaded without error");
 

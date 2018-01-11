@@ -5,6 +5,7 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
+const {to_luastring} = require("../../src/fengaricore.js");
 
 test("[test-suite] closure: testing equality", function (t) {
     let luaCode = `
@@ -20,7 +21,7 @@ test("[test-suite] closure: testing equality", function (t) {
         end
         assert(f() == f())
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -29,7 +30,7 @@ test("[test-suite] closure: testing equality", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -73,7 +74,7 @@ test("[test-suite] closure: testing closures with 'for' control variable", funct
         r,s = a[2].get()
         assert(r == "a" and s == "b")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -82,7 +83,7 @@ test("[test-suite] closure: testing closures with 'for' control variable", funct
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -113,7 +114,7 @@ test("[test-suite] closure: testing closures with 'for' control variable x break
         assert(({f()})[1] == 1)
         assert(({f()})[2] == "a")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -122,7 +123,7 @@ test("[test-suite] closure: testing closures with 'for' control variable x break
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -169,7 +170,7 @@ test("[test-suite] closure: testing closure x break x return x errors", function
         assert(b('get') == 'xuxu')
         b('set', 10); assert(b('get') == 14)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -178,7 +179,7 @@ test("[test-suite] closure: testing closure x break x return x errors", function
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -204,7 +205,7 @@ test("[test-suite] closure: testing multi-level closure", function (t) {
         w = 1.345
         assert(y(20)(30) == 60+w)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -213,7 +214,7 @@ test("[test-suite] closure: testing multi-level closure", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -236,7 +237,7 @@ test("[test-suite] closure: testing closures x repeat-until", function (t) {
         until i > 10 or a[i]() ~= x
         assert(i == 11 and a[1]() == 1 and a[3]() == 3 and i == 4)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -245,7 +246,7 @@ test("[test-suite] closure: testing closures x repeat-until", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -289,7 +290,7 @@ test("[test-suite] closure: testing closures created in 'then' and 'else' parts 
           assert(a[i](i * 10) == i % 3 and a[i]() == i * 10)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -298,7 +299,7 @@ test("[test-suite] closure: testing closures created in 'then' and 'else' parts 
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -321,7 +322,7 @@ test("[test-suite] closure: test for correctly closing upvalues in tail calls of
         end
         t()
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -330,7 +331,7 @@ test("[test-suite] closure: test for correctly closing upvalues in tail calls of
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 

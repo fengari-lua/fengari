@@ -7,7 +7,7 @@ const lauxlib = require('../src/lauxlib.js');
 const lualib  = require('../src/lualib.js');
 const lapi    = require('../src/lapi.js');
 const lstring = require("../src/lstring.js");
-
+const {to_luastring} = require("../src/fengaricore.js");
 
 // Roughly the same tests as test/lvm.js to cover all opcodes
 test('LOADK, RETURN', function (t) {
@@ -27,10 +27,10 @@ test('LOADK, RETURN', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -67,10 +67,10 @@ test('MOVE', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -107,10 +107,10 @@ test('Binary op', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -147,10 +147,10 @@ test('Unary op, LOADBOOL', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -185,10 +185,10 @@ test('NEWTABLE', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -227,10 +227,10 @@ test('CALL', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -273,10 +273,10 @@ test('Multiple return', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -314,10 +314,10 @@ test('TAILCALL', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -355,10 +355,10 @@ test('VARARG', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -394,10 +394,10 @@ test('LE, JMP', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -433,10 +433,10 @@ test('LT', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -472,10 +472,10 @@ test('EQ', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -512,10 +512,10 @@ test('TESTSET (and)', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -552,10 +552,10 @@ test('TESTSET (or)', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -596,10 +596,10 @@ test('TEST (false)', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -639,10 +639,10 @@ test('FORPREP, FORLOOP (int)', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -682,10 +682,10 @@ test('FORPREP, FORLOOP (float)', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -724,10 +724,10 @@ test('SETTABLE, GETTABLE', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -744,7 +744,7 @@ test('SETTABLE, GETTABLE', function (t) {
     );
 
     t.strictEqual(
-        lua.lua_topointer(L, -1).strong.get(lstring.luaS_hash(lua.to_luastring("two"))).value.jsstring(),
+        lua.lua_topointer(L, -1).strong.get(lstring.luaS_hash(to_luastring("two"))).value.jsstring(),
         "world",
         "Program output is correct"
     );
@@ -775,10 +775,10 @@ test('SETUPVAL, GETUPVAL', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -817,10 +817,10 @@ test('SETTABUP, GETTABUP', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -837,7 +837,7 @@ test('SETTABUP, GETTABUP', function (t) {
     );
 
     t.strictEqual(
-        lua.lua_topointer(L, -1).strong.get(lstring.luaS_hash(lua.to_luastring("two"))).value.jsstring(),
+        lua.lua_topointer(L, -1).strong.get(lstring.luaS_hash(to_luastring("two"))).value.jsstring(),
         "world",
         "Program output is correct"
     );
@@ -867,10 +867,10 @@ test('SELF', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -906,10 +906,10 @@ test('SETLIST', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -949,10 +949,10 @@ test('Variable SETLIST', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -987,10 +987,10 @@ test('Long SETLIST', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -1042,10 +1042,10 @@ test('TFORCALL, TFORLOOP', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -1083,10 +1083,10 @@ test('LEN', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 
@@ -1132,10 +1132,10 @@ test('CONCAT', function (t) {
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
-            return code ? lua.to_luastring(code) : null;
+            return code ? to_luastring(code) : null;
         };
 
-        lua.lua_load(L, reader, luaCode, lua.to_luastring("test"), lua.to_luastring("text"));
+        lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
     }, "Lua program loaded without error");
 

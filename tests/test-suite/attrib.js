@@ -5,7 +5,7 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
-
+const {to_luastring} = require("../../src/fengaricore.js");
 
 test("[test-suite] attrib: testing require", function (t) {
     let luaCode = `
@@ -53,7 +53,7 @@ test("[test-suite] attrib: testing require", function (t) {
           package.path = oldpath
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -62,7 +62,7 @@ test("[test-suite] attrib: testing require", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -169,7 +169,7 @@ test("[test-suite] attrib: testing assignments, logical operators, and construct
         a[1], f(a)[2], b, c = {['alo']=assert}, 10, a[1], a[f], 6, 10, 23, f(a), 2
         a[1].alo(a[2]==10 and b==10 and c==print)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -178,7 +178,7 @@ test("[test-suite] attrib: testing assignments, logical operators, and construct
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -245,7 +245,7 @@ test("[test-suite] attrib: test of large float/integer indices ", function (t) {
         assert(a[maxintF] == 20 and a[maxintF - 1.0] == 11 and
                a[-maxintF] == 22 and a[-maxintF + 1.0] == 13)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -254,7 +254,7 @@ test("[test-suite] attrib: test of large float/integer indices ", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -277,7 +277,7 @@ test("[test-suite] attrib: test conflicts in multiple assignment", function (t) 
                  b[3] == 1)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -286,7 +286,7 @@ test("[test-suite] attrib: test conflicts in multiple assignment", function (t) 
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -315,7 +315,7 @@ test("[test-suite] attrib: repeat test with upvalues", function (t) {
           assert(t[1] == 10)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -324,7 +324,7 @@ test("[test-suite] attrib: repeat test with upvalues", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -351,7 +351,7 @@ test("[test-suite] attrib: bug in 5.2 beta", function (t) {
         local a, b = foo()()
         assert(a == 3 and b == 14)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -360,7 +360,7 @@ test("[test-suite] attrib: bug in 5.2 beta", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 

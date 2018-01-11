@@ -5,11 +5,12 @@ const fs      = require('fs');
 
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
+const {to_luastring} = require("./fengaricore.js");
 
 const IO_PREFIX = "_IO_";
 const IOPREF_LEN = IO_PREFIX.length;
-const IO_INPUT = lua.to_luastring(IO_PREFIX + "input");
-const IO_OUTPUT = lua.to_luastring(IO_PREFIX + "output");
+const IO_INPUT = to_luastring(IO_PREFIX + "input");
+const IO_OUTPUT = to_luastring(IO_PREFIX + "output");
 
 const tolstream = function(L) {
     return lauxlib.luaL_checkudata(L, 1, lauxlib.LUA_FILEHANDLE);
@@ -36,14 +37,14 @@ const f_tostring = function(L) {
     if (isclosed(p))
         lua.lua_pushliteral(L, "file (closed)");
     else
-        lua.lua_pushstring(L, lua.to_luastring(`file (${p.f.toString()})`));
+        lua.lua_pushstring(L, to_luastring(`file (${p.f.toString()})`));
     return 1;
 };
 
 const tofile = function(L) {
     let p = tolstream(L);
     if (isclosed(p))
-        lauxlib.luaL_error(L, lua.to_luastring("attempt to use a closed file"));
+        lauxlib.luaL_error(L, to_luastring("attempt to use a closed file"));
     assert(p.f);
     return p.f;
 };
@@ -74,7 +75,7 @@ const getiofile = function(L, findex) {
     lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, findex);
     let p = lua.lua_touserdata(L, -1);
     if (isclosed(p))
-        lauxlib.luaL_error(L, lua.to_luastring("standard %s file is closed"), findex.subarray(IOPREF_LEN));
+        lauxlib.luaL_error(L, to_luastring("standard %s file is closed"), findex.subarray(IOPREF_LEN));
     return p.f;
 };
 
@@ -82,7 +83,7 @@ const g_iofile = function(L, f, mode) {
     if (!lua.lua_isnoneornil(L, 1)) {
         let filename = lua.lua_tostring(L, 1);
         if (filename)
-            lauxlib.luaL_error(L, lua.to_luastring("opening files not yet implemented"));
+            lauxlib.luaL_error(L, to_luastring("opening files not yet implemented"));
         else {
             tofile(L);  /* check that it's a valid file handle */
             lua.lua_pushvalue(L, 1);
@@ -160,7 +161,7 @@ const flib = {
 const createmeta = function(L) {
     lauxlib.luaL_newmetatable(L, lauxlib.LUA_FILEHANDLE);  /* create metatable for file handles */
     lua.lua_pushvalue(L, -1);  /* push metatable */
-    lua.lua_setfield(L, -2, lua.to_luastring("__index", true));  /* metatable.__index = metatable */
+    lua.lua_setfield(L, -2, to_luastring("__index", true));  /* metatable.__index = metatable */
     lauxlib.luaL_setfuncs(L, flib, 0);  /* add file methods to new metatable */
     lua.lua_pop(L, 1);  /* pop new metatable */
 };
@@ -188,9 +189,9 @@ const luaopen_io = function(L) {
     lauxlib.luaL_newlib(L, iolib);
     createmeta(L);
     /* create (and set) default files */
-    createstdfile(L, process.stdin, IO_INPUT, lua.to_luastring("stdin"));
-    createstdfile(L, process.stdout, IO_OUTPUT, lua.to_luastring("stdout"));
-    createstdfile(L, process.stderr, null, lua.to_luastring("stderr"));
+    createstdfile(L, process.stdin, IO_INPUT, to_luastring("stdin"));
+    createstdfile(L, process.stdout, IO_OUTPUT, to_luastring("stdout"));
+    createstdfile(L, process.stderr, null, to_luastring("stderr"));
     return 1;
 };
 

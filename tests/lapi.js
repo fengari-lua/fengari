@@ -5,8 +5,9 @@ const test       = require('tape');
 const tests      = require("./tests.js");
 const toByteCode = tests.toByteCode;
 
-const lauxlib    = require("../src/lauxlib.js");
 const lua        = require('../src/lua.js');
+const lauxlib    = require("../src/lauxlib.js");
+const {to_luastring} = require("../src/fengaricore.js");
 
 test('luaL_newstate, lua_pushnil, luaL_typename', function (t) {
     let L;
@@ -369,7 +370,7 @@ test('lua_load with no chunkname', function (t) {
     t.doesNotThrow(function () {
         L = lauxlib.luaL_newstate();
 
-        lua.lua_load(L, function(L, s) { let r = s.code; s.code = null; return r; }, {code: lua.to_luastring("return 'hello'")}, null, null);
+        lua.lua_load(L, function(L, s) { let r = s.code; s.code = null; return r; }, {code: to_luastring("return 'hello'")}, null, null);
 
         lua.lua_call(L, 0, 1);
     }, "JS Lua program ran without error");
@@ -395,7 +396,7 @@ test('lua_load and lua_call it', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lua.lua_load(L, function(L, s) { let r = s.bc; s.bc = null; return r; }, {bc: bc}, lua.to_luastring("test-lua_load"), lua.to_luastring("binary"));
+        lua.lua_load(L, function(L, s) { let r = s.bc; s.bc = null; return r; }, {bc: bc}, to_luastring("test-lua_load"), to_luastring("binary"));
 
         lua.lua_call(L, 0, 1);
 
@@ -420,10 +421,10 @@ test('lua script reads js upvalues', function (t) {
 
         L = lauxlib.luaL_newstate();
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_pushliteral(L, "hello");
-        lua.lua_setglobal(L, lua.to_luastring("js"));
+        lua.lua_setglobal(L, to_luastring("js"));
 
         lua.lua_call(L, 0, 1);
 
@@ -518,7 +519,7 @@ test('lua_atnativeerror', function(t) {
     lua.lua_atnativeerror(L, function(L) {
         let e = lua.lua_touserdata(L, 1);
         t.strictEqual(e, errob);
-        lua.lua_pushstring(L, lua.to_luastring("runtime error!"));
+        lua.lua_pushstring(L, to_luastring("runtime error!"));
         return 1;
     });
     lua.lua_pushcfunction(L, function(L) {
@@ -532,7 +533,7 @@ test('lua_atnativeerror', function(t) {
     lua.lua_atnativeerror(L, function(L) {
         let e = lua.lua_touserdata(L, 1);
         t.strictEqual(e, errob);
-        lauxlib.luaL_error(L, lua.to_luastring("runtime error!"));
+        lauxlib.luaL_error(L, to_luastring("runtime error!"));
     });
     lua.lua_pushcfunction(L, function(L) {
         throw errob;

@@ -2,10 +2,11 @@
 
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
+const {to_luastring} = require("./fengaricore.js");
 
 const getco = function(L) {
     let co = lua.lua_tothread(L, 1);
-    lauxlib.luaL_argcheck(L, co, 1, lua.to_luastring("thread expected", true));
+    lauxlib.luaL_argcheck(L, co, 1, to_luastring("thread expected", true));
     return co;
 };
 

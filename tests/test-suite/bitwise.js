@@ -5,7 +5,7 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
-
+const {to_luastring} = require("../../src/fengaricore.js");
 
 const prefix = `
     package.preload.bit32 = function ()     --{
@@ -176,7 +176,7 @@ test("[test-suite] bitwise: testing bitwise operations", function (t) {
         -- embedded zeros
         assert(not pcall(function () return "0xffffffffffffffff\\0" | 0 end))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -185,7 +185,7 @@ test("[test-suite] bitwise: testing bitwise operations", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -208,7 +208,7 @@ test("[test-suite] bitwise: testing bitwise library", function (t) {
         assert(bit32.band() == bit32.band(0xffffffff))
         assert(bit32.band(1,2) == 0)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -217,7 +217,7 @@ test("[test-suite] bitwise: testing bitwise library", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -285,7 +285,7 @@ test("[test-suite] bitwise: out-of-range numbers", function (t) {
         assert(0x12345678 >> 32 == 0)
         assert(0x12345678 >> -32 == 0x1234567800000000)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -294,7 +294,7 @@ test("[test-suite] bitwise: out-of-range numbers", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -340,7 +340,7 @@ test("[test-suite] bitwise: some special cases", function (t) {
           assert(bit32.rshift(bit32.rshift(b, 4), -4) == bit32.band(b, bit32.bnot(0xf)))
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -349,7 +349,7 @@ test("[test-suite] bitwise: some special cases", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -379,7 +379,7 @@ test("[test-suite] bitwise: for this test, use at most 24 bits (mantissa of a si
         assert(not pcall(bit32.lshift, 45, print))
         assert(not pcall(bit32.rshift, 45, print))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -388,7 +388,7 @@ test("[test-suite] bitwise: for this test, use at most 24 bits (mantissa of a si
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -422,7 +422,7 @@ test("[test-suite] bitwise: testing extract/replace", function (t) {
         assert(bit32.replace(-1, 0, 31) == (1 << 31) - 1)
         assert(bit32.replace(-1, 0, 1, 2) == (1 << 32) - 7)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -431,7 +431,7 @@ test("[test-suite] bitwise: testing extract/replace", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -449,7 +449,7 @@ test("[test-suite] bitwise: testing conversion of floats", function (t) {
         assert(bit32.bor(3.0) == 3)
         assert(bit32.bor(-4.0) == 0xfffffffc)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -458,7 +458,7 @@ test("[test-suite] bitwise: testing conversion of floats", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -480,7 +480,7 @@ test("[test-suite] bitwise: large floats and large-enough integers?", function (
           assert(bit32.bor(-2.0^48 - 6.0) == 0xfffffffa)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -489,7 +489,7 @@ test("[test-suite] bitwise: large floats and large-enough integers?", function (
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 

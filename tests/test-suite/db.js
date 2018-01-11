@@ -5,7 +5,7 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
-
+const {to_luastring} = require("../../src/fengaricore.js");
 
 const prefix = `
     local function dostring(s) return assert(load(s))() end
@@ -51,7 +51,7 @@ test("[test-suite] db: getinfo, ...line...", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -99,7 +99,7 @@ test("[test-suite] db: test file and string names truncation", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -158,7 +158,7 @@ test("[test-suite] db: local", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -236,7 +236,7 @@ test("[test-suite] db: line hook", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -263,7 +263,7 @@ test("[test-suite] db: invalid levels in [gs]etlocal", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -299,7 +299,7 @@ test("[test-suite] db: parameter names", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -348,7 +348,7 @@ test("[test-suite] db: vararg", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -375,7 +375,7 @@ test("[test-suite] db: access to vararg in non-vararg function", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -483,7 +483,7 @@ test("[test-suite] db: test hook presence in debug info", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -529,7 +529,7 @@ test("[test-suite] db: tests for manipulating non-registered locals (C and Lua t
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -590,7 +590,7 @@ test("[test-suite] db: testing access to function arguments", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -649,7 +649,7 @@ test("[test-suite] db: testing access to local variables in return hook (bug in 
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -701,7 +701,7 @@ test("[test-suite] db: testing upvalue access", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -743,7 +743,7 @@ test("[test-suite] db: testing count hooks", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -822,7 +822,7 @@ test("[test-suite] db: tests for tail calls", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -864,7 +864,7 @@ test("[test-suite] db: testing local function information", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -901,7 +901,7 @@ test("[test-suite] db: testing traceback", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -938,7 +938,7 @@ test("[test-suite] db: testing nparams, nups e isvararg", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1028,8 +1028,8 @@ test("[test-suite] db: testing debugging of coroutines", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        let b = lua.to_luastring(luaCode);
-        if (lauxlib.luaL_loadbuffer(L, b, b.length, lua.to_luastring("@db.lua")) !== lua.LUA_OK)
+        let b = to_luastring(luaCode);
+        if (lauxlib.luaL_loadbuffer(L, b, b.length, to_luastring("@db.lua")) !== lua.LUA_OK)
             throw Error(lua.lua_tojsstring(L, -1));
 
     }, "Lua program loaded without error");
@@ -1069,7 +1069,7 @@ test("[test-suite] db: check get/setlocal in coroutines", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1116,7 +1116,7 @@ test("[test-suite] db: check traceback of suspended (or dead with error) corouti
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1159,7 +1159,7 @@ test("[test-suite] db: check test acessing line numbers of a coroutine from a re
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1211,7 +1211,7 @@ test("[test-suite] db: test tagmethod information", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1243,7 +1243,7 @@ test("[test-suite] db: testing for-iterator name", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1302,8 +1302,8 @@ test("[test-suite] db: testing traceback sizes", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        let b = lua.to_luastring(luaCode);
-        if (lauxlib.luaL_loadbuffer(L, b, b.length, lua.to_luastring("@db.lua")) !== lua.LUA_OK)
+        let b = to_luastring(luaCode);
+        if (lauxlib.luaL_loadbuffer(L, b, b.length, to_luastring("@db.lua")) !== lua.LUA_OK)
             throw Error(lua.lua_tojsstring(L, -1));
 
     }, "Lua program loaded without error");
@@ -1371,7 +1371,7 @@ test("[test-suite] db: testing debug functions on chunk without debug info", fun
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1427,7 +1427,7 @@ test("[test-suite] db: tests for 'source' in binary dumps", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 

@@ -5,7 +5,7 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
-
+const {to_luastring} = require("../../src/fengaricore.js");
 
 const checkerror = `
     local maxi, mini = math.maxinteger, math.mininteger
@@ -45,7 +45,7 @@ test('[test-suite] strings: string comparisons', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkerror + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -87,7 +87,7 @@ test('[test-suite] strings: string.sub', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkerror + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -125,7 +125,7 @@ test('[test-suite] strings: string.find', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkerror + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -157,7 +157,7 @@ test('[test-suite] strings: string.len and #', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkerror + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -214,7 +214,7 @@ test('[test-suite] strings: string.byte/string.char', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkerror + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -251,7 +251,7 @@ test('[test-suite] strings: repetitions with separator', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkerror + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -303,7 +303,7 @@ test('[test-suite] strings: tostring', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkerror + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -350,7 +350,7 @@ test('[test-suite] strings: string.format', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkerror + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -391,7 +391,7 @@ test('[test-suite] strings: %q', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkerror + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -418,7 +418,7 @@ test('[test-suite] strings: embedded zeros error', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkerror + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -461,7 +461,7 @@ test('[test-suite] strings: format x tostring', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkerror + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -498,7 +498,7 @@ test('[test-suite] strings: longest number that can be formatted', function (t) 
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkerror + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -547,7 +547,7 @@ test('[test-suite] strings: large numbers for format', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkerror + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -604,7 +604,7 @@ test("[test-suite] strings: 'format %a %A'", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkerror + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -644,7 +644,7 @@ test("[test-suite] strings: errors in format", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkerror + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -695,7 +695,7 @@ test("[test-suite] strings: table.concat", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkerror + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -751,7 +751,7 @@ test.skip("[test-suite] strings: locale", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkerror + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -782,7 +782,7 @@ test("[test-suite] strings: bug in Lua 5.3.2: 'gmatch' iterator does not work ac
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(checkerror + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(checkerror + luaCode));
 
     }, "Lua program loaded without error");
 

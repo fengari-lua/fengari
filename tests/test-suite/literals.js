@@ -5,7 +5,7 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
-
+const {to_luastring} = require("../../src/fengaricore.js");
 
 const dostring = `
     local function dostring (x) return assert(load(x), "")() end
@@ -16,7 +16,7 @@ test("[test-suite] literals: dostring", function (t) {
         dostring("x \\v\\f = \\t\\r 'a\\0a' \\v\\f\\f")
         assert(x == 'a\\0a' and string.len(x) == 3)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -25,7 +25,7 @@ test("[test-suite] literals: dostring", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(dostring + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(dostring + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -46,7 +46,7 @@ test("[test-suite] literals: escape sequences", function (t) {
 "'\\]])
         assert(string.find("\\b\\f\\n\\r\\t\\v", "^%c%c%c%c%c%c$"))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -55,7 +55,7 @@ test("[test-suite] literals: escape sequences", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -78,7 +78,7 @@ test("[test-suite] literals: assume ASCII just for tests", function (t) {
 
         assert(010 .. 020 .. -030 == "1020-30")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -87,7 +87,7 @@ test("[test-suite] literals: assume ASCII just for tests", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -125,7 +125,7 @@ assert("abc\\z
         ghi\\z
        " == 'abcdefghi')
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -134,7 +134,7 @@ assert("abc\\z
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -163,7 +163,7 @@ test("[test-suite] literals: UTF-8 sequences", function (t) {
         -- limits for 4-byte sequences
         assert("\\u{10000}\\u{10FFFF}" == "\\xF0\\x90\\x80\\x80\\z\\xF4\\x8F\\xBF\\xBF")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -172,7 +172,7 @@ test("[test-suite] literals: UTF-8 sequences", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -229,7 +229,7 @@ test("[test-suite] literals: Error in escape sequences", function (t) {
         lexerror("'alo \\\\z", "<eof>")
         lexerror([['alo \\98]], "<eof>")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -238,7 +238,7 @@ test("[test-suite] literals: Error in escape sequences", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -260,7 +260,7 @@ test("[test-suite] literals: valid characters in variable names", function (t) {
                  not load("a" .. s .. "1 = 1", ""))
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -269,7 +269,7 @@ test("[test-suite] literals: valid characters in variable names", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -295,7 +295,7 @@ test("[test-suite] literals: long variable names", function (t) {
         assert(_G[var1] == 5 and _G[var2] == 6 and f() == -1)
         var1, var2, f = nil
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -304,7 +304,7 @@ test("[test-suite] literals: long variable names", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(dostring + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(dostring + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -321,7 +321,7 @@ test("[test-suite] literals: escapes", function (t) {
     let luaCode = `assert("\\n\\t" == [[\n\n\t]])
 assert([[\n\n $debug]] == "\\n $debug")
 assert([[ [ ]] ~= [[ ] ]])`, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -330,7 +330,7 @@ assert([[ [ ]] ~= [[ ] ]])`, L;
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(dostring + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(dostring + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -396,7 +396,7 @@ assert(x)
 prog = nil
 a = nil
 b = nil`, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -405,7 +405,7 @@ b = nil`, L;
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(dostring + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(dostring + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -438,7 +438,7 @@ for _, n in pairs{"\\n", "\\r", "\\n\\r", "\\r\\n"} do
   assert(dostring(prog) == nn)
   assert(_G.x == "hi\\n" and _G.y == "\\nhello\\r\\n\\n")
 end`, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -447,7 +447,7 @@ end`, L;
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(dostring + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(dostring + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -480,7 +480,7 @@ x y z [==[ blu foo
 ]
 ]=]==]
 error error]=]===]`, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -489,7 +489,7 @@ error error]=]===]`, L;
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(dostring + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(dostring + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -518,7 +518,7 @@ end
 for s in coroutine.wrap(function () gen("", len) end) do
   assert(s == load("return [====[\\n"..s.."]====]", "")())
 end`, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -527,7 +527,7 @@ end`, L;
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(dostring + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(dostring + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -547,7 +547,7 @@ test("[test-suite] literals: testing %q x line ends", function (t) {
         local c = string.format("return %q", s)
         assert(assert(load(c))() == s)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -556,7 +556,7 @@ test("[test-suite] literals: testing %q x line ends", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(dostring + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(dostring + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -577,7 +577,7 @@ test("[test-suite] literals: testing errors", function (t) {
         assert(not load"a = '\\\\345'")
         assert(not load"a = [=x]")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -586,7 +586,7 @@ test("[test-suite] literals: testing errors", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(dostring + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(dostring + luaCode));
 
     }, "Lua program loaded without error");
 

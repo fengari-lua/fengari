@@ -5,6 +5,7 @@ const test       = require('tape');
 const lua     = require('../src/lua.js');
 const lauxlib = require('../src/lauxlib.js');
 const lualib  = require('../src/lualib.js');
+const {to_luastring} = require("../src/fengaricore.js");
 
 test('luaG_typeerror', function (t) {
     let luaCode = `
@@ -20,7 +21,7 @@ test('luaG_typeerror', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_pcall(L, 0, -1, 0);
 
@@ -48,7 +49,7 @@ test('luaG_typeerror', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_pcall(L, 0, -1, 0);
 
@@ -75,7 +76,7 @@ test('luaG_typeerror', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_pcall(L, 0, -1, 0);
 
@@ -102,7 +103,7 @@ test('luaG_typeerror', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_pcall(L, 0, -1, 0);
 
@@ -128,7 +129,7 @@ test('luaG_concaterror', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_pcall(L, 0, -1, 0);
 
@@ -154,7 +155,7 @@ test('luaG_opinterror', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_pcall(L, 0, -1, 0);
 
@@ -180,7 +181,7 @@ test('luaG_tointerror', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_pcall(L, 0, -1, 0);
 

@@ -5,6 +5,7 @@ const test       = require('tape');
 const lua     = require('../src/lua.js');
 const lauxlib = require('../src/lauxlib.js');
 const lualib  = require('../src/lualib.js');
+const {to_luastring} = require("../src/fengaricore.js");
 
 
 test('print', function (t) {
@@ -20,7 +21,7 @@ test('print', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -52,7 +53,7 @@ test('setmetatable, getmetatable', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -95,7 +96,7 @@ test('rawequal', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -139,7 +140,7 @@ test('rawset, rawget', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -184,7 +185,7 @@ test('type', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -235,7 +236,7 @@ test('error', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -256,7 +257,7 @@ test('error, protected', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_pcall(L, 0, -1, 0);
 
@@ -286,7 +287,7 @@ test('pcall', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -320,7 +321,7 @@ test('xpcall', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -358,7 +359,7 @@ test('ipairs', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -385,7 +386,7 @@ test('select', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -428,7 +429,7 @@ test('tonumber', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -478,7 +479,7 @@ test('assert', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_pcall(L, 0, -1, 0);
 
@@ -504,7 +505,7 @@ test('rawlen', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -549,7 +550,7 @@ test('next', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -588,7 +589,7 @@ test('pairs', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -636,7 +637,7 @@ test('pairs with __pairs', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 

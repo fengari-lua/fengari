@@ -5,9 +5,9 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
+const {to_luastring} = require("../../src/fengaricore.js");
 
 const ltests  = require('./ltests.js');
-
 
 test("[test-suite] events: testing metatable", function (t) {
     let luaCode = `
@@ -182,7 +182,7 @@ test("[test-suite] events: testing metatable", function (t) {
         assert(1.5 >> a == 1.5)
         assert(cap[0] == "shr" and cap[1] == 1.5 and cap[2] == a)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -191,7 +191,7 @@ test("[test-suite] events: testing metatable", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -216,7 +216,7 @@ test("[test-suite] events: test for rawlen", function (t) {
         -- rawlen for long strings
         assert(rawlen(string.rep('a', 1000)) == 1000)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -225,7 +225,7 @@ test("[test-suite] events: test for rawlen", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -277,7 +277,7 @@ test("[test-suite] events: test comparison", function (t) {
 
         test()  -- retest comparisons, now using both 'lt' and 'le'
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -286,7 +286,7 @@ test("[test-suite] events: test comparison", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -360,7 +360,7 @@ test("[test-suite] events: test 'partial order'", function (t) {
         t[Set{1,3,5}] = 1
         assert(t[Set{1,3,5}] == nil)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -369,7 +369,7 @@ test("[test-suite] events: test 'partial order'", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -403,7 +403,7 @@ test("[test-suite] events: __eq between userdata", function (t) {
         assert(u2 == u1 and u2 == u3 and u3 == u2)
         assert(u2 ~= {})   -- different types cannot be equal
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -414,7 +414,7 @@ test("[test-suite] events: __eq between userdata", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -455,7 +455,7 @@ test("[test-suite] events: concat", function (t) {
         x = 0 .."a".."b"..c..d.."e".."f".."g"
         assert(x.val == "0abcdefg")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -466,7 +466,7 @@ test("[test-suite] events: concat", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -490,7 +490,7 @@ test("[test-suite] events: concat metamethod x numbers (bug in 5.1.1)", function
         assert(c..5 == c and 5 .. c == c)
         assert(4 .. c .. 5 == c and 4 .. 5 .. 6 .. 7 .. c == c)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -501,7 +501,7 @@ test("[test-suite] events: concat metamethod x numbers (bug in 5.1.1)", function
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -529,7 +529,7 @@ test("[test-suite] events: test comparison compatibilities", function (t) {
         setmetatable(d, t2)
         assert(c == d and c < d and not(d <= c))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -540,7 +540,7 @@ test("[test-suite] events: test comparison compatibilities", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -564,16 +564,16 @@ test("[test-suite] events: test for several levels of callstest for several leve
             end
           end
         }
-        
+
         local a = setmetatable({}, tt)
         local b = setmetatable({f=a}, tt)
         local c = setmetatable({f=b}, tt)
-        
+
         i = 0
         x = c(3,4,5)
         assert(i == 3 and x[1] == 3 and x[3] == 5)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -584,7 +584,7 @@ test("[test-suite] events: test for several levels of callstest for several leve
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -606,7 +606,7 @@ test("[test-suite] events: __index on _ENV", function (t) {
         rawset(a, "x", 1, 2, 3)
         assert(a.x == 1 and rawget(a, "x", 3) == 1)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -617,7 +617,7 @@ test("[test-suite] events: __index on _ENV", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -661,7 +661,7 @@ test("[test-suite] events: testing metatables for basic types", function (t) {
 
         debug.setmetatable(nil, {})
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -672,7 +672,7 @@ test("[test-suite] events: testing metatables for basic types", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -691,7 +691,7 @@ test("[test-suite] events: loops in delegation", function (t) {
         assert(not pcall(function (a,b) return a[b] end, a, 10))
         assert(not pcall(function (a,b,c) a[b] = c end, a, 10, true))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -702,7 +702,7 @@ test("[test-suite] events: loops in delegation", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -729,7 +729,7 @@ test("[test-suite] events: bug in 5.1", function (t) {
         child.foo = 10      --> CRASH (on some machines)
         assert(T == parent and K == "foo" and V == 10)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -740,7 +740,7 @@ test("[test-suite] events: bug in 5.1", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 

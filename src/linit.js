@@ -2,6 +2,8 @@
 
 const lua      = require('./lua.js');
 const lauxlib  = require('./lauxlib.js');
+const {to_luastring} = require("./fengaricore.js");
+
 const lbaselib = require('./lbaselib.js');
 const lcorolib = require('./lcorolib.js');
 const lmathlib = require('./lmathlib.js');
@@ -30,7 +32,7 @@ const luaL_openlibs = function(L) {
 
     /* "require" functions from 'loadedlibs' and set results to global table */
     for (let lib in loadedlibs) {
-        lauxlib.luaL_requiref(L, lua.to_luastring(lib), loadedlibs[lib], 1);
+        lauxlib.luaL_requiref(L, to_luastring(lib), loadedlibs[lib], 1);
         lua.lua_pop(L, 1); /* remove lib */
     }
 };

@@ -3,6 +3,7 @@
 const fengari  = require('./fengari.js');
 const lua      = require('./lua.js');
 const lauxlib  = require('./lauxlib.js');
+const {luastring_indexOf, to_jsstring, to_luastring, to_uristring} = require("./fengaricore.js");
 
 const global_env = (function() {
     /* global WorkerGlobalScope */ /* see https://github.com/sindresorhus/globals/issues/127 */
@@ -21,7 +22,7 @@ const global_env = (function() {
     }
 })();
 
-const CLIBS         = lua.to_luastring("__CLIBS__", true);
+const CLIBS         = to_luastring("__CLIBS__", true);
 const LUA_PATH_VAR  = "LUA_PATH";
 const LUA_CPATH_VAR = "LUA_CPATH";
 
@@ -37,13 +38,13 @@ const LUA_CSUBSEP   = lua.LUA_DIRSEP;
 const LUA_LSUBSEP   = lua.LUA_DIRSEP;
 
 /* prefix for open functions in C libraries */
-const LUA_POF       = lua.to_luastring("luaopen_");
+const LUA_POF       = to_luastring("luaopen_");
 
 /* separator for open functions in C libraries */
-const LUA_OFSEP     = lua.to_luastring("_");
+const LUA_OFSEP     = to_luastring("_");
 const LIB_FAIL      = "open";
 
-const AUXMARK       = lua.to_luastring("\x01");
+const AUXMARK       = to_luastring("\x01");
 
 
 /*
@@ -55,13 +56,13 @@ const AUXMARK       = lua.to_luastring("\x01");
 let lsys_load;
 if (typeof process === "undefined") {
     lsys_load = function(L, path, seeglb) {
-        path = lua.to_uristring(path);
+        path = to_uristring(path);
         let xhr = new XMLHttpRequest();
         xhr.open("GET", path, false);
         xhr.send();
 
         if (xhr.status < 200 || xhr.status >= 300) {
-            lua.lua_pushstring(L, lua.to_luastring(`${xhr.status}: ${xhr.statusText}`));
+            lua.lua_pushstring(L, to_luastring(`${xhr.status}: ${xhr.statusText}`));
             return null;
         }
 
@@ -73,7 +74,7 @@ if (typeof process === "undefined") {
         try {
             func = Function("fengari", code);
         } catch (e) {
-            lua.lua_pushstring(L, lua.to_luastring(`${e.name}: ${e.message}`));
+            lua.lua_pushstring(L, to_luastring(`${e.name}: ${e.message}`));
             return null;
         }
         let res = func(fengari);
@@ -82,20 +83,20 @@ if (typeof process === "undefined") {
         } else if (res === void 0) { /* assume library added symbols to global environment */
             return global_env;
         } else {
-            lua.lua_pushstring(L, lua.to_luastring(`library returned unexpected type (${typeof res})`));
+            lua.lua_pushstring(L, to_luastring(`library returned unexpected type (${typeof res})`));
             return null;
         }
     };
 } else {
     const pathlib = require('path');
     lsys_load = function(L, path, seeglb) {
-        path = lua.to_jsstring(path);
+        path = to_jsstring(path);
         /* relative paths should be relative to cwd, not this js file */
         path = pathlib.resolve(process.cwd(), path);
         try {
             return require(path);
         } catch (e) {
-            lua.lua_pushstring(L, lua.to_luastring(e.message));
+            lua.lua_pushstring(L, to_luastring(e.message));
             return null;
         }
     };
@@ -107,12 +108,12 @@ if (typeof process === "undefined") {
 ** error string in the stack.
 */
 const lsys_sym = function(L, lib, sym) {
-    let f = lib[lua.to_jsstring(sym)];
+    let f = lib[to_jsstring(sym)];
 
     if (f && typeof f === 'function')
         return f;
     else {
-        lua.lua_pushfstring(L, lua.to_luastring("undefined symbol: %s"), sym);
+        lua.lua_pushfstring(L, to_luastring("undefined symbol: %s"), sym);
         return null;
     }
 };
@@ -121,7 +122,7 @@ const lsys_sym = function(L, lib, sym) {
 ** return registry.LUA_NOENV as a boolean
 */
 const noenv = function(L) {
-    lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, lua.to_luastring("LUA_NOENV"));
+    lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, to_luastring("LUA_NOENV"));
     let b = lua.lua_toboolean(L, -1);
     lua.lua_pop(L, 1);  /* remove value */
     return b;
@@ -143,7 +144,7 @@ if (typeof process !== "undefined") { // Only with Node
 } else {
     /* TODO: use async/await ? */
     readable = function(path) {
-        path = lua.to_uristring(path);
+        path = to_uristring(path);
         let xhr = new XMLHttpRequest();
         /* Following GET request done by searcher_Web will be cached */
         xhr.open("GET", path, false);
@@ -217,21 +218,21 @@ const env = (function() {
 */
 const setpath = function(L, fieldname, envname, dft) {
     let nver = `${envname}${lua.LUA_VERSUFFIX}`;
-    lua.lua_pushstring(L, lua.to_luastring(nver));
+    lua.lua_pushstring(L, to_luastring(nver));
     let path = env[nver];  /* use versioned name */
     if (path === undefined)  /* no environment variable? */
         path = env[envname];  /* try unversioned name */
     if (path === undefined || noenv(L))  /* no environment variable? */
-        lua.lua_pushstring(L, lua.to_luastring(dft));  /* use default */
+        lua.lua_pushstring(L, to_luastring(dft));  /* use default */
     else {
         /* replace ";;" by ";AUXMARK;" and then AUXMARK by default path */
         path = lauxlib.luaL_gsub(
             L,
-            lua.to_luastring(path),
-            lua.to_luastring(lua.LUA_PATH_SEP + lua.LUA_PATH_SEP, true),
-            lua.to_luastring(lua.LUA_PATH_SEP + lua.to_jsstring(AUXMARK) + lua.LUA_PATH_SEP, true)
+            to_luastring(path),
+            to_luastring(lua.LUA_PATH_SEP + lua.LUA_PATH_SEP, true),
+            to_luastring(lua.LUA_PATH_SEP + to_jsstring(AUXMARK) + lua.LUA_PATH_SEP, true)
         );
-        lauxlib.luaL_gsub(L, path, AUXMARK, lua.to_luastring(dft));
+        lauxlib.luaL_gsub(L, path, AUXMARK, to_luastring(dft));
         lua.lua_remove(L, -2); /* remove result from 1st 'gsub' */
     }
     lua.lua_setfield(L, -3, fieldname);  /* package[fieldname] = path value */
@@ -265,7 +266,7 @@ const addtoclib = function(L, path, plib) {
 const pushnexttemplate = function(L, path) {
     while (path[0] === lua.LUA_PATH_SEP.charCodeAt(0)) path = path.subarray(1);  /* skip separators */
     if (path.length === 0) return null;  /* no more templates */
-    let l = lua.luastring_indexOf(path, lua.LUA_PATH_SEP.charCodeAt(0));  /* find next separator */
+    let l = luastring_indexOf(path, lua.LUA_PATH_SEP.charCodeAt(0));  /* find next separator */
     if (l < 0) l = path.length;
     lua.lua_pushlstring(L, path, l);  /* template */
     return path.subarray(l);
@@ -277,11 +278,11 @@ const searchpath = function(L, name, path, sep, dirsep) {
     if (sep[0] !== 0)  /* non-empty separator? */
         name = lauxlib.luaL_gsub(L, name, sep, dirsep);  /* replace it by 'dirsep' */
     while ((path = pushnexttemplate(L, path)) !== null) {
-        let filename = lauxlib.luaL_gsub(L, lua.lua_tostring(L, -1), lua.to_luastring(lua.LUA_PATH_MARK, true), name);
+        let filename = lauxlib.luaL_gsub(L, lua.lua_tostring(L, -1), to_luastring(lua.LUA_PATH_MARK, true), name);
         lua.lua_remove(L, -2);  /* remove path template */
         if (readable(filename))  /* does file exist and is readable? */
             return filename;  /* return that file name */
-        lua.lua_pushfstring(L, lua.to_luastring("\n\tno file '%s'"), filename);
+        lua.lua_pushfstring(L, to_luastring("\n\tno file '%s'"), filename);
         lua.lua_remove(L, -2);  /* remove file name */
         lauxlib.luaL_addvalue(msg);
     }
@@ -294,8 +295,8 @@ const ll_searchpath = function(L) {
         L,
         lauxlib.luaL_checkstring(L, 1),
         lauxlib.luaL_checkstring(L, 2),
-        lauxlib.luaL_optstring(L, 3, lua.to_luastring(".")),
-        lauxlib.luaL_optstring(L, 4, lua.to_luastring(lua.LUA_DIRSEP))
+        lauxlib.luaL_optstring(L, 3, to_luastring(".")),
+        lauxlib.luaL_optstring(L, 4, to_luastring(lua.LUA_DIRSEP))
     );
     if (f !== null) return 1;
     else {  /* error message is on top of the stack */
@@ -309,8 +310,8 @@ const findfile = function(L, name, pname, dirsep) {
     lua.lua_getfield(L, lua.lua_upvalueindex(1), pname);
     let path = lua.lua_tostring(L, -1);
     if (path === null)
-        lauxlib.luaL_error(L, lua.to_luastring("'package.%s' must be a string"), pname);
-    return searchpath(L, name, path, lua.to_luastring("."), dirsep);
+        lauxlib.luaL_error(L, to_luastring("'package.%s' must be a string"), pname);
+    return searchpath(L, name, path, to_luastring("."), dirsep);
 };
 
 const checkload = function(L, stat, filename) {
@@ -318,13 +319,13 @@ const checkload = function(L, stat, filename) {
         lua.lua_pushstring(L, filename);  /* will be 2nd argument to module */
         return 2;  /* return open function and file name */
     } else
-        return lauxlib.luaL_error(L, lua.to_luastring("error loading module '%s' from file '%s':\n\t%s"),
+        return lauxlib.luaL_error(L, to_luastring("error loading module '%s' from file '%s':\n\t%s"),
             lua.lua_tostring(L, 1), filename, lua.lua_tostring(L, -1));
 };
 
 const searcher_Lua = function(L) {
     let name = lauxlib.luaL_checkstring(L, 1);
-    let filename = findfile(L, name, lua.to_luastring("path", true), lua.to_luastring(LUA_LSUBSEP, true));
+    let filename = findfile(L, name, to_luastring("path", true), to_luastring(LUA_LSUBSEP, true));
     if (filename === null) return 1;  /* module not found in this path */
     return checkload(L, lauxlib.luaL_loadfile(L, filename) === lua.LUA_OK, filename);
 };
@@ -339,39 +340,39 @@ const searcher_Lua = function(L) {
 */
 const loadfunc = function(L, filename, modname) {
     let openfunc;
-    modname = lauxlib.luaL_gsub(L, modname, lua.to_luastring("."), LUA_OFSEP);
-    let mark = lua.luastring_indexOf(modname, LUA_IGMARK.charCodeAt(0));
+    modname = lauxlib.luaL_gsub(L, modname, to_luastring("."), LUA_OFSEP);
+    let mark = luastring_indexOf(modname, LUA_IGMARK.charCodeAt(0));
     if (mark >= 0) {
         openfunc = lua.lua_pushlstring(L, modname, mark);
-        openfunc = lua.lua_pushfstring(L, lua.to_luastring("%s%s"), LUA_POF, openfunc);
+        openfunc = lua.lua_pushfstring(L, to_luastring("%s%s"), LUA_POF, openfunc);
         let stat = lookforfunc(L, filename, openfunc);
         if (stat !== ERRFUNC) return stat;
         modname = mark + 1;  /* else go ahead and try old-style name */
     }
-    openfunc = lua.lua_pushfstring(L, lua.to_luastring("%s%s"), LUA_POF, modname);
+    openfunc = lua.lua_pushfstring(L, to_luastring("%s%s"), LUA_POF, modname);
     return lookforfunc(L, filename, openfunc);
 };
 
 const searcher_C = function(L) {
     let name = lauxlib.luaL_checkstring(L, 1);
-    let filename = findfile(L, name, lua.to_luastring("cpath", true), lua.to_luastring(LUA_CSUBSEP, true));
+    let filename = findfile(L, name, to_luastring("cpath", true), to_luastring(LUA_CSUBSEP, true));
     if (filename === null) return 1;  /* module not found in this path */
     return checkload(L, (loadfunc(L, filename, name) === 0), filename);
 };
 
 const searcher_Croot = function(L) {
     let name = lauxlib.luaL_checkstring(L, 1);
-    let p = lua.luastring_indexOf(name, '.'.charCodeAt(0));
+    let p = luastring_indexOf(name, '.'.charCodeAt(0));
     let stat;
     if (p < 0) return 0;  /* is root */
     lua.lua_pushlstring(L, name, p);
-    let filename = findfile(L, lua.lua_tostring(L, -1), lua.to_luastring("cpath", true), lua.to_luastring(LUA_CSUBSEP, true));
+    let filename = findfile(L, lua.lua_tostring(L, -1), to_luastring("cpath", true), to_luastring(LUA_CSUBSEP, true));
     if (filename === null) return 1;  /* root not found */
     if ((stat = loadfunc(L, filename, name)) !== 0) {
         if (stat != ERRFUNC)
             return checkload(L, 0, filename);  /* real error */
         else {  /* open function not found */
-            lua.lua_pushstring(L, lua.to_luastring("\n\tno module '%s' in file '%s'"), name, filename);
+            lua.lua_pushstring(L, to_luastring("\n\tno module '%s' in file '%s'"), name, filename);
             return 1;
         }
     }
@@ -383,7 +384,7 @@ const searcher_preload = function(L) {
     let name = lauxlib.luaL_checkstring(L, 1);
     lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, lauxlib.LUA_PRELOAD_TABLE);
     if (lua.lua_getfield(L, -1, name) === lua.LUA_TNIL)  /* not found? */
-        lua.lua_pushfstring(L, lua.to_luastring("\n\tno field package.preload['%s']"), name);
+        lua.lua_pushfstring(L, to_luastring("\n\tno field package.preload['%s']"), name);
     return 1;
 };
 
@@ -391,8 +392,8 @@ const findloader = function(L, name, ctx, k) {
     let msg = new lauxlib.luaL_Buffer();  /* to build error message */
     lauxlib.luaL_buffinit(L, msg);
     /* push 'package.searchers' to index 3 in the stack */
-    if (lua.lua_getfield(L, lua.lua_upvalueindex(1), lua.to_luastring("searchers", true)) !== lua.LUA_TTABLE)
-        lauxlib.luaL_error(L, lua.to_luastring("'package.searchers' must be a table"));
+    if (lua.lua_getfield(L, lua.lua_upvalueindex(1), to_luastring("searchers", true)) !== lua.LUA_TTABLE)
+        lauxlib.luaL_error(L, to_luastring("'package.searchers' must be a table"));
     let ctx2 = {name: name, i: 1, msg: msg, ctx: ctx, k: k};
     return findloader_cont(L, lua.LUA_OK, ctx2);
 };
@@ -404,7 +405,7 @@ const findloader_cont = function(L, status, ctx) {
             if (lua.lua_rawgeti(L, 3, ctx.i) === lua.LUA_TNIL) {  /* no more searchers? */
                 lua.lua_pop(L, 1);  /* remove nil */
                 lauxlib.luaL_pushresult(ctx.msg);  /* create error message */
-                lauxlib.luaL_error(L, lua.to_luastring("module '%s' not found:%s"), ctx.name, lua.lua_tostring(L, -1));
+                lauxlib.luaL_error(L, to_luastring("module '%s' not found:%s"), ctx.name, lua.lua_tostring(L, -1));
             }
             lua.lua_pushstring(L, ctx.name);
             lua.lua_callk(L, 1, 2, ctx, findloader_cont);  /* call it */
@@ -475,7 +476,7 @@ const createsearcherstable = function(L) {
         lua.lua_pushcclosure(L, searchers[i], 1);
         lua.lua_rawseti(L, -2, i+1);
     }
-    lua.lua_setfield(L, -2, lua.to_luastring("searchers", true));  /* put it in field 'searchers' */
+    lua.lua_setfield(L, -2, to_luastring("searchers", true));  /* put it in field 'searchers' */
 };
 
 /*
@@ -494,18 +495,18 @@ const luaopen_package = function(L) {
     lauxlib.luaL_newlib(L, pk_funcs);  /* create 'package' table */
     createsearcherstable(L);
     /* set paths */
-    setpath(L, lua.to_luastring("path", true), LUA_PATH_VAR, lua.LUA_PATH_DEFAULT);
-    setpath(L, lua.to_luastring("cpath", true), LUA_CPATH_VAR, lua.LUA_CPATH_DEFAULT);
+    setpath(L, to_luastring("path", true), LUA_PATH_VAR, lua.LUA_PATH_DEFAULT);
+    setpath(L, to_luastring("cpath", true), LUA_CPATH_VAR, lua.LUA_CPATH_DEFAULT);
     /* store config information */
     lua.lua_pushliteral(L, lua.LUA_DIRSEP + "\n" + lua.LUA_PATH_SEP + "\n" + lua.LUA_PATH_MARK + "\n" +
                         lua.LUA_EXEC_DIR + "\n" + LUA_IGMARK + "\n");
-    lua.lua_setfield(L, -2, lua.to_luastring("config", true));
+    lua.lua_setfield(L, -2, to_luastring("config", true));
     /* set field 'loaded' */
     lauxlib.luaL_getsubtable(L, lua.LUA_REGISTRYINDEX, lauxlib.LUA_LOADED_TABLE);
-    lua.lua_setfield(L, -2, lua.to_luastring("loaded", true));
+    lua.lua_setfield(L, -2, to_luastring("loaded", true));
     /* set field 'preload' */
     lauxlib.luaL_getsubtable(L, lua.LUA_REGISTRYINDEX, lauxlib.LUA_PRELOAD_TABLE);
-    lua.lua_setfield(L, -2, lua.to_luastring("preload", true));
+    lua.lua_setfield(L, -2, to_luastring("preload", true));
     lua.lua_pushglobaltable(L);
     lua.lua_pushvalue(L, -2);  /* set 'package' as upvalue for next lib */
     lauxlib.luaL_setfuncs(L, ll_funcs, 1);  /* open lib into global table */

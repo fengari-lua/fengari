@@ -22,16 +22,6 @@ const LUA_RELEASE             = LUA_VERSION + "." + LUA_VERSION_RELEASE;
 const LUA_COPYRIGHT           = LUA_RELEASE + "  Copyright (C) 1994-2017 Lua.org, PUC-Rio";
 const LUA_AUTHORS             = "R. Ierusalimschy, L. H. de Figueiredo, W. Celes";
 
-const FENGARI_VERSION_MAJOR   = "0";
-const FENGARI_VERSION_MINOR   = "0";
-const FENGARI_VERSION_NUM     = 1;
-const FENGARI_VERSION_RELEASE = "1";
-
-const FENGARI_VERSION         = "Fengari " + FENGARI_VERSION_MAJOR + "." + FENGARI_VERSION_MINOR;
-const FENGARI_RELEASE         = FENGARI_VERSION + "." + FENGARI_VERSION_RELEASE;
-const FENGARI_AUTHORS         = "B. Giannangeli, Daurnimator";
-const FENGARI_COPYRIGHT       = FENGARI_RELEASE + "  Copyright (C) 2017-2018 " + FENGARI_AUTHORS + "\nBased on: " + LUA_COPYRIGHT;
-
 const LUA_VERSUFFIX           = "_" + LUA_VERSION_MAJOR + "_" + LUA_VERSION_MINOR;
 
 const LUA_INIT_VAR            = "LUA_INIT";
@@ -437,14 +427,6 @@ if (typeof process === "undefined") {
 }
 
 module.exports.CT                      = CT;
-module.exports.FENGARI_AUTHORS         = FENGARI_AUTHORS;
-module.exports.FENGARI_COPYRIGHT       = FENGARI_COPYRIGHT;
-module.exports.FENGARI_RELEASE         = FENGARI_RELEASE;
-module.exports.FENGARI_VERSION         = FENGARI_VERSION;
-module.exports.FENGARI_VERSION_MAJOR   = FENGARI_VERSION_MAJOR;
-module.exports.FENGARI_VERSION_MINOR   = FENGARI_VERSION_MINOR;
-module.exports.FENGARI_VERSION_NUM     = FENGARI_VERSION_NUM;
-module.exports.FENGARI_VERSION_RELEASE = FENGARI_VERSION_RELEASE;
 module.exports.LUA_AUTHORS             = LUA_AUTHORS;
 module.exports.LUA_COPYRIGHT           = LUA_COPYRIGHT;
 module.exports.LUA_HOOKCALL            = LUA_HOOKCALL;

@@ -5,7 +5,7 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
-
+const {to_luastring} = require("../../src/fengaricore.js");
 
 test("[test-suite] pm: pattern matching", function (t) {
     let luaCode = `
@@ -86,7 +86,7 @@ test("[test-suite] pm: pattern matching", function (t) {
         assert(f("0alo alo", "%x*") == "0a")
         assert(f("alo alo", "%C+") == "alo alo")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -95,7 +95,7 @@ test("[test-suite] pm: pattern matching", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -125,7 +125,7 @@ test("[test-suite] pm: tonumber", function (t) {
         -- assert(f1('=======', '^(=*)=%1$') == '=======')
         assert(string.match('==========', '^([=]*)=%1$') == nil)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -134,7 +134,7 @@ test("[test-suite] pm: tonumber", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -177,7 +177,7 @@ test("[test-suite] pm: range", function (t) {
         assert(strset('%Z') == strset('[\\1-\\255]'))
         assert(strset('.') == strset('[\\1-\\255%z]'))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -186,7 +186,7 @@ test("[test-suite] pm: range", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -210,7 +210,7 @@ test("[test-suite] pm: classes", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadfile(L, lua.to_luastring("tests/test-suite/pm-classes.lua"));
+        lauxlib.luaL_loadfile(L, to_luastring("tests/test-suite/pm-classes.lua"));
 
     }, "Lua program loaded without error");
 
@@ -234,7 +234,7 @@ test("[test-suite] pm: gsub", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadfile(L, lua.to_luastring("tests/test-suite/pm-gsub.lua"));
+        lauxlib.luaL_loadfile(L, to_luastring("tests/test-suite/pm-gsub.lua"));
 
     }, "Lua program loaded without error");
 
@@ -262,7 +262,7 @@ test("[test-suite] pm: empty matches", function (t) {
           assert(res == "-a-b-c-d-")
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -271,7 +271,7 @@ test("[test-suite] pm: empty matches", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -316,7 +316,7 @@ test("[test-suite] pm: gsub", function (t) {
             end)
         assert(s == r and t[1] == 1 and t[3] == 3 and t[7] == 4 and t[13] == 4)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -325,7 +325,7 @@ test("[test-suite] pm: gsub", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -348,7 +348,7 @@ test("[test-suite] pm: gsub isbalanced", function (t) {
         assert(not isbalanced("(9 ((8) 7) a b (\\0 c) a"))
         assert(string.gsub("alo 'oi' alo", "%b''", '"') == 'alo " alo')
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -357,7 +357,7 @@ test("[test-suite] pm: gsub isbalanced", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -397,7 +397,7 @@ test("[test-suite] pm: capture", function (t) {
         checkerror("invalid capture index %%1", string.gsub, "alo", "(%1)", "a")
         checkerror("invalid use of '%%'", string.gsub, "alo", ".", "%x")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -406,7 +406,7 @@ test("[test-suite] pm: capture", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -434,7 +434,7 @@ test("[test-suite] pm: bug since 2.5 (C-stack overflow) (TODO: _soft)", function
           assert(not r and string.find(m, "too complex"))
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -443,7 +443,7 @@ test("[test-suite] pm: bug since 2.5 (C-stack overflow) (TODO: _soft)", function
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -471,7 +471,7 @@ test("[test-suite] pm: big strings (TODO: _soft)", function (t) {
           assert(not pcall(string.gsub, a, 'b'))
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -480,7 +480,7 @@ test("[test-suite] pm: big strings (TODO: _soft)", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -502,7 +502,7 @@ test("[test-suite] pm: recursive nest of gsubs", function (t) {
         local x = "abcdef"
         assert(rev(rev(x)) == x)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -511,7 +511,7 @@ test("[test-suite] pm: recursive nest of gsubs", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -536,7 +536,7 @@ test("[test-suite] pm: gsub with tables", function (t) {
         t = {}; setmetatable(t, {__index = function (t,s) return string.upper(s) end})
         assert(string.gsub("a alo b hi", "%w%w+", t) == "a ALO b HI")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -545,7 +545,7 @@ test("[test-suite] pm: gsub with tables", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -584,7 +584,7 @@ test("[test-suite] pm: gmatch", function (t) {
         for k,v in pairs(t) do assert(k+1 == v+0); a=a+1 end
         assert(a == 3)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -593,7 +593,7 @@ test("[test-suite] pm: gmatch", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -634,7 +634,7 @@ test("[test-suite] pm: tests for '%f' ('frontiers')", function (t) {
         end
         assert(#a == 0)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -643,7 +643,7 @@ test("[test-suite] pm: tests for '%f' ('frontiers')", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -676,7 +676,7 @@ test("[test-suite] pm: malformed patterns", function (t) {
         malform("%")
         malform("%f", "missing")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -685,7 +685,7 @@ test("[test-suite] pm: malformed patterns", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -708,7 +708,7 @@ test("[test-suite] pm: \\0 in patterns", function (t) {
         assert(string.match("abc\\0\\0\\0", "%\\0+") == "\\0\\0\\0")
         assert(string.match("abc\\0\\0\\0", "%\\0%\\0?") == "\\0\\0")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -717,7 +717,7 @@ test("[test-suite] pm: \\0 in patterns", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -735,7 +735,7 @@ test("[test-suite] pm: magic char after \\0", function (t) {
         assert(string.find("abc\\0\\0","\\0.") == 4)
         assert(string.find("abcx\\0\\0abc\\0abc","x\\0\\0abc\\0a.") == 4)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -744,7 +744,7 @@ test("[test-suite] pm: magic char after \\0", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 

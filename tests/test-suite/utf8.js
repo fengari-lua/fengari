@@ -5,7 +5,7 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
-
+const {to_luastring} = require("../../src/fengaricore.js");
 
 const prefix = `
     local function checkerror (msg, f, ...)
@@ -107,7 +107,7 @@ test("[test-suite] utf8: offset", function (t) {
     t.doesNotThrow(function () {
         L = lauxlib.luaL_newstate();
         lualib.luaL_openlibs(L);
-        if (lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
             throw new SyntaxError(lua.lua_tojsstring(L, -1));
     }, "Lua program loaded without error");
 
@@ -136,7 +136,7 @@ test("[test-suite] utf8: error indication in utf8.len", function (t) {
     t.doesNotThrow(function () {
         L = lauxlib.luaL_newstate();
         lualib.luaL_openlibs(L);
-        if (lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
             throw new SyntaxError(lua.lua_tojsstring(L, -1));
     }, "Lua program loaded without error");
 
@@ -162,7 +162,7 @@ test("[test-suite] utf8: error in initial position for offset", function (t) {
     t.doesNotThrow(function () {
         L = lauxlib.luaL_newstate();
         lualib.luaL_openlibs(L);
-        if (lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
             throw new SyntaxError(lua.lua_tojsstring(L, -1));
     }, "Lua program loaded without error");
 
@@ -206,7 +206,7 @@ test("[test-suite] utf8: codepoints", function (t) {
     t.doesNotThrow(function () {
         L = lauxlib.luaL_newstate();
         lualib.luaL_openlibs(L);
-        if (lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
             throw new SyntaxError(lua.lua_tojsstring(L, -1));
     }, "Lua program loaded without error");
 
@@ -226,7 +226,7 @@ test("[test-suite] utf8: UTF-8 representation for 0x11ffff (value out of valid r
     t.doesNotThrow(function () {
         L = lauxlib.luaL_newstate();
         lualib.luaL_openlibs(L);
-        if (lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
             throw new SyntaxError(lua.lua_tojsstring(L, -1));
     }, "Lua program loaded without error");
 
@@ -249,7 +249,7 @@ test("[test-suite] utf8: overlong sequences", function (t) {
     t.doesNotThrow(function () {
         L = lauxlib.luaL_newstate();
         lualib.luaL_openlibs(L);
-        if (lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
             throw new SyntaxError(lua.lua_tojsstring(L, -1));
     }, "Lua program loaded without error");
 
@@ -272,7 +272,7 @@ test("[test-suite] utf8: invalid bytes", function (t) {
     t.doesNotThrow(function () {
         L = lauxlib.luaL_newstate();
         lualib.luaL_openlibs(L);
-        if (lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
             throw new SyntaxError(lua.lua_tojsstring(L, -1));
     }, "Lua program loaded without error");
 
@@ -292,7 +292,7 @@ test("[test-suite] utf8: empty strings", function (t) {
     t.doesNotThrow(function () {
         L = lauxlib.luaL_newstate();
         lualib.luaL_openlibs(L);
-        if (lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
             throw new SyntaxError(lua.lua_tojsstring(L, -1));
     }, "Lua program loaded without error");
 
@@ -339,7 +339,7 @@ test("[test-suite] utf8: minimum and maximum values for each sequence size", fun
     t.doesNotThrow(function () {
         L = lauxlib.luaL_newstate();
         lualib.luaL_openlibs(L);
-        if (lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
             throw new SyntaxError(lua.lua_tojsstring(L, -1));
     }, "Lua program loaded without error");
 

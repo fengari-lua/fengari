@@ -5,7 +5,7 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
-
+const {to_luastring} = require("../../src/fengaricore.js");
 
 test("[test-suite] vararg: testing vararg", function (t) {
     let luaCode = `
@@ -73,7 +73,7 @@ test("[test-suite] vararg: testing vararg", function (t) {
         while i <= lim do a[i] = i; i=i+1 end
         assert(call(math.max, a) == lim)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -82,7 +82,7 @@ test("[test-suite] vararg: testing vararg", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -118,7 +118,7 @@ test("[test-suite] vararg: new-style varargs", function (t) {
         a,b,c,d,e = f(4)
         assert(a==nil and b==nil and c==nil and d==nil and e==nil)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -127,7 +127,7 @@ test("[test-suite] vararg: new-style varargs", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -168,7 +168,7 @@ test("[test-suite] vararg: varargs for main chunks", function (t) {
         pcall(select, 10000)
         pcall(select, -10000)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -177,7 +177,7 @@ test("[test-suite] vararg: varargs for main chunks", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -204,7 +204,7 @@ test("[test-suite] vararg: bug in 5.2.2", function (t) {
         -- assertion fail here
         f()
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -213,7 +213,7 @@ test("[test-suite] vararg: bug in 5.2.2", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 

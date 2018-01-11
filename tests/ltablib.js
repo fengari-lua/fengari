@@ -5,7 +5,7 @@ const test       = require('tape');
 const lua     = require('../src/lua.js');
 const lauxlib = require('../src/lauxlib.js');
 const lualib  = require('../src/lualib.js');
-
+const {to_luastring} = require("../src/fengaricore.js");
 
 const inttable2array = function(t) {
     let a = [];
@@ -31,7 +31,7 @@ test('table.concat', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -58,7 +58,7 @@ test('table.pack', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -87,7 +87,7 @@ test('table.unpack', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -129,7 +129,7 @@ test('table.insert', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -161,7 +161,7 @@ test('table.remove', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -192,7 +192,7 @@ test('table.move', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -223,7 +223,7 @@ test('table.sort (<)', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -254,7 +254,7 @@ test('table.sort with cmp function', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 

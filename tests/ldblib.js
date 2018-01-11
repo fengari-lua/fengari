@@ -5,7 +5,7 @@ const test     = require('tape');
 const lua     = require('../src/lua.js');
 const lauxlib = require('../src/lauxlib.js');
 const lualib  = require('../src/lualib.js');
-
+const {to_luastring} = require("../src/fengaricore.js");
 
 test('debug.sethook', function (t) {
     let luaCode = `
@@ -32,7 +32,7 @@ test('debug.sethook', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -75,7 +75,7 @@ test('debug.gethook', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -87,7 +87,7 @@ test('debug.gethook', function (t) {
 
     t.deepEqual(
         lua.lua_typename(L, lua.lua_type(L, -3)),
-        lua.to_luastring("function"),
+        to_luastring("function"),
         "Correct element(s) on the stack"
     );
 
@@ -134,7 +134,7 @@ test('debug.getlocal', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -181,7 +181,7 @@ test('debug.setlocal', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -235,7 +235,7 @@ test('debug.upvalueid', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -278,7 +278,7 @@ test('debug.upvaluejoin', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -322,8 +322,8 @@ test('debug.traceback (with a global)', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        luaCode = lua.to_luastring(luaCode);
-        lauxlib.luaL_loadbuffer(L, luaCode, luaCode.length, lua.to_luastring("traceback-test"));
+        luaCode = to_luastring(luaCode);
+        lauxlib.luaL_loadbuffer(L, luaCode, luaCode.length, to_luastring("traceback-test"));
 
     }, "Lua program loaded without error");
 
@@ -379,8 +379,8 @@ test('debug.traceback (with a upvalue)', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        luaCode = lua.to_luastring(luaCode);
-        lauxlib.luaL_loadbuffer(L, luaCode, luaCode.length, lua.to_luastring("traceback-test"));
+        luaCode = to_luastring(luaCode);
+        lauxlib.luaL_loadbuffer(L, luaCode, luaCode.length, to_luastring("traceback-test"));
 
     }, "Lua program loaded without error");
 
@@ -431,8 +431,8 @@ test('debug.getinfo', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        luaCode = lua.to_luastring(luaCode);
-        lauxlib.luaL_loadbuffer(L, luaCode, luaCode.length, lua.to_luastring("getinfo-test"));
+        luaCode = to_luastring(luaCode);
+        lauxlib.luaL_loadbuffer(L, luaCode, luaCode.length, to_luastring("getinfo-test"));
 
     }, "Lua program loaded without error");
 

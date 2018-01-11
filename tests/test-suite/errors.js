@@ -5,7 +5,7 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
-
+const {to_luastring} = require("../../src/fengaricore.js");
 
 const prefix = `
     -- avoid problems with 'strict' module (which may generate other error messages)
@@ -48,7 +48,7 @@ test("[test-suite] errors: test error message with no extra info", function (t) 
     let luaCode = `
         assert(doit("error('hi', 0)") == 'hi')
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -57,7 +57,7 @@ test("[test-suite] errors: test error message with no extra info", function (t) 
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -74,7 +74,7 @@ test("[test-suite] errors: test error message with no info", function (t) {
     let luaCode = `
         assert(doit("error()") == nil)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -83,7 +83,7 @@ test("[test-suite] errors: test error message with no info", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -115,7 +115,7 @@ test("[test-suite] errors: test common errors/errors that crashed in the past", 
 
         ]], "'}' expected (to close '{' at line 1)", "<eof>", 3)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -124,7 +124,7 @@ test("[test-suite] errors: test common errors/errors that crashed in the past", 
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -161,7 +161,7 @@ test("[test-suite] errors: tests for better error messages", function (t) {
         checkmessage("local a,b,c; (function () a = b+1 end)()", "upvalue 'b'")
         assert(not doit"local aaa={bbb={ddd=next}}; aaa.bbb:ddd(nil)")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -170,7 +170,7 @@ test("[test-suite] errors: tests for better error messages", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -195,7 +195,7 @@ test("[test-suite] errors: upvalues being indexed do not go to the stack", funct
         checkmessage("aaa='2'; b=nil;x=aaa*b", "global 'b'")
         checkmessage("aaa={}; x=-aaa", "global 'aaa'")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -204,7 +204,7 @@ test("[test-suite] errors: upvalues being indexed do not go to the stack", funct
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -232,7 +232,7 @@ test("[test-suite] errors: short circuit", function (t) {
         checkmessage("print('10' < 10)", "string with number")
         checkmessage("print(10 < '23')", "number with string")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -241,7 +241,7 @@ test("[test-suite] errors: short circuit", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -274,7 +274,7 @@ test("[test-suite] errors: float->integer conversions", function (t) {
         checkmessage("a = 24 // 0", "divide by zero")
         checkmessage("a = 1 % 0", "'n%0'")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -283,7 +283,7 @@ test("[test-suite] errors: float->integer conversions", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -306,7 +306,7 @@ test("[test-suite] errors: passing light userdata instead of full userdata", fun
         ]], "light userdata")
         _G.D = nil
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -315,7 +315,7 @@ test("[test-suite] errors: passing light userdata instead of full userdata", fun
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -343,7 +343,7 @@ test("[test-suite] errors: named objects (field '__name')", function (t) {
           _G.XX = nil
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -352,7 +352,7 @@ test("[test-suite] errors: named objects (field '__name')", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -370,7 +370,7 @@ test("[test-suite] errors: global functions", function (t) {
         checkmessage("(io.write or print){}", "io.write")
         checkmessage("(collectgarbage or print){}", "collectgarbage")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -379,7 +379,7 @@ test("[test-suite] errors: global functions", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -408,7 +408,7 @@ test("[test-suite] errors: errors in functions without debug info", function (t)
           checkerr("^%?:%-1:.*table value", f)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -417,7 +417,7 @@ test("[test-suite] errors: errors in functions without debug info", function (t)
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -443,7 +443,7 @@ test("[test-suite] errors: tests for field accesses after RK limit", function (t
         checkmessage(s.."; local t = {}; a = t.bbb + 1", "field 'bbb'")
         checkmessage(s.."; local t = {}; t:bbb()", "method 'bbb'")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -452,7 +452,7 @@ test("[test-suite] errors: tests for field accesses after RK limit", function (t
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -478,7 +478,7 @@ test("[test-suite] errors: global", function (t) {
           {d = x and aaa[x or y]}}
         ]], "global 'aaa'")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -487,7 +487,7 @@ test("[test-suite] errors: global", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -507,7 +507,7 @@ test("[test-suite] errors: field", function (t) {
         if math.sin(1) == 0 then return 3 end    -- return
         x.a()]], "field 'a'")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -516,7 +516,7 @@ test("[test-suite] errors: field", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -540,7 +540,7 @@ test("[test-suite] errors: global insert", function (t) {
           insert(prefix, a)
         end]], "global 'insert'")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -549,7 +549,7 @@ test("[test-suite] errors: global insert", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -568,7 +568,7 @@ test("[test-suite] errors: sin", function (t) {
           return math.sin("a")
         ]], "'sin'")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -577,7 +577,7 @@ test("[test-suite] errors: sin", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -596,7 +596,7 @@ test("[test-suite] errors: concatenate", function (t) {
         checkmessage([[x = "a" .. false]], "concatenate")
         checkmessage([[x = {} .. 2]], "concatenate")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -605,7 +605,7 @@ test("[test-suite] errors: concatenate", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -628,7 +628,7 @@ test("[test-suite] errors: unknown global", function (t) {
         main()
         ]], "global 'NoSuchName'")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -637,7 +637,7 @@ test("[test-suite] errors: unknown global", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -660,7 +660,7 @@ test("[test-suite] errors: __index", function (t) {
         checkmessage("table.sort({1,2,3}, table.sort)", "'table.sort'")
         checkmessage("string.gsub('s', 's', setmetatable)", "'setmetatable'")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -669,7 +669,7 @@ test("[test-suite] errors: __index", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -696,7 +696,7 @@ test("[test-suite] errors: tests for errors in coroutines", function (t) {
         f = coroutine.wrap(function () table.sort({1,2,3}, coroutine.yield) end)
         checkerr("yield across", f)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -705,7 +705,7 @@ test("[test-suite] errors: tests for errors in coroutines", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -735,7 +735,7 @@ test("[test-suite] errors: testing size of 'source' info", function (t) {
         end
 
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -744,7 +744,7 @@ test("[test-suite] errors: testing size of 'source' info", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -812,7 +812,7 @@ test("[test-suite] errors: testing line error", function (t) {
         X=1;lineerror((p), 2)
         X=2;lineerror((p), 1)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -821,7 +821,7 @@ test("[test-suite] errors: testing line error", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -847,7 +847,7 @@ test("[test-suite] errors: several tests that exhaust the Lua stack", function (
         assert(checkstackmessage(doit('y()')))
         assert(checkstackmessage(doit('y()')))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -856,7 +856,7 @@ test("[test-suite] errors: several tests that exhaust the Lua stack", function (
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -890,7 +890,7 @@ test("[test-suite] errors: error lines in stack overflow", function (t) {
         end
         assert(i > 15)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -899,7 +899,7 @@ test("[test-suite] errors: error lines in stack overflow", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -927,7 +927,7 @@ test("[test-suite] errors: error in error handling", function (t) {
         end
         f(3)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -936,7 +936,7 @@ test("[test-suite] errors: error in error handling", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -966,7 +966,7 @@ test("[test-suite] errors: too many results", function (t) {
         end
         checkerr("too many results", f)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -975,7 +975,7 @@ test("[test-suite] errors: too many results", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1006,7 +1006,7 @@ test("[test-suite] errors: non string messages", function (t) {
           -- 'assert' with extra arguments
           res, msg = pcall(assert, false, "X", t)
           assert(not res and msg == "X")
-         
+
           -- 'assert' with no message
           res, msg = pcall(function () assert(false) end)
           local line = string.match(msg, "%w+%.lua:(%d+): assertion failed!$")
@@ -1024,7 +1024,7 @@ test("[test-suite] errors: non string messages", function (t) {
           assert(not res and string.find(msg, "value expected"))
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1033,7 +1033,7 @@ test("[test-suite] errors: non string messages", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadbuffer(L, lua.to_luastring(prefix + luaCode), null, lua.to_luastring("@errors.lua"));
+        lauxlib.luaL_loadbuffer(L, to_luastring(prefix + luaCode), null, to_luastring("@errors.lua"));
 
     }, "Lua program loaded without error");
 
@@ -1053,7 +1053,7 @@ test("[test-suite] errors: xpcall with arguments", function (t) {
         a, b, c = xpcall(string.find, function (x) return {} end, true, "al")
         assert(not a and type(b) == "table" and c == nil)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1062,7 +1062,7 @@ test("[test-suite] errors: xpcall with arguments", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1084,7 +1084,7 @@ test("[test-suite] errors: testing tokens in error messages", function (t) {
         checksyntax("while << do end", "", "<<", 1)
         checksyntax("for >> do end", "", ">>", 1)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1093,7 +1093,7 @@ test("[test-suite] errors: testing tokens in error messages", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1110,7 +1110,7 @@ test("[test-suite] errors: test invalid non-printable char in a chunk", function
     let luaCode = `
         checksyntax("a\\1a = 1", "", "<\\\\1>", 1)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1119,7 +1119,7 @@ test("[test-suite] errors: test invalid non-printable char in a chunk", function
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1139,7 +1139,7 @@ test("[test-suite] errors: test 255 as first char in a chunk", function (t) {
         doit('I = load("a=9+"); a=3')
         assert(a==3 and I == nil)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1148,7 +1148,7 @@ test("[test-suite] errors: test 255 as first char in a chunk", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1170,7 +1170,7 @@ test("[test-suite] errors: lots of errors", function (t) {
           doit('a = 4+nil')
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1179,7 +1179,7 @@ test("[test-suite] errors: lots of errors", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1217,7 +1217,7 @@ test("[test-suite] errors: testing syntax limits", function (t) {
 
         checkmessage("a = f(x" .. string.rep(",x", 260) .. ")", "too many registers")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1226,7 +1226,7 @@ test("[test-suite] errors: testing syntax limits", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1263,7 +1263,7 @@ test("[test-suite] errors: upvalues limit", function (t) {
         assert(c > 255 and string.find(b, "too many upvalues") and
                string.find(b, "line 5"))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1272,7 +1272,7 @@ test("[test-suite] errors: upvalues limit", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1295,7 +1295,7 @@ test("[test-suite] errors: local variables limit", function (t) {
         local a,b = load(s)
         assert(string.find(b, "line 2") and string.find(b, "too many local variables"))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1304,7 +1304,7 @@ test("[test-suite] errors: local variables limit", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 

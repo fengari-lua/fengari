@@ -5,6 +5,7 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
+const {to_luastring} = require("../../src/fengaricore.js");
 
 const ltests  = require('./ltests.js');
 
@@ -32,7 +33,7 @@ test("[test-suite] api: registry", function (t) {
         a = T.testC("pushvalue R; return 1")
         assert(a == debug.getregistry())
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -43,7 +44,7 @@ test("[test-suite] api: registry", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -62,7 +63,7 @@ test("[test-suite] api: absindex", function (t) {
         assert(T.testC("settop 10; absindex 1; return 1") == 1)
         assert(T.testC("settop 10; absindex R; return 1") < -10)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -73,7 +74,7 @@ test("[test-suite] api: absindex", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -99,7 +100,7 @@ test("[test-suite] api: testing alignment", function (t) {
         a,b,c = f()
         assert(a == 2 and b == 3 and not c)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -110,7 +111,7 @@ test("[test-suite] api: testing alignment", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -164,7 +165,7 @@ test("[test-suite] api: test that all trues are equal", function (t) {
         t = pack(T.testC("copy -3 -1; return *", 2, 3, 4, 5))
         tcheck(t, {n=4,2,3,4,3})
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -175,7 +176,7 @@ test("[test-suite] api: test that all trues are equal", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -212,7 +213,7 @@ test("[test-suite] api: testing 'rotate'", function (t) {
           tcheck(t, {10, 20, 30, 40})
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -223,7 +224,7 @@ test("[test-suite] api: testing 'rotate'", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -265,7 +266,7 @@ test("[test-suite] api: testing non-function message handlers", function (t) {
         t = pack(T.testC("concat 5; return *", "alo", 2, 3, "joao", 12))
         tcheck(t, {n=1,"alo23joao12"})
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -276,7 +277,7 @@ test("[test-suite] api: testing non-function message handlers", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -294,7 +295,7 @@ test("[test-suite] api: testing MULTRET", function (t) {
              function (a,b) return 1,2,3,4,a,b end, "alo", "joao"))
         tcheck(t, {n=6,1,2,3,4,"alo", "joao"})
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -305,7 +306,7 @@ test("[test-suite] api: testing MULTRET", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -327,7 +328,7 @@ test("[test-suite] api: test returning more results than fit in the caller stack
           assert(b == "10")
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -338,7 +339,7 @@ test("[test-suite] api: test returning more results than fit in the caller stack
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -362,7 +363,7 @@ test("[test-suite] api: testing globals", function (t) {
         ]]}
         assert(a[2] == 14 and a[3] == "a31" and a[4] == nil and _G.a == "a31")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -373,7 +374,7 @@ test("[test-suite] api: testing globals", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -420,7 +421,7 @@ test("[test-suite] api: testing arith", function (t) {
         assert(T.testC("arith _; arith +; arith %; return 1", b, a, c)[1] ==
                        8 % (4 + (-3)*2))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -431,7 +432,7 @@ test("[test-suite] api: testing arith", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -448,7 +449,7 @@ test("[test-suite] api: errors in arithmetic", function (t) {
         checkerr("divide by zero", T.testC, "arith \\\\", 10, 0)
         checkerr("%%0", T.testC, "arith %", 10, 0)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -459,7 +460,7 @@ test("[test-suite] api: errors in arithmetic", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -481,7 +482,7 @@ test("[test-suite] api: testing lessthan and lessequal", function (t) {
         assert(not T.testC("compare LT 2 -3, return 1", "4", "2", "2", "3", "2", "2"))
         assert(not T.testC("compare LT -3 2, return 1", "3", "2", "2", "4", "2", "2"))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -492,7 +493,7 @@ test("[test-suite] api: testing lessthan and lessequal", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -524,7 +525,7 @@ test("[test-suite] api: non-valid indices produce false", function (t) {
         a,b = T.testC("compare LE 5 -6, return 2", a1, 2, 2, a1, 2, 20)
         assert(a == 20 and b == true)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -535,7 +536,7 @@ test("[test-suite] api: non-valid indices produce false", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -575,7 +576,7 @@ test("[test-suite] api: testing length", function (t) {
         ]], t)
         assert(a == print and c == 1)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -586,7 +587,7 @@ test("[test-suite] api: testing length", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -617,7 +618,7 @@ test("[test-suite] api: testing __concat", function (t) {
         -- concat with 1 element
         assert(T.testC("concat 1; return 1", "xuxu") == "xuxu")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -628,7 +629,7 @@ test("[test-suite] api: testing __concat", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -672,7 +673,7 @@ test("[test-suite] api: testing lua_is", function (t) {
         assert(count(io.stdin) == 1)
         assert(count(nil, 15) == 100)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -683,7 +684,7 @@ test("[test-suite] api: testing lua_is", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -733,7 +734,7 @@ test("[test-suite] api: testing lua_to...", function (t) {
         a = to("tocfunction", math.deg)
         assert(a(3) == math.deg(3) and a == math.deg)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -744,7 +745,7 @@ test("[test-suite] api: testing lua_to...", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -771,7 +772,7 @@ test("[test-suite] api: testing panic function", function (t) {
           -- "argerror" without frames
           assert(T.checkpanic("loadstring 4") ==
               "bad argument #4 (string expected, got no value)")
-          
+
 
           --[[ TODO: T.totalmem
           -- memory error
@@ -792,7 +793,7 @@ test("[test-suite] api: testing panic function", function (t) {
 
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -803,7 +804,7 @@ test("[test-suite] api: testing panic function", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -848,7 +849,7 @@ test("[test-suite] api: testing deep JS stack", { skip: true }, function (t) {
         assert(next(t) == nil)
         prog, g, t = nil
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -859,7 +860,7 @@ test("[test-suite] api: testing deep JS stack", { skip: true }, function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -891,7 +892,7 @@ test("[test-suite] api: testing errors", function (t) {
         check3("%.", T.testC("loadfile 2; return *", "."))
         check3("xxxx", T.testC("loadfile 2; return *", "xxxx"))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -902,7 +903,7 @@ test("[test-suite] api: testing errors", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -929,7 +930,7 @@ test("[test-suite] api: test errors in non protected threads", { skip: true }, f
           checkerrnopro("getglobal 'f'; call 0 0;", "stack overflow")
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -940,7 +941,7 @@ test("[test-suite] api: test errors in non protected threads", { skip: true }, f
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -992,7 +993,7 @@ test("[test-suite] api: testing table access", function (t) {
         assert(a[b] == 19)
 
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1003,7 +1004,7 @@ test("[test-suite] api: testing table access", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1032,7 +1033,7 @@ test("[test-suite] api: testing getfield/setfield with long keys", function (t) 
           _012345678901234567890123456789012345678901234567890123456789 = nil
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1043,7 +1044,7 @@ test("[test-suite] api: testing getfield/setfield with long keys", function (t) 
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1066,7 +1067,7 @@ test("[test-suite] api: testing next", function (t) {
         t = pack(T.testC("next; pop 1; next; return *", a, nil))
         tcheck(t, {n=1,a})
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1077,7 +1078,7 @@ test("[test-suite] api: testing next", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1106,7 +1107,7 @@ test("[test-suite] api: testing upvalues", function (t) {
           -- T.checkmemory()
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1117,7 +1118,7 @@ test("[test-suite] api: testing upvalues", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1142,7 +1143,7 @@ test("[test-suite] api: testing absent upvalues from JS-function pointers", func
         T.upvalue(f, 2, "xuxu")
         assert(T.upvalue(f, 2) == "xuxu")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1153,7 +1154,7 @@ test("[test-suite] api: testing absent upvalues from JS-function pointers", func
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1179,7 +1180,7 @@ test("[test-suite] api: large closures", function (t) {
           assert(not A("isnil U256; return 1"))
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1190,7 +1191,7 @@ test("[test-suite] api: large closures", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1226,7 +1227,7 @@ test("[test-suite] api: testing get/setuservalue", function (t) {
         -- collectgarbage()   -- number should not be a problem for collector
         assert(debug.getuservalue(b) == 134)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1237,7 +1238,7 @@ test("[test-suite] api: testing get/setuservalue", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1257,7 +1258,7 @@ test("[test-suite] api: testing get/setuservalue", { skip: true }, function (t) 
         T.gcstate("pause")  -- complete collection
         assert(debug.getuservalue(b).x == 100)  -- uvalue should be there
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1268,7 +1269,7 @@ test("[test-suite] api: testing get/setuservalue", { skip: true }, function (t) 
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1294,7 +1295,7 @@ test("[test-suite] api: long chain of userdata", { skip: true }, function (t) {
         assert(debug.getuservalue(b).x == 100)
         b = nil
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1305,7 +1306,7 @@ test("[test-suite] api: long chain of userdata", { skip: true }, function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1366,7 +1367,7 @@ test("[test-suite] api: reuse of references", { skip: true }, function (t) {
 
         assert(type(T.getref(a)) == 'table')
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1377,7 +1378,7 @@ test("[test-suite] api: reuse of references", { skip: true }, function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1494,7 +1495,7 @@ test("[test-suite] api: collect in cl the `val' of all collected userdata", { sk
         collectgarbage()
         assert(#cl == 1 and cl[1] == x)   -- old 'x' must be collected
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1505,7 +1506,7 @@ test("[test-suite] api: collect in cl the `val' of all collected userdata", { sk
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1550,7 +1551,7 @@ test("[test-suite] api: test whether udate collection frees memory in the right 
           collectgarbage("restart")
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1561,7 +1562,7 @@ test("[test-suite] api: test whether udate collection frees memory in the right 
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1582,7 +1583,7 @@ test("[test-suite] api: testing lua_equal", function (t) {
         assert(not T.testC("compare EQ 2 3; return 1"))
         assert(not T.testC("compare EQ 2 3; return 1", 3))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1593,7 +1594,7 @@ test("[test-suite] api: testing lua_equal", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1624,7 +1625,7 @@ test("[test-suite] api: testing lua_equal with fallbacks", function (t) {
           assert(f(10) ~= f(10))
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1635,7 +1636,7 @@ test("[test-suite] api: testing lua_equal with fallbacks", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1670,7 +1671,7 @@ test("[test-suite] api: testing changing hooks during hooks", function (t) {
         assert(t[5] == "line" and t[6] == line + 2)
         assert(t[7] == nil)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1681,7 +1682,7 @@ test("[test-suite] api: testing changing hooks during hooks", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1722,7 +1723,7 @@ test("[test-suite] api: testing errors during GC", { skip: true }, function (t) 
           assert(A == 10)  -- number of normal collections
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1733,7 +1734,7 @@ test("[test-suite] api: testing errors during GC", { skip: true }, function (t) 
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1757,7 +1758,7 @@ test("[test-suite] api: test for userdata vals", function (t) {
           assert(type(tostring(a[1])) == "string")
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1768,7 +1769,7 @@ test("[test-suite] api: test for userdata vals", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1828,7 +1829,7 @@ test("[test-suite] api: testing multiple states", function (t) {
 
         T.closestate(L1)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1839,7 +1840,7 @@ test("[test-suite] api: testing multiple states", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1859,7 +1860,7 @@ test("[test-suite] api: testing memory limits", { skip: true }, function (t) {
         checkerr("not enough memory", load"local a={}; for i=1,100000 do a[i]=i end")
         T.totalmem(0)          -- restore high limit
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1870,7 +1871,7 @@ test("[test-suite] api: testing memory limits", { skip: true }, function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1914,7 +1915,7 @@ test("[test-suite] api: testing memory errors when creating a new state", { skip
         b = testamem("state creation", T.newstate)
         T.closestate(b);  -- close new state
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1925,7 +1926,7 @@ test("[test-suite] api: testing memory errors when creating a new state", { skip
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + memprefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + memprefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1952,7 +1953,7 @@ test("[test-suite] api: get main thread from registry (at index LUA_RIDX_MAINTHR
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + memprefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + memprefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1980,7 +1981,7 @@ test("[test-suite] api: test thread creation after stressing GC", { skip: true }
           return T.doonnewstack("x=1") == 0  -- try to create thread
         end)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1991,7 +1992,7 @@ test("[test-suite] api: test thread creation after stressing GC", { skip: true }
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + memprefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + memprefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -2009,7 +2010,7 @@ test("[test-suite] api: testing memory x compiler", { skip: true }, function (t)
           return load("x=1")  -- try to do load a string
         end)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -2020,7 +2021,7 @@ test("[test-suite] api: testing memory x compiler", { skip: true }, function (t)
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + memprefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + memprefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -2055,7 +2056,7 @@ test("[test-suite] api: testing memory x dofile", { skip: true }, function (t) {
         assert(os.remove(t))
         assert(_G.a == "aaax")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -2066,7 +2067,7 @@ test("[test-suite] api: testing memory x dofile", { skip: true }, function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + memprefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + memprefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -2138,7 +2139,7 @@ test("[test-suite] api: other generic tests", { skip: true }, function (t) {
           end)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -2149,7 +2150,7 @@ test("[test-suite] api: other generic tests", { skip: true }, function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + memprefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + memprefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -2175,7 +2176,7 @@ test("[test-suite] api: testing some auxlib functions", function (t) {
         assert(gsub("...", ".", "/.") == "/././.")
         assert(gsub("...", "...", "") == "")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -2186,7 +2187,7 @@ test("[test-suite] api: testing some auxlib functions", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -2247,7 +2248,7 @@ test("[test-suite] api: testing luaL_newmetatable", function (t) {
           r.xuxu = nil; r.xuxu1 = nil
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -2258,7 +2259,7 @@ test("[test-suite] api: testing luaL_newmetatable", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 

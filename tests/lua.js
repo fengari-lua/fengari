@@ -5,8 +5,7 @@ const test     = require('tape');
 const lua     = require('../src/lua.js');
 const lauxlib = require('../src/lauxlib.js');
 const lualib  = require('../src/lualib.js');
-const lapi    = require('../src/lapi.js');
-
+const {to_luastring} = require("../src/fengaricore.js");
 
 // TODO: remove
 test.skip('locals.lua', function (t) {
@@ -24,13 +23,13 @@ test.skip('locals.lua', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 });
@@ -51,13 +50,13 @@ test.skip('constructs.lua', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 });
@@ -76,13 +75,13 @@ test.skip('strings.lua', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
     t.doesNotThrow(function () {
 
-        lapi.lua_call(L, 0, -1);
+        lua.lua_call(L, 0, -1);
 
     }, "Lua program ran without error");
 });

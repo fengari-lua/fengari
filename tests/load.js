@@ -8,7 +8,7 @@ const toByteCode = tests.toByteCode;
 const lua     = require('../src/lua.js');
 const lauxlib = require('../src/lauxlib.js');
 const lualib  = require('../src/lualib.js');
-
+const {to_luastring} = require("../src/fengaricore.js");
 
 test('luaL_loadstring', function (t) {
     let luaCode = `
@@ -24,7 +24,7 @@ test('luaL_loadstring', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -56,7 +56,7 @@ test('load', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -90,7 +90,7 @@ test('luaL_loadbuffer', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadbuffer(L, bc, null, lua.to_luastring("test"));
+        lauxlib.luaL_loadbuffer(L, bc, null, to_luastring("test"));
 
     }, "Lua program loaded without error");
 
@@ -122,7 +122,7 @@ test('loadfile', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -154,7 +154,7 @@ test('loadfile (binary)', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -185,7 +185,7 @@ test('dofile', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 

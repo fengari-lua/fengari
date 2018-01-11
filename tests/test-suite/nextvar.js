@@ -5,7 +5,7 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
-
+const {to_luastring} = require("../../src/fengaricore.js");
 
 const prefix = `
     local function checkerror (msg, f, ...)
@@ -27,7 +27,7 @@ test("[test-suite] nextvar: testing size operator", function (t) {
           assert(#a == i)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -36,7 +36,7 @@ test("[test-suite] nextvar: testing size operator", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -59,7 +59,7 @@ test("[test-suite] nextvar: testing ipairs", function (t) {
 
         for _ in ipairs{x=12, y=24} do assert(nil) end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -68,7 +68,7 @@ test("[test-suite] nextvar: testing ipairs", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -92,7 +92,7 @@ test("[test-suite] nextvar: test for 'false' x ipair", function (t) {
         end
         assert(i == 4)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -101,7 +101,7 @@ test("[test-suite] nextvar: test for 'false' x ipair", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -118,7 +118,7 @@ test("[test-suite] nextvar: iterator function is always the same", function (t) 
     let luaCode = `
         assert(type(ipairs{}) == 'function' and ipairs{} == ipairs{})
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -127,7 +127,7 @@ test("[test-suite] nextvar: iterator function is always the same", function (t) 
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -171,7 +171,7 @@ test("[test-suite] nextvar: JS tests", { skip: true }, function (t) {
           a = math.ceil(a*1.3)
         end
 
-         
+
         local function check (t, na, nh)
           local a, h = T.querytab(t)
           if a ~= na or h ~= nh then
@@ -195,7 +195,7 @@ test("[test-suite] nextvar: JS tests", { skip: true }, function (t) {
         for i=1,lim do
           s = s..i..','
           local s = s
-          for k=0,lim do 
+          for k=0,lim do
             local t = load(s..'}', '')()
             assert(#t == i)
             check(t, fb(i), mp2(k))
@@ -272,7 +272,7 @@ test("[test-suite] nextvar: JS tests", { skip: true }, function (t) {
         local a = {}
         for i=1,lim do a[i] = true; foo(i, table.unpack(a)) end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -281,7 +281,7 @@ test("[test-suite] nextvar: JS tests", { skip: true }, function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -302,7 +302,7 @@ test("[test-suite] nextvar: test size operation on empty tables", function (t) {
         assert(#{nil, nil, nil} == 0)
         assert(#{nil, nil, nil, nil} == 0)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -311,7 +311,7 @@ test("[test-suite] nextvar: test size operation on empty tables", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -332,7 +332,7 @@ test("[test-suite] nextvar: test size operation on empty tables", function (t) {
         assert(#{nil, nil, nil} == 0)
         assert(#{nil, nil, nil, nil} == 0)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -341,7 +341,7 @@ test("[test-suite] nextvar: test size operation on empty tables", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -393,7 +393,7 @@ test("[test-suite] nextvar: next uses always the same iteration function", funct
         _G["xxx"] = 1
         assert(xxx==find("xxx"))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -402,7 +402,7 @@ test("[test-suite] nextvar: next uses always the same iteration function", funct
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -419,7 +419,7 @@ test("[test-suite] nextvar: invalid key to 'next'", function (t) {
     let luaCode = `
         checkerror("invalid key", next, {10,20}, 3)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -428,7 +428,7 @@ test("[test-suite] nextvar: invalid key to 'next'", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -446,7 +446,7 @@ test("[test-suite] nextvar: both 'pairs' and 'ipairs' need an argument", functio
         checkerror("bad argument", pairs)
         checkerror("bad argument", ipairs)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -455,7 +455,7 @@ test("[test-suite] nextvar: both 'pairs' and 'ipairs' need an argument", functio
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -485,7 +485,7 @@ test("[test-suite] nextvar: fmod table", function (t) {
         assert(n.n == 9000)
         a = nil
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -494,7 +494,7 @@ test("[test-suite] nextvar: fmod table", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -522,7 +522,7 @@ test("[test-suite] nextvar: check next", function (t) {
         checknext{1,2,3,4,x=1,y=2,z=3}
         checknext{1,2,3,4,5,x=1,y=2,z=3}
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -531,7 +531,7 @@ test("[test-suite] nextvar: check next", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -555,7 +555,7 @@ test("[test-suite] nextvar: # operator", function (t) {
           assert(#a == i)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -564,7 +564,7 @@ test("[test-suite] nextvar: # operator", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -596,7 +596,7 @@ test("[test-suite] nextvar: maxn", function (t) {
 
         table.maxn = nil
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -605,7 +605,7 @@ test("[test-suite] nextvar: maxn", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -624,7 +624,7 @@ test("[test-suite] nextvar: int overflow", function (t) {
         for i=0,50 do a[2^i] = true end
         assert(a[#a])
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -633,7 +633,7 @@ test("[test-suite] nextvar: int overflow", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -721,7 +721,7 @@ test("[test-suite] nextvar: erasing values", function (t) {
         assert(table.remove(a, 2) == 20)
         assert(a[#a] == 30 and #a == 2)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -730,7 +730,7 @@ test("[test-suite] nextvar: erasing values", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -791,7 +791,7 @@ test("[test-suite] nextvar: testing table library with metamethods", function (t
 
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -800,7 +800,7 @@ test("[test-suite] nextvar: testing table library with metamethods", function (t
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -839,12 +839,12 @@ test("[test-suite] nextvar: JS tests", { skip: true }, function (t) {
         mt.__newindex = nil
         mt.__len = nil
         local tab2 = {}
-        local u2 = T.newuserdata(0) 
+        local u2 = T.newuserdata(0)
         debug.setmetatable(u2, {__newindex = function (_, k, v) tab2[k] = v end})
         table.move(u, 1, 4, 1, u2)
         assert(#tab2 == 4 and tab2[1] == tab[1] and tab2[4] == tab[4])
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -853,7 +853,7 @@ test("[test-suite] nextvar: JS tests", { skip: true }, function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -883,7 +883,7 @@ test("[test-suite] nextvar: next", function (t) {
         a = nil; for i=1,1 do assert(not a); a=1 end; assert(a)
         a = nil; for i=1,1,-1 do assert(not a); a=1 end; assert(a)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -892,7 +892,7 @@ test("[test-suite] nextvar: next", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -926,7 +926,7 @@ test("[test-suite] nextvar: testing floats in numeric for", function (t) {
           a = 0; for i=1.0, 0.99999, -1 do a=a+1 end; assert(a==1)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -935,7 +935,7 @@ test("[test-suite] nextvar: testing floats in numeric for", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -952,7 +952,7 @@ test("[test-suite] nextvar: conversion", function (t) {
     let luaCode = `
         a = 0; for i="10","1","-2" do a=a+1 end; assert(a==5)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -961,7 +961,7 @@ test("[test-suite] nextvar: conversion", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1030,7 +1030,7 @@ test("[test-suite] nextvar: checking types", function (t) {
 
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1039,7 +1039,7 @@ test("[test-suite] nextvar: checking types", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1071,7 +1071,7 @@ test("[test-suite] nextvar: testing generic 'for'", function (t) {
         end
         assert(x == 5)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1080,7 +1080,7 @@ test("[test-suite] nextvar: testing generic 'for'", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1123,7 +1123,7 @@ test("[test-suite] nextvar: testing __pairs and __ipairs metamethod", function (
         a.n = 5
         a[3] = 30
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1132,7 +1132,7 @@ test("[test-suite] nextvar: testing __pairs and __ipairs metamethod", function (
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1149,7 +1149,7 @@ test("[test-suite] nextvar: testing ipairs with metamethods", function (t) {
     let luaCode = `
         a = {n=10}
         setmetatable(a, { __index = function (t,k)
-                             if k <= t.n then return k * 10 end 
+                             if k <= t.n then return k * 10 end
                           end})
         i = 0
         for k,v in ipairs(a) do
@@ -1158,7 +1158,7 @@ test("[test-suite] nextvar: testing ipairs with metamethods", function (t) {
         end
         assert(i == a.n)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1167,7 +1167,7 @@ test("[test-suite] nextvar: testing ipairs with metamethods", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 

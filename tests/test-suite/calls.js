@@ -5,7 +5,7 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
-
+const {to_luastring} = require("../../src/fengaricore.js");
 
 test("[test-suite] calls: test 'type'", function (t) {
     let luaCode = `
@@ -22,7 +22,7 @@ test("[test-suite] calls: test 'type'", function (t) {
         assert(type(f) == 'function')
         assert(not pcall(type))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -31,7 +31,7 @@ test("[test-suite] calls: test 'type'", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -56,11 +56,11 @@ test("[test-suite] calls: test error in 'print'", function (t) {
           _ENV.tostring = function () return {} end
           local st, msg = pcall(print, 1)
           assert(st == false and string.find(msg, "must return a string"))
-          
+
           _ENV.tostring = tostring
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -69,7 +69,7 @@ test("[test-suite] calls: test error in 'print'", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -96,7 +96,7 @@ test("[test-suite] calls: testing local-function recursion", function (t) {
         end
         assert(fact == false)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -105,7 +105,7 @@ test("[test-suite] calls: testing local-function recursion", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -203,7 +203,7 @@ test("[test-suite] calls: testing declarations", function (t) {
         (function (x) a=x end)(23)
         assert(a == 23 and (function (x) return x*2 end)(20) == 40)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -212,7 +212,7 @@ test("[test-suite] calls: testing declarations", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -261,7 +261,7 @@ test("[test-suite] calls: testing closures", function (t) {
 
         Z, F, f = nil
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -270,7 +270,7 @@ test("[test-suite] calls: testing closures", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -319,7 +319,7 @@ test("[test-suite] calls: testing multiple returns", function (t) {
         a = ret2{ unlpack{1,2,3}, unlpack{3,2,1}, unlpack{"a", "b"}}
         assert(a[1] == 1 and a[2] == 3 and a[3] == "a" and a[4] == "b")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -328,7 +328,7 @@ test("[test-suite] calls: testing multiple returns", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -348,7 +348,7 @@ test("[test-suite] calls: testing calls with 'incorrect' arguments", function (t
         assert(math.sin(1,2) == math.sin(1))
         table.sort({10,9,8,4,19,23,0,0}, function (a,b) return a<b end, "extra arg")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -357,7 +357,7 @@ test("[test-suite] calls: testing calls with 'incorrect' arguments", function (t
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -420,7 +420,7 @@ test("[test-suite] calls: test for generic load", function (t) {
         cannotload("unexpected symbol", load("*a = 123"))
         cannotload("hhi", load(function () error("hhi") end))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -429,7 +429,7 @@ test("[test-suite] calls: test for generic load", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -446,7 +446,7 @@ test("[test-suite] calls: any value is valid for _ENV", function (t) {
     let luaCode = `
         assert(load("return _ENV", nil, nil, 123)() == 123)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -455,7 +455,7 @@ test("[test-suite] calls: any value is valid for _ENV", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -483,7 +483,7 @@ test("[test-suite] calls: load when _ENV is not first upvalue", function (t) {
 
         assert(assert(load("return XX + ...", nil, nil, {XX = 13}))(4) == 17)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -492,7 +492,7 @@ test("[test-suite] calls: load when _ENV is not first upvalue", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -528,7 +528,7 @@ test("[test-suite] calls: test generic load with nested functions", function (t)
         a = assert(load(read1(x)))
         assert(a()(2)(3)(10) == 15)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -537,7 +537,7 @@ test("[test-suite] calls: test generic load with nested functions", function (t)
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -568,7 +568,7 @@ test("[test-suite] calls: test for dump/undump with upvalues", function (t) {
         x("set")
         assert(x() == 24)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -577,7 +577,7 @@ test("[test-suite] calls: test for dump/undump with upvalues", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -615,7 +615,7 @@ test("[test-suite] calls: test for dump/undump with many upvalues", function (t)
           assert(f() == 10 * nup)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -624,7 +624,7 @@ test("[test-suite] calls: test for dump/undump with many upvalues", function (t)
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -647,7 +647,7 @@ test("[test-suite] calls: test for long method names", function (t) {
           assert(t:_012345678901234567890123456789012345678901234567890123456789() == 1)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -656,7 +656,7 @@ test("[test-suite] calls: test for long method names", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -675,7 +675,7 @@ test("[test-suite] calls: test for bug in parameter adjustment", function (t) {
         assert((function () local a; return a end)(4) == nil)
         assert((function (a) return a end)() == nil)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -684,7 +684,7 @@ test("[test-suite] calls: test for bug in parameter adjustment", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -734,7 +734,7 @@ test("[test-suite] calls: testing binary chunks", function (t) {
           assert(assert(load(c))() == 10)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -743,7 +743,7 @@ test("[test-suite] calls: testing binary chunks", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 

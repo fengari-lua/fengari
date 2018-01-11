@@ -5,9 +5,9 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
+const {to_luastring} = require("../../src/fengaricore.js");
 
 const ltests  = require('./ltests.js');
-
 
 test("[test-suite] code: testing reuse in constant table", function (t) {
     let luaCode = `
@@ -31,7 +31,7 @@ test("[test-suite] code: testing reuse in constant table", function (t) {
 
         checkKlist(foo, {3, 0, 0.0, 3.78/4, -3.78/4, -3.79/4, 3.0})
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -42,7 +42,7 @@ test("[test-suite] code: testing reuse in constant table", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -83,7 +83,7 @@ test("[test-suite] code: some basic instructions", function (t) {
           (function () end){f()}
         end, 'CLOSURE', 'NEWTABLE', 'GETTABUP', 'CALL', 'SETLIST', 'CALL', 'RETURN')
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -94,7 +94,7 @@ test("[test-suite] code: some basic instructions", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -126,7 +126,7 @@ test("[test-suite] code: sequence of LOADNILs", function (t) {
           assert(a == nil and b == nil and c == nil and d == nil)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -137,7 +137,7 @@ test("[test-suite] code: sequence of LOADNILs", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -153,7 +153,7 @@ test("[test-suite] code: single return", function (t) {
     let luaCode = `
         check (function (a,b,c) return a end, 'RETURN')
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -164,7 +164,7 @@ test("[test-suite] code: single return", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -187,7 +187,7 @@ test("[test-suite] code: infinite loops", function (t) {
         check(function () repeat local x = 1 until true end,
         'LOADK', 'RETURN')
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -198,7 +198,7 @@ test("[test-suite] code: infinite loops", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -215,7 +215,7 @@ test("[test-suite] code: concat optimization", function (t) {
         check(function (a,b,c,d) return a..b..c..d end,
           'MOVE', 'MOVE', 'MOVE', 'MOVE', 'CONCAT', 'RETURN')
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -226,7 +226,7 @@ test("[test-suite] code: concat optimization", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -245,7 +245,7 @@ test("[test-suite] code: not", function (t) {
         check(function () return not not true end, 'LOADBOOL', 'RETURN')
         check(function () return not not 1 end, 'LOADBOOL', 'RETURN')
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -256,7 +256,7 @@ test("[test-suite] code: not", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -280,7 +280,7 @@ test("[test-suite] code: direct access to locals", function (t) {
           'DIV', 'ADD', 'GETTABLE', 'SUB', 'GETTABLE', 'POW',
             'UNM', 'SETTABLE', 'SETTABLE', 'RETURN')
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -291,7 +291,7 @@ test("[test-suite] code: direct access to locals", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -327,7 +327,7 @@ test("[test-suite] code: direct access to constants", function (t) {
         end,
           'LOADNIL', 'SETTABLE', 'RETURN')
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -338,7 +338,7 @@ test("[test-suite] code: direct access to constants", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -373,7 +373,7 @@ test("[test-suite] code: constant folding", function (t) {
         checkK(function () return ~~-100024.0 end, -100024)
         checkK(function () return ((100 << 6) << -4) >> 2 end, 100)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -384,7 +384,7 @@ test("[test-suite] code: constant folding", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -403,7 +403,7 @@ test("[test-suite] code: no folding", function (t) {
         check(function () return 0%0 end, 'MOD', 'RETURN')
         check(function () return -4//0 end, 'IDIV', 'RETURN')
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -414,7 +414,7 @@ test("[test-suite] code: no folding", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -437,7 +437,7 @@ test("[test-suite] code: bug in constant folding for 5.1", function (t) {
           b[a], a = c, b
           a, b = c, a
           a = a
-        end, 
+        end,
           'LOADNIL',
           'MOVE', 'MOVE', 'SETTABLE',
           'MOVE', 'MOVE', 'MOVE', 'SETTABLE',
@@ -445,7 +445,7 @@ test("[test-suite] code: bug in constant folding for 5.1", function (t) {
           -- no code for a = a
           'RETURN')
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -456,7 +456,7 @@ test("[test-suite] code: bug in constant folding for 5.1", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -482,7 +482,7 @@ test("[test-suite] code: x == nil , x ~= nil", function (t) {
         checkequal(function (l) local a; return 0 <= a and a <= l end,
                    function (l) local a; return not (not(a >= 0) or not(a <= l)) end)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -493,7 +493,7 @@ test("[test-suite] code: x == nil , x ~= nil", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -515,7 +515,7 @@ test("[test-suite] code: if-goto optimizations", function (t) {
                      else goto l3
                      end
                 end
-                ::l1:: ::l2:: ::l3:: ::l4:: 
+                ::l1:: ::l2:: ::l3:: ::l4::
         end, 'EQ', 'JMP', 'EQ', 'JMP', 'EQ', 'JMP', 'EQ', 'JMP', 'JMP', 'RETURN')
 
         checkequal(
@@ -529,7 +529,7 @@ test("[test-suite] code: if-goto optimizations", function (t) {
         function (a) while true do if not(a < 10) then break end; a = a + 1; end end
         )
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -540,7 +540,7 @@ test("[test-suite] code: if-goto optimizations", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 

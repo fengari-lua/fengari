@@ -5,6 +5,7 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
+const {to_luastring} = require("../../src/fengaricore.js");
 
 const ltests  = require('./ltests.js');
 
@@ -64,7 +65,7 @@ test("[test-suite] coroutine: is main thread", function (t) {
         assert(not coroutine.isyieldable())
         assert(not pcall(coroutine.yield))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -73,7 +74,7 @@ test("[test-suite] coroutine: is main thread", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -91,7 +92,7 @@ test("[test-suite] coroutine: trivial errors", function (t) {
         assert(not pcall(coroutine.resume, 0))
         assert(not pcall(coroutine.status, 0))
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -100,7 +101,7 @@ test("[test-suite] coroutine: trivial errors", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -158,7 +159,7 @@ test("[test-suite] coroutine: tests for multiple yield/resume arguments", functi
         s, a = coroutine.resume(f, "xuxu")
         assert(not s and string.find(a, "dead") and coroutine.status(f) == "dead")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -167,7 +168,7 @@ test("[test-suite] coroutine: tests for multiple yield/resume arguments", functi
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -192,7 +193,7 @@ test("[test-suite] coroutine: yields in tail calls", function (t) {
         for i=1,10 do _G.x = i; assert(f(i) == i) end
         _G.x = 'xuxu'; assert(f('xuxu') == 'a')
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -201,7 +202,7 @@ test("[test-suite] coroutine: yields in tail calls", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -228,7 +229,7 @@ test("[test-suite] coroutine: recursive", function (t) {
           s = s*i
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -237,7 +238,7 @@ test("[test-suite] coroutine: recursive", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -281,7 +282,7 @@ test("[test-suite] coroutine: sieve", function (t) {
         assert(#a == 25 and a[#a] == 97)
         x, a = nil
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -290,7 +291,7 @@ test("[test-suite] coroutine: sieve", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -333,7 +334,7 @@ test("[test-suite] coroutine: yielding across JS boundaries", function (t) {
         r, msg = co(100)
         assert(not r and msg == 240)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -342,7 +343,7 @@ test("[test-suite] coroutine: yielding across JS boundaries", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -371,7 +372,7 @@ test("[test-suite] coroutine: unyieldable JS call", function (t) {
           assert(co() == "aa")
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -380,7 +381,7 @@ test("[test-suite] coroutine: unyieldable JS call", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -416,7 +417,7 @@ test("[test-suite] coroutine: errors in coroutines", function (t) {
         a,b = coroutine.resume(x)
         assert(not a and string.find(b, "dead") and coroutine.status(x) == "dead")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -425,7 +426,7 @@ test("[test-suite] coroutine: errors in coroutines", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -456,7 +457,7 @@ test("[test-suite] coroutine: co-routines x for loop", function (t) {
         end
         assert(a == 5^4)
    `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -465,7 +466,7 @@ test("[test-suite] coroutine: co-routines x for loop", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -499,7 +500,7 @@ test("[test-suite] coroutine: old bug: attempt to resume itself", function (t) {
         assert(coroutine.resume(co, co) == false)
         assert(coroutine.resume(co, co) == false)
    `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -508,7 +509,7 @@ test("[test-suite] coroutine: old bug: attempt to resume itself", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -534,7 +535,7 @@ test("[test-suite] coroutine: old bug: other old bug when attempting to resume i
           assert(not st and string.find(res, "non%-suspended"))
         end
    `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -543,7 +544,7 @@ test("[test-suite] coroutine: old bug: other old bug when attempting to resume i
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -570,7 +571,7 @@ test("[test-suite] coroutine: attempt to resume 'normal' coroutine", function (t
         assert(a and b == 3)
         assert(coroutine.status(co1) == 'dead')
    `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -579,7 +580,7 @@ test("[test-suite] coroutine: attempt to resume 'normal' coroutine", function (t
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -598,7 +599,7 @@ test("[test-suite] coroutine: infinite recursion of coroutines", function (t) {
         assert(not pcall(a, a))
         a = nil
    `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -607,7 +608,7 @@ test("[test-suite] coroutine: infinite recursion of coroutines", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -634,7 +635,7 @@ test("[test-suite] coroutine: access to locals of erroneous coroutines", functio
         assert(_G.f() == 11)
         assert(_G.f() == 12)
    `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -643,7 +644,7 @@ test("[test-suite] coroutine: access to locals of erroneous coroutines", functio
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -665,7 +666,7 @@ test("[test-suite] coroutine: leaving a pending coroutine open", function (t) {
 
         _X()
    `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -674,7 +675,7 @@ test("[test-suite] coroutine: leaving a pending coroutine open", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -714,7 +715,7 @@ test("[test-suite] coroutine: stack overflow", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -774,7 +775,7 @@ test("[test-suite] coroutine: testing yields inside metamethods", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -812,7 +813,7 @@ test("[test-suite] coroutine: tests for comparsion operators", function (t) {
             until res ~= 10
             return res
           end
-          
+
           local function test ()
             local a1 = setmetatable({x=1}, mt1)
             local a2 = setmetatable({x=2}, mt2)
@@ -824,7 +825,7 @@ test("[test-suite] coroutine: tests for comparsion operators", function (t) {
             assert(2 >= a2)
             return true
           end
-          
+
           run(test)
 
         end
@@ -838,7 +839,7 @@ test("[test-suite] coroutine: tests for comparsion operators", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -870,7 +871,7 @@ test("[test-suite] coroutine: getuptable & setuptable", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -905,7 +906,7 @@ test("[test-suite] coroutine: testing yields inside 'for' iterators", function (
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -950,7 +951,7 @@ test("[test-suite] coroutine: testing yields inside hooks", function (t) {
 
         assert(B // A == 7)    -- fact(7) // fact(6)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -961,7 +962,7 @@ test("[test-suite] coroutine: testing yields inside hooks", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(jsprefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(jsprefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -993,7 +994,7 @@ test("[test-suite] coroutine: testing yields inside line hook", function (t) {
         _G.X = nil; co(); assert(_G.X == line + 3 and _G.XX == 20)
         assert(co() == 10)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1004,7 +1005,7 @@ test("[test-suite] coroutine: testing yields inside line hook", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(jsprefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(jsprefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1034,7 +1035,7 @@ test("[test-suite] coroutine: testing yields in count hook", function (t) {
         repeat c = c + 1; local a = co() until a == 10
         assert(_G.XX == 20 and c >= 5)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1045,7 +1046,7 @@ test("[test-suite] coroutine: testing yields in count hook", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(jsprefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(jsprefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1084,7 +1085,7 @@ test("[test-suite] coroutine: testing yields inside line hook", function (t) {
         assert(_G.XX == 20 and c >= 5)
         _G.X = nil; _G.XX = nil
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1095,7 +1096,7 @@ test("[test-suite] coroutine: testing yields inside line hook", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(jsprefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(jsprefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1136,7 +1137,7 @@ test("[test-suite] coroutine: testing debug library on a coroutine suspended ins
           assert(not coroutine.resume(c))
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1147,7 +1148,7 @@ test("[test-suite] coroutine: testing debug library on a coroutine suspended ins
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1172,7 +1173,7 @@ test("[test-suite] coroutine: testing debug library on last function in a suspen
           assert(b == 10)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1183,7 +1184,7 @@ test("[test-suite] coroutine: testing debug library on last function in a suspen
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1218,7 +1219,7 @@ test("[test-suite] coroutine: reusing a thread", function (t) {
 
         assert(X == 'a a a' and Y == 'OK')
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1229,7 +1230,7 @@ test("[test-suite] coroutine: reusing a thread", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1267,7 +1268,7 @@ test("[test-suite] coroutine: resuming running coroutine", function (t) {
         assert(a == coroutine.running() and string.find(b, "non%-suspended") and
                c == "ERRRUN" and d == 4)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1278,7 +1279,7 @@ test("[test-suite] coroutine: resuming running coroutine", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1322,7 +1323,7 @@ test("[test-suite] coroutine: using a main thread as a coroutine", function (t) 
 
         T.closestate(state)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1333,7 +1334,7 @@ test("[test-suite] coroutine: using a main thread as a coroutine", function (t) 
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1386,7 +1387,7 @@ test("[test-suite] coroutine: tests for coroutine API", function (t) {
                a[9] == "YIELD" and a[10] == 4)
         assert(not pcall(co))   -- coroutine is dead now
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1397,7 +1398,7 @@ test("[test-suite] coroutine: tests for coroutine API", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1419,7 +1420,7 @@ test("[test-suite] coroutine: tests for coroutine API", function (t) {
         assert(co(23,16) == 5)
         assert(co(23,16) == 10)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1430,7 +1431,7 @@ test("[test-suite] coroutine: tests for coroutine API", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1476,7 +1477,7 @@ test("[test-suite] coroutine: testing coroutines with C bodies", function (t) {
 
         assert(a == 'YIELD' and b == 'a' and c == 102 and d == 'OK')
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1487,7 +1488,7 @@ test("[test-suite] coroutine: testing coroutines with C bodies", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1531,7 +1532,7 @@ test("[test-suite] coroutine: testing chain of suspendable C calls", function (t
         -- three '34's (one from each pending C call)
         assert(#a == 3 and a[1] == a[2] and a[2] == a[3] and a[3] == 34)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1542,7 +1543,7 @@ test("[test-suite] coroutine: testing chain of suspendable C calls", function (t
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1562,11 +1563,11 @@ test("[test-suite] coroutine: testing yields with continuations", function (t) {
                   cannot be here!
                ]],
                [[  # 1st continuation
-                 yieldk 0 3 
+                 yieldk 0 3
                  cannot be here!
                ]],
                [[  # 2nd continuation
-                 yieldk 0 4 
+                 yieldk 0 4
                  cannot be here!
                ]],
                [[  # 3th continuation
@@ -1608,7 +1609,7 @@ test("[test-suite] coroutine: testing yields with continuations", function (t) {
 
         assert(not pcall(co))   -- coroutine should be dead
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1619,7 +1620,7 @@ test("[test-suite] coroutine: testing yields with continuations", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -1641,7 +1642,7 @@ test("[test-suite] coroutine: bug in nCcalls", function (t) {
         local a = {co()}
         assert(a[10] == "hi")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -1652,7 +1653,7 @@ test("[test-suite] coroutine: bug in nCcalls", function (t) {
 
         ltests.luaopen_tests(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 

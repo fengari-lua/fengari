@@ -5,7 +5,7 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
-
+const {to_luastring} = require("../../src/fengaricore.js");
 
 const prefix = `
     local unpack = table.unpack
@@ -59,7 +59,7 @@ test("[test-suite] sort: testing unpack", function (t) {
         a,x = unpack({1,2}, 1, 1)
         assert(a==1 and x==nil)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -68,7 +68,7 @@ test("[test-suite] sort: testing unpack", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -111,7 +111,7 @@ test("[test-suite] sort: testing unpack", function (t) {
           a, b = unpack(t, minI + 1, minI); assert(a == nil and b == nil)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -120,7 +120,7 @@ test("[test-suite] sort: testing unpack", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -141,7 +141,7 @@ test("[test-suite] sort: testing unpack", function (t) {
           checkerror("object length is not an integer", table.insert, t, 1)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -150,7 +150,7 @@ test("[test-suite] sort: testing unpack", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -166,7 +166,7 @@ test("[test-suite] sort: testing unpack", function (t) {
 test("[test-suite] sort: testing pack", function (t) {
     let luaCode = `
         a = table.pack()
-        assert(a[1] == nil and a.n == 0) 
+        assert(a[1] == nil and a.n == 0)
 
         a = table.pack(table)
         assert(a[1] == table and a.n == 1)
@@ -174,7 +174,7 @@ test("[test-suite] sort: testing pack", function (t) {
         a = table.pack(nil, nil, nil, nil)
         assert(a[1] == nil and a.n == 4)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -183,7 +183,7 @@ test("[test-suite] sort: testing pack", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -203,8 +203,8 @@ test("[test-suite] sort: testing move", function (t) {
           checkerror("table expected", table.move, 1, 2, 3, 4)
 
           local function eqT (a, b)
-            for k, v in pairs(a) do assert(b[k] == v) end 
-            for k, v in pairs(b) do assert(a[k] == v) end 
+            for k, v in pairs(a) do assert(b[k] == v) end
+            for k, v in pairs(b) do assert(a[k] == v) end
           end
 
           local a = table.move({10,20,30}, 1, 3, 2)  -- move forward
@@ -269,7 +269,7 @@ test("[test-suite] sort: testing move", function (t) {
           assert(not stat and msg == b)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -278,7 +278,7 @@ test("[test-suite] sort: testing move", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -320,7 +320,7 @@ test("[test-suite] sort: testing long move", function (t) {
         checkerror("wrap around", table.move, {}, 1, 2, maxI)
         checkerror("wrap around", table.move, {}, minI, -2, 2)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -329,7 +329,7 @@ test("[test-suite] sort: testing long move", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -350,7 +350,7 @@ test("[test-suite] sort: testing sort, strange lengths", function (t) {
         a = setmetatable({}, {__len = function () return maxI end})
         checkerror("too big", table.sort, a)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -359,7 +359,7 @@ test("[test-suite] sort: testing sort, strange lengths", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -383,7 +383,7 @@ test("[test-suite] sort: test checks for invalid order functions", function (t) 
         check{1,2,3,4,5}
         check{1,2,3,4,5,6}
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -392,7 +392,7 @@ test("[test-suite] sort: test checks for invalid order functions", function (t) 
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -420,7 +420,7 @@ test("[test-suite] sort: sort alpha", function (t) {
         table.sort(a)
         check(a)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -429,7 +429,7 @@ test("[test-suite] sort: sort alpha", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -477,7 +477,7 @@ test("[test-suite] sort: sort perm", function (t) {
         perm{1,2,3,4,5,6}
         perm{2,2,3,3,5,6}
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -486,7 +486,7 @@ test("[test-suite] sort: sort perm", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -527,7 +527,7 @@ test("[test-suite] sort: Invert-sorting", function (t) {
 
         for i,v in pairs(a) do assert(v == false) end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -536,7 +536,7 @@ test("[test-suite] sort: Invert-sorting", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -576,7 +576,7 @@ test("[test-suite] sort: sorting", function (t) {
         check(a, tt.__lt)
         check(a)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -585,7 +585,7 @@ test("[test-suite] sort: sorting", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 

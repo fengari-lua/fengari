@@ -5,7 +5,7 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
-
+const {to_luastring} = require("../../src/fengaricore.js");
 
 test("[test-suite] goto: error messages", function (t) {
     let luaCode = `
@@ -45,7 +45,7 @@ test("[test-suite] goto: error messages", function (t) {
           until xuxu < x
         ]], "local 'xuxu'")
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -54,7 +54,7 @@ test("[test-suite] goto: error messages", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -124,7 +124,7 @@ test("[test-suite] goto", function (t) {
           ::l1:: ; ::l2:: ;;
         else end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -133,7 +133,7 @@ test("[test-suite] goto", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -164,7 +164,7 @@ test("[test-suite] goto: to repeat a label in a different function is OK", funct
 
         ::l6:: foo()
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -173,7 +173,7 @@ test("[test-suite] goto: to repeat a label in a different function is OK", funct
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -203,7 +203,7 @@ test("[test-suite] goto: bug in 5.2 -> 5.3.2", function (t) {
           assert(x == 2 and y == true)
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -212,7 +212,7 @@ test("[test-suite] goto: bug in 5.2 -> 5.3.2", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -288,7 +288,7 @@ test("[test-suite] goto: testing closing of upvalues", function (t) {
           end
         end
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -297,7 +297,7 @@ test("[test-suite] goto: testing closing of upvalues", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 
@@ -342,7 +342,7 @@ test("[test-suite] goto: testing if x goto optimizations", function (t) {
         assert(testG(4) == 5)
         assert(testG(5) == 10)
     `, L;
-    
+
     t.plan(2);
 
     t.doesNotThrow(function () {
@@ -351,7 +351,7 @@ test("[test-suite] goto: testing if x goto optimizations", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
     }, "Lua program loaded without error");
 

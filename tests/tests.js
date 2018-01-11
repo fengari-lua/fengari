@@ -2,6 +2,7 @@
 
 const lua     = require("../src/lua.js");
 const lauxlib = require("../src/lauxlib.js");
+const {to_luastring} = require("../src/fengaricore.js");
 
 const toByteCode = function(luaCode) {
     let L = getState(luaCode);
@@ -19,7 +20,7 @@ const getState = function(luaCode) {
     if (!L)
         throw Error("unable to create lua_State");
 
-    if (lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode)) !== lua.LUA_OK)
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) !== lua.LUA_OK)
         throw Error(lua.lua_tojsstring(L, -1));
 
     return L;

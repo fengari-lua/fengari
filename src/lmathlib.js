@@ -3,6 +3,7 @@
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
 const luaconf = require('./luaconf.js');
+const {to_luastring} = require("./fengaricore.js");
 
 const math_random = function(L) {
     let low, up;
@@ -21,13 +22,13 @@ const math_random = function(L) {
             up = lauxlib.luaL_checkinteger(L, 2);
             break;
         }
-        default: return lauxlib.luaL_error(L, lua.to_luastring("wrong number of arguments", true));
+        default: return lauxlib.luaL_error(L, to_luastring("wrong number of arguments", true));
     }
 
     /* random integer in the interval [low, up] */
-    lauxlib.luaL_argcheck(L, low <= up, 1, lua.to_luastring("interval is empty", true));
+    lauxlib.luaL_argcheck(L, low <= up, 1, to_luastring("interval is empty", true));
     lauxlib.luaL_argcheck(L, low >= 0 || up <= luaconf.LUA_MAXINTEGER + low, 1,
-        lua.to_luastring("interval too large", true));
+        to_luastring("interval too large", true));
 
     r *= (up - low) + 1;
     lua.lua_pushinteger(L, Math.floor(r) + low);
@@ -162,7 +163,7 @@ const math_rad = function(L) {
 const math_min = function(L) {
     let n = lua.lua_gettop(L);  /* number of arguments */
     let imin = 1;  /* index of current minimum value */
-    lauxlib.luaL_argcheck(L, n >= 1, 1, lua.to_luastring("value expected", true));
+    lauxlib.luaL_argcheck(L, n >= 1, 1, to_luastring("value expected", true));
     for (let i = 2; i <= n; i++){
         if (lua.lua_compare(L, i, imin, lua.LUA_OPLT))
             imin = i;
@@ -174,7 +175,7 @@ const math_min = function(L) {
 const math_max = function(L) {
     let n = lua.lua_gettop(L);  /* number of arguments */
     let imax = 1;  /* index of current minimum value */
-    lauxlib.luaL_argcheck(L, n >= 1, 1, lua.to_luastring("value expected", true));
+    lauxlib.luaL_argcheck(L, n >= 1, 1, to_luastring("value expected", true));
     for (let i = 2; i <= n; i++){
         if (lua.lua_compare(L, imax, i, lua.LUA_OPLT))
             imax = i;
@@ -201,7 +202,7 @@ const math_fmod = function(L) {
         let d = lua.lua_tointeger(L, 2);
         /* no special case needed for -1 in javascript */
         if (d === 0) {
-            lauxlib.luaL_argerror(L, 2, lua.to_luastring("zero", true));
+            lauxlib.luaL_argerror(L, 2, to_luastring("zero", true));
         } else
             lua.lua_pushinteger(L, (lua.lua_tointeger(L, 1) % d)|0);
     } else {
@@ -253,13 +254,13 @@ const mathlib = {
 const luaopen_math = function(L) {
     lauxlib.luaL_newlib(L, mathlib);
     lua.lua_pushnumber(L, Math.PI);
-    lua.lua_setfield(L, -2, lua.to_luastring("pi", true));
+    lua.lua_setfield(L, -2, to_luastring("pi", true));
     lua.lua_pushnumber(L, Infinity);
-    lua.lua_setfield(L, -2, lua.to_luastring("huge", true));
+    lua.lua_setfield(L, -2, to_luastring("huge", true));
     lua.lua_pushinteger(L, luaconf.LUA_MAXINTEGER);
-    lua.lua_setfield(L, -2, lua.to_luastring("maxinteger", true));
+    lua.lua_setfield(L, -2, to_luastring("maxinteger", true));
     lua.lua_pushinteger(L, luaconf.LUA_MININTEGER);
-    lua.lua_setfield(L, -2, lua.to_luastring("mininteger", true));
+    lua.lua_setfield(L, -2, to_luastring("mininteger", true));
     return 1;
 };
 

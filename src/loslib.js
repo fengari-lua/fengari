@@ -2,25 +2,26 @@
 
 const lua      = require('./lua.js');
 const lauxlib  = require('./lauxlib.js');
+const {luastring_indexOf, to_jsstring, to_luastring} = require("./fengaricore.js");
 
 const strftime = require('strftime');
 
 /* options for ANSI C 89 (only 1-char options) */
-const L_STRFTIMEC89 = lua.to_luastring("aAbBcdHIjmMpSUwWxXyYZ%");
+const L_STRFTIMEC89 = to_luastring("aAbBcdHIjmMpSUwWxXyYZ%");
 const LUA_STRFTIMEOPTIONS = L_STRFTIMEC89;
 
 /* options for ISO C 99 and POSIX */
-// const L_STRFTIMEC99 = lua.to_luastring("aAbBcCdDeFgGhHIjmMnprRStTuUVwWxXyYzZ%||EcECExEXEyEYOdOeOHOIOmOMOSOuOUOVOwOWOy");  /* two-char options */
+// const L_STRFTIMEC99 = to_luastring("aAbBcCdDeFgGhHIjmMnprRStTuUVwWxXyYzZ%||EcECExEXEyEYOdOeOHOIOmOMOSOuOUOVOwOWOy");  /* two-char options */
 // const LUA_STRFTIMEOPTIONS = L_STRFTIMEC99;
 
 /* options for Windows */
-// const L_STRFTIMEWIN = lua.to_luastring("aAbBcdHIjmMpSUwWxXyYzZ%||#c#x#d#H#I#j#m#M#S#U#w#W#y#Y");  /* two-char options */
+// const L_STRFTIMEWIN = to_luastring("aAbBcdHIjmMpSUwWxXyYzZ%||#c#x#d#H#I#j#m#M#S#U#w#W#y#Y");  /* two-char options */
 // const LUA_STRFTIMEOPTIONS = L_STRFTIMEWIN;
 
 
 const setfield = function(L, key, value) {
     lua.lua_pushinteger(L, value);
-    lua.lua_setfield(L, -2, lua.to_luastring(key, true));
+    lua.lua_setfield(L, -2, to_luastring(key, true));
 };
 
 const setallfields = function(L, time, utc) {
@@ -39,18 +40,18 @@ const setallfields = function(L, time, utc) {
 const L_MAXDATEFIELD = (Number.MAX_SAFE_INTEGER / 2);
 
 const getfield = function(L, key, d, delta) {
-    let t = lua.lua_getfield(L, -1, lua.to_luastring(key, true));  /* get field and its type */
+    let t = lua.lua_getfield(L, -1, to_luastring(key, true));  /* get field and its type */
     let res = lua.lua_tointegerx(L, -1);
     if (res === false) {  /* field is not an integer? */
         if (t !== lua.LUA_TNIL)  /* some other value? */
-            return lauxlib.luaL_error(L, lua.to_luastring("field '%s' is not an integer"), key);
+            return lauxlib.luaL_error(L, to_luastring("field '%s' is not an integer"), key);
         else if (d < 0)  /* absent field; no default? */
-            return lauxlib.luaL_error(L, lua.to_luastring("field '%s' missing in date table"), key);
+            return lauxlib.luaL_error(L, to_luastring("field '%s' missing in date table"), key);
         res = d;
     }
     else {
         if (!(-L_MAXDATEFIELD <= res && res <= L_MAXDATEFIELD))
-            return lauxlib.luaL_error(L, lua.to_luastring("field '%s' is out-of-bound"), key);
+            return lauxlib.luaL_error(L, to_luastring("field '%s' is out-of-bound"), key);
         res -= delta;
     }
     lua.lua_pop(L, 1);
@@ -78,7 +79,7 @@ const checkoption = function(L, conv, i, buff) {
         }
     }
     lauxlib.luaL_argerror(L, 1,
-        lua.lua_pushfstring(L, lua.to_luastring("invalid conversion specifier '%%%s'"), conv));
+        lua.lua_pushfstring(L, to_luastring("invalid conversion specifier '%%%s'"), conv));
 };
 
 /* maximum size for an individual 'strftime' item */
@@ -86,7 +87,7 @@ const checkoption = function(L, conv, i, buff) {
 
 
 const os_date = function(L) {
-    let s = lauxlib.luaL_optlstring(L, 1, lua.to_luastring("%c"));
+    let s = lauxlib.luaL_optlstring(L, 1, to_luastring("%c"));
     let t = lauxlib.luaL_opt(L, l_checktime, 2, new Date().getTime() / 1000) * 1000;
     let stm = new Date(t);
     let utc = false;
@@ -97,7 +98,7 @@ const os_date = function(L) {
     }
 
     if (stm === null)  /* invalid date? */
-        lauxlib.luaL_error(L, lua.to_luastring("time result cannot be represented in this installation", true));
+        lauxlib.luaL_error(L, to_luastring("time result cannot be represented in this installation", true));
     if (s[i] === "*".charCodeAt(0) && s[i+1] === "t".charCodeAt(0)) {
         lua.lua_createtable(L, 0, 9);  /* 9 = number of fields */
         setallfields(L, stm, utc);
@@ -112,11 +113,11 @@ const os_date = function(L) {
             } else {
                 i++;  /* skip '%' */
                 i = checkoption(L, s, i, cc.subarray(1));  /* copy specifier to 'cc' */
-                let len = lua.luastring_indexOf(cc, 0);
+                let len = luastring_indexOf(cc, 0);
                 if (len !== -1)
                     cc = cc.subarray(0, len);
-                let buff = strftime(lua.to_jsstring(cc), stm);
-                lauxlib.luaL_addstring(b, lua.to_luastring(buff));
+                let buff = strftime(to_jsstring(cc), stm);
+                lauxlib.luaL_addstring(b, to_luastring(buff));
             }
         }
         lauxlib.luaL_pushresult(b);
@@ -144,7 +145,7 @@ const os_time = function(L) {
 
 const l_checktime = function(L, arg) {
     let t = lauxlib.luaL_checkinteger(L, arg);
-    // lauxlib.luaL_argcheck(L, t, arg, lua.to_luastring("time out-of-bounds"));
+    // lauxlib.luaL_argcheck(L, t, arg, to_luastring("time out-of-bounds"));
     return t;
 };
 
@@ -186,7 +187,7 @@ if (typeof process === "undefined") {
 
     syslib.getenv = function(L) {
         let key = lauxlib.luaL_checkstring(L, 1);
-        key = lua.to_jsstring(key); /* https://github.com/nodejs/node/issues/16961 */
+        key = to_jsstring(key); /* https://github.com/nodejs/node/issues/16961 */
         if (Object.prototype.hasOwnProperty.call(process.env, key)) {
             lua.lua_pushliteral(L, process.env[key]);
         } else {
@@ -233,8 +234,8 @@ if (typeof process === "undefined") {
     syslib.tmpname = function(L) {
         let name = lua_tmpname();
         if (!name)
-            return lauxlib.luaL_error(L, lua.to_luastring("unable to generate a unique filename"));
-        lua.lua_pushstring(L, lua.to_luastring(name));
+            return lauxlib.luaL_error(L, to_luastring("unable to generate a unique filename"));
+        lua.lua_pushstring(L, to_luastring(name));
         return 1;
     };
 

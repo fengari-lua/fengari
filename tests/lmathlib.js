@@ -5,7 +5,7 @@ const test       = require('tape');
 const lua     = require('../src/lua.js');
 const lauxlib = require('../src/lauxlib.js');
 const lualib  = require('../src/lualib.js');
-
+const {to_luastring} = require("../src/fengaricore.js");
 
 test('math.abs, math.sin, math.cos, math.tan, math.asin, math.acos, math.atan', function (t) {
     let luaCode = `
@@ -21,7 +21,7 @@ test('math.abs, math.sin, math.cos, math.tan, math.asin, math.acos, math.atan', 
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -84,7 +84,7 @@ test('math.ceil, math.floor', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -117,7 +117,7 @@ test('math.deg, math.rad', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -150,7 +150,7 @@ test('math.log', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -189,7 +189,7 @@ test('math.exp', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -216,7 +216,7 @@ test('math.min, math.max', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -249,7 +249,7 @@ test('math.random', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -280,7 +280,7 @@ test('math.sqrt', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -307,7 +307,7 @@ test('math.tointeger', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -334,7 +334,7 @@ test('math.type', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -373,7 +373,7 @@ test('math.ult', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -400,7 +400,7 @@ test('math.fmod', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 
@@ -427,7 +427,7 @@ test('math.modf', function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
 
         lua.lua_call(L, 0, -1);
 

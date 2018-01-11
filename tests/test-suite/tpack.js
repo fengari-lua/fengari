@@ -5,7 +5,7 @@ const test     = require('tape');
 const lua     = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
 const lualib  = require('../../src/lualib.js');
-
+const {to_luastring} = require("../../src/fengaricore.js");
 
 const prefix = `
     local pack = string.pack
@@ -55,7 +55,7 @@ test("[test-suite] tpack: maximum size for integers", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -91,7 +91,7 @@ test("[test-suite] tpack: minimum behavior for integer formats", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -130,7 +130,7 @@ test("[test-suite] tpack: minimum behavior for integer formats", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -175,7 +175,7 @@ test("[test-suite] tpack: minimum behavior for integer formats", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -209,7 +209,7 @@ test("[test-suite] tpack: minimum behavior for integer formats", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -242,7 +242,7 @@ test("[test-suite] tpack: sign extension", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -273,7 +273,7 @@ test("[test-suite] tpack: mixed endianness", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -308,7 +308,7 @@ test("[test-suite] tpack: testing invalid formats", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -343,7 +343,7 @@ test("[test-suite] tpack: overflow in option size (error will be in digit after 
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -384,7 +384,7 @@ test("[test-suite] tpack: overflow in packing", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -418,7 +418,7 @@ test("[test-suite] tpack: Lua integer size", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -458,7 +458,7 @@ test("[test-suite] tpack: testing pack/unpack of floating-point numbers", functi
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -524,7 +524,7 @@ test("[test-suite] tpack: testing pack/unpack of strings", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -544,7 +544,7 @@ test("[test-suite] tpack: testing multiple types and sequence", function (t) {
           assert(#x == packsize("<b h b f d f n i"))
           local a, b, c, d, e, f, g, h = unpack("<b h b f d f n i", x)
           assert(a == 1 and b == 2 and c == 3 and d == 4 and e == 5 and f == 6 and
-                 g == 7 and h == 8) 
+                 g == 7 and h == 8)
         end
     `, L;
 
@@ -556,7 +556,7 @@ test("[test-suite] tpack: testing multiple types and sequence", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -577,7 +577,7 @@ test("[test-suite] tpack: testing alignment", function (t) {
           assert(#x == packsize(">!8 b Xh i4 i8 c1 Xi8"))
           assert(x == "\\xf4" .. "\\0\\0\\0" ..
                       "\\0\\0\\0\\100" ..
-                      "\\0\\0\\0\\0\\0\\0\\0\\xC8" .. 
+                      "\\0\\0\\0\\0\\0\\0\\0\\xC8" ..
                       "\\xEC" .. "\\0\\0\\0\\0\\0\\0\\0")
           local a, b, c, d, pos = unpack(">!8 c1 Xh i4 i8 b Xi8 XI XH", x)
           assert(a == "\\xF4" and b == 100 and c == 200 and d == -20 and (pos - 1) == #x)
@@ -622,7 +622,7 @@ test("[test-suite] tpack: testing alignment", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
@@ -665,7 +665,7 @@ test("[test-suite] tpack: testing initial position", function (t) {
           checkerror("out of string", unpack, "c0", x, 0)
           checkerror("out of string", unpack, "c0", x, #x + 2)
           checkerror("out of string", unpack, "c0", x, -(#x + 1))
-         
+
         end
     `, L;
 
@@ -677,7 +677,7 @@ test("[test-suite] tpack: testing initial position", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadstring(L, lua.to_luastring(prefix + luaCode));
+        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
 
     }, "Lua program loaded without error");
 
