@@ -1,7 +1,81 @@
 "use strict";
 
-const defs     = require('./defs.js');
-const lcode    = require('./lcode.js');
+const {
+    LUA_MULTRET,
+    char,
+    to_luastring
+} = require('./defs.js');
+const {
+    BinOpr: {
+        OPR_ADD,
+        OPR_AND,
+        OPR_BAND,
+        OPR_BOR,
+        OPR_BXOR,
+        OPR_CONCAT,
+        OPR_DIV,
+        OPR_EQ,
+        OPR_GE,
+        OPR_GT,
+        OPR_IDIV,
+        OPR_LE,
+        OPR_LT,
+        OPR_MOD,
+        OPR_MUL,
+        OPR_NE,
+        OPR_NOBINOPR,
+        OPR_OR,
+        OPR_POW,
+        OPR_SHL,
+        OPR_SHR,
+        OPR_SUB
+    },
+    UnOpr: {
+        OPR_BNOT,
+        OPR_LEN,
+        OPR_MINUS,
+        OPR_NOT,
+        OPR_NOUNOPR
+    },
+    NO_JUMP,
+    getinstruction,
+    luaK_checkstack,
+    luaK_codeABC,
+    luaK_codeABx,
+    luaK_codeAsBx,
+    luaK_codek,
+    luaK_concat,
+    luaK_dischargevars,
+    luaK_exp2RK,
+    luaK_exp2anyreg,
+    luaK_exp2anyregup,
+    luaK_exp2nextreg,
+    luaK_exp2val,
+    luaK_fixline,
+    luaK_getlabel,
+    luaK_goiffalse,
+    luaK_goiftrue,
+    luaK_indexed,
+    luaK_infix,
+    luaK_intK,
+    luaK_jump,
+    luaK_jumpto,
+    luaK_nil,
+    luaK_patchclose,
+    luaK_patchlist,
+    luaK_patchtohere,
+    luaK_posfix,
+    luaK_prefix,
+    luaK_reserveregs,
+    luaK_ret,
+    luaK_self,
+    luaK_setlist,
+    luaK_setmultret,
+    luaK_setoneret,
+    luaK_setreturns,
+    luaK_storevar,
+    luaK_stringK
+} = require('./lcode.js');
 const ldo      = require('./ldo.js');
 const lfunc    = require('./lfunc.js');
 const llex     = require('./llex.js');
@@ -11,15 +85,30 @@ const {
     lua_assert
 }  = require('./llimits.js');
 const lobject  = require('./lobject.js');
-const lopcodes = require('./lopcodes.js');
+const {
+    OpCodesI: {
+        OP_CALL,
+        OP_CLOSURE,
+        OP_FORLOOP,
+        OP_FORPREP,
+        OP_GETUPVAL,
+        OP_MOVE,
+        OP_NEWTABLE,
+        OP_SETTABLE,
+        OP_TAILCALL,
+        OP_TFORCALL,
+        OP_TFORLOOP,
+        OP_VARARG
+    },
+    LFIELDS_PER_FLUSH,
+    SETARG_B,
+    SETARG_C,
+    SET_OPCODE
+} = require('./lopcodes.js');
 const lstring  = require('./lstring.js');
 const ltable   = require('./ltable.js');
-const BinOpr   = lcode.BinOpr;
-const OpCodesI = lopcodes.OpCodesI;
 const Proto    = lfunc.Proto;
 const R        = llex.RESERVED;
-const UnOpr    = lcode.UnOpr;
-const char     = defs.char;
 
 const MAXVARS = 200;
 
@@ -167,16 +256,16 @@ const semerror = function(ls, msg) {
 };
 
 const error_expected = function(ls, token) {
-    llex.luaX_syntaxerror(ls, lobject.luaO_pushfstring(ls.L, defs.to_luastring("%s expected", true), llex.luaX_token2str(ls, token)));
+    llex.luaX_syntaxerror(ls, lobject.luaO_pushfstring(ls.L, to_luastring("%s expected", true), llex.luaX_token2str(ls, token)));
 };
 
 const errorlimit = function(fs, limit, what) {
     let L = fs.ls.L;
     let line = fs.f.linedefined;
     let where = (line === 0)
-        ? defs.to_luastring("main function", true)
-        : lobject.luaO_pushfstring(L, defs.to_luastring("function at line %d", true), line);
-    let msg = lobject.luaO_pushfstring(L, defs.to_luastring("too many %s (limit is %d) in %s", true),
+        ? to_luastring("main function", true)
+        : lobject.luaO_pushfstring(L, to_luastring("function at line %d", true), line);
+    let msg = lobject.luaO_pushfstring(L, to_luastring("too many %s (limit is %d) in %s", true),
         what, limit, where);
     llex.luaX_syntaxerror(fs.ls, msg);
 };
@@ -215,7 +304,7 @@ const check_match = function(ls, what, who, where) {
             error_expected(ls, what);
         else
             llex.luaX_syntaxerror(ls, lobject.luaO_pushfstring(ls.L,
-                defs.to_luastring("%s expected (to close %s at line %d)"),
+                to_luastring("%s expected (to close %s at line %d)"),
                 llex.luaX_token2str(ls, what), llex.luaX_token2str(ls, who), where));
     }
 };
@@ -228,13 +317,13 @@ const str_checkname = function(ls) {
 };
 
 const init_exp = function(e, k, i) {
-    e.f = e.t = lcode.NO_JUMP;
+    e.f = e.t = NO_JUMP;
     e.k = k;
     e.u.info = i;
 };
 
 const codestring = function(ls, e, s) {
-    init_exp(e, expkind.VK, lcode.luaK_stringK(ls.fs, s));
+    init_exp(e, expkind.VK, luaK_stringK(ls.fs, s));
 };
 
 const checkname = function(ls, e) {
@@ -253,14 +342,14 @@ const new_localvar = function(ls, name) {
     let fs = ls.fs;
     let dyd = ls.dyd;
     let reg = registerlocalvar(ls, name);
-    checklimit(fs, dyd.actvar.n + 1 - fs.firstlocal, MAXVARS, defs.to_luastring("local variables", true));
+    checklimit(fs, dyd.actvar.n + 1 - fs.firstlocal, MAXVARS, to_luastring("local variables", true));
     dyd.actvar.arr[dyd.actvar.n] = new Vardesc();
     dyd.actvar.arr[dyd.actvar.n].idx = reg;
     dyd.actvar.n++;
 };
 
 const new_localvarliteral = function(ls, name) {
-    new_localvar(ls, llex.luaX_newstring(ls, defs.to_luastring(name, true)));
+    new_localvar(ls, llex.luaX_newstring(ls, to_luastring(name, true)));
 };
 
 const getlocvar = function(fs, i) {
@@ -293,7 +382,7 @@ const searchupvalue = function(fs, name) {
 
 const newupvalue = function(fs, name, v) {
     let f = fs.f;
-    checklimit(fs, fs.nups + 1, lfunc.MAXUPVAL, defs.to_luastring("upvalues", true));
+    checklimit(fs, fs.nups + 1, lfunc.MAXUPVAL, to_luastring("upvalues", true));
     f.upvalues[fs.nups] = {
         instack: v.k === expkind.VLOCAL,
         idx: v.u.info,
@@ -358,7 +447,7 @@ const singlevar = function(ls, vr) {
         singlevaraux(fs, ls.envn, vr, 1);  /* get environment variable */
         lua_assert(vr.k !== expkind.VVOID);  /* this one must exist */
         codestring(ls, key, varname);  /* key is variable name */
-        lcode.luaK_indexed(fs, vr, key);  /* env[varname] */
+        luaK_indexed(fs, vr, key);  /* env[varname] */
     }
 };
 
@@ -368,14 +457,14 @@ const adjust_assign = function(ls, nvars, nexps, e) {
     if (hasmultret(e.k)) {
         extra++;  /* includes call itself */
         if (extra < 0) extra = 0;
-        lcode.luaK_setreturns(fs, e, extra);  /* last exp. provides the difference */
-        if (extra > 1) lcode.luaK_reserveregs(fs, extra - 1);
+        luaK_setreturns(fs, e, extra);  /* last exp. provides the difference */
+        if (extra > 1) luaK_reserveregs(fs, extra - 1);
     } else {
-        if (e.k !== expkind.VVOID) lcode.luaK_exp2nextreg(fs, e);  /* close last expression */
+        if (e.k !== expkind.VVOID) luaK_exp2nextreg(fs, e);  /* close last expression */
         if (extra > 0) {
             let reg = fs.freereg;
-            lcode.luaK_reserveregs(fs, extra);
-            lcode.luaK_nil(fs, reg, extra);
+            luaK_reserveregs(fs, extra);
+            luaK_nil(fs, reg, extra);
         }
     }
     if (nexps > nvars)
@@ -385,7 +474,7 @@ const adjust_assign = function(ls, nvars, nexps, e) {
 const enterlevel = function(ls) {
     let L = ls.L;
     ++L.nCcalls;
-    checklimit(ls.fs, L.nCcalls, LUAI_MAXCCALLS, defs.to_luastring("JS levels", true));
+    checklimit(ls.fs, L.nCcalls, LUAI_MAXCCALLS, to_luastring("JS levels", true));
 };
 
 const leavelevel = function(ls) {
@@ -400,11 +489,11 @@ const closegoto = function(ls, g, label) {
     if (gt.nactvar < label.nactvar) {
         let vname = getlocvar(fs, gt.nactvar).varname;
         let msg = lobject.luaO_pushfstring(ls.L,
-            defs.to_luastring("<goto %s> at line %d jumps into the scope of local '%s'"),
+            to_luastring("<goto %s> at line %d jumps into the scope of local '%s'"),
             gt.name.getstr(), gt.line, vname.getstr());
         semerror(ls, msg);
     }
-    lcode.luaK_patchlist(fs, gt.pc, label.pc);
+    luaK_patchlist(fs, gt.pc, label.pc);
     /* remove goto from pending list */
     for (let i = g; i < gl.n - 1; i++)
         gl.arr[i] = gl.arr[i + 1];
@@ -423,7 +512,7 @@ const findlabel = function(ls, g) {
         let lb = dyd.label.arr[i];
         if (eqstr(lb.name, gt.name)) {  /* correct label? */
             if (gt.nactvar > lb.nactvar && (bl.upval || dyd.label.n > bl.firstlabel))
-                lcode.luaK_patchclose(ls.fs, gt.pc, lb.nactvar);
+                luaK_patchclose(ls.fs, gt.pc, lb.nactvar);
             closegoto(ls, g, lb);  /* close it */
             return true;
         }
@@ -472,7 +561,7 @@ const movegotosout = function(fs, bl) {
         let gt = gl.arr[i];
         if (gt.nactvar > bl.nactvar) {
             if (bl.upval)
-                lcode.luaK_patchclose(fs, gt.pc, bl.nactvar);
+                luaK_patchclose(fs, gt.pc, bl.nactvar);
             gt.nactvar = bl.nactvar;
         }
         if (!findlabel(fs.ls, i))
@@ -508,7 +597,7 @@ const undefgoto = function(ls, gt) {
     let msg = llex.isreserved(gt.name)
         ? "<%s> at line %d not inside a loop"
         : "no visible label '%s' for <goto> at line %d";
-    msg = lobject.luaO_pushfstring(ls.L, defs.to_luastring(msg), gt.name.getstr(), gt.line);
+    msg = lobject.luaO_pushfstring(ls.L, to_luastring(msg), gt.name.getstr(), gt.line);
     semerror(ls, msg);
 };
 
@@ -529,8 +618,8 @@ const addprototype = function(ls) {
 */
 const codeclosure = function(ls, v) {
     let fs = ls.fs.prev;
-    init_exp(v, expkind.VRELOCABLE, lcode.luaK_codeABx(fs, OpCodesI.OP_CLOSURE, 0, fs.np -1));
-    lcode.luaK_exp2nextreg(fs, v);  /* fix it at the last register */
+    init_exp(v, expkind.VRELOCABLE, luaK_codeABx(fs, OP_CLOSURE, 0, fs.np -1));
+    luaK_exp2nextreg(fs, v);  /* fix it at the last register */
 };
 
 const open_func = function(ls, fs, bl) {
@@ -539,7 +628,7 @@ const open_func = function(ls, fs, bl) {
     ls.fs = fs;
     fs.pc = 0;
     fs.lasttarget = 0;
-    fs.jpc = lcode.NO_JUMP;
+    fs.jpc = NO_JUMP;
     fs.freereg = 0;
     fs.nk = 0;
     fs.np = 0;
@@ -560,9 +649,9 @@ const leaveblock = function(fs) {
     let ls = fs.ls;
     if (bl.previous && bl.upval) {
         /* create a 'jump to here' to close upvalues */
-        let j = lcode.luaK_jump(fs);
-        lcode.luaK_patchclose(fs, j , bl.nactvar);
-        lcode.luaK_patchtohere(fs, j);
+        let j = luaK_jump(fs);
+        luaK_patchclose(fs, j , bl.nactvar);
+        luaK_patchtohere(fs, j);
     }
 
     if (bl.isloop)
@@ -581,7 +670,7 @@ const leaveblock = function(fs) {
 
 const close_func = function(ls) {
     let fs = ls.fs;
-    lcode.luaK_ret(fs, 0, 0);  /* final return */
+    luaK_ret(fs, 0, 0);  /* final return */
     leaveblock(fs);
     lua_assert(fs.bl === null);
     ls.fs = fs.prev;
@@ -616,17 +705,17 @@ const fieldsel = function(ls, v) {
     /* fieldsel -> ['.' | ':'] NAME */
     let fs = ls.fs;
     let key = new expdesc();
-    lcode.luaK_exp2anyregup(fs, v);
+    luaK_exp2anyregup(fs, v);
     llex.luaX_next(ls);  /* skip the dot or colon */
     checkname(ls, key);
-    lcode.luaK_indexed(fs, v, key);
+    luaK_indexed(fs, v, key);
 };
 
 const yindex = function(ls, v) {
     /* index -> '[' expr ']' */
     llex.luaX_next(ls);  /* skip the '[' */
     expr(ls, v);
-    lcode.luaK_exp2val(ls.fs, v);
+    luaK_exp2val(ls.fs, v);
     checknext(ls, char[']']);
 };
 
@@ -654,24 +743,24 @@ const recfield = function(ls, cc) {
     let val = new expdesc();
 
     if (ls.t.token === R.TK_NAME) {
-        checklimit(fs, cc.nh, MAX_INT, defs.to_luastring("items in a constructor", true));
+        checklimit(fs, cc.nh, MAX_INT, to_luastring("items in a constructor", true));
         checkname(ls, key);
     } else  /* ls->t.token === '[' */
         yindex(ls, key);
     cc.nh++;
     checknext(ls, char['=']);
-    let rkkey = lcode.luaK_exp2RK(fs, key);
+    let rkkey = luaK_exp2RK(fs, key);
     expr(ls, val);
-    lcode.luaK_codeABC(fs, OpCodesI.OP_SETTABLE, cc.t.u.info, rkkey, lcode.luaK_exp2RK(fs, val));
+    luaK_codeABC(fs, OP_SETTABLE, cc.t.u.info, rkkey, luaK_exp2RK(fs, val));
     fs.freereg = reg;  /* free registers */
 };
 
 const closelistfield = function(fs, cc) {
     if (cc.v.k === expkind.VVOID) return;  /* there is no list item */
-    lcode.luaK_exp2nextreg(fs, cc.v);
+    luaK_exp2nextreg(fs, cc.v);
     cc.v.k = expkind.VVOID;
-    if (cc.tostore === lopcodes.LFIELDS_PER_FLUSH) {
-        lcode.luaK_setlist(fs, cc.t.u.info, cc.na, cc.tostore);  /* flush */
+    if (cc.tostore === LFIELDS_PER_FLUSH) {
+        luaK_setlist(fs, cc.t.u.info, cc.na, cc.tostore);  /* flush */
         cc.tostore = 0;  /* no more items pending */
     }
 };
@@ -679,20 +768,20 @@ const closelistfield = function(fs, cc) {
 const lastlistfield = function(fs, cc) {
     if (cc.tostore === 0) return;
     if (hasmultret(cc.v.k)) {
-        lcode.luaK_setmultret(fs, cc.v);
-        lcode.luaK_setlist(fs, cc.t.u.info, cc.na, defs.LUA_MULTRET);
+        luaK_setmultret(fs, cc.v);
+        luaK_setlist(fs, cc.t.u.info, cc.na, LUA_MULTRET);
         cc.na--;  /* do not count last expression (unknown number of elements) */
     } else {
         if (cc.v.k !== expkind.VVOID)
-            lcode.luaK_exp2nextreg(fs, cc.v);
-        lcode.luaK_setlist(fs, cc.t.u.info, cc.na, cc.tostore);
+            luaK_exp2nextreg(fs, cc.v);
+        luaK_setlist(fs, cc.t.u.info, cc.na, cc.tostore);
     }
 };
 
 const listfield = function(ls, cc) {
     /* listfield -> exp */
     expr(ls, cc.v);
-    checklimit(ls.fs, cc.na, MAX_INT, defs.to_luastring("items in a constructor", true));
+    checklimit(ls.fs, cc.na, MAX_INT, to_luastring("items in a constructor", true));
     cc.na++;
     cc.tostore++;
 };
@@ -723,13 +812,13 @@ const constructor = function(ls, t) {
        sep -> ',' | ';' */
     let fs = ls.fs;
     let line = ls.linenumber;
-    let pc = lcode.luaK_codeABC(fs, OpCodesI.OP_NEWTABLE, 0, 0, 0);
+    let pc = luaK_codeABC(fs, OP_NEWTABLE, 0, 0, 0);
     let cc = new ConsControl();
     cc.na = cc.nh = cc.tostore = 0;
     cc.t = t;
     init_exp(t, expkind.VRELOCABLE, pc);
     init_exp(cc.v, expkind.VVOID, 0);  /* no value (yet) */
-    lcode.luaK_exp2nextreg(ls.fs, t);  /* fix it at stack top */
+    luaK_exp2nextreg(ls.fs, t);  /* fix it at stack top */
     checknext(ls, char['{']);
     do {
         lua_assert(cc.v.k === expkind.VVOID || cc.tostore > 0);
@@ -739,8 +828,8 @@ const constructor = function(ls, t) {
     } while (testnext(ls, char[',']) || testnext(ls, char[';']));
     check_match(ls, char['}'], char['{'], line);
     lastlistfield(fs, cc);
-    lopcodes.SETARG_B(fs.f.code[pc], lobject.luaO_int2fb(cc.na));  /* set initial array size */
-    lopcodes.SETARG_C(fs.f.code[pc], lobject.luaO_int2fb(cc.nh));  /* set initial table size */
+    SETARG_B(fs.f.code[pc], lobject.luaO_int2fb(cc.na));  /* set initial array size */
+    SETARG_C(fs.f.code[pc], lobject.luaO_int2fb(cc.nh));  /* set initial table size */
 };
 
 /* }====================================================================== */
@@ -764,13 +853,13 @@ const parlist = function(ls) {
                     f.is_vararg = true;  /* declared vararg */
                     break;
                 }
-                default: llex.luaX_syntaxerror(ls, defs.to_luastring("<name> or '...' expected", true));
+                default: llex.luaX_syntaxerror(ls, to_luastring("<name> or '...' expected", true));
             }
         } while(!f.is_vararg && testnext(ls, char[',']));
     }
     adjustlocalvars(ls, nparams);
     f.numparams = fs.nactvar;
-    lcode.luaK_reserveregs(fs, fs.nactvar);  /* reserve register for parameters */
+    luaK_reserveregs(fs, fs.nactvar);  /* reserve register for parameters */
 };
 
 const body = function(ls, e, ismethod, line) {
@@ -799,7 +888,7 @@ const explist = function(ls, v) {
     let n = 1;  /* at least one expression */
     expr(ls, v);
     while (testnext(ls, char[','])) {
-        lcode.luaK_exp2nextreg(ls.fs, v);
+        luaK_exp2nextreg(ls.fs, v);
         expr(ls, v);
         n++;
     }
@@ -816,7 +905,7 @@ const funcargs = function(ls, f, line) {
                 args.k = expkind.VVOID;
             else {
                 explist(ls, args);
-                lcode.luaK_setmultret(fs, args);
+                luaK_setmultret(fs, args);
             }
             check_match(ls, char[')'], char['('], line);
             break;
@@ -831,21 +920,21 @@ const funcargs = function(ls, f, line) {
             break;
         }
         default: {
-            llex.luaX_syntaxerror(ls, defs.to_luastring("function arguments expected", true));
+            llex.luaX_syntaxerror(ls, to_luastring("function arguments expected", true));
         }
     }
     lua_assert(f.k === expkind.VNONRELOC);
     let nparams;
     let base = f.u.info;  /* base register for call */
     if (hasmultret(args.k))
-        nparams = defs.LUA_MULTRET;  /* open call */
+        nparams = LUA_MULTRET;  /* open call */
     else {
         if (args.k !== expkind.VVOID)
-            lcode.luaK_exp2nextreg(fs, args);  /* close last argument */
+            luaK_exp2nextreg(fs, args);  /* close last argument */
         nparams = fs.freereg - (base+1);
     }
-    init_exp(f, expkind.VCALL, lcode.luaK_codeABC(fs, OpCodesI.OP_CALL, base, nparams+1, 2));
-    lcode.luaK_fixline(fs, line);
+    init_exp(f, expkind.VCALL, luaK_codeABC(fs, OP_CALL, base, nparams+1, 2));
+    luaK_fixline(fs, line);
     fs.freereg = base + 1; /* call remove function and arguments and leaves (unless changed) one result */
 };
 
@@ -863,7 +952,7 @@ const primaryexp = function(ls, v) {
             llex.luaX_next(ls);
             expr(ls, v);
             check_match(ls, char[')'], char['('], line);
-            lcode.luaK_dischargevars(ls.fs, v);
+            luaK_dischargevars(ls.fs, v);
             return;
         }
         case R.TK_NAME: {
@@ -871,7 +960,7 @@ const primaryexp = function(ls, v) {
             return;
         }
         default: {
-            llex.luaX_syntaxerror(ls, defs.to_luastring("unexpected symbol", true));
+            llex.luaX_syntaxerror(ls, to_luastring("unexpected symbol", true));
         }
     }
 };
@@ -890,21 +979,21 @@ const suffixedexp = function(ls, v) {
             }
             case char['[']: {  /* '[' exp1 ']' */
                 let key = new expdesc();
-                lcode.luaK_exp2anyregup(fs, v);
+                luaK_exp2anyregup(fs, v);
                 yindex(ls, key);
-                lcode.luaK_indexed(fs, v, key);
+                luaK_indexed(fs, v, key);
                 break;
             }
             case char[':']: {  /* ':' NAME funcargs */
                 let key = new expdesc();
                 llex.luaX_next(ls);
                 checkname(ls, key);
-                lcode.luaK_self(fs, v, key);
+                luaK_self(fs, v, key);
                 funcargs(ls, v, line);
                 break;
             }
             case char['(']: case R.TK_STRING: case char['{']: {  /* funcargs */
-                lcode.luaK_exp2nextreg(fs, v);
+                luaK_exp2nextreg(fs, v);
                 funcargs(ls, v, line);
                 break;
             }
@@ -945,8 +1034,8 @@ const simpleexp = function(ls, v) {
         }
         case R.TK_DOTS: {  /* vararg */
             let fs = ls.fs;
-            check_condition(ls, fs.f.is_vararg, defs.to_luastring("cannot use '...' outside a vararg function", true));
-            init_exp(v, expkind.VVARARG, lcode.luaK_codeABC(fs, OpCodesI.OP_VARARG, 0, 1, 0));
+            check_condition(ls, fs.f.is_vararg, to_luastring("cannot use '...' outside a vararg function", true));
+            init_exp(v, expkind.VVARARG, luaK_codeABC(fs, OP_VARARG, 0, 1, 0));
             break;
         }
         case char['{']: {  /* constructor */
@@ -968,38 +1057,38 @@ const simpleexp = function(ls, v) {
 
 const getunopr = function(op) {
     switch (op) {
-        case R.TK_NOT:  return UnOpr.OPR_NOT;
-        case char['-']: return UnOpr.OPR_MINUS;
-        case char['~']: return UnOpr.OPR_BNOT;
-        case char['#']: return UnOpr.OPR_LEN;
-        default:        return UnOpr.OPR_NOUNOPR;
+        case R.TK_NOT:  return OPR_NOT;
+        case char['-']: return OPR_MINUS;
+        case char['~']: return OPR_BNOT;
+        case char['#']: return OPR_LEN;
+        default:        return OPR_NOUNOPR;
     }
 };
 
 const getbinopr = function(op) {
     switch (op) {
-        case char['+']:   return BinOpr.OPR_ADD;
-        case char['-']:   return BinOpr.OPR_SUB;
-        case char['*']:   return BinOpr.OPR_MUL;
-        case char['%']:   return BinOpr.OPR_MOD;
-        case char['^']:   return BinOpr.OPR_POW;
-        case char['/']:   return BinOpr.OPR_DIV;
-        case R.TK_IDIV:   return BinOpr.OPR_IDIV;
-        case char['&']:   return BinOpr.OPR_BAND;
-        case char['|']:   return BinOpr.OPR_BOR;
-        case char['~']:   return BinOpr.OPR_BXOR;
-        case R.TK_SHL:    return BinOpr.OPR_SHL;
-        case R.TK_SHR:    return BinOpr.OPR_SHR;
-        case R.TK_CONCAT: return BinOpr.OPR_CONCAT;
-        case R.TK_NE:     return BinOpr.OPR_NE;
-        case R.TK_EQ:     return BinOpr.OPR_EQ;
-        case char['<']:   return BinOpr.OPR_LT;
-        case R.TK_LE:     return BinOpr.OPR_LE;
-        case char['>']:   return BinOpr.OPR_GT;
-        case R.TK_GE:     return BinOpr.OPR_GE;
-        case R.TK_AND:    return BinOpr.OPR_AND;
-        case R.TK_OR:     return BinOpr.OPR_OR;
-        default:          return BinOpr.OPR_NOBINOPR;
+        case char['+']:   return OPR_ADD;
+        case char['-']:   return OPR_SUB;
+        case char['*']:   return OPR_MUL;
+        case char['%']:   return OPR_MOD;
+        case char['^']:   return OPR_POW;
+        case char['/']:   return OPR_DIV;
+        case R.TK_IDIV:   return OPR_IDIV;
+        case char['&']:   return OPR_BAND;
+        case char['|']:   return OPR_BOR;
+        case char['~']:   return OPR_BXOR;
+        case R.TK_SHL:    return OPR_SHL;
+        case R.TK_SHR:    return OPR_SHR;
+        case R.TK_CONCAT: return OPR_CONCAT;
+        case R.TK_NE:     return OPR_NE;
+        case R.TK_EQ:     return OPR_EQ;
+        case char['<']:   return OPR_LT;
+        case R.TK_LE:     return OPR_LE;
+        case char['>']:   return OPR_GT;
+        case R.TK_GE:     return OPR_GE;
+        case R.TK_AND:    return OPR_AND;
+        case R.TK_OR:     return OPR_OR;
+        default:          return OPR_NOBINOPR;
     }
 };
 
@@ -1025,23 +1114,23 @@ const UNARY_PRIORITY = 12;
 const subexpr = function(ls, v, limit) {
     enterlevel(ls);
     let uop = getunopr(ls.t.token);
-    if (uop !== UnOpr.OPR_NOUNOPR) {
+    if (uop !== OPR_NOUNOPR) {
         let line = ls.linenumber;
         llex.luaX_next(ls);
         subexpr(ls, v, UNARY_PRIORITY);
-        lcode.luaK_prefix(ls.fs, uop, v, line);
+        luaK_prefix(ls.fs, uop, v, line);
     } else
         simpleexp(ls, v);
     /* expand while operators have priorities higher than 'limit' */
     let op = getbinopr(ls.t.token);
-    while (op !== BinOpr.OPR_NOBINOPR && priority[op].left > limit) {
+    while (op !== OPR_NOBINOPR && priority[op].left > limit) {
         let v2 = new expdesc();
         let line = ls.linenumber;
         llex.luaX_next(ls);
-        lcode.luaK_infix(ls.fs, op, v);
+        luaK_infix(ls.fs, op, v);
         /* read sub-expression with higher priority */
         let nextop = subexpr(ls, v2, priority[op].right);
-        lcode.luaK_posfix(ls.fs, op, v, v2, line);
+        luaK_posfix(ls.fs, op, v, v2, line);
         op = nextop;
     }
     leavelevel(ls);
@@ -1109,22 +1198,22 @@ const check_conflict = function(ls, lh, v) {
     }
     if (conflict) {
         /* copy upvalue/local value to a temporary (in position 'extra') */
-        let op = v.k === expkind.VLOCAL ? OpCodesI.OP_MOVE : OpCodesI.OP_GETUPVAL;
-        lcode.luaK_codeABC(fs, op, extra, v.u.info, 0);
-        lcode.luaK_reserveregs(fs, 1);
+        let op = v.k === expkind.VLOCAL ? OP_MOVE : OP_GETUPVAL;
+        luaK_codeABC(fs, op, extra, v.u.info, 0);
+        luaK_reserveregs(fs, 1);
     }
 };
 
 const assignment = function(ls, lh, nvars) {
     let e = new expdesc();
-    check_condition(ls, vkisvar(lh.v.k), defs.to_luastring("syntax error", true));
+    check_condition(ls, vkisvar(lh.v.k), to_luastring("syntax error", true));
     if (testnext(ls, char[','])) {  /* assignment -> ',' suffixedexp assignment */
         let nv = new LHS_assign();
         nv.prev = lh;
         suffixedexp(ls, nv.v);
         if (nv.v.k !== expkind.VINDEXED)
             check_conflict(ls, lh, nv.v);
-        checklimit(ls.fs, nvars + ls.L.nCcalls, LUAI_MAXCCALLS, defs.to_luastring("JS levels", true));
+        checklimit(ls.fs, nvars + ls.L.nCcalls, LUAI_MAXCCALLS, to_luastring("JS levels", true));
         assignment(ls, nv, nvars + 1);
     } else {  /* assignment -> '=' explist */
         checknext(ls, char['=']);
@@ -1132,13 +1221,13 @@ const assignment = function(ls, lh, nvars) {
         if (nexps !== nvars)
             adjust_assign(ls, nvars, nexps, e);
         else {
-            lcode.luaK_setoneret(ls.fs, e);  /* close last expression */
-            lcode.luaK_storevar(ls.fs, lh.v, e);
+            luaK_setoneret(ls.fs, e);  /* close last expression */
+            luaK_storevar(ls.fs, lh.v, e);
             return;  /* avoid default */
         }
     }
     init_exp(e, expkind.VNONRELOC, ls.fs.freereg-1);  /* default assignment */
-    lcode.luaK_storevar(ls.fs, lh.v, e);
+    luaK_storevar(ls.fs, lh.v, e);
 };
 
 const cond = function(ls) {
@@ -1146,7 +1235,7 @@ const cond = function(ls) {
     let v = new expdesc();
     expr(ls, v);  /* read condition */
     if (v.k === expkind.VNIL) v.k = expkind.VFALSE;  /* 'falses' are all equal here */
-    lcode.luaK_goiftrue(ls.fs, v);
+    luaK_goiftrue(ls.fs, v);
     return v.f;
 };
 
@@ -1168,7 +1257,7 @@ const checkrepeated = function(fs, ll, label) {
     for (let i = fs.bl.firstlabel; i < ll.n; i++) {
         if (eqstr(label, ll.arr[i].name)) {
             let msg = lobject.luaO_pushfstring(fs.ls.L,
-                defs.to_luastring("label '%s' already defined on line %d", true),
+                to_luastring("label '%s' already defined on line %d", true),
                 label.getstr(), ll.arr[i].line);
             semerror(fs.ls, msg);
         }
@@ -1189,7 +1278,7 @@ const labelstat = function(ls, label, line) {
     checkrepeated(fs, ll, label);  /* check for repeated labels */
     checknext(ls, R.TK_DBCOLON);  /* skip double colon */
     /* create new entry for this label */
-    l = newlabelentry(ls, ll, label, line, lcode.luaK_getlabel(fs));
+    l = newlabelentry(ls, ll, label, line, luaK_getlabel(fs));
     skipnoopstat(ls);  /* skip other no-op statements */
     if (block_follow(ls, 0)) {  /* label is last no-op statement in the block? */
         /* assume that locals are already out of scope */
@@ -1203,21 +1292,21 @@ const whilestat = function(ls, line) {
     let fs = ls.fs;
     let bl = new BlockCnt();
     llex.luaX_next(ls);  /* skip WHILE */
-    let whileinit = lcode.luaK_getlabel(fs);
+    let whileinit = luaK_getlabel(fs);
     let condexit = cond(ls);
     enterblock(fs, bl, 1);
     checknext(ls, R.TK_DO);
     block(ls);
-    lcode.luaK_jumpto(fs, whileinit);
+    luaK_jumpto(fs, whileinit);
     check_match(ls, R.TK_END, R.TK_WHILE, line);
     leaveblock(fs);
-    lcode.luaK_patchtohere(fs, condexit);  /* false conditions finish the loop */
+    luaK_patchtohere(fs, condexit);  /* false conditions finish the loop */
 };
 
 const repeatstat = function(ls, line) {
     /* repeatstat -> REPEAT block UNTIL cond */
     let fs = ls.fs;
-    let repeat_init = lcode.luaK_getlabel(fs);
+    let repeat_init = luaK_getlabel(fs);
     let bl1 = new BlockCnt();
     let bl2 = new BlockCnt();
     enterblock(fs, bl1, 1);  /* loop block */
@@ -1227,16 +1316,16 @@ const repeatstat = function(ls, line) {
     check_match(ls, R.TK_UNTIL, R.TK_REPEAT, line);
     let condexit = cond(ls);  /* read condition (inside scope block) */
     if (bl2.upval)  /* upvalues? */
-        lcode.luaK_patchclose(fs, condexit, bl2.nactvar);
+        luaK_patchclose(fs, condexit, bl2.nactvar);
     leaveblock(fs);  /* finish scope */
-    lcode.luaK_patchlist(fs, condexit, repeat_init);  /* close the loop */
+    luaK_patchlist(fs, condexit, repeat_init);  /* close the loop */
     leaveblock(fs);  /* finish loop */
 };
 
 const exp1 = function(ls) {
     let e = new expdesc();
     expr(ls, e);
-    lcode.luaK_exp2nextreg(ls.fs, e);
+    luaK_exp2nextreg(ls.fs, e);
     lua_assert(e.k === expkind.VNONRELOC);
     let reg = e.u.info;
     return reg;
@@ -1249,22 +1338,22 @@ const forbody = function(ls, base, line, nvars, isnum) {
     let endfor;
     adjustlocalvars(ls, 3);  /* control variables */
     checknext(ls, R.TK_DO);
-    let prep = isnum ? lcode.luaK_codeAsBx(fs, OpCodesI.OP_FORPREP, base, lcode.NO_JUMP) : lcode.luaK_jump(fs);
+    let prep = isnum ? luaK_codeAsBx(fs, OP_FORPREP, base, NO_JUMP) : luaK_jump(fs);
     enterblock(fs, bl, 0);  /* scope for declared variables */
     adjustlocalvars(ls, nvars);
-    lcode.luaK_reserveregs(fs, nvars);
+    luaK_reserveregs(fs, nvars);
     block(ls);
     leaveblock(fs);  /* end of scope for declared variables */
-    lcode.luaK_patchtohere(fs, prep);
+    luaK_patchtohere(fs, prep);
     if (isnum)  /* end of scope for declared variables */
-        endfor = lcode.luaK_codeAsBx(fs, OpCodesI.OP_FORLOOP, base, lcode.NO_JUMP);
+        endfor = luaK_codeAsBx(fs, OP_FORLOOP, base, NO_JUMP);
     else {  /* generic for */
-        lcode.luaK_codeABC(fs, OpCodesI.OP_TFORCALL, base, 0, nvars);
-        lcode.luaK_fixline(fs, line);
-        endfor = lcode.luaK_codeAsBx(fs, OpCodesI.OP_TFORLOOP, base + 2, lcode.NO_JUMP);
+        luaK_codeABC(fs, OP_TFORCALL, base, 0, nvars);
+        luaK_fixline(fs, line);
+        endfor = luaK_codeAsBx(fs, OP_TFORLOOP, base + 2, NO_JUMP);
     }
-    lcode.luaK_patchlist(fs, endfor, prep + 1);
-    lcode.luaK_fixline(fs, line);
+    luaK_patchlist(fs, endfor, prep + 1);
+    luaK_fixline(fs, line);
 };
 
 const fornum = function(ls, varname, line) {
@@ -1282,8 +1371,8 @@ const fornum = function(ls, varname, line) {
     if (testnext(ls, char[',']))
         exp1(ls);  /* optional step */
     else {  /* default step = 1 */
-        lcode.luaK_codek(fs, fs.freereg, lcode.luaK_intK(fs, 1));
-        lcode.luaK_reserveregs(fs, 1);
+        luaK_codek(fs, fs.freereg, luaK_intK(fs, 1));
+        luaK_reserveregs(fs, 1);
     }
     forbody(ls, base, line, 1, 1);
 };
@@ -1307,7 +1396,7 @@ const forlist = function(ls, indexname) {
     checknext(ls, R.TK_IN);
     let line = ls.linenumber;
     adjust_assign(ls, 3, explist(ls, e), e);
-    lcode.luaK_checkstack(fs, 3);  /* extra space to call generator */
+    luaK_checkstack(fs, 3);  /* extra space to call generator */
     forbody(ls, base, line, nvars - 3, 0);
 };
 
@@ -1321,7 +1410,7 @@ const forstat = function(ls, line) {
     switch (ls.t.token) {
         case char['=']: fornum(ls, varname, line); break;
         case char[',']: case R.TK_IN: forlist(ls, varname); break;
-        default: llex.luaX_syntaxerror(ls, defs.to_luastring("'=' or 'in' expected", true));
+        default: llex.luaX_syntaxerror(ls, to_luastring("'=' or 'in' expected", true));
     }
     check_match(ls, R.TK_END, R.TK_FOR, line);
     leaveblock(fs);  /* loop scope ('break' jumps to this point) */
@@ -1339,7 +1428,7 @@ const test_then_block = function(ls, escapelist) {
     checknext(ls, R.TK_THEN);
 
     if (ls.t.token === R.TK_GOTO || ls.t.token === R.TK_BREAK) {
-        lcode.luaK_goiffalse(ls.fs, v);  /* will jump to label if condition is true */
+        luaK_goiffalse(ls.fs, v);  /* will jump to label if condition is true */
         enterblock(fs, bl, false);  /* must enter block before 'goto' */
         gotostat(ls, v.t);   /* handle goto/break */
         while (testnext(ls, char[';']));  /* skip colons */
@@ -1347,9 +1436,9 @@ const test_then_block = function(ls, escapelist) {
             leaveblock(fs);
             return escapelist;  /* and that is it */
         } else  /* must skip over 'then' part if condition is false */
-            jf = lcode.luaK_jump(fs);
+            jf = luaK_jump(fs);
     } else {  /* regular case (not goto/break) */
-        lcode.luaK_goiftrue(ls.fs, v);  /* skip over block if condition is false */
+        luaK_goiftrue(ls.fs, v);  /* skip over block if condition is false */
         enterblock(fs, bl, false);
         jf = v.f;
     }
@@ -1357,8 +1446,8 @@ const test_then_block = function(ls, escapelist) {
     statlist(ls);  /* 'then' part */
     leaveblock(fs);
     if (ls.t.token === R.TK_ELSE || ls.t.token === R.TK_ELSEIF)  /* followed by 'else'/'elseif'? */
-        escapelist = lcode.luaK_concat(fs, escapelist, lcode.luaK_jump(fs));  /* must jump over it */
-    lcode.luaK_patchtohere(fs, jf);
+        escapelist = luaK_concat(fs, escapelist, luaK_jump(fs));  /* must jump over it */
+    luaK_patchtohere(fs, jf);
 
     return escapelist;
 };
@@ -1366,14 +1455,14 @@ const test_then_block = function(ls, escapelist) {
 const ifstat = function(ls, line) {
     /* ifstat -> IF cond THEN block {ELSEIF cond THEN block} [ELSE block] END */
     let fs = ls.fs;
-    let escapelist = lcode.NO_JUMP;  /* exit list for finished parts */
+    let escapelist = NO_JUMP;  /* exit list for finished parts */
     escapelist = test_then_block(ls, escapelist);  /* IF cond THEN block */
     while (ls.t.token === R.TK_ELSEIF)
         escapelist = test_then_block(ls, escapelist);  /* ELSEIF cond THEN block */
     if (testnext(ls, R.TK_ELSE))
         block(ls);  /* 'else' part */
     check_match(ls, R.TK_END, R.TK_IF, line);
-    lcode.luaK_patchtohere(fs, escapelist);  /* patch escape list to 'if' end */
+    luaK_patchtohere(fs, escapelist);  /* patch escape list to 'if' end */
 };
 
 const localfunc = function(ls) {
@@ -1425,8 +1514,8 @@ const funcstat = function(ls, line) {
     llex.luaX_next(ls);  /* skip FUNCTION */
     let ismethod = funcname(ls, v);
     body(ls, b, ismethod, line);
-    lcode.luaK_storevar(ls.fs, v, b);
-    lcode.luaK_fixline(ls.fs, line);  /* definition "happens" in the first line */
+    luaK_storevar(ls.fs, v, b);
+    luaK_fixline(ls.fs, line);  /* definition "happens" in the first line */
 };
 
 const exprstat= function(ls) {
@@ -1439,8 +1528,8 @@ const exprstat= function(ls) {
         assignment(ls, v, 1);
     }
     else {  /* stat -> func */
-        check_condition(ls, v.v.k === expkind.VCALL, defs.to_luastring("syntax error", true));
-        lopcodes.SETARG_C(lcode.getinstruction(fs, v.v), 1);  /* call statement uses no results */
+        check_condition(ls, v.v.k === expkind.VCALL, to_luastring("syntax error", true));
+        SETARG_C(getinstruction(fs, v.v), 1);  /* call statement uses no results */
     }
 };
 
@@ -1454,24 +1543,24 @@ const retstat = function(ls) {
     else {
         nret = explist(ls, e);  /* optional return values */
         if (hasmultret(e.k)) {
-            lcode.luaK_setmultret(fs, e);
+            luaK_setmultret(fs, e);
             if (e.k === expkind.VCALL && nret === 1) {  /* tail call? */
-                lopcodes.SET_OPCODE(lcode.getinstruction(fs, e), OpCodesI.OP_TAILCALL);
-                lua_assert(lcode.getinstruction(fs, e).A === fs.nactvar);
+                SET_OPCODE(getinstruction(fs, e), OP_TAILCALL);
+                lua_assert(getinstruction(fs, e).A === fs.nactvar);
             }
             first = fs.nactvar;
-            nret = defs.LUA_MULTRET;  /* return all values */
+            nret = LUA_MULTRET;  /* return all values */
         } else {
             if (nret === 1)  /* only one single value? */
-                first = lcode.luaK_exp2anyreg(fs, e);
+                first = luaK_exp2anyreg(fs, e);
             else {
-                lcode.luaK_exp2nextreg(fs, e);  /* values must go to the stack */
+                luaK_exp2nextreg(fs, e);  /* values must go to the stack */
                 first = fs.nactvar;  /* return all active values */
                 lua_assert(nret === fs.freereg - first);
             }
         }
     }
-    lcode.luaK_ret(fs, first, nret);
+    luaK_ret(fs, first, nret);
     testnext(ls, char[';']);  /* skip optional semicolon */
 };
 
@@ -1529,7 +1618,7 @@ const statement = function(ls) {
         }
         case R.TK_BREAK:   /* stat -> breakstat */
         case R.TK_GOTO: {  /* stat -> 'goto' NAME */
-            gotostat(ls, lcode.luaK_jump(ls.fs));
+            gotostat(ls, luaK_jump(ls.fs));
             break;
         }
         default: {  /* stat -> func | assignment */
