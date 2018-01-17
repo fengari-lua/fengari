@@ -1,8 +1,7 @@
 "use strict";
 
-const assert  = require('assert');
-
 const defs    = require('./defs.js');
+const { lua_assert } = require('./llimits.js');
 const lobject = require('./lobject.js');
 const CT      = defs.constant_types;
 
@@ -53,7 +52,7 @@ const luaF_findupval = function(L, level) {
     let prevp;
     let p = L.openupval;
     while (p !== null && p.vOff >= level) {
-        assert(p.isopen());
+        lua_assert(p.isopen());
         if (p.vOff === level) /* found a corresponding upvalue? */
             return p; /* return it */
         prevp = p;
@@ -75,7 +74,7 @@ const luaF_findupval = function(L, level) {
 const luaF_close = function(L, level) {
     while (L.openupval !== null && L.openupval.vOff >= level) {
         let uv = L.openupval;
-        assert(uv.isopen());
+        lua_assert(uv.isopen());
         L.openupval = uv.open_next; /* remove from 'open' list */
         if (uv.refcount === 0) { /* no references? */
             /* free upvalue */
