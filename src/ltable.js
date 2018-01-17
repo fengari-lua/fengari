@@ -1,12 +1,28 @@
 "use strict";
 
-const defs    = require('./defs.js');
+const {
+    constant_types: {
+        LUA_TBOOLEAN,
+        LUA_TCCL,
+        LUA_TLCF,
+        LUA_TLCL,
+        LUA_TLIGHTUSERDATA,
+        LUA_TLNGSTR,
+        LUA_TNIL,
+        LUA_TNUMFLT,
+        LUA_TNUMINT,
+        LUA_TSHRSTR,
+        LUA_TTABLE,
+        LUA_TTHREAD,
+        LUA_TUSERDATA
+    },
+    to_luastring
+} = require('./defs.js');
 const { lua_assert } = require('./llimits.js');
 const ldebug  = require('./ldebug.js');
 const lobject = require('./lobject.js');
 const lstring = require('./lstring.js');
 const lstate  = require('./lstate.js');
-const CT      = defs.constant_types;
 
 /* used to prevent conflicts with lightuserdata keys */
 let lightuserdata_hashes = new WeakMap();
@@ -23,25 +39,25 @@ const get_lightuserdata_hash = function(v) {
 
 const table_hash = function(L, key) {
     switch(key.type) {
-        case CT.LUA_TNIL:
-            return ldebug.luaG_runerror(L, defs.to_luastring("table index is nil", true));
-        case CT.LUA_TNUMFLT:
+        case LUA_TNIL:
+            return ldebug.luaG_runerror(L, to_luastring("table index is nil", true));
+        case LUA_TNUMFLT:
             if (isNaN(key.value))
-                return ldebug.luaG_runerror(L, defs.to_luastring("table index is NaN", true));
+                return ldebug.luaG_runerror(L, to_luastring("table index is NaN", true));
             /* fall through */
-        case CT.LUA_TNUMINT: /* takes advantage of floats and integers being same in JS */
-        case CT.LUA_TBOOLEAN:
-        case CT.LUA_TTABLE:
-        case CT.LUA_TLCL:
-        case CT.LUA_TLCF:
-        case CT.LUA_TCCL:
-        case CT.LUA_TUSERDATA:
-        case CT.LUA_TTHREAD:
+        case LUA_TNUMINT: /* takes advantage of floats and integers being same in JS */
+        case LUA_TBOOLEAN:
+        case LUA_TTABLE:
+        case LUA_TLCL:
+        case LUA_TLCF:
+        case LUA_TCCL:
+        case LUA_TUSERDATA:
+        case LUA_TTHREAD:
             return key.value;
-        case CT.LUA_TSHRSTR:
-        case CT.LUA_TLNGSTR:
+        case LUA_TSHRSTR:
+        case LUA_TLNGSTR:
             return lstring.luaS_hashlongstr(key.tsvalue());
-        case CT.LUA_TLIGHTUSERDATA: {
+        case LUA_TLIGHTUSERDATA: {
             let v = key.value;
             switch(typeof v) {
                 case "string":
@@ -174,11 +190,11 @@ const setgeneric = function(t, hash, key) {
     let kv = key.value;
     if ((key.ttisfloat() && (kv|0) === kv)) { /* does index fit in an integer? */
         /* insert it as an integer */
-        key = new lobject.TValue(CT.LUA_TNUMINT, kv);
+        key = new lobject.TValue(LUA_TNUMINT, kv);
     } else {
         key = new lobject.TValue(key.type, kv);
     }
-    let tv = new lobject.TValue(CT.LUA_TNIL, null);
+    let tv = new lobject.TValue(LUA_TNIL, null);
     add(t, hash, key, tv);
     return tv;
 };
@@ -195,7 +211,7 @@ const luaH_setint = function(t, key, value) {
         let tv = v.value;
         tv.setfrom(value);
     } else {
-        let k = new lobject.TValue(CT.LUA_TNUMINT, key);
+        let k = new lobject.TValue(LUA_TNUMINT, key);
         let v = new lobject.TValue(value.type, value.value);
         add(t, hash, k, v);
     }
@@ -233,7 +249,7 @@ const luaH_next = function(L, table, keyI) {
     let keyO = L.stack[keyI];
 
     let entry;
-    if (keyO.type === CT.LUA_TNIL) {
+    if (keyO.type === LUA_TNIL) {
         entry = table.f;
         if (!entry)
             return false;
@@ -251,7 +267,7 @@ const luaH_next = function(L, table, keyI) {
             entry = (table.dead_weak && table.dead_weak.get(hash)) || table.dead_strong.get(hash);
             if (!entry)
                 /* item not in table */
-                return ldebug.luaG_runerror(L, defs.to_luastring("invalid key to 'next'"));
+                return ldebug.luaG_runerror(L, to_luastring("invalid key to 'next'"));
             /* Iterate until either out of keys, or until finding a non-dead key */
             do {
                 entry = entry.n;
