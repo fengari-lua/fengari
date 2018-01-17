@@ -1,8 +1,7 @@
 "use strict";
 
-const assert = require('assert');
-
 const defs    = require('./defs.js');
+const { lua_assert } = require('./llimits.js');
 const ldebug  = require('./ldebug.js');
 const lobject = require('./lobject.js');
 const lstring = require('./lstring.js');
@@ -151,17 +150,17 @@ const getgeneric = function(t, hash) {
 };
 
 const luaH_getint = function(t, key) {
-    assert(typeof key == "number" && (key|0) === key);
+    lua_assert(typeof key == "number" && (key|0) === key);
     return getgeneric(t, key);
 };
 
 const luaH_getstr = function(t, key) {
-    assert(key instanceof lstring.TString);
+    lua_assert(key instanceof lstring.TString);
     return getgeneric(t, lstring.luaS_hashlongstr(key));
 };
 
 const luaH_get = function(L, t, key) {
-    assert(key instanceof lobject.TValue);
+    lua_assert(key instanceof lobject.TValue);
     if (key.ttisnil() || (key.ttisfloat() && isNaN(key.value)))
         return lobject.luaO_nilobject;
     return getgeneric(t, table_hash(L, key));
@@ -185,7 +184,7 @@ const setgeneric = function(t, hash, key) {
 };
 
 const luaH_setint = function(t, key, value) {
-    assert(typeof key == "number" && (key|0) === key && value instanceof lobject.TValue);
+    lua_assert(typeof key == "number" && (key|0) === key && value instanceof lobject.TValue);
     let hash = key; /* table_hash known result */
     if (value.ttisnil()) {
         mark_dead(t, hash);
@@ -203,13 +202,13 @@ const luaH_setint = function(t, key, value) {
 };
 
 const luaH_set = function(L, t, key) {
-    assert(key instanceof lobject.TValue);
+    lua_assert(key instanceof lobject.TValue);
     let hash = table_hash(L, key);
     return setgeneric(t, hash, key);
 };
 
 const luaH_delete = function(L, t, key) {
-    assert(key instanceof lobject.TValue);
+    lua_assert(key instanceof lobject.TValue);
     let hash = table_hash(L, key);
     return mark_dead(t, hash);
 };
