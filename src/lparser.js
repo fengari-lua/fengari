@@ -1,7 +1,5 @@
 "use strict";
 
-const assert = require('assert');
-
 const defs     = require('./defs.js');
 const lcode    = require('./lcode.js');
 const ldo      = require('./ldo.js');
@@ -9,7 +7,8 @@ const lfunc    = require('./lfunc.js');
 const llex     = require('./llex.js');
 const {
     LUAI_MAXCCALLS,
-    MAX_INT
+    MAX_INT,
+    lua_assert
 }  = require('./llimits.js');
 const lobject  = require('./lobject.js');
 const lopcodes = require('./lopcodes.js');
@@ -266,7 +265,7 @@ const new_localvarliteral = function(ls, name) {
 
 const getlocvar = function(fs, i) {
     let idx = fs.ls.dyd.actvar.arr[fs.firstlocal + i].idx;
-    assert(idx < fs.nlocvars);
+    lua_assert(idx < fs.nlocvars);
     return fs.f.locvars[idx];
 };
 
@@ -357,7 +356,7 @@ const singlevar = function(ls, vr) {
     if (vr.k === expkind.VVOID) {  /* is global name? */
         let key = new expdesc();
         singlevaraux(fs, ls.envn, vr, 1);  /* get environment variable */
-        assert(vr.k !== expkind.VVOID);  /* this one must exist */
+        lua_assert(vr.k !== expkind.VVOID);  /* this one must exist */
         codestring(ls, key, varname);  /* key is variable name */
         lcode.luaK_indexed(fs, vr, key);  /* env[varname] */
     }
@@ -397,7 +396,7 @@ const closegoto = function(ls, g, label) {
     let fs = ls.fs;
     let gl = ls.dyd.gt;
     let gt = gl.arr[g];
-    assert(eqstr(gt.name, label.name));
+    lua_assert(eqstr(gt.name, label.name));
     if (gt.nactvar < label.nactvar) {
         let vname = getlocvar(fs, gt.nactvar).varname;
         let msg = lobject.luaO_pushfstring(ls.L,
@@ -489,7 +488,7 @@ const enterblock = function(fs, bl, isloop) {
     bl.upval = 0;
     bl.previous = fs.bl;
     fs.bl = bl;
-    assert(fs.freereg === fs.nactvar);
+    lua_assert(fs.freereg === fs.nactvar);
 };
 
 /*
@@ -571,7 +570,7 @@ const leaveblock = function(fs) {
 
     fs.bl = bl.previous;
     removevars(fs, bl.nactvar);
-    assert(bl.nactvar === fs.nactvar);
+    lua_assert(bl.nactvar === fs.nactvar);
     fs.freereg = fs.nactvar;  /* free registers */
     ls.dyd.label.n = bl.firstlabel;  /* remove local labels */
     if (bl.previous)  /* inner block? */
@@ -584,7 +583,7 @@ const close_func = function(ls) {
     let fs = ls.fs;
     lcode.luaK_ret(fs, 0, 0);  /* final return */
     leaveblock(fs);
-    assert(fs.bl === null);
+    lua_assert(fs.bl === null);
     ls.fs = fs.prev;
 };
 
@@ -733,7 +732,7 @@ const constructor = function(ls, t) {
     lcode.luaK_exp2nextreg(ls.fs, t);  /* fix it at stack top */
     checknext(ls, char['{']);
     do {
-        assert(cc.v.k === expkind.VVOID || cc.tostore > 0);
+        lua_assert(cc.v.k === expkind.VVOID || cc.tostore > 0);
         if (ls.t.token === char['}']) break;
         closelistfield(fs, cc);
         field(ls, cc);
@@ -835,7 +834,7 @@ const funcargs = function(ls, f, line) {
             llex.luaX_syntaxerror(ls, defs.to_luastring("function arguments expected", true));
         }
     }
-    assert(f.k === expkind.VNONRELOC);
+    lua_assert(f.k === expkind.VNONRELOC);
     let nparams;
     let base = f.u.info;  /* base register for call */
     if (hasmultret(args.k))
@@ -1238,7 +1237,7 @@ const exp1 = function(ls) {
     let e = new expdesc();
     expr(ls, e);
     lcode.luaK_exp2nextreg(ls.fs, e);
-    assert(e.k === expkind.VNONRELOC);
+    lua_assert(e.k === expkind.VNONRELOC);
     let reg = e.u.info;
     return reg;
 };
@@ -1458,7 +1457,7 @@ const retstat = function(ls) {
             lcode.luaK_setmultret(fs, e);
             if (e.k === expkind.VCALL && nret === 1) {  /* tail call? */
                 lopcodes.SET_OPCODE(lcode.getinstruction(fs, e), OpCodesI.OP_TAILCALL);
-                assert(lcode.getinstruction(fs, e).A === fs.nactvar);
+                lua_assert(lcode.getinstruction(fs, e).A === fs.nactvar);
             }
             first = fs.nactvar;
             nret = defs.LUA_MULTRET;  /* return all values */
@@ -1468,7 +1467,7 @@ const retstat = function(ls) {
             else {
                 lcode.luaK_exp2nextreg(fs, e);  /* values must go to the stack */
                 first = fs.nactvar;  /* return all active values */
-                assert(nret === fs.freereg - first);
+                lua_assert(nret === fs.freereg - first);
             }
         }
     }
@@ -1538,8 +1537,7 @@ const statement = function(ls) {
             break;
         }
     }
-
-    assert(ls.fs.f.maxstacksize >= ls.fs.freereg && ls.fs.freereg >= ls.fs.nactvar);
+    lua_assert(ls.fs.f.maxstacksize >= ls.fs.freereg && ls.fs.freereg >= ls.fs.nactvar);
     ls.fs.freereg = ls.fs.nactvar;  /* free registers */
     leavelevel(ls);
 };
@@ -1577,9 +1575,9 @@ const luaY_parser = function(L, z, buff, dyd, name, firstchar) {
     dyd.actvar.n = dyd.gt.n = dyd.label.n = 0;
     llex.luaX_setinput(L, lexstate, z, funcstate.f.source, firstchar);
     mainfunc(lexstate, funcstate);
-    assert(!funcstate.prev && funcstate.nups === 1 && !lexstate.fs);
+    lua_assert(!funcstate.prev && funcstate.nups === 1 && !lexstate.fs);
     /* all scopes should be correctly finished */
-    assert(dyd.actvar.n === 0 && dyd.gt.n === 0 && dyd.label.n === 0);
+    lua_assert(dyd.actvar.n === 0 && dyd.gt.n === 0 && dyd.label.n === 0);
     delete L.stack[--L.top];  /* remove scanner's table */
     return cl;  /* closure is on the stack, too */
 };
