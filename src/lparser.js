@@ -7,7 +7,10 @@ const lcode    = require('./lcode.js');
 const ldo      = require('./ldo.js');
 const lfunc    = require('./lfunc.js');
 const llex     = require('./llex.js');
-const llimits  = require('./llimits.js');
+const {
+    LUAI_MAXCCALLS,
+    MAX_INT
+}  = require('./llimits.js');
 const lobject  = require('./lobject.js');
 const lopcodes = require('./lopcodes.js');
 const lstring  = require('./lstring.js');
@@ -383,7 +386,7 @@ const adjust_assign = function(ls, nvars, nexps, e) {
 const enterlevel = function(ls) {
     let L = ls.L;
     ++L.nCcalls;
-    checklimit(ls.fs, L.nCcalls, llimits.LUAI_MAXCCALLS, defs.to_luastring("JS levels", true));
+    checklimit(ls.fs, L.nCcalls, LUAI_MAXCCALLS, defs.to_luastring("JS levels", true));
 };
 
 const leavelevel = function(ls) {
@@ -652,7 +655,7 @@ const recfield = function(ls, cc) {
     let val = new expdesc();
 
     if (ls.t.token === R.TK_NAME) {
-        checklimit(fs, cc.nh, llimits.MAX_INT, defs.to_luastring("items in a constructor", true));
+        checklimit(fs, cc.nh, MAX_INT, defs.to_luastring("items in a constructor", true));
         checkname(ls, key);
     } else  /* ls->t.token === '[' */
         yindex(ls, key);
@@ -690,7 +693,7 @@ const lastlistfield = function(fs, cc) {
 const listfield = function(ls, cc) {
     /* listfield -> exp */
     expr(ls, cc.v);
-    checklimit(ls.fs, cc.na, llimits.MAX_INT, defs.to_luastring("items in a constructor", true));
+    checklimit(ls.fs, cc.na, MAX_INT, defs.to_luastring("items in a constructor", true));
     cc.na++;
     cc.tostore++;
 };
@@ -1122,7 +1125,7 @@ const assignment = function(ls, lh, nvars) {
         suffixedexp(ls, nv.v);
         if (nv.v.k !== expkind.VINDEXED)
             check_conflict(ls, lh, nv.v);
-        checklimit(ls.fs, nvars + ls.L.nCcalls, llimits.LUAI_MAXCCALLS, defs.to_luastring("JS levels", true));
+        checklimit(ls.fs, nvars + ls.L.nCcalls, LUAI_MAXCCALLS, defs.to_luastring("JS levels", true));
         assignment(ls, nv, nvars + 1);
     } else {  /* assignment -> '=' explist */
         checknext(ls, char['=']);
