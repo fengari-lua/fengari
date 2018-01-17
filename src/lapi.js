@@ -1,13 +1,44 @@
 "use strict";
 
-const defs      = require('./defs.js');
+const {
+    LUA_MULTRET,
+    LUA_OPBNOT,
+    LUA_OPEQ,
+    LUA_OPLE,
+    LUA_OPLT,
+    LUA_OPUNM,
+    LUA_REGISTRYINDEX,
+    LUA_RIDX_GLOBALS,
+    LUA_VERSION_NUM,
+    constant_types: {
+        LUA_NUMTAGS,
+        LUA_TBOOLEAN,
+        LUA_TCCL,
+        LUA_TFUNCTION,
+        LUA_TLCF,
+        LUA_TLCL,
+        LUA_TLIGHTUSERDATA,
+        LUA_TLNGSTR,
+        LUA_TNIL,
+        LUA_TNONE,
+        LUA_TNUMFLT,
+        LUA_TNUMINT,
+        LUA_TSHRSTR,
+        LUA_TTABLE,
+        LUA_TTHREAD,
+        LUA_TUSERDATA
+    },
+    thread_status: { LUA_OK },
+    from_userstring,
+    to_luastring,
+} = require('./defs.js');
 const {
     api_check,
     lua_assert
 } = require('./llimits.js');
 const ldebug    = require('./ldebug.js');
 const ldo       = require('./ldo.js');
-const ldump     = require('./ldump.js');
+const { luaU_dump } = require('./ldump.js');
 const lfunc     = require('./lfunc.js');
 const lobject   = require('./lobject.js');
 const lstate    = require('./lstate.js');
@@ -17,13 +48,10 @@ const {
     luaS_newliteral
 } = require('./lstring.js');
 const ltm       = require('./ltm.js');
-const luaconf   = require('./luaconf.js');
+const { LUAI_MAXSTACK } = require('./luaconf.js');
 const lvm       = require('./lvm.js');
 const ltable    = require('./ltable.js');
-const lzio      = require('./lzio.js');
-const MAXUPVAL  = lfunc.MAXUPVAL;
-const CT        = defs.constant_types;
-const TS        = defs.thread_status;
+const { ZIO } = require('./lzio.js');
 const TValue    = lobject.TValue;
 const CClosure  = lobject.CClosure;
 
@@ -45,7 +73,7 @@ const isvalid = function(o) {
 };
 
 const lua_version = function(L) {
-    if (L === null) return defs.LUA_VERSION_NUM;
+    if (L === null) return LUA_VERSION_NUM;
     else return L.l_G.version;
 };
 
@@ -69,14 +97,14 @@ const index2addr = function(L, idx) {
         api_check(L, idx <= ci.top - (ci.funcOff + 1), "unacceptable index");
         if (o >= L.top) return lobject.luaO_nilobject;
         else return L.stack[o];
-    } else if (idx > defs.LUA_REGISTRYINDEX) {
+    } else if (idx > LUA_REGISTRYINDEX) {
         api_check(L, idx !== 0 && -idx <= L.top, "invalid index");
         return L.stack[L.top + idx];
-    } else if (idx === defs.LUA_REGISTRYINDEX) {
+    } else if (idx === LUA_REGISTRYINDEX) {
         return L.l_G.l_registry;
     } else { /* upvalues */
-        idx = defs.LUA_REGISTRYINDEX - idx;
-        api_check(L, idx <= MAXUPVAL + 1, "upvalue index too large");
+        idx = LUA_REGISTRYINDEX - idx;
+        api_check(L, idx <= lfunc.MAXUPVAL + 1, "upvalue index too large");
         if (ci.func.ttislcf()) /* light C function? */
             return lobject.luaO_nilobject; /* it has no upvalues */
         else {
@@ -93,7 +121,7 @@ const index2addr_ = function(L, idx) {
         api_check(L, idx <= ci.top - (ci.funcOff + 1), "unacceptable index");
         if (o >= L.top) return null;
         else return o;
-    } else if (idx > defs.LUA_REGISTRYINDEX) {
+    } else if (idx > LUA_REGISTRYINDEX) {
         api_check(L, idx !== 0 && -idx <= L.top, "invalid index");
         return L.top + idx;
     } else { /* registry or upvalue */
@@ -109,7 +137,7 @@ const lua_checkstack = function(L, n) {
         res = true;
     else { /* no; need to grow stack */
         let inuse = L.top + lstate.EXTRA_STACK;
-        if (inuse > luaconf.LUAI_MAXSTACK - n)  /* can grow without overflow? */
+        if (inuse > LUAI_MAXSTACK - n)  /* can grow without overflow? */
             res = false;  /* no */
         else { /* try to grow stack */
             ldo.luaD_growstack(L, n);
@@ -145,7 +173,7 @@ const lua_xmove = function(from, to, n) {
 ** convert an acceptable stack index into an absolute index
 */
 const lua_absindex = function(L, idx) {
-    return (idx > 0 || idx <= defs.LUA_REGISTRYINDEX)
+    return (idx > 0 || idx <= LUA_REGISTRYINDEX)
         ? idx
         : (L.top - L.ci.funcOff) + idx;
 };
@@ -193,7 +221,7 @@ const lua_rotate = function(L, idx, n) {
     let t = L.top - 1;
     let pIdx = index2addr_(L, idx);
     let p = L.stack[pIdx];
-    api_check(L, isvalid(p) && idx > defs.LUA_REGISTRYINDEX, "index not in the stack");
+    api_check(L, isvalid(p) && idx > LUA_REGISTRYINDEX, "index not in the stack");
     api_check(L, (n >= 0 ? n : -n) <= (t - pIdx + 1), "invalid 'n'");
     let m = n >= 0 ? t - n : pIdx - n - 1;  /* end of prefix */
     reverse(L, pIdx, m);
@@ -225,19 +253,19 @@ const lua_replace = function(L, idx) {
 */
 
 const lua_pushnil = function(L) {
-    L.stack[L.top] = new TValue(CT.LUA_TNIL, null);
+    L.stack[L.top] = new TValue(LUA_TNIL, null);
     api_incr_top(L);
 };
 
 const lua_pushnumber = function(L, n) {
     fengari_argcheck(L, typeof n === "number");
-    L.stack[L.top] = new TValue(CT.LUA_TNUMFLT, n);
+    L.stack[L.top] = new TValue(LUA_TNUMFLT, n);
     api_incr_top(L);
 };
 
 const lua_pushinteger = function(L, n) {
     fengari_argcheck(L, typeof n === "number" && (n|0) === n);
-    L.stack[L.top] = new TValue(CT.LUA_TNUMINT, n);
+    L.stack[L.top] = new TValue(LUA_TNUMINT, n);
     api_incr_top(L);
 };
 
@@ -245,10 +273,10 @@ const lua_pushlstring = function(L, s, len) {
     fengari_argcheck(L, typeof len === "number");
     let ts;
     if (len === 0) {
-        s = defs.to_luastring("", true);
+        s = to_luastring("", true);
         ts = luaS_bless(L, s);
     } else {
-        s = defs.from_userstring(s);
+        s = from_userstring(s);
         api_check(L, s.length >= len, "invalid length to lua_pushlstring");
         ts = luaS_new(L, s.subarray(0, len));
     }
@@ -259,10 +287,10 @@ const lua_pushlstring = function(L, s, len) {
 
 const lua_pushstring = function (L, s) {
     if (s === undefined || s === null) {
-        L.stack[L.top] = new TValue(CT.LUA_TNIL, null);
+        L.stack[L.top] = new TValue(LUA_TNIL, null);
         L.top++;
     } else {
-        let ts = luaS_new(L, defs.from_userstring(s));
+        let ts = luaS_new(L, from_userstring(s));
         lobject.pushsvalue2s(L, ts);
         s = ts.getstr(); /* internal copy */
     }
@@ -271,19 +299,19 @@ const lua_pushstring = function (L, s) {
 };
 
 const lua_pushvfstring = function (L, fmt, argp) {
-    fmt = defs.from_userstring(fmt);
+    fmt = from_userstring(fmt);
     return lobject.luaO_pushvfstring(L, fmt, argp);
 };
 
 const lua_pushfstring = function (L, fmt, ...argp) {
-    fmt = defs.from_userstring(fmt);
+    fmt = from_userstring(fmt);
     return lobject.luaO_pushvfstring(L, fmt, argp);
 };
 
 /* Similar to lua_pushstring, but takes a JS string */
 const lua_pushliteral = function (L, s) {
     if (s === undefined || s === null) {
-        L.stack[L.top] = new TValue(CT.LUA_TNIL, null);
+        L.stack[L.top] = new TValue(LUA_TNIL, null);
         L.top++;
     } else {
         fengari_argcheck(typeof s === "string", "lua_pushliteral expects a JS string");
@@ -299,10 +327,10 @@ const lua_pushliteral = function (L, s) {
 const lua_pushcclosure = function(L, fn, n) {
     fengari_argcheck(typeof fn === "function" || typeof n === "number");
     if (n === 0)
-        L.stack[L.top] = new TValue(CT.LUA_TLCF, fn);
+        L.stack[L.top] = new TValue(LUA_TLCF, fn);
     else {
         api_checknelems(L, n);
-        api_check(L, n <= MAXUPVAL, "upvalue index too large");
+        api_check(L, n <= lfunc.MAXUPVAL, "upvalue index too large");
         let cl = new CClosure(L, fn, n);
         for (let i=0; i<n; i++)
             cl.upvalue[i].setfrom(L.stack[L.top - n + i]);
@@ -324,23 +352,23 @@ const lua_pushcfunction = function(L, fn) {
 const lua_pushjsfunction = lua_pushcfunction;
 
 const lua_pushboolean = function(L, b) {
-    L.stack[L.top] = new TValue(CT.LUA_TBOOLEAN, b ? true : false);
+    L.stack[L.top] = new TValue(LUA_TBOOLEAN, b ? true : false);
     api_incr_top(L);
 };
 
 const lua_pushlightuserdata = function(L, p) {
-    L.stack[L.top] = new TValue(CT.LUA_TLIGHTUSERDATA, p);
+    L.stack[L.top] = new TValue(LUA_TLIGHTUSERDATA, p);
     api_incr_top(L);
 };
 
 const lua_pushthread = function(L) {
-    L.stack[L.top] = new TValue(CT.LUA_TTHREAD, L);
+    L.stack[L.top] = new TValue(LUA_TTHREAD, L);
     api_incr_top(L);
     return L.l_G.mainthread === L;
 };
 
 const lua_pushglobaltable = function(L) {
-    lua_rawgeti(L, defs.LUA_REGISTRYINDEX, defs.LUA_RIDX_GLOBALS);
+    lua_rawgeti(L, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
 };
 
 /*
@@ -351,7 +379,7 @@ const lua_pushglobaltable = function(L) {
 ** t[k] = value at the top of the stack (where 'k' is a string)
 */
 const auxsetstr = function(L, t, k) {
-    let str = luaS_new(L, defs.from_userstring(k));
+    let str = luaS_new(L, from_userstring(k));
     api_checknelems(L, 1);
     lobject.pushsvalue2s(L, str); /* push 'str' (to make it a TValue) */
     api_check(L, L.top <= L.ci.top, "stack overflow");
@@ -362,7 +390,7 @@ const auxsetstr = function(L, t, k) {
 };
 
 const lua_setglobal = function(L, name) {
-    auxsetstr(L, ltable.luaH_getint(L.l_G.l_registry.value, defs.LUA_RIDX_GLOBALS), name);
+    auxsetstr(L, ltable.luaH_getint(L.l_G.l_registry.value, LUA_RIDX_GLOBALS), name);
 };
 
 const lua_setmetatable = function(L, objindex) {
@@ -377,8 +405,8 @@ const lua_setmetatable = function(L, objindex) {
     }
 
     switch (obj.ttnov()) {
-        case CT.LUA_TUSERDATA:
-        case CT.LUA_TTABLE: {
+        case LUA_TUSERDATA:
+        case LUA_TTABLE: {
             obj.value.metatable = mt;
             break;
         }
@@ -408,7 +436,7 @@ const lua_seti = function(L, idx, n) {
     fengari_argcheck(typeof n === "number" && (n|0) === n);
     api_checknelems(L, 1);
     let t = index2addr(L, idx);
-    L.stack[L.top] = new TValue(CT.LUA_TNUMINT, n);
+    L.stack[L.top] = new TValue(LUA_TNUMINT, n);
     api_incr_top(L);
     lvm.settable(L, t, L.stack[L.top - 1], L.stack[L.top - 2]);
     /* pop value and key */
@@ -445,7 +473,7 @@ const lua_rawsetp = function(L, idx, p) {
     api_checknelems(L, 1);
     let o = index2addr(L, idx);
     api_check(L, o.ttistable(), "table expected");
-    let k = new TValue(CT.LUA_TLIGHTUSERDATA, p);
+    let k = new TValue(LUA_TLIGHTUSERDATA, p);
     let v = L.stack[L.top - 1];
     if (v.ttisnil()) {
         ltable.luaH_delete(L, o.value, k);
@@ -461,7 +489,7 @@ const lua_rawsetp = function(L, idx, p) {
 */
 
 const auxgetstr = function(L, t, k) {
-    let str = luaS_new(L, defs.from_userstring(k));
+    let str = luaS_new(L, from_userstring(k));
     lobject.pushsvalue2s(L, str);
     api_check(L, L.top <= L.ci.top, "stack overflow");
     lvm.luaV_gettable(L, t, L.stack[L.top - 1], L.top - 1);
@@ -479,7 +507,7 @@ const lua_rawgeti = function(L, idx, n) {
 const lua_rawgetp = function(L, idx, p) {
     let t = index2addr(L, idx);
     api_check(L, t.ttistable(), "table expected");
-    let k = new TValue(CT.LUA_TLIGHTUSERDATA, p);
+    let k = new TValue(LUA_TLIGHTUSERDATA, p);
     lobject.pushobj2s(L, ltable.luaH_get(L, t.value, k));
     api_check(L, L.top <= L.ci.top, "stack overflow");
     return L.stack[L.top - 1].ttnov();
@@ -494,7 +522,7 @@ const lua_rawget = function(L, idx) {
 
 // narray and nrec are mostly useless for this implementation
 const lua_createtable = function(L, narray, nrec) {
-    let t = new lobject.TValue(CT.LUA_TTABLE, ltable.luaH_new(L));
+    let t = new lobject.TValue(LUA_TTABLE, ltable.luaH_new(L));
     L.stack[L.top] = t;
     api_incr_top(L);
 };
@@ -505,28 +533,28 @@ const luaS_newudata = function(L, size) {
 
 const lua_newuserdata = function(L, size) {
     let u = luaS_newudata(L, size);
-    L.stack[L.top] = new lobject.TValue(CT.LUA_TUSERDATA, u);
+    L.stack[L.top] = new lobject.TValue(LUA_TUSERDATA, u);
     api_incr_top(L);
     return u.data;
 };
 
 const aux_upvalue = function(L, fi, n) {
     switch(fi.ttype()) {
-        case CT.LUA_TCCL: {  /* C closure */
+        case LUA_TCCL: {  /* C closure */
             let f = fi.value;
             if (!(1 <= n && n <= f.nupvalues)) return null;
             return {
-                name: defs.to_luastring("", true),
+                name: to_luastring("", true),
                 val: f.upvalue[n-1]
             };
         }
-        case CT.LUA_TLCL: {  /* Lua closure */
+        case LUA_TLCL: {  /* Lua closure */
             let f = fi.value;
             let p = f.p;
             if (!(1 <= n && n <= p.upvalues.length)) return null;
             let name = p.upvalues[n-1].name;
             return {
-                name: name ? name.getstr() : defs.to_luastring("(*no name)", true),
+                name: name ? name.getstr() : to_luastring("(*no name)", true),
                 val: f.upvals[n-1].v
             };
         }
@@ -574,8 +602,8 @@ const lua_getmetatable = function(L, objindex) {
     let mt;
     let res = false;
     switch (obj.ttnov()) {
-        case CT.LUA_TTABLE:
-        case CT.LUA_TUSERDATA:
+        case LUA_TTABLE:
+        case LUA_TUSERDATA:
             mt = obj.value.metatable;
             break;
         default:
@@ -584,7 +612,7 @@ const lua_getmetatable = function(L, objindex) {
     }
 
     if (mt !== null && mt !== undefined) {
-        L.stack[L.top] = new TValue(CT.LUA_TTABLE, mt);
+        L.stack[L.top] = new TValue(LUA_TTABLE, mt);
         api_incr_top(L);
         res = true;
     }
@@ -614,14 +642,14 @@ const lua_getfield = function(L, idx, k) {
 const lua_geti = function(L, idx, n) {
     fengari_argcheck(typeof n === "number" && (n|0) === n);
     let t = index2addr(L, idx);
-    L.stack[L.top] = new TValue(CT.LUA_TNUMINT, n);
+    L.stack[L.top] = new TValue(LUA_TNUMINT, n);
     api_incr_top(L);
     lvm.luaV_gettable(L, t, L.stack[L.top - 1], L.top - 1);
     return L.stack[L.top - 1].ttnov();
 };
 
 const lua_getglobal = function(L, name) {
-    return auxgetstr(L, ltable.luaH_getint(L.l_G.l_registry.value, defs.LUA_RIDX_GLOBALS), name);
+    return auxgetstr(L, ltable.luaH_getint(L.l_G.l_registry.value, LUA_RIDX_GLOBALS), name);
 };
 
 /*
@@ -669,12 +697,12 @@ const lua_todataview = function(L, idx) {
 const lua_rawlen = function(L, idx) {
     let o = index2addr(L, idx);
     switch (o.ttype()) {
-        case CT.LUA_TSHRSTR:
-        case CT.LUA_TLNGSTR:
+        case LUA_TSHRSTR:
+        case LUA_TLNGSTR:
             return o.vslen();
-        case CT.LUA_TUSERDATA:
+        case LUA_TUSERDATA:
             return o.value.len;
-        case CT.LUA_TTABLE:
+        case LUA_TTABLE:
             return ltable.luaH_getn(o.value);
         default:
             return 0;
@@ -708,9 +736,9 @@ const lua_tonumberx = function(L, idx) {
 const lua_touserdata = function(L, idx) {
     let o = index2addr(L, idx);
     switch (o.ttnov()) {
-        case CT.LUA_TUSERDATA:
+        case LUA_TUSERDATA:
             return o.value.data;
-        case CT.LUA_TLIGHTUSERDATA:
+        case LUA_TLIGHTUSERDATA:
             return o.value;
         default: return null;
     }
@@ -724,13 +752,13 @@ const lua_tothread = function(L, idx) {
 const lua_topointer = function(L, idx) {
     let o = index2addr(L, idx);
     switch (o.ttype()) {
-        case CT.LUA_TTABLE:
-        case CT.LUA_TLCL:
-        case CT.LUA_TCCL:
-        case CT.LUA_TLCF:
-        case CT.LUA_TTHREAD:
-        case CT.LUA_TUSERDATA: /* note: this differs in behaviour to reference lua implementation */
-        case CT.LUA_TLIGHTUSERDATA:
+        case LUA_TTABLE:
+        case LUA_TLCL:
+        case LUA_TCCL:
+        case LUA_TLCF:
+        case LUA_TTHREAD:
+        case LUA_TUSERDATA: /* note: this differs in behaviour to reference lua implementation */
+        case LUA_TLIGHTUSERDATA:
             return o.value;
         default:
             return null;
@@ -777,9 +805,9 @@ const lua_compare = function(L, index1, index2, op) {
 
     if (isvalid(o1) && isvalid(o2)) {
         switch (op) {
-            case defs.LUA_OPEQ: i = lvm.luaV_equalobj(L, o1, o2); break;
-            case defs.LUA_OPLT: i = lvm.luaV_lessthan(L, o1, o2); break;
-            case defs.LUA_OPLE: i = lvm.luaV_lessequal(L, o1, o2); break;
+            case LUA_OPEQ: i = lvm.luaV_equalobj(L, o1, o2); break;
+            case LUA_OPLT: i = lvm.luaV_lessthan(L, o1, o2); break;
+            case LUA_OPLE: i = lvm.luaV_lessequal(L, o1, o2); break;
             default: api_check(L, false, "invalid option");
         }
     }
@@ -803,11 +831,11 @@ const f_call = function(L, ud) {
 
 const lua_type = function(L, idx) {
     let o = index2addr(L, idx);
-    return isvalid(o) ?  o.ttnov() : CT.LUA_TNONE;
+    return isvalid(o) ?  o.ttnov() : LUA_TNONE;
 };
 
 const lua_typename = function(L, t) {
-    api_check(L, CT.LUA_TNONE <= t && t < CT.LUA_NUMTAGS, "invalid tag");
+    api_check(L, LUA_TNONE <= t && t < LUA_NUMTAGS, "invalid tag");
     return ltm.ttypename(t);
 };
 
@@ -817,15 +845,15 @@ const lua_iscfunction = function(L, idx) {
 };
 
 const lua_isnil = function(L, n) {
-    return lua_type(L, n) === CT.LUA_TNIL;
+    return lua_type(L, n) === LUA_TNIL;
 };
 
 const lua_isboolean = function(L, n) {
-    return lua_type(L, n) === CT.LUA_TBOOLEAN;
+    return lua_type(L, n) === LUA_TBOOLEAN;
 };
 
 const lua_isnone = function(L, n) {
-    return lua_type(L, n) === CT.LUA_TNONE;
+    return lua_type(L, n) === LUA_TNONE;
 };
 
 const lua_isnoneornil = function(L, n) {
@@ -855,15 +883,15 @@ const lua_isuserdata = function(L, idx) {
 };
 
 const lua_isthread = function(L, idx) {
-    return lua_type(L, idx) === CT.LUA_TTHREAD;
+    return lua_type(L, idx) === LUA_TTHREAD;
 };
 
 const lua_isfunction = function(L, idx) {
-    return lua_type(L, idx) === CT.LUA_TFUNCTION;
+    return lua_type(L, idx) === LUA_TFUNCTION;
 };
 
 const lua_islightuserdata = function(L, idx) {
-    return lua_type(L, idx) === CT.LUA_TLIGHTUSERDATA;
+    return lua_type(L, idx) === LUA_TLIGHTUSERDATA;
 };
 
 const lua_rawequal = function(L, index1, index2) {
@@ -873,7 +901,7 @@ const lua_rawequal = function(L, index1, index2) {
 };
 
 const lua_arith = function(L, op) {
-    if (op !== defs.LUA_OPUNM && op !== defs.LUA_OPBNOT)
+    if (op !== LUA_OPUNM && op !== LUA_OPBNOT)
         api_checknelems(L, 2);  /* all other operations expect two operands */
     else {  /* for unary operations, add fake 2nd operand */
         api_checknelems(L, 1);
@@ -889,18 +917,18 @@ const lua_arith = function(L, op) {
 ** 'load' and 'call' functions (run Lua code)
 */
 
-const default_chunkname = defs.to_luastring("?");
+const default_chunkname = to_luastring("?");
 const lua_load = function(L, reader, data, chunkname, mode) {
     if (!chunkname) chunkname = default_chunkname;
-    else chunkname = defs.from_userstring(chunkname);
-    if (mode !== null) mode = defs.from_userstring(mode);
-    let z = new lzio.ZIO(L, reader, data);
+    else chunkname = from_userstring(chunkname);
+    if (mode !== null) mode = from_userstring(mode);
+    let z = new ZIO(L, reader, data);
     let status = ldo.luaD_protectedparser(L, z, chunkname, mode);
-    if (status === TS.LUA_OK) {  /* no errors? */
+    if (status === LUA_OK) {  /* no errors? */
         let f = L.stack[L.top - 1].value; /* get newly created function */
         if (f.nupvalues >= 1) {  /* does it have an upvalue? */
             /* get global table from registry */
-            let gt = ltable.luaH_getint(L.l_G.l_registry.value, defs.LUA_RIDX_GLOBALS);
+            let gt = ltable.luaH_getint(L.l_G.l_registry.value, LUA_RIDX_GLOBALS);
             /* set global table as 1st upvalue of 'f' (may be LUA_ENV) */
             f.upvals[0].v.setfrom(gt);
         }
@@ -912,7 +940,7 @@ const lua_dump = function(L, writer, data, strip) {
     api_checknelems(L, 1);
     let o = L.stack[L.top -1];
     if (o.ttisLclosure())
-        return ldump.luaU_dump(L, o.value.p, writer, data, strip);
+        return luaU_dump(L, o.value.p, writer, data, strip);
     return 1;
 };
 
@@ -929,14 +957,14 @@ const lua_setuservalue = function(L, idx) {
 };
 
 const checkresults = function(L,na,nr) {
-    api_check(L, (nr) == defs.LUA_MULTRET || (L.ci.top - L.top >= (nr) - (na)),
+    api_check(L, (nr) == LUA_MULTRET || (L.ci.top - L.top >= (nr) - (na)),
         "results from function overflow current stack size");
 };
 
 const lua_callk = function(L, nargs, nresults, ctx, k) {
     api_check(L, k === null || !(L.ci.callstatus & lstate.CIST_LUA), "cannot use continuations inside hooks");
     api_checknelems(L, nargs + 1);
-    api_check(L, L.status === TS.LUA_OK, "cannot do calls on non-normal thread");
+    api_check(L, L.status === LUA_OK, "cannot do calls on non-normal thread");
     checkresults(L, nargs, nresults);
     let func = L.top - (nargs + 1);
     if (k !== null && L.nny === 0) { /* need to prepare continuation? */
@@ -947,7 +975,7 @@ const lua_callk = function(L, nargs, nresults, ctx, k) {
         ldo.luaD_callnoyield(L, func, nresults);
     }
 
-    if (nresults === defs.LUA_MULTRET && L.ci.top < L.top)
+    if (nresults === LUA_MULTRET && L.ci.top < L.top)
         L.ci.top = L.top;
 };
 
@@ -958,7 +986,7 @@ const lua_call = function(L, n, r) {
 const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
     api_check(L, k === null || !(L.ci.callstatus & lstate.CIST_LUA), "cannot use continuations inside hooks");
     api_checknelems(L, nargs + 1);
-    api_check(L, L.status === TS.LUA_OK, "cannot do calls on non-normal thread");
+    api_check(L, L.status === LUA_OK, "cannot do calls on non-normal thread");
     checkresults(L, nargs, nresults);
     let c = {
         func: null,
@@ -995,10 +1023,10 @@ const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
         ldo.luaD_call(L, c.funcOff, nresults);  /* do the call */
         ci.callstatus &= ~lstate.CIST_YPCALL;
         L.errfunc = ci.c_old_errfunc;
-        status = TS.LUA_OK;
+        status = LUA_OK;
     }
 
-    if (nresults === defs.LUA_MULTRET && L.ci.top < L.top)
+    if (nresults === LUA_MULTRET && L.ci.top < L.top)
         L.ci.top = L.top;
 
     return status;
@@ -1037,7 +1065,7 @@ const lua_concat = function(L, n) {
     if (n >= 2)
         lvm.luaV_concat(L, n);
     else if (n === 0) {
-        lobject.pushsvalue2s(L, luaS_bless(L, defs.to_luastring("", true)));
+        lobject.pushsvalue2s(L, luaS_bless(L, to_luastring("", true)));
         api_check(L, L.top <= L.ci.top, "stack overflow");
     }
 };
@@ -1065,10 +1093,10 @@ const getupvalref = function(L, fidx, n) {
 const lua_upvalueid = function(L, fidx, n) {
     let fi = index2addr(L, fidx);
     switch (fi.ttype()) {
-        case CT.LUA_TLCL: {  /* lua closure */
+        case LUA_TLCL: {  /* lua closure */
             return getupvalref(L, fidx, n).upval;
         }
-        case CT.LUA_TCCL: {  /* C closure */
+        case LUA_TCCL: {  /* C closure */
             let f = fi.value;
             api_check(L, 1 <= n && n <= f.nupvalues, "invalid upvalue index");
             return f.upvalue[n - 1];
