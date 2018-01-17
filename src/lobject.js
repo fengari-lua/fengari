@@ -1,7 +1,5 @@
 "use strict";
 
-const assert = require('assert');
-
 const defs    = require('./defs.js');
 const ljstype = require('./ljstype.js');
 const ldebug  = require('./ldebug.js');
@@ -14,7 +12,8 @@ const luaconf = require('./luaconf.js');
 const lvm     = require('./lvm.js');
 const {
     MAX_INT,
-    luai_nummod
+    luai_nummod,
+    lua_assert
 } = require("./llimits.js");
 const ltm     = require('./ltm.js');
 const CT      = defs.constant_types;
@@ -130,7 +129,7 @@ class TValue {
     }
 
     chgfltvalue(x) {
-        assert(this.type == CT.LUA_TNUMFLT);
+        lua_assert(this.type == CT.LUA_TNUMFLT);
         this.value = x;
     }
 
@@ -140,7 +139,7 @@ class TValue {
     }
 
     chgivalue(x) {
-        assert(this.type == CT.LUA_TNUMINT);
+        lua_assert(this.type == CT.LUA_TNUMINT);
         this.value = x;
     }
 
@@ -205,7 +204,7 @@ class TValue {
     }
 
     tsvalue() {
-        assert(this.ttisstring());
+        lua_assert(this.ttisstring());
         return this.value;
     }
 
@@ -355,7 +354,7 @@ const UTF8BUFFSZ = 8;
 
 const luaO_utf8esc = function(buff, x) {
     let n = 1;  /* number of bytes put in buffer (backwards) */
-    assert(x <= 0x10FFFF);
+    lua_assert(x <= 0x10FFFF);
     if (x < 0x80)  /* ascii? */
         buff[UTF8BUFFSZ - 1] = x;
     else {  /* need continuation bytes */
@@ -680,7 +679,7 @@ const intarith = function(L, op, v1, v2) {
         case defs.LUA_OPSHR:  return lvm.luaV_shiftl(v1, -v2);
         case defs.LUA_OPUNM:  return (0 - v1)|0;
         case defs.LUA_OPBNOT: return (~0 ^ v1);
-        default: assert(0);
+        default: lua_assert(0);
     }
 };
 
@@ -695,7 +694,7 @@ const numarith = function(L, op, v1, v2) {
         case defs.LUA_OPIDIV: return Math.floor(v1 / v2);
         case defs.LUA_OPUNM:  return -v1;
         case defs.LUA_OPMOD:  return luai_nummod(L, v1, v2);
-        default: assert(0);
+        default: lua_assert(0);
     }
 };
 
@@ -735,7 +734,7 @@ const luaO_arith = function(L, op, p1, p2, p3) {
         }
     }
     /* could not perform raw operation; try metamethod */
-    assert(L !== null);  /* should not fail when folding (compile time) */
+    lua_assert(L !== null);  /* should not fail when folding (compile time) */
     ltm.luaT_trybinTM(L, p1, p2, p3, (op - defs.LUA_OPADD) + ltm.TMS.TM_ADD);
 };
 
