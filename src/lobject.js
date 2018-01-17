@@ -12,7 +12,10 @@ const lstring = require('./lstring.js');
 const ltable  = require('./ltable.js');
 const luaconf = require('./luaconf.js');
 const lvm     = require('./lvm.js');
-const llimits = require('./llimits.js');
+const {
+    MAX_INT,
+    luai_nummod
+} = require("./llimits.js");
 const ltm     = require('./ltm.js');
 const CT      = defs.constant_types;
 const char    = defs.char;
@@ -470,8 +473,8 @@ const l_str2d = function(s) {
     return end;
 };
 
-const MAXBY10  = Math.floor(llimits.MAX_INT / 10);
-const MAXLASTD = llimits.MAX_INT % 10;
+const MAXBY10  = Math.floor(MAX_INT / 10);
+const MAXLASTD = MAX_INT % 10;
 
 const l_str2int = function(s) {
     let i = 0;
@@ -691,7 +694,7 @@ const numarith = function(L, op, v1, v2) {
         case defs.LUA_OPPOW:  return Math.pow(v1, v2);
         case defs.LUA_OPIDIV: return Math.floor(v1 / v2);
         case defs.LUA_OPUNM:  return -v1;
-        case defs.LUA_OPMOD:  return llimits.luai_nummod(L, v1, v2);
+        case defs.LUA_OPMOD:  return luai_nummod(L, v1, v2);
         default: assert(0);
     }
 };
