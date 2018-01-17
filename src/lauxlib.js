@@ -906,9 +906,7 @@ const lua_writestringerror = function() {
     }
 };
 
-const luaL_checkversion = function(L) {
-    let ver = lua.LUA_VERSION_NUM;
-    let sz = LUAL_NUMSIZES;
+const luaL_checkversion_ = function(L, ver, sz) {
     let v = lua.lua_version(L);
     if (sz != LUAL_NUMSIZES)  /* check numeric types */
         luaL_error(L, to_luastring("core and library have incompatible numeric types"));
@@ -916,6 +914,11 @@ const luaL_checkversion = function(L) {
         luaL_error(L, to_luastring("multiple Lua VMs detected"));
     else if (v !== ver)
         luaL_error(L, to_luastring("version mismatch: app. needs %f, Lua core provides %f"), ver, v);
+};
+
+/* There is no point in providing this function... */
+const luaL_checkversion = function(L) {
+    luaL_checkversion_(L, lua.LUA_VERSION_NUM, LUAL_NUMSIZES);
 };
 
 module.exports.LUA_ERRFILE          = LUA_ERRFILE;
@@ -945,6 +948,7 @@ module.exports.luaL_checkstring     = luaL_checkstring;
 module.exports.luaL_checktype       = luaL_checktype;
 module.exports.luaL_checkudata      = luaL_checkudata;
 module.exports.luaL_checkversion    = luaL_checkversion;
+module.exports.luaL_checkversion_   = luaL_checkversion_;
 module.exports.luaL_dofile          = luaL_dofile;
 module.exports.luaL_dostring        = luaL_dostring;
 module.exports.luaL_error           = luaL_error;
