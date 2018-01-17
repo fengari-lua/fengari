@@ -1,12 +1,14 @@
 "use strict";
 
-const assert = require('assert');
-
 const defs     = require('./defs.js');
 const lapi     = require('./lapi.js');
 const ldebug   = require('./ldebug.js');
 const lfunc    = require('./lfunc.js');
-const llimits  = require('./llimits.js');
+const {
+    api_check,
+    lua_assert,
+    LUAI_MAXCCALLS
+} = require('./llimits.js');
 const lobject  = require('./lobject.js');
 const lopcodes = require('./lopcodes.js');
 const lparser  = require('./lparser.js');
@@ -59,8 +61,8 @@ const seterrorobj = function(L, errcode, oldtop) {
 const ERRORSTACKSIZE = luaconf.LUAI_MAXSTACK + 200;
 
 const luaD_reallocstack = function(L, newsize) {
-    assert(newsize <= luaconf.LUAI_MAXSTACK || newsize == ERRORSTACKSIZE);
-    assert(L.stack_last == L.stack.length - lstate.EXTRA_STACK);
+    lua_assert(newsize <= luaconf.LUAI_MAXSTACK || newsize == ERRORSTACKSIZE);
+    lua_assert(L.stack_last == L.stack.length - lstate.EXTRA_STACK);
     L.stack.length = newsize;
     L.stack_last = newsize - lstate.EXTRA_STACK;
 };
@@ -93,7 +95,7 @@ const stackinuse = function(L) {
     for (let ci = L.ci; ci !== null; ci = ci.previous) {
         if (lim < ci.top) lim = ci.top;
     }
-    assert(lim <= L.stack_last);
+    lua_assert(lim <= L.stack_last);
     return lim + 1; /* part of stack in use */
 };
 
@@ -136,14 +138,14 @@ const luaD_precall = function(L, off, nresults) {
             ci.nresults = nresults;
             ci.func = func;
             ci.top = L.top + defs.LUA_MINSTACK;
-            assert(ci.top <= L.stack_last);
+            lua_assert(ci.top <= L.stack_last);
             ci.callstatus = 0;
             if (L.hookmask & defs.LUA_MASKCALL)
                 luaD_hook(L, defs.LUA_HOOKCALL, -1);
             let n = f(L); /* do the actual call */
-
-            assert(typeof n == "number" && n >= 0 && (n|0) === n, "invalid return value from JS function (expected integer)");
-            assert(n < L.top - L.ci.funcOff, "not enough elements in the stack");
+            if (typeof n !== "number" || n < 0 || (n|0) !== n)
+                throw Error("invalid return value from JS function (expected integer)");
+            lapi.api_checknelems(L, n);
 
             luaD_poscall(L, ci, L.top - n, n);
 
@@ -261,11 +263,11 @@ const luaD_hook = function(L, event, line) {
         ar.i_ci = ci;
         luaD_checkstack(L, defs.LUA_MINSTACK);  /* ensure minimum stack size */
         ci.top = L.top + defs.LUA_MINSTACK;
-        assert(ci.top <= L.stack_last);
+        lua_assert(ci.top <= L.stack_last);
         L.allowhook = 0;  /* cannot call hooks inside a hook */
         ci.callstatus |= lstate.CIST_HOOKED;
         hook(L, ar);
-        assert(!L.allowhook);
+        lua_assert(!L.allowhook);
         L.allowhook = 1;
         ci.top = ci_top;
         adjust_top(L, top);
@@ -322,9 +324,9 @@ const tryfuncTM = function(L, off, func) {
 ** allow overflow handling to work)
 */
 const stackerror = function(L) {
-    if (L.nCcalls === llimits.LUAI_MAXCCALLS)
+    if (L.nCcalls === LUAI_MAXCCALLS)
         ldebug.luaG_runerror(L, defs.to_luastring("JS stack overflow", true));
-    else if (L.nCcalls >= llimits.LUAI_MAXCCALLS + (llimits.LUAI_MAXCCALLS >> 3))
+    else if (L.nCcalls >= LUAI_MAXCCALLS + (LUAI_MAXCCALLS >> 3))
         luaD_throw(L, TS.LUA_ERRERR);  /* error while handing stack error */
 };
 
@@ -335,7 +337,7 @@ const stackerror = function(L) {
 ** function position.
 */
 const luaD_call = function(L, off, nResults) {
-    if (++L.nCcalls >= llimits.LUAI_MAXCCALLS)
+    if (++L.nCcalls >= LUAI_MAXCCALLS)
         stackerror(L);
     if (!luaD_precall(L, off, nResults))
         lvm.luaV_execute(L);
@@ -425,9 +427,9 @@ const finishCcall = function(L, status) {
     let ci = L.ci;
 
     /* must have a continuation and must be able to call it */
-    assert(ci.c_k !== null && L.nny === 0);
+    lua_assert(ci.c_k !== null && L.nny === 0);
     /* error status can only happen in a protected call */
-    assert(ci.callstatus & lstate.CIST_YPCALL || status === TS.LUA_YIELD);
+    lua_assert(ci.callstatus & lstate.CIST_YPCALL || status === TS.LUA_YIELD);
 
     if (ci.callstatus & TS.CIST_YPCALL) {  /* was inside a pcall? */
         ci.callstatus &= ~TS.CIST_YPCALL;  /* continuation is also inside it */
@@ -439,7 +441,7 @@ const finishCcall = function(L, status) {
     if (ci.nresults === defs.LUA_MULTRET && L.ci.top < L.top) L.ci.top = L.top;
     let c_k = ci.c_k; /* don't want to call as method */
     let n = c_k(L, status, ci.c_ctx);  /* call continuation function */
-    assert(n < (L.top - L.ci.funcOff), "not enough elements in the stack");
+    lapi.api_checknelems(L, n);
     luaD_poscall(L, ci, L.top - n, n);  /* finish 'luaD_precall' */
 };
 
@@ -507,7 +509,7 @@ const resume_error = function(L, msg, narg) {
     let ts = lstring.luaS_newliteral(L, msg);
     if (narg === 0) {
         lobject.pushsvalue2s(L, ts);
-        assert(L.top <= L.ci.top, "stack overflow");
+        api_check(L, L.top <= L.ci.top, "stack overflow");
     } else {
         /* remove args from the stack */
         for (let i=1; i<narg; i++)
@@ -531,7 +533,7 @@ const resume = function(L, n) {
         if (!luaD_precall(L, firstArg - 1, defs.LUA_MULTRET))  /* Lua function? */
             lvm.luaV_execute(L);  /* call it */
     } else {  /* resuming from previous yield */
-        assert(L.status === TS.LUA_YIELD);
+        lua_assert(L.status === TS.LUA_YIELD);
         L.status = TS.LUA_OK;  /* mark that it is running (again) */
         ci.funcOff = ci.extra;
         ci.func = L.stack[ci.funcOff];
@@ -541,7 +543,7 @@ const resume = function(L, n) {
         else {  /* 'common' yield */
             if (ci.c_k !== null) {  /* does it have a continuation function? */
                 n = ci.c_k(L, TS.LUA_YIELD, ci.c_ctx); /* call continuation */
-                assert(n < (L.top - L.ci.funcOff), "not enough elements in the stack");
+                lapi.api_checknelems(L, n);
                 firstArg = L.top - n;  /* yield results come from continuation */
             }
 
@@ -562,13 +564,12 @@ const lua_resume = function(L, from, nargs) {
         return resume_error(L, "cannot resume dead coroutine", nargs);
 
     L.nCcalls = from ? from.nCcalls + 1 : 1;
-    if (L.nCcalls >= llimits.LUAI_MAXCCALLS)
+    if (L.nCcalls >= LUAI_MAXCCALLS)
         return resume_error(L, "JS stack overflow", nargs);
 
     L.nny = 0;  /* allow yields */
 
-    assert((L.status === TS.LUA_OK ? nargs + 1: nargs) < (L.top - L.ci.funcOff),
-        "not enough elements in the stack");
+    lapi.api_checknelems(L, L.status === TS.LUA_OK ? nargs + 1: nargs);
 
     let status = luaD_rawrunprotected(L, resume, nargs);
     if (status === -1)  /* error calling 'lua_resume'? */
@@ -584,12 +585,12 @@ const lua_resume = function(L, from, nargs) {
             seterrorobj(L, status, L.top);  /* push error message */
             L.ci.top = L.top;
         } else
-            assert(status === L.status);  /* normal end or yield */
+            lua_assert(status === L.status);  /* normal end or yield */
     }
 
     L.nny = oldnny;  /* restore 'nny' */
     L.nCcalls--;
-    assert(L.nCcalls === (from ? from.nCcalls : 0));
+    lua_assert(L.nCcalls === (from ? from.nCcalls : 0));
     return status;
 };
 
@@ -599,7 +600,7 @@ const lua_isyieldable = function(L) {
 
 const lua_yieldk = function(L, nresults, ctx, k) {
     let ci = L.ci;
-    assert(nresults < (L.top - L.ci.funcOff), "not enough elements in the stack");
+    lapi.api_checknelems(L, nresults);
 
     if (L.nny > 0) {
         if (L !== L.l_G.mainthread)
@@ -611,7 +612,7 @@ const lua_yieldk = function(L, nresults, ctx, k) {
     L.status = TS.LUA_YIELD;
     ci.extra = ci.funcOff;  /* save current 'func' */
     if (ci.callstatus & lstate.CIST_LUA)  /* inside a hook? */
-        assert(k === null, "hooks cannot continue after yielding");
+        api_check(L, k === null, "hooks cannot continue after yielding");
     else {
         ci.c_k = k;
         if (k !== null)  /* is there a continuation? */
@@ -621,7 +622,7 @@ const lua_yieldk = function(L, nresults, ctx, k) {
         luaD_throw(L, TS.LUA_YIELD);
     }
 
-    assert(ci.callstatus & lstate.CIST_HOOKED);  /* must be inside a hook */
+    lua_assert(ci.callstatus & lstate.CIST_HOOKED);  /* must be inside a hook */
     return 0;  /* return to 'luaD_hook' */
 };
 
@@ -693,7 +694,7 @@ const f_parser = function(L, p) {
         cl = lparser.luaY_parser(L, p.z, p.buff, p.dyd, p.name, c);
     }
 
-    assert(cl.nupvalues === cl.p.upvalues.length);
+    lua_assert(cl.nupvalues === cl.p.upvalues.length);
     lfunc.luaF_initupvals(L, cl);
 };
 
