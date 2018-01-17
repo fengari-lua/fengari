@@ -1,7 +1,5 @@
 "use strict";
 
-const assert = require('assert');
-
 const {
     LUA_MASKLINE,
     LUA_MASKCOUNT,
@@ -81,6 +79,7 @@ const {
     lua_numbertointeger
 } = require('./luaconf.js');
 const {
+    lua_assert,
     luai_nummod
 } = require('./llimits.js');
 const lobject = require('./lobject.js');
@@ -115,11 +114,11 @@ const luaV_finishOp = function(L) {
             let res = !L.stack[L.top - 1].l_isfalse();
             delete L.stack[--L.top];
             if (ci.callstatus & lstate.CIST_LEQ) {  /* "<=" using "<" instead? */
-                assert(op === OP_LE);
+                lua_assert(op === OP_LE);
                 ci.callstatus ^= lstate.CIST_LEQ;  /* clear mark */
                 res = !res;  /* negate result */
             }
-            assert(ci.l_code[ci.l_savedpc].opcode === OP_JMP);
+            lua_assert(ci.l_code[ci.l_savedpc].opcode === OP_JMP);
             if (res !== (inst.A ? true : false))  /* condition failed? */
                 ci.l_savedpc++;  /* skip jump instruction */
             break;
@@ -139,7 +138,7 @@ const luaV_finishOp = function(L) {
             break;
         }
         case OP_TFORCALL: {
-            assert(ci.l_code[ci.l_savedpc].opcode === OP_TFORLOOP);
+            lua_assert(ci.l_code[ci.l_savedpc].opcode === OP_TFORLOOP);
             ldo.adjust_top(L, ci.top);  /* correct top */
             break;
         }
@@ -177,7 +176,7 @@ const luaV_execute = function(L) {
     ci.callstatus |= lstate.CIST_FRESH;
     newframe:
     for (;;) {
-        assert(ci === L.ci);
+        lua_assert(ci === L.ci);
         let cl = ci.func.value;
         let k = cl.p.k;
         let base = ci.l_base;
@@ -202,7 +201,7 @@ const luaV_execute = function(L) {
                 break;
             }
             case OP_LOADKX: {
-                assert(ci.l_code[ci.l_savedpc].opcode === OP_EXTRAARG);
+                lua_assert(ci.l_code[ci.l_savedpc].opcode === OP_EXTRAARG);
                 let konst = k[ci.l_code[ci.l_savedpc++].Ax];
                 lobject.setobj2s(L, ra, konst);
                 break;
@@ -545,7 +544,7 @@ const luaV_execute = function(L) {
                     oci.next = null;
                     ci = L.ci = oci;
 
-                    assert(L.top === oci.l_base + L.stack[ofuncOff].value.p.maxstacksize);
+                    lua_assert(L.top === oci.l_base + L.stack[ofuncOff].value.p.maxstacksize);
 
                     continue newframe;
                 }
@@ -560,8 +559,8 @@ const luaV_execute = function(L) {
                 /* invocation via reentry: continue execution */
                 ci = L.ci;
                 if (b) ldo.adjust_top(L, ci.top);
-                assert(ci.callstatus & lstate.CIST_LUA);
-                assert(ci.l_code[ci.l_savedpc - 1].opcode === OP_CALL);
+                lua_assert(ci.callstatus & lstate.CIST_LUA);
+                lua_assert(ci.l_code[ci.l_savedpc - 1].opcode === OP_CALL);
                 continue newframe;
             }
             case OP_FORLOOP: {
@@ -626,7 +625,7 @@ const luaV_execute = function(L) {
                 /* go straight to OP_TFORLOOP */
                 i = ci.l_code[ci.l_savedpc++];
                 ra = RA(L, base, i);
-                assert(i.opcode === OP_TFORLOOP);
+                lua_assert(i.opcode === OP_TFORLOOP);
             }
             /* fall through */
             case OP_TFORLOOP: {
@@ -643,7 +642,7 @@ const luaV_execute = function(L) {
                 if (n === 0) n = L.top - ra - 1;
 
                 if (c === 0) {
-                    assert(ci.l_code[ci.l_savedpc].opcode === OP_EXTRAARG);
+                    lua_assert(ci.l_code[ci.l_savedpc].opcode === OP_EXTRAARG);
                     c = ci.l_code[ci.l_savedpc++].Ax;
                 }
 
@@ -1040,7 +1039,7 @@ const copy2buff = function(L, top, n, buff) {
 ** from 'L->top - total' up to 'L->top - 1'.
 */
 const luaV_concat = function(L, total) {
-    assert(total >= 2);
+    lua_assert(total >= 2);
     do {
         let top = L.top;
         let n = 2; /* number of elements handled in this pass (at least 2) */

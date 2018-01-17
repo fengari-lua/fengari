@@ -1,8 +1,10 @@
 "use strict";
 
-const assert = require('assert');
-
 const defs     = require('./defs.js');
+const {
+    api_check,
+    lua_assert
+} = require('./llimits.js');
 const ldo      = require('./ldo.js');
 const lfunc    = require('./lfunc.js');
 const llex     = require('./llex.js');
@@ -19,7 +21,7 @@ const CT = defs.constant_types;
 const TS = defs.thread_status;
 
 const currentpc = function(ci) {
-    assert(ci.callstatus & lstate.CIST_LUA);
+    lua_assert(ci.callstatus & lstate.CIST_LUA);
     return ci.l_savedpc - 1;
 };
 
@@ -85,7 +87,7 @@ const lua_getstack = function(L, level, ar) {
 };
 
 const upvalname = function(p, uv) {
-    assert(uv < p.upvalues.length);
+    lua_assert(uv < p.upvalues.length);
     let s = p.upvalues[uv].name;
     if (s === null) return defs.to_luastring("?", true);
     return s.getstr();
@@ -142,7 +144,7 @@ const lua_getlocal = function(L, ar, n) {
         if (local) {
             name = local.name;
             lobject.pushobj2s(L, L.stack[local.pos]);
-            assert(L.top <= L.ci.top, "stack overflow");
+            api_check(L, L.top <= L.ci.top, "stack overflow");
         } else {
             name = null;
         }
@@ -187,13 +189,13 @@ const collectvalidlines = function(L, f) {
     if (f === null || f instanceof lobject.CClosure) {
         L.stack[L.top] = new lobject.TValue(CT.LUA_TNIL, null);
         L.top++;
-        assert(L.top <= L.ci.top, "stack overflow");
+        lua_assert(L.top <= L.ci.top, "stack overflow");
     } else {
         let lineinfo = f.p.lineinfo;
         let t = ltable.luaH_new(L);
         L.stack[L.top] = new lobject.TValue(CT.LUA_TTABLE, t);
         L.top++;
-        assert(L.top <= L.ci.top, "stack overflow");
+        lua_assert(L.top <= L.ci.top, "stack overflow");
         let v = new lobject.TValue(CT.LUA_TBOOLEAN, true);
         for (let i = 0; i < lineinfo.length; i++)
             ltable.luaH_setint(t, lineinfo[i], v);
@@ -273,20 +275,20 @@ const lua_getinfo = function(L, what, ar) {
     if (what[0] === char['>']) {
         ci = null;
         func = L.stack[L.top - 1];
-        assert(L, func.ttisfunction(), "function expected");
+        api_check(L, func.ttisfunction(), "function expected");
         what = what.subarray(1);  /* skip the '>' */
         L.top--;  /* pop function */
     } else {
         ci = ar.i_ci;
         func = ci.func;
-        assert(ci.func.ttisfunction());
+        lua_assert(ci.func.ttisfunction());
     }
 
     cl = func.ttisclosure() ? func.value : null;
     status = auxgetinfo(L, what, ar, cl, ci);
     if (defs.luastring_indexOf(what, char['f']) >= 0) {
         lobject.pushobj2s(L, func);
-        assert(L.top <= L.ci.top, "stack overflow");
+        api_check(L, L.top <= L.ci.top, "stack overflow");
     }
 
     swapextra(L);

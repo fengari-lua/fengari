@@ -49,3 +49,6 @@ module.exports.LUA_LOADLIBNAME = LUA_LOADLIBNAME;
 module.exports.luaopen_package = require("./loadlib.js").luaopen_package;
 
 module.exports.luaL_openlibs = linit.luaL_openlibs;
+
+/* customary export */
+module.exports.lua_assert = function(c) {};

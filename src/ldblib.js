@@ -1,9 +1,8 @@
 "use strict";
 
-const assert  = require('assert');
-
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
+const lualib = require('./lualib.js');
 const {luastring_indexOf, to_luastring} = require("./fengaricore.js");
 
 /*
@@ -282,7 +281,7 @@ const hookf = function(L, ar) {
         if (ar.currentline >= 0)
             lua.lua_pushinteger(L, ar.currentline);  /* push current line */
         else lua.lua_pushnil(L);
-        assert(lua.lua_getinfo(L, to_luastring("lS"), ar));
+        lualib.lua_assert(lua.lua_getinfo(L, to_luastring("lS"), ar));
         lua.lua_call(L, 2, 0);  /* call hook function */
     }
 };

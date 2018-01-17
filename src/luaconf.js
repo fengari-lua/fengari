@@ -41,6 +41,10 @@ const lua_getlocaledecpoint = function() {
     return (1.1).toLocaleString().substring(1, 2);
 };
 
+const luai_apicheck = function(l, e) {
+    if (!e) throw Error(e);
+};
+
 // See: http://croquetweak.blogspot.fr/2014/08/deconstructing-floats-frexp-and-ldexp.html
 const frexp = function(value) {
     if (value === 0) return [value, 0];
@@ -78,3 +82,4 @@ module.exports.lua_getlocaledecpoint = lua_getlocaledecpoint;
 module.exports.lua_integer2str       = lua_integer2str;
 module.exports.lua_number2str        = lua_number2str;
 module.exports.lua_numbertointeger   = lua_numbertointeger;
+module.exports.luai_apicheck         = luai_apicheck;
