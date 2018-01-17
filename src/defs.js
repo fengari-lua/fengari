@@ -1,6 +1,5 @@
 "use strict";
 
-const assert  = require('assert');
 const luaconf = require('./luaconf.js');
 
 // To avoid charCodeAt everywhere
@@ -172,7 +171,7 @@ const luastring_eq = function(a, b) {
 };
 
 const to_jsstring = function(value, from, to) {
-    assert(is_luastring(value), "jsstring expects a Uint8Array");
+    if (!is_luastring(value)) throw new TypeError("to_jsstring expects a Uint8Array");
 
     if (to === void 0) {
         to = value.length;
@@ -238,6 +237,7 @@ const uri_allowed = (";,/?:@&=+$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUV
 
 /* utility function to convert a lua string to a js string with uri escaping */
 const to_uristring = function(a) {
+    if (!is_luastring(a)) throw new TypeError("to_uristring expects a Uint8Array");
     let s = "";
     for (let i=0; i<a.length; i++) {
         let v = a[i];
@@ -253,7 +253,7 @@ const to_uristring = function(a) {
 const to_luastring_cache = {};
 
 const to_luastring = function(str, cache) {
-    assert(typeof str === "string", "to_luastring expects a javascript string");
+    if (typeof str !== "string") throw new TypeError("to_luastring expects a javascript string");
 
     if (cache) {
         let cached = to_luastring_cache[str];
@@ -301,7 +301,7 @@ const to_luastring = function(str, cache) {
 };
 
 const from_userstring = function(str) {
-    assert(is_luastring(str), "expects an array of bytes");
+    if (!is_luastring(str)) throw new TypeError("expects an array of bytes");
     return str;
 };
 
