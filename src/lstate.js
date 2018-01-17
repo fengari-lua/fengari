@@ -1,19 +1,29 @@
 "use strict";
 
-const defs                 = require('./defs.js');
+const {
+    LUA_MINSTACK,
+    LUA_RIDX_GLOBALS,
+    LUA_RIDX_MAINTHREAD,
+    constant_types: {
+        LUA_NUMTAGS,
+        LUA_TNIL,
+        LUA_TTABLE,
+        LUA_TTHREAD
+    },
+    thread_status: {
+        LUA_OK
+    }
+} = require('./defs.js');
 const lobject              = require('./lobject.js');
 const ldo                  = require('./ldo.js');
 const lapi                 = require('./lapi.js');
 const ltable               = require('./ltable.js');
 const lfunc                = require('./lfunc.js');
 const ltm                  = require('./ltm.js');
-const CT                   = defs.constant_types;
-const TS                   = defs.thread_status;
-const LUA_NUMTAGS          = CT.LUA_NUMTAGS;
 
 const EXTRA_STACK = 5;
 
-const BASIC_STACK_SIZE = 2 * defs.LUA_MINSTACK;
+const BASIC_STACK_SIZE = 2 * LUA_MINSTACK;
 
 class CallInfo {
 
@@ -62,7 +72,7 @@ class lua_State {
         this.hookcount = this.basehookcount;
         this.openupval = null;
         this.nny = 1;
-        this.status = TS.LUA_OK;
+        this.status = LUA_OK;
         this.errfunc = 0;
     }
 
@@ -75,7 +85,7 @@ class global_State {
         this.ids = new WeakMap();
 
         this.mainthread = null;
-        this.l_registry = new lobject.TValue(CT.LUA_TNIL, null);
+        this.l_registry = new lobject.TValue(LUA_TNIL, null);
         this.panic = null;
         this.atnativeerror = null;
         this.version = null;
@@ -109,8 +119,8 @@ const stack_init = function(L1, L) {
     ci.callstatus = 0;
     ci.funcOff = L1.top;
     ci.func = L1.stack[L1.top];
-    L1.stack[L1.top++] = new lobject.TValue(CT.LUA_TNIL, null);
-    ci.top = L1.top + defs.LUA_MINSTACK;
+    L1.stack[L1.top++] = new lobject.TValue(LUA_TNIL, null);
+    ci.top = L1.top + LUA_MINSTACK;
     L1.ci = ci;
 };
 
@@ -126,8 +136,8 @@ const freestack = function(L) {
 const init_registry = function(L, g) {
     let registry = ltable.luaH_new(L);
     g.l_registry.sethvalue(registry);
-    ltable.luaH_setint(registry, defs.LUA_RIDX_MAINTHREAD, new lobject.TValue(CT.LUA_TTHREAD, L));
-    ltable.luaH_setint(registry, defs.LUA_RIDX_GLOBALS, new lobject.TValue(CT.LUA_TTABLE, ltable.luaH_new(L)));
+    ltable.luaH_setint(registry, LUA_RIDX_MAINTHREAD, new lobject.TValue(LUA_TTHREAD, L));
+    ltable.luaH_setint(registry, LUA_RIDX_GLOBALS, new lobject.TValue(LUA_TTABLE, ltable.luaH_new(L)));
 };
 
 /*
@@ -145,7 +155,7 @@ const f_luaopen = function(L) {
 const lua_newthread = function(L) {
     let g = L.l_G;
     let L1 = new lua_State(g);
-    L.stack[L.top] = new lobject.TValue(CT.LUA_TTHREAD, L1);
+    L.stack[L.top] = new lobject.TValue(LUA_TTHREAD, L1);
     lapi.api_incr_top(L);
     L1.hookmask = L.hookmask;
     L1.basehookcount = L.basehookcount;
@@ -165,7 +175,7 @@ const lua_newstate = function() {
     let L = new lua_State(g);
     g.mainthread = L;
 
-    if (ldo.luaD_rawrunprotected(L, f_luaopen, null) !== TS.LUA_OK) {
+    if (ldo.luaD_rawrunprotected(L, f_luaopen, null) !== LUA_OK) {
         L = null;
     }
 
