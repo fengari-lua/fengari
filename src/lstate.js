@@ -1,7 +1,5 @@
 "use strict";
 
-const assert               = require('assert');
-
 const defs                 = require('./defs.js');
 const lobject              = require('./lobject.js');
 const ldo                  = require('./ldo.js');
@@ -148,8 +146,7 @@ const lua_newthread = function(L) {
     let g = L.l_G;
     let L1 = new lua_State(g);
     L.stack[L.top] = new lobject.TValue(CT.LUA_TTHREAD, L1);
-    L.top++;
-    assert(L.top <= L.ci.top, "stack overflow");
+    lapi.api_incr_top(L);
     L1.hookmask = L.hookmask;
     L1.basehookcount = L.basehookcount;
     L1.hook = L.hook;
