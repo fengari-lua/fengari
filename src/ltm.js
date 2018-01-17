@@ -1,8 +1,7 @@
 "use strict";
 
-const assert  = require('assert');
-
 const defs    = require('./defs.js');
+const { lua_assert } = require('./llimits.js');
 const lobject = require('./lobject.js');
 const ldo     = require('./ldo.js');
 const lstate  = require('./lstate.js');
@@ -175,7 +174,7 @@ const fasttm = function(l, et, e) {
 
 const luaT_gettm = function(events, event, ename) {
     const tm = ltable.luaH_getstr(events, ename);
-    assert(event <= TMS.TM_EQ);
+    lua_assert(event <= TMS.TM_EQ);
     if (tm.ttisnil()) {  /* no tag method? */
         events.flags |= 1<<event;  /* cache this fact */
         return null;
