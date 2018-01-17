@@ -5,6 +5,7 @@ const {
     api_check,
     lua_assert
 } = require('./llimits.js');
+const lapi     = require('./lapi.js');
 const ldo      = require('./ldo.js');
 const lfunc    = require('./lfunc.js');
 const llex     = require('./llex.js');
@@ -188,14 +189,12 @@ const funcinfo = function(ar, cl) {
 const collectvalidlines = function(L, f) {
     if (f === null || f instanceof lobject.CClosure) {
         L.stack[L.top] = new lobject.TValue(CT.LUA_TNIL, null);
-        L.top++;
-        lua_assert(L.top <= L.ci.top, "stack overflow");
+        lapi.api_incr_top(L);
     } else {
         let lineinfo = f.p.lineinfo;
         let t = ltable.luaH_new(L);
         L.stack[L.top] = new lobject.TValue(CT.LUA_TTABLE, t);
-        L.top++;
-        lua_assert(L.top <= L.ci.top, "stack overflow");
+        lapi.api_incr_top(L);
         let v = new lobject.TValue(CT.LUA_TBOOLEAN, true);
         for (let i = 0; i < lineinfo.length; i++)
             ltable.luaH_setint(t, lineinfo[i], v);
