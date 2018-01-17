@@ -21,7 +21,10 @@ const {
 const { lua_assert } = require('./llimits.js');
 const ldebug  = require('./ldebug.js');
 const lobject = require('./lobject.js');
-const lstring = require('./lstring.js');
+const {
+    luaS_hashlongstr,
+    TString
+} = require('./lstring.js');
 const lstate  = require('./lstate.js');
 
 /* used to prevent conflicts with lightuserdata keys */
@@ -56,7 +59,7 @@ const table_hash = function(L, key) {
             return key.value;
         case LUA_TSHRSTR:
         case LUA_TLNGSTR:
-            return lstring.luaS_hashlongstr(key.tsvalue());
+            return luaS_hashlongstr(key.tsvalue());
         case LUA_TLIGHTUSERDATA: {
             let v = key.value;
             switch(typeof v) {
@@ -171,8 +174,8 @@ const luaH_getint = function(t, key) {
 };
 
 const luaH_getstr = function(t, key) {
-    lua_assert(key instanceof lstring.TString);
-    return getgeneric(t, lstring.luaS_hashlongstr(key));
+    lua_assert(key instanceof TString);
+    return getgeneric(t, luaS_hashlongstr(key));
 };
 
 const luaH_get = function(L, t, key) {

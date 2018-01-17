@@ -105,7 +105,11 @@ const {
     SETARG_C,
     SET_OPCODE
 } = require('./lopcodes.js');
-const lstring  = require('./lstring.js');
+const {
+    luaS_eqlngstr,
+    luaS_new,
+    luaS_newliteral
+} = require('./lstring.js');
 const ltable   = require('./ltable.js');
 const Proto    = lfunc.Proto;
 const R        = llex.RESERVED;
@@ -118,7 +122,7 @@ const hasmultret = function(k) {
 
 const eqstr = function(a, b) {
     /* TODO: use plain equality as strings are cached */
-    return lstring.luaS_eqlngstr(a, b);
+    return luaS_eqlngstr(a, b);
 };
 
 class BlockCnt {
@@ -584,7 +588,7 @@ const enterblock = function(fs, bl, isloop) {
 ** create a label named 'break' to resolve break statements
 */
 const breaklabel = function(ls) {
-    let n = lstring.luaS_newliteral(ls.L, "break");
+    let n = luaS_newliteral(ls.L, "break");
     let l = newlabelentry(ls, ls.dyd.label, n, 0, ls.fs.pc);
     findgotos(ls, ls.dyd.label.arr[l]);
 };
@@ -1246,7 +1250,7 @@ const gotostat = function(ls, pc) {
         label = str_checkname(ls);
     else {
         llex.luaX_next(ls);  /* skip break */
-        label = lstring.luaS_newliteral(ls.L, "break");
+        label = luaS_newliteral(ls.L, "break");
     }
     let g = newlabelentry(ls, ls.dyd.gt, label, line, pc);
     findlabel(ls, g);  /* close it if label already defined */
@@ -1658,7 +1662,7 @@ const luaY_parser = function(L, z, buff, dyd, name, firstchar) {
     ldo.luaD_inctop(L);
     L.stack[L.top-1].sethvalue(lexstate.h);
     funcstate.f = cl.p = new Proto(L);
-    funcstate.f.source = lstring.luaS_new(L, name);
+    funcstate.f.source = luaS_new(L, name);
     lexstate.buff = buff;
     lexstate.dyd = dyd;
     dyd.actvar.n = dyd.gt.n = dyd.label.n = 0;

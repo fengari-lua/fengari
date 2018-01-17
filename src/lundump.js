@@ -7,7 +7,9 @@ const ldo      = require('./ldo.js');
 const lfunc    = require('./lfunc.js');
 const lobject  = require('./lobject.js');
 const lopcodes = require('./lopcodes.js');
-const lstring  = require('./lstring.js');
+const {
+    luaS_bless
+} = require('./lstring.js');
 const lzio     = require('./lzio.js');
 
 const {
@@ -96,7 +98,7 @@ class BytecodeParser {
             return null;
         }
 
-        return lstring.luaS_bless(this.L, this.read(size));
+        return luaS_bless(this.L, this.read(size));
     }
 
     /* creates a mask with 'n' 1 bits at position 'p' */

@@ -11,7 +11,12 @@ const ldebug   = require('./ldebug.js');
 const ldo      = require('./ldo.js');
 const ljstype  = require('./ljstype.js');
 const lobject  = require('./lobject.js');
-const lstring  = require('./lstring.js');
+const {
+    luaS_bless,
+    luaS_hash,
+    luaS_hashlongstr,
+    luaS_new
+} = require('./lstring.js');
 const ltable   = require('./ltable.js');
 const llimits  = require('./llimits.js');
 const lzio     = require('./lzio.js');
@@ -152,13 +157,13 @@ const save_and_next = function(ls) {
 */
 const luaX_newstring = function(ls, str) {
     let L = ls.L;
-    let ts = lstring.luaS_new(L, str);
+    let ts = luaS_new(L, str);
     let o = ltable.luaH_set(L, ls.h, new lobject.TValue(LUA_TLNGSTR, ts));
     if (o.ttisnil()) { /* not in use yet? */
         o.setbvalue(true);
     } else { /* string already present */
         /* HACK: Workaround lack of ltable 'keyfromval' */
-        let tpair = ls.h.strong.get(lstring.luaS_hashlongstr(ts));
+        let tpair = ls.h.strong.get(luaS_hashlongstr(ts));
         lua_assert(tpair.value == o); /* fengari addition */
         ts = tpair.key.tsvalue(); /* re-use value previously stored */
     }
@@ -195,7 +200,7 @@ const luaX_setinput = function(L, ls, z, source, firstchar) {
     ls.linenumber = 1;
     ls.lastline = 1;
     ls.source = source;
-    ls.envn = lstring.luaS_bless(L, LUA_ENV);
+    ls.envn = luaS_bless(L, LUA_ENV);
     lzio.luaZ_resizebuffer(L, ls.buff, llimits.LUA_MINBUFFER);  /* initialize buffer */
 };
 
@@ -459,10 +464,10 @@ const read_string = function(ls, del, seminfo) {
 };
 
 const token_to_index = Object.create(null); /* don't want to return true for e.g. 'hasOwnProperty' */
-luaX_tokens.forEach((e, i)=>token_to_index[lstring.luaS_hash(to_luastring(e))] = i);
+luaX_tokens.forEach((e, i)=>token_to_index[luaS_hash(to_luastring(e))] = i);
 
 const isreserved = function(w) {
-    let kidx = token_to_index[lstring.luaS_hashlongstr(w)];
+    let kidx = token_to_index[luaS_hashlongstr(w)];
     return kidx !== void 0 && kidx <= 22;
 };
 
@@ -568,7 +573,7 @@ const llex = function(ls, seminfo) {
                     } while (ljstype.lislalnum(ls.current));
                     let ts = luaX_newstring(ls, lzio.luaZ_buffer(ls.buff));
                     seminfo.ts = ts;
-                    let kidx = token_to_index[lstring.luaS_hashlongstr(ts)];
+                    let kidx = token_to_index[luaS_hashlongstr(ts)];
                     if (kidx !== void 0 && kidx <= 22)  /* reserved word? */
                         return kidx + FIRST_RESERVED;
                     else

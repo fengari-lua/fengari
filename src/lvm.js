@@ -85,7 +85,11 @@ const {
 const lobject = require('./lobject.js');
 const lfunc   = require('./lfunc.js');
 const lstate  = require('./lstate.js');
-const lstring = require('./lstring.js');
+const {
+    luaS_bless,
+    luaS_eqlngstr,
+    luaS_hashlongstr
+} = require('./lstring.js');
 const ldo     = require('./ldo.js');
 const ltm     = require('./ltm.js');
 const ltable  = require('./ltable.js');
@@ -762,7 +766,7 @@ const luaV_equalobj = function(L, t1, t2) {
             return t1.value === t2.value ? 1 : 0;
         case LUA_TSHRSTR:
         case LUA_TLNGSTR: {
-            return lstring.luaS_eqlngstr(t1.tsvalue(), t2.tsvalue()) ? 1 : 0;
+            return luaS_eqlngstr(t1.tsvalue(), t2.tsvalue()) ? 1 : 0;
         }
         case LUA_TUSERDATA:
         case LUA_TTABLE:
@@ -880,8 +884,8 @@ const LEnum = function(l, r) {
 ** -larger than zero if 'ls' is smaller-equal-larger than 'rs'.
 */
 const l_strcmp = function(ls, rs) {
-    let l = lstring.luaS_hashlongstr(ls);
-    let r = lstring.luaS_hashlongstr(rs);
+    let l = luaS_hashlongstr(ls);
+    let r = luaS_hashlongstr(rs);
     /* In fengari we assume string hash has same collation as byte values */
     if (l === r)
         return 0;
@@ -1060,7 +1064,7 @@ const luaV_concat = function(L, total) {
             }
             let buff = new Uint8Array(tl);
             copy2buff(L, top, n, buff);
-            let ts = lstring.luaS_bless(L, buff);
+            let ts = luaS_bless(L, buff);
             lobject.setsvalue2s(L, top - n, ts);
         }
         total -= n - 1; /* got 'n' strings to create 1 new */

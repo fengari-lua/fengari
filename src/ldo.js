@@ -13,7 +13,7 @@ const lobject  = require('./lobject.js');
 const lopcodes = require('./lopcodes.js');
 const lparser  = require('./lparser.js');
 const lstate   = require('./lstate.js');
-const lstring  = require('./lstring.js');
+const { luaS_newliteral } = require('./lstring.js');
 const ltm      = require('./ltm.js');
 const luaconf  = require('./luaconf.js');
 const lundump  = require('./lundump.js');
@@ -42,11 +42,11 @@ const seterrorobj = function(L, errcode, oldtop) {
 
     switch (errcode) {
         case TS.LUA_ERRMEM: {
-            lobject.setsvalue2s(L, oldtop, lstring.luaS_newliteral(L, "not enough memory"));
+            lobject.setsvalue2s(L, oldtop, luaS_newliteral(L, "not enough memory"));
             break;
         }
         case TS.LUA_ERRERR: {
-            lobject.setsvalue2s(L, oldtop, lstring.luaS_newliteral(L, "error in error handling"));
+            lobject.setsvalue2s(L, oldtop, luaS_newliteral(L, "error in error handling"));
             break;
         }
         default: {
@@ -506,7 +506,7 @@ const recover = function(L, status) {
 ** coroutine error handler and should not kill the coroutine.)
 */
 const resume_error = function(L, msg, narg) {
-    let ts = lstring.luaS_newliteral(L, msg);
+    let ts = luaS_newliteral(L, msg);
     if (narg === 0) {
         lobject.pushsvalue2s(L, ts);
         api_check(L, L.top <= L.ci.top, "stack overflow");

@@ -46,7 +46,10 @@ const ldebug  = require('./ldebug.js');
 const ldo     = require('./ldo.js');
 const lfunc   = require('./lfunc.js');
 const lstate  = require('./lstate.js');
-const lstring = require('./lstring.js');
+const {
+    luaS_bless,
+    luaS_new
+} = require('./lstring.js');
 const ltable  = require('./ltable.js');
 const luaconf = require('./luaconf.js');
 const lvm     = require('./lvm.js');
@@ -576,12 +579,12 @@ const luaO_tostring = function(L, obj) {
         }
         buff = to_luastring(str);
     }
-    obj.setsvalue(lstring.luaS_bless(L, buff));
+    obj.setsvalue(luaS_bless(L, buff));
 };
 
 const pushstr = function(L, str) {
     ldo.luaD_inctop(L);
-    setsvalue2s(L, L.top-1, lstring.luaS_new(L, str));
+    setsvalue2s(L, L.top-1, luaS_new(L, str));
 };
 
 const luaO_pushvfstring = function(L, fmt, argp) {

@@ -11,7 +11,11 @@ const ldump     = require('./ldump.js');
 const lfunc     = require('./lfunc.js');
 const lobject   = require('./lobject.js');
 const lstate    = require('./lstate.js');
-const lstring   = require('./lstring.js');
+const {
+    luaS_bless,
+    luaS_new,
+    luaS_newliteral
+} = require('./lstring.js');
 const ltm       = require('./ltm.js');
 const luaconf   = require('./luaconf.js');
 const lvm       = require('./lvm.js');
@@ -242,11 +246,11 @@ const lua_pushlstring = function(L, s, len) {
     let ts;
     if (len === 0) {
         s = defs.to_luastring("", true);
-        ts = lstring.luaS_bless(L, s);
+        ts = luaS_bless(L, s);
     } else {
         s = defs.from_userstring(s);
         api_check(L, s.length >= len, "invalid length to lua_pushlstring");
-        ts = lstring.luaS_new(L, s.subarray(0, len));
+        ts = luaS_new(L, s.subarray(0, len));
     }
     lobject.pushsvalue2s(L, ts);
     api_check(L, L.top <= L.ci.top, "stack overflow");
@@ -258,7 +262,7 @@ const lua_pushstring = function (L, s) {
         L.stack[L.top] = new TValue(CT.LUA_TNIL, null);
         L.top++;
     } else {
-        let ts = lstring.luaS_new(L, defs.from_userstring(s));
+        let ts = luaS_new(L, defs.from_userstring(s));
         lobject.pushsvalue2s(L, ts);
         s = ts.getstr(); /* internal copy */
     }
@@ -283,7 +287,7 @@ const lua_pushliteral = function (L, s) {
         L.top++;
     } else {
         fengari_argcheck(typeof s === "string", "lua_pushliteral expects a JS string");
-        let ts = lstring.luaS_newliteral(L, s);
+        let ts = luaS_newliteral(L, s);
         lobject.pushsvalue2s(L, ts);
         s = ts.getstr(); /* internal copy */
     }
@@ -347,7 +351,7 @@ const lua_pushglobaltable = function(L) {
 ** t[k] = value at the top of the stack (where 'k' is a string)
 */
 const auxsetstr = function(L, t, k) {
-    let str = lstring.luaS_new(L, defs.from_userstring(k));
+    let str = luaS_new(L, defs.from_userstring(k));
     api_checknelems(L, 1);
     lobject.pushsvalue2s(L, str); /* push 'str' (to make it a TValue) */
     api_check(L, L.top <= L.ci.top, "stack overflow");
@@ -457,7 +461,7 @@ const lua_rawsetp = function(L, idx, p) {
 */
 
 const auxgetstr = function(L, t, k) {
-    let str = lstring.luaS_new(L, defs.from_userstring(k));
+    let str = luaS_new(L, defs.from_userstring(k));
     lobject.pushsvalue2s(L, str);
     api_check(L, L.top <= L.ci.top, "stack overflow");
     lvm.luaV_gettable(L, t, L.stack[L.top - 1], L.top - 1);
@@ -1033,7 +1037,7 @@ const lua_concat = function(L, n) {
     if (n >= 2)
         lvm.luaV_concat(L, n);
     else if (n === 0) {
-        lobject.pushsvalue2s(L, lstring.luaS_bless(L, defs.to_luastring("", true)));
+        lobject.pushsvalue2s(L, luaS_bless(L, defs.to_luastring("", true)));
         api_check(L, L.top <= L.ci.top, "stack overflow");
     }
 };
