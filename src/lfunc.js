@@ -1,9 +1,8 @@
 "use strict";
 
-const defs    = require('./defs.js');
+const { constant_types: { LUA_TNIL } } = require('./defs.js');
 const { lua_assert } = require('./llimits.js');
 const lobject = require('./lobject.js');
-const CT      = defs.constant_types;
 
 class Proto {
 
@@ -95,7 +94,7 @@ const luaF_initupvals = function(L, cl) {
     for (let i = 0; i < cl.nupvalues; i++) {
         let uv = new UpVal(L);
         uv.refcount = 1;
-        uv.v = new lobject.TValue(CT.LUA_TNIL, null);
+        uv.v = new lobject.TValue(LUA_TNIL, null);
         cl.upvals[i] = uv;
     }
 };
