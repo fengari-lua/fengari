@@ -1,26 +1,47 @@
 "use strict";
 
-const defs     = require('./defs.js');
+const {
+    LUA_SIGNATURE,
+    char,
+    constant_types: {
+        LUA_TBOOLEAN,
+        LUA_TLNGSTR,
+        LUA_TNIL,
+        LUA_TNUMFLT,
+        LUA_TNUMINT,
+        LUA_TSHRSTR
+    },
+    thread_status: { LUA_ERRSYNTAX },
+    is_luastring,
+    luastring_eq,
+    to_luastring
+} = require('./defs.js');
 const ldo      = require('./ldo.js');
 const lfunc    = require('./lfunc.js');
 const lobject  = require('./lobject.js');
-const lopcodes = require('./lopcodes.js');
+const {
+    MAXARG_sBx,
+    POS_A,
+    POS_Ax,
+    POS_B,
+    POS_Bx,
+    POS_C,
+    POS_OP,
+    SIZE_A,
+    SIZE_Ax,
+    SIZE_B,
+    SIZE_Bx,
+    SIZE_C,
+    SIZE_OP
+} = require('./lopcodes.js');
 const { lua_assert } = require("./llimits.js");
+const { luaS_bless } = require('./lstring.js');
 const {
-    luaS_bless
-} = require('./lstring.js');
-const lzio     = require('./lzio.js');
+    luaZ_read,
+    ZIO
+} = require('./lzio.js');
 
-const {
-    LUA_TBOOLEAN,
-    LUA_TLNGSTR,
-    LUA_TNIL,
-    LUA_TNUMFLT,
-    LUA_TNUMINT,
-    LUA_TSHRSTR
-} = defs.constant_types;
-
-let LUAC_DATA = [0x19, 0x93, defs.char["\r"], defs.char["\n"], 0x1a, defs.char["\n"]];
+let LUAC_DATA = [0x19, 0x93, char["\r"], char["\n"], 0x1a, char["\n"]];
 
 class BytecodeParser {
 
@@ -31,13 +52,13 @@ class BytecodeParser {
         this.integerSize = 4;
         this.numberSize = 8;
 
-        lua_assert(Z instanceof lzio.ZIO, "BytecodeParser only operates on a ZIO");
-        lua_assert(defs.is_luastring(name));
+        lua_assert(Z instanceof ZIO, "BytecodeParser only operates on a ZIO");
+        lua_assert(is_luastring(name));
 
-        if (name[0] == defs.char["@"] || name[0] == defs.char["="])
+        if (name[0] == char["@"] || name[0] == char["="])
             this.name = name.subarray(1);
-        else if (name[0] == defs.LUA_SIGNATURE.charCodeAt(0))
-            this.name = defs.to_luastring("binary string", true);
+        else if (name[0] == LUA_SIGNATURE.charCodeAt(0))
+            this.name = to_luastring("binary string", true);
         else
             this.name = name;
 
@@ -54,19 +75,19 @@ class BytecodeParser {
 
     read(size) {
         let u8 = new Uint8Array(size);
-        if(lzio.luaZ_read(this.Z, u8, 0, size) !== 0)
+        if(luaZ_read(this.Z, u8, 0, size) !== 0)
             this.error("truncated");
         return u8;
     }
 
     readByte() {
-        if (lzio.luaZ_read(this.Z, this.u8, 0, 1) !== 0)
+        if (luaZ_read(this.Z, this.u8, 0, 1) !== 0)
             this.error("truncated");
         return this.u8[0];
     }
 
     readInteger() {
-        if (lzio.luaZ_read(this.Z, this.u8, 0, this.integerSize) !== 0)
+        if (luaZ_read(this.Z, this.u8, 0, this.integerSize) !== 0)
             this.error("truncated");
         return this.dv.getInt32(0, true);
     }
@@ -76,13 +97,13 @@ class BytecodeParser {
     }
 
     readInt() {
-        if (lzio.luaZ_read(this.Z, this.u8, 0, this.intSize) !== 0)
+        if (luaZ_read(this.Z, this.u8, 0, this.intSize) !== 0)
             this.error("truncated");
         return this.dv.getInt32(0, true);
     }
 
     readNumber() {
-        if (lzio.luaZ_read(this.Z, this.u8, 0, this.numberSize) !== 0)
+        if (luaZ_read(this.Z, this.u8, 0, this.numberSize) !== 0)
             this.error("truncated");
         return this.dv.getFloat64(0, true);
     }
@@ -111,27 +132,26 @@ class BytecodeParser {
     }
 
     readInstruction() {
-        if (lzio.luaZ_read(this.Z, this.u8, 0, this.instructionSize) !== 0)
+        if (luaZ_read(this.Z, this.u8, 0, this.instructionSize) !== 0)
             this.error("truncated");
         return this.dv.getUint32(0, true);
     }
 
     readCode(f) {
         let n = this.readInt();
-        let o = lopcodes;
         let p = BytecodeParser;
 
         for (let i = 0; i < n; i++) {
             let ins = this.readInstruction();
             f.code[i] = {
                 code:   ins,
-                opcode: (ins >> o.POS_OP) & p.MASK1(o.SIZE_OP, 0),
-                A:      (ins >> o.POS_A)  & p.MASK1(o.SIZE_A,  0),
-                B:      (ins >> o.POS_B)  & p.MASK1(o.SIZE_B,  0),
-                C:      (ins >> o.POS_C)  & p.MASK1(o.SIZE_C,  0),
-                Bx:     (ins >> o.POS_Bx) & p.MASK1(o.SIZE_Bx, 0),
-                Ax:     (ins >> o.POS_Ax) & p.MASK1(o.SIZE_Ax, 0),
-                sBx:    ((ins >> o.POS_Bx) & p.MASK1(o.SIZE_Bx, 0)) - o.MAXARG_sBx
+                opcode: (ins >> POS_OP) & p.MASK1(SIZE_OP, 0),
+                A:      (ins >> POS_A)  & p.MASK1(SIZE_A,  0),
+                B:      (ins >> POS_B)  & p.MASK1(SIZE_B,  0),
+                C:      (ins >> POS_C)  & p.MASK1(SIZE_C,  0),
+                Bx:     (ins >> POS_Bx) & p.MASK1(SIZE_Bx, 0),
+                Ax:     (ins >> POS_Ax) & p.MASK1(SIZE_Ax, 0),
+                sBx:    ((ins >> POS_Bx) & p.MASK1(SIZE_Bx, 0)) - MAXARG_sBx
             };
         }
     }
@@ -224,12 +244,12 @@ class BytecodeParser {
 
     checkliteral(s, msg) {
         let buff = this.read(s.length);
-        if (!defs.luastring_eq(buff, s))
+        if (!luastring_eq(buff, s))
             this.error(msg);
     }
 
     checkHeader() {
-        this.checkliteral(defs.to_luastring(defs.LUA_SIGNATURE.substring(1)), "not a"); /* 1st char already checked */
+        this.checkliteral(to_luastring(LUA_SIGNATURE.substring(1)), "not a"); /* 1st char already checked */
 
         if (this.readByte() !== 0x53)
             this.error("version mismatch in");
@@ -260,8 +280,8 @@ class BytecodeParser {
     }
 
     error(why) {
-        lobject.luaO_pushfstring(this.L, defs.to_luastring("%s: %s precompiled chunk"), this.name, defs.to_luastring(why));
-        ldo.luaD_throw(this.L, defs.thread_status.LUA_ERRSYNTAX);
+        lobject.luaO_pushfstring(this.L, to_luastring("%s: %s precompiled chunk"), this.name, to_luastring(why));
+        ldo.luaD_throw(this.L, LUA_ERRSYNTAX);
     }
 
     checksize(byte, size, tname) {
