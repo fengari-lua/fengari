@@ -1,6 +1,11 @@
 "use strict";
 
-const defs = require('./defs.js');
+const {
+    is_luastring,
+    luastring_eq,
+    luastring_from,
+    to_luastring
+} = require('./defs.js');
 const { lua_assert } = require("./llimits.js");
 
 class TString {
@@ -23,13 +28,13 @@ class TString {
 const luaS_eqlngstr = function(a, b) {
     lua_assert(a instanceof TString);
     lua_assert(b instanceof TString);
-    return a == b || defs.luastring_eq(a.realstring, b.realstring);
+    return a == b || luastring_eq(a.realstring, b.realstring);
 };
 
 /* converts strings (arrays) to a consistent map key
    make sure this doesn't conflict with any of the anti-collision strategies in ltable */
 const luaS_hash = function(str) {
-    lua_assert(defs.is_luastring(str));
+    lua_assert(is_luastring(str));
     let len = str.length;
     let s = "|";
     for (let i=0; i<len; i++)
@@ -53,12 +58,12 @@ const luaS_bless = function(L, str) {
 
 /* makes a copy */
 const luaS_new = function(L, str) {
-    return luaS_bless(L, defs.luastring_from(str));
+    return luaS_bless(L, luastring_from(str));
 };
 
 /* takes a js string */
 const luaS_newliteral = function(L, str) {
-    return luaS_bless(L, defs.to_luastring(str));
+    return luaS_bless(L, to_luastring(str));
 };
 
 module.exports.luaS_eqlngstr    = luaS_eqlngstr;
