@@ -5,7 +5,6 @@ const test       = require('tape');
 const lua     = require('../src/lua.js');
 const lauxlib = require('../src/lauxlib.js');
 const lualib  = require('../src/lualib.js');
-const lapi    = require('../src/lapi.js');
 const lstring = require("../src/lstring.js");
 const {to_luastring} = require("../src/fengaricore.js");
 
@@ -199,7 +198,7 @@ test('NEWTABLE', function (t) {
     }, "Lua program ran without error");
 
     t.ok(
-        L.stack[lapi.index2addr_(L, -1)].ttistable(),
+        lua.lua_type(L, -1) === lua.LUA_TTABLE,
         "Program output is correct"
     );
 });

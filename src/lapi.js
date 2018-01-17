@@ -1106,8 +1106,6 @@ const lua_getextraspace = function () {
     return 0;
 };
 
-module.exports.index2addr            = index2addr;
-module.exports.index2addr_           = index2addr_;
 module.exports.lua_absindex          = lua_absindex;
 module.exports.lua_arith             = lua_arith;
 module.exports.lua_atpanic           = lua_atpanic;
