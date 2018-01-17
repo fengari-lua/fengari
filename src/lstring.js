@@ -1,8 +1,7 @@
 "use strict";
 
-const assert = require("assert");
-
 const defs = require('./defs.js');
+const { lua_assert } = require("./llimits.js");
 
 class TString {
 
@@ -22,15 +21,15 @@ class TString {
 }
 
 const luaS_eqlngstr = function(a, b) {
-    assert(a instanceof TString);
-    assert(b instanceof TString);
+    lua_assert(a instanceof TString);
+    lua_assert(b instanceof TString);
     return a == b || defs.luastring_eq(a.realstring, b.realstring);
 };
 
 /* converts strings (arrays) to a consistent map key
    make sure this doesn't conflict with any of the anti-collision strategies in ltable */
 const luaS_hash = function(str) {
-    assert(defs.is_luastring(str));
+    lua_assert(defs.is_luastring(str));
     let len = str.length;
     let s = "|";
     for (let i=0; i<len; i++)
@@ -39,7 +38,7 @@ const luaS_hash = function(str) {
 };
 
 const luaS_hashlongstr = function(ts) {
-    assert(ts instanceof TString);
+    lua_assert(ts instanceof TString);
     if(ts.hash === null) {
         ts.hash = luaS_hash(ts.getstr());
     }
@@ -48,7 +47,7 @@ const luaS_hashlongstr = function(ts) {
 
 /* variant that takes ownership of array */
 const luaS_bless = function(L, str) {
-    assert(str instanceof Uint8Array);
+    lua_assert(str instanceof Uint8Array);
     return new TString(L, str);
 };
 
