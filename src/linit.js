@@ -1,8 +1,9 @@
 "use strict";
 
-const lua      = require('./lua.js');
-const lauxlib  = require('./lauxlib.js');
-const {to_luastring} = require("./fengaricore.js");
+const { lua_pop } = require('./lua.js');
+const { luaL_requiref } = require('./lauxlib.js');
+const lualib = require('./lualib.js');
+const { to_luastring } = require("./fengaricore.js");
 
 const lbaselib = require('./lbaselib.js');
 const lcorolib = require('./lcorolib.js');
@@ -13,7 +14,6 @@ const lutf8lib = require('./lutf8lib.js');
 const ldblib   = require('./ldblib.js');
 const loslib   = require('./loslib.js');
 const loadlib  = require('./loadlib.js');
-const lualib   = require('./lualib.js');
 
 const luaL_openlibs = function(L) {
     const loadedlibs = {
@@ -32,8 +32,8 @@ const luaL_openlibs = function(L) {
 
     /* "require" functions from 'loadedlibs' and set results to global table */
     for (let lib in loadedlibs) {
-        lauxlib.luaL_requiref(L, to_luastring(lib), loadedlibs[lib], 1);
-        lua.lua_pop(L, 1); /* remove lib */
+        luaL_requiref(L, to_luastring(lib), loadedlibs[lib], 1);
+        lua_pop(L, 1); /* remove lib */
     }
 };
 
