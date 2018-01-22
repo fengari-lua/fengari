@@ -1,9 +1,86 @@
 "use strict";
 
-const lua     = require('./lua.js');
-const lauxlib = require('./lauxlib.js');
+const {
+    LUA_MASKCALL,
+    LUA_MASKCOUNT,
+    LUA_MASKLINE,
+    LUA_MASKRET,
+    LUA_REGISTRYINDEX,
+    LUA_TFUNCTION,
+    LUA_TNIL,
+    LUA_TTABLE,
+    LUA_TUSERDATA,
+    lua_Debug,
+    lua_call,
+    lua_checkstack,
+    lua_createtable,
+    lua_gethook,
+    lua_gethookcount,
+    lua_gethookmask,
+    lua_getinfo,
+    lua_getlocal,
+    lua_getmetatable,
+    lua_getstack,
+    lua_getupvalue,
+    lua_getuservalue,
+    lua_insert,
+    lua_iscfunction,
+    lua_isfunction,
+    lua_isnoneornil,
+    lua_isthread,
+    lua_newtable,
+    lua_pcall,
+    lua_pop,
+    lua_pushboolean,
+    lua_pushfstring,
+    lua_pushinteger,
+    lua_pushlightuserdata,
+    lua_pushliteral,
+    lua_pushnil,
+    lua_pushstring,
+    lua_pushthread,
+    lua_pushvalue,
+    lua_rawget,
+    lua_rawgetp,
+    lua_rawset,
+    lua_rawsetp,
+    lua_remove,
+    lua_rotate,
+    lua_setfield,
+    lua_sethook,
+    lua_setlocal,
+    lua_setmetatable,
+    lua_settop,
+    lua_setupvalue,
+    lua_setuservalue,
+    lua_tojsstring,
+    lua_tostring,
+    lua_tothread,
+    lua_type,
+    lua_upvalueid,
+    lua_upvaluejoin,
+    lua_xmove
+} = require('./lua.js');
+const {
+    luaL_argcheck,
+    luaL_argerror,
+    luaL_checkany,
+    luaL_checkinteger,
+    luaL_checkstring,
+    luaL_checktype,
+    luaL_error,
+    luaL_loadbuffer,
+    luaL_newlib,
+    luaL_optinteger,
+    luaL_optstring,
+    luaL_traceback,
+    lua_writestringerror
+} = require('./lauxlib.js');
 const lualib = require('./lualib.js');
-const {luastring_indexOf, to_luastring} = require("./fengaricore.js");
+const {
+    luastring_indexOf,
+    to_luastring
+} = require("./fengaricore.js");
 
 /*
 ** If L1 != L, L1 can be in any state, and therefore there are no
@@ -11,45 +88,45 @@ const {luastring_indexOf, to_luastring} = require("./fengaricore.js");
 ** checked.
 */
 const checkstack = function(L, L1, n) {
-    if (L !== L1 && !lua.lua_checkstack(L1, n))
-        lauxlib.luaL_error(L, to_luastring("stack overflow", true));
+    if (L !== L1 && !lua_checkstack(L1, n))
+        luaL_error(L, to_luastring("stack overflow", true));
 };
 
 const db_getregistry = function(L) {
-    lua.lua_pushvalue(L, lua.LUA_REGISTRYINDEX);
+    lua_pushvalue(L, LUA_REGISTRYINDEX);
     return 1;
 };
 
 const db_getmetatable = function(L) {
-    lauxlib.luaL_checkany(L, 1);
-    if (!lua.lua_getmetatable(L, 1)) {
-        lua.lua_pushnil(L);  /* no metatable */
+    luaL_checkany(L, 1);
+    if (!lua_getmetatable(L, 1)) {
+        lua_pushnil(L);  /* no metatable */
     }
     return 1;
 };
 
 const db_setmetatable = function(L) {
-    const t = lua.lua_type(L, 2);
-    lauxlib.luaL_argcheck(L, t == lua.LUA_TNIL || t == lua.LUA_TTABLE, 2, to_luastring("nil or table expected", true));
-    lua.lua_settop(L, 2);
-    lua.lua_setmetatable(L, 1);
+    const t = lua_type(L, 2);
+    luaL_argcheck(L, t == LUA_TNIL || t == LUA_TTABLE, 2, to_luastring("nil or table expected", true));
+    lua_settop(L, 2);
+    lua_setmetatable(L, 1);
     return 1;  /* return 1st argument */
 };
 
 const db_getuservalue = function(L) {
-    if (lua.lua_type(L, 1) !== lua.LUA_TUSERDATA)
-        lua.lua_pushnil(L);
+    if (lua_type(L, 1) !== LUA_TUSERDATA)
+        lua_pushnil(L);
     else
-        lua.lua_getuservalue(L, 1);
+        lua_getuservalue(L, 1);
     return 1;
 };
 
 
 const db_setuservalue = function(L) {
-    lauxlib.luaL_checktype(L, 1, lua.LUA_TUSERDATA);
-    lauxlib.luaL_checkany(L, 2);
-    lua.lua_settop(L, 2);
-    lua.lua_setuservalue(L, 1);
+    luaL_checktype(L, 1, LUA_TUSERDATA);
+    luaL_checkany(L, 2);
+    lua_settop(L, 2);
+    lua_setuservalue(L, 1);
     return 1;
 };
 
@@ -60,10 +137,10 @@ const db_setuservalue = function(L) {
 ** access their other arguments)
 */
 const getthread = function(L) {
-    if (lua.lua_isthread(L, 1)) {
+    if (lua_isthread(L, 1)) {
         return {
             arg: 1,
-            thread: lua.lua_tothread(L, 1)
+            thread: lua_tothread(L, 1)
         };
     } else {
         return {
@@ -79,18 +156,18 @@ const getthread = function(L) {
 ** value can be a string, an int, or a boolean.
 */
 const settabss = function(L, k, v) {
-    lua.lua_pushstring(L, v);
-    lua.lua_setfield(L, -2, k);
+    lua_pushstring(L, v);
+    lua_setfield(L, -2, k);
 };
 
 const settabsi = function(L, k, v) {
-    lua.lua_pushinteger(L, v);
-    lua.lua_setfield(L, -2, k);
+    lua_pushinteger(L, v);
+    lua_setfield(L, -2, k);
 };
 
 const settabsb = function(L, k, v) {
-    lua.lua_pushboolean(L, v);
-    lua.lua_setfield(L, -2, k);
+    lua_pushboolean(L, v);
+    lua_setfield(L, -2, k);
 };
 
 
@@ -103,10 +180,10 @@ const settabsb = function(L, k, v) {
 */
 const treatstackoption = function(L, L1, fname) {
     if (L == L1)
-        lua.lua_rotate(L, -2, 1);  /* exchange object and table */
+        lua_rotate(L, -2, 1);  /* exchange object and table */
     else
-        lua.lua_xmove(L1, L, 1);  /* move object to the "main" stack */
-    lua.lua_setfield(L, -2, fname);  /* put object into table */
+        lua_xmove(L1, L, 1);  /* move object to the "main" stack */
+    lua_setfield(L, -2, fname);  /* put object into table */
 };
 
 /*
@@ -116,26 +193,26 @@ const treatstackoption = function(L, L1, fname) {
 ** 'lua_getinfo'.
 */
 const db_getinfo = function(L) {
-    let ar = new lua.lua_Debug();
+    let ar = new lua_Debug();
     let thread = getthread(L);
     let arg = thread.arg;
     let L1 = thread.thread;
-    let options = lauxlib.luaL_optstring(L, arg + 2, to_luastring("flnStu", true));
+    let options = luaL_optstring(L, arg + 2, to_luastring("flnStu", true));
     checkstack(L, L1, 3);
-    if (lua.lua_isfunction(L, arg + 1)) {  /* info about a function? */
-        options = lua.lua_pushfstring(L, to_luastring(">%s"), options);  /* add '>' to 'options' */
-        lua.lua_pushvalue(L, arg + 1);  /* move function to 'L1' stack */
-        lua.lua_xmove(L, L1, 1);
+    if (lua_isfunction(L, arg + 1)) {  /* info about a function? */
+        options = lua_pushfstring(L, to_luastring(">%s"), options);  /* add '>' to 'options' */
+        lua_pushvalue(L, arg + 1);  /* move function to 'L1' stack */
+        lua_xmove(L, L1, 1);
     } else {  /* stack level */
-        if (!lua.lua_getstack(L1, lauxlib.luaL_checkinteger(L, arg + 1), ar)) {
-            lua.lua_pushnil(L);  /* level out of range */
+        if (!lua_getstack(L1, luaL_checkinteger(L, arg + 1), ar)) {
+            lua_pushnil(L);  /* level out of range */
             return 1;
         }
     }
 
-    if (!lua.lua_getinfo(L1, options, ar))
-        lauxlib.luaL_argerror(L, arg + 2, to_luastring("invalid option", true));
-    lua.lua_newtable(L);  /* table to collect results */
+    if (!lua_getinfo(L1, options, ar))
+        luaL_argerror(L, arg + 2, to_luastring("invalid option", true));
+    lua_newtable(L);  /* table to collect results */
     if (luastring_indexOf(options, 'S'.charCodeAt(0)) > -1) {
         settabss(L, to_luastring("source", true), ar.source);
         settabss(L, to_luastring("short_src", true), ar.short_src);
@@ -167,26 +244,26 @@ const db_getlocal = function(L) {
     let thread = getthread(L);
     let L1 = thread.thread;
     let arg = thread.arg;
-    let ar = new lua.lua_Debug();
-    let nvar = lauxlib.luaL_checkinteger(L, arg + 2);  /* local-variable index */
-    if (lua.lua_isfunction(L, arg + 1)) {
-        lua.lua_pushvalue(L, arg + 1);  /* push function */
-        lua.lua_pushstring(L, lua.lua_getlocal(L, null, nvar));  /* push local name */
+    let ar = new lua_Debug();
+    let nvar = luaL_checkinteger(L, arg + 2);  /* local-variable index */
+    if (lua_isfunction(L, arg + 1)) {
+        lua_pushvalue(L, arg + 1);  /* push function */
+        lua_pushstring(L, lua_getlocal(L, null, nvar));  /* push local name */
         return 1;  /* return only name (there is no value) */
     } else {  /* stack-level argument */
-        let level = lauxlib.luaL_checkinteger(L, arg + 1);
-        if (!lua.lua_getstack(L1, level, ar))  /* out of range? */
-            return lauxlib.luaL_argerror(L, arg+1, to_luastring("level out of range", true));
+        let level = luaL_checkinteger(L, arg + 1);
+        if (!lua_getstack(L1, level, ar))  /* out of range? */
+            return luaL_argerror(L, arg+1, to_luastring("level out of range", true));
         checkstack(L, L1, 1);
-        let name = lua.lua_getlocal(L1, ar, nvar);
+        let name = lua_getlocal(L1, ar, nvar);
         if (name) {
-            lua.lua_xmove(L1, L, 1);  /* move local value */
-            lua.lua_pushstring(L, name);  /* push name */
-            lua.lua_rotate(L, -2, 1);  /* re-order */
+            lua_xmove(L1, L, 1);  /* move local value */
+            lua_pushstring(L, name);  /* push name */
+            lua_rotate(L, -2, 1);  /* re-order */
             return 2;
         }
         else {
-            lua.lua_pushnil(L);  /* no name (nor value) */
+            lua_pushnil(L);  /* no name (nor value) */
             return 1;
         }
     }
@@ -196,19 +273,19 @@ const db_setlocal = function(L) {
     let thread = getthread(L);
     let L1 = thread.thread;
     let arg = thread.arg;
-    let ar = new lua.lua_Debug();
-    let level = lauxlib.luaL_checkinteger(L, arg + 1);
-    let nvar = lauxlib.luaL_checkinteger(L, arg + 2);
-    if (!lua.lua_getstack(L1, level, ar))  /* out of range? */
-        return lauxlib.luaL_argerror(L, arg + 1, to_luastring("level out of range", true));
-    lauxlib.luaL_checkany(L, arg + 3);
-    lua.lua_settop(L, arg + 3);
+    let ar = new lua_Debug();
+    let level = luaL_checkinteger(L, arg + 1);
+    let nvar = luaL_checkinteger(L, arg + 2);
+    if (!lua_getstack(L1, level, ar))  /* out of range? */
+        return luaL_argerror(L, arg + 1, to_luastring("level out of range", true));
+    luaL_checkany(L, arg + 3);
+    lua_settop(L, arg + 3);
     checkstack(L, L1, 1);
-    lua.lua_xmove(L, L1, 1);
-    let name = lua.lua_setlocal(L1, ar, nvar);
+    lua_xmove(L, L1, 1);
+    let name = lua_setlocal(L1, ar, nvar);
     if (name === null)
-        lua.lua_pop(L1, 1);  /* pop value (if not popped by 'lua_setlocal') */
-    lua.lua_pushstring(L, name);
+        lua_pop(L1, 1);  /* pop value (if not popped by 'lua_setlocal') */
+    lua_pushstring(L, name);
     return 1;
 };
 
@@ -216,12 +293,12 @@ const db_setlocal = function(L) {
 ** get (if 'get' is true) or set an upvalue from a closure
 */
 const auxupvalue = function(L, get) {
-    let n = lauxlib.luaL_checkinteger(L, 2);  /* upvalue index */
-    lauxlib.luaL_checktype(L, 1, lua.LUA_TFUNCTION);  /* closure */
-    let name = get ? lua.lua_getupvalue(L, 1, n) : lua.lua_setupvalue(L, 1, n);
+    let n = luaL_checkinteger(L, 2);  /* upvalue index */
+    luaL_checktype(L, 1, LUA_TFUNCTION);  /* closure */
+    let name = get ? lua_getupvalue(L, 1, n) : lua_setupvalue(L, 1, n);
     if (name === null) return 0;
-    lua.lua_pushstring(L, name);
-    lua.lua_insert(L, -(get+1));  /* no-op if get is false */
+    lua_pushstring(L, name);
+    lua_insert(L, -(get+1));  /* no-op if get is false */
     return get + 1;
 };
 
@@ -231,7 +308,7 @@ const db_getupvalue = function(L) {
 };
 
 const db_setupvalue = function(L) {
-    lauxlib.luaL_checkany(L, 3);
+    luaL_checkany(L, 3);
     return auxupvalue(L, 0);
 };
 
@@ -240,24 +317,24 @@ const db_setupvalue = function(L) {
 ** returns its index
 */
 const checkupval = function(L, argf, argnup) {
-    let nup = lauxlib.luaL_checkinteger(L, argnup);  /* upvalue index */
-    lauxlib.luaL_checktype(L, argf, lua.LUA_TFUNCTION);  /* closure */
-    lauxlib.luaL_argcheck(L, (lua.lua_getupvalue(L, argf, nup) !== null), argnup, to_luastring("invalid upvalue index", true));
+    let nup = luaL_checkinteger(L, argnup);  /* upvalue index */
+    luaL_checktype(L, argf, LUA_TFUNCTION);  /* closure */
+    luaL_argcheck(L, (lua_getupvalue(L, argf, nup) !== null), argnup, to_luastring("invalid upvalue index", true));
     return nup;
 };
 
 const db_upvalueid = function(L) {
     let n = checkupval(L, 1, 2);
-    lua.lua_pushlightuserdata(L, lua.lua_upvalueid(L, 1, n));
+    lua_pushlightuserdata(L, lua_upvalueid(L, 1, n));
     return 1;
 };
 
 const db_upvaluejoin = function(L) {
     let n1 = checkupval(L, 1, 2);
     let n2 = checkupval(L, 3, 4);
-    lauxlib.luaL_argcheck(L, !lua.lua_iscfunction(L, 1), 1, to_luastring("Lua function expected", true));
-    lauxlib.luaL_argcheck(L, !lua.lua_iscfunction(L, 3), 3, to_luastring("Lua function expected", true));
-    lua.lua_upvaluejoin(L, 1, n1, 3, n2);
+    luaL_argcheck(L, !lua_iscfunction(L, 1), 1, to_luastring("Lua function expected", true));
+    luaL_argcheck(L, !lua_iscfunction(L, 3), 3, to_luastring("Lua function expected", true));
+    lua_upvaluejoin(L, 1, n1, 3, n2);
     return 0;
 };
 
@@ -274,15 +351,15 @@ const hooknames = ["call", "return", "line", "count", "tail call"].map(e => to_l
 ** thread (if there is one)
 */
 const hookf = function(L, ar) {
-    lua.lua_rawgetp(L, lua.LUA_REGISTRYINDEX, HOOKKEY);
-    lua.lua_pushthread(L);
-    if (lua.lua_rawget(L, -2) === lua.LUA_TFUNCTION) {  /* is there a hook function? */
-        lua.lua_pushstring(L, hooknames[ar.event]);  /* push event name */
+    lua_rawgetp(L, LUA_REGISTRYINDEX, HOOKKEY);
+    lua_pushthread(L);
+    if (lua_rawget(L, -2) === LUA_TFUNCTION) {  /* is there a hook function? */
+        lua_pushstring(L, hooknames[ar.event]);  /* push event name */
         if (ar.currentline >= 0)
-            lua.lua_pushinteger(L, ar.currentline);  /* push current line */
-        else lua.lua_pushnil(L);
-        lualib.lua_assert(lua.lua_getinfo(L, to_luastring("lS"), ar));
-        lua.lua_call(L, 2, 0);  /* call hook function */
+            lua_pushinteger(L, ar.currentline);  /* push current line */
+        else lua_pushnil(L);
+        lualib.lua_assert(lua_getinfo(L, to_luastring("lS"), ar));
+        lua_call(L, 2, 0);  /* call hook function */
     }
 };
 
@@ -291,10 +368,10 @@ const hookf = function(L, ar) {
 */
 const makemask = function(smask, count) {
     let mask = 0;
-    if (luastring_indexOf(smask, "c".charCodeAt(0)) > -1) mask |= lua.LUA_MASKCALL;
-    if (luastring_indexOf(smask, "r".charCodeAt(0)) > -1) mask |= lua.LUA_MASKRET;
-    if (luastring_indexOf(smask, "l".charCodeAt(0)) > -1) mask |= lua.LUA_MASKLINE;
-    if (count > 0) mask |= lua.LUA_MASKCOUNT;
+    if (luastring_indexOf(smask, "c".charCodeAt(0)) > -1) mask |= LUA_MASKCALL;
+    if (luastring_indexOf(smask, "r".charCodeAt(0)) > -1) mask |= LUA_MASKRET;
+    if (luastring_indexOf(smask, "l".charCodeAt(0)) > -1) mask |= LUA_MASKLINE;
+    if (count > 0) mask |= LUA_MASKCOUNT;
     return mask;
 };
 
@@ -303,9 +380,9 @@ const makemask = function(smask, count) {
 */
 const unmakemask = function(mask, smask) {
     let i = 0;
-    if (mask & lua.LUA_MASKCALL) smask[i++] = "c".charCodeAt(0);
-    if (mask & lua.LUA_MASKRET) smask[i++] = "r".charCodeAt(0);
-    if (mask & lua.LUA_MASKLINE) smask[i++] = "l".charCodeAt(0);
+    if (mask & LUA_MASKCALL) smask[i++] = "c".charCodeAt(0);
+    if (mask & LUA_MASKRET) smask[i++] = "r".charCodeAt(0);
+    if (mask & LUA_MASKLINE) smask[i++] = "l".charCodeAt(0);
     return smask.subarray(0, i);
 };
 
@@ -314,30 +391,30 @@ const db_sethook = function(L) {
     let thread = getthread(L);
     let L1 = thread.thread;
     let arg = thread.arg;
-    if (lua.lua_isnoneornil(L, arg+1)) {  /* no hook? */
-        lua.lua_settop(L, arg+1);
+    if (lua_isnoneornil(L, arg+1)) {  /* no hook? */
+        lua_settop(L, arg+1);
         func = null; mask = 0; count = 0;  /* turn off hooks */
     }
     else {
-        const smask = lauxlib.luaL_checkstring(L, arg + 2);
-        lauxlib.luaL_checktype(L, arg+1, lua.LUA_TFUNCTION);
-        count = lauxlib.luaL_optinteger(L, arg + 3, 0);
+        const smask = luaL_checkstring(L, arg + 2);
+        luaL_checktype(L, arg+1, LUA_TFUNCTION);
+        count = luaL_optinteger(L, arg + 3, 0);
         func = hookf; mask = makemask(smask, count);
     }
-    if (lua.lua_rawgetp(L, lua.LUA_REGISTRYINDEX, HOOKKEY) === lua.LUA_TNIL) {
-        lua.lua_createtable(L, 0, 2);  /* create a hook table */
-        lua.lua_pushvalue(L, -1);
-        lua.lua_rawsetp(L, lua.LUA_REGISTRYINDEX, HOOKKEY);  /* set it in position */
-        lua.lua_pushstring(L, to_luastring("k"));
-        lua.lua_setfield(L, -2, to_luastring("__mode", true));  /** hooktable.__mode = "k" */
-        lua.lua_pushvalue(L, -1);
-        lua.lua_setmetatable(L, -2);  /* setmetatable(hooktable) = hooktable */
+    if (lua_rawgetp(L, LUA_REGISTRYINDEX, HOOKKEY) === LUA_TNIL) {
+        lua_createtable(L, 0, 2);  /* create a hook table */
+        lua_pushvalue(L, -1);
+        lua_rawsetp(L, LUA_REGISTRYINDEX, HOOKKEY);  /* set it in position */
+        lua_pushstring(L, to_luastring("k"));
+        lua_setfield(L, -2, to_luastring("__mode", true));  /** hooktable.__mode = "k" */
+        lua_pushvalue(L, -1);
+        lua_setmetatable(L, -2);  /* setmetatable(hooktable) = hooktable */
     }
     checkstack(L, L1, 1);
-    lua.lua_pushthread(L1); lua.lua_xmove(L1, L, 1);  /* key (thread) */
-    lua.lua_pushvalue(L, arg + 1);  /* value (hook function) */
-    lua.lua_rawset(L, -3);  /* hooktable[L1] = new Lua hook */
-    lua.lua_sethook(L1, func, mask, count);
+    lua_pushthread(L1); lua_xmove(L1, L, 1);  /* key (thread) */
+    lua_pushvalue(L, arg + 1);  /* value (hook function) */
+    lua_rawset(L, -3);  /* hooktable[L1] = new Lua hook */
+    lua_sethook(L1, func, mask, count);
     return 0;
 };
 
@@ -345,21 +422,21 @@ const db_gethook = function(L) {
     let thread = getthread(L);
     let L1 = thread.thread;
     let buff = new Uint8Array(5);
-    let mask = lua.lua_gethookmask(L1);
-    let hook = lua.lua_gethook(L1);
+    let mask = lua_gethookmask(L1);
+    let hook = lua_gethook(L1);
     if (hook === null)  /* no hook? */
-        lua.lua_pushnil(L);
+        lua_pushnil(L);
     else if (hook !== hookf)  /* external hook? */
-        lua.lua_pushliteral(L, "external hook");
+        lua_pushliteral(L, "external hook");
     else {  /* hook table must exist */
-        lua.lua_rawgetp(L, lua.LUA_REGISTRYINDEX, HOOKKEY);
+        lua_rawgetp(L, LUA_REGISTRYINDEX, HOOKKEY);
         checkstack(L, L1, 1);
-        lua.lua_pushthread(L1); lua.lua_xmove(L1, L, 1);
-        lua.lua_rawget(L, -2);   /* 1st result = hooktable[L1] */
-        lua.lua_remove(L, -2);  /* remove hook table */
+        lua_pushthread(L1); lua_xmove(L1, L, 1);
+        lua_rawget(L, -2);   /* 1st result = hooktable[L1] */
+        lua_remove(L, -2);  /* remove hook table */
     }
-    lua.lua_pushstring(L, unmakemask(mask, buff));  /* 2nd result = mask */
-    lua.lua_pushinteger(L, lua.lua_gethookcount(L1));  /* 3rd result = count */
+    lua_pushstring(L, unmakemask(mask, buff));  /* 2nd result = mask */
+    lua_pushinteger(L, lua_gethookcount(L1));  /* 3rd result = count */
     return 3;
 };
 
@@ -367,12 +444,12 @@ const db_traceback = function(L) {
     let thread = getthread(L);
     let L1 = thread.thread;
     let arg = thread.arg;
-    let msg = lua.lua_tostring(L, arg + 1);
-    if (msg === null && !lua.lua_isnoneornil(L, arg + 1))  /* non-string 'msg'? */
-        lua.lua_pushvalue(L, arg + 1);  /* return it untouched */
+    let msg = lua_tostring(L, arg + 1);
+    if (msg === null && !lua_isnoneornil(L, arg + 1))  /* non-string 'msg'? */
+        lua_pushvalue(L, arg + 1);  /* return it untouched */
     else {
-        let level = lauxlib.luaL_optinteger(L, arg + 2, L === L1 ? 1 : 0);
-        lauxlib.luaL_traceback(L, L1, msg, level);
+        let level = luaL_optinteger(L, arg + 2, L === L1 ? 1 : 0);
+        luaL_traceback(L, L1, msg, level);
     }
     return 1;
 };
@@ -425,17 +502,17 @@ if (getinput) {
                 continue;
 
             let buffer = to_luastring(input);
-            if (lauxlib.luaL_loadbuffer(L, buffer, buffer.length, to_luastring("=(debug command)", true))
-                || lua.lua_pcall(L, 0, 0, 0)) {
-                lauxlib.lua_writestringerror(lua.lua_tojsstring(L, -1), "\n");
+            if (luaL_loadbuffer(L, buffer, buffer.length, to_luastring("=(debug command)", true))
+                || lua_pcall(L, 0, 0, 0)) {
+                lua_writestringerror(lua_tojsstring(L, -1), "\n");
             }
-            lua.lua_settop(L, 0);  /* remove eventual returns */
+            lua_settop(L, 0);  /* remove eventual returns */
         }
     };
 }
 
 const luaopen_debug = function(L) {
-    lauxlib.luaL_newlib(L, dblib);
+    luaL_newlib(L, dblib);
     return 1;
 };
 
