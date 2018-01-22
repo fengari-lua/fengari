@@ -431,8 +431,8 @@ const finishCcall = function(L, status) {
     /* error status can only happen in a protected call */
     lua_assert(ci.callstatus & lstate.CIST_YPCALL || status === TS.LUA_YIELD);
 
-    if (ci.callstatus & TS.CIST_YPCALL) {  /* was inside a pcall? */
-        ci.callstatus &= ~TS.CIST_YPCALL;  /* continuation is also inside it */
+    if (ci.callstatus & lstate.CIST_YPCALL) {  /* was inside a pcall? */
+        ci.callstatus &= ~lstate.CIST_YPCALL;  /* continuation is also inside it */
         L.errfunc = ci.c_old_errfunc;  /* with the same error function */
     }
 
