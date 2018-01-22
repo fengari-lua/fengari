@@ -1,6 +1,6 @@
 "use strict";
 
-const luaconf = require('./luaconf.js');
+const { LUAI_MAXSTACK } = require('./luaconf.js');
 
 // To avoid charCodeAt everywhere
 const char = [];
@@ -85,7 +85,7 @@ const LUA_OPLE = 2;
 
 const LUA_MINSTACK = 20;
 
-const LUA_REGISTRYINDEX = -luaconf.LUAI_MAXSTACK - 1000;
+const LUA_REGISTRYINDEX = -LUAI_MAXSTACK - 1000;
 
 const lua_upvalueindex = function(i) {
     return LUA_REGISTRYINDEX - i;

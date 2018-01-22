@@ -42,7 +42,7 @@ const lparser  = require('./lparser.js');
 const lstate   = require('./lstate.js');
 const { luaS_newliteral } = require('./lstring.js');
 const ltm      = require('./ltm.js');
-const luaconf  = require('./luaconf.js');
+const { LUAI_MAXSTACK } = require('./luaconf.js');
 const lundump  = require('./lundump.js');
 const lvm      = require('./lvm.js');
 const lzio     = require('./lzio.js');
@@ -82,10 +82,10 @@ const seterrorobj = function(L, errcode, oldtop) {
         delete L.stack[--L.top];
 };
 
-const ERRORSTACKSIZE = luaconf.LUAI_MAXSTACK + 200;
+const ERRORSTACKSIZE = LUAI_MAXSTACK + 200;
 
 const luaD_reallocstack = function(L, newsize) {
-    lua_assert(newsize <= luaconf.LUAI_MAXSTACK || newsize == ERRORSTACKSIZE);
+    lua_assert(newsize <= LUAI_MAXSTACK || newsize == ERRORSTACKSIZE);
     lua_assert(L.stack_last == L.stack.length - lstate.EXTRA_STACK);
     L.stack.length = newsize;
     L.stack_last = newsize - lstate.EXTRA_STACK;
@@ -93,14 +93,14 @@ const luaD_reallocstack = function(L, newsize) {
 
 const luaD_growstack = function(L, n) {
     let size = L.stack.length;
-    if (size > luaconf.LUAI_MAXSTACK)
+    if (size > LUAI_MAXSTACK)
         luaD_throw(L, LUA_ERRERR);
     else {
         let needed = L.top + n + lstate.EXTRA_STACK;
         let newsize = 2 * size;
-        if (newsize > luaconf.LUAI_MAXSTACK) newsize = luaconf.LUAI_MAXSTACK;
+        if (newsize > LUAI_MAXSTACK) newsize = LUAI_MAXSTACK;
         if (newsize < needed) newsize = needed;
-        if (newsize > luaconf.LUAI_MAXSTACK) {  /* stack overflow? */
+        if (newsize > LUAI_MAXSTACK) {  /* stack overflow? */
             luaD_reallocstack(L, ERRORSTACKSIZE);
             ldebug.luaG_runerror(L, to_luastring("stack overflow", true));
         }
@@ -126,13 +126,13 @@ const stackinuse = function(L) {
 const luaD_shrinkstack = function(L) {
     let inuse = stackinuse(L);
     let goodsize = inuse + Math.floor(inuse / 8) + 2*lstate.EXTRA_STACK;
-    if (goodsize > luaconf.LUAI_MAXSTACK)
-        goodsize = luaconf.LUAI_MAXSTACK;  /* respect stack limit */
-    if (L.stack.length > luaconf.LUAI_MAXSTACK)  /* had been handling stack overflow? */
+    if (goodsize > LUAI_MAXSTACK)
+        goodsize = LUAI_MAXSTACK;  /* respect stack limit */
+    if (L.stack.length > LUAI_MAXSTACK)  /* had been handling stack overflow? */
         lstate.luaE_freeCI(L);  /* free all CIs (list grew because of an error) */
     /* if thread is currently not handling a stack overflow and its
      good size is smaller than current size, shrink its stack */
-    if (inuse <= (luaconf.LUAI_MAXSTACK - lstate.EXTRA_STACK) && goodsize < L.stack.length)
+    if (inuse <= (LUAI_MAXSTACK - lstate.EXTRA_STACK) && goodsize < L.stack.length)
         luaD_reallocstack(L, goodsize);
 };
 
