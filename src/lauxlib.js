@@ -1,10 +1,88 @@
 "use strict";
 
-const lua = require('./lua.js');
-const {luastring_eq, to_luastring, to_uristring} = require("./fengaricore.js");
+const {
+    LUA_ERRERR,
+    LUA_MULTRET,
+    LUA_REGISTRYINDEX,
+    LUA_SIGNATURE,
+    LUA_TBOOLEAN,
+    LUA_TLIGHTUSERDATA,
+    LUA_TNIL,
+    LUA_TNONE,
+    LUA_TNUMBER,
+    LUA_TSTRING,
+    LUA_TTABLE,
+    LUA_VERSION_NUM,
+    lua_Debug,
+    lua_absindex,
+    lua_atpanic,
+    lua_call,
+    lua_checkstack,
+    lua_concat,
+    lua_copy,
+    lua_createtable,
+    lua_error,
+    lua_getfield,
+    lua_getinfo,
+    lua_getmetatable,
+    lua_getstack,
+    lua_gettop,
+    lua_insert,
+    lua_isinteger,
+    lua_isnil,
+    lua_isnumber,
+    lua_isstring,
+    lua_istable,
+    lua_len,
+    lua_load,
+    lua_newstate,
+    lua_newtable,
+    lua_next,
+    lua_pcall,
+    lua_pop,
+    lua_pushboolean,
+    lua_pushcclosure,
+    lua_pushcfunction,
+    lua_pushfstring,
+    lua_pushinteger,
+    lua_pushliteral,
+    lua_pushlstring,
+    lua_pushnil,
+    lua_pushstring,
+    lua_pushvalue,
+    lua_pushvfstring,
+    lua_rawequal,
+    lua_rawget,
+    lua_rawgeti,
+    lua_rawlen,
+    lua_rawseti,
+    lua_remove,
+    lua_setfield,
+    lua_setglobal,
+    lua_setmetatable,
+    lua_settop,
+    lua_toboolean,
+    lua_tointeger,
+    lua_tointegerx,
+    lua_tojsstring,
+    lua_tolstring,
+    lua_tonumber,
+    lua_tonumberx,
+    lua_topointer,
+    lua_tostring,
+    lua_touserdata,
+    lua_type,
+    lua_typename,
+    lua_version
+} = require('./lua.js');
+const {
+    luastring_eq,
+    to_luastring,
+    to_uristring
+} = require("./fengaricore.js");
 
 /* extra error code for 'luaL_loadfilex' */
-const LUA_ERRFILE = lua.LUA_ERRERR+1;
+const LUA_ERRFILE = LUA_ERRERR+1;
 
 /* key, in the registry, for table of loaded modules */
 const LUA_LOADED_TABLE = to_luastring("_LOADED");
@@ -37,25 +115,25 @@ const LEVELS2 = 11;  /* size of the second part of the stack */
 ** return 1 + string at top if find a good name.
 */
 const findfield = function(L, objidx, level) {
-    if (level === 0 || !lua.lua_istable(L, -1))
+    if (level === 0 || !lua_istable(L, -1))
         return 0;  /* not found */
 
-    lua.lua_pushnil(L);  /* start 'next' loop */
+    lua_pushnil(L);  /* start 'next' loop */
 
-    while (lua.lua_next(L, -2)) {  /* for each pair in table */
-        if (lua.lua_type(L, -2) === lua.LUA_TSTRING) {  /* ignore non-string keys */
-            if (lua.lua_rawequal(L, objidx, -1)) {  /* found object? */
-                lua.lua_pop(L, 1);  /* remove value (but keep name) */
+    while (lua_next(L, -2)) {  /* for each pair in table */
+        if (lua_type(L, -2) === LUA_TSTRING) {  /* ignore non-string keys */
+            if (lua_rawequal(L, objidx, -1)) {  /* found object? */
+                lua_pop(L, 1);  /* remove value (but keep name) */
                 return 1;
             } else if (findfield(L, objidx, level - 1)) {  /* try recursively */
-                lua.lua_remove(L, -2);  /* remove table (but keep name) */
-                lua.lua_pushliteral(L, ".");
-                lua.lua_insert(L, -2);  /* place '.' between the two names */
-                lua.lua_concat(L, 3);
+                lua_remove(L, -2);  /* remove table (but keep name) */
+                lua_pushliteral(L, ".");
+                lua_insert(L, -2);  /* place '.' between the two names */
+                lua_concat(L, 3);
                 return 1;
             }
         }
-        lua.lua_pop(L, 1);  /* remove value */
+        lua_pop(L, 1);  /* remove value */
     }
 
     return 0;  /* not found */
@@ -65,98 +143,98 @@ const findfield = function(L, objidx, level) {
 ** Search for a name for a function in all loaded modules
 */
 const pushglobalfuncname = function(L, ar) {
-    let top = lua.lua_gettop(L);
-    lua.lua_getinfo(L, to_luastring("f"), ar);  /* push function */
-    lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
+    let top = lua_gettop(L);
+    lua_getinfo(L, to_luastring("f"), ar);  /* push function */
+    lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
     if (findfield(L, top + 1, 2)) {
-        let name = lua.lua_tostring(L, -1);
+        let name = lua_tostring(L, -1);
         if (name[0] === "_".charCodeAt(0) && name[1] === "G".charCodeAt(0) && name[2] === ".".charCodeAt(0)) {  /* name start with '_G.'? */
-            lua.lua_pushstring(L, name.subarray(3));  /* push name without prefix */
-            lua.lua_remove(L, -2);  /* remove original name */
+            lua_pushstring(L, name.subarray(3));  /* push name without prefix */
+            lua_remove(L, -2);  /* remove original name */
         }
-        lua.lua_copy(L, -1, top + 1);  /* move name to proper place */
-        lua.lua_pop(L, 2);  /* remove pushed values */
+        lua_copy(L, -1, top + 1);  /* move name to proper place */
+        lua_pop(L, 2);  /* remove pushed values */
         return 1;
     } else {
-        lua.lua_settop(L, top);  /* remove function and global table */
+        lua_settop(L, top);  /* remove function and global table */
         return 0;
     }
 };
 
 const pushfuncname = function(L, ar) {
     if (pushglobalfuncname(L, ar)) {  /* try first a global name */
-        lua.lua_pushfstring(L, to_luastring("function '%s'"), lua.lua_tostring(L, -1));
-        lua.lua_remove(L, -2);  /* remove name */
+        lua_pushfstring(L, to_luastring("function '%s'"), lua_tostring(L, -1));
+        lua_remove(L, -2);  /* remove name */
     }
     else if (ar.namewhat.length !== 0)  /* is there a name from code? */
-        lua.lua_pushfstring(L, to_luastring("%s '%s'"), ar.namewhat, ar.name);  /* use it */
+        lua_pushfstring(L, to_luastring("%s '%s'"), ar.namewhat, ar.name);  /* use it */
     else if (ar.what && ar.what[0] === 'm'.charCodeAt(0))  /* main? */
-        lua.lua_pushliteral(L, "main chunk");
+        lua_pushliteral(L, "main chunk");
     else if (ar.what && ar.what[0] === 'L'.charCodeAt(0))  /* for Lua functions, use <file:line> */
-        lua.lua_pushfstring(L, to_luastring("function <%s:%d>"), ar.short_src, ar.linedefined);
+        lua_pushfstring(L, to_luastring("function <%s:%d>"), ar.short_src, ar.linedefined);
     else  /* nothing left... */
-        lua.lua_pushliteral(L, "?");
+        lua_pushliteral(L, "?");
 };
 
 const lastlevel = function(L) {
-    let ar = new lua.lua_Debug();
+    let ar = new lua_Debug();
     let li = 1;
     let le = 1;
     /* find an upper bound */
-    while (lua.lua_getstack(L, le, ar)) { li = le; le *= 2; }
+    while (lua_getstack(L, le, ar)) { li = le; le *= 2; }
     /* do a binary search */
     while (li < le) {
         let m = Math.floor((li + le)/2);
-        if (lua.lua_getstack(L, m, ar)) li = m + 1;
+        if (lua_getstack(L, m, ar)) li = m + 1;
         else le = m;
     }
     return le - 1;
 };
 
 const luaL_traceback = function(L, L1, msg, level) {
-    let ar = new lua.lua_Debug();
-    let top = lua.lua_gettop(L);
+    let ar = new lua_Debug();
+    let top = lua_gettop(L);
     let last = lastlevel(L1);
     let n1 = last - level > LEVELS1 + LEVELS2 ? LEVELS1 : -1;
     if (msg)
-        lua.lua_pushfstring(L, to_luastring("%s\n"), msg);
+        lua_pushfstring(L, to_luastring("%s\n"), msg);
     luaL_checkstack(L, 10, null);
-    lua.lua_pushliteral(L, "stack traceback:");
-    while (lua.lua_getstack(L1, level++, ar)) {
+    lua_pushliteral(L, "stack traceback:");
+    while (lua_getstack(L1, level++, ar)) {
         if (n1-- === 0) {  /* too many levels? */
-            lua.lua_pushliteral(L, "\n\t...");  /* add a '...' */
+            lua_pushliteral(L, "\n\t...");  /* add a '...' */
             level = last - LEVELS2 + 1;  /* and skip to last ones */
         } else {
-            lua.lua_getinfo(L1, to_luastring("Slnt", true), ar);
-            lua.lua_pushfstring(L, to_luastring("\n\t%s:"), ar.short_src);
+            lua_getinfo(L1, to_luastring("Slnt", true), ar);
+            lua_pushfstring(L, to_luastring("\n\t%s:"), ar.short_src);
             if (ar.currentline > 0)
-                lua.lua_pushliteral(L, `${ar.currentline}:`);
-            lua.lua_pushliteral(L, " in ");
+                lua_pushliteral(L, `${ar.currentline}:`);
+            lua_pushliteral(L, " in ");
             pushfuncname(L, ar);
             if (ar.istailcall)
-                lua.lua_pushliteral(L, "\n\t(...tail calls..)");
-            lua.lua_concat(L, lua.lua_gettop(L) - top);
+                lua_pushliteral(L, "\n\t(...tail calls..)");
+            lua_concat(L, lua_gettop(L) - top);
         }
     }
-    lua.lua_concat(L, lua.lua_gettop(L) - top);
+    lua_concat(L, lua_gettop(L) - top);
 };
 
 const panic = function(L) {
     let msg = "PANIC: unprotected error in call to Lua API";
     try {
-        msg += " (" + lua.lua_tojsstring(L, -1) + ")";
+        msg += " (" + lua_tojsstring(L, -1) + ")";
     } catch (e) {
     }
     throw new Error(msg);
 };
 
 const luaL_argerror = function(L, arg, extramsg) {
-    let ar = new lua.lua_Debug();
+    let ar = new lua_Debug();
 
-    if (!lua.lua_getstack(L, 0, ar))  /* no stack frame? */
+    if (!lua_getstack(L, 0, ar))  /* no stack frame? */
         return luaL_error(L, to_luastring("bad argument #%d (%s)"), arg, extramsg);
 
-    lua.lua_getinfo(L, to_luastring("n"), ar);
+    lua_getinfo(L, to_luastring("n"), ar);
 
     if (luastring_eq(ar.namewhat, to_luastring("method"))) {
         arg--;  /* do not count 'self' */
@@ -165,55 +243,55 @@ const luaL_argerror = function(L, arg, extramsg) {
     }
 
     if (ar.name === null)
-        ar.name = pushglobalfuncname(L, ar) ? lua.lua_tostring(L, -1) : to_luastring("?");
+        ar.name = pushglobalfuncname(L, ar) ? lua_tostring(L, -1) : to_luastring("?");
 
     return luaL_error(L, to_luastring("bad argument #%d to '%s' (%s)"), arg, ar.name, extramsg);
 };
 
 const typeerror = function(L, arg, tname) {
     let typearg;
-    if (luaL_getmetafield(L, arg, __name) === lua.LUA_TSTRING)
-        typearg = lua.lua_tostring(L, -1);
-    else if (lua.lua_type(L, arg) === lua.LUA_TLIGHTUSERDATA)
+    if (luaL_getmetafield(L, arg, __name) === LUA_TSTRING)
+        typearg = lua_tostring(L, -1);
+    else if (lua_type(L, arg) === LUA_TLIGHTUSERDATA)
         typearg = to_luastring("light userdata", true);
     else
         typearg = luaL_typename(L, arg);
 
-    let msg = lua.lua_pushfstring(L, to_luastring("%s expected, got %s"), tname, typearg);
+    let msg = lua_pushfstring(L, to_luastring("%s expected, got %s"), tname, typearg);
     return luaL_argerror(L, arg, msg);
 };
 
 const luaL_where = function(L, level) {
-    let ar = new lua.lua_Debug();
-    if (lua.lua_getstack(L, level, ar)) {
-        lua.lua_getinfo(L, to_luastring("Sl", true), ar);
+    let ar = new lua_Debug();
+    if (lua_getstack(L, level, ar)) {
+        lua_getinfo(L, to_luastring("Sl", true), ar);
         if (ar.currentline > 0) {
-            lua.lua_pushfstring(L, to_luastring("%s:%d: "), ar.short_src, ar.currentline);
+            lua_pushfstring(L, to_luastring("%s:%d: "), ar.short_src, ar.currentline);
             return;
         }
     }
-    lua.lua_pushstring(L, to_luastring(""));
+    lua_pushstring(L, to_luastring(""));
 };
 
 const luaL_error = function(L, fmt, ...argp) {
     luaL_where(L, 1);
-    lua.lua_pushvfstring(L, fmt, argp);
-    lua.lua_concat(L, 2);
-    return lua.lua_error(L);
+    lua_pushvfstring(L, fmt, argp);
+    lua_concat(L, 2);
+    return lua_error(L);
 };
 
 /* Unlike normal lua, we pass in an error object */
 const luaL_fileresult = function(L, stat, fname, e) {
     if (stat) {
-        lua.lua_pushboolean(L, 1);
+        lua_pushboolean(L, 1);
         return 1;
     } else {
-        lua.lua_pushnil(L);
+        lua_pushnil(L);
         if (fname)
-            lua.lua_pushfstring(L, to_luastring("%s: %s"), fname, to_luastring(e.message));
+            lua_pushfstring(L, to_luastring("%s: %s"), fname, to_luastring(e.message));
         else
-            lua.lua_pushstring(L, to_luastring(e.message));
-        lua.lua_pushinteger(L, -e.errno);
+            lua_pushstring(L, to_luastring(e.message));
+        lua_pushinteger(L, -e.errno);
         return 3;
     }
 };
@@ -222,9 +300,9 @@ const luaL_fileresult = function(L, stat, fname, e) {
 const luaL_execresult = function(L, e) {
     let what, stat;
     if (e === null) {
-        lua.lua_pushboolean(L, 1);
-        lua.lua_pushliteral(L, "exit");
-        lua.lua_pushinteger(L, 0);
+        lua_pushboolean(L, 1);
+        lua_pushliteral(L, "exit");
+        lua_pushinteger(L, 0);
         return 3;
     } else if (e.status) {
         what = "exit";
@@ -236,42 +314,42 @@ const luaL_execresult = function(L, e) {
         /* XXX: node seems to have e.errno as a string instead of a number */
         return luaL_fileresult(L, 0, null, e);
     }
-    lua.lua_pushnil(L);
-    lua.lua_pushliteral(L, what);
-    lua.lua_pushinteger(L, stat);
+    lua_pushnil(L);
+    lua_pushliteral(L, what);
+    lua_pushinteger(L, stat);
     return 3;
 };
 
 const luaL_getmetatable = function(L, n) {
-    return lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, n);
+    return lua_getfield(L, LUA_REGISTRYINDEX, n);
 };
 
 const luaL_newmetatable = function(L, tname) {
-    if (luaL_getmetatable(L, tname) !== lua.LUA_TNIL)  /* name already in use? */
+    if (luaL_getmetatable(L, tname) !== LUA_TNIL)  /* name already in use? */
         return 0;  /* leave previous value on top, but return 0 */
-    lua.lua_pop(L, 1);
-    lua.lua_createtable(L, 0, 2);  /* create metatable */
-    lua.lua_pushstring(L, tname);
-    lua.lua_setfield(L, -2, __name);  /* metatable.__name = tname */
-    lua.lua_pushvalue(L, -1);
-    lua.lua_setfield(L, lua.LUA_REGISTRYINDEX, tname);  /* registry.name = metatable */
+    lua_pop(L, 1);
+    lua_createtable(L, 0, 2);  /* create metatable */
+    lua_pushstring(L, tname);
+    lua_setfield(L, -2, __name);  /* metatable.__name = tname */
+    lua_pushvalue(L, -1);
+    lua_setfield(L, LUA_REGISTRYINDEX, tname);  /* registry.name = metatable */
     return 1;
 
 };
 
 const luaL_setmetatable = function(L, tname) {
     luaL_getmetatable(L, tname);
-    lua.lua_setmetatable(L, -2);
+    lua_setmetatable(L, -2);
 };
 
 const luaL_testudata = function(L, ud, tname) {
-    let p = lua.lua_touserdata(L, ud);
+    let p = lua_touserdata(L, ud);
     if (p !== null) {  /* value is a userdata? */
-        if (lua.lua_getmetatable(L, ud)) {  /* does it have a metatable? */
+        if (lua_getmetatable(L, ud)) {  /* does it have a metatable? */
             luaL_getmetatable(L, tname);  /* get correct metatable */
-            if (!lua.lua_rawequal(L, -1, -2))  /* not the same? */
+            if (!lua_rawequal(L, -1, -2))  /* not the same? */
                 p = null;  /* value is a userdata with wrong metatable */
-            lua.lua_pop(L, 2);  /* remove both metatables */
+            lua_pop(L, 2);  /* remove both metatables */
             return p;
         }
     }
@@ -289,22 +367,22 @@ const luaL_checkoption = function(L, arg, def, lst) {
     for (let i = 0; lst[i]; i++)
         if (lst[i].join('|') === name.join('|'))
             return i;
-    return luaL_argerror(L, arg, lua.lua_pushfstring(L, to_luastring("invalid option '%s'"), name));
+    return luaL_argerror(L, arg, lua_pushfstring(L, to_luastring("invalid option '%s'"), name));
 };
 
 const tag_error = function(L, arg, tag) {
-    typeerror(L, arg, lua.lua_typename(L, tag));
+    typeerror(L, arg, lua_typename(L, tag));
 };
 
 const luaL_newstate = function() {
-    let L = lua.lua_newstate();
-    if (L) lua.lua_atpanic(L, panic);
+    let L = lua_newstate();
+    if (L) lua_atpanic(L, panic);
     return L;
 };
 
 
 const luaL_typename = function(L, i) {
-    return lua.lua_typename(L, lua.lua_type(L, i));
+    return lua_typename(L, lua_type(L, i));
 };
 
 const luaL_argcheck = function(L, cond, arg, extramsg) {
@@ -312,12 +390,12 @@ const luaL_argcheck = function(L, cond, arg, extramsg) {
 };
 
 const luaL_checkany = function(L, arg) {
-    if (lua.lua_type(L, arg) === lua.LUA_TNONE)
+    if (lua_type(L, arg) === LUA_TNONE)
         luaL_argerror(L, arg, to_luastring("value expected", true));
 };
 
 const luaL_checktype = function(L, arg, t) {
-    if (lua.lua_type(L, arg) !== t)
+    if (lua_type(L, arg) !== t)
         tag_error(L, arg, t);
 };
 
@@ -326,13 +404,13 @@ const luaL_checkstring = function(L, n) {
 };
 
 const luaL_checklstring = function(L, arg) {
-    let s = lua.lua_tolstring(L, arg);
-    if (s === null || s === undefined) tag_error(L, arg, lua.LUA_TSTRING);
+    let s = lua_tolstring(L, arg);
+    if (s === null || s === undefined) tag_error(L, arg, LUA_TSTRING);
     return s;
 };
 
 const luaL_optlstring = function(L, arg, def) {
-    if (lua.lua_type(L, arg) <= 0) {
+    if (lua_type(L, arg) <= 0) {
         return def;
     } else return luaL_checklstring(L, arg);
 };
@@ -340,16 +418,16 @@ const luaL_optlstring = function(L, arg, def) {
 const luaL_optstring = luaL_optlstring;
 
 const interror = function(L, arg) {
-    if (lua.lua_isnumber(L, arg))
+    if (lua_isnumber(L, arg))
         luaL_argerror(L, arg, to_luastring("number has no integer representation", true));
     else
-        tag_error(L, arg, lua.LUA_TNUMBER);
+        tag_error(L, arg, LUA_TNUMBER);
 };
 
 const luaL_checknumber = function(L, arg) {
-    let d = lua.lua_tonumberx(L, arg);
+    let d = lua_tonumberx(L, arg);
     if (d === false)
-        tag_error(L, arg, lua.LUA_TNUMBER);
+        tag_error(L, arg, LUA_TNUMBER);
     return d;
 };
 
@@ -358,7 +436,7 @@ const luaL_optnumber = function(L, arg, def) {
 };
 
 const luaL_checkinteger = function(L, arg) {
-    let d = lua.lua_tointegerx(L, arg);
+    let d = lua_tointegerx(L, arg);
     if (d === false)
         interror(L, arg);
     return d;
@@ -408,7 +486,7 @@ const luaL_addstring = function(B, s) {
 };
 
 const luaL_pushresult = function(B) {
-    lua.lua_pushlstring(B.L, B.b, B.n);
+    lua_pushlstring(B.L, B.b, B.n);
     /* delete old buffer */
     B.n = 0;
     B.b = empty;
@@ -430,13 +508,13 @@ const luaL_pushresultsize = function(B, sz) {
 
 const luaL_addvalue = function(B) {
     let L = B.L;
-    let s = lua.lua_tostring(L, -1);
+    let s = lua_tostring(L, -1);
     luaL_addlstring(B, s, s.length);
-    lua.lua_pop(L, 1);  /* remove value */
+    lua_pop(L, 1);  /* remove value */
 };
 
 const luaL_opt = function(L, f, n, d) {
-    return lua.lua_type(L, n) <= 0 ? d : f(L, n);
+    return lua_type(L, n) <= 0 ? d : f(L, n);
 };
 
 const getS = function(L, ud) {
@@ -446,7 +524,7 @@ const getS = function(L, ud) {
 };
 
 const luaL_loadbufferx = function(L, buff, size, name, mode) {
-    return lua.lua_load(L, getS, {string: buff}, name, mode);
+    return lua_load(L, getS, {string: buff}, name, mode);
 };
 
 const luaL_loadbuffer = function(L, s, sz, n) {
@@ -458,40 +536,40 @@ const luaL_loadstring = function(L, s) {
 };
 
 const luaL_dostring = function(L, s) {
-    return (luaL_loadstring(L, s) || lua.lua_pcall(L, 0, lua.LUA_MULTRET, 0));
+    return (luaL_loadstring(L, s) || lua_pcall(L, 0, LUA_MULTRET, 0));
 };
 
 const luaL_getmetafield = function(L, obj, event) {
-    if (!lua.lua_getmetatable(L, obj))  /* no metatable? */
-        return lua.LUA_TNIL;
+    if (!lua_getmetatable(L, obj))  /* no metatable? */
+        return LUA_TNIL;
     else {
-        lua.lua_pushstring(L, event);
-        let tt = lua.lua_rawget(L, -2);
-        if (tt === lua.LUA_TNIL)  /* is metafield nil? */
-            lua.lua_pop(L, 2);  /* remove metatable and metafield */
+        lua_pushstring(L, event);
+        let tt = lua_rawget(L, -2);
+        if (tt === LUA_TNIL)  /* is metafield nil? */
+            lua_pop(L, 2);  /* remove metatable and metafield */
         else
-            lua.lua_remove(L, -2);  /* remove only metatable */
+            lua_remove(L, -2);  /* remove only metatable */
         return tt;  /* return metafield type */
     }
 };
 
 const luaL_callmeta = function(L, obj, event) {
-    obj = lua.lua_absindex(L, obj);
-    if (luaL_getmetafield(L, obj, event) === lua.LUA_TNIL)
+    obj = lua_absindex(L, obj);
+    if (luaL_getmetafield(L, obj, event) === LUA_TNIL)
         return false;
 
-    lua.lua_pushvalue(L, obj);
-    lua.lua_call(L, 1, 1);
+    lua_pushvalue(L, obj);
+    lua_call(L, 1, 1);
 
     return true;
 };
 
 const luaL_len = function(L, idx) {
-    lua.lua_len(L, idx);
-    let l = lua.lua_tointegerx(L, -1);
+    lua_len(L, idx);
+    let l = lua_tointegerx(L, -1);
     if (l === false)
         luaL_error(L, to_luastring("object length is not an integer", true));
-    lua.lua_pop(L, 1);  /* remove object */
+    lua_pop(L, 1);  /* remove object */
     return l;
 };
 
@@ -499,39 +577,39 @@ const p_I = to_luastring("%I");
 const p_f = to_luastring("%f");
 const luaL_tolstring = function(L, idx) {
     if (luaL_callmeta(L, idx, __tostring)) {
-        if (!lua.lua_isstring(L, -1))
+        if (!lua_isstring(L, -1))
             luaL_error(L, to_luastring("'__tostring' must return a string"));
     } else {
-        let t = lua.lua_type(L, idx);
+        let t = lua_type(L, idx);
         switch(t) {
-            case lua.LUA_TNUMBER: {
-                if (lua.lua_isinteger(L, idx))
-                    lua.lua_pushfstring(L, p_I, lua.lua_tointeger(L, idx));
+            case LUA_TNUMBER: {
+                if (lua_isinteger(L, idx))
+                    lua_pushfstring(L, p_I, lua_tointeger(L, idx));
                 else
-                    lua.lua_pushfstring(L, p_f, lua.lua_tonumber(L, idx));
+                    lua_pushfstring(L, p_f, lua_tonumber(L, idx));
                 break;
             }
-            case lua.LUA_TSTRING:
-                lua.lua_pushvalue(L, idx);
+            case LUA_TSTRING:
+                lua_pushvalue(L, idx);
                 break;
-            case lua.LUA_TBOOLEAN:
-                lua.lua_pushliteral(L, (lua.lua_toboolean(L, idx) ? "true" : "false"));
+            case LUA_TBOOLEAN:
+                lua_pushliteral(L, (lua_toboolean(L, idx) ? "true" : "false"));
                 break;
-            case lua.LUA_TNIL:
-                lua.lua_pushliteral(L, "nil");
+            case LUA_TNIL:
+                lua_pushliteral(L, "nil");
                 break;
             default: {
                 let tt = luaL_getmetafield(L, idx, __name);
-                let kind = tt === lua.LUA_TSTRING ? lua.lua_tostring(L, -1) : luaL_typename(L, idx);
-                lua.lua_pushfstring(L, to_luastring("%s: %p"), kind, lua.lua_topointer(L, idx));
-                if (tt !== lua.LUA_TNIL)
-                    lua.lua_remove(L, -2);
+                let kind = tt === LUA_TSTRING ? lua_tostring(L, -1) : luaL_typename(L, idx);
+                lua_pushfstring(L, to_luastring("%s: %p"), kind, lua_topointer(L, idx));
+                if (tt !== LUA_TNIL)
+                    lua_remove(L, -2);
                 break;
             }
         }
     }
 
-    return lua.lua_tolstring(L, -1);
+    return lua_tolstring(L, -1);
 };
 
 /*
@@ -541,20 +619,20 @@ const luaL_tolstring = function(L, idx) {
 ** Leaves resulting module on the top.
 */
 const luaL_requiref = function(L, modname, openf, glb) {
-    luaL_getsubtable(L, lua.LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
-    lua.lua_getfield(L, -1, modname); /* LOADED[modname] */
-    if (!lua.lua_toboolean(L, -1)) {  /* package not already loaded? */
-        lua.lua_pop(L, 1);  /* remove field */
-        lua.lua_pushcfunction(L, openf);
-        lua.lua_pushstring(L, modname);  /* argument to open function */
-        lua.lua_call(L, 1, 1);  /* call 'openf' to open module */
-        lua.lua_pushvalue(L, -1);  /* make copy of module (call result) */
-        lua.lua_setfield(L, -3, modname);  /* LOADED[modname] = module */
+    luaL_getsubtable(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
+    lua_getfield(L, -1, modname); /* LOADED[modname] */
+    if (!lua_toboolean(L, -1)) {  /* package not already loaded? */
+        lua_pop(L, 1);  /* remove field */
+        lua_pushcfunction(L, openf);
+        lua_pushstring(L, modname);  /* argument to open function */
+        lua_call(L, 1, 1);  /* call 'openf' to open module */
+        lua_pushvalue(L, -1);  /* make copy of module (call result) */
+        lua_setfield(L, -3, modname);  /* LOADED[modname] = module */
     }
-    lua.lua_remove(L, -2);  /* remove LOADED table */
+    lua_remove(L, -2);  /* remove LOADED table */
     if (glb) {
-        lua.lua_pushvalue(L, -1);  /* copy of module */
-        lua.lua_setglobal(L, modname);  /* _G[modname] = module */
+        lua_pushvalue(L, -1);  /* copy of module */
+        lua_setglobal(L, modname);  /* _G[modname] = module */
     }
 };
 
@@ -583,7 +661,7 @@ const luaL_gsub = function(L, s, p, r) {
     }
     luaL_addstring(b, s);  /* push last suffix */
     luaL_pushresult(b);
-    return lua.lua_tostring(L, -1);
+    return lua_tostring(L, -1);
 };
 
 /*
@@ -591,14 +669,14 @@ const luaL_gsub = function(L, s, p, r) {
 ** into the stack
 */
 const luaL_getsubtable = function(L, idx, fname) {
-    if (lua.lua_getfield(L, idx, fname) === lua.LUA_TTABLE)
+    if (lua_getfield(L, idx, fname) === LUA_TTABLE)
         return true;  /* table already there */
     else {
-        lua.lua_pop(L, 1);  /* remove previous result */
-        idx = lua.lua_absindex(L, idx);
-        lua.lua_newtable(L);
-        lua.lua_pushvalue(L, -1);  /* copy to be left at top */
-        lua.lua_setfield(L, idx, fname);  /* assign new table to field */
+        lua_pop(L, 1);  /* remove previous result */
+        idx = lua_absindex(L, idx);
+        lua_newtable(L);
+        lua_pushvalue(L, -1);  /* copy to be left at top */
+        lua_setfield(L, idx, fname);  /* assign new table to field */
         return false;  /* false, because did not find table there */
     }
 };
@@ -612,11 +690,11 @@ const luaL_setfuncs = function(L, l, nup) {
     luaL_checkstack(L, nup, to_luastring("too many upvalues", true));
     for (let lib in l) {  /* fill the table with given functions */
         for (let i = 0; i < nup; i++)  /* copy upvalues to the top */
-            lua.lua_pushvalue(L, -nup);
-        lua.lua_pushcclosure(L, l[lib], nup);  /* closure with those upvalues */
-        lua.lua_setfield(L, -(nup + 2), to_luastring(lib));
+            lua_pushvalue(L, -nup);
+        lua_pushcclosure(L, l[lib], nup);  /* closure with those upvalues */
+        lua_setfield(L, -(nup + 2), to_luastring(lib));
     }
-    lua.lua_pop(L, nup);  /* remove upvalues */
+    lua_pop(L, nup);  /* remove upvalues */
 };
 
 /*
@@ -627,7 +705,7 @@ const luaL_setfuncs = function(L, l, nup) {
 ** but without 'msg'.)
 */
 const luaL_checkstack = function(L, space, msg) {
-    if (!lua.lua_checkstack(L, space)) {
+    if (!lua_checkstack(L, space)) {
         if (msg)
             luaL_error(L, to_luastring("stack overflow (%s)"), msg);
         else
@@ -636,11 +714,11 @@ const luaL_checkstack = function(L, space, msg) {
 };
 
 const luaL_newlibtable = function(L) {
-    lua.lua_createtable(L);
+    lua_createtable(L);
 };
 
 const luaL_newlib = function(L, l) {
-    lua.lua_createtable(L);
+    lua_createtable(L);
     luaL_setfuncs(L, l, 0);
 };
 
@@ -650,41 +728,41 @@ const LUA_REFNIL = -1;
 
 const luaL_ref = function(L, t) {
     let ref;
-    if (lua.lua_isnil(L, -1)) {
-        lua.lua_pop(L, 1);  /* remove from stack */
+    if (lua_isnil(L, -1)) {
+        lua_pop(L, 1);  /* remove from stack */
         return LUA_REFNIL;  /* 'nil' has a unique fixed reference */
     }
-    t = lua.lua_absindex(L, t);
-    lua.lua_rawgeti(L, t, 0);  /* get first free element */
-    ref = lua.lua_tointeger(L, -1);  /* ref = t[freelist] */
-    lua.lua_pop(L, 1);  /* remove it from stack */
+    t = lua_absindex(L, t);
+    lua_rawgeti(L, t, 0);  /* get first free element */
+    ref = lua_tointeger(L, -1);  /* ref = t[freelist] */
+    lua_pop(L, 1);  /* remove it from stack */
     if (ref !== 0) {  /* any free element? */
-        lua.lua_rawgeti(L, t, ref);  /* remove it from list */
-        lua.lua_rawseti(L, t, 0);  /* (t[freelist] = t[ref]) */
+        lua_rawgeti(L, t, ref);  /* remove it from list */
+        lua_rawseti(L, t, 0);  /* (t[freelist] = t[ref]) */
     }
     else  /* no free elements */
-        ref = lua.lua_rawlen(L, t) + 1;  /* get a new reference */
-    lua.lua_rawseti(L, t, ref);
+        ref = lua_rawlen(L, t) + 1;  /* get a new reference */
+    lua_rawseti(L, t, ref);
     return ref;
 };
 
 
 const luaL_unref = function(L, t, ref) {
     if (ref >= 0) {
-        t = lua.lua_absindex(L, t);
-        lua.lua_rawgeti(L, t, 0);
-        lua.lua_rawseti(L, t, ref);  /* t[ref] = t[freelist] */
-        lua.lua_pushinteger(L, ref);
-        lua.lua_rawseti(L, t, 0);  /* t[freelist] = ref */
+        t = lua_absindex(L, t);
+        lua_rawgeti(L, t, 0);
+        lua_rawseti(L, t, ref);  /* t[ref] = t[freelist] */
+        lua_pushinteger(L, ref);
+        lua_rawseti(L, t, 0);  /* t[freelist] = ref */
     }
 };
 
 
 const errfile = function(L, what, fnameindex, error) {
     let serr = error.message;
-    let filename = lua.lua_tostring(L, fnameindex).subarray(1);
-    lua.lua_pushfstring(L, to_luastring("cannot %s %s: %s"), to_luastring(what), filename, to_luastring(serr));
-    lua.lua_remove(L, fnameindex);
+    let filename = lua_tostring(L, fnameindex).subarray(1);
+    lua_pushfstring(L, to_luastring("cannot %s %s: %s"), to_luastring(what), filename, to_luastring(serr));
+    lua_remove(L, fnameindex);
     return LUA_ERRFILE;
 };
 
@@ -765,11 +843,11 @@ if (typeof process === "undefined") {
 
     luaL_loadfilex = function(L, filename, mode) {
         let lf = new LoadF();
-        let fnameindex = lua.lua_gettop(L) + 1;  /* index of filename on the stack */
+        let fnameindex = lua_gettop(L) + 1;  /* index of filename on the stack */
         if (filename === null) {
             throw new Error("Can't read stdin in the browser");
         } else {
-            lua.lua_pushfstring(L, to_luastring("@%s"), filename);
+            lua_pushfstring(L, to_luastring("@%s"), filename);
             let path = to_uristring(filename);
             let xhr = new XMLHttpRequest();
             xhr.open("GET", path, false);
@@ -793,20 +871,20 @@ if (typeof process === "undefined") {
         }
         let com = skipcomment(lf);
         /* check for signature first, as we don't want to add line number corrections in binary case */
-        if (com.c === lua.LUA_SIGNATURE.charCodeAt(0) && filename) {  /* binary file? */
+        if (com.c === LUA_SIGNATURE.charCodeAt(0) && filename) {  /* binary file? */
             /* no need to re-open in node.js */
         } else if (com.skipped) { /* read initial portion */
             lf.buff[lf.n++] = '\n'.charCodeAt(0);  /* add line to correct line numbers */
         }
         if (com.c !== null)
             lf.buff[lf.n++] = com.c; /* 'c' is the first character of the stream */
-        let status = lua.lua_load(L, getF, lf, lua.lua_tostring(L, -1), mode);
+        let status = lua_load(L, getF, lf, lua_tostring(L, -1), mode);
         let readstatus = lf.err;
         if (readstatus) {
-            lua.lua_settop(L, fnameindex);  /* ignore results from 'lua_load' */
+            lua_settop(L, fnameindex);  /* ignore results from 'lua_load' */
             return errfile(L, "read", fnameindex, readstatus);
         }
-        lua.lua_remove(L, fnameindex);
+        lua_remove(L, fnameindex);
         return status;
     };
 } else {
@@ -847,12 +925,12 @@ if (typeof process === "undefined") {
 
     luaL_loadfilex = function(L, filename, mode) {
         let lf = new LoadF();
-        let fnameindex = lua.lua_gettop(L) + 1;  /* index of filename on the stack */
+        let fnameindex = lua_gettop(L) + 1;  /* index of filename on the stack */
         if (filename === null) {
-            lua.lua_pushliteral(L, "=stdin");
+            lua_pushliteral(L, "=stdin");
             lf.f = process.stdin.fd;
         } else {
-            lua.lua_pushfstring(L, to_luastring("@%s"), filename);
+            lua_pushfstring(L, to_luastring("@%s"), filename);
             try {
                 lf.f = fs.openSync(filename, "r");
             } catch (e) {
@@ -861,21 +939,21 @@ if (typeof process === "undefined") {
         }
         let com = skipcomment(lf);
         /* check for signature first, as we don't want to add line number corrections in binary case */
-        if (com.c === lua.LUA_SIGNATURE.charCodeAt(0) && filename) {  /* binary file? */
+        if (com.c === LUA_SIGNATURE.charCodeAt(0) && filename) {  /* binary file? */
             /* no need to re-open in node.js */
         } else if (com.skipped) { /* read initial portion */
             lf.buff[lf.n++] = '\n'.charCodeAt(0);  /* add line to correct line numbers */
         }
         if (com.c !== null)
             lf.buff[lf.n++] = com.c; /* 'c' is the first character of the stream */
-        let status = lua.lua_load(L, getF, lf, lua.lua_tostring(L, -1), mode);
+        let status = lua_load(L, getF, lf, lua_tostring(L, -1), mode);
         let readstatus = lf.err;
         if (filename) try { fs.closeSync(lf.f); } catch(e) {}  /* close file (even in case of errors) */
         if (readstatus) {
-            lua.lua_settop(L, fnameindex);  /* ignore results from 'lua_load' */
+            lua_settop(L, fnameindex);  /* ignore results from 'lua_load' */
             return errfile(L, "read", fnameindex, readstatus);
         }
-        lua.lua_remove(L, fnameindex);
+        lua_remove(L, fnameindex);
         return status;
     };
 }
@@ -885,7 +963,7 @@ const luaL_loadfile = function(L, filename) {
 };
 
 const luaL_dofile = function(L, filename) {
-    return (luaL_loadfile(L, filename) || lua.lua_pcall(L, 0, lua.LUA_MULTRET, 0));
+    return (luaL_loadfile(L, filename) || lua_pcall(L, 0, LUA_MULTRET, 0));
 };
 
 const lua_writestringerror = function() {
@@ -907,10 +985,10 @@ const lua_writestringerror = function() {
 };
 
 const luaL_checkversion_ = function(L, ver, sz) {
-    let v = lua.lua_version(L);
+    let v = lua_version(L);
     if (sz != LUAL_NUMSIZES)  /* check numeric types */
         luaL_error(L, to_luastring("core and library have incompatible numeric types"));
-    if (v != lua.lua_version(null))
+    if (v != lua_version(null))
         luaL_error(L, to_luastring("multiple Lua VMs detected"));
     else if (v !== ver)
         luaL_error(L, to_luastring("version mismatch: app. needs %f, Lua core provides %f"), ver, v);
@@ -918,7 +996,7 @@ const luaL_checkversion_ = function(L, ver, sz) {
 
 /* There is no point in providing this function... */
 const luaL_checkversion = function(L) {
-    luaL_checkversion_(L, lua.LUA_VERSION_NUM, LUAL_NUMSIZES);
+    luaL_checkversion_(L, LUA_VERSION_NUM, LUAL_NUMSIZES);
 };
 
 module.exports.LUA_ERRFILE          = LUA_ERRFILE;
