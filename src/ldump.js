@@ -1,12 +1,25 @@
 "use strict";
 
-const defs    = require('./defs.js');
-const CT      = defs.constant_types;
+const {
+    LUA_SIGNATURE,
+    LUA_VERSION_MAJOR,
+    LUA_VERSION_MINOR,
+    constant_types: {
+        LUA_TBOOLEAN,
+        LUA_TLNGSTR,
+        LUA_TNIL,
+        LUA_TNUMFLT,
+        LUA_TNUMINT,
+        LUA_TSHRSTR
+    },
+    luastring_of,
+    to_luastring
+} = require('./defs.js');
 
-const LUAC_DATA    = defs.luastring_of(25, 147, 13, 10, 26, 10);
+const LUAC_DATA    = luastring_of(25, 147, 13, 10, 26, 10);
 const LUAC_INT     = 0x5678;
 const LUAC_NUM     = 370.5;
-const LUAC_VERSION = Number(defs.LUA_VERSION_MAJOR) * 16 + Number(defs.LUA_VERSION_MINOR);
+const LUAC_VERSION = Number(LUA_VERSION_MAJOR) * 16 + Number(LUA_VERSION_MINOR);
 const LUAC_FORMAT  = 0;   /* this is the official format */
 
 class DumpState {
@@ -25,12 +38,12 @@ const DumpBlock = function(b, size, D) {
 };
 
 const DumpLiteral = function(s, D) {
-    s = defs.to_luastring(s);
+    s = to_luastring(s);
     DumpBlock(s, s.length, D);
 };
 
 const DumpByte = function(y, D) {
-    DumpBlock(defs.luastring_of(y), 1, D);
+    DumpBlock(luastring_of(y), 1, D);
 };
 
 const DumpInt = function(x, D) {
@@ -88,19 +101,19 @@ const DumpConstants = function(f, D) {
         let o = f.k[i];
         DumpByte(o.ttype(), D);
         switch (o.ttype()) {
-            case CT.LUA_TNIL:
+            case LUA_TNIL:
                 break;
-            case CT.LUA_TBOOLEAN:
+            case LUA_TBOOLEAN:
                 DumpByte(o.value ? 1 : 0, D);
                 break;
-            case CT.LUA_TNUMFLT:
+            case LUA_TNUMFLT:
                 DumpNumber(o.value, D);
                 break;
-            case CT.LUA_TNUMINT:
+            case LUA_TNUMINT:
                 DumpInteger(o.value, D);
                 break;
-            case CT.LUA_TSHRSTR:
-            case CT.LUA_TLNGSTR:
+            case LUA_TSHRSTR:
+            case LUA_TLNGSTR:
                 DumpString(o.tsvalue(), D);
                 break;
         }
@@ -159,7 +172,7 @@ const DumpFunction = function(f, psource, D) {
 };
 
 const DumpHeader = function(D) {
-    DumpLiteral(defs.LUA_SIGNATURE, D);
+    DumpLiteral(LUA_SIGNATURE, D);
     DumpByte(LUAC_VERSION, D);
     DumpByte(LUAC_FORMAT, D);
     DumpBlock(LUAC_DATA, LUAC_DATA.length, D);
