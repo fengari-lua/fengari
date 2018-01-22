@@ -1,8 +1,80 @@
 "use strict";
 
-const lua     = require('./lua.js');
-const lauxlib = require('./lauxlib.js');
-const {to_jsstring, to_luastring} = require("./fengaricore.js");
+const {
+    LUA_MULTRET,
+    LUA_OK,
+    LUA_TFUNCTION,
+    LUA_TNIL,
+    LUA_TNONE,
+    LUA_TNUMBER,
+    LUA_TSTRING,
+    LUA_TTABLE,
+    LUA_VERSION,
+    LUA_YIELD,
+    lua_call,
+    lua_callk,
+    lua_concat,
+    lua_error,
+    lua_getglobal,
+    lua_geti,
+    lua_getmetatable,
+    lua_gettop,
+    lua_insert,
+    lua_isnil,
+    lua_isnone,
+    lua_isstring,
+    lua_load,
+    lua_next,
+    lua_pcallk,
+    lua_pop,
+    lua_pushboolean,
+    lua_pushcfunction,
+    lua_pushglobaltable,
+    lua_pushinteger,
+    lua_pushliteral,
+    lua_pushnil,
+    lua_pushstring,
+    lua_pushvalue,
+    lua_rawequal,
+    lua_rawget,
+    lua_rawlen,
+    lua_rawset,
+    lua_remove,
+    lua_replace,
+    lua_rotate,
+    lua_setfield,
+    lua_setmetatable,
+    lua_settop,
+    lua_setupvalue,
+    lua_stringtonumber,
+    lua_toboolean,
+    lua_tolstring,
+    lua_tostring,
+    lua_type,
+    lua_typename
+} = require('./lua.js');
+const {
+    luaL_argcheck,
+    luaL_checkany,
+    luaL_checkinteger,
+    luaL_checkoption,
+    luaL_checkstack,
+    luaL_checktype,
+    luaL_error,
+    luaL_getmetafield,
+    luaL_loadbufferx,
+    luaL_loadfile,
+    luaL_loadfilex,
+    luaL_optinteger,
+    luaL_optstring,
+    luaL_setfuncs,
+    luaL_tolstring,
+    luaL_where
+} = require('./lauxlib.js');
+const {
+    to_jsstring,
+    to_luastring
+} = require("./fengaricore.js");
 
 let lua_writestring;
 let lua_writeline;
@@ -47,79 +119,79 @@ if (typeof process === "undefined") {
     };
 }
 const luaB_print = function(L) {
-    let n = lua.lua_gettop(L); /* number of arguments */
-    lua.lua_getglobal(L, to_luastring("tostring", true));
+    let n = lua_gettop(L); /* number of arguments */
+    lua_getglobal(L, to_luastring("tostring", true));
     for (let i = 1; i <= n; i++) {
-        lua.lua_pushvalue(L, -1);  /* function to be called */
-        lua.lua_pushvalue(L, i);  /* value to print */
-        lua.lua_call(L, 1, 1);
-        let s = lua.lua_tolstring(L, -1);
+        lua_pushvalue(L, -1);  /* function to be called */
+        lua_pushvalue(L, i);  /* value to print */
+        lua_call(L, 1, 1);
+        let s = lua_tolstring(L, -1);
         if (s === null)
-            return lauxlib.luaL_error(L, to_luastring("'tostring' must return a string to 'print'", true));
+            return luaL_error(L, to_luastring("'tostring' must return a string to 'print'", true));
         if (i > 1) lua_writestring(to_luastring("\t"));
         lua_writestring(s);
-        lua.lua_pop(L, 1);
+        lua_pop(L, 1);
     }
     lua_writeline();
     return 0;
 };
 
 const luaB_tostring = function(L) {
-    lauxlib.luaL_checkany(L, 1);
-    lauxlib.luaL_tolstring(L, 1);
+    luaL_checkany(L, 1);
+    luaL_tolstring(L, 1);
 
     return 1;
 };
 
 const luaB_getmetatable = function(L) {
-    lauxlib.luaL_checkany(L, 1);
-    if (!lua.lua_getmetatable(L, 1)) {
-        lua.lua_pushnil(L);
+    luaL_checkany(L, 1);
+    if (!lua_getmetatable(L, 1)) {
+        lua_pushnil(L);
         return 1;  /* no metatable */
     }
-    lauxlib.luaL_getmetafield(L, 1, to_luastring("__metatable", true));
+    luaL_getmetafield(L, 1, to_luastring("__metatable", true));
     return 1;  /* returns either __metatable field (if present) or metatable */
 };
 
 const luaB_setmetatable = function(L) {
-    let t = lua.lua_type(L, 2);
-    lauxlib.luaL_checktype(L, 1, lua.LUA_TTABLE);
-    lauxlib.luaL_argcheck(L, t === lua.LUA_TNIL || t === lua.LUA_TTABLE, 2, to_luastring("nil or table expected", true));
-    if (lauxlib.luaL_getmetafield(L, 1, to_luastring("__metatable", true)) !== lua.LUA_TNIL)
-        return lauxlib.luaL_error(L, to_luastring("cannot change a protected metatable", true));
-    lua.lua_settop(L, 2);
-    lua.lua_setmetatable(L, 1);
+    let t = lua_type(L, 2);
+    luaL_checktype(L, 1, LUA_TTABLE);
+    luaL_argcheck(L, t === LUA_TNIL || t === LUA_TTABLE, 2, to_luastring("nil or table expected", true));
+    if (luaL_getmetafield(L, 1, to_luastring("__metatable", true)) !== LUA_TNIL)
+        return luaL_error(L, to_luastring("cannot change a protected metatable", true));
+    lua_settop(L, 2);
+    lua_setmetatable(L, 1);
     return 1;
 };
 
 const luaB_rawequal = function(L) {
-    lauxlib.luaL_checkany(L, 1);
-    lauxlib.luaL_checkany(L, 2);
-    lua.lua_pushboolean(L, lua.lua_rawequal(L, 1, 2));
+    luaL_checkany(L, 1);
+    luaL_checkany(L, 2);
+    lua_pushboolean(L, lua_rawequal(L, 1, 2));
     return 1;
 };
 
 const luaB_rawlen = function(L) {
-    let t = lua.lua_type(L, 1);
-    lauxlib.luaL_argcheck(L, t === lua.LUA_TTABLE || t === lua.LUA_TSTRING, 1, to_luastring("table or string expected", true));
-    lua.lua_pushinteger(L, lua.lua_rawlen(L, 1));
+    let t = lua_type(L, 1);
+    luaL_argcheck(L, t === LUA_TTABLE || t === LUA_TSTRING, 1, to_luastring("table or string expected", true));
+    lua_pushinteger(L, lua_rawlen(L, 1));
     return 1;
 };
 
 const luaB_rawget = function(L) {
-    lauxlib.luaL_checktype(L, 1, lua.LUA_TTABLE);
-    lauxlib.luaL_checkany(L, 2);
-    lua.lua_settop(L, 2);
-    lua.lua_rawget(L, 1);
+    luaL_checktype(L, 1, LUA_TTABLE);
+    luaL_checkany(L, 2);
+    lua_settop(L, 2);
+    lua_rawget(L, 1);
     return 1;
 };
 
 const luaB_rawset = function(L) {
-    lauxlib.luaL_checktype(L, 1, lua.LUA_TTABLE);
-    lauxlib.luaL_checkany(L, 2);
-    lauxlib.luaL_checkany(L, 3);
-    lua.lua_settop(L, 3);
-    lua.lua_rawset(L, 1);
+    luaL_checktype(L, 1, LUA_TTABLE);
+    luaL_checkany(L, 2);
+    luaL_checkany(L, 3);
+    lua_settop(L, 3);
+    lua_rawset(L, 1);
     return 1;
 };
 
@@ -129,39 +201,39 @@ const opts = [
     "isrunning"
 ].map((e) => to_luastring(e));
 const luaB_collectgarbage = function(L) {
-    lauxlib.luaL_checkoption(L, 1, to_luastring("collect"), opts);
-    lauxlib.luaL_optinteger(L, 2, 0);
-    lauxlib.luaL_error(L, to_luastring("lua_gc not implemented"));
+    luaL_checkoption(L, 1, to_luastring("collect"), opts);
+    luaL_optinteger(L, 2, 0);
+    luaL_error(L, to_luastring("lua_gc not implemented"));
 };
 
 const luaB_type = function(L) {
-    let t = lua.lua_type(L, 1);
-    lauxlib.luaL_argcheck(L, t !== lua.LUA_TNONE, 1, to_luastring("value expected", true));
-    lua.lua_pushstring(L, lua.lua_typename(L, t));
+    let t = lua_type(L, 1);
+    luaL_argcheck(L, t !== LUA_TNONE, 1, to_luastring("value expected", true));
+    lua_pushstring(L, lua_typename(L, t));
     return 1;
 };
 
 const pairsmeta = function(L, method, iszero, iter) {
-    lauxlib.luaL_checkany(L, 1);
-    if (lauxlib.luaL_getmetafield(L, 1, method) === lua.LUA_TNIL) {  /* no metamethod? */
-        lua.lua_pushcfunction(L, iter);  /* will return generator, */
-        lua.lua_pushvalue(L, 1);  /* state, */
-        if (iszero) lua.lua_pushinteger(L, 0);  /* and initial value */
-        else lua.lua_pushnil(L);
+    luaL_checkany(L, 1);
+    if (luaL_getmetafield(L, 1, method) === LUA_TNIL) {  /* no metamethod? */
+        lua_pushcfunction(L, iter);  /* will return generator, */
+        lua_pushvalue(L, 1);  /* state, */
+        if (iszero) lua_pushinteger(L, 0);  /* and initial value */
+        else lua_pushnil(L);
     } else {
-        lua.lua_pushvalue(L, 1);  /* argument 'self' to metamethod */
-        lua.lua_call(L, 1, 3);  /* get 3 values from metamethod */
+        lua_pushvalue(L, 1);  /* argument 'self' to metamethod */
+        lua_call(L, 1, 3);  /* get 3 values from metamethod */
     }
     return 3;
 };
 
 const luaB_next = function(L) {
-    lauxlib.luaL_checktype(L, 1, lua.LUA_TTABLE);
-    lua.lua_settop(L, 2);  /* create a 2nd argument if there isn't one */
-    if (lua.lua_next(L, 1))
+    luaL_checktype(L, 1, LUA_TTABLE);
+    lua_settop(L, 2);  /* create a 2nd argument if there isn't one */
+    if (lua_next(L, 1))
         return 2;
     else {
-        lua.lua_pushnil(L);
+        lua_pushnil(L);
         return 1;
     }
 };
@@ -174,9 +246,9 @@ const luaB_pairs = function(L) {
 ** Traversal function for 'ipairs'
 */
 const ipairsaux = function(L) {
-    let i = lauxlib.luaL_checkinteger(L, 2) + 1;
-    lua.lua_pushinteger(L, i);
-    return lua.lua_geti(L, 1, i) === lua.LUA_TNIL ? 1 : 2;
+    let i = luaL_checkinteger(L, 2) + 1;
+    lua_pushinteger(L, i);
+    return lua_geti(L, 1, i) === LUA_TNIL ? 1 : 2;
 };
 
 /*
@@ -187,10 +259,10 @@ const luaB_ipairs = function(L) {
     // Lua 5.2
     // return pairsmeta(L, "__ipairs", 1, ipairsaux);
 
-    lauxlib.luaL_checkany(L, 1);
-    lua.lua_pushcfunction(L, ipairsaux);  /* iteration function */
-    lua.lua_pushvalue(L, 1);  /* state */
-    lua.lua_pushinteger(L, 0);  /* initial value */
+    luaL_checkany(L, 1);
+    lua_pushcfunction(L, ipairsaux);  /* iteration function */
+    lua_pushvalue(L, 1);  /* state */
+    lua_pushinteger(L, 0);  /* initial value */
     return 3;
 };
 
@@ -216,65 +288,65 @@ const b_str2int = function(s, base) {
 };
 
 const luaB_tonumber = function(L) {
-    if (lua.lua_type(L, 2) <= 0) {  /* standard conversion? */
-        lauxlib.luaL_checkany(L, 1);
-        if (lua.lua_type(L, 1) === lua.LUA_TNUMBER) {  /* already a number? */
-            lua.lua_settop(L, 1);
+    if (lua_type(L, 2) <= 0) {  /* standard conversion? */
+        luaL_checkany(L, 1);
+        if (lua_type(L, 1) === LUA_TNUMBER) {  /* already a number? */
+            lua_settop(L, 1);
             return 1;
         } else {
-            let s = lua.lua_tostring(L, 1);
-            if (s !== null && lua.lua_stringtonumber(L, s) === s.length+1)
+            let s = lua_tostring(L, 1);
+            if (s !== null && lua_stringtonumber(L, s) === s.length+1)
                 return 1;  /* successful conversion to number */
         }
     } else {
-        let base = lauxlib.luaL_checkinteger(L, 2);
-        lauxlib.luaL_checktype(L, 1, lua.LUA_TSTRING);  /* no numbers as strings */
-        let s = lua.lua_tostring(L, 1);
-        lauxlib.luaL_argcheck(L, 2 <= base && base <= 36, 2, to_luastring("base out of range", true));
+        let base = luaL_checkinteger(L, 2);
+        luaL_checktype(L, 1, LUA_TSTRING);  /* no numbers as strings */
+        let s = lua_tostring(L, 1);
+        luaL_argcheck(L, 2 <= base && base <= 36, 2, to_luastring("base out of range", true));
         let n = b_str2int(s, base);
         if (n !== null) {
-            lua.lua_pushinteger(L, n);
+            lua_pushinteger(L, n);
             return 1;
         }
     }
 
-    lua.lua_pushnil(L);
+    lua_pushnil(L);
     return 1;
 };
 
 const luaB_error = function(L) {
-    let level = lauxlib.luaL_optinteger(L, 2, 1);
-    lua.lua_settop(L, 1);
-    if (lua.lua_type(L, 1) === lua.LUA_TSTRING && level > 0) {
-        lauxlib.luaL_where(L, level);  /* add extra information */
-        lua.lua_pushvalue(L, 1);
-        lua.lua_concat(L, 2);
+    let level = luaL_optinteger(L, 2, 1);
+    lua_settop(L, 1);
+    if (lua_type(L, 1) === LUA_TSTRING && level > 0) {
+        luaL_where(L, level);  /* add extra information */
+        lua_pushvalue(L, 1);
+        lua_concat(L, 2);
     }
-    return lua.lua_error(L);
+    return lua_error(L);
 };
 
 const luaB_assert = function(L) {
-    if (lua.lua_toboolean(L, 1))  /* condition is true? */
-        return lua.lua_gettop(L);  /* return all arguments */
+    if (lua_toboolean(L, 1))  /* condition is true? */
+        return lua_gettop(L);  /* return all arguments */
     else {
-        lauxlib.luaL_checkany(L, 1);  /* there must be a condition */
-        lua.lua_remove(L, 1);  /* remove it */
-        lua.lua_pushliteral(L, "assertion failed!");  /* default message */
-        lua.lua_settop(L, 1);  /* leave only message (default if no other one) */
+        luaL_checkany(L, 1);  /* there must be a condition */
+        lua_remove(L, 1);  /* remove it */
+        lua_pushliteral(L, "assertion failed!");  /* default message */
+        lua_settop(L, 1);  /* leave only message (default if no other one) */
         return luaB_error(L);  /* call 'error' */
     }
 };
 
 const luaB_select = function(L) {
-    let n = lua.lua_gettop(L);
-    if (lua.lua_type(L, 1) === lua.LUA_TSTRING && lua.lua_tostring(L, 1)[0] === "#".charCodeAt(0)) {
-        lua.lua_pushinteger(L, n - 1);
+    let n = lua_gettop(L);
+    if (lua_type(L, 1) === LUA_TSTRING && lua_tostring(L, 1)[0] === "#".charCodeAt(0)) {
+        lua_pushinteger(L, n - 1);
         return 1;
     } else {
-        let i = lauxlib.luaL_checkinteger(L, 1);
+        let i = luaL_checkinteger(L, 1);
         if (i < 0) i = n + i;
         else if (i > n) i = n;
-        lauxlib.luaL_argcheck(L, 1 <= i, 1, to_luastring("index out of range", true));
+        luaL_argcheck(L, 1 <= i, 1, to_luastring("index out of range", true));
         return n - i;
     }
 };
@@ -287,19 +359,19 @@ const luaB_select = function(L) {
 ** ignored).
 */
 const finishpcall = function(L, status, extra) {
-    if (status !== lua.LUA_OK && status !== lua.LUA_YIELD) {  /* error? */
-        lua.lua_pushboolean(L, 0);  /* first result (false) */
-        lua.lua_pushvalue(L, -2);  /* error message */
+    if (status !== LUA_OK && status !== LUA_YIELD) {  /* error? */
+        lua_pushboolean(L, 0);  /* first result (false) */
+        lua_pushvalue(L, -2);  /* error message */
         return 2;  /* return false, msg */
     } else
-        return lua.lua_gettop(L) - extra;
+        return lua_gettop(L) - extra;
 };
 
 const luaB_pcall = function(L) {
-    lauxlib.luaL_checkany(L, 1);
-    lua.lua_pushboolean(L, 1);  /* first result if no errors */
-    lua.lua_insert(L, 1);  /* put it in place */
-    let status = lua.lua_pcallk(L, lua.lua_gettop(L) - 2, lua.LUA_MULTRET, 0, 0, finishpcall);
+    luaL_checkany(L, 1);
+    lua_pushboolean(L, 1);  /* first result if no errors */
+    lua_insert(L, 1);  /* put it in place */
+    let status = lua_pcallk(L, lua_gettop(L) - 2, LUA_MULTRET, 0, 0, finishpcall);
     return finishpcall(L, status, 0);
 };
 
@@ -309,27 +381,27 @@ const luaB_pcall = function(L) {
 ** 2 to 'finishpcall' to skip the 2 first values when returning results.
 */
 const luaB_xpcall = function(L) {
-    let n = lua.lua_gettop(L);
-    lauxlib.luaL_checktype(L, 2, lua.LUA_TFUNCTION);  /* check error function */
-    lua.lua_pushboolean(L, 1);  /* first result */
-    lua.lua_pushvalue(L, 1);  /* function */
-    lua.lua_rotate(L, 3, 2);  /* move them below function's arguments */
-    let status = lua.lua_pcallk(L, n - 2, lua.LUA_MULTRET, 2, 2, finishpcall);
+    let n = lua_gettop(L);
+    luaL_checktype(L, 2, LUA_TFUNCTION);  /* check error function */
+    lua_pushboolean(L, 1);  /* first result */
+    lua_pushvalue(L, 1);  /* function */
+    lua_rotate(L, 3, 2);  /* move them below function's arguments */
+    let status = lua_pcallk(L, n - 2, LUA_MULTRET, 2, 2, finishpcall);
     return finishpcall(L, status, 2);
 };
 
 // TODO: does it overwrite the upvalue of the previous closure ?
 const load_aux = function(L, status, envidx) {
-    if (status === lua.LUA_OK) {
+    if (status === LUA_OK) {
         if (envidx !== 0) {  /* 'env' parameter? */
-            lua.lua_pushvalue(L, envidx);  /* environment for loaded function */
-            if (!lua.lua_setupvalue(L, -2, 1))  /* set it as 1st upvalue */
-                lua.lua_pop(L, 1);  /* remove 'env' if not used by previous call */
+            lua_pushvalue(L, envidx);  /* environment for loaded function */
+            if (!lua_setupvalue(L, -2, 1))  /* set it as 1st upvalue */
+                lua_pop(L, 1);  /* remove 'env' if not used by previous call */
         }
         return 1;
     } else {  /* error (message is on top of the stack) */
-        lua.lua_pushnil(L);
-        lua.lua_insert(L, -2);  /* put before error message */
+        lua_pushnil(L);
+        lua_insert(L, -2);  /* put before error message */
         return 2;  /* return nil plus error message */
     }
 };
@@ -348,53 +420,53 @@ const RESERVEDSLOT = 5;
 ** reserved slot inside the stack.
 */
 const generic_reader = function(L, ud) {
-    lauxlib.luaL_checkstack(L, 2, to_luastring("too many nested functions", true));
-    lua.lua_pushvalue(L, 1);  /* get function */
-    lua.lua_call(L, 0, 1);  /* call it */
-    if (lua.lua_isnil(L, -1)) {
-        lua.lua_pop(L, 1);  /* pop result */
+    luaL_checkstack(L, 2, to_luastring("too many nested functions", true));
+    lua_pushvalue(L, 1);  /* get function */
+    lua_call(L, 0, 1);  /* call it */
+    if (lua_isnil(L, -1)) {
+        lua_pop(L, 1);  /* pop result */
         return null;
-    } else if (!lua.lua_isstring(L, -1))
-        lauxlib.luaL_error(L, to_luastring("reader function must return a string", true));
-    lua.lua_replace(L, RESERVEDSLOT);  /* save string in reserved slot */
-    return lua.lua_tostring(L, RESERVEDSLOT);
+    } else if (!lua_isstring(L, -1))
+        luaL_error(L, to_luastring("reader function must return a string", true));
+    lua_replace(L, RESERVEDSLOT);  /* save string in reserved slot */
+    return lua_tostring(L, RESERVEDSLOT);
 };
 
 const luaB_load = function(L) {
-    let s = lua.lua_tostring(L, 1);
-    let mode = lauxlib.luaL_optstring(L, 3, to_luastring("bt", true));
-    let env = !lua.lua_isnone(L, 4) ? 4 : 0;  /* 'env' index or 0 if no 'env' */
+    let s = lua_tostring(L, 1);
+    let mode = luaL_optstring(L, 3, to_luastring("bt", true));
+    let env = !lua_isnone(L, 4) ? 4 : 0;  /* 'env' index or 0 if no 'env' */
     let status;
     if (s !== null) {  /* loading a string? */
-        let chunkname = lauxlib.luaL_optstring(L, 2, s);
-        status = lauxlib.luaL_loadbufferx(L, s, s.length, chunkname, mode);
+        let chunkname = luaL_optstring(L, 2, s);
+        status = luaL_loadbufferx(L, s, s.length, chunkname, mode);
     } else {  /* loading from a reader function */
-        let chunkname = lauxlib.luaL_optstring(L, 2, to_luastring("=(load)", true));
-        lauxlib.luaL_checktype(L, 1, lua.LUA_TFUNCTION);
-        lua.lua_settop(L, RESERVEDSLOT);  /* create reserved slot */
-        status = lua.lua_load(L, generic_reader, null, chunkname, mode);
+        let chunkname = luaL_optstring(L, 2, to_luastring("=(load)", true));
+        luaL_checktype(L, 1, LUA_TFUNCTION);
+        lua_settop(L, RESERVEDSLOT);  /* create reserved slot */
+        status = lua_load(L, generic_reader, null, chunkname, mode);
     }
     return load_aux(L, status, env);
 };
 
 const luaB_loadfile = function(L) {
-    let fname = lauxlib.luaL_optstring(L, 1, null);
-    let mode = lauxlib.luaL_optstring(L, 2, null);
-    let env = !lua.lua_isnone(L, 3) ? 3 : 0;  /* 'env' index or 0 if no 'env' */
-    let status = lauxlib.luaL_loadfilex(L, fname, mode);
+    let fname = luaL_optstring(L, 1, null);
+    let mode = luaL_optstring(L, 2, null);
+    let env = !lua_isnone(L, 3) ? 3 : 0;  /* 'env' index or 0 if no 'env' */
+    let status = luaL_loadfilex(L, fname, mode);
     return load_aux(L, status, env);
 };
 
 const dofilecont = function(L, d1, d2) {
-    return lua.lua_gettop(L) - 1;
+    return lua_gettop(L) - 1;
 };
 
 const luaB_dofile = function(L) {
-    let fname = lauxlib.luaL_optstring(L, 1, null);
-    lua.lua_settop(L, 1);
-    if (lauxlib.luaL_loadfile(L, fname) !== lua.LUA_OK)
-        return lua.lua_error(L);
-    lua.lua_callk(L, 0, lua.LUA_MULTRET, 0, dofilecont);
+    let fname = luaL_optstring(L, 1, null);
+    lua_settop(L, 1);
+    if (luaL_loadfile(L, fname) !== LUA_OK)
+        return lua_error(L);
+    lua_callk(L, 0, LUA_MULTRET, 0, dofilecont);
     return dofilecont(L, 0, 0);
 };
 
@@ -425,14 +497,14 @@ const base_funcs = {
 
 const luaopen_base = function(L) {
     /* open lib into global table */
-    lua.lua_pushglobaltable(L);
-    lauxlib.luaL_setfuncs(L, base_funcs, 0);
+    lua_pushglobaltable(L);
+    luaL_setfuncs(L, base_funcs, 0);
     /* set global _G */
-    lua.lua_pushvalue(L, -1);
-    lua.lua_setfield(L, -2, to_luastring("_G", true));
+    lua_pushvalue(L, -1);
+    lua_setfield(L, -2, to_luastring("_G", true));
     /* set global _VERSION */
-    lua.lua_pushliteral(L, lua.LUA_VERSION);
-    lua.lua_setfield(L, -2, to_luastring("_VERSION", true));
+    lua_pushliteral(L, LUA_VERSION);
+    lua_setfield(L, -2, to_luastring("_VERSION", true));
     return 1;
 };
 
