@@ -1,8 +1,51 @@
 "use strict";
 
-const lua      = require('./lua.js');
-const lauxlib  = require('./lauxlib.js');
-const {luastring_indexOf, to_jsstring, to_luastring} = require("./fengaricore.js");
+const {
+    LUA_TNIL,
+    LUA_TTABLE,
+    lua_close,
+    lua_createtable,
+    lua_getfield,
+    lua_isboolean,
+    lua_isnoneornil,
+    lua_pop,
+    lua_pushboolean,
+    lua_pushfstring,
+    lua_pushinteger,
+    lua_pushliteral,
+    lua_pushnil,
+    lua_pushnumber,
+    lua_pushstring,
+    lua_setfield,
+    lua_settop,
+    lua_toboolean,
+    lua_tointegerx
+} = require('./lua.js');
+const {
+    luaL_Buffer,
+    luaL_addchar,
+    luaL_addstring,
+    // luaL_argcheck,
+    luaL_argerror,
+    luaL_buffinit,
+    luaL_checkinteger,
+    luaL_checkstring,
+    luaL_checktype,
+    luaL_error,
+    luaL_execresult,
+    luaL_fileresult,
+    luaL_newlib,
+    luaL_opt,
+    luaL_optinteger,
+    luaL_optlstring,
+    luaL_optstring,
+    luaL_pushresult
+} = require('./lauxlib.js');
+const {
+    luastring_indexOf,
+    to_jsstring,
+    to_luastring
+} = require("./fengaricore.js");
 
 const strftime = require('strftime');
 
@@ -20,8 +63,8 @@ const LUA_STRFTIMEOPTIONS = L_STRFTIMEC89;
 
 
 const setfield = function(L, key, value) {
-    lua.lua_pushinteger(L, value);
-    lua.lua_setfield(L, -2, to_luastring(key, true));
+    lua_pushinteger(L, value);
+    lua_setfield(L, -2, to_luastring(key, true));
 };
 
 const setallfields = function(L, time, utc) {
@@ -40,21 +83,21 @@ const setallfields = function(L, time, utc) {
 const L_MAXDATEFIELD = (Number.MAX_SAFE_INTEGER / 2);
 
 const getfield = function(L, key, d, delta) {
-    let t = lua.lua_getfield(L, -1, to_luastring(key, true));  /* get field and its type */
-    let res = lua.lua_tointegerx(L, -1);
+    let t = lua_getfield(L, -1, to_luastring(key, true));  /* get field and its type */
+    let res = lua_tointegerx(L, -1);
     if (res === false) {  /* field is not an integer? */
-        if (t !== lua.LUA_TNIL)  /* some other value? */
-            return lauxlib.luaL_error(L, to_luastring("field '%s' is not an integer"), key);
+        if (t !== LUA_TNIL)  /* some other value? */
+            return luaL_error(L, to_luastring("field '%s' is not an integer"), key);
         else if (d < 0)  /* absent field; no default? */
-            return lauxlib.luaL_error(L, to_luastring("field '%s' missing in date table"), key);
+            return luaL_error(L, to_luastring("field '%s' missing in date table"), key);
         res = d;
     }
     else {
         if (!(-L_MAXDATEFIELD <= res && res <= L_MAXDATEFIELD))
-            return lauxlib.luaL_error(L, to_luastring("field '%s' is out-of-bound"), key);
+            return luaL_error(L, to_luastring("field '%s' is out-of-bound"), key);
         res -= delta;
     }
-    lua.lua_pop(L, 1);
+    lua_pop(L, 1);
     return res;
 };
 
@@ -78,8 +121,8 @@ const checkoption = function(L, conv, i, buff) {
             return i + oplen;  /* return next item */
         }
     }
-    lauxlib.luaL_argerror(L, 1,
-        lua.lua_pushfstring(L, to_luastring("invalid conversion specifier '%%%s'"), conv));
+    luaL_argerror(L, 1,
+        lua_pushfstring(L, to_luastring("invalid conversion specifier '%%%s'"), conv));
 };
 
 /* maximum size for an individual 'strftime' item */
@@ -87,8 +130,8 @@ const checkoption = function(L, conv, i, buff) {
 
 
 const os_date = function(L) {
-    let s = lauxlib.luaL_optlstring(L, 1, to_luastring("%c"));
-    let t = lauxlib.luaL_opt(L, l_checktime, 2, new Date().getTime() / 1000) * 1000;
+    let s = luaL_optlstring(L, 1, to_luastring("%c"));
+    let t = luaL_opt(L, l_checktime, 2, new Date().getTime() / 1000) * 1000;
     let stm = new Date(t);
     let utc = false;
     let i = 0;
@@ -98,18 +141,18 @@ const os_date = function(L) {
     }
 
     if (stm === null)  /* invalid date? */
-        lauxlib.luaL_error(L, to_luastring("time result cannot be represented in this installation", true));
+        luaL_error(L, to_luastring("time result cannot be represented in this installation", true));
     if (s[i] === "*".charCodeAt(0) && s[i+1] === "t".charCodeAt(0)) {
-        lua.lua_createtable(L, 0, 9);  /* 9 = number of fields */
+        lua_createtable(L, 0, 9);  /* 9 = number of fields */
         setallfields(L, stm, utc);
     } else {
         let cc = new Uint8Array(4);
         cc[0] = "%".charCodeAt(0);
-        let b = new lauxlib.luaL_Buffer();
-        lauxlib.luaL_buffinit(L, b);
+        let b = new luaL_Buffer();
+        luaL_buffinit(L, b);
         while (i < s.length) {
             if (s[i] !== '%'.charCodeAt(0)) {  /* not a conversion specifier? */
-                lauxlib.luaL_addchar(b, s[i++]);
+                luaL_addchar(b, s[i++]);
             } else {
                 i++;  /* skip '%' */
                 i = checkoption(L, s, i, cc.subarray(1));  /* copy specifier to 'cc' */
@@ -117,19 +160,19 @@ const os_date = function(L) {
                 if (len !== -1)
                     cc = cc.subarray(0, len);
                 let buff = strftime(to_jsstring(cc), stm);
-                lauxlib.luaL_addstring(b, to_luastring(buff));
+                luaL_addstring(b, to_luastring(buff));
             }
         }
-        lauxlib.luaL_pushresult(b);
+        luaL_pushresult(b);
     }
     return 1;
 };
 
 const os_time = function(L) {
     let t = new Date();
-    if (!lua.lua_isnoneornil(L, 1))  /* called with arg */{
-        lauxlib.luaL_checktype(L, 1, lua.LUA_TTABLE);  /* make sure table is at the top */
-        lua.lua_settop(L, 1);
+    if (!lua_isnoneornil(L, 1))  /* called with arg */{
+        luaL_checktype(L, 1, LUA_TTABLE);  /* make sure table is at the top */
+        lua_settop(L, 1);
         t.setSeconds(getfield(L, "sec", 0, 0));
         t.setMinutes(getfield(L, "min", 0, 0));
         t.setHours(getfield(L, "hour", 12, 0));
@@ -139,20 +182,20 @@ const os_time = function(L) {
         setallfields(L, t);
     }
 
-    lua.lua_pushinteger(L, Math.floor(t / 1000));
+    lua_pushinteger(L, Math.floor(t / 1000));
     return 1;
 };
 
 const l_checktime = function(L, arg) {
-    let t = lauxlib.luaL_checkinteger(L, arg);
-    // lauxlib.luaL_argcheck(L, t, arg, to_luastring("time out-of-bounds"));
+    let t = luaL_checkinteger(L, arg);
+    // luaL_argcheck(L, t, arg, to_luastring("time out-of-bounds"));
     return t;
 };
 
 const os_difftime = function(L) {
     let t1 = l_checktime(L, 1);
     let t2 = l_checktime(L, 2);
-    lua.lua_pushnumber(L, new Date(t1) - new Date(t2));
+    lua_pushnumber(L, new Date(t1) - new Date(t2));
     return 1;
 };
 
@@ -164,7 +207,7 @@ const syslib = {
 
 if (typeof process === "undefined") {
     syslib.clock = function(L) {
-        lua.lua_pushnumber(L, performance.now()/1000);
+        lua_pushnumber(L, performance.now()/1000);
         return 1;
     };
 } else {
@@ -175,29 +218,29 @@ if (typeof process === "undefined") {
 
     syslib.exit = function(L) {
         let status;
-        if (lua.lua_isboolean(L, 1))
-            status = (lua.lua_toboolean(L, 1) ? 0 : 1);
+        if (lua_isboolean(L, 1))
+            status = (lua_toboolean(L, 1) ? 0 : 1);
         else
-            status = lauxlib.luaL_optinteger(L, 1, 0);
-        if (lua.lua_toboolean(L, 2))
-            lua.lua_close(L);
+            status = luaL_optinteger(L, 1, 0);
+        if (lua_toboolean(L, 2))
+            lua_close(L);
         if (L) process.exit(status);  /* 'if' to avoid warnings for unreachable 'return' */
         return 0;
     };
 
     syslib.getenv = function(L) {
-        let key = lauxlib.luaL_checkstring(L, 1);
+        let key = luaL_checkstring(L, 1);
         key = to_jsstring(key); /* https://github.com/nodejs/node/issues/16961 */
         if (Object.prototype.hasOwnProperty.call(process.env, key)) {
-            lua.lua_pushliteral(L, process.env[key]);
+            lua_pushliteral(L, process.env[key]);
         } else {
-            lua.lua_pushnil(L);
+            lua_pushnil(L);
         }
         return 1;
     };
 
     syslib.clock = function(L) {
-        lua.lua_pushnumber(L, process.uptime());
+        lua_pushnumber(L, process.uptime());
         return 1;
     };
 
@@ -207,7 +250,7 @@ if (typeof process === "undefined") {
     };
 
     syslib.remove = function(L) {
-        let filename = lauxlib.luaL_checkstring(L, 1);
+        let filename = luaL_checkstring(L, 1);
         try {
             if (fs.lstatSync(filename).isDirectory()) {
                 fs.rmdirSync(filename);
@@ -215,32 +258,32 @@ if (typeof process === "undefined") {
                 fs.unlinkSync(filename);
             }
         } catch (e) {
-            return lauxlib.luaL_fileresult(L, false, filename, e);
+            return luaL_fileresult(L, false, filename, e);
         }
-        return lauxlib.luaL_fileresult(L, true);
+        return luaL_fileresult(L, true);
     };
 
     syslib.rename = function(L) {
-        let fromname = lauxlib.luaL_checkstring(L, 1);
-        let toname = lauxlib.luaL_checkstring(L, 2);
+        let fromname = luaL_checkstring(L, 1);
+        let toname = luaL_checkstring(L, 2);
         try {
             fs.renameSync(fromname, toname);
         } catch (e) {
-            return lauxlib.luaL_fileresult(L, false, false, e);
+            return luaL_fileresult(L, false, false, e);
         }
-        return lauxlib.luaL_fileresult(L, true);
+        return luaL_fileresult(L, true);
     };
 
     syslib.tmpname = function(L) {
         let name = lua_tmpname();
         if (!name)
-            return lauxlib.luaL_error(L, to_luastring("unable to generate a unique filename"));
-        lua.lua_pushstring(L, to_luastring(name));
+            return luaL_error(L, to_luastring("unable to generate a unique filename"));
+        lua_pushstring(L, to_luastring(name));
         return 1;
     };
 
     syslib.execute = function(L) {
-        let cmd = lauxlib.luaL_optstring(L, 1, null);
+        let cmd = luaL_optstring(L, 1, null);
         if (cmd !== null) {
             try {
                 child_process.execSync(
@@ -250,23 +293,23 @@ if (typeof process === "undefined") {
                     }
                 );
             } catch (e) {
-                return lauxlib.luaL_execresult(L, e);
+                return luaL_execresult(L, e);
             }
 
-            return lauxlib.luaL_execresult(L, null);
+            return luaL_execresult(L, null);
         } else {
             /* Assume a shell is available.
                If it's good enough for musl it's good enough for us.
                http://git.musl-libc.org/cgit/musl/tree/src/process/system.c?id=ac45692a53a1b8d2ede329d91652d43c1fb5dc8d#n22
             */
-            lua.lua_pushboolean(L, 1);
+            lua_pushboolean(L, 1);
             return 1;
         }
     };
 }
 
 const luaopen_os = function(L) {
-    lauxlib.luaL_newlib(L, syslib);
+    luaL_newlib(L, syslib);
     return 1;
 };
 
