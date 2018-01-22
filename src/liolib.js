@@ -1,6 +1,5 @@
 "use strict";
 
-const assert  = require('assert');
 const fs      = require('fs');
 
 const {
@@ -32,6 +31,7 @@ const {
     luaL_setmetatable,
     luaL_testudata
 } = require('./lauxlib.js');
+const lualib = require('./lualib.js');
 const { to_luastring } = require("./fengaricore.js");
 
 const IO_PREFIX = "_IO_";
@@ -72,7 +72,7 @@ const tofile = function(L) {
     let p = tolstream(L);
     if (isclosed(p))
         luaL_error(L, to_luastring("attempt to use a closed file"));
-    assert(p.f);
+    lualib.lua_assert(p.f);
     return p.f;
 };
 

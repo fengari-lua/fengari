@@ -1,10 +1,9 @@
 "use strict";
 
-const assert  = require('assert');
-
 const lua     = require('./lua.js');
 const lauxlib = require('./lauxlib.js');
 const luaconf = require('./luaconf.js');
+const lualib = require('./lualib.js');
 const {to_luastring} = require("./fengaricore.js");
 
 /*
@@ -234,7 +233,7 @@ const partition = function(L, lo, up) {
 const choosePivot = function(lo, up, rnd) {
     let r4 = Math.floor((up - lo) / 4);  /* range/4 */
     let p = rnd % (r4 * 2) + (lo + r4);
-    assert(lo + r4 <= p && p <= up - r4);
+    lualib.lua_assert(lo + r4 <= p && p <= up - r4);
     return p;
 };
 

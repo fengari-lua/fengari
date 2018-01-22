@@ -1,11 +1,11 @@
 "use strict";
 
-const assert  = require('assert');
 const sprintf = require('sprintf-js').sprintf;
 
 const lauxlib = require('./lauxlib.js');
 const lua     = require('./lua.js');
 const luaconf = require('./luaconf.js');
+const lualib = require('./lualib.js');
 const {luastring_indexOf, to_jsstring, to_luastring} = require("./fengaricore.js");
 
 const sL_ESC  = '%';
@@ -724,7 +724,7 @@ const unpackint = function(L, str, islittle, size, issigned) {
 };
 
 const unpacknum = function(L, b, islittle, size) {
-    assert(b.length >= size);
+    lualib.lua_assert(b.length >= size);
 
     let dv = new DataView(new ArrayBuffer(size));
     for (let i = 0; i < size; i++)
@@ -1148,7 +1148,7 @@ const prepstate = function(ms, L, s, ls, p, lp) {
 
 const reprepstate = function(ms) {
     ms.level = 0;
-    assert(ms.matchdepth === MAXCCALLS);
+    lualib.lua_assert(ms.matchdepth === MAXCCALLS);
 };
 
 const find_subarray = function(arr, subarr, from_index) {
