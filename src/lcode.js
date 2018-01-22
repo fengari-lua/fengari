@@ -1,6 +1,29 @@
 "use strict";
 
-const defs     = require('./defs.js');
+const {
+    LUA_MULTRET,
+    LUA_OPADD,
+    LUA_OPBAND,
+    LUA_OPBNOT,
+    LUA_OPBOR,
+    LUA_OPBXOR,
+    LUA_OPDIV,
+    LUA_OPIDIV,
+    LUA_OPMOD,
+    LUA_OPSHL,
+    LUA_OPSHR,
+    LUA_OPUNM,
+    constant_types: {
+        LUA_TBOOLEAN,
+        LUA_TLIGHTUSERDATA,
+        LUA_TLNGSTR,
+        LUA_TNIL,
+        LUA_TNUMFLT,
+        LUA_TNUMINT,
+        LUA_TTABLE
+    },
+    to_luastring
+} = require('./defs.js');
 const { lua_assert } = require("./llimits.js");
 const llex     = require('./llex.js');
 const lobject  = require('./lobject.js');
@@ -9,15 +32,6 @@ const lparser  = require('./lparser.js');
 const ltable   = require('./ltable.js');
 const lvm      = require('./lvm.js');
 
-const {
-    LUA_TBOOLEAN,
-    LUA_TLIGHTUSERDATA,
-    LUA_TLNGSTR,
-    LUA_TNIL,
-    LUA_TNUMFLT,
-    LUA_TNUMINT,
-    LUA_TTABLE
-} = defs.constant_types;
 const OpCodesI = lopcodes.OpCodesI;
 const TValue   = lobject.TValue;
 
@@ -142,7 +156,7 @@ const fixjump = function(fs, pc, dest) {
     let offset = dest - (pc + 1);
     lua_assert(dest !== NO_JUMP);
     if (Math.abs(offset) > lopcodes.MAXARG_sBx)
-        llex.luaX_syntaxerror(fs.ls, defs.to_luastring("control structure too long", true));
+        llex.luaX_syntaxerror(fs.ls, to_luastring("control structure too long", true));
     lopcodes.SETARG_sBx(jmp, offset);
 };
 
@@ -387,7 +401,7 @@ const luaK_checkstack = function(fs, n) {
     let newstack = fs.freereg + n;
     if (newstack > fs.f.maxstacksize) {
         if (newstack >= MAXREGS)
-            llex.luaX_syntaxerror(fs.ls, defs.to_luastring("function or expression needs too many registers", true));
+            llex.luaX_syntaxerror(fs.ls, to_luastring("function or expression needs too many registers", true));
         fs.f.maxstacksize = newstack;
     }
 };
@@ -525,11 +539,11 @@ const luaK_setreturns = function(fs, e, nresults) {
         lopcodes.SETARG_A(pc, fs.freereg);
         luaK_reserveregs(fs, 1);
     }
-    else lua_assert(nresults === defs.LUA_MULTRET);
+    else lua_assert(nresults === LUA_MULTRET);
 };
 
 const luaK_setmultret = function(fs, e) {
-    luaK_setreturns(fs, e, defs.LUA_MULTRET);
+    luaK_setreturns(fs, e, LUA_MULTRET);
 };
 
 /*
@@ -955,11 +969,11 @@ const luaK_indexed = function(fs, t, k) {
 */
 const validop = function(op, v1, v2) {
     switch (op) {
-        case defs.LUA_OPBAND: case defs.LUA_OPBOR: case defs.LUA_OPBXOR:
-        case defs.LUA_OPSHL: case defs.LUA_OPSHR: case defs.LUA_OPBNOT: {  /* conversion errors */
+        case LUA_OPBAND: case LUA_OPBOR: case LUA_OPBXOR:
+        case LUA_OPSHL: case LUA_OPSHR: case LUA_OPBNOT: {  /* conversion errors */
             return (lvm.tointeger(v1) !== false && lvm.tointeger(v2) !== false);
         }
-        case defs.LUA_OPDIV: case defs.LUA_OPIDIV: case defs.LUA_OPMOD:  /* division by 0 */
+        case LUA_OPDIV: case LUA_OPIDIV: case LUA_OPMOD:  /* division by 0 */
             return (v2.value !== 0);
         default: return 1;  /* everything else is valid */
     }
@@ -1070,7 +1084,7 @@ const luaK_prefix = function(fs, op, e, line) {
     ef.f = NO_JUMP;
     switch (op) {
         case UnOpr.OPR_MINUS: case UnOpr.OPR_BNOT:  /* use 'ef' as fake 2nd operand */
-            if (constfolding(op + defs.LUA_OPUNM, e, ef))
+            if (constfolding(op + LUA_OPUNM, e, ef))
                 break;
             /* FALLTHROUGH */
         case UnOpr.OPR_LEN:
@@ -1157,7 +1171,7 @@ const luaK_posfix = function(fs, op, e1, e2, line) {
         case BinOpr.OPR_IDIV: case BinOpr.OPR_MOD: case BinOpr.OPR_POW:
         case BinOpr.OPR_BAND: case BinOpr.OPR_BOR: case BinOpr.OPR_BXOR:
         case BinOpr.OPR_SHL: case BinOpr.OPR_SHR: {
-            if (!constfolding(op + defs.LUA_OPADD, e1, e2))
+            if (!constfolding(op + LUA_OPADD, e1, e2))
                 codebinexpval(fs, op + OpCodesI.OP_ADD, e1, e2, line);
             break;
         }
@@ -1187,7 +1201,7 @@ const luaK_fixline = function(fs, line) {
 */
 const luaK_setlist = function(fs, base, nelems, tostore) {
     let c =  (nelems - 1)/lopcodes.LFIELDS_PER_FLUSH + 1;
-    let b = (tostore === defs.LUA_MULTRET) ? 0 : tostore;
+    let b = (tostore === LUA_MULTRET) ? 0 : tostore;
     lua_assert(tostore !== 0 && tostore <= lopcodes.LFIELDS_PER_FLUSH);
     if (c <= lopcodes.MAXARG_C)
         luaK_codeABC(fs, OpCodesI.OP_SETLIST, base, b, c);
@@ -1196,7 +1210,7 @@ const luaK_setlist = function(fs, base, nelems, tostore) {
         codeextraarg(fs, c);
     }
     else
-        llex.luaX_syntaxerror(fs.ls, defs.to_luastring("constructor too long", true));
+        llex.luaX_syntaxerror(fs.ls, to_luastring("constructor too long", true));
     fs.freereg = base + 1;  /* free registers with list values */
 };
 
