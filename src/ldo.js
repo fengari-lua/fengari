@@ -231,7 +231,7 @@ const moveresults = function(L, firstResult, res, nres, wanted) {
                     lobject.setobjs2s(L, res + i, firstResult + i);
                 for (; i < wanted; i++) {
                     if (res+i >= L.top)
-                        L.stack[res + i] = new lobject.TValue(CT.LUAT_NIL, null);
+                        L.stack[res + i] = new lobject.TValue(CT.LUA_TNIL, null);
                     else
                         L.stack[res + i].setnilvalue();
                 }
