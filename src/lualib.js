@@ -1,9 +1,12 @@
 "use strict";
 
-const lua   = require("./lua.js");
+const {
+	LUA_VERSION_MAJOR,
+	LUA_VERSION_MINOR
+} = require("./lua.js");
 const linit = require('./linit.js');
 
-const LUA_VERSUFFIX = "_" + lua.LUA_VERSION_MAJOR + "_" + lua.LUA_VERSION_MINOR;
+const LUA_VERSUFFIX = "_" + LUA_VERSION_MAJOR + "_" + LUA_VERSION_MINOR;
 module.exports.LUA_VERSUFFIX = LUA_VERSUFFIX;
 
 const LUA_COLIBNAME = "coroutine";
