@@ -1,13 +1,14 @@
 "use strict";
 
 const {
-	LUA_VERSION_MAJOR,
-	LUA_VERSION_MINOR
+    LUA_VERSION_MAJOR,
+    LUA_VERSION_MINOR
 } = require("./lua.js");
-const linit = require('./linit.js');
 
 const LUA_VERSUFFIX = "_" + LUA_VERSION_MAJOR + "_" + LUA_VERSION_MINOR;
 module.exports.LUA_VERSUFFIX = LUA_VERSUFFIX;
+
+module.exports.lua_assert = function(c) {};
 
 const LUA_COLIBNAME = "coroutine";
 module.exports.LUA_COLIBNAME = LUA_COLIBNAME;
@@ -51,7 +52,5 @@ const LUA_LOADLIBNAME = "package";
 module.exports.LUA_LOADLIBNAME = LUA_LOADLIBNAME;
 module.exports.luaopen_package = require("./loadlib.js").luaopen_package;
 
+const linit = require('./linit.js');
 module.exports.luaL_openlibs = linit.luaL_openlibs;
-
-/* customary export */
-module.exports.lua_assert = function(c) {};
