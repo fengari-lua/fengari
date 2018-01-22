@@ -1,10 +1,54 @@
 "use strict";
 
-const lua     = require('./lua.js');
-const lauxlib = require('./lauxlib.js');
-const luaconf = require('./luaconf.js');
+const { LUA_MAXINTEGER } = require('./luaconf.js');
+const {
+    LUA_OPEQ,
+    LUA_OPLT,
+    LUA_TFUNCTION,
+    LUA_TNIL,
+    LUA_TTABLE,
+    lua_call,
+    lua_checkstack,
+    lua_compare,
+    lua_createtable,
+    lua_geti,
+    lua_getmetatable,
+    lua_gettop,
+    lua_insert,
+    lua_isnil,
+    lua_isnoneornil,
+    lua_isstring,
+    lua_pop,
+    lua_pushinteger,
+    lua_pushnil,
+    lua_pushstring,
+    lua_pushvalue,
+    lua_rawget,
+    lua_setfield,
+    lua_seti,
+    lua_settop,
+    lua_toboolean,
+    lua_type
+} = require('./lua.js');
+const {
+    luaL_Buffer,
+    luaL_addlstring,
+    luaL_addvalue,
+    luaL_argcheck,
+    luaL_buffinit,
+    luaL_checkinteger,
+    luaL_checktype,
+    luaL_error,
+    luaL_len,
+    luaL_newlib,
+    luaL_opt,
+    luaL_optinteger,
+    luaL_optlstring,
+    luaL_pushresult,
+    luaL_typename
+} = require('./lauxlib.js');
 const lualib = require('./lualib.js');
-const {to_luastring} = require("./fengaricore.js");
+const { to_luastring } = require("./fengaricore.js");
 
 /*
 ** Operations that an object must define to mimic a table
@@ -16,8 +60,8 @@ const TAB_L  = 4;               /* length */
 const TAB_RW = (TAB_R | TAB_W); /* read/write */
 
 const checkfield = function(L, key, n) {
-    lua.lua_pushstring(L, key);
-    return lua.lua_rawget(L, -n) !== lua.LUA_TNIL;
+    lua_pushstring(L, key);
+    return lua_rawget(L, -n) !== LUA_TNIL;
 };
 
 /*
@@ -25,70 +69,70 @@ const checkfield = function(L, key, n) {
 ** has a metatable with the required metamethods)
 */
 const checktab = function(L, arg, what) {
-    if (lua.lua_type(L, arg) !== lua.LUA_TTABLE) {  /* is it not a table? */
+    if (lua_type(L, arg) !== LUA_TTABLE) {  /* is it not a table? */
         let n = 1;
-        if (lua.lua_getmetatable(L, arg) &&  /* must have metatable */
+        if (lua_getmetatable(L, arg) &&  /* must have metatable */
             (!(what & TAB_R) || checkfield(L, to_luastring("__index", true), ++n)) &&
             (!(what & TAB_W) || checkfield(L, to_luastring("__newindex", true), ++n)) &&
             (!(what & TAB_L) || checkfield(L, to_luastring("__len", true), ++n))) {
-            lua.lua_pop(L, n);  /* pop metatable and tested metamethods */
+            lua_pop(L, n);  /* pop metatable and tested metamethods */
         }
         else
-            lauxlib.luaL_checktype(L, arg, lua.LUA_TTABLE);  /* force an error */
+            luaL_checktype(L, arg, LUA_TTABLE);  /* force an error */
     }
 };
 
 const aux_getn = function(L, n, w) {
     checktab(L, n, w | TAB_L);
-    return lauxlib.luaL_len(L, n);
+    return luaL_len(L, n);
 };
 
 const addfield = function(L, b, i) {
-    lua.lua_geti(L, 1, i);
-    if (!lua.lua_isstring(L, -1))
-        lauxlib.luaL_error(L, to_luastring("invalid value (%s) at index %d in table for 'concat'"),
-            lauxlib.luaL_typename(L, -1), i);
+    lua_geti(L, 1, i);
+    if (!lua_isstring(L, -1))
+        luaL_error(L, to_luastring("invalid value (%s) at index %d in table for 'concat'"),
+            luaL_typename(L, -1), i);
 
-    lauxlib.luaL_addvalue(b);
+    luaL_addvalue(b);
 };
 
 const tinsert = function(L) {
     let e = aux_getn(L, 1, TAB_RW) + 1;  /* first empty element */
     let pos;
-    switch (lua.lua_gettop(L)) {
+    switch (lua_gettop(L)) {
         case 2:
             pos = e;
             break;
         case 3: {
-            pos = lauxlib.luaL_checkinteger(L, 2);  /* 2nd argument is the position */
-            lauxlib.luaL_argcheck(L, 1 <= pos && pos <= e, 2, to_luastring("position out of bounds", true));
+            pos = luaL_checkinteger(L, 2);  /* 2nd argument is the position */
+            luaL_argcheck(L, 1 <= pos && pos <= e, 2, to_luastring("position out of bounds", true));
             for (let i = e; i > pos; i--) {  /* move up elements */
-                lua.lua_geti(L, 1, i - 1);
-                lua.lua_seti(L, 1, i);  /* t[i] = t[i - 1] */
+                lua_geti(L, 1, i - 1);
+                lua_seti(L, 1, i);  /* t[i] = t[i - 1] */
             }
             break;
         }
         default: {
-            return lauxlib.luaL_error(L, to_luastring("wrong number of arguments to 'insert'", true));
+            return luaL_error(L, to_luastring("wrong number of arguments to 'insert'", true));
         }
     }
 
-    lua.lua_seti(L, 1, pos);  /* t[pos] = v */
+    lua_seti(L, 1, pos);  /* t[pos] = v */
     return 0;
 };
 
 const tremove = function(L) {
     let size = aux_getn(L, 1, TAB_RW);
-    let pos = lauxlib.luaL_optinteger(L, 2, size);
+    let pos = luaL_optinteger(L, 2, size);
     if (pos !== size)  /* validate 'pos' if given */
-        lauxlib.luaL_argcheck(L, 1 <= pos && pos <= size + 1, 1, to_luastring("position out of bounds", true));
-    lua.lua_geti(L, 1, pos);  /* result = t[pos] */
+        luaL_argcheck(L, 1 <= pos && pos <= size + 1, 1, to_luastring("position out of bounds", true));
+    lua_geti(L, 1, pos);  /* result = t[pos] */
     for (; pos < size; pos++) {
-        lua.lua_geti(L, 1, pos + 1);
-        lua.lua_seti(L, 1, pos);  /* t[pos] = t[pos + 1] */
+        lua_geti(L, 1, pos + 1);
+        lua_seti(L, 1, pos);  /* t[pos] = t[pos + 1] */
     }
-    lua.lua_pushnil(L);
-    lua.lua_seti(L, 1, pos);  /* t[pos] = nil */
+    lua_pushnil(L);
+    lua_seti(L, 1, pos);  /* t[pos] = nil */
     return 1;
 };
 
@@ -99,78 +143,78 @@ const tremove = function(L) {
 ** than origin, or copying to another table.
 */
 const tmove = function(L) {
-    let f = lauxlib.luaL_checkinteger(L, 2);
-    let e = lauxlib.luaL_checkinteger(L, 3);
-    let t = lauxlib.luaL_checkinteger(L, 4);
-    let tt = !lua.lua_isnoneornil(L, 5) ? 5 : 1;  /* destination table */
+    let f = luaL_checkinteger(L, 2);
+    let e = luaL_checkinteger(L, 3);
+    let t = luaL_checkinteger(L, 4);
+    let tt = !lua_isnoneornil(L, 5) ? 5 : 1;  /* destination table */
     checktab(L, 1, TAB_R);
     checktab(L, tt, TAB_W);
     if (e >= f) {  /* otherwise, nothing to move */
-        lauxlib.luaL_argcheck(L, f > 0 || e < luaconf.LUA_MAXINTEGER + f, 3, to_luastring("too many elements to move", true));
+        luaL_argcheck(L, f > 0 || e < LUA_MAXINTEGER + f, 3, to_luastring("too many elements to move", true));
         let n = e - f + 1;  /* number of elements to move */
-        lauxlib.luaL_argcheck(L, t <= luaconf.LUA_MAXINTEGER - n + 1, 4, to_luastring("destination wrap around", true));
+        luaL_argcheck(L, t <= LUA_MAXINTEGER - n + 1, 4, to_luastring("destination wrap around", true));
 
-        if (t > e || t <= f || (tt !== 1 && lua.lua_compare(L, 1, tt, lua.LUA_OPEQ) !== 1)) {
+        if (t > e || t <= f || (tt !== 1 && lua_compare(L, 1, tt, LUA_OPEQ) !== 1)) {
             for (let i = 0; i < n; i++) {
-                lua.lua_geti(L, 1, f + i);
-                lua.lua_seti(L, tt, t + i);
+                lua_geti(L, 1, f + i);
+                lua_seti(L, tt, t + i);
             }
         } else {
             for (let i = n - 1; i >= 0; i--) {
-                lua.lua_geti(L, 1, f + i);
-                lua.lua_seti(L, tt, t + i);
+                lua_geti(L, 1, f + i);
+                lua_seti(L, tt, t + i);
             }
         }
     }
 
-    lua.lua_pushvalue(L, tt);  /* return destination table */
+    lua_pushvalue(L, tt);  /* return destination table */
     return 1;
 };
 
 const tconcat = function(L) {
     let last = aux_getn(L, 1, TAB_R);
-    let sep = lauxlib.luaL_optlstring(L, 2, to_luastring(""));
+    let sep = luaL_optlstring(L, 2, to_luastring(""));
     let lsep = sep.length;
-    let i = lauxlib.luaL_optinteger(L, 3, 1);
-    last = lauxlib.luaL_optinteger(L, 4, last);
+    let i = luaL_optinteger(L, 3, 1);
+    last = luaL_optinteger(L, 4, last);
 
-    let b = new lauxlib.luaL_Buffer();
-    lauxlib.luaL_buffinit(L, b);
+    let b = new luaL_Buffer();
+    luaL_buffinit(L, b);
 
     for (; i < last; i++) {
         addfield(L, b, i);
-        lauxlib.luaL_addlstring(b, sep, lsep);
+        luaL_addlstring(b, sep, lsep);
     }
 
     if (i === last)
         addfield(L, b, i);
 
-    lauxlib.luaL_pushresult(b);
+    luaL_pushresult(b);
 
     return 1;
 };
 
 const pack = function(L) {
-    let n = lua.lua_gettop(L);  /* number of elements to pack */
-    lua.lua_createtable(L, n, 1);  /* create result table */
-    lua.lua_insert(L, 1);  /* put it at index 1 */
+    let n = lua_gettop(L);  /* number of elements to pack */
+    lua_createtable(L, n, 1);  /* create result table */
+    lua_insert(L, 1);  /* put it at index 1 */
     for (let i = n; i >= 1; i--)  /* assign elements */
-        lua.lua_seti(L, 1, i);
-    lua.lua_pushinteger(L, n);
-    lua.lua_setfield(L, 1, to_luastring("n"));  /* t.n = number of elements */
+        lua_seti(L, 1, i);
+    lua_pushinteger(L, n);
+    lua_setfield(L, 1, to_luastring("n"));  /* t.n = number of elements */
     return 1;  /* return table */
 };
 
 const unpack = function(L) {
-    let i = lauxlib.luaL_optinteger(L, 2, 1);
-    let e = lauxlib.luaL_opt(L, lauxlib.luaL_checkinteger, 3, lauxlib.luaL_len(L, 1));
+    let i = luaL_optinteger(L, 2, 1);
+    let e = luaL_opt(L, luaL_checkinteger, 3, luaL_len(L, 1));
     if (i > e) return 0;  /* empty range */
     let n = e - i;  /* number of elements minus 1 (avoid overflows) */
-    if (n >= Number.MAX_SAFE_INTEGER || !lua.lua_checkstack(L, ++n))
-        return lauxlib.luaL_error(L, to_luastring("too many results to unpack", true));
+    if (n >= Number.MAX_SAFE_INTEGER || !lua_checkstack(L, ++n))
+        return luaL_error(L, to_luastring("too many results to unpack", true));
     for (; i < e; i++)  /* push arg[i..e - 1] (to avoid overflows) */
-        lua.lua_geti(L, 1, i);
-    lua.lua_geti(L, 1, e);  /* push last element */
+        lua_geti(L, 1, i);
+    lua_geti(L, 1, e);  /* push last element */
     return n;
 };
 
@@ -181,20 +225,20 @@ const l_randomizePivot = function() {
 const RANLIMIT = 100;
 
 const set2 = function(L, i, j) {
-    lua.lua_seti(L, 1, i);
-    lua.lua_seti(L, 1, j);
+    lua_seti(L, 1, i);
+    lua_seti(L, 1, j);
 };
 
 const sort_comp = function(L, a, b) {
-    if (lua.lua_isnil(L, 2))  /* no function? */
-        return lua.lua_compare(L, a, b, lua.LUA_OPLT);  /* a < b */
+    if (lua_isnil(L, 2))  /* no function? */
+        return lua_compare(L, a, b, LUA_OPLT);  /* a < b */
     else {  /* function */
-        lua.lua_pushvalue(L, 2);    /* push function */
-        lua.lua_pushvalue(L, a-1);  /* -1 to compensate function */
-        lua.lua_pushvalue(L, b-2);  /* -2 to compensate function and 'a' */
-        lua.lua_call(L, 2, 1);      /* call function */
-        let res = lua.lua_toboolean(L, -1);  /* get result */
-        lua.lua_pop(L, 1);          /* pop result */
+        lua_pushvalue(L, 2);    /* push function */
+        lua_pushvalue(L, a-1);  /* -1 to compensate function */
+        lua_pushvalue(L, b-2);  /* -2 to compensate function and 'a' */
+        lua_call(L, 2, 1);      /* call function */
+        let res = lua_toboolean(L, -1);  /* get result */
+        lua_pop(L, 1);          /* pop result */
         return res;
     }
 };
@@ -205,22 +249,22 @@ const partition = function(L, lo, up) {
     /* loop invariant: a[lo .. i] <= P <= a[j .. up] */
     for (;;) {
         /* next loop: repeat ++i while a[i] < P */
-        while (lua.lua_geti(L, 1, ++i), sort_comp(L, -1, -2)) {
+        while (lua_geti(L, 1, ++i), sort_comp(L, -1, -2)) {
             if (i == up - 1)  /* a[i] < P  but a[up - 1] == P  ?? */
-                lauxlib.luaL_error(L, to_luastring("invalid order function for sorting"));
-            lua.lua_pop(L, 1);  /* remove a[i] */
+                luaL_error(L, to_luastring("invalid order function for sorting"));
+            lua_pop(L, 1);  /* remove a[i] */
         }
         /* after the loop, a[i] >= P and a[lo .. i - 1] < P */
         /* next loop: repeat --j while P < a[j] */
-        while (lua.lua_geti(L, 1, --j), sort_comp(L, -3, -1)) {
+        while (lua_geti(L, 1, --j), sort_comp(L, -3, -1)) {
             if (j < i)  /* j < i  but  a[j] > P ?? */
-                lauxlib.luaL_error(L, to_luastring("invalid order function for sorting"));
-            lua.lua_pop(L, 1);  /* remove a[j] */
+                luaL_error(L, to_luastring("invalid order function for sorting"));
+            lua_pop(L, 1);  /* remove a[j] */
         }
         /* after the loop, a[j] <= P and a[j + 1 .. up] >= P */
         if (j < i) {  /* no elements out of place? */
             /* a[lo .. i - 1] <= P <= a[j + 1 .. i .. up] */
-            lua.lua_pop(L, 1);  /* pop a[j] */
+            lua_pop(L, 1);  /* pop a[j] */
             /* swap pivot (a[up - 1]) with a[i] to satisfy pos-condition */
             set2(L, up - 1, i);
             return i;
@@ -240,12 +284,12 @@ const choosePivot = function(lo, up, rnd) {
 const auxsort = function(L, lo, up, rnd) {
     while (lo < up) {  /* loop for tail recursion */
         /* sort elements 'lo', 'p', and 'up' */
-        lua.lua_geti(L, 1, lo);
-        lua.lua_geti(L, 1, up);
+        lua_geti(L, 1, lo);
+        lua_geti(L, 1, up);
         if (sort_comp(L, -1, -2))  /* a[up] < a[lo]? */
             set2(L, lo, up);  /* swap a[lo] - a[up] */
         else
-            lua.lua_pop(L, 2);  /* remove both values */
+            lua_pop(L, 2);  /* remove both values */
         if (up - lo == 1)  /* only 2 elements? */
             return;  /* already sorted */
         let p;  /* Pivot index */
@@ -253,23 +297,23 @@ const auxsort = function(L, lo, up, rnd) {
             p = Math.floor((lo + up)/2);  /* middle element is a good pivot */
         else  /* for larger intervals, it is worth a random pivot */
             p = choosePivot(lo, up, rnd);
-        lua.lua_geti(L, 1, p);
-        lua.lua_geti(L, 1, lo);
+        lua_geti(L, 1, p);
+        lua_geti(L, 1, lo);
         if (sort_comp(L, -2, -1))  /* a[p] < a[lo]? */
             set2(L, p, lo);  /* swap a[p] - a[lo] */
         else {
-            lua.lua_pop(L, 1);  /* remove a[lo] */
-            lua.lua_geti(L, 1, up);
+            lua_pop(L, 1);  /* remove a[lo] */
+            lua_geti(L, 1, up);
             if (sort_comp(L, -1, -2))  /* a[up] < a[p]? */
                 set2(L, p, up);  /* swap a[up] - a[p] */
             else
-                lua.lua_pop(L, 2);
+                lua_pop(L, 2);
         }
         if (up - lo == 2)  /* only 3 elements? */
             return;  /* already sorted */
-        lua.lua_geti(L, 1, p);  /* get middle element (Pivot) */
-        lua.lua_pushvalue(L, -1);  /* push Pivot */
-        lua.lua_geti(L, 1, up - 1);  /* push a[up - 1] */
+        lua_geti(L, 1, p);  /* get middle element (Pivot) */
+        lua_pushvalue(L, -1);  /* push Pivot */
+        lua_geti(L, 1, up - 1);  /* push a[up - 1] */
         set2(L, p, up - 1);  /* swap Pivot (a[p]) with a[up - 1] */
         p = partition(L, lo, up);
         let n;
@@ -291,10 +335,10 @@ const auxsort = function(L, lo, up, rnd) {
 const sort = function(L) {
     let n = aux_getn(L, 1, TAB_RW);
     if (n > 1) {  /* non-trivial interval? */
-        lauxlib.luaL_argcheck(L, n < luaconf.LUA_MAXINTEGER, 1, to_luastring("array too big", true));
-        if (!lua.lua_isnoneornil(L, 2))  /* is there a 2nd argument? */
-            lauxlib.luaL_checktype(L, 2, lua.LUA_TFUNCTION);  /* must be a function */
-        lua.lua_settop(L, 2);  /* make sure there are two arguments */
+        luaL_argcheck(L, n < LUA_MAXINTEGER, 1, to_luastring("array too big", true));
+        if (!lua_isnoneornil(L, 2))  /* is there a 2nd argument? */
+            luaL_checktype(L, 2, LUA_TFUNCTION);  /* must be a function */
+        lua_settop(L, 2);  /* make sure there are two arguments */
         auxsort(L, 1, n, 0);
     }
     return 0;
@@ -311,7 +355,7 @@ const tab_funcs = {
 };
 
 const luaopen_table = function(L) {
-    lauxlib.luaL_newlib(L, tab_funcs);
+    luaL_newlib(L, tab_funcs);
     return 1;
 };
 
