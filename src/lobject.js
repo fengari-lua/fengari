@@ -397,8 +397,8 @@ const luaO_chunkid = function(source, bufflen) {
 };
 
 const luaO_hexavalue = function(c) {
-    if (lisdigit(c)) return c - char['0'];
-    else return (String.fromCharCode(c).toLowerCase().charCodeAt(0) - char['a']) + 10;
+    if (lisdigit(c)) return c - 48;
+    else return (c & 0xdf) - 55;
 };
 
 const UTF8BUFFSZ = 8;
