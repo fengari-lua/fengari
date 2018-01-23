@@ -5,7 +5,6 @@ const {
     LUA_HOOKLINE,
     LUA_MASKCOUNT,
     LUA_MASKLINE,
-    char,
     constant_types: {
         LUA_TBOOLEAN,
         LUA_TNIL,
@@ -238,15 +237,15 @@ const auxgetinfo = function(L, what, ar, f, ci) {
     let status = 1;
     for (; what.length > 0; what = what.subarray(1)) {
         switch (what[0]) {
-            case char['S']: {
+            case 83 /* ('S').charCodeAt(0) */: {
                 funcinfo(ar, f);
                 break;
             }
-            case char['l']: {
+            case 108 /* ('l').charCodeAt(0) */: {
                 ar.currentline = ci && ci.callstatus & lstate.CIST_LUA ? currentline(ci) : -1;
                 break;
             }
-            case char['u']: {
+            case 117 /* ('u').charCodeAt(0) */: {
                 ar.nups = f === null ? 0 : f.nupvalues;
                 if (f === null || f instanceof lobject.CClosure) {
                     ar.isvararg = true;
@@ -257,11 +256,11 @@ const auxgetinfo = function(L, what, ar, f, ci) {
                 }
                 break;
             }
-            case char['t']: {
+            case 116 /* ('t').charCodeAt(0) */: {
                 ar.istailcall = ci ? ci.callstatus & lstate.CIST_TAIL : 0;
                 break;
             }
-            case char['n']: {
+            case 110 /* ('n').charCodeAt(0) */: {
                 let r = getfuncname(L, ci);
                 if (r === null) {
                     ar.namewhat = to_luastring("", true);
@@ -272,8 +271,8 @@ const auxgetinfo = function(L, what, ar, f, ci) {
                 }
                 break;
             }
-            case char['L']:
-            case char['f']:  /* handled by lua_getinfo */
+            case 76 /* ('L').charCodeAt(0) */:
+            case 102 /* ('f').charCodeAt(0) */:  /* handled by lua_getinfo */
                 break;
             default: status = 0;  /* invalid option */
         }
@@ -286,7 +285,7 @@ const lua_getinfo = function(L, what, ar) {
     what = from_userstring(what);
     let status, cl, ci, func;
     swapextra(L);
-    if (what[0] === char['>']) {
+    if (what[0] === 62 /* ('>').charCodeAt(0) */) {
         ci = null;
         func = L.stack[L.top - 1];
         api_check(L, func.ttisfunction(), "function expected");
@@ -300,13 +299,13 @@ const lua_getinfo = function(L, what, ar) {
 
     cl = func.ttisclosure() ? func.value : null;
     status = auxgetinfo(L, what, ar, cl, ci);
-    if (luastring_indexOf(what, char['f']) >= 0) {
+    if (luastring_indexOf(what, 102 /* ('f').charCodeAt(0) */) >= 0) {
         lobject.pushobj2s(L, func);
         api_check(L, L.top <= L.ci.top, "stack overflow");
     }
 
     swapextra(L);
-    if (luastring_indexOf(what, char['L']) >= 0)
+    if (luastring_indexOf(what, 76 /* ('L').charCodeAt(0) */) >= 0)
         collectvalidlines(L, cl);
 
     return status;
@@ -327,7 +326,7 @@ const kname = function(p, pc, c) {
         /* else no reasonable name found */
     } else {  /* 'c' is a register */
         let what = getobjname(p, pc, c); /* search for 'c' */
-        if (what && what.funcname[0] === char['c']) {  /* found a constant name? */
+        if (what && what.funcname[0] === 99 /* ('c').charCodeAt(0) */) {  /* found a constant name? */
             return what;  /* 'name' already filled */
         }
         /* else no reasonable name found */
