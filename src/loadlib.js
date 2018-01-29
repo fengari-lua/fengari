@@ -288,7 +288,7 @@ const setpath = function(L, fieldname, envname, dft) {
     if (path === undefined)  /* no environment variable? */
         path = env[envname];  /* try unversioned name */
     if (path === undefined || noenv(L))  /* no environment variable? */
-        lua_pushstring(L, to_luastring(dft));  /* use default */
+        lua_pushstring(L, dft);  /* use default */
     else {
         /* replace ";;" by ";AUXMARK;" and then AUXMARK by default path */
         path = luaL_gsub(
@@ -297,7 +297,7 @@ const setpath = function(L, fieldname, envname, dft) {
             to_luastring(LUA_PATH_SEP + LUA_PATH_SEP, true),
             to_luastring(LUA_PATH_SEP + to_jsstring(AUXMARK) + LUA_PATH_SEP, true)
         );
-        luaL_gsub(L, path, AUXMARK, to_luastring(dft));
+        luaL_gsub(L, path, AUXMARK, dft);
         lua_remove(L, -2); /* remove result from 1st 'gsub' */
     }
     lua_setfield(L, -3, fieldname);  /* package[fieldname] = path value */
