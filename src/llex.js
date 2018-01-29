@@ -5,7 +5,11 @@ const {
     thread_status: { LUA_ERRSYNTAX },
     to_luastring
 } = require('./defs.js');
-const { lua_assert } = require('./llimits.js');
+const {
+    LUA_MINBUFFER,
+    MAX_INT,
+    lua_assert
+} = require('./llimits.js');
 const ldebug   = require('./ldebug.js');
 const ldo      = require('./ldo.js');
 const ljstype  = require('./ljstype.js');
@@ -17,7 +21,6 @@ const {
     luaS_new
 } = require('./lstring.js');
 const ltable   = require('./ltable.js');
-const llimits  = require('./llimits.js');
 const {
     EOZ,
     luaZ_buffer,
@@ -158,7 +161,7 @@ class LexState {
 const save = function(ls, c) {
     let b = ls.buff;
     if (b.n + 1 > b.buffer.length) {
-        if (b.buffer.length >= llimits.MAX_INT/2)
+        if (b.buffer.length >= MAX_INT/2)
             lexerror(ls, to_luastring("lexical element too long", true), 0);
         let newsize = b.buffer.length*2;
         luaZ_resizebuffer(ls.L, b, newsize);
@@ -221,7 +224,7 @@ const inclinenumber = function(ls) {
     next(ls);  /* skip '\n' or '\r' */
     if (currIsNewline(ls) && ls.current !== old)
         next(ls);  /* skip '\n\r' or '\r\n' */
-    if (++ls.linenumber >= llimits.MAX_INT)
+    if (++ls.linenumber >= MAX_INT)
         lexerror(ls, to_luastring("chunk has too many lines", true), 0);
 };
 
@@ -242,7 +245,7 @@ const luaX_setinput = function(L, ls, z, source, firstchar) {
     ls.lastline = 1;
     ls.source = source;
     ls.envn = luaS_bless(L, LUA_ENV);
-    luaZ_resizebuffer(L, ls.buff, llimits.LUA_MINBUFFER);  /* initialize buffer */
+    luaZ_resizebuffer(L, ls.buff, LUA_MINBUFFER);  /* initialize buffer */
 };
 
 const check_next1 = function(ls, c) {
