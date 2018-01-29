@@ -433,17 +433,15 @@ class Header {
 /*
 ** options for pack/unpack
 */
-const KOption = {
-    Kint:       0, /* signed integers */
-    Kuint:      1, /* unsigned integers */
-    Kfloat:     2, /* floating-point numbers */
-    Kchar:      3, /* fixed-length strings */
-    Kstring:    4, /* strings with prefixed length */
-    Kzstr:      5, /* zero-terminated strings */
-    Kpadding:   6, /* padding */
-    Kpaddalign: 7, /* padding for alignment */
-    Knop:       8  /* no-op (configuration or spaces) */
-};
+const Kint       = 0; /* signed integers */
+const Kuint      = 1; /* unsigned integers */
+const Kfloat     = 2; /* floating-point numbers */
+const Kchar      = 3; /* fixed-length strings */
+const Kstring    = 4; /* strings with prefixed length */
+const Kzstr      = 5; /* zero-terminated strings */
+const Kpadding   = 6; /* padding */
+const Kpaddalign = 7; /* padding for alignment */
+const Knop       = 8; /* no-op (configuration or spaces) */
 
 const digit = isdigit;
 
@@ -479,31 +477,31 @@ const getoption = function(h, fmt) {
         size: 0  /* default */
     };
     switch (r.opt) {
-        case 98  /*'b'*/: r.size = 1; r.opt = KOption.Kint;   return r; // sizeof(char): 1
-        case 66  /*'B'*/: r.size = 1; r.opt = KOption.Kuint;  return r;
-        case 104 /*'h'*/: r.size = 2; r.opt = KOption.Kint;   return r; // sizeof(short): 2
-        case 72  /*'H'*/: r.size = 2; r.opt = KOption.Kuint;  return r;
-        case 108 /*'l'*/: r.size = 4; r.opt = KOption.Kint;   return r; // sizeof(long): 4
-        case 76  /*'L'*/: r.size = 4; r.opt = KOption.Kuint;  return r;
-        case 106 /*'j'*/: r.size = 4; r.opt = KOption.Kint;   return r; // sizeof(lua_Integer): 4
-        case 74  /*'J'*/: r.size = 4; r.opt = KOption.Kuint;  return r;
-        case 84  /*'T'*/: r.size = 4; r.opt = KOption.Kuint;  return r; // sizeof(size_t): 4
-        case 102 /*'f'*/: r.size = 4; r.opt = KOption.Kfloat; return r; // sizeof(float): 4
-        case 100 /*'d'*/: r.size = 8; r.opt = KOption.Kfloat; return r; // sizeof(double): 8
-        case 110 /*'n'*/: r.size = 8; r.opt = KOption.Kfloat; return r; // sizeof(lua_Number): 8
-        case 105 /*'i'*/: r.size = getnumlimit(h, fmt, 4); r.opt = KOption.Kint;    return r; // sizeof(int): 4
-        case 73  /*'I'*/: r.size = getnumlimit(h, fmt, 4); r.opt = KOption.Kuint;   return r;
-        case 115 /*'s'*/: r.size = getnumlimit(h, fmt, 4); r.opt = KOption.Kstring; return r;
+        case 98  /*'b'*/: r.size = 1; r.opt = Kint;   return r; // sizeof(char): 1
+        case 66  /*'B'*/: r.size = 1; r.opt = Kuint;  return r;
+        case 104 /*'h'*/: r.size = 2; r.opt = Kint;   return r; // sizeof(short): 2
+        case 72  /*'H'*/: r.size = 2; r.opt = Kuint;  return r;
+        case 108 /*'l'*/: r.size = 4; r.opt = Kint;   return r; // sizeof(long): 4
+        case 76  /*'L'*/: r.size = 4; r.opt = Kuint;  return r;
+        case 106 /*'j'*/: r.size = 4; r.opt = Kint;   return r; // sizeof(lua_Integer): 4
+        case 74  /*'J'*/: r.size = 4; r.opt = Kuint;  return r;
+        case 84  /*'T'*/: r.size = 4; r.opt = Kuint;  return r; // sizeof(size_t): 4
+        case 102 /*'f'*/: r.size = 4; r.opt = Kfloat; return r; // sizeof(float): 4
+        case 100 /*'d'*/: r.size = 8; r.opt = Kfloat; return r; // sizeof(double): 8
+        case 110 /*'n'*/: r.size = 8; r.opt = Kfloat; return r; // sizeof(lua_Number): 8
+        case 105 /*'i'*/: r.size = getnumlimit(h, fmt, 4); r.opt = Kint;    return r; // sizeof(int): 4
+        case 73  /*'I'*/: r.size = getnumlimit(h, fmt, 4); r.opt = Kuint;   return r;
+        case 115 /*'s'*/: r.size = getnumlimit(h, fmt, 4); r.opt = Kstring; return r;
         case 99  /*'c'*/: {
             r.size = getnum(fmt, -1);
             if (r.size === -1)
                 luaL_error(h.L, to_luastring("missing size for format option 'c'"));
-            r.opt = KOption.Kchar;
+            r.opt = Kchar;
             return r;
         }
-        case 122 /*'z'*/:             r.opt = KOption.Kzstr;      return r;
-        case 120 /*'x'*/: r.size = 1; r.opt = KOption.Kpadding;   return r;
-        case 88  /*'X'*/:             r.opt = KOption.Kpaddalign; return r;
+        case 122 /*'z'*/:             r.opt = Kzstr;      return r;
+        case 120 /*'x'*/: r.size = 1; r.opt = Kpadding;   return r;
+        case 88  /*'X'*/:             r.opt = Kpaddalign; return r;
         case 32  /*' '*/: break;
         case 60  /*'<'*/: h.islittle = true; break;
         case 62  /*'>'*/: h.islittle = false; break;
@@ -511,7 +509,7 @@ const getoption = function(h, fmt) {
         case 33  /*'!'*/: h.maxalign = getnumlimit(h, fmt, MAXALIGN); break;
         default: luaL_error(h.L, to_luastring("invalid format option '%c'"), r.opt);
     }
-    r.opt = KOption.Knop;
+    r.opt = Knop;
     return r;
 };
 
@@ -535,18 +533,18 @@ const getdetails = function(h, totalsize, fmt) {
     r.size = opt.size;
     r.opt = opt.opt;
     let align = r.size;  /* usually, alignment follows size */
-    if (r.opt === KOption.Kpaddalign) {  /* 'X' gets alignment from following option */
+    if (r.opt === Kpaddalign) {  /* 'X' gets alignment from following option */
         if (fmt.off >= fmt.s.length || fmt.s[fmt.off] === 0)
             luaL_argerror(h.L, 1, to_luastring("invalid next option for option 'X'", true));
         else {
             let o = getoption(h, fmt);
             align = o.size;
             o = o.opt;
-            if (o === KOption.Kchar || align === 0)
+            if (o === Kchar || align === 0)
                 luaL_argerror(h.L, 1, to_luastring("invalid next option for option 'X'", true));
         }
     }
-    if (align <= 1 || r.opt === KOption.Kchar)  /* need no alignment? */
+    if (align <= 1 || r.opt === Kchar)  /* need no alignment? */
         r.ntoalign = 0;
     else {
         if (align > h.maxalign)  /* enforce maximum alignment */
@@ -599,7 +597,7 @@ const str_pack = function(L) {
             luaL_addchar(b, LUAL_PACKPADBYTE);  /* fill alignment */
         arg++;
         switch (opt) {
-            case KOption.Kint: {  /* signed integers */
+            case Kint: {  /* signed integers */
                 let n = luaL_checkinteger(L, arg);
                 if (size < SZINT) {  /* need overflow check? */
                     let lim = 1 << (size * 8) - 1;
@@ -608,14 +606,14 @@ const str_pack = function(L) {
                 packint(b, n, h.islittle, size, n < 0);
                 break;
             }
-            case KOption.Kuint: {  /* unsigned integers */
+            case Kuint: {  /* unsigned integers */
                 let n = luaL_checkinteger(L, arg);
                 if (size < SZINT)
                     luaL_argcheck(L, (n>>>0) < (1 << (size * NB)), arg, to_luastring("unsigned overflow", true));
                 packint(b, n>>>0, h.islittle, size, false);
                 break;
             }
-            case KOption.Kfloat: {  /* floating-point options */
+            case Kfloat: {  /* floating-point options */
                 let buff = luaL_prepbuffsize(b, size);
                 let n = luaL_checknumber(L, arg);  /* get argument */
                 let dv = new DataView(buff.buffer, buff.byteOffset, buff.byteLength);
@@ -624,7 +622,7 @@ const str_pack = function(L) {
                 luaL_addsize(b, size);
                 break;
             }
-            case KOption.Kchar: {  /* fixed-size string */
+            case Kchar: {  /* fixed-size string */
                 let s = luaL_checkstring(L, arg);
                 let len = s.length;
                 luaL_argcheck(L, len <= size, arg, to_luastring("string longer than given size", true));
@@ -633,7 +631,7 @@ const str_pack = function(L) {
                     luaL_addchar(b, LUAL_PACKPADBYTE);
                 break;
             }
-            case KOption.Kstring: {  /* strings with length count */
+            case Kstring: {  /* strings with length count */
                 let s = luaL_checkstring(L, arg);
                 let len = s.length;
                 luaL_argcheck(L,
@@ -644,7 +642,7 @@ const str_pack = function(L) {
                 totalsize += len;
                 break;
             }
-            case KOption.Kzstr: {  /* zero-terminated string */
+            case Kzstr: {  /* zero-terminated string */
                 let s = luaL_checkstring(L, arg);
                 let len = s.length;
                 luaL_argcheck(L, luastring_indexOf(s, 0) < 0, arg, to_luastring("strings contains zeros", true));
@@ -653,8 +651,8 @@ const str_pack = function(L) {
                 totalsize += len + 1;
                 break;
             }
-            case KOption.Kpadding: luaL_addchar(b, LUAL_PACKPADBYTE); /* fall through */
-            case KOption.Kpaddalign: case KOption.Knop:
+            case Kpadding: luaL_addchar(b, LUAL_PACKPADBYTE); /* fall through */
+            case Kpaddalign: case Knop:
                 arg--;  /* undo increment */
                 break;
         }
@@ -750,8 +748,8 @@ const str_packsize = function(L) {
         luaL_argcheck(L, totalsize <= MAXSIZE - size, 1, to_luastring("format result too large", true));
         totalsize += size;
         switch (opt) {
-            case KOption.Kstring:  /* strings with length count */
-            case KOption.Kzstr:    /* zero-terminated string */
+            case Kstring:  /* strings with length count */
+            case Kzstr:    /* zero-terminated string */
                 luaL_argerror(L, 1, to_luastring("variable-length format", true));
                 /* call never return, but to avoid warnings: *//* fall through */
             default:  break;
@@ -825,36 +823,36 @@ const str_unpack = function(L) {
         luaL_checkstack(L, 2, to_luastring("too many results", true));
         n++;
         switch (opt) {
-            case KOption.Kint:
-            case KOption.Kuint: {
-                let res = unpackint(L, data.subarray(pos), h.islittle, size, opt === KOption.Kint);
+            case Kint:
+            case Kuint: {
+                let res = unpackint(L, data.subarray(pos), h.islittle, size, opt === Kint);
                 lua_pushinteger(L, res);
                 break;
             }
-            case KOption.Kfloat: {
+            case Kfloat: {
                 let res = unpacknum(L, data.subarray(pos), h.islittle, size);
                 lua_pushnumber(L, res);
                 break;
             }
-            case KOption.Kchar: {
+            case Kchar: {
                 lua_pushstring(L, data.subarray(pos, pos + size));
                 break;
             }
-            case KOption.Kstring: {
+            case Kstring: {
                 let len = unpackint(L, data.subarray(pos), h.islittle, size, 0);
                 luaL_argcheck(L, pos + len + size <= ld, 2, to_luastring("data string too short", true));
                 lua_pushstring(L, data.subarray(pos + size, pos + size + len));
                 pos += len;  /* skip string */
                 break;
             }
-            case KOption.Kzstr: {
+            case Kzstr: {
                 let e = luastring_indexOf(data, 0, pos);
                 if (e === -1) e = data.length - pos;
                 lua_pushstring(L, data.subarray(pos, e));
                 pos = e + 1;  /* skip string plus final '\0' */
                 break;
             }
-            case KOption.Kpaddalign: case KOption.Kpadding: case KOption.Knop:
+            case Kpaddalign: case Kpadding: case Knop:
                 n--;  /* undo increment */
                 break;
         }
