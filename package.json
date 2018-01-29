@@ -43,6 +43,7 @@
     "strftime": "^0.10.0",
     "tmp": "^0.0.33"
   },
+  "sideEffects": false,
   "eslintConfig": {
     "env": {
       "browser": true,
