@@ -45,7 +45,7 @@ const ltm      = require('./ltm.js');
 const { LUAI_MAXSTACK } = require('./luaconf.js');
 const lundump  = require('./lundump.js');
 const lvm      = require('./lvm.js');
-const lzio     = require('./lzio.js');
+const { MBuffer } = require('./lzio.js');
 
 const adjust_top = function(L, newtop) {
     if (L.top < newtop) {
@@ -692,7 +692,7 @@ const luaD_callnoyield = function(L, off, nResults) {
 class SParser {
     constructor(z, name, mode) {  /* data to 'f_parser' */
         this.z = z;
-        this.buff = new lzio.MBuffer();  /* dynamic structure used by the scanner */
+        this.buff = new MBuffer();  /* dynamic structure used by the scanner */
         this.dyd = new lparser.Dyndata();  /* dynamic structures used by the parser */
         this.mode = mode;
         this.name = name;

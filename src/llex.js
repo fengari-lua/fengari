@@ -18,7 +18,13 @@ const {
 } = require('./lstring.js');
 const ltable   = require('./ltable.js');
 const llimits  = require('./llimits.js');
-const lzio     = require('./lzio.js');
+const {
+    EOZ,
+    luaZ_buffer,
+    luaZ_buffremove,
+    luaZ_resetbuffer,
+    luaZ_resizebuffer
+} = require('./lzio.js');
 
 const FIRST_RESERVED = 257;
 
@@ -119,7 +125,7 @@ const save = function(ls, c) {
         if (b.buffer.length >= llimits.MAX_INT/2)
             lexerror(ls, to_luastring("lexical element too long", true), 0);
         let newsize = b.buffer.length*2;
-        lzio.luaZ_resizebuffer(ls.L, b, newsize);
+        luaZ_resizebuffer(ls.L, b, newsize);
     }
     b.buffer[b.n++] = c < 0 ? 255 + c + 1 : c;
 };
@@ -200,7 +206,7 @@ const luaX_setinput = function(L, ls, z, source, firstchar) {
     ls.lastline = 1;
     ls.source = source;
     ls.envn = luaS_bless(L, LUA_ENV);
-    lzio.luaZ_resizebuffer(L, ls.buff, llimits.LUA_MINBUFFER);  /* initialize buffer */
+    luaZ_resizebuffer(L, ls.buff, llimits.LUA_MINBUFFER);  /* initialize buffer */
 };
 
 const check_next1 = function(ls, c) {
@@ -246,7 +252,7 @@ const read_numeral = function(ls, seminfo) {
     // save(ls, 0);
 
     let obj = new lobject.TValue();
-    if (lobject.luaO_str2num(lzio.luaZ_buffer(ls.buff), obj) === 0)  /* format error? */
+    if (lobject.luaO_str2num(luaZ_buffer(ls.buff), obj) === 0)  /* format error? */
         lexerror(ls, to_luastring("malformed number", true), R.TK_FLT);
     if (obj.ttisinteger()) {
         seminfo.i = obj.value;
@@ -263,7 +269,7 @@ const txtToken = function(ls, token) {
         case R.TK_NAME: case R.TK_STRING:
         case R.TK_FLT: case R.TK_INT:
             // save(ls, 0);
-            return lobject.luaO_pushfstring(ls.L, to_luastring("'%s'", true), lzio.luaZ_buffer(ls.buff));
+            return lobject.luaO_pushfstring(ls.L, to_luastring("'%s'", true), luaZ_buffer(ls.buff));
         default:
             return luaX_token2str(ls, token);
     }
@@ -307,7 +313,7 @@ const read_long_string = function(ls, seminfo, sep) {
     let skip = false;
     for (; !skip ;) {
         switch (ls.current) {
-            case lzio.EOZ: {  /* error */
+            case EOZ: {  /* error */
                 let what = seminfo ? "string" : "comment";
                 let msg = `unfinished long ${what} (starting at line ${line})`;
                 lexerror(ls, to_luastring(msg), R.TK_EOS);
@@ -324,7 +330,7 @@ const read_long_string = function(ls, seminfo, sep) {
             case 13 /* ('\r').charCodeAt(0) */: {
                 save(ls, 10 /* ('\n').charCodeAt(0) */);
                 inclinenumber(ls);
-                if (!seminfo) lzio.luaZ_resetbuffer(ls.buff);
+                if (!seminfo) luaZ_resetbuffer(ls.buff);
                 break;
             }
             default: {
@@ -340,7 +346,7 @@ const read_long_string = function(ls, seminfo, sep) {
 
 const esccheck = function(ls, c, msg) {
     if (!c) {
-        if (ls.current !== lzio.EOZ)
+        if (ls.current !== EOZ)
             save_and_next(ls);  /* add current to buffer for error message */
         lexerror(ls, msg, R.TK_STRING);
     }
@@ -355,7 +361,7 @@ const gethexa = function(ls) {
 const readhexaesc = function(ls) {
     let r = gethexa(ls);
     r = (r << 4) + gethexa(ls);
-    lzio.luaZ_buffremove(ls.buff, 2);  /* remove saved chars from buffer */
+    luaZ_buffremove(ls.buff, 2);  /* remove saved chars from buffer */
     return r;
 };
 
@@ -374,7 +380,7 @@ const readutf8desc = function(ls) {
     }
     esccheck(ls, ls.current === 125 /* ('}').charCodeAt(0) */, to_luastring("missing '}'", true));
     next(ls);  /* skip '}' */
-    lzio.luaZ_buffremove(ls.buff, i);  /* remove saved chars from buffer */
+    luaZ_buffremove(ls.buff, i);  /* remove saved chars from buffer */
     return r;
 };
 
@@ -393,7 +399,7 @@ const readdecesc = function(ls) {
         save_and_next(ls);
     }
     esccheck(ls, r <= 255, to_luastring("decimal escape too large", true));
-    lzio.luaZ_buffremove(ls.buff, i);  /* remove read digits from buffer */
+    luaZ_buffremove(ls.buff, i);  /* remove read digits from buffer */
     return r;
 };
 
@@ -402,7 +408,7 @@ const read_string = function(ls, del, seminfo) {
 
     while (ls.current !== del) {
         switch (ls.current) {
-            case lzio.EOZ:
+            case EOZ:
                 lexerror(ls, to_luastring("unfinished string", true), R.TK_EOS);
                 break;
             case 10 /* ('\n').charCodeAt(0) */:
@@ -430,9 +436,9 @@ const read_string = function(ls, del, seminfo) {
                     case 34 /* ('"').charCodeAt(0) */:
                     case 39 /* ('\'').charCodeAt(0) */:
                         c = ls.current; will = 'read_save'; break;
-                    case lzio.EOZ: will = 'no_save'; break;  /* will raise an error next loop */
+                    case EOZ: will = 'no_save'; break;  /* will raise an error next loop */
                     case 122 /* ('z').charCodeAt(0) */: {  /* zap following span of spaces */
-                        lzio.luaZ_buffremove(ls.buff, 1);  /* remove '\\' */
+                        luaZ_buffremove(ls.buff, 1);  /* remove '\\' */
                         next(ls);  /* skip the 'z' */
                         while (ljstype.lisspace(ls.current)) {
                             if (currIsNewline(ls)) inclinenumber(ls);
@@ -451,7 +457,7 @@ const read_string = function(ls, del, seminfo) {
                     next(ls);
 
                 if (will === 'read_save' || will === 'only_save') {
-                    lzio.luaZ_buffremove(ls.buff, 1);  /* remove '\\' */
+                    luaZ_buffremove(ls.buff, 1);  /* remove '\\' */
                     save(ls, c);
                 }
 
@@ -475,7 +481,7 @@ const isreserved = function(w) {
 };
 
 const llex = function(ls, seminfo) {
-    lzio.luaZ_resetbuffer(ls.buff);
+    luaZ_resetbuffer(ls.buff);
     for (;;) {
         lua_assert(typeof ls.current == "number"); /* fengari addition */
         switch (ls.current) {
@@ -498,16 +504,16 @@ const llex = function(ls, seminfo) {
                 next(ls);
                 if (ls.current === 91 /* ('[').charCodeAt(0) */) {  /* long comment? */
                     let sep = skip_sep(ls);
-                    lzio.luaZ_resetbuffer(ls.buff);  /* 'skip_sep' may dirty the buffer */
+                    luaZ_resetbuffer(ls.buff);  /* 'skip_sep' may dirty the buffer */
                     if (sep >= 0) {
                         read_long_string(ls, null, sep);  /* skip long comment */
-                        lzio.luaZ_resetbuffer(ls.buff);  /* previous call may dirty the buff. */
+                        luaZ_resetbuffer(ls.buff);  /* previous call may dirty the buff. */
                         break;
                     }
                 }
 
                 /* else short comment */
-                while (!currIsNewline(ls) && ls.current !== lzio.EOZ)
+                while (!currIsNewline(ls) && ls.current !== EOZ)
                     next(ls);  /* skip until end of line (or end of file) */
                 break;
             }
@@ -571,7 +577,7 @@ const llex = function(ls, seminfo) {
             case 53 /* ('5').charCodeAt(0) */: case 54 /* ('6').charCodeAt(0) */: case 55 /* ('7').charCodeAt(0) */: case 56 /* ('8').charCodeAt(0) */: case 57 /* ('9').charCodeAt(0) */: {
                 return read_numeral(ls, seminfo);
             }
-            case lzio.EOZ: {
+            case EOZ: {
                 return R.TK_EOS;
             }
             default: {
@@ -579,7 +585,7 @@ const llex = function(ls, seminfo) {
                     do {
                         save_and_next(ls);
                     } while (ljstype.lislalnum(ls.current));
-                    let ts = luaX_newstring(ls, lzio.luaZ_buffer(ls.buff));
+                    let ts = luaX_newstring(ls, luaZ_buffer(ls.buff));
                     seminfo.ts = ts;
                     let kidx = token_to_index[luaS_hashlongstr(ts)];
                     if (kidx !== void 0 && kidx <= 22)  /* reserved word? */
