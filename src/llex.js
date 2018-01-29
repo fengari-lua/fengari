@@ -2,7 +2,6 @@
 
 const {
     constant_types: { LUA_TLNGSTR },
-    char,
     thread_status: { LUA_ERRSYNTAX },
     to_luastring
 } = require('./defs.js');
@@ -138,7 +137,7 @@ const luaX_token2str = function(ls, token) {
 };
 
 const currIsNewline = function(ls) {
-    return ls.current === char['\n'] || ls.current === char['\r'];
+    return ls.current === 10 /* ('\n').charCodeAt(0) */ || ls.current === 13 /* ('\r').charCodeAt(0) */;
 };
 
 const next = function(ls) {
@@ -205,7 +204,7 @@ const luaX_setinput = function(L, ls, z, source, firstchar) {
 };
 
 const check_next1 = function(ls, c) {
-    if (ls.current === c.charCodeAt(0)) {
+    if (ls.current === c) {
         next(ls);
         return true;
     }
@@ -231,7 +230,7 @@ const read_numeral = function(ls, seminfo) {
     let first = ls.current;
     lua_assert(ljstype.lisdigit(ls.current));
     save_and_next(ls);
-    if (first === char['0'] && check_next2(ls, "xX"))  /* hexadecimal? */
+    if (first === 48 /* ('0').charCodeAt(0) */ && check_next2(ls, "xX"))  /* hexadecimal? */
         expo = "Pp";
 
     for (;;) {
@@ -239,7 +238,7 @@ const read_numeral = function(ls, seminfo) {
             check_next2(ls, "-+");  /* optional exponent sign */
         if (ljstype.lisxdigit(ls.current))
             save_and_next(ls);
-        else if (ls.current === char['.'])
+        else if (ls.current === 46 /* ('.').charCodeAt(0) */)
             save_and_next(ls);
         else break;
     }
@@ -289,9 +288,9 @@ const luaX_syntaxerror = function(ls, msg) {
 const skip_sep = function(ls) {
     let count = 0;
     let s = ls.current;
-    lua_assert(s === char['['] || s === char[']']);
+    lua_assert(s === 91 /* ('[').charCodeAt(0) */ || s === 93 /* (']').charCodeAt(0) */);
     save_and_next(ls);
-    while (ls.current === char['=']) {
+    while (ls.current === 61 /* ('=').charCodeAt(0) */) {
         save_and_next(ls);
         count++;
     }
@@ -314,15 +313,16 @@ const read_long_string = function(ls, seminfo, sep) {
                 lexerror(ls, to_luastring(msg), R.TK_EOS);
                 break;
             }
-            case char[']']: {
+            case 93 /* (']').charCodeAt(0) */: {
                 if (skip_sep(ls) === sep) {
                     save_and_next(ls);  /* skip 2nd ']' */
                     skip = true;
                 }
                 break;
             }
-            case char['\n']: case char['\r']: {
-                save(ls, char['\n']);
+            case 10 /* ('\n').charCodeAt(0) */:
+            case 13 /* ('\r').charCodeAt(0) */: {
+                save(ls, 10 /* ('\n').charCodeAt(0) */);
                 inclinenumber(ls);
                 if (!seminfo) lzio.luaZ_resetbuffer(ls.buff);
                 break;
@@ -362,7 +362,7 @@ const readhexaesc = function(ls) {
 const readutf8desc = function(ls) {
     let i = 4;  /* chars to be removed: '\', 'u', '{', and first digit */
     save_and_next(ls);  /* skip 'u' */
-    esccheck(ls, ls.current === char['{'], to_luastring("missing '{'", true));
+    esccheck(ls, ls.current === 123 /* ('{').charCodeAt(0) */, to_luastring("missing '{'", true));
     let r = gethexa(ls);  /* must have at least one digit */
 
     save_and_next(ls);
@@ -372,7 +372,7 @@ const readutf8desc = function(ls) {
         esccheck(ls, r <= 0x10FFFF, to_luastring("UTF-8 value too large", true));
         save_and_next(ls);
     }
-    esccheck(ls, ls.current === char['}'], to_luastring("missing '}'", true));
+    esccheck(ls, ls.current === 125 /* ('}').charCodeAt(0) */, to_luastring("missing '}'", true));
     next(ls);  /* skip '}' */
     lzio.luaZ_buffremove(ls.buff, i);  /* remove saved chars from buffer */
     return r;
@@ -389,7 +389,7 @@ const readdecesc = function(ls) {
     let r = 0;  /* result accumulator */
     let i;
     for (i = 0; i < 3 && ljstype.lisdigit(ls.current); i++) {  /* read up to 3 digits */
-        r = 10 * r + ls.current - char['0'];
+        r = 10 * r + ls.current - 48 /* ('0').charCodeAt(0) */;
         save_and_next(ls);
     }
     esccheck(ls, r <= 255, to_luastring("decimal escape too large", true));
@@ -405,30 +405,33 @@ const read_string = function(ls, del, seminfo) {
             case lzio.EOZ:
                 lexerror(ls, to_luastring("unfinished string", true), R.TK_EOS);
                 break;
-            case char['\n']:
-            case char['\r']:
+            case 10 /* ('\n').charCodeAt(0) */:
+            case 13 /* ('\r').charCodeAt(0) */:
                 lexerror(ls, to_luastring("unfinished string", true), R.TK_STRING);
                 break;
-            case char['\\']: {  /* escape sequences */
+            case 92 /* ('\\').charCodeAt(0) */: {  /* escape sequences */
                 save_and_next(ls);  /* keep '\\' for error messages */
                 let will;
                 let c;
                 switch(ls.current) {
-                    case char['a']: c = 7 /* \a isn't valid JS */; will = 'read_save'; break;
-                    case char['b']: c = char['\b']; will = 'read_save'; break;
-                    case char['f']: c = char['\f']; will = 'read_save'; break;
-                    case char['n']: c = char['\n']; will = 'read_save'; break;
-                    case char['r']: c = char['\r']; will = 'read_save'; break;
-                    case char['t']: c = char['\t']; will = 'read_save'; break;
-                    case char['v']: c = char['\v']; will = 'read_save'; break;
-                    case char['x']: c = readhexaesc(ls); will = 'read_save'; break;
-                    case char['u']: utf8esc(ls); will = 'no_save'; break;
-                    case char['\n']: case char['\r']:
-                        inclinenumber(ls); c = char['\n']; will = 'only_save'; break;
-                    case char['\\']: case char['"']: case char['\'']:
+                    case 97 /* ('a').charCodeAt(0) */: c = 7 /* \a isn't valid JS */; will = 'read_save'; break;
+                    case 98 /* ('b').charCodeAt(0) */: c = 8 /* ('\b').charCodeAt(0) */; will = 'read_save'; break;
+                    case 102 /* ('f').charCodeAt(0) */: c = 12 /* ('\f').charCodeAt(0) */; will = 'read_save'; break;
+                    case 110 /* ('n').charCodeAt(0) */: c = 10 /* ('\n').charCodeAt(0) */; will = 'read_save'; break;
+                    case 114 /* ('r').charCodeAt(0) */: c = 13 /* ('\r').charCodeAt(0) */; will = 'read_save'; break;
+                    case 116 /* ('t').charCodeAt(0) */: c = 9 /* ('\t').charCodeAt(0) */; will = 'read_save'; break;
+                    case 118 /* ('v').charCodeAt(0) */: c = 11 /* ('\v').charCodeAt(0) */; will = 'read_save'; break;
+                    case 120 /* ('x').charCodeAt(0) */: c = readhexaesc(ls); will = 'read_save'; break;
+                    case 117 /* ('u').charCodeAt(0) */: utf8esc(ls); will = 'no_save'; break;
+                    case 10 /* ('\n').charCodeAt(0) */:
+                    case 13 /* ('\r').charCodeAt(0) */:
+                        inclinenumber(ls); c = 10 /* ('\n').charCodeAt(0) */; will = 'only_save'; break;
+                    case 92 /* ('\\').charCodeAt(0) */:
+                    case 34 /* ('"').charCodeAt(0) */:
+                    case 39 /* ('\'').charCodeAt(0) */:
                         c = ls.current; will = 'read_save'; break;
                     case lzio.EOZ: will = 'no_save'; break;  /* will raise an error next loop */
-                    case char['z']: {  /* zap following span of spaces */
+                    case 122 /* ('z').charCodeAt(0) */: {  /* zap following span of spaces */
                         lzio.luaZ_buffremove(ls.buff, 1);  /* remove '\\' */
                         next(ls);  /* skip the 'z' */
                         while (ljstype.lisspace(ls.current)) {
@@ -476,20 +479,24 @@ const llex = function(ls, seminfo) {
     for (;;) {
         lua_assert(typeof ls.current == "number"); /* fengari addition */
         switch (ls.current) {
-            case char['\n']: case char['\r']: {  /* line breaks */
+            case 10 /* ('\n').charCodeAt(0) */:
+            case 13 /* ('\r').charCodeAt(0) */: {  /* line breaks */
                 inclinenumber(ls);
                 break;
             }
-            case char[' ']: case char['\f']: case char['\t']: case char['\v']: {  /* spaces */
+            case 32 /* (' ').charCodeAt(0) */:
+            case 12 /* ('\f').charCodeAt(0) */:
+            case 9 /* ('\t').charCodeAt(0) */:
+            case 11 /* ('\v').charCodeAt(0) */: {  /* spaces */
                 next(ls);
                 break;
             }
-            case char['-']: {  /* '-' or '--' (comment) */
+            case 45 /* ('-').charCodeAt(0) */: {  /* '-' or '--' (comment) */
                 next(ls);
-                if (ls.current !== char['-']) return char['-'];
+                if (ls.current !== 45 /* ('-').charCodeAt(0) */) return 45 /* ('-').charCodeAt(0) */;
                 /* else is a comment */
                 next(ls);
-                if (ls.current === char['[']) {  /* long comment? */
+                if (ls.current === 91 /* ('[').charCodeAt(0) */) {  /* long comment? */
                     let sep = skip_sep(ls);
                     lzio.luaZ_resetbuffer(ls.buff);  /* 'skip_sep' may dirty the buffer */
                     if (sep >= 0) {
@@ -504,63 +511,64 @@ const llex = function(ls, seminfo) {
                     next(ls);  /* skip until end of line (or end of file) */
                 break;
             }
-            case char['[']: {  /* long string or simply '[' */
+            case 91 /* ('[').charCodeAt(0) */: {  /* long string or simply '[' */
                 let sep = skip_sep(ls);
                 if (sep >= 0) {
                     read_long_string(ls, seminfo, sep);
                     return R.TK_STRING;
                 } else if (sep !== -1)  /* '[=...' missing second bracket */
                     lexerror(ls, to_luastring("invalid long string delimiter", true), R.TK_STRING);
-                return char['['];
+                return 91 /* ('[').charCodeAt(0) */;
             }
-            case char['=']: {
+            case 61 /* ('=').charCodeAt(0) */: {
                 next(ls);
-                if (check_next1(ls, '=')) return R.TK_EQ;
-                else return char['='];
+                if (check_next1(ls, 61 /* ('=').charCodeAt(0) */)) return R.TK_EQ;
+                else return 61 /* ('=').charCodeAt(0) */;
             }
-            case char['<']: {
+            case 60 /* ('<').charCodeAt(0) */: {
                 next(ls);
-                if (check_next1(ls, '=')) return R.TK_LE;
-                else if (check_next1(ls, '<')) return R.TK_SHL;
-                else return char['<'];
+                if (check_next1(ls, 61 /* ('=').charCodeAt(0) */)) return R.TK_LE;
+                else if (check_next1(ls, 60 /* ('<').charCodeAt(0) */)) return R.TK_SHL;
+                else return 60 /* ('<').charCodeAt(0) */;
             }
-            case char['>']: {
+            case 62 /* ('>').charCodeAt(0) */: {
                 next(ls);
-                if (check_next1(ls, '=')) return R.TK_GE;
-                else if (check_next1(ls, '>')) return R.TK_SHR;
-                else return char['>'];
+                if (check_next1(ls, 61 /* ('=').charCodeAt(0) */)) return R.TK_GE;
+                else if (check_next1(ls, 62 /* ('>').charCodeAt(0) */)) return R.TK_SHR;
+                else return 62 /* ('>').charCodeAt(0) */;
             }
-            case char['/']: {
+            case 47 /* ('/').charCodeAt(0) */: {
                 next(ls);
-                if (check_next1(ls, '/')) return R.TK_IDIV;
-                else return char['/'];
+                if (check_next1(ls, 47 /* ('/').charCodeAt(0) */)) return R.TK_IDIV;
+                else return 47 /* ('/').charCodeAt(0) */;
             }
-            case char['~']: {
+            case 126 /* ('~').charCodeAt(0) */: {
                 next(ls);
-                if (check_next1(ls, '=')) return R.TK_NE;
-                else return char['~'];
+                if (check_next1(ls, 61 /* ('=').charCodeAt(0) */)) return R.TK_NE;
+                else return 126 /* ('~').charCodeAt(0) */;
             }
-            case char[':']: {
+            case 58 /* (':').charCodeAt(0) */: {
                 next(ls);
-                if (check_next1(ls, ':')) return R.TK_DBCOLON;
-                else return char[':'];
+                if (check_next1(ls, 58 /* (':').charCodeAt(0) */)) return R.TK_DBCOLON;
+                else return 58 /* (':').charCodeAt(0) */;
             }
-            case char['"']: case char['\'']: {  /* short literal strings */
+            case 34 /* ('"').charCodeAt(0) */:
+            case 39 /* ('\'').charCodeAt(0) */: {  /* short literal strings */
                 read_string(ls, ls.current, seminfo);
                 return R.TK_STRING;
             }
-            case char['.']: {  /* '.', '..', '...', or number */
+            case 46 /* ('.').charCodeAt(0) */: {  /* '.', '..', '...', or number */
                 save_and_next(ls);
-                if (check_next1(ls, '.')) {
-                    if (check_next1(ls, '.'))
+                if (check_next1(ls, 46 /* ('.').charCodeAt(0) */)) {
+                    if (check_next1(ls, 46 /* ('.').charCodeAt(0) */))
                         return R.TK_DOTS;   /* '...' */
                     else return R.TK_CONCAT;   /* '..' */
                 }
-                else if (!ljstype.lisdigit(ls.current)) return char['.'];
+                else if (!ljstype.lisdigit(ls.current)) return 46 /* ('.').charCodeAt(0) */;
                 else return read_numeral(ls, seminfo);
             }
-            case char['0']: case char['1']: case char['2']: case char['3']: case char['4']:
-            case char['5']: case char['6']: case char['7']: case char['8']: case char['9']: {
+            case 48 /* ('0').charCodeAt(0) */: case 49 /* ('1').charCodeAt(0) */: case 50 /* ('2').charCodeAt(0) */: case 51 /* ('3').charCodeAt(0) */: case 52 /* ('4').charCodeAt(0) */:
+            case 53 /* ('5').charCodeAt(0) */: case 54 /* ('6').charCodeAt(0) */: case 55 /* ('7').charCodeAt(0) */: case 56 /* ('8').charCodeAt(0) */: case 57 /* ('9').charCodeAt(0) */: {
                 return read_numeral(ls, seminfo);
             }
             case lzio.EOZ: {

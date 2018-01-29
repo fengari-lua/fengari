@@ -2,7 +2,6 @@
 
 const {
     LUA_MULTRET,
-    char,
     to_luastring
 } = require('./defs.js');
 const {
@@ -720,7 +719,7 @@ const yindex = function(ls, v) {
     llex.luaX_next(ls);  /* skip the '[' */
     expr(ls, v);
     luaK_exp2val(ls.fs, v);
-    checknext(ls, char[']']);
+    checknext(ls, 93 /* (']').charCodeAt(0) */);
 };
 
 /*
@@ -752,7 +751,7 @@ const recfield = function(ls, cc) {
     } else  /* ls->t.token === '[' */
         yindex(ls, key);
     cc.nh++;
-    checknext(ls, char['=']);
+    checknext(ls, 61 /* ('=').charCodeAt(0) */);
     let rkkey = luaK_exp2RK(fs, key);
     expr(ls, val);
     luaK_codeABC(fs, OP_SETTABLE, cc.t.u.info, rkkey, luaK_exp2RK(fs, val));
@@ -794,13 +793,13 @@ const field = function(ls, cc) {
     /* field -> listfield | recfield */
     switch (ls.t.token) {
         case R.TK_NAME: {  /* may be 'listfield' or 'recfield' */
-            if (llex.luaX_lookahead(ls) !== char['='])  /* expression? */
+            if (llex.luaX_lookahead(ls) !== 61 /* ('=').charCodeAt(0) */)  /* expression? */
                 listfield(ls, cc);
             else
                 recfield(ls, cc);
             break;
         }
-        case char['[']: {
+        case 91 /* ('[').charCodeAt(0) */: {
             recfield(ls, cc);
             break;
         }
@@ -823,14 +822,14 @@ const constructor = function(ls, t) {
     init_exp(t, expkind.VRELOCABLE, pc);
     init_exp(cc.v, expkind.VVOID, 0);  /* no value (yet) */
     luaK_exp2nextreg(ls.fs, t);  /* fix it at stack top */
-    checknext(ls, char['{']);
+    checknext(ls, 123 /* ('{').charCodeAt(0) */);
     do {
         lua_assert(cc.v.k === expkind.VVOID || cc.tostore > 0);
-        if (ls.t.token === char['}']) break;
+        if (ls.t.token === 125 /* ('}').charCodeAt(0) */) break;
         closelistfield(fs, cc);
         field(ls, cc);
-    } while (testnext(ls, char[',']) || testnext(ls, char[';']));
-    check_match(ls, char['}'], char['{'], line);
+    } while (testnext(ls, 44 /* (',').charCodeAt(0) */) || testnext(ls, 59 /* (';').charCodeAt(0) */));
+    check_match(ls, 125 /* ('}').charCodeAt(0) */, 123 /* ('{').charCodeAt(0) */, line);
     lastlistfield(fs, cc);
     SETARG_B(fs.f.code[pc], lobject.luaO_int2fb(cc.na));  /* set initial array size */
     SETARG_C(fs.f.code[pc], lobject.luaO_int2fb(cc.nh));  /* set initial table size */
@@ -844,7 +843,7 @@ const parlist = function(ls) {
     let f = fs.f;
     let nparams = 0;
     f.is_vararg = false;
-    if (ls.t.token !== char[')']) {  /* is 'parlist' not empty? */
+    if (ls.t.token !== 41 /* (')').charCodeAt(0) */) {  /* is 'parlist' not empty? */
         do {
             switch (ls.t.token) {
                 case R.TK_NAME: {  /* param -> NAME */
@@ -859,7 +858,7 @@ const parlist = function(ls) {
                 }
                 default: llex.luaX_syntaxerror(ls, to_luastring("<name> or '...' expected", true));
             }
-        } while(!f.is_vararg && testnext(ls, char[',']));
+        } while(!f.is_vararg && testnext(ls, 44 /* (',').charCodeAt(0) */));
     }
     adjustlocalvars(ls, nparams);
     f.numparams = fs.nactvar;
@@ -873,13 +872,13 @@ const body = function(ls, e, ismethod, line) {
     new_fs.f = addprototype(ls);
     new_fs.f.linedefined = line;
     open_func(ls, new_fs, bl);
-    checknext(ls, char['(']);
+    checknext(ls, 40 /* ('(').charCodeAt(0) */);
     if (ismethod) {
         new_localvarliteral(ls, "self");  /* create 'self' parameter */
         adjustlocalvars(ls, 1);
     }
     parlist(ls);
-    checknext(ls, char[')']);
+    checknext(ls, 41 /* (')').charCodeAt(0) */);
     statlist(ls);
     new_fs.f.lastlinedefined = ls.linenumber;
     check_match(ls, R.TK_END, R.TK_FUNCTION, line);
@@ -891,7 +890,7 @@ const explist = function(ls, v) {
     /* explist -> expr { ',' expr } */
     let n = 1;  /* at least one expression */
     expr(ls, v);
-    while (testnext(ls, char[','])) {
+    while (testnext(ls, 44 /* (',').charCodeAt(0) */)) {
         luaK_exp2nextreg(ls.fs, v);
         expr(ls, v);
         n++;
@@ -903,18 +902,18 @@ const funcargs = function(ls, f, line) {
     let fs = ls.fs;
     let args = new expdesc();
     switch (ls.t.token) {
-        case char['(']: {  /* funcargs -> '(' [ explist ] ')' */
+        case 40 /* ('(').charCodeAt(0) */: {  /* funcargs -> '(' [ explist ] ')' */
             llex.luaX_next(ls);
-            if (ls.t.token === char[')'])  /* arg list is empty? */
+            if (ls.t.token === 41 /* (')').charCodeAt(0) */)  /* arg list is empty? */
                 args.k = expkind.VVOID;
             else {
                 explist(ls, args);
                 luaK_setmultret(fs, args);
             }
-            check_match(ls, char[')'], char['('], line);
+            check_match(ls, 41 /* (')').charCodeAt(0) */, 40 /* ('(').charCodeAt(0) */, line);
             break;
         }
-        case char['{']: {  /* funcargs -> constructor */
+        case 123 /* ('{').charCodeAt(0) */: {  /* funcargs -> constructor */
             constructor(ls, args);
             break;
         }
@@ -951,11 +950,11 @@ const funcargs = function(ls, f, line) {
 const primaryexp = function(ls, v) {
     /* primaryexp -> NAME | '(' expr ')' */
     switch (ls.t.token) {
-        case char['(']: {
+        case 40 /* ('(').charCodeAt(0) */: {
             let line = ls.linenumber;
             llex.luaX_next(ls);
             expr(ls, v);
-            check_match(ls, char[')'], char['('], line);
+            check_match(ls, 41 /* (')').charCodeAt(0) */, 40 /* ('(').charCodeAt(0) */, line);
             luaK_dischargevars(ls.fs, v);
             return;
         }
@@ -977,18 +976,18 @@ const suffixedexp = function(ls, v) {
     primaryexp(ls, v);
     for (;;) {
         switch (ls.t.token) {
-            case char['.']: {  /* fieldsel */
+            case 46 /* ('.').charCodeAt(0) */: {  /* fieldsel */
                 fieldsel(ls, v);
                 break;
             }
-            case char['[']: {  /* '[' exp1 ']' */
+            case 91 /* ('[').charCodeAt(0) */: {  /* '[' exp1 ']' */
                 let key = new expdesc();
                 luaK_exp2anyregup(fs, v);
                 yindex(ls, key);
                 luaK_indexed(fs, v, key);
                 break;
             }
-            case char[':']: {  /* ':' NAME funcargs */
+            case 58 /* (':').charCodeAt(0) */: {  /* ':' NAME funcargs */
                 let key = new expdesc();
                 llex.luaX_next(ls);
                 checkname(ls, key);
@@ -996,7 +995,7 @@ const suffixedexp = function(ls, v) {
                 funcargs(ls, v, line);
                 break;
             }
-            case char['(']: case R.TK_STRING: case char['{']: {  /* funcargs */
+            case 40 /* ('(').charCodeAt(0) */: case R.TK_STRING: case 123 /* ('{').charCodeAt(0) */: {  /* funcargs */
                 luaK_exp2nextreg(fs, v);
                 funcargs(ls, v, line);
                 break;
@@ -1042,7 +1041,7 @@ const simpleexp = function(ls, v) {
             init_exp(v, expkind.VVARARG, luaK_codeABC(fs, OP_VARARG, 0, 1, 0));
             break;
         }
-        case char['{']: {  /* constructor */
+        case 123 /* ('{').charCodeAt(0) */: {  /* constructor */
             constructor(ls, v);
             return;
         }
@@ -1061,34 +1060,34 @@ const simpleexp = function(ls, v) {
 
 const getunopr = function(op) {
     switch (op) {
-        case R.TK_NOT:  return OPR_NOT;
-        case char['-']: return OPR_MINUS;
-        case char['~']: return OPR_BNOT;
-        case char['#']: return OPR_LEN;
-        default:        return OPR_NOUNOPR;
+        case R.TK_NOT: return OPR_NOT;
+        case 45 /* ('-').charCodeAt(0) */: return OPR_MINUS;
+        case 126 /* ('~').charCodeAt(0) */: return OPR_BNOT;
+        case 35 /* ('#').charCodeAt(0) */: return OPR_LEN;
+        default: return OPR_NOUNOPR;
     }
 };
 
 const getbinopr = function(op) {
     switch (op) {
-        case char['+']:   return OPR_ADD;
-        case char['-']:   return OPR_SUB;
-        case char['*']:   return OPR_MUL;
-        case char['%']:   return OPR_MOD;
-        case char['^']:   return OPR_POW;
-        case char['/']:   return OPR_DIV;
+        case 43 /* ('+').charCodeAt(0) */: return OPR_ADD;
+        case 45 /* ('-').charCodeAt(0) */: return OPR_SUB;
+        case 42 /* ('*').charCodeAt(0) */: return OPR_MUL;
+        case 37 /* ('%').charCodeAt(0) */: return OPR_MOD;
+        case 94 /* ('^').charCodeAt(0) */: return OPR_POW;
+        case 47 /* ('/').charCodeAt(0) */: return OPR_DIV;
         case R.TK_IDIV:   return OPR_IDIV;
-        case char['&']:   return OPR_BAND;
-        case char['|']:   return OPR_BOR;
-        case char['~']:   return OPR_BXOR;
+        case 38 /* ('&').charCodeAt(0) */: return OPR_BAND;
+        case 124 /* ('|').charCodeAt(0) */: return OPR_BOR;
+        case 126 /* ('~').charCodeAt(0) */: return OPR_BXOR;
         case R.TK_SHL:    return OPR_SHL;
         case R.TK_SHR:    return OPR_SHR;
         case R.TK_CONCAT: return OPR_CONCAT;
         case R.TK_NE:     return OPR_NE;
         case R.TK_EQ:     return OPR_EQ;
-        case char['<']:   return OPR_LT;
+        case 60 /* ('<').charCodeAt(0) */: return OPR_LT;
         case R.TK_LE:     return OPR_LE;
-        case char['>']:   return OPR_GT;
+        case 62 /* ('>').charCodeAt(0) */: return OPR_GT;
         case R.TK_GE:     return OPR_GE;
         case R.TK_AND:    return OPR_AND;
         case R.TK_OR:     return OPR_OR;
@@ -1211,7 +1210,7 @@ const check_conflict = function(ls, lh, v) {
 const assignment = function(ls, lh, nvars) {
     let e = new expdesc();
     check_condition(ls, vkisvar(lh.v.k), to_luastring("syntax error", true));
-    if (testnext(ls, char[','])) {  /* assignment -> ',' suffixedexp assignment */
+    if (testnext(ls, 44 /* (',').charCodeAt(0) */)) {  /* assignment -> ',' suffixedexp assignment */
         let nv = new LHS_assign();
         nv.prev = lh;
         suffixedexp(ls, nv.v);
@@ -1220,7 +1219,7 @@ const assignment = function(ls, lh, nvars) {
         checklimit(ls.fs, nvars + ls.L.nCcalls, LUAI_MAXCCALLS, to_luastring("JS levels", true));
         assignment(ls, nv, nvars + 1);
     } else {  /* assignment -> '=' explist */
-        checknext(ls, char['=']);
+        checknext(ls, 61 /* ('=').charCodeAt(0) */);
         let nexps = explist(ls, e);
         if (nexps !== nvars)
             adjust_assign(ls, nvars, nexps, e);
@@ -1270,7 +1269,7 @@ const checkrepeated = function(fs, ll, label) {
 
 /* skip no-op statements */
 const skipnoopstat = function(ls) {
-    while (ls.t.token === char[';'] || ls.t.token === R.TK_DBCOLON)
+    while (ls.t.token === 59 /* (';').charCodeAt(0) */ || ls.t.token === R.TK_DBCOLON)
         statement(ls);
 };
 
@@ -1368,11 +1367,11 @@ const fornum = function(ls, varname, line) {
     new_localvarliteral(ls, "(for limit)");
     new_localvarliteral(ls, "(for step)");
     new_localvar(ls, varname);
-    checknext(ls, char['=']);
+    checknext(ls, 61 /* ('=').charCodeAt(0) */);
     exp1(ls);  /* initial value */
-    checknext(ls, char[',']);
+    checknext(ls, 44 /* (',').charCodeAt(0) */);
     exp1(ls);  /* limit */
-    if (testnext(ls, char[',']))
+    if (testnext(ls, 44 /* (',').charCodeAt(0) */))
         exp1(ls);  /* optional step */
     else {  /* default step = 1 */
         luaK_codek(fs, fs.freereg, luaK_intK(fs, 1));
@@ -1393,7 +1392,7 @@ const forlist = function(ls, indexname) {
     new_localvarliteral(ls, "(for control)");
     /* create declared variables */
     new_localvar(ls, indexname);
-    while (testnext(ls, char[','])) {
+    while (testnext(ls, 44 /* (',').charCodeAt(0) */)) {
         new_localvar(ls, str_checkname(ls));
         nvars++;
     }
@@ -1412,8 +1411,8 @@ const forstat = function(ls, line) {
     llex.luaX_next(ls);  /* skip 'for' */
     let varname = str_checkname(ls);  /* first variable name */
     switch (ls.t.token) {
-        case char['=']: fornum(ls, varname, line); break;
-        case char[',']: case R.TK_IN: forlist(ls, varname); break;
+        case 61 /* ('=').charCodeAt(0) */: fornum(ls, varname, line); break;
+        case 44 /* (',').charCodeAt(0) */: case R.TK_IN: forlist(ls, varname); break;
         default: llex.luaX_syntaxerror(ls, to_luastring("'=' or 'in' expected", true));
     }
     check_match(ls, R.TK_END, R.TK_FOR, line);
@@ -1435,7 +1434,7 @@ const test_then_block = function(ls, escapelist) {
         luaK_goiffalse(ls.fs, v);  /* will jump to label if condition is true */
         enterblock(fs, bl, false);  /* must enter block before 'goto' */
         gotostat(ls, v.t);   /* handle goto/break */
-        while (testnext(ls, char[';']));  /* skip colons */
+        while (testnext(ls, 59 /* (';').charCodeAt(0) */));  /* skip colons */
         if (block_follow(ls, 0)) {  /* 'goto' is the entire block? */
             leaveblock(fs);
             return escapelist;  /* and that is it */
@@ -1487,8 +1486,8 @@ const localstat = function(ls) {
     do {
         new_localvar(ls, str_checkname(ls));
         nvars++;
-    } while (testnext(ls, char[',']));
-    if (testnext(ls, char['=']))
+    } while (testnext(ls, 44 /* (',').charCodeAt(0) */));
+    if (testnext(ls, 61 /* ('=').charCodeAt(0) */))
         nexps = explist(ls, e);
     else {
         e.k = expkind.VVOID;
@@ -1502,9 +1501,9 @@ const funcname = function(ls, v) {
     /* funcname -> NAME {fieldsel} [':' NAME] */
     let ismethod = 0;
     singlevar(ls, v);
-    while (ls.t.token === char['.'])
+    while (ls.t.token === 46 /* ('.').charCodeAt(0) */)
         fieldsel(ls, v);
-    if (ls.t.token === char[':']) {
+    if (ls.t.token === 58 /* (':').charCodeAt(0) */) {
         ismethod = 1;
         fieldsel(ls, v);
     }
@@ -1527,7 +1526,7 @@ const exprstat= function(ls) {
     let fs = ls.fs;
     let v = new LHS_assign();
     suffixedexp(ls, v.v);
-    if (ls.t.token === char['='] || ls.t.token === char[',']) { /* stat . assignment ? */
+    if (ls.t.token === 61 /* ('=').charCodeAt(0) */ || ls.t.token === 44 /* (',').charCodeAt(0) */) { /* stat . assignment ? */
         v.prev = null;
         assignment(ls, v, 1);
     }
@@ -1542,7 +1541,7 @@ const retstat = function(ls) {
     let fs = ls.fs;
     let e = new expdesc();
     let first, nret;  /* registers with returned values */
-    if (block_follow(ls, 1) || ls.t.token === char[';'])
+    if (block_follow(ls, 1) || ls.t.token === 59 /* (';').charCodeAt(0) */)
         first = nret = 0;  /* return no values */
     else {
         nret = explist(ls, e);  /* optional return values */
@@ -1565,14 +1564,14 @@ const retstat = function(ls) {
         }
     }
     luaK_ret(fs, first, nret);
-    testnext(ls, char[';']);  /* skip optional semicolon */
+    testnext(ls, 59 /* (';').charCodeAt(0) */);  /* skip optional semicolon */
 };
 
 const statement = function(ls) {
     let line = ls.linenumber;  /* may be needed for error messages */
     enterlevel(ls);
     switch(ls.t.token) {
-        case char[';']: {  /* stat -> ';' (empty statement) */
+        case 59 /* (';').charCodeAt(0) */: {  /* stat -> ';' (empty statement) */
             llex.luaX_next(ls);  /* skip ';' */
             break;
         }

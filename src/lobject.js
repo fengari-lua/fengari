@@ -354,7 +354,7 @@ const POS  = to_luastring("\"]");
 const luaO_chunkid = function(source, bufflen) {
     let l = source.length;
     let out;
-    if (source[0] === char['=']) {  /* 'literal' source */
+    if (source[0] === 61 /* ('=').charCodeAt(0) */) {  /* 'literal' source */
         if (l < bufflen) {  /* small enough? */
             out = new Uint8Array(l-1);
             out.set(source.subarray(1));
@@ -362,7 +362,7 @@ const luaO_chunkid = function(source, bufflen) {
             out = new Uint8Array(bufflen);
             out.set(source.subarray(1, bufflen+1));
         }
-    } else if (source[0] === char['@']) {  /* file name */
+    } else if (source[0] === 64 /* ('@').charCodeAt(0) */) {  /* file name */
         if (l <= bufflen) {  /* small enough? */
             out = new Uint8Array(l-1);
             out.set(source.subarray(1));
@@ -374,7 +374,7 @@ const luaO_chunkid = function(source, bufflen) {
         }
     } else {  /* string; format as [string "source"] */
         out = new Uint8Array(bufflen);
-        let nli = luastring_indexOf(source, char['\n']);  /* find first new line (if any) */
+        let nli = luastring_indexOf(source, 10 /* ('\n').charCodeAt(0) */);  /* find first new line (if any) */
         out.set(PRE);  /* add prefix */
         let out_i = PRE.length;
         bufflen -= PRE.length + RETS.length + POS.length;  /* save space for prefix+suffix */
@@ -438,16 +438,16 @@ const lua_strx2number = function(s) {
     let neg;  /* 1 if number is negative */
     let hasdot = false;  /* true after seen a dot */
     while (lisspace(s[i])) i++;  /* skip initial spaces */
-    if ((neg = (s[i] === char['-']))) i++;  /* check signal */
-    else if (s[i] === char['+']) i++;
-    if (!(s[i] === char['0'] && (s[i+1] === char['x'] || s[i+1] === char['X'])))  /* check '0x' */
+    if ((neg = (s[i] === 45 /* ('-').charCodeAt(0) */))) i++;  /* check signal */
+    else if (s[i] === 43 /* ('+').charCodeAt(0) */) i++;
+    if (!(s[i] === 48 /* ('0').charCodeAt(0) */ && (s[i+1] === 120 /* ('x').charCodeAt(0) */ || s[i+1] === 88 /* ('X').charCodeAt(0) */)))  /* check '0x' */
         return null;  /* invalid format (no '0x') */
     for (i += 2; ; i++) {  /* skip '0x' and read numeral */
         if (s[i] === dot) {
             if (hasdot) break;  /* second dot? stop loop */
             else hasdot = true;
         } else if (lisxdigit(s[i])) {
-            if (sigdig === 0 && s[i] === char['0'])  /* non-significant digit (zero)? */
+            if (sigdig === 0 && s[i] === 48 /* ('0').charCodeAt(0) */)  /* non-significant digit (zero)? */
                 nosigdig++;
             else if (++sigdig <= MAXSIGDIG)  /* can read it without overflow? */
                 r = (r * 16) + luaO_hexavalue(s[i]);
@@ -459,16 +459,16 @@ const lua_strx2number = function(s) {
     if (nosigdig + sigdig === 0)  /* no digits? */
         return null;  /* invalid format */
     e *= 4;  /* each digit multiplies/divides value by 2^4 */
-    if (s[i] === char['p'] || s[i] === char['P']) {  /* exponent part? */
+    if (s[i] === 112 /* ('p').charCodeAt(0) */ || s[i] === 80 /* ('P').charCodeAt(0) */) {  /* exponent part? */
         let exp1 = 0;  /* exponent value */
         let neg1;  /* exponent signal */
         i++;  /* skip 'p' */
-        if ((neg1 = (s[i] === char['-']))) i++;  /* signal */
-        else if (s[i] === char['+']) i++;
+        if ((neg1 = (s[i] === 45 /* ('-').charCodeAt(0) */))) i++;  /* signal */
+        else if (s[i] === 43 /* ('+').charCodeAt(0) */) i++;
         if (!lisdigit(s[i]))
             return null;  /* invalid; must have at least one digit */
         while (lisdigit(s[i]))  /* read exponent */
-            exp1 = exp1 * 10 + s[i++] - char['0'];
+            exp1 = exp1 * 10 + s[i++] - 48 /* ('0').charCodeAt(0) */;
         if (neg1) exp1 = -exp1;
         e += exp1;
     }
@@ -501,8 +501,20 @@ const l_str2dloc = function(s, mode) {
     return (result.i === s.length || s[result.i] === 0) ? result : null;  /* OK if no trailing characters */
 };
 
-const SIGILS = [char["."], char["x"], char["X"], char["n"], char["N"]];
-const modes = {[char["."]]: ".", [char["x"]]: "x", [char["X"]]: "x", [char["n"]]: "n", [char["N"]]: "n"};
+const SIGILS = [
+    46  /* (".").charCodeAt(0) */,
+    120 /* ("x").charCodeAt(0) */,
+    88  /* ("X").charCodeAt(0) */,
+    110 /* ("n").charCodeAt(0) */,
+    78  /* ("N").charCodeAt(0) */
+];
+const modes = {
+    [ 46]: ".",
+    [120]: "x",
+    [ 88]: "x",
+    [110]: "n",
+    [ 78]: "n"
+};
 const l_str2d = function(s) {
     let l = s.length;
     let pmode = 0;
@@ -533,9 +545,9 @@ const l_str2int = function(s) {
     let neg;
 
     while (lisspace(s[i])) i++;  /* skip initial spaces */
-    if ((neg = (s[i] === char['-']))) i++;
-    else if (s[i] === char['+']) i++;
-    if (s[i] === char['0'] && (s[i+1] === char['x'] || s[i+1] === char['X'])) {  /* hex? */
+    if ((neg = (s[i] === 45 /* ('-').charCodeAt(0) */))) i++;
+    else if (s[i] === 43 /* ('+').charCodeAt(0) */) i++;
+    if (s[i] === 48 /* ('0').charCodeAt(0) */ && (s[i+1] === 120 /* ('x').charCodeAt(0) */ || s[i+1] === 88 /* ('X').charCodeAt(0) */)) {  /* hex? */
         i += 2;  /* skip '0x' */
 
         for (; lisxdigit(s[i]); i++) {
@@ -544,7 +556,7 @@ const l_str2int = function(s) {
         }
     } else {  /* decimal */
         for (; lisdigit(s[i]); i++) {
-            let d = s[i] - char['0'];
+            let d = s[i] - 48 /* ('0').charCodeAt(0) */;
             if (a >= MAXBY10 && (a > MAXBY10 || d > MAXLASTD + neg))  /* overflow? */
                 return null;  /* do not accept it (as integer) */
             a = (a * 10 + d)|0;
@@ -603,11 +615,11 @@ const luaO_pushvfstring = function(L, fmt, argp) {
     let a = 0;
     let e;
     for (;;) {
-        e = luastring_indexOf(fmt, char['%'], i);
+        e = luastring_indexOf(fmt, 37 /* ('%').charCodeAt(0) */, i);
         if (e == -1) break;
         pushstr(L, fmt.subarray(i, e));
         switch(fmt[e+1]) {
-            case char['s']: {
+            case 115 /* ('s').charCodeAt(0) */: {
                 let s = argp[a++];
                 if (s === null) s = to_luastring("(null)", true);
                 else {
@@ -620,7 +632,7 @@ const luaO_pushvfstring = function(L, fmt, argp) {
                 pushstr(L, s);
                 break;
             }
-            case char['c']: {
+            case 99 /* ('c').charCodeAt(0) */: {
                 let buff = argp[a++];
                 if (lisprint(buff))
                     pushstr(L, luastring_of(buff));
@@ -628,18 +640,18 @@ const luaO_pushvfstring = function(L, fmt, argp) {
                     luaO_pushfstring(L, to_luastring("<\\%d>", true), buff);
                 break;
             }
-            case char['d']:
-            case char['I']:
+            case 100 /* ('d').charCodeAt(0) */:
+            case 73 /* ('I').charCodeAt(0) */:
                 ldo.luaD_inctop(L);
                 L.stack[L.top-1].setivalue(argp[a++]);
                 luaO_tostring(L, L.stack[L.top-1]);
                 break;
-            case char['f']:
+            case 102 /* ('f').charCodeAt(0) */:
                 ldo.luaD_inctop(L);
                 L.stack[L.top-1].setfltvalue(argp[a++]);
                 luaO_tostring(L, L.stack[L.top-1]);
                 break;
-            case char['p']: {
+            case 112 /* ('p').charCodeAt(0) */: {
                 let v = argp[a++];
                 if (v instanceof lstate.lua_State ||
                     v instanceof ltable.Table ||
@@ -671,13 +683,13 @@ const luaO_pushvfstring = function(L, fmt, argp) {
                 }
                 break;
             }
-            case char['U']: {
+            case 85 /* ('U').charCodeAt(0) */: {
                 let buff = new Uint8Array(UTF8BUFFSZ);
                 let l = luaO_utf8esc(buff, argp[a++]);
                 pushstr(L, buff.subarray(UTF8BUFFSZ - l));
                 break;
             }
-            case char['%']:
+            case 37 /* ('%').charCodeAt(0) */:
                 pushstr(L, to_luastring("%", true));
                 break;
             default:
