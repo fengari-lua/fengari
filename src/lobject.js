@@ -195,7 +195,7 @@ class TValue {
 
     setnilvalue() {
         this.type = LUA_TNIL;
-        this.value = void 0;
+        this.value = null;
     }
 
     setfvalue(x) {
