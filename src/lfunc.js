@@ -4,7 +4,6 @@ const { constant_types: { LUA_TNIL } } = require('./defs.js');
 const lobject = require('./lobject.js');
 
 class Proto {
-
     constructor(L) {
         this.id = L.l_G.id_counter++;
         this.k = [];              // constants used by the function
@@ -21,12 +20,10 @@ class Proto {
         this.lastlinedefined = 0; // debug information
         this.source = null;       // used for debug information
     }
-
 }
 
 const luaF_newLclosure = function(L, n) {
-    let c = new lobject.LClosure(L, n);
-    return c;
+    return new lobject.LClosure(L, n);
 };
 
 
@@ -47,9 +44,8 @@ const luaF_close = function(L, level) {
 ** fill a closure with new upvalues
 */
 const luaF_initupvals = function(L, cl) {
-    for (let i = 0; i < cl.nupvalues; i++) {
+    for (let i = 0; i < cl.nupvalues; i++)
         cl.upvals[i] = new lobject.TValue(LUA_TNIL, null);
-    }
 };
 
 /*
@@ -66,7 +62,6 @@ const luaF_getlocalname = function(f, local_number, pc) {
     }
     return null;  /* not found */
 };
-
 
 module.exports.MAXUPVAL          = 255;
 module.exports.Proto             = Proto;
