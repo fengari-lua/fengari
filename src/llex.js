@@ -12,7 +12,13 @@ const {
 } = require('./llimits.js');
 const ldebug   = require('./ldebug.js');
 const ldo      = require('./ldo.js');
-const ljstype  = require('./ljstype.js');
+const {
+    lisdigit,
+    lislalnum,
+    lislalpha,
+    lisspace,
+    lisxdigit
+} = require('./ljstype.js');
 const lobject  = require('./lobject.js');
 const {
     luaS_bless,
@@ -273,7 +279,7 @@ const check_next2 = function(ls, set) {
 const read_numeral = function(ls, seminfo) {
     let expo = "Ee";
     let first = ls.current;
-    lua_assert(ljstype.lisdigit(ls.current));
+    lua_assert(lisdigit(ls.current));
     save_and_next(ls);
     if (first === 48 /* ('0').charCodeAt(0) */ && check_next2(ls, "xX"))  /* hexadecimal? */
         expo = "Pp";
@@ -281,7 +287,7 @@ const read_numeral = function(ls, seminfo) {
     for (;;) {
         if (check_next2(ls, expo))  /* exponent part? */
             check_next2(ls, "-+");  /* optional exponent sign */
-        if (ljstype.lisxdigit(ls.current))
+        if (lisxdigit(ls.current))
             save_and_next(ls);
         else if (ls.current === 46 /* ('.').charCodeAt(0) */)
             save_and_next(ls);
@@ -393,7 +399,7 @@ const esccheck = function(ls, c, msg) {
 
 const gethexa = function(ls) {
     save_and_next(ls);
-    esccheck(ls, ljstype.lisxdigit(ls.current), to_luastring("hexadecimal digit expected", true));
+    esccheck(ls, lisxdigit(ls.current), to_luastring("hexadecimal digit expected", true));
     return lobject.luaO_hexavalue(ls.current);
 };
 
@@ -411,7 +417,7 @@ const readutf8desc = function(ls) {
     let r = gethexa(ls);  /* must have at least one digit */
 
     save_and_next(ls);
-    while (ljstype.lisxdigit(ls.current)) {
+    while (lisxdigit(ls.current)) {
         i++;
         r = (r << 4) + lobject.luaO_hexavalue(ls.current);
         esccheck(ls, r <= 0x10FFFF, to_luastring("UTF-8 value too large", true));
@@ -433,7 +439,7 @@ const utf8esc = function(ls) {
 const readdecesc = function(ls) {
     let r = 0;  /* result accumulator */
     let i;
-    for (i = 0; i < 3 && ljstype.lisdigit(ls.current); i++) {  /* read up to 3 digits */
+    for (i = 0; i < 3 && lisdigit(ls.current); i++) {  /* read up to 3 digits */
         r = 10 * r + ls.current - 48 /* ('0').charCodeAt(0) */;
         save_and_next(ls);
     }
@@ -479,14 +485,14 @@ const read_string = function(ls, del, seminfo) {
                     case 122 /* ('z').charCodeAt(0) */: {  /* zap following span of spaces */
                         luaZ_buffremove(ls.buff, 1);  /* remove '\\' */
                         next(ls);  /* skip the 'z' */
-                        while (ljstype.lisspace(ls.current)) {
+                        while (lisspace(ls.current)) {
                             if (currIsNewline(ls)) inclinenumber(ls);
                             else next(ls);
                         }
                         will = 'no_save'; break;
                     }
                     default: {
-                        esccheck(ls, ljstype.lisdigit(ls.current), to_luastring("invalid escape sequence", true));
+                        esccheck(ls, lisdigit(ls.current), to_luastring("invalid escape sequence", true));
                         c = readdecesc(ls);  /* digital escape '\ddd' */
                         will = 'only_save'; break;
                     }
@@ -609,7 +615,7 @@ const llex = function(ls, seminfo) {
                         return TK_DOTS;   /* '...' */
                     else return TK_CONCAT;   /* '..' */
                 }
-                else if (!ljstype.lisdigit(ls.current)) return 46 /* ('.').charCodeAt(0) */;
+                else if (!lisdigit(ls.current)) return 46 /* ('.').charCodeAt(0) */;
                 else return read_numeral(ls, seminfo);
             }
             case 48 /* ('0').charCodeAt(0) */: case 49 /* ('1').charCodeAt(0) */: case 50 /* ('2').charCodeAt(0) */: case 51 /* ('3').charCodeAt(0) */: case 52 /* ('4').charCodeAt(0) */:
@@ -620,10 +626,10 @@ const llex = function(ls, seminfo) {
                 return TK_EOS;
             }
             default: {
-                if (ljstype.lislalpha(ls.current)) {  /* identifier or reserved word? */
+                if (lislalpha(ls.current)) {  /* identifier or reserved word? */
                     do {
                         save_and_next(ls);
-                    } while (ljstype.lislalnum(ls.current));
+                    } while (lislalnum(ls.current));
                     let ts = luaX_newstring(ls, luaZ_buffer(ls.buff));
                     seminfo.ts = ts;
                     let kidx = token_to_index[luaS_hashlongstr(ts)];
