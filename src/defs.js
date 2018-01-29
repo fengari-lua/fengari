@@ -2,115 +2,9 @@
 
 const { LUAI_MAXSTACK } = require('./luaconf.js');
 
-/* mark for precompiled code ('<esc>Lua') */
-const LUA_SIGNATURE           = "\x1bLua";
-
-const LUA_VERSION_MAJOR       = "5";
-const LUA_VERSION_MINOR       = "3";
-const LUA_VERSION_NUM         = 503;
-const LUA_VERSION_RELEASE     = "4";
-
-const LUA_VERSION             = "Lua " + LUA_VERSION_MAJOR + "." + LUA_VERSION_MINOR;
-const LUA_RELEASE             = LUA_VERSION + "." + LUA_VERSION_RELEASE;
-const LUA_COPYRIGHT           = LUA_RELEASE + "  Copyright (C) 1994-2017 Lua.org, PUC-Rio";
-const LUA_AUTHORS             = "R. Ierusalimschy, L. H. de Figueiredo, W. Celes";
-
-const LUA_VERSUFFIX           = "_" + LUA_VERSION_MAJOR + "_" + LUA_VERSION_MINOR;
-
-const LUA_INIT_VAR            = "LUA_INIT";
-const LUA_INITVARVERSION      = LUA_INIT_VAR + LUA_VERSUFFIX;
-
-const thread_status = {
-    LUA_OK:        0,
-    LUA_YIELD:     1,
-    LUA_ERRRUN:    2,
-    LUA_ERRSYNTAX: 3,
-    LUA_ERRMEM:    4,
-    LUA_ERRGCMM:   5,
-    LUA_ERRERR:    6
-};
-
-const constant_types = {
-    LUA_TNONE:          -1,
-    LUA_TNIL:           0,
-    LUA_TBOOLEAN:       1,
-    LUA_TLIGHTUSERDATA: 2,
-    LUA_TNUMBER:        3,
-    LUA_TSTRING:        4,
-    LUA_TTABLE:         5,
-    LUA_TFUNCTION:      6,
-    LUA_TUSERDATA:      7,
-    LUA_TTHREAD:        8,
-    LUA_NUMTAGS:        9
-};
-
-constant_types.LUA_TSHRSTR = constant_types.LUA_TSTRING | (0 << 4);  /* short strings */
-constant_types.LUA_TLNGSTR = constant_types.LUA_TSTRING | (1 << 4);  /* long strings */
-
-constant_types.LUA_TNUMFLT = constant_types.LUA_TNUMBER | (0 << 4);  /* float numbers */
-constant_types.LUA_TNUMINT = constant_types.LUA_TNUMBER | (1 << 4);  /* integer numbers */
-
-constant_types.LUA_TLCL = constant_types.LUA_TFUNCTION | (0 << 4);  /* Lua closure */
-constant_types.LUA_TLCF = constant_types.LUA_TFUNCTION | (1 << 4);  /* light C function */
-constant_types.LUA_TCCL = constant_types.LUA_TFUNCTION | (2 << 4);  /* C closure */
-
 /*
-** Comparison and arithmetic functions
-*/
-
-const LUA_OPADD  = 0;   /* ORDER TM, ORDER OP */
-const LUA_OPSUB  = 1;
-const LUA_OPMUL  = 2;
-const LUA_OPMOD  = 3;
-const LUA_OPPOW  = 4;
-const LUA_OPDIV  = 5;
-const LUA_OPIDIV = 6;
-const LUA_OPBAND = 7;
-const LUA_OPBOR  = 8;
-const LUA_OPBXOR = 9;
-const LUA_OPSHL  = 10;
-const LUA_OPSHR  = 11;
-const LUA_OPUNM  = 12;
-const LUA_OPBNOT = 13;
-
-const LUA_OPEQ = 0;
-const LUA_OPLT = 1;
-const LUA_OPLE = 2;
-
-const LUA_MINSTACK = 20;
-
-const LUA_REGISTRYINDEX = -LUAI_MAXSTACK - 1000;
-
-const lua_upvalueindex = function(i) {
-    return LUA_REGISTRYINDEX - i;
-};
-
-/* predefined values in the registry */
-const LUA_RIDX_MAINTHREAD = 1;
-const LUA_RIDX_GLOBALS    = 2;
-const LUA_RIDX_LAST       = LUA_RIDX_GLOBALS;
-
-class lua_Debug {
-
-    constructor() {
-        this.event = NaN;
-        this.name = null;           /* (n) */
-        this.namewhat = null;       /* (n) 'global', 'local', 'field', 'method' */
-        this.what = null;           /* (S) 'Lua', 'C', 'main', 'tail' */
-        this.source = null;         /* (S) */
-        this.currentline = NaN;     /* (l) */
-        this.linedefined = NaN;     /* (S) */
-        this.lastlinedefined = NaN; /* (S) */
-        this.nups = NaN;            /* (u) number of upvalues */
-        this.nparams = NaN;         /* (u) number of parameters */
-        this.isvararg = NaN;        /* (u) */
-        this.istailcall = NaN;      /* (t) */
-        this.short_src = null;      /* (S) */
-        /* private part */
-        this.i_ci = null;           /* active function */
-    }
-
-}
+ * Fengari specific string conversion functions
+ */
 
 let luastring_from;
 if (typeof Uint8Array.from === "function") {
@@ -298,6 +192,114 @@ const from_userstring = function(str) {
     if (!is_luastring(str)) throw new TypeError("expects an array of bytes");
     return str;
 };
+
+/* mark for precompiled code ('<esc>Lua') */
+const LUA_SIGNATURE           = "\x1bLua";
+
+const LUA_VERSION_MAJOR       = "5";
+const LUA_VERSION_MINOR       = "3";
+const LUA_VERSION_NUM         = 503;
+const LUA_VERSION_RELEASE     = "4";
+
+const LUA_VERSION             = "Lua " + LUA_VERSION_MAJOR + "." + LUA_VERSION_MINOR;
+const LUA_RELEASE             = LUA_VERSION + "." + LUA_VERSION_RELEASE;
+const LUA_COPYRIGHT           = LUA_RELEASE + "  Copyright (C) 1994-2017 Lua.org, PUC-Rio";
+const LUA_AUTHORS             = "R. Ierusalimschy, L. H. de Figueiredo, W. Celes";
+
+const LUA_VERSUFFIX           = "_" + LUA_VERSION_MAJOR + "_" + LUA_VERSION_MINOR;
+
+const LUA_INIT_VAR            = "LUA_INIT";
+const LUA_INITVARVERSION      = LUA_INIT_VAR + LUA_VERSUFFIX;
+
+const thread_status = {
+    LUA_OK:        0,
+    LUA_YIELD:     1,
+    LUA_ERRRUN:    2,
+    LUA_ERRSYNTAX: 3,
+    LUA_ERRMEM:    4,
+    LUA_ERRGCMM:   5,
+    LUA_ERRERR:    6
+};
+
+const constant_types = {
+    LUA_TNONE:          -1,
+    LUA_TNIL:           0,
+    LUA_TBOOLEAN:       1,
+    LUA_TLIGHTUSERDATA: 2,
+    LUA_TNUMBER:        3,
+    LUA_TSTRING:        4,
+    LUA_TTABLE:         5,
+    LUA_TFUNCTION:      6,
+    LUA_TUSERDATA:      7,
+    LUA_TTHREAD:        8,
+    LUA_NUMTAGS:        9
+};
+
+constant_types.LUA_TSHRSTR = constant_types.LUA_TSTRING | (0 << 4);  /* short strings */
+constant_types.LUA_TLNGSTR = constant_types.LUA_TSTRING | (1 << 4);  /* long strings */
+
+constant_types.LUA_TNUMFLT = constant_types.LUA_TNUMBER | (0 << 4);  /* float numbers */
+constant_types.LUA_TNUMINT = constant_types.LUA_TNUMBER | (1 << 4);  /* integer numbers */
+
+constant_types.LUA_TLCL = constant_types.LUA_TFUNCTION | (0 << 4);  /* Lua closure */
+constant_types.LUA_TLCF = constant_types.LUA_TFUNCTION | (1 << 4);  /* light C function */
+constant_types.LUA_TCCL = constant_types.LUA_TFUNCTION | (2 << 4);  /* C closure */
+
+/*
+** Comparison and arithmetic functions
+*/
+
+const LUA_OPADD  = 0;   /* ORDER TM, ORDER OP */
+const LUA_OPSUB  = 1;
+const LUA_OPMUL  = 2;
+const LUA_OPMOD  = 3;
+const LUA_OPPOW  = 4;
+const LUA_OPDIV  = 5;
+const LUA_OPIDIV = 6;
+const LUA_OPBAND = 7;
+const LUA_OPBOR  = 8;
+const LUA_OPBXOR = 9;
+const LUA_OPSHL  = 10;
+const LUA_OPSHR  = 11;
+const LUA_OPUNM  = 12;
+const LUA_OPBNOT = 13;
+
+const LUA_OPEQ = 0;
+const LUA_OPLT = 1;
+const LUA_OPLE = 2;
+
+const LUA_MINSTACK = 20;
+
+const LUA_REGISTRYINDEX = -LUAI_MAXSTACK - 1000;
+
+const lua_upvalueindex = function(i) {
+    return LUA_REGISTRYINDEX - i;
+};
+
+/* predefined values in the registry */
+const LUA_RIDX_MAINTHREAD = 1;
+const LUA_RIDX_GLOBALS    = 2;
+const LUA_RIDX_LAST       = LUA_RIDX_GLOBALS;
+
+class lua_Debug {
+    constructor() {
+        this.event = NaN;
+        this.name = null;           /* (n) */
+        this.namewhat = null;       /* (n) 'global', 'local', 'field', 'method' */
+        this.what = null;           /* (S) 'Lua', 'C', 'main', 'tail' */
+        this.source = null;         /* (S) */
+        this.currentline = NaN;     /* (l) */
+        this.linedefined = NaN;     /* (S) */
+        this.lastlinedefined = NaN; /* (S) */
+        this.nups = NaN;            /* (u) number of upvalues */
+        this.nparams = NaN;         /* (u) number of parameters */
+        this.isvararg = NaN;        /* (u) */
+        this.istailcall = NaN;      /* (t) */
+        this.short_src = null;      /* (S) */
+        /* private part */
+        this.i_ci = null;           /* active function */
+    }
+}
 
 /*
 ** Event codes
