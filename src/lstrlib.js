@@ -673,15 +673,29 @@ const str_reverse = function(L) {
 
 const str_lower = function(L) {
     let s = luaL_checkstring(L, 1);
-    // TODO: will fail on invalid UTF-8
-    lua_pushstring(L, to_luastring(to_jsstring(s).toLowerCase()));
+    let l = s.length;
+    let r = new Uint8Array(l);
+    for (let i=0; i<l; i++) {
+        let c = s[i];
+        if (isupper(c))
+            c = c | 0x20;
+        r[i] = c;
+    }
+    lua_pushstring(L, r);
     return 1;
 };
 
 const str_upper = function(L) {
     let s = luaL_checkstring(L, 1);
-    // TODO: will fail on invalid UTF-8
-    lua_pushstring(L, to_luastring(to_jsstring(s).toUpperCase()));
+    let l = s.length;
+    let r = new Uint8Array(l);
+    for (let i=0; i<l; i++) {
+        let c = s[i];
+        if (islower(c))
+            c = c & 0xdf;
+        r[i] = c;
+    }
+    lua_pushstring(L, r);
     return 1;
 };
 
