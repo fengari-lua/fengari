@@ -56,7 +56,9 @@
       "indent": [
         "error",
         4,
-        {"SwitchCase": 1}
+        {
+          "SwitchCase": 1
+        }
       ],
       "linebreak-style": [
         "error",
@@ -65,11 +67,15 @@
       "no-console": 0,
       "no-empty": [
         2,
-        { "allowEmptyCatch": true }
+        {
+          "allowEmptyCatch": true
+        }
       ],
       "no-unused-vars": [
         2,
-        { "args": "none" }
+        {
+          "args": "none"
+        }
       ],
       "semi": [
         "error",
