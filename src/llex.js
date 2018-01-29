@@ -118,7 +118,7 @@ const luaX_tokens = [
     "//", "..", "...", "==", ">=", "<=", "~=",
     "<<", ">>", "::", "<eof>",
     "<number>", "<integer>", "<name>", "<string>"
-];
+].map((e, i)=>to_luastring(e));
 
 class SemInfo {
     constructor() {
@@ -172,9 +172,9 @@ const luaX_token2str = function(ls, token) {
     } else {
         let s = luaX_tokens[token - FIRST_RESERVED];
         if (token < TK_EOS)  /* fixed format (symbols and reserved words)? */
-            return lobject.luaO_pushfstring(ls.L, to_luastring("'%s'", true), to_luastring(s));
+            return lobject.luaO_pushfstring(ls.L, to_luastring("'%s'", true), s);
         else  /* names, strings, and numerals */
-            return to_luastring(s);
+            return s;
     }
 };
 
@@ -509,7 +509,7 @@ const read_string = function(ls, del, seminfo) {
 };
 
 const token_to_index = Object.create(null); /* don't want to return true for e.g. 'hasOwnProperty' */
-luaX_tokens.forEach((e, i)=>token_to_index[luaS_hash(to_luastring(e))] = i);
+luaX_tokens.forEach((e, i)=>token_to_index[luaS_hash(e)] = i);
 
 const isreserved = function(w) {
     let kidx = token_to_index[luaS_hashlongstr(w)];
