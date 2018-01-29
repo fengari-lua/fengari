@@ -148,7 +148,10 @@ const pushglobalfuncname = function(L, ar) {
     lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
     if (findfield(L, top + 1, 2)) {
         let name = lua_tostring(L, -1);
-        if (name[0] === "_".charCodeAt(0) && name[1] === "G".charCodeAt(0) && name[2] === ".".charCodeAt(0)) {  /* name start with '_G.'? */
+        if (name[0] === 95 /* '_'.charCodeAt(0) */ &&
+            name[1] === 71 /* 'G'.charCodeAt(0) */ &&
+            name[2] === 46 /* '.'.charCodeAt(0) */
+        ) {  /* name start with '_G.'? */
             lua_pushstring(L, name.subarray(3));  /* push name without prefix */
             lua_remove(L, -2);  /* remove original name */
         }
@@ -168,9 +171,9 @@ const pushfuncname = function(L, ar) {
     }
     else if (ar.namewhat.length !== 0)  /* is there a name from code? */
         lua_pushfstring(L, to_luastring("%s '%s'"), ar.namewhat, ar.name);  /* use it */
-    else if (ar.what && ar.what[0] === 'm'.charCodeAt(0))  /* main? */
+    else if (ar.what && ar.what[0] === 109 /* 'm'.charCodeAt(0) */)  /* main? */
         lua_pushliteral(L, "main chunk");
-    else if (ar.what && ar.what[0] === 'L'.charCodeAt(0))  /* for Lua functions, use <file:line> */
+    else if (ar.what && ar.what[0] === 76 /* 'L'.charCodeAt(0) */)  /* for Lua functions, use <file:line> */
         lua_pushfstring(L, to_luastring("function <%s:%d>"), ar.short_src, ar.linedefined);
     else  /* nothing left... */
         lua_pushliteral(L, "?");
@@ -792,10 +795,10 @@ const skipBOM = function(lf) {
 */
 const skipcomment = function(lf) {
     let c = skipBOM(lf);
-    if (c === '#'.charCodeAt(0)) {  /* first line is a comment (Unix exec. file)? */
+    if (c === 35 /* '#'.charCodeAt(0) */) {  /* first line is a comment (Unix exec. file)? */
         do {  /* skip first line */
             c = getc(lf);
-        } while (c && c !== '\n'.charCodeAt(0));
+        } while (c && c !== 10 /* '\n'.charCodeAt(0) */);
 
         return {
             skipped: true,
@@ -874,7 +877,7 @@ if (typeof process === "undefined") {
         if (com.c === LUA_SIGNATURE[0] && filename) {  /* binary file? */
             /* no need to re-open in node.js */
         } else if (com.skipped) { /* read initial portion */
-            lf.buff[lf.n++] = '\n'.charCodeAt(0);  /* add line to correct line numbers */
+            lf.buff[lf.n++] = 10 /* '\n'.charCodeAt(0) */;  /* add line to correct line numbers */
         }
         if (com.c !== null)
             lf.buff[lf.n++] = com.c; /* 'c' is the first character of the stream */
@@ -942,7 +945,7 @@ if (typeof process === "undefined") {
         if (com.c === LUA_SIGNATURE[0] && filename) {  /* binary file? */
             /* no need to re-open in node.js */
         } else if (com.skipped) { /* read initial portion */
-            lf.buff[lf.n++] = '\n'.charCodeAt(0);  /* add line to correct line numbers */
+            lf.buff[lf.n++] = 10 /* '\n'.charCodeAt(0) */;  /* add line to correct line numbers */
         }
         if (com.c !== null)
             lf.buff[lf.n++] = com.c; /* 'c' is the first character of the stream */
