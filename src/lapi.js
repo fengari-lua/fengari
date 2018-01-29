@@ -255,19 +255,19 @@ const lua_pushnil = function(L) {
 };
 
 const lua_pushnumber = function(L, n) {
-    fengari_argcheck(L, typeof n === "number");
+    fengari_argcheck(typeof n === "number");
     L.stack[L.top] = new TValue(LUA_TNUMFLT, n);
     api_incr_top(L);
 };
 
 const lua_pushinteger = function(L, n) {
-    fengari_argcheck(L, typeof n === "number" && (n|0) === n);
+    fengari_argcheck(typeof n === "number" && (n|0) === n);
     L.stack[L.top] = new TValue(LUA_TNUMINT, n);
     api_incr_top(L);
 };
 
 const lua_pushlstring = function(L, s, len) {
-    fengari_argcheck(L, typeof len === "number");
+    fengari_argcheck(typeof len === "number");
     let ts;
     if (len === 0) {
         s = to_luastring("", true);
