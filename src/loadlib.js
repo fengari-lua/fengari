@@ -87,7 +87,7 @@ const global_env = (function() {
     }
 })();
 
-const CLIBS         = to_luastring("__CLIBS__", true);
+const CLIBS         = to_luastring("__CLIBS__");
 const LUA_PATH_VAR  = "LUA_PATH";
 const LUA_CPATH_VAR = "LUA_CPATH";
 
