@@ -254,10 +254,10 @@ const addquoted = function(b, s, len) {
 ** Ensures the 'buff' string uses a dot as the radix character.
 */
 const checkdp = function(buff) {
-    if (luastring_indexOf(buff, '.'.charCodeAt(0)) < 0) {  /* no dot? */
+    if (luastring_indexOf(buff, 46 /* ('.').charCodeAt(0) */) < 0) {  /* no dot? */
         let point = lua_getlocaledecpoint();  /* try locale point */
         let ppoint = luastring_indexOf(buff, point);
-        if (ppoint) buff[ppoint] = '.';  /* change it to a dot */
+        if (ppoint) buff[ppoint] = 46 /* ('.').charCodeAt(0) */;  /* change it to a dot */
     }
 };
 
