@@ -213,29 +213,29 @@ const db_getinfo = function(L) {
     if (!lua_getinfo(L1, options, ar))
         luaL_argerror(L, arg + 2, to_luastring("invalid option", true));
     lua_newtable(L);  /* table to collect results */
-    if (luastring_indexOf(options, 'S'.charCodeAt(0)) > -1) {
+    if (luastring_indexOf(options, 83 /* 'S'.charCodeAt(0) */) > -1) {
         settabss(L, to_luastring("source", true), ar.source);
         settabss(L, to_luastring("short_src", true), ar.short_src);
         settabsi(L, to_luastring("linedefined", true), ar.linedefined);
         settabsi(L, to_luastring("lastlinedefined", true), ar.lastlinedefined);
         settabss(L, to_luastring("what", true), ar.what);
     }
-    if (luastring_indexOf(options, 'l'.charCodeAt(0)) > -1)
+    if (luastring_indexOf(options, 108 /* 'l'.charCodeAt(0) */) > -1)
         settabsi(L, to_luastring("currentline", true), ar.currentline);
-    if (luastring_indexOf(options, 'u'.charCodeAt(0)) > -1) {
+    if (luastring_indexOf(options, 117 /* 'u'.charCodeAt(0) */) > -1) {
         settabsi(L, to_luastring("nups", true), ar.nups);
         settabsi(L, to_luastring("nparams", true), ar.nparams);
         settabsb(L, to_luastring("isvararg", true), ar.isvararg);
     }
-    if (luastring_indexOf(options, 'n'.charCodeAt(0)) > -1) {
+    if (luastring_indexOf(options, 110 /* 'n'.charCodeAt(0) */) > -1) {
         settabss(L, to_luastring("name", true), ar.name);
         settabss(L, to_luastring("namewhat", true), ar.namewhat);
     }
-    if (luastring_indexOf(options, 't'.charCodeAt(0)) > -1)
+    if (luastring_indexOf(options, 116 /* 't'.charCodeAt(0) */) > -1)
         settabsb(L, to_luastring("istailcall", true), ar.istailcall);
-    if (luastring_indexOf(options, 'L'.charCodeAt(0)) > -1)
+    if (luastring_indexOf(options, 76 /* 'L'.charCodeAt(0) */) > -1)
         treatstackoption(L, L1, to_luastring("activelines", true));
-    if (luastring_indexOf(options, 'f'.charCodeAt(0)) > -1)
+    if (luastring_indexOf(options, 102 /* 'f'.charCodeAt(0) */) > -1)
         treatstackoption(L, L1, to_luastring("func", true));
     return 1;  /* return table */
 };
@@ -368,9 +368,9 @@ const hookf = function(L, ar) {
 */
 const makemask = function(smask, count) {
     let mask = 0;
-    if (luastring_indexOf(smask, "c".charCodeAt(0)) > -1) mask |= LUA_MASKCALL;
-    if (luastring_indexOf(smask, "r".charCodeAt(0)) > -1) mask |= LUA_MASKRET;
-    if (luastring_indexOf(smask, "l".charCodeAt(0)) > -1) mask |= LUA_MASKLINE;
+    if (luastring_indexOf(smask, 99 /* 'c'.charCodeAt(0) */) > -1) mask |= LUA_MASKCALL;
+    if (luastring_indexOf(smask, 114 /* 'r'.charCodeAt(0) */) > -1) mask |= LUA_MASKRET;
+    if (luastring_indexOf(smask, 108 /* 'l'.charCodeAt(0) */) > -1) mask |= LUA_MASKLINE;
     if (count > 0) mask |= LUA_MASKCOUNT;
     return mask;
 };
@@ -380,9 +380,9 @@ const makemask = function(smask, count) {
 */
 const unmakemask = function(mask, smask) {
     let i = 0;
-    if (mask & LUA_MASKCALL) smask[i++] = "c".charCodeAt(0);
-    if (mask & LUA_MASKRET) smask[i++] = "r".charCodeAt(0);
-    if (mask & LUA_MASKLINE) smask[i++] = "l".charCodeAt(0);
+    if (mask & LUA_MASKCALL) smask[i++] = 99 /* 'c'.charCodeAt(0) */;
+    if (mask & LUA_MASKRET) smask[i++] = 114 /* 'r'.charCodeAt(0) */;
+    if (mask & LUA_MASKLINE) smask[i++] = 108 /* 'l'.charCodeAt(0) */;
     return smask.subarray(0, i);
 };
 
