@@ -1081,9 +1081,8 @@ const getupvalref = function(L, fidx, n) {
     let f = fi.value;
     api_check(L, 1 <= n && n <= f.p.upvalues.length, "invalid upvalue index");
     return {
-        closure: f,
-        upval: f.upvals[n - 1],
-        upvalOff: n - 1
+        f: f,
+        i: n - 1
     };
 };
 
@@ -1091,7 +1090,8 @@ const lua_upvalueid = function(L, fidx, n) {
     let fi = index2addr(L, fidx);
     switch (fi.ttype()) {
         case LUA_TLCL: {  /* lua closure */
-            return getupvalref(L, fidx, n).upval;
+            let ref = getupvalref(L, fidx, n);
+            return ref.f.upvals[ref.i];
         }
         case LUA_TCCL: {  /* C closure */
             let f = fi.value;
@@ -1108,9 +1108,8 @@ const lua_upvalueid = function(L, fidx, n) {
 const lua_upvaluejoin = function(L, fidx1, n1, fidx2, n2) {
     let ref1 = getupvalref(L, fidx1, n1);
     let ref2 = getupvalref(L, fidx2, n2);
-    let up2 = ref2.upval;
-    let f1 = ref1.closure;
-    f1.upvals[ref1.upvalOff] = up2;
+    let up2 = ref2.f.upvals[ref2.i];
+    ref1.f.upvals[ref1.i] = up2;
 };
 
 // This functions are only there for compatibility purposes
