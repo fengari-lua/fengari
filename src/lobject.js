@@ -657,26 +657,38 @@ const luaO_pushvfstring = function(L, fmt, argp) {
                     v instanceof LClosure ||
                     v instanceof CClosure) {
                     pushstr(L, to_luastring("0x"+v.id.toString(16)));
-                } else if (v === null) { /* handle null before checking for typeof == object */
-                    pushstr(L, to_luastring("null"));
-                } else if (typeof v === "function" || typeof v === "object") {
-                    let id = L.l_G.ids.get(v);
-                    if (!id) {
-                        id = L.l_G.id_counter++;
-                        L.l_G.ids.set(v, id);
+                }
+                switch(typeof v) {
+                    case "undefined":
+                        pushstr(L, to_luastring("undefined"));
+                        break;
+                    case "number":  /* before check object as null is an object */
+                        pushstr(L, to_luastring("Number("+v+")"));
+                        break;
+                    case "string":  /* before check object as null is an object */
+                        pushstr(L, to_luastring("String("+JSON.stringify(v)+")"));
+                        break;
+                    case "boolean":  /* before check object as null is an object */
+                        pushstr(L, to_luastring(v?"Boolean(true)":"Boolean(false)"));
+                        break;
+                    case "object":
+                        if (v === null) { /* null is special */
+                            pushstr(L, to_luastring("null"));
+                            break;
+                        }
+                        /* fall through */
+                    case "function": {
+                        let id = L.l_G.ids.get(v);
+                        if (!id) {
+                            id = L.l_G.id_counter++;
+                            L.l_G.ids.set(v, id);
+                        }
+                        pushstr(L, to_luastring("0x"+id.toString(16)));
+                        break;
                     }
-                    pushstr(L, to_luastring("0x"+id.toString(16)));
-                } else if (v === void 0) {
-                    pushstr(L, to_luastring("undefined"));
-                } else if (typeof v === "number") { /* before check object as null is an object */
-                    pushstr(L, to_luastring("Number("+v+")"));
-                } else if (typeof v === "string") { /* before check object as null is an object */
-                    pushstr(L, to_luastring("String("+JSON.stringify(v)+")"));
-                } else if (typeof v === "boolean") { /* before check object as null is an object */
-                    pushstr(L, to_luastring(v?"Boolean(true)":"Boolean(false)"));
-                } else {
-                    /* user provided object. no id available */
-                    pushstr(L, to_luastring("<id NYI>"));
+                    default:
+                        /* user provided object. no id available */
+                        pushstr(L, to_luastring("<id NYI>"));
                 }
                 break;
             }
