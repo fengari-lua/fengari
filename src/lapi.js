@@ -1079,7 +1079,7 @@ const getupvalref = function(L, fidx, n) {
     let fi = index2addr(L, fidx);
     api_check(L, fi.ttisLclosure(), "Lua function expected");
     let f = fi.value;
-    api_check(L, 1 <= n && n <= f.p.upvalues.length, "invalid upvalue index");
+    api_check(L, n|0 === n && 1 <= n && n <= f.p.upvalues.length, "invalid upvalue index");
     return {
         f: f,
         i: n - 1
@@ -1095,7 +1095,7 @@ const lua_upvalueid = function(L, fidx, n) {
         }
         case LUA_TCCL: {  /* C closure */
             let f = fi.value;
-            api_check(L, 1 <= n && n <= f.nupvalues, "invalid upvalue index");
+            api_check(L, n|0 === n && 1 <= n && n <= f.nupvalues, "invalid upvalue index");
             return f.upvalue[n - 1];
         }
         default: {
