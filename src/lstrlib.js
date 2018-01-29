@@ -191,10 +191,13 @@ const num2straux = function(x) {
 
 const lua_number2strx = function(L, fmt, x) {
     let buff = num2straux(x);
-    if (fmt[SIZELENMOD] === 'A'.charCodeAt(0)) {
-        for (let i = 0; i < buff.length; i++)
-            buff[i] = String.fromCharCode(buff[i]).toUpperCase().charCodeAt(0);
-    } else if (fmt[SIZELENMOD] !== 'a'.charCodeAt(0))
+    if (fmt[SIZELENMOD] === 65 /* 'A'.charCodeAt(0) */) {
+        for (let i = 0; i < buff.length; i++) {
+            let c = buff[i];
+            if (c >= 97) /* toupper */
+                buff[i] = c & 0xdf;
+        }
+    } else if (fmt[SIZELENMOD] !== 97 /* 'a'.charCodeAt(0) */)
         luaL_error(L, to_luastring("modifiers for format '%%a'/'%%A' not implemented"));
     return buff;
 };
