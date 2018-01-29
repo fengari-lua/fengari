@@ -255,7 +255,7 @@ const addquoted = function(b, s, len) {
 */
 const checkdp = function(buff) {
     if (luastring_indexOf(buff, '.'.charCodeAt(0)) < 0) {  /* no dot? */
-        let point = lua_getlocaledecpoint().charCodeAt(0);  /* try locale point */
+        let point = lua_getlocaledecpoint();  /* try locale point */
         let ppoint = luastring_indexOf(buff, point);
         if (ppoint) buff[ppoint] = '.';  /* change it to a dot */
     }

@@ -15,7 +15,6 @@ const {
     LUA_OPSHR,
     LUA_OPSUB,
     LUA_OPUNM,
-    char,
     constant_types: {
         LUA_NUMTAGS,
         LUA_TBOOLEAN,
@@ -430,7 +429,7 @@ const MAXSIGDIG = 30;
 */
 const lua_strx2number = function(s) {
     let i = 0;
-    let dot = char[lua_getlocaledecpoint()];
+    let dot = lua_getlocaledecpoint();
     let r = 0.0;  /* result (accumulator) */
     let sigdig = 0;  /* number of significant digits */
     let nosigdig = 0;  /* number of non-significant digits */
@@ -597,7 +596,7 @@ const luaO_tostring = function(L, obj) {
         let str = lua_number2str(obj.value);
         // Assume no LUA_COMPAT_FLOATSTRING
         if (/^[-0123456789]+$/.test(str)) {  /* looks like an int? */
-            str += lua_getlocaledecpoint() + '0'; /* adds '.0' to result */
+            str += String.fromCharCode(lua_getlocaledecpoint()) + '0'; /* adds '.0' to result */
         }
         buff = to_luastring(str);
     }

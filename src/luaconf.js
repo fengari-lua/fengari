@@ -38,7 +38,7 @@ const LUA_INTEGER_FMT = `%${LUA_INTEGER_FRMLEN}d`;
 const LUA_NUMBER_FMT  = "%.14g";
 
 const lua_getlocaledecpoint = function() {
-    return (1.1).toLocaleString().substring(1, 2);
+    return (1.1).toLocaleString().charCodeAt(1);
 };
 
 const luai_apicheck = function(l, e) {
