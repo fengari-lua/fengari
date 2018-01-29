@@ -2,7 +2,6 @@
 
 const {
     LUA_SIGNATURE,
-    char,
     constant_types: {
         LUA_TBOOLEAN,
         LUA_TLNGSTR,
@@ -41,7 +40,7 @@ const {
     ZIO
 } = require('./lzio.js');
 
-let LUAC_DATA = [0x19, 0x93, char["\r"], char["\n"], 0x1a, char["\n"]];
+let LUAC_DATA = [0x19, 0x93, 13, 10, 0x1a, 10];
 
 class BytecodeParser {
 
@@ -55,7 +54,7 @@ class BytecodeParser {
         lua_assert(Z instanceof ZIO, "BytecodeParser only operates on a ZIO");
         lua_assert(is_luastring(name));
 
-        if (name[0] == char["@"] || name[0] == char["="])
+        if (name[0] === 64 /* ('@').charCodeAt(0) */ || name[0] === 61 /* ('=').charCodeAt(0) */)
             this.name = name.subarray(1);
         else if (name[0] == LUA_SIGNATURE.charCodeAt(0))
             this.name = to_luastring("binary string", true);
