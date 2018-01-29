@@ -18,7 +18,6 @@ const lobject              = require('./lobject.js');
 const ldo                  = require('./ldo.js');
 const lapi                 = require('./lapi.js');
 const ltable               = require('./ltable.js');
-const lfunc                = require('./lfunc.js');
 const ltm                  = require('./ltm.js');
 
 const EXTRA_STACK = 5;
@@ -70,7 +69,6 @@ class lua_State {
         this.basehookcount = 0;
         this.allowhook = 1;
         this.hookcount = this.basehookcount;
-        this.openupval = null;
         this.nny = 1;
         this.status = LUA_OK;
         this.errfunc = 0;
@@ -166,7 +164,6 @@ const lua_newthread = function(L) {
 };
 
 const luaE_freethread = function(L, L1) {
-    lfunc.luaF_close(L1, L1.stack);
     freestack(L1);
 };
 
@@ -183,7 +180,6 @@ const lua_newstate = function() {
 };
 
 const close_state = function(L) {
-    lfunc.luaF_close(L, L.stack);  /* close all upvalues for this thread */
     freestack(L);
 };
 

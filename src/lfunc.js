@@ -1,7 +1,6 @@
 "use strict";
 
 const { constant_types: { LUA_TNIL } } = require('./defs.js');
-const { lua_assert } = require('./llimits.js');
 const lobject = require('./lobject.js');
 
 class Proto {
@@ -25,22 +24,6 @@ class Proto {
 
 }
 
-class UpVal {
-
-    constructor(L) {
-        this.id = L.l_G.id_counter++;
-        this.v = void 0; /* if open: reference to TValue on stack. if closed: TValue */
-        this.vOff = void 0; /* if open: index on stack. if closed: undefined */
-        this.refcount = 0;
-        this.open_next = null; /* linked list (when open) */
-    }
-
-    isopen() {
-        return this.vOff !== void 0;
-    }
-
-}
-
 const luaF_newLclosure = function(L, n) {
     let c = new lobject.LClosure(L, n);
     return c;
@@ -48,54 +31,24 @@ const luaF_newLclosure = function(L, n) {
 
 
 const luaF_findupval = function(L, level) {
-    let prevp;
-    let p = L.openupval;
-    while (p !== null && p.vOff >= level) {
-        lua_assert(p.isopen());
-        if (p.vOff === level) /* found a corresponding upvalue? */
-            return p; /* return it */
-        prevp = p;
-        p = p.open_next;
-    }
-    /* not found: create a new upvalue */
-    let uv = new UpVal(L);
-    /* link it to list of open upvalues */
-    uv.open_next = p;
-    if (prevp)
-        prevp.open_next = uv;
-    else
-        L.openupval = uv;
-    uv.v = L.stack[level]; /* current value lives in the stack */
-    uv.vOff = level;
-    return uv;
+    return L.stack[level];
 };
 
 const luaF_close = function(L, level) {
-    while (L.openupval !== null && L.openupval.vOff >= level) {
-        let uv = L.openupval;
-        lua_assert(uv.isopen());
-        L.openupval = uv.open_next; /* remove from 'open' list */
-        if (uv.refcount === 0) { /* no references? */
-            /* free upvalue */
-            uv.v = void 0;
-            uv.open_next = null;
-        } else {
-            let from = uv.v;
-            uv.v = new lobject.TValue(from.type, from.value);
-        }
-        uv.vOff = void 0;
+    /* Create new TValues on stack;
+     * any closures will keep referencing old TValues */
+    for (let i=level; i<L.top; i++) {
+        let old = L.stack[i];
+        L.stack[i] = new lobject.TValue(old.type, old.value);
     }
 };
 
 /*
-** fill a closure with new closed upvalues
+** fill a closure with new upvalues
 */
 const luaF_initupvals = function(L, cl) {
     for (let i = 0; i < cl.nupvalues; i++) {
-        let uv = new UpVal(L);
-        uv.refcount = 1;
-        uv.v = new lobject.TValue(LUA_TNIL, null);
-        cl.upvals[i] = uv;
+        cl.upvals[i] = new lobject.TValue(LUA_TNIL, null);
     }
 };
 
@@ -117,7 +70,6 @@ const luaF_getlocalname = function(f, local_number, pc) {
 
 module.exports.MAXUPVAL          = 255;
 module.exports.Proto             = Proto;
-module.exports.UpVal             = UpVal;
 module.exports.luaF_findupval    = luaF_findupval;
 module.exports.luaF_close        = luaF_close;
 module.exports.luaF_getlocalname = luaF_getlocalname;

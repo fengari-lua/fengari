@@ -32,10 +32,7 @@ const {
     from_userstring,
     to_luastring,
 } = require('./defs.js');
-const {
-    api_check,
-    lua_assert
-} = require('./llimits.js');
+const { api_check } = require('./llimits.js');
 const ldebug    = require('./ldebug.js');
 const ldo       = require('./ldo.js');
 const { luaU_dump } = require('./ldump.js');
@@ -555,7 +552,7 @@ const aux_upvalue = function(L, fi, n) {
             let name = p.upvalues[n-1].name;
             return {
                 name: name ? name.getstr() : to_luastring("(*no name)", true),
-                val: f.upvals[n-1].v
+                val: f.upvals[n-1]
             };
         }
         default: return null;  /* not a closure */
@@ -930,7 +927,7 @@ const lua_load = function(L, reader, data, chunkname, mode) {
             /* get global table from registry */
             let gt = ltable.luaH_getint(L.l_G.l_registry.value, LUA_RIDX_GLOBALS);
             /* set global table as 1st upvalue of 'f' (may be LUA_ENV) */
-            f.upvals[0].v.setfrom(gt);
+            f.upvals[0].setfrom(gt);
         }
     }
     return status;
@@ -1111,13 +1108,9 @@ const lua_upvalueid = function(L, fidx, n) {
 const lua_upvaluejoin = function(L, fidx1, n1, fidx2, n2) {
     let ref1 = getupvalref(L, fidx1, n1);
     let ref2 = getupvalref(L, fidx2, n2);
-    let up1 = ref1.upval;
     let up2 = ref2.upval;
     let f1 = ref1.closure;
-    lua_assert(up1.refcount > 0);
-    up1.refcount--;
     f1.upvals[ref1.upvalOff] = up2;
-    up2.refcount++;
 };
 
 // This functions are only there for compatibility purposes

@@ -225,11 +225,11 @@ const luaV_execute = function(L) {
             }
             case OP_GETUPVAL: {
                 let b = i.B;
-                lobject.setobj2s(L, ra, cl.upvals[b].v);
+                lobject.setobj2s(L, ra, cl.upvals[b]);
                 break;
             }
             case OP_GETTABUP: {
-                let upval = cl.upvals[i.B].v;
+                let upval = cl.upvals[i.B];
                 let rc = RKC(L, base, k, i);
                 luaV_gettable(L, upval, rc, ra);
                 break;
@@ -241,7 +241,7 @@ const luaV_execute = function(L) {
                 break;
             }
             case OP_SETTABUP: {
-                let upval = cl.upvals[i.A].v;
+                let upval = cl.upvals[i.A];
                 let rb = RKB(L, base, k, i);
                 let rc = RKC(L, base, k, i);
                 settable(L, upval, rb, rc);
@@ -249,7 +249,7 @@ const luaV_execute = function(L) {
             }
             case OP_SETUPVAL: {
                 let uv = cl.upvals[i.B];
-                uv.v.setfrom(L.stack[ra]);
+                uv.setfrom(L.stack[ra]);
                 break;
             }
             case OP_SETTABLE: {
@@ -973,8 +973,8 @@ const getcached = function(p, encup, stack, base) {
         let uv = p.upvalues;
         let nup = uv.length;
         for (let i = 0; i < nup; i++) {  /* check whether it has right upvalues */
-            let v = uv[i].instack ? stack[base + uv[i].idx] : encup[uv[i].idx].v;
-            if (c.upvals[i].v !== v)
+            let v = uv[i].instack ? stack[base + uv[i].idx] : encup[uv[i].idx];
+            if (c.upvals[i] !== v)
                 return null;  /* wrong upvalue; cannot reuse closure */
         }
     }
@@ -996,7 +996,6 @@ const pushclosure = function(L, p, encup, base, ra) {
             ncl.upvals[i] = lfunc.luaF_findupval(L, base + uv[i].idx);
         else
             ncl.upvals[i] = encup[uv[i].idx];
-        ncl.upvals[i].refcount++;
     }
     p.cache = ncl;  /* save it on cache for reuse */
 };

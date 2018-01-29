@@ -48,7 +48,6 @@ const {
 } = require('./ljstype.js');
 const ldebug  = require('./ldebug.js');
 const ldo     = require('./ldo.js');
-const lfunc   = require('./lfunc.js');
 const lstate  = require('./lstate.js');
 const {
     luaS_bless,
@@ -301,7 +300,7 @@ class LClosure {
 
         this.p = null;
         this.nupvalues = n;
-        this.upvals = new Array(n); /* list of upvalues as UpVals. initialised in luaF_initupvals */
+        this.upvals = new Array(n); /* list of upvalues. initialised in luaF_initupvals */
     }
 
 }
@@ -656,8 +655,7 @@ const luaO_pushvfstring = function(L, fmt, argp) {
                     v instanceof ltable.Table ||
                     v instanceof Udata ||
                     v instanceof LClosure ||
-                    v instanceof CClosure ||
-                    v instanceof lfunc.UpVal) {
+                    v instanceof CClosure) {
                     pushstr(L, to_luastring("0x"+v.id.toString(16)));
                 } else if (v === null) { /* handle null before checking for typeof == object */
                     pushstr(L, to_luastring("null"));
