@@ -274,17 +274,9 @@ const b_str2int = function(s, base) {
     }
     let r = /^[\t\v\f \n\r]*([+-]?)0*([0-9A-Za-z]+)[\t\v\f \n\r]*$/.exec(s);
     if (!r) return null;
-    let neg = r[1] === "-";
-    let digits = r[2];
-    let n = 0;
-    for (let si=0; si<digits.length; si++) {
-        let digit = /\d/.test(digits[si])
-            ? (digits.charCodeAt(si) - '0'.charCodeAt(0))
-            : (digits[si].toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0) + 10);
-        if (digit >= base) return null;  /* invalid numeral */
-        n = ((n * base)|0) + digit;
-    }
-    return (neg ? -n : n)|0;
+    let v = parseInt(r[1]+r[2], base);
+    if (isNaN(v)) return null;
+    return v|0;
 };
 
 const luaB_tonumber = function(L) {
