@@ -194,7 +194,7 @@ const from_userstring = function(str) {
 };
 
 /* mark for precompiled code ('<esc>Lua') */
-const LUA_SIGNATURE           = "\x1bLua";
+const LUA_SIGNATURE = to_luastring("\x1bLua");
 
 const LUA_VERSION_MAJOR       = "5";
 const LUA_VERSION_MINOR       = "3";

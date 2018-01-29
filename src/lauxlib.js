@@ -871,7 +871,7 @@ if (typeof process === "undefined") {
         }
         let com = skipcomment(lf);
         /* check for signature first, as we don't want to add line number corrections in binary case */
-        if (com.c === LUA_SIGNATURE.charCodeAt(0) && filename) {  /* binary file? */
+        if (com.c === LUA_SIGNATURE[0] && filename) {  /* binary file? */
             /* no need to re-open in node.js */
         } else if (com.skipped) { /* read initial portion */
             lf.buff[lf.n++] = '\n'.charCodeAt(0);  /* add line to correct line numbers */
@@ -939,7 +939,7 @@ if (typeof process === "undefined") {
         }
         let com = skipcomment(lf);
         /* check for signature first, as we don't want to add line number corrections in binary case */
-        if (com.c === LUA_SIGNATURE.charCodeAt(0) && filename) {  /* binary file? */
+        if (com.c === LUA_SIGNATURE[0] && filename) {  /* binary file? */
             /* no need to re-open in node.js */
         } else if (com.skipped) { /* read initial portion */
             lf.buff[lf.n++] = '\n'.charCodeAt(0);  /* add line to correct line numbers */

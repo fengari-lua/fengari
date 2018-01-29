@@ -12,8 +12,7 @@ const {
         LUA_TNUMINT,
         LUA_TSHRSTR
     },
-    luastring_of,
-    to_luastring
+    luastring_of
 } = require('./defs.js');
 
 const LUAC_DATA    = luastring_of(25, 147, 13, 10, 26, 10);
@@ -35,11 +34,6 @@ class DumpState {
 const DumpBlock = function(b, size, D) {
     if (D.status === 0 && size > 0)
         D.status = D.writer(D.L, b, size, D.data);
-};
-
-const DumpLiteral = function(s, D) {
-    s = to_luastring(s);
-    DumpBlock(s, s.length, D);
 };
 
 const DumpByte = function(y, D) {
@@ -172,7 +166,7 @@ const DumpFunction = function(f, psource, D) {
 };
 
 const DumpHeader = function(D) {
-    DumpLiteral(LUA_SIGNATURE, D);
+    DumpBlock(LUA_SIGNATURE, LUA_SIGNATURE.length, D);
     DumpByte(LUAC_VERSION, D);
     DumpByte(LUAC_FORMAT, D);
     DumpBlock(LUAC_DATA, LUAC_DATA.length, D);

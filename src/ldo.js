@@ -710,7 +710,7 @@ const checkmode = function(L, mode, x) {
 const f_parser = function(L, p) {
     let cl;
     let c = p.z.zgetc();  /* read first character */
-    if (c === LUA_SIGNATURE.charCodeAt(0)) {
+    if (c === LUA_SIGNATURE[0]) {
         checkmode(L, p.mode, to_luastring("binary", true));
         cl = lundump.luaU_undump(L, p.z, p.name);
     } else {

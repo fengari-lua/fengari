@@ -56,7 +56,7 @@ class BytecodeParser {
 
         if (name[0] === 64 /* ('@').charCodeAt(0) */ || name[0] === 61 /* ('=').charCodeAt(0) */)
             this.name = name.subarray(1);
-        else if (name[0] == LUA_SIGNATURE.charCodeAt(0))
+        else if (name[0] == LUA_SIGNATURE[0])
             this.name = to_luastring("binary string", true);
         else
             this.name = name;
@@ -248,7 +248,7 @@ class BytecodeParser {
     }
 
     checkHeader() {
-        this.checkliteral(to_luastring(LUA_SIGNATURE.substring(1)), "not a"); /* 1st char already checked */
+        this.checkliteral(LUA_SIGNATURE.subarray(1), "not a"); /* 1st char already checked */
 
         if (this.readByte() !== 0x53)
             this.error("version mismatch in");
