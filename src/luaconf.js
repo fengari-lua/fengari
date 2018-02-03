@@ -61,11 +61,7 @@ const frexp = function(value) {
 };
 
 const ldexp = function(mantissa, exponent) {
-    var steps = Math.min(3, Math.ceil(Math.abs(exponent) / 1023));
-    var result = mantissa;
-    for (var i = 0; i < steps; i++)
-        result *= Math.pow(2, Math.floor((exponent + i) / steps));
-    return result;
+    return mantissa * Math.pow(2, exponent);
 };
 
 module.exports.LUAI_MAXSTACK         = LUAI_MAXSTACK;
