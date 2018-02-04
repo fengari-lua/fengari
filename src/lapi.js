@@ -354,7 +354,7 @@ const lua_pushcfunction = function(L, fn) {
 const lua_pushjsfunction = lua_pushcfunction;
 
 const lua_pushboolean = function(L, b) {
-    L.stack[L.top] = new TValue(LUA_TBOOLEAN, b ? true : false);
+    L.stack[L.top] = new TValue(LUA_TBOOLEAN, !!b);
     api_incr_top(L);
 };
 
