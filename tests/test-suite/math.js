@@ -1393,6 +1393,8 @@ test("[test-suite] math: testing -0 and NaN", function (t) {
 
 test("[test-suite] math: test random for floats", function (t) {
     let luaCode = `
+        math.randomseed(0)
+
         do   -- test random for floats
           local max = -math.huge
           local min = math.huge
