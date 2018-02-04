@@ -4,7 +4,12 @@ const assert   = require("assert");
 
 const lua      = require('../../src/lua.js');
 const lauxlib  = require('../../src/lauxlib.js');
-const {luastring_indexOf, to_jsstring, to_luastring} = require("../../src/fengaricore.js");
+const {
+    luastring_eq,
+    luastring_indexOf,
+    to_jsstring,
+    to_luastring
+} = require("../../src/fengaricore.js");
 const ljstype  = require('../../src/ljstype.js');
 const lopcodes = require('../../src/lopcodes.js');
 const sprintf  = require('sprintf-js').sprintf;
@@ -450,7 +455,7 @@ const runJS = function(L, L1, pc) {
             case "tostring": {
                 let s = lua.lua_tostring(L1, getindex(L, L1, pc));
                 let s1 = lua.lua_pushstring(L1, s);
-                assert((s === null && s1 === null) || s.join('|') === s1.join('|'));
+                assert(luastring_eq(s, s1));
                 break;
             }
             case "type": {

@@ -368,7 +368,7 @@ const luaL_checkudata = function(L, ud, tname) {
 const luaL_checkoption = function(L, arg, def, lst) {
     let name = def ? luaL_optstring(L, arg, def) : luaL_checkstring(L, arg);
     for (let i = 0; lst[i]; i++)
-        if (lst[i].join('|') === name.join('|'))
+        if (luastring_eq(lst[i], name))
             return i;
     return luaL_argerror(L, arg, lua_pushfstring(L, to_luastring("invalid option '%s'"), name));
 };
