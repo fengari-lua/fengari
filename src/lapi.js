@@ -993,14 +993,8 @@ const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
     api_checknelems(L, nargs + 1);
     api_check(L, L.status === LUA_OK, "cannot do calls on non-normal thread");
     checkresults(L, nargs, nresults);
-    let c = {
-        func: null,
-        funcOff: NaN,
-        nresults: NaN
-    };
     let status;
     let func;
-
     if (errfunc === 0)
         func = 0;
     else {
@@ -1008,24 +1002,24 @@ const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
         // TODO: api_checkstackindex(L, errfunc, o);
         func = index2addr_(L, errfunc);
     }
-
-    c.funcOff = L.top - (nargs + 1); /* function to be called */
-    c.func = L.stack[c.funcOff];
-
+    let funcOff = L.top - (nargs + 1); /* function to be called */
     if (k === null || L.nny > 0) { /* no continuation or no yieldable? */
-        c.nresults = nresults; /* do a 'conventional' protected call */
-        status = ldo.luaD_pcall(L, f_call, c, c.funcOff, func);
+        let c = {
+            funcOff: funcOff,
+            nresults: nresults /* do a 'conventional' protected call */
+        };
+        status = ldo.luaD_pcall(L, f_call, c, funcOff, func);
     } else { /* prepare continuation (call is already protected by 'resume') */
         let ci = L.ci;
         ci.c_k = k;  /* prepare continuation (call is already protected by 'resume') */
         ci.c_ctx = ctx;  /* prepare continuation (call is already protected by 'resume') */
         /* save information for error recovery */
-        ci.extra = c.funcOff;
+        ci.extra = funcOff;
         ci.c_old_errfunc = L.errfunc;
         L.errfunc = func;
         ci.callstatus &= ~lstate.CIST_OAH | L.allowhook;
         ci.callstatus |= lstate.CIST_YPCALL;  /* function can do error recovery */
-        ldo.luaD_call(L, c.funcOff, nresults);  /* do the call */
+        ldo.luaD_call(L, funcOff, nresults);  /* do the call */
         ci.callstatus &= ~lstate.CIST_YPCALL;
         L.errfunc = ci.c_old_errfunc;
         status = LUA_OK;
