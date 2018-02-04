@@ -36,9 +36,22 @@ const {
 } = require('./luaconf.js');
 const { to_luastring } = require("./fengaricore.js");
 
+let rand_state;
+/* use same parameters as glibc LCG */
+const l_rand = function() {
+    rand_state = (1103515245 * rand_state + 12345) & 0x7fffffff;
+    return rand_state;
+};
+const l_srand = function(x) {
+    rand_state = x|0;
+    if (rand_state === 0)
+        rand_state = 1;
+};
+
 const math_random = function(L) {
     let low, up;
-    let r = Math.random();
+    /* use Math.random until randomseed is called */
+    let r = (rand_state === void 0)?Math.random():(l_rand() / 0x80000000);
     switch (lua_gettop(L)) {  /* check number of arguments */
         case 0:
             lua_pushnumber(L, r);  /* Number between 0 and 1 */
@@ -64,6 +77,12 @@ const math_random = function(L) {
     r *= (up - low) + 1;
     lua_pushinteger(L, Math.floor(r) + low);
     return 1;
+};
+
+const math_randomseed = function(L) {
+    l_srand(luaL_checknumber(L, 1));
+    l_rand(); /* discard first value to avoid undesirable correlations */
+    return 0;
 };
 
 const math_abs = function(L) {
@@ -274,6 +293,7 @@ const mathlib = {
     "modf":       math_modf,
     "rad":        math_rad,
     "random":     math_random,
+    "randomseed": math_randomseed,
     "sin":        math_sin,
     "sqrt":       math_sqrt,
     "tan":        math_tan,

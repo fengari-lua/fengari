@@ -117,7 +117,6 @@ p(L);
 
 ## NYI
 
-- `math.randomseed()`
 - `io.input()`: partially implemented
 - `io.lines()`
 - `io.open()`
