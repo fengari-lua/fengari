@@ -962,7 +962,7 @@ const lua_setuservalue = function(L, idx) {
 };
 
 const checkresults = function(L,na,nr) {
-    api_check(L, (nr) == LUA_MULTRET || (L.ci.top - L.top >= (nr) - (na)),
+    api_check(L, nr === LUA_MULTRET || (L.ci.top - L.top >= (nr) - (na)),
         "results from function overflow current stack size");
 };
 
