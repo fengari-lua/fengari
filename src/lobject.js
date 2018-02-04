@@ -547,13 +547,12 @@ const l_str2int = function(s) {
     else if (s[i] === 43 /* ('+').charCodeAt(0) */) i++;
     if (s[i] === 48 /* ('0').charCodeAt(0) */ && (s[i+1] === 120 /* ('x').charCodeAt(0) */ || s[i+1] === 88 /* ('X').charCodeAt(0) */)) {  /* hex? */
         i += 2;  /* skip '0x' */
-
-        for (; lisxdigit(s[i]); i++) {
+        for (; i < s.length && lisxdigit(s[i]); i++) {
             a = (a * 16 + luaO_hexavalue(s[i]))|0;
             empty = false;
         }
     } else {  /* decimal */
-        for (; lisdigit(s[i]); i++) {
+        for (; i < s.length && lisdigit(s[i]); i++) {
             let d = s[i] - 48 /* ('0').charCodeAt(0) */;
             if (a >= MAXBY10 && (a > MAXBY10 || d > MAXLASTD + neg))  /* overflow? */
                 return null;  /* do not accept it (as integer) */
@@ -561,7 +560,7 @@ const l_str2int = function(s) {
             empty = false;
         }
     }
-    while (lisspace(s[i])) i++;  /* skip trailing spaces */
+    while (i < s.length && lisspace(s[i])) i++;  /* skip trailing spaces */
     if (empty || (i !== s.length && s[i] !== 0)) return null;  /* something wrong in the numeral */
     else {
         return {
