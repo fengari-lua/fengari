@@ -65,6 +65,10 @@ const fengari_argcheck = function(c) {
     if (!c) throw TypeError("invalid argument");
 };
 
+const fengari_argcheckinteger = function(n) {
+    fengari_argcheck(typeof n === "number" && (n|0) === n);
+};
+
 const isvalid = function(o) {
     return o !== lobject.luaO_nilobject;
 };
@@ -261,13 +265,13 @@ const lua_pushnumber = function(L, n) {
 };
 
 const lua_pushinteger = function(L, n) {
-    fengari_argcheck(typeof n === "number" && (n|0) === n);
+    fengari_argcheckinteger(n);
     L.stack[L.top] = new TValue(LUA_TNUMINT, n);
     api_incr_top(L);
 };
 
 const lua_pushlstring = function(L, s, len) {
-    fengari_argcheck(typeof len === "number");
+    fengari_argcheckinteger(len);
     let ts;
     if (len === 0) {
         s = to_luastring("", true);
@@ -311,7 +315,7 @@ const lua_pushliteral = function (L, s) {
         L.stack[L.top] = new TValue(LUA_TNIL, null);
         L.top++;
     } else {
-        fengari_argcheck(typeof s === "string", "lua_pushliteral expects a JS string");
+        fengari_argcheck(typeof s === "string");
         let ts = luaS_newliteral(L, s);
         lobject.pushsvalue2s(L, ts);
         s = ts.getstr(); /* internal copy */
@@ -322,7 +326,8 @@ const lua_pushliteral = function (L, s) {
 };
 
 const lua_pushcclosure = function(L, fn, n) {
-    fengari_argcheck(typeof fn === "function" || typeof n === "number");
+    fengari_argcheck(typeof fn === "function");
+    fengari_argcheckinteger(n);
     if (n === 0)
         L.stack[L.top] = new TValue(LUA_TLCF, fn);
     else {
@@ -430,7 +435,7 @@ const lua_setfield = function(L, idx, k) {
 };
 
 const lua_seti = function(L, idx, n) {
-    fengari_argcheck(typeof n === "number" && (n|0) === n);
+    fengari_argcheckinteger(n);
     api_checknelems(L, 1);
     let t = index2addr(L, idx);
     L.stack[L.top] = new TValue(LUA_TNUMINT, n);
@@ -459,6 +464,7 @@ const lua_rawset = function(L, idx) {
 };
 
 const lua_rawseti = function(L, idx, n) {
+    fengari_argcheckinteger(n);
     api_checknelems(L, 1);
     let o = index2addr(L, idx);
     api_check(L, o.ttistable(), "table expected");
@@ -495,6 +501,7 @@ const auxgetstr = function(L, t, k) {
 
 const lua_rawgeti = function(L, idx, n) {
     let t = index2addr(L, idx);
+    fengari_argcheckinteger(n);
     api_check(L, t.ttistable(), "table expected");
     lobject.pushobj2s(L, ltable.luaH_getint(t.value, n));
     api_check(L, L.top <= L.ci.top, "stack overflow");
@@ -536,6 +543,7 @@ const lua_newuserdata = function(L, size) {
 };
 
 const aux_upvalue = function(L, fi, n) {
+    fengari_argcheckinteger(n);
     switch(fi.ttype()) {
         case LUA_TCCL: {  /* C closure */
             let f = fi.value;
@@ -637,8 +645,8 @@ const lua_getfield = function(L, idx, k) {
 };
 
 const lua_geti = function(L, idx, n) {
-    fengari_argcheck(typeof n === "number" && (n|0) === n);
     let t = index2addr(L, idx);
+    fengari_argcheckinteger(n);
     L.stack[L.top] = new TValue(LUA_TNUMINT, n);
     api_incr_top(L);
     lvm.luaV_gettable(L, t, L.stack[L.top - 1], L.top - 1);
@@ -1079,7 +1087,8 @@ const getupvalref = function(L, fidx, n) {
     let fi = index2addr(L, fidx);
     api_check(L, fi.ttisLclosure(), "Lua function expected");
     let f = fi.value;
-    api_check(L, n|0 === n && 1 <= n && n <= f.p.upvalues.length, "invalid upvalue index");
+    fengari_argcheckinteger(n);
+    api_check(L, 1 <= n && n <= f.p.upvalues.length, "invalid upvalue index");
     return {
         f: f,
         i: n - 1
