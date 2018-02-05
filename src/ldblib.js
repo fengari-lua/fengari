@@ -13,7 +13,6 @@ const {
     lua_Debug,
     lua_call,
     lua_checkstack,
-    lua_createtable,
     lua_gethook,
     lua_gethookcount,
     lua_gethookmask,
@@ -38,13 +37,9 @@ const {
     lua_pushliteral,
     lua_pushnil,
     lua_pushstring,
-    lua_pushthread,
     lua_pushvalue,
-    lua_rawget,
     lua_rawgetp,
-    lua_rawset,
     lua_rawsetp,
-    lua_remove,
     lua_rotate,
     lua_setfield,
     lua_sethook,
@@ -54,8 +49,10 @@ const {
     lua_setupvalue,
     lua_setuservalue,
     lua_tojsstring,
+    lua_toproxy,
     lua_tostring,
     lua_tothread,
+    lua_touserdata,
     lua_type,
     lua_upvalueid,
     lua_upvaluejoin,
@@ -352,8 +349,10 @@ const hooknames = ["call", "return", "line", "count", "tail call"].map(e => to_l
 */
 const hookf = function(L, ar) {
     lua_rawgetp(L, LUA_REGISTRYINDEX, HOOKKEY);
-    lua_pushthread(L);
-    if (lua_rawget(L, -2) === LUA_TFUNCTION) {  /* is there a hook function? */
+    let hooktable = lua_touserdata(L, -1);
+    let proxy = hooktable.get(L);
+    if (proxy) {  /* is there a hook function? */
+        proxy(L);
         lua_pushstring(L, hooknames[ar.event]);  /* push event name */
         if (ar.currentline >= 0)
             lua_pushinteger(L, ar.currentline);  /* push current line */
@@ -401,19 +400,17 @@ const db_sethook = function(L) {
         count = luaL_optinteger(L, arg + 3, 0);
         func = hookf; mask = makemask(smask, count);
     }
+    /* as weak tables are not supported; use a JS weak-map */
+    let hooktable;
     if (lua_rawgetp(L, LUA_REGISTRYINDEX, HOOKKEY) === LUA_TNIL) {
-        lua_createtable(L, 0, 2);  /* create a hook table */
-        lua_pushvalue(L, -1);
+        hooktable = new WeakMap();
+        lua_pushlightuserdata(L, hooktable);
         lua_rawsetp(L, LUA_REGISTRYINDEX, HOOKKEY);  /* set it in position */
-        lua_pushstring(L, to_luastring("k"));
-        lua_setfield(L, -2, to_luastring("__mode", true));  /** hooktable.__mode = "k" */
-        lua_pushvalue(L, -1);
-        lua_setmetatable(L, -2);  /* setmetatable(hooktable) = hooktable */
+    } else {
+        hooktable = lua_touserdata(L, -1);
     }
-    checkstack(L, L1, 1);
-    lua_pushthread(L1); lua_xmove(L1, L, 1);  /* key (thread) */
-    lua_pushvalue(L, arg + 1);  /* value (hook function) */
-    lua_rawset(L, -3);  /* hooktable[L1] = new Lua hook */
+    let proxy = lua_toproxy(L, arg + 1);  /* value (hook function) */
+    hooktable.set(L1, proxy);
     lua_sethook(L1, func, mask, count);
     return 0;
 };
@@ -430,10 +427,9 @@ const db_gethook = function(L) {
         lua_pushliteral(L, "external hook");
     else {  /* hook table must exist */
         lua_rawgetp(L, LUA_REGISTRYINDEX, HOOKKEY);
-        checkstack(L, L1, 1);
-        lua_pushthread(L1); lua_xmove(L1, L, 1);
-        lua_rawget(L, -2);   /* 1st result = hooktable[L1] */
-        lua_remove(L, -2);  /* remove hook table */
+        let hooktable = lua_touserdata(L, -1);
+        let proxy = hooktable.get(L1);
+        proxy(L);
     }
     lua_pushstring(L, unmakemask(mask, buff));  /* 2nd result = mask */
     lua_pushinteger(L, lua_gethookcount(L1));  /* 3rd result = count */
