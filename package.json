@@ -4,6 +4,7 @@
   "description": "A Lua VM written in JS ES6 targeting the browser",
   "main": "src/fengari.js",
   "directories": {
+    "lib": "src",
     "test": "tests"
   },
   "scripts": {
