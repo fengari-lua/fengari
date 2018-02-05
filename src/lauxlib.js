@@ -76,6 +76,7 @@ const {
     lua_version
 } = require('./lua.js');
 const {
+    from_userstring,
     luastring_eq,
     to_luastring,
     to_uristring
@@ -366,7 +367,7 @@ const luaL_checkudata = function(L, ud, tname) {
 };
 
 const luaL_checkoption = function(L, arg, def, lst) {
-    let name = def ? luaL_optstring(L, arg, def) : luaL_checkstring(L, arg);
+    let name = def !== null ? luaL_optstring(L, arg, def) : luaL_checkstring(L, arg);
     for (let i = 0; lst[i]; i++)
         if (luastring_eq(lst[i], name))
             return i;
@@ -414,7 +415,7 @@ const luaL_checklstring = function(L, arg) {
 
 const luaL_optlstring = function(L, arg, def) {
     if (lua_type(L, arg) <= 0) {
-        return def;
+        return def === null ? null : from_userstring(def);
     } else return luaL_checklstring(L, arg);
 };
 
