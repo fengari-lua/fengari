@@ -71,6 +71,8 @@ In the browser `require` and `package.loadlib` try to find a file by making sync
 ### _Differences_ from C API
 
 - `lua_tointegerx` and `lua_tonumberx` do not have out-parameters indicating conversion success. Instead, ``false`` is returned when conversion fails.
+- `luaL_execresult` takes an extra argument: an error object. The error object should have a fields `status`, `signal` and `errno`.
+- `luaL_fileresult` takes an extra argument: an error object. The error object should have a field `errno`.
 
 
 ## Extensions
