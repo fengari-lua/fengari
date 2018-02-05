@@ -12,6 +12,7 @@ const {
 } = require("../../src/fengaricore.js");
 const ljstype  = require('../../src/ljstype.js');
 const lopcodes = require('../../src/lopcodes.js');
+const { pushobj2s } = require('../../src/lobject.js');
 const sprintf  = require('sprintf-js').sprintf;
 
 const delimits = [" ", "\t", "\n", ",", ";"].map(e => e.charCodeAt(0));
@@ -781,7 +782,7 @@ const setnameval = function(L, name, val) {
 };
 
 const pushobject = function(L, o){
-    L.stack[L.top++] = o;
+    pushobj2s(L, o);
     assert(L.top <= L.ci.top, "stack overflow");
 };
 
