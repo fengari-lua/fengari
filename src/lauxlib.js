@@ -1,6 +1,9 @@
 "use strict";
 
 const {
+    LUAL_BUFFERSIZE
+} = require('./luaconf.js');
+const {
     LUA_ERRERR,
     LUA_MULTRET,
     LUA_REGISTRYINDEX,
@@ -470,8 +473,6 @@ const luaL_buffinitsize = function(L, B, sz) {
     luaL_buffinit(L, B);
     return luaL_prepbuffsize(B, sz);
 };
-
-const LUAL_BUFFERSIZE = 8192;
 
 const luaL_prepbuffer = function(B) {
     return luaL_prepbuffsize(B, LUAL_BUFFERSIZE);

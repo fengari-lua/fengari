@@ -45,6 +45,11 @@ const luai_apicheck = function(l, e) {
     if (!e) throw Error(e);
 };
 
+/*
+@@ LUAL_BUFFERSIZE is the buffer size used by the lauxlib buffer system.
+*/
+const LUAL_BUFFERSIZE = 8192;
+
 // See: http://croquetweak.blogspot.fr/2014/08/deconstructing-floats-frexp-and-ldexp.html
 const frexp = function(value) {
     if (value === 0) return [value, 0];
@@ -76,6 +81,7 @@ module.exports.LUA_MAXINTEGER        = LUA_MAXINTEGER;
 module.exports.LUA_MININTEGER        = LUA_MININTEGER;
 module.exports.LUA_NUMBER_FMT        = LUA_NUMBER_FMT;
 module.exports.LUA_NUMBER_FRMLEN     = LUA_NUMBER_FRMLEN;
+module.exports.LUAL_BUFFERSIZE       = LUAL_BUFFERSIZE;
 module.exports.frexp                 = frexp;
 module.exports.ldexp                 = ldexp;
 module.exports.lua_getlocaledecpoint = lua_getlocaledecpoint;
