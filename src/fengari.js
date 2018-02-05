@@ -1,3 +1,11 @@
+/**
+@license MIT
+
+Copyright © 2017-2018 Benoit Giannangeli
+Copyright © 2017-2018 Daurnimator
+Copyright © 1994–2017 Lua.org, PUC-Rio.
+*/
+
 "use strict";
 
 const core = require("./fengaricore.js");
