@@ -395,9 +395,9 @@ if (typeof process === "undefined") {
     module.exports.LUA_PATH_DEFAULT = LUA_PATH_DEFAULT;
 
     const LUA_CPATH_DEFAULT = to_luastring(
-        LUA_CDIR + "?.dll;" +
-        LUA_CDIR + "..\\lib\\lua\\" + LUA_VDIR + "\\?.dll;" +
-        LUA_CDIR + "loadall.dll;.\\?.dll"
+        LUA_CDIR + "?.js;" +
+        LUA_CDIR + "..\\lib\\lua\\" + LUA_VDIR + "\\?.js;" +
+        LUA_CDIR + "loadall.js;.\\?.js"
     );
     module.exports.LUA_CPATH_DEFAULT = LUA_CPATH_DEFAULT;
 } else {
@@ -421,7 +421,7 @@ if (typeof process === "undefined") {
     module.exports.LUA_PATH_DEFAULT = LUA_PATH_DEFAULT;
 
     const LUA_CPATH_DEFAULT = to_luastring(
-        LUA_CDIR + "?.so;" + LUA_CDIR + "loadall.so;./?.so"
+        LUA_CDIR + "?.js;" + LUA_CDIR + "loadall.js;./?.js"
     );
     module.exports.LUA_CPATH_DEFAULT = LUA_CPATH_DEFAULT;
 }
