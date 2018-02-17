@@ -396,7 +396,7 @@ if (typeof process === "undefined") {
 
     const LUA_JSPATH_DEFAULT = to_luastring(
         LUA_JSDIR + "?.js;" +
-        LUA_JSDIR + "..\\lib\\lua\\" + LUA_VDIR + "\\?.js;" +
+        LUA_JSDIR + "..\\share\\lua\\" + LUA_VDIR + "\\?.js;" +
         LUA_JSDIR + "loadall.js;.\\?.js"
     );
     module.exports.LUA_JSPATH_DEFAULT = LUA_JSPATH_DEFAULT;
@@ -410,7 +410,7 @@ if (typeof process === "undefined") {
     const LUA_LDIR = LUA_ROOT + "share/lua/" + LUA_VDIR + "/";
     module.exports.LUA_LDIR = LUA_LDIR;
 
-    const LUA_JSDIR = LUA_ROOT + "lib/lua/" + LUA_VDIR + "/";
+    const LUA_JSDIR = LUA_ROOT + "share/lua/" + LUA_VDIR + "/";
     module.exports.LUA_JSDIR = LUA_JSDIR;
 
     const LUA_PATH_DEFAULT = to_luastring(
