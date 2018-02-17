@@ -339,7 +339,7 @@ module.exports.LUA_EXEC_DIR = LUA_EXEC_DIR;
 /*
 @@ LUA_PATH_DEFAULT is the default path that Lua uses to look for
 ** Lua libraries.
-@@ LUA_CPATH_DEFAULT is the default path that Lua uses to look for
+@@ LUA_JSPATH_DEFAULT is the default path that Lua uses to look for
 ** C libraries.
 ** CHANGE them if your machine has a non-conventional directory
 ** hierarchy or if you want to install your libraries in
@@ -355,20 +355,20 @@ if (typeof process === "undefined") {
     const LUA_LDIR = "./lua/" + LUA_VDIR + "/";
     module.exports.LUA_LDIR = LUA_LDIR;
 
-    const LUA_CDIR = "./lua/" + LUA_VDIR + "/";
-    module.exports.LUA_CDIR = LUA_CDIR;
+    const LUA_JSDIR = "./lua/" + LUA_VDIR + "/";
+    module.exports.LUA_JSDIR = LUA_JSDIR;
 
     const LUA_PATH_DEFAULT = to_luastring(
         LUA_LDIR + "?.lua;" + LUA_LDIR + "?/init.lua;" +
-        LUA_CDIR + "?.lua;" + LUA_CDIR + "?/init.lua;" +
+        LUA_JSDIR + "?.lua;" + LUA_JSDIR + "?/init.lua;" +
         "./?.lua;./?/init.lua"
     );
     module.exports.LUA_PATH_DEFAULT = LUA_PATH_DEFAULT;
 
-    const LUA_CPATH_DEFAULT = to_luastring(
-        LUA_CDIR + "?.js;" + LUA_CDIR + "loadall.js;./?.js"
+    const LUA_JSPATH_DEFAULT = to_luastring(
+        LUA_JSDIR + "?.js;" + LUA_JSDIR + "loadall.js;./?.js"
     );
-    module.exports.LUA_CPATH_DEFAULT = LUA_CPATH_DEFAULT;
+    module.exports.LUA_JSPATH_DEFAULT = LUA_JSPATH_DEFAULT;
 } else if (require('os').platform() === 'win32') {
     const LUA_DIRSEP = "\\";
     module.exports.LUA_DIRSEP = LUA_DIRSEP;
@@ -380,26 +380,26 @@ if (typeof process === "undefined") {
     const LUA_LDIR = "!\\lua\\";
     module.exports.LUA_LDIR = LUA_LDIR;
 
-    const LUA_CDIR = "!\\";
-    module.exports.LUA_CDIR = LUA_CDIR;
+    const LUA_JSDIR = "!\\";
+    module.exports.LUA_JSDIR = LUA_JSDIR;
 
     const LUA_SHRDIR = "!\\..\\share\\lua\\" + LUA_VDIR + "\\";
     module.exports.LUA_SHRDIR = LUA_SHRDIR;
 
     const LUA_PATH_DEFAULT = to_luastring(
         LUA_LDIR + "?.lua;" + LUA_LDIR + "?\\init.lua;" +
-        LUA_CDIR + "?.lua;" + LUA_CDIR + "?\\init.lua;" +
+        LUA_JSDIR + "?.lua;" + LUA_JSDIR + "?\\init.lua;" +
         LUA_SHRDIR + "?.lua;" + LUA_SHRDIR + "?\\init.lua;" +
         ".\\?.lua;.\\?\\init.lua"
     );
     module.exports.LUA_PATH_DEFAULT = LUA_PATH_DEFAULT;
 
-    const LUA_CPATH_DEFAULT = to_luastring(
-        LUA_CDIR + "?.js;" +
-        LUA_CDIR + "..\\lib\\lua\\" + LUA_VDIR + "\\?.js;" +
-        LUA_CDIR + "loadall.js;.\\?.js"
+    const LUA_JSPATH_DEFAULT = to_luastring(
+        LUA_JSDIR + "?.js;" +
+        LUA_JSDIR + "..\\lib\\lua\\" + LUA_VDIR + "\\?.js;" +
+        LUA_JSDIR + "loadall.js;.\\?.js"
     );
-    module.exports.LUA_CPATH_DEFAULT = LUA_CPATH_DEFAULT;
+    module.exports.LUA_JSPATH_DEFAULT = LUA_JSPATH_DEFAULT;
 } else {
     const LUA_DIRSEP = "/";
     module.exports.LUA_DIRSEP = LUA_DIRSEP;
@@ -410,20 +410,20 @@ if (typeof process === "undefined") {
     const LUA_LDIR = LUA_ROOT + "share/lua/" + LUA_VDIR + "/";
     module.exports.LUA_LDIR = LUA_LDIR;
 
-    const LUA_CDIR = LUA_ROOT + "lib/lua/" + LUA_VDIR + "/";
-    module.exports.LUA_CDIR = LUA_CDIR;
+    const LUA_JSDIR = LUA_ROOT + "lib/lua/" + LUA_VDIR + "/";
+    module.exports.LUA_JSDIR = LUA_JSDIR;
 
     const LUA_PATH_DEFAULT = to_luastring(
         LUA_LDIR + "?.lua;" + LUA_LDIR + "?/init.lua;" +
-        LUA_CDIR + "?.lua;" + LUA_CDIR + "?/init.lua;" +
+        LUA_JSDIR + "?.lua;" + LUA_JSDIR + "?/init.lua;" +
         "./?.lua;./?/init.lua"
     );
     module.exports.LUA_PATH_DEFAULT = LUA_PATH_DEFAULT;
 
-    const LUA_CPATH_DEFAULT = to_luastring(
-        LUA_CDIR + "?.js;" + LUA_CDIR + "loadall.js;./?.js"
+    const LUA_JSPATH_DEFAULT = to_luastring(
+        LUA_JSDIR + "?.js;" + LUA_JSDIR + "loadall.js;./?.js"
     );
-    module.exports.LUA_CPATH_DEFAULT = LUA_CPATH_DEFAULT;
+    module.exports.LUA_JSPATH_DEFAULT = LUA_JSPATH_DEFAULT;
 }
 
 module.exports.LUA_AUTHORS             = LUA_AUTHORS;

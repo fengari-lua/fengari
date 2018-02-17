@@ -1,9 +1,9 @@
 "use strict";
 
 const {
-    LUA_CPATH_DEFAULT,
     LUA_DIRSEP,
     LUA_EXEC_DIR,
+    LUA_JSPATH_DEFAULT,
     LUA_OK,
     LUA_PATH_DEFAULT,
     LUA_PATH_MARK,
@@ -87,29 +87,29 @@ const global_env = (function() {
     }
 })();
 
-const CLIBS         = to_luastring("__CLIBS__");
-const LUA_PATH_VAR  = "LUA_PATH";
-const LUA_CPATH_VAR = "LUA_CPATH";
+const JSLIBS = to_luastring("__JSLIBS__");
+const LUA_PATH_VAR = "LUA_PATH";
+const LUA_JSPATH_VAR = "LUA_JSPATH";
 
-const LUA_IGMARK    = "-";
+const LUA_IGMARK = "-";
 
 /*
 ** LUA_CSUBSEP is the character that replaces dots in submodule names
-** when searching for a C loader.
+** when searching for a JS loader.
 ** LUA_LSUBSEP is the character that replaces dots in submodule names
 ** when searching for a Lua loader.
 */
-const LUA_CSUBSEP   = LUA_DIRSEP;
-const LUA_LSUBSEP   = LUA_DIRSEP;
+const LUA_CSUBSEP = LUA_DIRSEP;
+const LUA_LSUBSEP = LUA_DIRSEP;
 
-/* prefix for open functions in C libraries */
-const LUA_POF       = to_luastring("luaopen_");
+/* prefix for open functions in JS libraries */
+const LUA_POF = to_luastring("luaopen_");
 
-/* separator for open functions in C libraries */
-const LUA_OFSEP     = to_luastring("_");
-const LIB_FAIL      = "open";
+/* separator for open functions in JS libraries */
+const LUA_OFSEP = to_luastring("_");
+const LIB_FAIL = "open";
 
-const AUXMARK       = to_luastring("\x01");
+const AUXMARK = to_luastring("\x01");
 
 
 /*
@@ -236,11 +236,11 @@ const ERRFUNC = 2;
 ** errors, return an error code and an error message in the stack.
 */
 const lookforfunc = function(L, path, sym) {
-    let reg = checkclib(L, path);  /* check loaded C libraries */
+    let reg = checkjslib(L, path);  /* check loaded JS libraries */
     if (reg === null) {  /* must load library? */
         reg = lsys_load(L, path, sym[0] === '*'.charCodeAt(0));  /* a global symbols if 'sym'=='*' */
         if (reg === null) return ERRLIB;  /* unable to load library */
-        addtoclib(L, path, reg);
+        addtojslib(L, path, reg);
     }
     if (sym[0] === '*'.charCodeAt(0)) {  /* loading only library (no function)? */
         lua_pushboolean(L, 1);  /* return 'true' */
@@ -305,27 +305,27 @@ const setpath = function(L, fieldname, envname, dft) {
 };
 
 /*
-** return registry.CLIBS[path]
+** return registry.JSLIBS[path]
 */
-const checkclib = function(L, path) {
-    lua_rawgetp(L, LUA_REGISTRYINDEX, CLIBS);
+const checkjslib = function(L, path) {
+    lua_rawgetp(L, LUA_REGISTRYINDEX, JSLIBS);
     lua_getfield(L, -1, path);
-    let plib = lua_touserdata(L, -1);  /* plib = CLIBS[path] */
-    lua_pop(L, 2);  /* pop CLIBS table and 'plib' */
+    let plib = lua_touserdata(L, -1);  /* plib = JSLIBS[path] */
+    lua_pop(L, 2);  /* pop JSLIBS table and 'plib' */
     return plib;
 };
 
 /*
-** registry.CLIBS[path] = plib        -- for queries
-** registry.CLIBS[#CLIBS + 1] = plib  -- also keep a list of all libraries
+** registry.JSLIBS[path] = plib        -- for queries
+** registry.JSLIBS[#JSLIBS + 1] = plib  -- also keep a list of all libraries
 */
-const addtoclib = function(L, path, plib) {
-    lua_rawgetp(L, LUA_REGISTRYINDEX, CLIBS);
+const addtojslib = function(L, path, plib) {
+    lua_rawgetp(L, LUA_REGISTRYINDEX, JSLIBS);
     lua_pushlightuserdata(L, plib);
     lua_pushvalue(L, -1);
-    lua_setfield(L, -3, path);  /* CLIBS[path] = plib */
-    lua_rawseti(L, -2, luaL_len(L, -2) + 1);  /* CLIBS[#CLIBS + 1] = plib */
-    lua_pop(L, 1);  /* pop CLIBS table */
+    lua_setfield(L, -3, path);  /* JSLIBS[path] = plib */
+    lua_rawseti(L, -2, luaL_len(L, -2) + 1);  /* JSLIBS[#JSLIBS + 1] = plib */
+    lua_pop(L, 1);  /* pop JSLIBS table */
 };
 
 const pushnexttemplate = function(L, path) {
@@ -420,7 +420,7 @@ const loadfunc = function(L, filename, modname) {
 
 const searcher_C = function(L) {
     let name = luaL_checkstring(L, 1);
-    let filename = findfile(L, name, to_luastring("cpath", true), to_luastring(LUA_CSUBSEP, true));
+    let filename = findfile(L, name, to_luastring("jspath", true), to_luastring(LUA_CSUBSEP, true));
     if (filename === null) return 1;  /* module not found in this path */
     return checkload(L, (loadfunc(L, filename, name) === 0), filename);
 };
@@ -431,7 +431,7 @@ const searcher_Croot = function(L) {
     let stat;
     if (p < 0) return 0;  /* is root */
     lua_pushlstring(L, name, p);
-    let filename = findfile(L, lua_tostring(L, -1), to_luastring("cpath", true), to_luastring(LUA_CSUBSEP, true));
+    let filename = findfile(L, lua_tostring(L, -1), to_luastring("jspath", true), to_luastring(LUA_CSUBSEP, true));
     if (filename === null) return 1;  /* root not found */
     if ((stat = loadfunc(L, filename, name)) !== 0) {
         if (stat != ERRFUNC)
@@ -545,23 +545,23 @@ const createsearcherstable = function(L) {
 };
 
 /*
-** create table CLIBS to keep track of loaded C libraries,
+** create table JSLIBS to keep track of loaded JS libraries,
 ** setting a finalizer to close all libraries when closing state.
 */
-const createclibstable = function(L) {
-    lua_newtable(L);  /* create CLIBS table */
-    lua_createtable(L, 0, 1);  /* create metatable for CLIBS */
+const createjslibstable = function(L) {
+    lua_newtable(L);  /* create JSLIBS table */
+    lua_createtable(L, 0, 1);  /* create metatable for JSLIBS */
     lua_setmetatable(L, -2);
-    lua_rawsetp(L, LUA_REGISTRYINDEX, CLIBS);  /* set CLIBS table in registry */
+    lua_rawsetp(L, LUA_REGISTRYINDEX, JSLIBS);  /* set JSLIBS table in registry */
 };
 
 const luaopen_package = function(L) {
-    createclibstable(L);
+    createjslibstable(L);
     luaL_newlib(L, pk_funcs);  /* create 'package' table */
     createsearcherstable(L);
     /* set paths */
     setpath(L, to_luastring("path", true), LUA_PATH_VAR, LUA_PATH_DEFAULT);
-    setpath(L, to_luastring("cpath", true), LUA_CPATH_VAR, LUA_CPATH_DEFAULT);
+    setpath(L, to_luastring("jspath", true), LUA_JSPATH_VAR, LUA_JSPATH_DEFAULT);
     /* store config information */
     lua_pushliteral(L, LUA_DIRSEP + "\n" + LUA_PATH_SEP + "\n" + LUA_PATH_MARK + "\n" +
                         LUA_EXEC_DIR + "\n" + LUA_IGMARK + "\n");

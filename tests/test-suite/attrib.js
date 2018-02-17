@@ -17,7 +17,7 @@ test("[test-suite] attrib: testing require", function (t) {
         assert(require"coroutine" == coroutine)
 
         assert(type(package.path) == "string")
-        assert(type(package.cpath) == "string")
+        assert(type(package.jspath) == "string")
         assert(type(package.loaded) == "table")
         assert(type(package.preload) == "table")
 
