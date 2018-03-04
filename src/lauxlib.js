@@ -227,11 +227,7 @@ const luaL_traceback = function(L, L1, msg, level) {
 };
 
 const panic = function(L) {
-    let msg = "PANIC: unprotected error in call to Lua API";
-    try {
-        msg += " (" + lua_tojsstring(L, -1) + ")";
-    } catch (e) {
-    }
+    let msg = "PANIC: unprotected error in call to Lua API (" + lua_tojsstring(L, -1) + ")";
     throw new Error(msg);
 };
 
