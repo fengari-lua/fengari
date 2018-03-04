@@ -22,7 +22,7 @@ However it is rare to use this repository directly.
 
 Once you've loaded fengari, you can use the JS API:
 
-```javascript
+```js
 const luaconf  = fengari.luaconf;
 const lua      = fengari.lua;
 const lauxlib  = fengari.lauxlib;
@@ -48,13 +48,16 @@ Lua strings are 8-bits clean and can embed `\0`. Which means that invalid UTF-8/
 
 To address that issue, Fengari uses [`Uint8Array`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array) objects containing the raw bytes to implement lua strings. To push a JS string on the stack you can use `lua_pushliteral` which will convert it to an array of bytes before pushing it. To get a Lua string on the stack as a JS string you can use `lua_tojsstring` which will attempt to convert it to a UTF-16 JS string. The latter won't give you what you expect if the Lua string is not a valid UTF-16 sequence. You can also convert strings with `luastring_of`, `to_luastring`, `to_jsstring` and `to_uristring`.
 
+
 ### Integers
 
 The JS number type is always a double, and hence cannot accurately represent integers with more than 53 bits. As such, we've taken the route of a rarely used define (`LUA_INT_TYPE=LUA_INT_LONG`) in the PUC-Rio sources, where floats are doubles, but integers are 32 bits.
 
+
 ### `require` and `package.loadlib`
 
 In the browser `require` and `package.loadlib` try to find a file by making synchronous XHR requests.
+
 
 ### _Missing_ features
 
@@ -77,6 +80,7 @@ In the browser `require` and `package.loadlib` try to find a file by making sync
 - `lua_tointegerx` and `lua_tonumberx` do not have out-parameters indicating conversion success. Instead, ``false`` is returned when conversion fails.
 - `luaL_execresult` takes an extra argument: an error object. The error object should have a fields `status`, `signal` and `errno`.
 - `luaL_fileresult` takes an extra argument: an error object. The error object should have a field `errno`.
+
 
 ## Extensions
 
@@ -120,6 +124,7 @@ var p = lua_toproxy(L, 1);
 p(L);
 ````
 
+
 ## NYI
 
 - `io.input()`: partially implemented
@@ -133,6 +138,7 @@ p(L);
 - `file:read()`
 - `file:setvbuf()`
 - `file:__gc()`
+
 
 ## References
 
