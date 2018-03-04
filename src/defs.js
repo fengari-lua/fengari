@@ -58,7 +58,7 @@ const luastring_eq = function(a, b) {
     return true;
 };
 
-const to_jsstring = function(value, from, to) {
+const to_jsstring = function(value, from, to, replacement_char) {
     if (!is_luastring(value)) throw new TypeError("to_jsstring expects a Uint8Array");
 
     if (to === void 0) {
@@ -74,20 +74,41 @@ const to_jsstring = function(value, from, to) {
             /* single byte sequence */
             str += String.fromCharCode(u0);
         } else if (u0 < 0xC2 || u0 > 0xF4) {
-            throw RangeError("cannot convert invalid utf8 to javascript string");
+            if (!replacement_char) throw RangeError("cannot convert invalid utf8 to javascript string");
+            str += "�";
         } else if (u0 <= 0xDF) {
             /* two byte sequence */
-            if (i >= to) throw RangeError("cannot convert invalid utf8 to javascript string");
+            if (i >= to) {
+                if (!replacement_char) throw RangeError("cannot convert invalid utf8 to javascript string");
+                str += "�";
+                continue;
+            }
             let u1 = value[i++];
-            if ((u1&0xC0) !== 0x80) throw RangeError("cannot convert invalid utf8 to javascript string");
+            if ((u1&0xC0) !== 0x80) {
+                if (!replacement_char) throw RangeError("cannot convert invalid utf8 to javascript string");
+                str += "�";
+                continue;
+            }
             str += String.fromCharCode(((u0 & 0x1F) << 6) + (u1 & 0x3F));
         } else if (u0 <= 0xEF) {
             /* three byte sequence */
-            if (i+1 >= to) throw RangeError("cannot convert invalid utf8 to javascript string");
+            if (i+1 >= to) {
+                if (!replacement_char) throw RangeError("cannot convert invalid utf8 to javascript string");
+                str += "�";
+                continue;
+            }
             let u1 = value[i++];
-            if ((u1&0xC0) !== 0x80) throw RangeError("cannot convert invalid utf8 to javascript string");
+            if ((u1&0xC0) !== 0x80) {
+                if (!replacement_char) throw RangeError("cannot convert invalid utf8 to javascript string");
+                str += "�";
+                continue;
+            }
             let u2 = value[i++];
-            if ((u2&0xC0) !== 0x80) throw RangeError("cannot convert invalid utf8 to javascript string");
+            if ((u2&0xC0) !== 0x80) {
+                if (!replacement_char) throw RangeError("cannot convert invalid utf8 to javascript string");
+                str += "�";
+                continue;
+            }
             let u = ((u0 & 0x0F) << 12) + ((u1 & 0x3F) << 6) + (u2 & 0x3F);
             if (u <= 0xFFFF) { /* BMP codepoint */
                 str += String.fromCharCode(u);
@@ -99,13 +120,29 @@ const to_jsstring = function(value, from, to) {
             }
         } else {
             /* four byte sequence */
-            if (i+2 >= to) throw RangeError("cannot convert invalid utf8 to javascript string");
+            if (i+2 >= to) {
+                if (!replacement_char) throw RangeError("cannot convert invalid utf8 to javascript string");
+                str += "�";
+                continue;
+            }
             let u1 = value[i++];
-            if ((u1&0xC0) !== 0x80) throw RangeError("cannot convert invalid utf8 to javascript string");
+            if ((u1&0xC0) !== 0x80) {
+                if (!replacement_char) throw RangeError("cannot convert invalid utf8 to javascript string");
+                str += "�";
+                continue;
+            }
             let u2 = value[i++];
-            if ((u2&0xC0) !== 0x80) throw RangeError("cannot convert invalid utf8 to javascript string");
+            if ((u2&0xC0) !== 0x80) {
+                if (!replacement_char) throw RangeError("cannot convert invalid utf8 to javascript string");
+                str += "�";
+                continue;
+            }
             let u3 = value[i++];
-            if ((u3&0xC0) !== 0x80) throw RangeError("cannot convert invalid utf8 to javascript string");
+            if ((u3&0xC0) !== 0x80) {
+                if (!replacement_char) throw RangeError("cannot convert invalid utf8 to javascript string");
+                str += "�";
+                continue;
+            }
             /* Has to be astral codepoint */
             let u = ((u0 & 0x07) << 18) + ((u1 & 0x3F) << 12) + ((u2 & 0x3F) << 6) + (u3 & 0x3F);
             u -= 0x10000;
