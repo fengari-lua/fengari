@@ -1,5 +1,11 @@
 "use strict";
 
+/*
+@@ LUA_COMPAT_FLOATSTRING makes Lua format integral floats without a
+@@ a float mark ('.0').
+** This macro is not on by default even in compatibility mode,
+** because this is not really an incompatibility.
+*/
 const LUA_COMPAT_FLOATSTRING = false;
 
 const LUA_MAXINTEGER = 2147483647;
