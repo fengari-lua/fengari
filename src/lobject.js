@@ -55,6 +55,7 @@ const {
 } = require('./lstring.js');
 const ltable  = require('./ltable.js');
 const {
+    LUA_COMPAT_FLOATSTRING,
     ldexp,
     lua_getlocaledecpoint,
     lua_integer2str,
@@ -585,15 +586,13 @@ const luaO_str2num = function(s, o) {
     }
 };
 
-/* this currently returns new TValue instead of modifying */
 const luaO_tostring = function(L, obj) {
     let buff;
     if (obj.ttisinteger())
         buff = to_luastring(lua_integer2str(obj.value));
     else {
         let str = lua_number2str(obj.value);
-        // Assume no LUA_COMPAT_FLOATSTRING
-        if (/^[-0123456789]+$/.test(str)) {  /* looks like an int? */
+        if (!LUA_COMPAT_FLOATSTRING && /^[-0123456789]+$/.test(str)) {  /* looks like an int? */
             str += String.fromCharCode(lua_getlocaledecpoint()) + '0'; /* adds '.0' to result */
         }
         buff = to_luastring(str);
