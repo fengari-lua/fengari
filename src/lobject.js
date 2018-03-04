@@ -267,9 +267,8 @@ class TValue {
     }
 
     jsstring(from, to) {
-        return to_jsstring(this.svalue(), from, to);
+        return to_jsstring(this.svalue(), from, to, true);
     }
-
 }
 
 const pushobj2s = function(L, tv) {
