@@ -680,7 +680,7 @@ const lua_tolstring = function(L, idx) {
 
 const lua_tostring =  lua_tolstring;
 
-const lua_toljsstring = function(L, idx) {
+const lua_tojsstring = function(L, idx) {
     let o = index2addr(L, idx);
 
     if (!o.ttisstring()) {
@@ -691,8 +691,6 @@ const lua_toljsstring = function(L, idx) {
     }
     return o.jsstring();
 };
-
-const lua_tojsstring =  lua_toljsstring;
 
 const lua_todataview = function(L, idx) {
     let u8 = lua_tolstring(L, idx);
@@ -1228,7 +1226,6 @@ module.exports.lua_todataview        = lua_todataview;
 module.exports.lua_tointeger         = lua_tointeger;
 module.exports.lua_tointegerx        = lua_tointegerx;
 module.exports.lua_tojsstring        = lua_tojsstring;
-module.exports.lua_toljsstring       = lua_toljsstring;
 module.exports.lua_tolstring         = lua_tolstring;
 module.exports.lua_tonumber          = lua_tonumber;
 module.exports.lua_tonumberx         = lua_tonumberx;

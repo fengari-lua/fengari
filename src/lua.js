@@ -186,7 +186,6 @@ module.exports.lua_todataview          = lapi.lua_todataview;
 module.exports.lua_tointeger           = lapi.lua_tointeger;
 module.exports.lua_tointegerx          = lapi.lua_tointegerx;
 module.exports.lua_tojsstring          = lapi.lua_tojsstring;
-module.exports.lua_toljsstring         = lapi.lua_toljsstring;
 module.exports.lua_tolstring           = lapi.lua_tolstring;
 module.exports.lua_tonumber            = lapi.lua_tonumber;
 module.exports.lua_tonumberx           = lapi.lua_tonumberx;
