@@ -382,7 +382,6 @@ const luaB_xpcall = function(L) {
     return finishpcall(L, status, 2);
 };
 
-// TODO: does it overwrite the upvalue of the previous closure ?
 const load_aux = function(L, status, envidx) {
     if (status === LUA_OK) {
         if (envidx !== 0) {  /* 'env' parameter? */

@@ -653,7 +653,7 @@ const luaX_next = function(ls) {
         ls.t.token = ls.lookahead.token;  /* use this one */
         ls.t.seminfo.i = ls.lookahead.seminfo.i;
         ls.t.seminfo.r = ls.lookahead.seminfo.r;
-        ls.t.seminfo.ts = ls.lookahead.seminfo.ts; // TODO ?
+        ls.t.seminfo.ts = ls.lookahead.seminfo.ts;
         ls.lookahead.token = TK_EOS;  /* and discharge it */
     } else
         ls.t.token = llex(ls, ls.t.seminfo);  /* read next token */

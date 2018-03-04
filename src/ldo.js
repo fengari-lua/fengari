@@ -393,7 +393,7 @@ const luaD_throw = function(L, errcode) {
 
 const luaD_rawrunprotected = function(L, f, ud) {
     let oldnCcalls = L.nCcalls;
-    let lj = { // TODO: necessary when using try/catch ? (ldo.c:47-52)
+    let lj = {
         status: LUA_OK,
         previous: L.errorJmp /* chain new error handler */
     };

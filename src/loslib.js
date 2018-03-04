@@ -244,7 +244,6 @@ if (typeof process === "undefined") {
         return 1;
     };
 
-    // TODO: on POSIX system, should create the file
     const lua_tmpname = function() {
         return tmp.tmpNameSync();
     };

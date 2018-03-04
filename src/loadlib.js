@@ -207,7 +207,6 @@ if (typeof process !== "undefined") { // Only with Node
         return true;
     };
 } else {
-    /* TODO: use async/await ? */
     readable = function(path) {
         path = to_uristring(path);
         let xhr = new XMLHttpRequest();

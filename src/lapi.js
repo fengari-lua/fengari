@@ -900,7 +900,7 @@ const lua_islightuserdata = function(L, idx) {
 const lua_rawequal = function(L, index1, index2) {
     let o1 = index2addr(L, index1);
     let o2 = index2addr(L, index2);
-    return isvalid(o1) && isvalid(o2) ? lvm.luaV_equalobj(null, o1, o2) : 0; // TODO: isvalid ?
+    return isvalid(o1) && isvalid(o2) ? lvm.luaV_equalobj(null, o1, o2) : 0;
 };
 
 const lua_arith = function(L, op) {
@@ -996,8 +996,6 @@ const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
     if (errfunc === 0)
         func = 0;
     else {
-        // let o = index2addr(L, errfunc);
-        // TODO: api_checkstackindex(L, errfunc, o);
         func = index2addr_(L, errfunc);
     }
     let funcOff = L.top - (nargs + 1); /* function to be called */
