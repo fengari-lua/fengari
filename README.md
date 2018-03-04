@@ -23,6 +23,7 @@ However it is rare to use this repository directly.
 Once you've loaded fengari, you can use the JS API:
 
 ```javascript
+const luaconf  = fengari.luaconf;
 const lua      = fengari.lua;
 const lauxlib  = fengari.lauxlib;
 const lualib   = fengari.lualib;
