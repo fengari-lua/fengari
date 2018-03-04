@@ -127,7 +127,7 @@ const luaB_print = function(L) {
         lua_call(L, 1, 1);
         let s = lua_tolstring(L, -1);
         if (s === null)
-            return luaL_error(L, to_luastring("'tostring' must return a string to 'print'", true));
+            return luaL_error(L, to_luastring("'tostring' must return a string to 'print'"));
         if (i > 1) lua_writestring(to_luastring("\t"));
         lua_writestring(s);
         lua_pop(L, 1);
@@ -158,7 +158,7 @@ const luaB_setmetatable = function(L) {
     luaL_checktype(L, 1, LUA_TTABLE);
     luaL_argcheck(L, t === LUA_TNIL || t === LUA_TTABLE, 2, to_luastring("nil or table expected", true));
     if (luaL_getmetafield(L, 1, to_luastring("__metatable", true)) !== LUA_TNIL)
-        return luaL_error(L, to_luastring("cannot change a protected metatable", true));
+        return luaL_error(L, to_luastring("cannot change a protected metatable"));
     lua_settop(L, 2);
     lua_setmetatable(L, 1);
     return 1;
@@ -492,10 +492,10 @@ const luaopen_base = function(L) {
     luaL_setfuncs(L, base_funcs, 0);
     /* set global _G */
     lua_pushvalue(L, -1);
-    lua_setfield(L, -2, to_luastring("_G", true));
+    lua_setfield(L, -2, to_luastring("_G"));
     /* set global _VERSION */
     lua_pushliteral(L, LUA_VERSION);
-    lua_setfield(L, -2, to_luastring("_VERSION", true));
+    lua_setfield(L, -2, to_luastring("_VERSION"));
     return 1;
 };
 
