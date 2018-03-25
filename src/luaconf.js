@@ -19,8 +19,7 @@ const LUA_MININTEGER = -2147483648;
 ** its only purpose is to stop Lua from consuming unlimited stack
 ** space (and to reserve some numbers for pseudo-indices).
 */
-/* TODO: put back to 1000000. Node would go out of memory in some cases (e.g. travis) */
-const LUAI_MAXSTACK = conf.LUAI_MAXSTACK || 100000;
+const LUAI_MAXSTACK = conf.LUAI_MAXSTACK || 1000000;
 
 /*
 @@ LUA_IDSIZE gives the maximum size for the description of the source
