@@ -30,6 +30,7 @@ module.exports = [
         },
         plugins: [
             new webpack.DefinePlugin({
+                "process.env.FENGARICONF": "void 0",
                 "typeof process": JSON.stringify("undefined")
             })
         ]
