@@ -1,12 +1,14 @@
 "use strict";
 
+const conf = (process.env.FENGARICONF ? JSON.parse(process.env.FENGARICONF) : {});
+
 /*
 @@ LUA_COMPAT_FLOATSTRING makes Lua format integral floats without a
 @@ a float mark ('.0').
 ** This macro is not on by default even in compatibility mode,
 ** because this is not really an incompatibility.
 */
-const LUA_COMPAT_FLOATSTRING = false;
+const LUA_COMPAT_FLOATSTRING = conf.LUA_COMPAT_FLOATSTRING || false;
 
 const LUA_MAXINTEGER = 2147483647;
 const LUA_MININTEGER = -2147483648;
@@ -18,14 +20,14 @@ const LUA_MININTEGER = -2147483648;
 ** space (and to reserve some numbers for pseudo-indices).
 */
 /* TODO: put back to 1000000. Node would go out of memory in some cases (e.g. travis) */
-const LUAI_MAXSTACK = 100000;
+const LUAI_MAXSTACK = conf.LUAI_MAXSTACK || 100000;
 
 /*
 @@ LUA_IDSIZE gives the maximum size for the description of the source
 @@ of a function in debug information.
 ** CHANGE it if you want a different size.
 */
-const LUA_IDSIZE = 60-1; /* fengari uses 1 less than lua as we don't embed the null byte */
+const LUA_IDSIZE = conf.LUA_IDSIZE || (60-1); /* fengari uses 1 less than lua as we don't embed the null byte */
 
 const lua_integer2str = function(n) {
     return String(n); /* should match behaviour of LUA_INTEGER_FMT */
@@ -56,7 +58,7 @@ const luai_apicheck = function(l, e) {
 /*
 @@ LUAL_BUFFERSIZE is the buffer size used by the lauxlib buffer system.
 */
-const LUAL_BUFFERSIZE = 8192;
+const LUAL_BUFFERSIZE = conf.LUAL_BUFFERSIZE || 8192;
 
 // See: http://croquetweak.blogspot.fr/2014/08/deconstructing-floats-frexp-and-ldexp.html
 const frexp = function(value) {
