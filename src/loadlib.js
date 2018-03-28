@@ -4,10 +4,12 @@ const {
     LUA_DIRSEP,
     LUA_EXEC_DIR,
     LUA_JSPATH_DEFAULT,
-    LUA_OK,
     LUA_PATH_DEFAULT,
     LUA_PATH_MARK,
-    LUA_PATH_SEP,
+    LUA_PATH_SEP
+} = require('./luaconf.js');
+const {
+    LUA_OK,
     LUA_REGISTRYINDEX,
     LUA_TNIL,
     LUA_TTABLE,

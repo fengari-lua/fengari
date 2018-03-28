@@ -1,7 +1,5 @@
 "use strict";
 
-const { LUAI_MAXSTACK } = require('./luaconf.js');
-
 /*
  * Fengari specific string conversion functions
  */
@@ -230,18 +228,40 @@ const from_userstring = function(str) {
     return str;
 };
 
+module.exports.luastring_from    = luastring_from;
+module.exports.luastring_indexOf = luastring_indexOf;
+module.exports.luastring_of      = luastring_of;
+module.exports.is_luastring      = is_luastring;
+module.exports.luastring_eq      = luastring_eq;
+module.exports.to_jsstring       = to_jsstring;
+module.exports.to_uristring      = to_uristring;
+module.exports.to_luastring      = to_luastring;
+module.exports.from_userstring   = from_userstring;
+
+
 /* mark for precompiled code ('<esc>Lua') */
 const LUA_SIGNATURE = to_luastring("\x1bLua");
 
-const LUA_VERSION_MAJOR       = "5";
-const LUA_VERSION_MINOR       = "3";
-const LUA_VERSION_NUM         = 503;
-const LUA_VERSION_RELEASE     = "4";
+const LUA_VERSION_MAJOR   = "5";
+const LUA_VERSION_MINOR   = "3";
+const LUA_VERSION_NUM     = 503;
+const LUA_VERSION_RELEASE = "4";
 
-const LUA_VERSION             = "Lua " + LUA_VERSION_MAJOR + "." + LUA_VERSION_MINOR;
-const LUA_RELEASE             = LUA_VERSION + "." + LUA_VERSION_RELEASE;
-const LUA_COPYRIGHT           = LUA_RELEASE + "  Copyright (C) 1994-2017 Lua.org, PUC-Rio";
-const LUA_AUTHORS             = "R. Ierusalimschy, L. H. de Figueiredo, W. Celes";
+const LUA_VERSION         = "Lua " + LUA_VERSION_MAJOR + "." + LUA_VERSION_MINOR;
+const LUA_RELEASE         = LUA_VERSION + "." + LUA_VERSION_RELEASE;
+const LUA_COPYRIGHT       = LUA_RELEASE + "  Copyright (C) 1994-2017 Lua.org, PUC-Rio";
+const LUA_AUTHORS         = "R. Ierusalimschy, L. H. de Figueiredo, W. Celes";
+
+module.exports.LUA_SIGNATURE       = LUA_SIGNATURE;
+module.exports.LUA_VERSION_MAJOR   = LUA_VERSION_MAJOR;
+module.exports.LUA_VERSION_MINOR   = LUA_VERSION_MINOR;
+module.exports.LUA_VERSION_NUM     = LUA_VERSION_NUM;
+module.exports.LUA_VERSION_RELEASE = LUA_VERSION_RELEASE;
+module.exports.LUA_VERSION         = LUA_VERSION;
+module.exports.LUA_RELEASE         = LUA_RELEASE;
+module.exports.LUA_COPYRIGHT       = LUA_COPYRIGHT;
+module.exports.LUA_AUTHORS         = LUA_AUTHORS;
+
 
 const thread_status = {
     LUA_OK:        0,
@@ -302,6 +322,7 @@ const LUA_OPLE = 2;
 
 const LUA_MINSTACK = 20;
 
+const { LUAI_MAXSTACK } = require('./luaconf.js');
 const LUA_REGISTRYINDEX = -LUAI_MAXSTACK - 1000;
 
 const lua_upvalueindex = function(i) {
@@ -351,122 +372,6 @@ const LUA_MASKRET   = (1 << LUA_HOOKRET);
 const LUA_MASKLINE  = (1 << LUA_HOOKLINE);
 const LUA_MASKCOUNT = (1 << LUA_HOOKCOUNT);
 
-/*
-** LUA_PATH_SEP is the character that separates templates in a path.
-** LUA_PATH_MARK is the string that marks the substitution points in a
-** template.
-** LUA_EXEC_DIR in a Windows path is replaced by the executable's
-** directory.
-*/
-const LUA_PATH_SEP  = ";";
-module.exports.LUA_PATH_SEP = LUA_PATH_SEP;
-
-const LUA_PATH_MARK = "?";
-module.exports.LUA_PATH_MARK = LUA_PATH_MARK;
-
-const LUA_EXEC_DIR  = "!";
-module.exports.LUA_EXEC_DIR = LUA_EXEC_DIR;
-
-
-/*
-@@ LUA_PATH_DEFAULT is the default path that Lua uses to look for
-** Lua libraries.
-@@ LUA_JSPATH_DEFAULT is the default path that Lua uses to look for
-** C libraries.
-** CHANGE them if your machine has a non-conventional directory
-** hierarchy or if you want to install your libraries in
-** non-conventional directories.
-*/
-const LUA_VDIR = LUA_VERSION_MAJOR + "." + LUA_VERSION_MINOR;
-module.exports.LUA_VDIR = LUA_VDIR;
-
-if (typeof process === "undefined") {
-    const LUA_DIRSEP = "/";
-    module.exports.LUA_DIRSEP = LUA_DIRSEP;
-
-    const LUA_LDIR = "./lua/" + LUA_VDIR + "/";
-    module.exports.LUA_LDIR = LUA_LDIR;
-
-    const LUA_JSDIR = "./lua/" + LUA_VDIR + "/";
-    module.exports.LUA_JSDIR = LUA_JSDIR;
-
-    const LUA_PATH_DEFAULT = to_luastring(
-        LUA_LDIR + "?.lua;" + LUA_LDIR + "?/init.lua;" +
-        LUA_JSDIR + "?.lua;" + LUA_JSDIR + "?/init.lua;" +
-        "./?.lua;./?/init.lua"
-    );
-    module.exports.LUA_PATH_DEFAULT = LUA_PATH_DEFAULT;
-
-    const LUA_JSPATH_DEFAULT = to_luastring(
-        LUA_JSDIR + "?.js;" + LUA_JSDIR + "loadall.js;./?.js"
-    );
-    module.exports.LUA_JSPATH_DEFAULT = LUA_JSPATH_DEFAULT;
-} else if (require('os').platform() === 'win32') {
-    const LUA_DIRSEP = "\\";
-    module.exports.LUA_DIRSEP = LUA_DIRSEP;
-
-    /*
-    ** In Windows, any exclamation mark ('!') in the path is replaced by the
-    ** path of the directory of the executable file of the current process.
-    */
-    const LUA_LDIR = "!\\lua\\";
-    module.exports.LUA_LDIR = LUA_LDIR;
-
-    const LUA_JSDIR = "!\\";
-    module.exports.LUA_JSDIR = LUA_JSDIR;
-
-    const LUA_SHRDIR = "!\\..\\share\\lua\\" + LUA_VDIR + "\\";
-    module.exports.LUA_SHRDIR = LUA_SHRDIR;
-
-    const LUA_PATH_DEFAULT = to_luastring(
-        LUA_LDIR + "?.lua;" + LUA_LDIR + "?\\init.lua;" +
-        LUA_JSDIR + "?.lua;" + LUA_JSDIR + "?\\init.lua;" +
-        LUA_SHRDIR + "?.lua;" + LUA_SHRDIR + "?\\init.lua;" +
-        ".\\?.lua;.\\?\\init.lua"
-    );
-    module.exports.LUA_PATH_DEFAULT = LUA_PATH_DEFAULT;
-
-    const LUA_JSPATH_DEFAULT = to_luastring(
-        LUA_JSDIR + "?.js;" +
-        LUA_JSDIR + "..\\share\\lua\\" + LUA_VDIR + "\\?.js;" +
-        LUA_JSDIR + "loadall.js;.\\?.js"
-    );
-    module.exports.LUA_JSPATH_DEFAULT = LUA_JSPATH_DEFAULT;
-} else {
-    const LUA_DIRSEP = "/";
-    module.exports.LUA_DIRSEP = LUA_DIRSEP;
-
-    const LUA_ROOT = "/usr/local/";
-    module.exports.LUA_ROOT = LUA_ROOT;
-    const LUA_ROOT2 = "/usr/";
-
-    const LUA_LDIR = LUA_ROOT + "share/lua/" + LUA_VDIR + "/";
-    const LUA_LDIR2 = LUA_ROOT2 + "share/lua/" + LUA_VDIR + "/";
-    module.exports.LUA_LDIR = LUA_LDIR;
-
-    const LUA_JSDIR = LUA_ROOT + "share/lua/" + LUA_VDIR + "/";
-    module.exports.LUA_JSDIR = LUA_JSDIR;
-    const LUA_JSDIR2 = LUA_ROOT2 + "share/lua/" + LUA_VDIR + "/";
-
-    const LUA_PATH_DEFAULT = to_luastring(
-        LUA_LDIR + "?.lua;" + LUA_LDIR + "?/init.lua;" +
-        LUA_LDIR2 + "?.lua;" + LUA_LDIR2 + "?/init.lua;" +
-        LUA_JSDIR + "?.lua;" + LUA_JSDIR + "?/init.lua;" +
-        LUA_JSDIR2 + "?.lua;" + LUA_JSDIR2 + "?/init.lua;" +
-        "./?.lua;./?/init.lua"
-    );
-    module.exports.LUA_PATH_DEFAULT = LUA_PATH_DEFAULT;
-
-    const LUA_JSPATH_DEFAULT = to_luastring(
-        LUA_JSDIR + "?.js;" + LUA_JSDIR + "loadall.js;" +
-        LUA_JSDIR2 + "?.js;" + LUA_JSDIR2 + "loadall.js;" +
-        "./?.js"
-    );
-    module.exports.LUA_JSPATH_DEFAULT = LUA_JSPATH_DEFAULT;
-}
-
-module.exports.LUA_AUTHORS             = LUA_AUTHORS;
-module.exports.LUA_COPYRIGHT           = LUA_COPYRIGHT;
 module.exports.LUA_HOOKCALL            = LUA_HOOKCALL;
 module.exports.LUA_HOOKCOUNT           = LUA_HOOKCOUNT;
 module.exports.LUA_HOOKLINE            = LUA_HOOKLINE;
@@ -496,26 +401,10 @@ module.exports.LUA_OPSHR               = LUA_OPSHR;
 module.exports.LUA_OPSUB               = LUA_OPSUB;
 module.exports.LUA_OPUNM               = LUA_OPUNM;
 module.exports.LUA_REGISTRYINDEX       = LUA_REGISTRYINDEX;
-module.exports.LUA_RELEASE             = LUA_RELEASE;
 module.exports.LUA_RIDX_GLOBALS        = LUA_RIDX_GLOBALS;
 module.exports.LUA_RIDX_LAST           = LUA_RIDX_LAST;
 module.exports.LUA_RIDX_MAINTHREAD     = LUA_RIDX_MAINTHREAD;
-module.exports.LUA_SIGNATURE           = LUA_SIGNATURE;
-module.exports.LUA_VERSION             = LUA_VERSION;
-module.exports.LUA_VERSION_MAJOR       = LUA_VERSION_MAJOR;
-module.exports.LUA_VERSION_MINOR       = LUA_VERSION_MINOR;
-module.exports.LUA_VERSION_NUM         = LUA_VERSION_NUM;
-module.exports.LUA_VERSION_RELEASE     = LUA_VERSION_RELEASE;
 module.exports.constant_types          = constant_types;
 module.exports.lua_Debug               = lua_Debug;
 module.exports.lua_upvalueindex        = lua_upvalueindex;
 module.exports.thread_status           = thread_status;
-module.exports.is_luastring            = is_luastring;
-module.exports.luastring_eq            = luastring_eq;
-module.exports.luastring_from          = luastring_from;
-module.exports.luastring_indexOf       = luastring_indexOf;
-module.exports.luastring_of            = luastring_of;
-module.exports.to_jsstring             = to_jsstring;
-module.exports.to_luastring            = to_luastring;
-module.exports.to_uristring            = to_uristring;
-module.exports.from_userstring         = from_userstring;

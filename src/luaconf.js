@@ -2,6 +2,125 @@
 
 const conf = (process.env.FENGARICONF ? JSON.parse(process.env.FENGARICONF) : {});
 
+const {
+    LUA_VERSION_MAJOR,
+    LUA_VERSION_MINOR,
+    to_luastring
+} = require('./defs.js');
+
+/*
+** LUA_PATH_SEP is the character that separates templates in a path.
+** LUA_PATH_MARK is the string that marks the substitution points in a
+** template.
+** LUA_EXEC_DIR in a Windows path is replaced by the executable's
+** directory.
+*/
+const LUA_PATH_SEP  = ";";
+module.exports.LUA_PATH_SEP = LUA_PATH_SEP;
+
+const LUA_PATH_MARK = "?";
+module.exports.LUA_PATH_MARK = LUA_PATH_MARK;
+
+const LUA_EXEC_DIR  = "!";
+module.exports.LUA_EXEC_DIR = LUA_EXEC_DIR;
+
+/*
+@@ LUA_PATH_DEFAULT is the default path that Lua uses to look for
+** Lua libraries.
+@@ LUA_JSPATH_DEFAULT is the default path that Lua uses to look for
+** JS libraries.
+** CHANGE them if your machine has a non-conventional directory
+** hierarchy or if you want to install your libraries in
+** non-conventional directories.
+*/
+const LUA_VDIR = LUA_VERSION_MAJOR + "." + LUA_VERSION_MINOR;
+module.exports.LUA_VDIR = LUA_VDIR;
+
+if (typeof process === "undefined") {
+    const LUA_DIRSEP = "/";
+    module.exports.LUA_DIRSEP = LUA_DIRSEP;
+
+    const LUA_LDIR = "./lua/" + LUA_VDIR + "/";
+    module.exports.LUA_LDIR = LUA_LDIR;
+
+    const LUA_JSDIR = "./lua/" + LUA_VDIR + "/";
+    module.exports.LUA_JSDIR = LUA_JSDIR;
+
+    const LUA_PATH_DEFAULT = to_luastring(
+        LUA_LDIR + "?.lua;" + LUA_LDIR + "?/init.lua;" +
+        LUA_JSDIR + "?.lua;" + LUA_JSDIR + "?/init.lua;" +
+        "./?.lua;./?/init.lua"
+    );
+    module.exports.LUA_PATH_DEFAULT = LUA_PATH_DEFAULT;
+
+    const LUA_JSPATH_DEFAULT = to_luastring(
+        LUA_JSDIR + "?.js;" + LUA_JSDIR + "loadall.js;./?.js"
+    );
+    module.exports.LUA_JSPATH_DEFAULT = LUA_JSPATH_DEFAULT;
+} else if (require('os').platform() === 'win32') {
+    const LUA_DIRSEP = "\\";
+    module.exports.LUA_DIRSEP = LUA_DIRSEP;
+
+    /*
+    ** In Windows, any exclamation mark ('!') in the path is replaced by the
+    ** path of the directory of the executable file of the current process.
+    */
+    const LUA_LDIR = "!\\lua\\";
+    module.exports.LUA_LDIR = LUA_LDIR;
+
+    const LUA_JSDIR = "!\\";
+    module.exports.LUA_JSDIR = LUA_JSDIR;
+
+    const LUA_SHRDIR = "!\\..\\share\\lua\\" + LUA_VDIR + "\\";
+    module.exports.LUA_SHRDIR = LUA_SHRDIR;
+
+    const LUA_PATH_DEFAULT = to_luastring(
+        LUA_LDIR + "?.lua;" + LUA_LDIR + "?\\init.lua;" +
+        LUA_JSDIR + "?.lua;" + LUA_JSDIR + "?\\init.lua;" +
+        LUA_SHRDIR + "?.lua;" + LUA_SHRDIR + "?\\init.lua;" +
+        ".\\?.lua;.\\?\\init.lua"
+    );
+    module.exports.LUA_PATH_DEFAULT = LUA_PATH_DEFAULT;
+
+    const LUA_JSPATH_DEFAULT = to_luastring(
+        LUA_JSDIR + "?.js;" +
+        LUA_JSDIR + "..\\share\\lua\\" + LUA_VDIR + "\\?.js;" +
+        LUA_JSDIR + "loadall.js;.\\?.js"
+    );
+    module.exports.LUA_JSPATH_DEFAULT = LUA_JSPATH_DEFAULT;
+} else {
+    const LUA_DIRSEP = "/";
+    module.exports.LUA_DIRSEP = LUA_DIRSEP;
+
+    const LUA_ROOT = "/usr/local/";
+    module.exports.LUA_ROOT = LUA_ROOT;
+    const LUA_ROOT2 = "/usr/";
+
+    const LUA_LDIR = LUA_ROOT + "share/lua/" + LUA_VDIR + "/";
+    const LUA_LDIR2 = LUA_ROOT2 + "share/lua/" + LUA_VDIR + "/";
+    module.exports.LUA_LDIR = LUA_LDIR;
+
+    const LUA_JSDIR = LUA_ROOT + "share/lua/" + LUA_VDIR + "/";
+    module.exports.LUA_JSDIR = LUA_JSDIR;
+    const LUA_JSDIR2 = LUA_ROOT2 + "share/lua/" + LUA_VDIR + "/";
+
+    const LUA_PATH_DEFAULT = to_luastring(
+        LUA_LDIR + "?.lua;" + LUA_LDIR + "?/init.lua;" +
+        LUA_LDIR2 + "?.lua;" + LUA_LDIR2 + "?/init.lua;" +
+        LUA_JSDIR + "?.lua;" + LUA_JSDIR + "?/init.lua;" +
+        LUA_JSDIR2 + "?.lua;" + LUA_JSDIR2 + "?/init.lua;" +
+        "./?.lua;./?/init.lua"
+    );
+    module.exports.LUA_PATH_DEFAULT = LUA_PATH_DEFAULT;
+
+    const LUA_JSPATH_DEFAULT = to_luastring(
+        LUA_JSDIR + "?.js;" + LUA_JSDIR + "loadall.js;" +
+        LUA_JSDIR2 + "?.js;" + LUA_JSDIR2 + "loadall.js;" +
+        "./?.js"
+    );
+    module.exports.LUA_JSPATH_DEFAULT = LUA_JSPATH_DEFAULT;
+}
+
 /*
 @@ LUA_COMPAT_FLOATSTRING makes Lua format integral floats without a
 @@ a float mark ('.0').
