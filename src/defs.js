@@ -245,9 +245,6 @@ const LUA_AUTHORS             = "R. Ierusalimschy, L. H. de Figueiredo, W. Celes
 
 const LUA_VERSUFFIX           = "_" + LUA_VERSION_MAJOR + "_" + LUA_VERSION_MINOR;
 
-const LUA_INIT_VAR            = "LUA_INIT";
-const LUA_INITVARVERSION      = LUA_INIT_VAR + LUA_VERSUFFIX;
-
 const thread_status = {
     LUA_OK:        0,
     LUA_YIELD:     1,
@@ -477,8 +474,6 @@ module.exports.LUA_HOOKCOUNT           = LUA_HOOKCOUNT;
 module.exports.LUA_HOOKLINE            = LUA_HOOKLINE;
 module.exports.LUA_HOOKRET             = LUA_HOOKRET;
 module.exports.LUA_HOOKTAILCALL        = LUA_HOOKTAILCALL;
-module.exports.LUA_INITVARVERSION      = LUA_INITVARVERSION;
-module.exports.LUA_INIT_VAR            = LUA_INIT_VAR;
 module.exports.LUA_MASKCALL            = LUA_MASKCALL;
 module.exports.LUA_MASKCOUNT           = LUA_MASKCOUNT;
 module.exports.LUA_MASKLINE            = LUA_MASKLINE;
