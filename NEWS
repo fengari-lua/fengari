@@ -1,0 +1,15 @@
+UNRELEASED
+
+  - Fengari core implements Lua 5.3 in ES6
+  - Implements the Lua C API
+  - Lua standard library implemented on top of "C" API
+  - Works in node.js
+  - Works in browsers (including IE11+, Safari 8+, Chrome, Firefox and Edge)
+  - Lua test suite ported to JavaScript and passes (excluding items below)
+  - Known incompatability: garbage collector cannot be controlled
+  - Known incompatability: __gc not respected
+  - Known incompatability: __mode not respected
+  - Known incompatability: io library not available in browsers
+  - Known incompatability: io library unable to open new files
+  - Known incompatability: io library read functionality is not implemented
+  - Known incompatability: some os library functions are not implemented
