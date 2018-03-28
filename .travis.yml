@@ -13,7 +13,6 @@ install:
 
 script:
     - yarn lint
-    - yarn build
     - FENGARICONF='{"LUAI_MAXSTACK":100000}' travis_wait yarn test
 
 notifications:

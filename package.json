@@ -8,7 +8,6 @@
     "test": "tests"
   },
   "scripts": {
-    "build": "webpack",
     "lint": "eslint src/ tests/",
     "test": "tape tests/*.js tests/test-suite/*.js | faucet"
   },
@@ -30,13 +29,9 @@
   },
   "homepage": "https://github.com/fengari-lua/fengari#readme",
   "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-loader": "^7.1.1",
-    "babel-preset-env": "^1.6.1",
     "eslint": "^4.17.0",
     "faucet": "^0.0.1",
-    "tape": "^4.8.0",
-    "webpack": "^3.10.0"
+    "tape": "^4.8.0"
   },
   "dependencies": {
     "readline-sync": "^1.4.7",
