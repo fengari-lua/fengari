@@ -29,12 +29,12 @@
   },
   "homepage": "https://github.com/fengari-lua/fengari#readme",
   "devDependencies": {
-    "eslint": "^4.17.0",
+    "eslint": "^4.19.1",
     "faucet": "^0.0.1",
-    "tape": "^4.8.0"
+    "tape": "^4.9.0"
   },
   "dependencies": {
-    "readline-sync": "^1.4.7",
+    "readline-sync": "^1.4.9",
     "sprintf-js": "^1.1.1",
     "strftime": "^0.10.0",
     "tmp": "^0.0.33"
