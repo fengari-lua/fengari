@@ -243,8 +243,6 @@ const LUA_RELEASE             = LUA_VERSION + "." + LUA_VERSION_RELEASE;
 const LUA_COPYRIGHT           = LUA_RELEASE + "  Copyright (C) 1994-2017 Lua.org, PUC-Rio";
 const LUA_AUTHORS             = "R. Ierusalimschy, L. H. de Figueiredo, W. Celes";
 
-const LUA_VERSUFFIX           = "_" + LUA_VERSION_MAJOR + "_" + LUA_VERSION_MINOR;
-
 const thread_status = {
     LUA_OK:        0,
     LUA_YIELD:     1,
@@ -508,7 +506,6 @@ module.exports.LUA_VERSION_MAJOR       = LUA_VERSION_MAJOR;
 module.exports.LUA_VERSION_MINOR       = LUA_VERSION_MINOR;
 module.exports.LUA_VERSION_NUM         = LUA_VERSION_NUM;
 module.exports.LUA_VERSION_RELEASE     = LUA_VERSION_RELEASE;
-module.exports.LUA_VERSUFFIX           = LUA_VERSUFFIX;
 module.exports.constant_types          = constant_types;
 module.exports.lua_Debug               = lua_Debug;
 module.exports.lua_upvalueindex        = lua_upvalueindex;

@@ -11,7 +11,6 @@ const {
     LUA_REGISTRYINDEX,
     LUA_TNIL,
     LUA_TTABLE,
-    LUA_VERSUFFIX,
     lua_callk,
     lua_createtable,
     lua_getfield,
@@ -62,6 +61,7 @@ const {
     luaL_pushresult,
     luaL_setfuncs
 } = require('./lauxlib.js');
+const lualib = require('./lualib.js');
 const {
     luastring_indexOf,
     to_jsstring,
@@ -281,7 +281,7 @@ const env = (function() {
 ** Set a path
 */
 const setpath = function(L, fieldname, envname, dft) {
-    let nver = `${envname}${LUA_VERSUFFIX}`;
+    let nver = `${envname}${lualib.LUA_VERSUFFIX}`;
     lua_pushstring(L, to_luastring(nver));
     let path = env[nver];  /* use versioned name */
     if (path === undefined)  /* no environment variable? */
