@@ -58,6 +58,8 @@ The JS number type is always a double, and hence cannot accurately represent int
 
 In the browser `require` and `package.loadlib` try to find a file by making synchronous XHR requests.
 
+`require` has been extended to allow searchers to yield.
+
 
 ### _Missing_ features
 
