@@ -72,6 +72,7 @@ const {
     luaL_where
 } = require('./lauxlib.js');
 const {
+    FENGARI_VERSION_NUM,
     to_jsstring,
     to_luastring
 } = require("./fengaricore.js");
@@ -496,6 +497,9 @@ const luaopen_base = function(L) {
     /* set global _VERSION */
     lua_pushliteral(L, LUA_VERSION);
     lua_setfield(L, -2, to_luastring("_VERSION"));
+    /* set global _FENGARI_VERSION_NUM */
+    lua_pushinteger(L, FENGARI_VERSION_NUM);
+    lua_setfield(L, -2, to_luastring("_FENGARI_VERSION_NUM"));
     return 1;
 };
 
