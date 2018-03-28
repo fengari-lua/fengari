@@ -1,15 +1,19 @@
-language: node
+sudo: false
+dist: trusty
+language: node_js
 
 cache: yarn
 
-before_install:
-    - nvm install node
-    - export NODE=$(nvm which node)
-    - export NPM=${NODE%node}npm
-    - $NPM install -g yarn
+matrix:
+  include:
+    - node_js: 8
+    - node_js: node
 
-install:
-    - yarn
+before_install:
+  - 'if [[ `npm -v` != 5* ]]; then npm i -g npm@^5.0.0; fi'
+  - nvm --version
+  - node --version
+  - npm --version
 
 script:
     - yarn lint
