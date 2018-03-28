@@ -84,6 +84,11 @@ In the browser `require` and `package.loadlib` try to find a file by making sync
 - `luaL_fileresult` takes an extra argument: an error object. The error object should have a field `errno`.
 
 
+### Configuring
+
+Some luaconf options can be chosen at library load time. Fengari looks for `process.env.FENGARICONF` and if it exists, parses it as a JSON string.
+
+
 ## Extensions
 
 ### `dv = lua_todataview(L, idx)`
