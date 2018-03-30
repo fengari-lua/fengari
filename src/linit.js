@@ -38,3 +38,7 @@ loadedlibs[lualib.LUA_UTF8LIBNAME] = luaopen_utf8;
 loadedlibs[lualib.LUA_DBLIBNAME] = luaopen_debug;
 if (typeof process !== "undefined")
     loadedlibs[lualib.LUA_IOLIBNAME] = require('./liolib.js').luaopen_io;
+
+/* Extension: fengari library */
+const { luaopen_fengari } = require('./fengarilib.js');
+loadedlibs[lualib.LUA_FENGARILIBNAME] = luaopen_fengari;

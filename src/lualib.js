@@ -52,5 +52,9 @@ const LUA_LOADLIBNAME = "package";
 module.exports.LUA_LOADLIBNAME = LUA_LOADLIBNAME;
 module.exports.luaopen_package = require("./loadlib.js").luaopen_package;
 
+const LUA_FENGARILIBNAME = "fengari";
+module.exports.LUA_FENGARILIBNAME = LUA_FENGARILIBNAME;
+module.exports.luaopen_fengari = require("./fengarilib.js").luaopen_fengari;
+
 const linit = require('./linit.js');
 module.exports.luaL_openlibs = linit.luaL_openlibs;
