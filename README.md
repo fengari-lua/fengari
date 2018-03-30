@@ -132,6 +132,22 @@ p(L);
 ````
 
 
+### `fengari` library
+
+A library containing metadata about the fengari release.
+
+  - `AUTHORS`
+  - `COPYRIGHT`
+  - `RELEASE`
+  - `VERSION`
+  - `VERSION_MAJOR`
+  - `VERSION_MINOR`
+  - `VERSION_NUM`
+  - `VERSION_RELEASE`
+
+This library is automatically loaded by `luaL_openlibs` into the global `"fengari"`.
+
+
 ## NYI
 
 - `io.input()`: partially implemented
