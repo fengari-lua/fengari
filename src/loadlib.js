@@ -361,8 +361,8 @@ const ll_searchpath = function(L) {
         L,
         luaL_checkstring(L, 1),
         luaL_checkstring(L, 2),
-        luaL_optstring(L, 3, to_luastring(".")),
-        luaL_optstring(L, 4, to_luastring(LUA_DIRSEP))
+        luaL_optstring(L, 3, "."),
+        luaL_optstring(L, 4, LUA_DIRSEP)
     );
     if (f !== null) return 1;
     else {  /* error message is on top of the stack */

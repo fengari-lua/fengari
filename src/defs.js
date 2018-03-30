@@ -224,7 +224,13 @@ const to_luastring = function(str, cache) {
 };
 
 const from_userstring = function(str) {
-    if (!is_luastring(str)) throw new TypeError("expects an array of bytes");
+    if (!is_luastring(str)) {
+        if (typeof str === "string") {
+            str = to_luastring(str);
+        } else {
+            throw new TypeError("expects an array of bytes or javascript string");
+        }
+    }
     return str;
 };
 

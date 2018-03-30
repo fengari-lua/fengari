@@ -105,7 +105,7 @@ const tinsert = function(L) {
             break;
         case 3: {
             pos = luaL_checkinteger(L, 2);  /* 2nd argument is the position */
-            luaL_argcheck(L, 1 <= pos && pos <= e, 2, to_luastring("position out of bounds", true));
+            luaL_argcheck(L, 1 <= pos && pos <= e, 2, "position out of bounds");
             for (let i = e; i > pos; i--) {  /* move up elements */
                 lua_geti(L, 1, i - 1);
                 lua_seti(L, 1, i);  /* t[i] = t[i - 1] */
@@ -113,7 +113,7 @@ const tinsert = function(L) {
             break;
         }
         default: {
-            return luaL_error(L, to_luastring("wrong number of arguments to 'insert'", true));
+            return luaL_error(L, "wrong number of arguments to 'insert'");
         }
     }
 
@@ -125,7 +125,7 @@ const tremove = function(L) {
     let size = aux_getn(L, 1, TAB_RW);
     let pos = luaL_optinteger(L, 2, size);
     if (pos !== size)  /* validate 'pos' if given */
-        luaL_argcheck(L, 1 <= pos && pos <= size + 1, 1, to_luastring("position out of bounds", true));
+        luaL_argcheck(L, 1 <= pos && pos <= size + 1, 1, "position out of bounds");
     lua_geti(L, 1, pos);  /* result = t[pos] */
     for (; pos < size; pos++) {
         lua_geti(L, 1, pos + 1);
@@ -150,9 +150,9 @@ const tmove = function(L) {
     checktab(L, 1, TAB_R);
     checktab(L, tt, TAB_W);
     if (e >= f) {  /* otherwise, nothing to move */
-        luaL_argcheck(L, f > 0 || e < LUA_MAXINTEGER + f, 3, to_luastring("too many elements to move", true));
+        luaL_argcheck(L, f > 0 || e < LUA_MAXINTEGER + f, 3, "too many elements to move");
         let n = e - f + 1;  /* number of elements to move */
-        luaL_argcheck(L, t <= LUA_MAXINTEGER - n + 1, 4, to_luastring("destination wrap around", true));
+        luaL_argcheck(L, t <= LUA_MAXINTEGER - n + 1, 4, "destination wrap around");
 
         if (t > e || t <= f || (tt !== 1 && lua_compare(L, 1, tt, LUA_OPEQ) !== 1)) {
             for (let i = 0; i < n; i++) {
@@ -173,7 +173,7 @@ const tmove = function(L) {
 
 const tconcat = function(L) {
     let last = aux_getn(L, 1, TAB_R);
-    let sep = luaL_optlstring(L, 2, to_luastring(""));
+    let sep = luaL_optlstring(L, 2, "");
     let lsep = sep.length;
     let i = luaL_optinteger(L, 3, 1);
     last = luaL_optinteger(L, 4, last);
@@ -335,7 +335,7 @@ const auxsort = function(L, lo, up, rnd) {
 const sort = function(L) {
     let n = aux_getn(L, 1, TAB_RW);
     if (n > 1) {  /* non-trivial interval? */
-        luaL_argcheck(L, n < LUA_MAXINTEGER, 1, to_luastring("array too big", true));
+        luaL_argcheck(L, n < LUA_MAXINTEGER, 1, "array too big");
         if (!lua_isnoneornil(L, 2))  /* is there a 2nd argument? */
             luaL_checktype(L, 2, LUA_TFUNCTION);  /* must be a function */
         lua_settop(L, 2);  /* make sure there are two arguments */

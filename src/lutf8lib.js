@@ -85,8 +85,8 @@ const utflen = function(L) {
     let posi = u_posrelat(luaL_optinteger(L, 2, 1), len);
     let posj = u_posrelat(luaL_optinteger(L, 3, -1), len);
 
-    luaL_argcheck(L, 1 <= posi && --posi <= len, 2, to_luastring("initial position out of string"));
-    luaL_argcheck(L, --posj < len, 3, to_luastring("final position out of string"));
+    luaL_argcheck(L, 1 <= posi && --posi <= len, 2, "initial position out of string");
+    luaL_argcheck(L, --posj < len, 3, "final position out of string");
 
     while (posi <= posj) {
         let dec = utf8_decode(s, posi);
@@ -105,7 +105,7 @@ const utflen = function(L) {
 const p_U = to_luastring("%U");
 const pushutfchar = function(L, arg) {
     let code = luaL_checkinteger(L, arg);
-    luaL_argcheck(L, 0 <= code && code <= MAXUNICODE, arg, to_luastring("value out of range", true));
+    luaL_argcheck(L, 0 <= code && code <= MAXUNICODE, arg, "value out of range");
     lua_pushfstring(L, p_U, code);
 };
 
@@ -138,14 +138,14 @@ const byteoffset = function(L) {
     let posi = n >= 0 ? 1 : s.length + 1;
     posi = u_posrelat(luaL_optinteger(L, 3, posi), s.length);
 
-    luaL_argcheck(L, 1 <= posi && --posi <= s.length, 3, to_luastring("position out of range", true));
+    luaL_argcheck(L, 1 <= posi && --posi <= s.length, 3, "position out of range");
 
     if (n === 0) {
         /* find beginning of current byte sequence */
         while (posi > 0 && iscont(s[posi])) posi--;
     } else {
         if (iscont(s[posi]))
-            luaL_error(L, to_luastring("initial position is a continuation byte", true));
+            luaL_error(L, "initial position is a continuation byte");
 
         if (n < 0) {
             while (n < 0 && posi > 0) {  /* move back */
@@ -182,19 +182,19 @@ const codepoint = function(L) {
     let posi = u_posrelat(luaL_optinteger(L, 2, 1), s.length);
     let pose = u_posrelat(luaL_optinteger(L, 3, posi), s.length);
 
-    luaL_argcheck(L, posi >= 1, 2, to_luastring("out of range", true));
-    luaL_argcheck(L, pose <= s.length, 3, to_luastring("out of range", true));
+    luaL_argcheck(L, posi >= 1, 2, "out of range");
+    luaL_argcheck(L, pose <= s.length, 3, "out of range");
 
     if (posi > pose) return 0;  /* empty interval; return no values */
     if (pose - posi >= Number.MAX_SAFE_INTEGER)
-        return luaL_error(L, to_luastring("string slice too long", true));
+        return luaL_error(L, "string slice too long");
     let n = (pose - posi) + 1;
-    luaL_checkstack(L, n, to_luastring("string slice too long", true));
+    luaL_checkstack(L, n, "string slice too long");
     n = 0;
     for (posi -= 1; posi < pose;) {
         let dec = utf8_decode(s, posi);
         if (dec === null)
-            return luaL_error(L, to_luastring("invalid UTF-8 code", true));
+            return luaL_error(L, "invalid UTF-8 code");
         lua_pushinteger(L, dec.code);
         posi = dec.pos;
         n++;

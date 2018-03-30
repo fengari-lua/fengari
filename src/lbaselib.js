@@ -156,7 +156,7 @@ const luaB_getmetatable = function(L) {
 const luaB_setmetatable = function(L) {
     let t = lua_type(L, 2);
     luaL_checktype(L, 1, LUA_TTABLE);
-    luaL_argcheck(L, t === LUA_TNIL || t === LUA_TTABLE, 2, to_luastring("nil or table expected", true));
+    luaL_argcheck(L, t === LUA_TNIL || t === LUA_TTABLE, 2, "nil or table expected");
     if (luaL_getmetafield(L, 1, to_luastring("__metatable", true)) !== LUA_TNIL)
         return luaL_error(L, to_luastring("cannot change a protected metatable"));
     lua_settop(L, 2);
@@ -173,7 +173,7 @@ const luaB_rawequal = function(L) {
 
 const luaB_rawlen = function(L) {
     let t = lua_type(L, 1);
-    luaL_argcheck(L, t === LUA_TTABLE || t === LUA_TSTRING, 1, to_luastring("table or string expected", true));
+    luaL_argcheck(L, t === LUA_TTABLE || t === LUA_TSTRING, 1, "table or string expected");
     lua_pushinteger(L, lua_rawlen(L, 1));
     return 1;
 };
@@ -201,14 +201,14 @@ const opts = [
     "isrunning"
 ].map((e) => to_luastring(e));
 const luaB_collectgarbage = function(L) {
-    luaL_checkoption(L, 1, to_luastring("collect"), opts);
+    luaL_checkoption(L, 1, "collect", opts);
     luaL_optinteger(L, 2, 0);
     luaL_error(L, to_luastring("lua_gc not implemented"));
 };
 
 const luaB_type = function(L) {
     let t = lua_type(L, 1);
-    luaL_argcheck(L, t !== LUA_TNONE, 1, to_luastring("value expected", true));
+    luaL_argcheck(L, t !== LUA_TNONE, 1, "value expected");
     lua_pushstring(L, lua_typename(L, t));
     return 1;
 };
@@ -294,7 +294,7 @@ const luaB_tonumber = function(L) {
         let base = luaL_checkinteger(L, 2);
         luaL_checktype(L, 1, LUA_TSTRING);  /* no numbers as strings */
         let s = lua_tostring(L, 1);
-        luaL_argcheck(L, 2 <= base && base <= 36, 2, to_luastring("base out of range", true));
+        luaL_argcheck(L, 2 <= base && base <= 36, 2, "base out of range");
         let n = b_str2int(s, base);
         if (n !== null) {
             lua_pushinteger(L, n);
@@ -338,7 +338,7 @@ const luaB_select = function(L) {
         let i = luaL_checkinteger(L, 1);
         if (i < 0) i = n + i;
         else if (i > n) i = n;
-        luaL_argcheck(L, 1 <= i, 1, to_luastring("index out of range", true));
+        luaL_argcheck(L, 1 <= i, 1, "index out of range");
         return n - i;
     }
 };
@@ -425,14 +425,14 @@ const generic_reader = function(L, ud) {
 
 const luaB_load = function(L) {
     let s = lua_tostring(L, 1);
-    let mode = luaL_optstring(L, 3, to_luastring("bt", true));
+    let mode = luaL_optstring(L, 3, "bt");
     let env = !lua_isnone(L, 4) ? 4 : 0;  /* 'env' index or 0 if no 'env' */
     let status;
     if (s !== null) {  /* loading a string? */
         let chunkname = luaL_optstring(L, 2, s);
         status = luaL_loadbufferx(L, s, s.length, chunkname, mode);
     } else {  /* loading from a reader function */
-        let chunkname = luaL_optstring(L, 2, to_luastring("=(load)", true));
+        let chunkname = luaL_optstring(L, 2, "=(load)");
         luaL_checktype(L, 1, LUA_TFUNCTION);
         lua_settop(L, RESERVEDSLOT);  /* create reserved slot */
         status = lua_load(L, generic_reader, null, chunkname, mode);

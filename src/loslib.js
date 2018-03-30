@@ -130,7 +130,7 @@ const checkoption = function(L, conv, i, buff) {
 
 
 const os_date = function(L) {
-    let s = luaL_optlstring(L, 1, to_luastring("%c"));
+    let s = luaL_optlstring(L, 1, "%c");
     let t = luaL_opt(L, l_checktime, 2, new Date().getTime() / 1000) * 1000;
     let stm = new Date(t);
     let utc = false;
@@ -188,7 +188,7 @@ const os_time = function(L) {
 
 const l_checktime = function(L, arg) {
     let t = luaL_checkinteger(L, arg);
-    // luaL_argcheck(L, t, arg, to_luastring("time out-of-bounds"));
+    // luaL_argcheck(L, t, arg, "time out-of-bounds");
     return t;
 };
 

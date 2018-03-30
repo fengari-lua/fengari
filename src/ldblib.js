@@ -104,7 +104,7 @@ const db_getmetatable = function(L) {
 
 const db_setmetatable = function(L) {
     const t = lua_type(L, 2);
-    luaL_argcheck(L, t == LUA_TNIL || t == LUA_TTABLE, 2, to_luastring("nil or table expected", true));
+    luaL_argcheck(L, t == LUA_TNIL || t == LUA_TTABLE, 2, "nil or table expected");
     lua_settop(L, 2);
     lua_setmetatable(L, 1);
     return 1;  /* return 1st argument */
@@ -194,7 +194,7 @@ const db_getinfo = function(L) {
     let thread = getthread(L);
     let arg = thread.arg;
     let L1 = thread.thread;
-    let options = luaL_optstring(L, arg + 2, to_luastring("flnStu", true));
+    let options = luaL_optstring(L, arg + 2, "flnStu");
     checkstack(L, L1, 3);
     if (lua_isfunction(L, arg + 1)) {  /* info about a function? */
         options = lua_pushfstring(L, to_luastring(">%s"), options);  /* add '>' to 'options' */
@@ -208,7 +208,7 @@ const db_getinfo = function(L) {
     }
 
     if (!lua_getinfo(L1, options, ar))
-        luaL_argerror(L, arg + 2, to_luastring("invalid option", true));
+        luaL_argerror(L, arg + 2, "invalid option");
     lua_newtable(L);  /* table to collect results */
     if (luastring_indexOf(options, 83 /* 'S'.charCodeAt(0) */) > -1) {
         settabss(L, to_luastring("source", true), ar.source);
@@ -250,7 +250,7 @@ const db_getlocal = function(L) {
     } else {  /* stack-level argument */
         let level = luaL_checkinteger(L, arg + 1);
         if (!lua_getstack(L1, level, ar))  /* out of range? */
-            return luaL_argerror(L, arg+1, to_luastring("level out of range", true));
+            return luaL_argerror(L, arg+1, "level out of range");
         checkstack(L, L1, 1);
         let name = lua_getlocal(L1, ar, nvar);
         if (name) {
@@ -274,7 +274,7 @@ const db_setlocal = function(L) {
     let level = luaL_checkinteger(L, arg + 1);
     let nvar = luaL_checkinteger(L, arg + 2);
     if (!lua_getstack(L1, level, ar))  /* out of range? */
-        return luaL_argerror(L, arg + 1, to_luastring("level out of range", true));
+        return luaL_argerror(L, arg + 1, "level out of range");
     luaL_checkany(L, arg + 3);
     lua_settop(L, arg + 3);
     checkstack(L, L1, 1);
@@ -316,7 +316,7 @@ const db_setupvalue = function(L) {
 const checkupval = function(L, argf, argnup) {
     let nup = luaL_checkinteger(L, argnup);  /* upvalue index */
     luaL_checktype(L, argf, LUA_TFUNCTION);  /* closure */
-    luaL_argcheck(L, (lua_getupvalue(L, argf, nup) !== null), argnup, to_luastring("invalid upvalue index", true));
+    luaL_argcheck(L, (lua_getupvalue(L, argf, nup) !== null), argnup, "invalid upvalue index");
     return nup;
 };
 
@@ -329,8 +329,8 @@ const db_upvalueid = function(L) {
 const db_upvaluejoin = function(L) {
     let n1 = checkupval(L, 1, 2);
     let n2 = checkupval(L, 3, 4);
-    luaL_argcheck(L, !lua_iscfunction(L, 1), 1, to_luastring("Lua function expected", true));
-    luaL_argcheck(L, !lua_iscfunction(L, 3), 3, to_luastring("Lua function expected", true));
+    luaL_argcheck(L, !lua_iscfunction(L, 1), 1, "Lua function expected");
+    luaL_argcheck(L, !lua_iscfunction(L, 3), 3, "Lua function expected");
     lua_upvaluejoin(L, 1, n1, 3, n2);
     return 0;
 };

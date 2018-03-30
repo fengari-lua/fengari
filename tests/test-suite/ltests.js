@@ -559,7 +559,7 @@ const newstate = function(L) {
 
 const getstate = function(L) {
     let L1 = lua.lua_touserdata(L, 1);
-    lauxlib.luaL_argcheck(L, L1 !== null, 1, to_luastring("state expected", true));
+    lauxlib.luaL_argcheck(L, L1 !== null, 1, "state expected");
     return L1;
 };
 
@@ -678,7 +678,7 @@ const panicback = function(L) {
 const checkpanic = function(L) {
     let b = new Aux();
     let code = lauxlib.luaL_checkstring(L, 1);
-    b.paniccode = lauxlib.luaL_optstring(L, 2, to_luastring("", true));
+    b.paniccode = lauxlib.luaL_optstring(L, 2, "");
     b.L = L;
     let L1 = lua.lua_newstate();    /* create new state */
     if (L1 === null) {    /* error? */
@@ -758,7 +758,7 @@ const makeCfunc = function(L) {
 const coresume = function(L) {
     let status;
     let co = lua.lua_tothread(L, 1);
-    lauxlib.luaL_argcheck(L, co, 1, to_luastring("coroutine expected", true));
+    lauxlib.luaL_argcheck(L, co, 1, "coroutine expected");
     status = lua.lua_resume(co, L, 0);
     if (status != lua.LUA_OK && status !== lua.LUA_YIELD) {
         lua.lua_pushboolean(L, 0);
@@ -812,7 +812,7 @@ const buildop = function(p, pc) {
 
 const listcode = function(L) {
     lauxlib.luaL_argcheck(L, lua.lua_isfunction(L, 1) && !lua.lua_iscfunction(L, 1),
-        1, to_luastring("Lua function expected", true));
+        1, "Lua function expected");
     let p = obj_at(L, 1);
     lua.lua_newtable(L);
     setnameval(L, to_luastring("maxstack", true), p.maxstacksize);
@@ -828,7 +828,7 @@ const listcode = function(L) {
 const listk = function(L) {
     lauxlib.luaL_argcheck(L,
         lua.lua_isfunction(L, 1) && !lua.lua_iscfunction(L, 1),
-        1, to_luastring("Lua function expected"), true);
+        1, "Lua function expected");
     let p = obj_at(L, 1);
     lua.lua_createtable(L, p.k.length, 0);
     for (let i = 0; i < p.k.length; i++) {
