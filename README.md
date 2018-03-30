@@ -91,6 +91,11 @@ Some luaconf options can be chosen at library load time. Fengari looks for `proc
 
 ## Extensions
 
+### `_FENGARI_VERSION_NUM`
+
+A global containing the Fengari version as a number.
+
+
 ### `dv = lua_todataview(L, idx)`
 
 Equivalent to `lua_tolstring` but returns a [`DataView`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView) instead of a string.
