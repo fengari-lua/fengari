@@ -34,7 +34,6 @@ const {
     luaL_newlib,
     luaL_where
 } = require('./lauxlib.js');
-const { to_luastring } = require("./fengaricore.js");
 
 const getco = function(L) {
     let co = lua_tothread(L, 1);
