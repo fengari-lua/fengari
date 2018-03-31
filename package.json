@@ -9,6 +9,7 @@
   },
   "scripts": {
     "lint": "eslint src/ tests/",
+    "prepublishOnly": "git diff-index --quiet --cached HEAD -- && npm run lint && npm run test",
     "test": "tape tests/*.js tests/test-suite/*.js | faucet"
   },
   "repository": {
