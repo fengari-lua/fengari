@@ -1,4 +1,4 @@
-UNRELEASED
+0.1.0 - 2018-03-31
 
   - Fengari core implements Lua 5.3 in ES6
   - Implements the Lua C API
