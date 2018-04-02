@@ -176,7 +176,8 @@ test('math.log', function (t) {
 });
 
 
-test('math.exp', function (t) {
+/* Node.js 6 has incorrect results for Math.exp */
+(parseInt(process.versions.node) > 6 ? test : test.skip)('math.exp', function (t) {
     let luaCode = `
         return math.exp(10)
     `, L;
