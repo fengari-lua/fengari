@@ -1,7 +1,5 @@
 "use strict";
 
-const test       = require('tape');
-
 const lua     = require('../src/lua.js');
 const lauxlib = require('../src/lauxlib.js');
 const lualib  = require('../src/lualib.js');
@@ -9,202 +7,135 @@ const lstring = require("../src/lstring.js");
 const {to_luastring} = require("../src/fengaricore.js");
 
 // Roughly the same tests as test/lvm.js to cover all opcodes
-test('LOADK, RETURN', function (t) {
+test('LOADK, RETURN', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local a = "hello world"
         return a
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.strictEqual(
-        lua.lua_tojsstring(L, -1),
-        "hello world",
-        "Correct element(s) on the stack"
-    );
-
+    expect(lua.lua_tojsstring(L, -1)).toBe("hello world");
 });
 
 
-test('MOVE', function (t) {
+test('MOVE', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local a = "hello world"
         local b = a
         return b
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.strictEqual(
-        lua.lua_tojsstring(L, -1),
-        "hello world",
-        "Correct element(s) on the stack"
-    );
-
+    expect(lua.lua_tojsstring(L, -1)).toBe("hello world");
 });
 
 
-test('Binary op', function (t) {
+test('Binary op', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local a = 5
         local b = 10
         return a + b, a - b, a * b, a / b, a % b, a^b, a // b, a & b, a | b, a ~ b, a << b, a >> b
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.deepEqual(
-        L.stack.slice(L.top - 12, L.top).map(e => e.value),
-        [15, -5, 50, 0.5, 5, 9765625.0, 0, 0, 15, 15, 5120, 0],
-        "Program output is correct"
-    );
-
+    expect(L.stack.slice(L.top - 12, L.top).map(e => e.value))
+        .toEqual([15, -5, 50, 0.5, 5, 9765625.0, 0, 0, 15, 15, 5120, 0]);
 });
 
 
-test('Unary op, LOADBOOL', function (t) {
+test('Unary op, LOADBOOL', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local a = 5
         local b = false
         return -a, not b, ~a
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.deepEqual(
-        L.stack.slice(L.top - 3, L.top).map(e => e.value),
-        [-5, true, -6],
-        "Program output is correct"
-    );
+    expect(L.stack.slice(L.top - 3, L.top).map(e => e.value))
+        .toEqual([-5, true, -6]);
 });
 
 
-test('NEWTABLE', function (t) {
+test('NEWTABLE', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local a = {}
         return a
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.ok(
-        lua.lua_type(L, -1) === lua.LUA_TTABLE,
-        "Program output is correct"
-    );
+    expect(lua.lua_type(L, -1)).toBe(lua.LUA_TTABLE);
 });
 
 
-test('CALL', function (t) {
+test('CALL', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local f = function (a, b)
             return a + b
@@ -213,40 +144,26 @@ test('CALL', function (t) {
         local c = f(1, 2)
 
         return c
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.strictEqual(
-        lua.lua_tointeger(L, -1),
-        3,
-        "Program output is correct"
-    );
+    expect(lua.lua_tointeger(L, -1)).toBe(3);
 });
 
-test('Multiple return', function (t) {
+test('Multiple return', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local f = function (a, b)
             return a + b, a - b, a * b
@@ -259,320 +176,210 @@ test('Multiple return', function (t) {
         c, d, e = f(1,2)
 
         return c, d, e
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.deepEqual(
-        L.stack.slice(L.top - 3, L.top).map(e => e.value),
-        [3, -1, 2],
-        "Program output is correct"
-    );
+    expect(L.stack.slice(L.top - 3, L.top).map(e => e.value))
+        .toEqual([3, -1, 2]);
 });
 
 
-test('TAILCALL', function (t) {
+test('TAILCALL', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local f = function (a, b)
             return a + b
         end
 
         return f(1,2)
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.strictEqual(
-        lua.lua_tointeger(L, -1),
-        3,
-        "Program output is correct"
-    );
+    expect(lua.lua_tointeger(L, -1)).toBe(3);
 });
 
 
-test('VARARG', function (t) {
+test('VARARG', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local f = function (...)
             return ...
         end
 
         return f(1,2,3)
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.deepEqual(
-        L.stack.slice(L.top - 3, L.top).map(e => e.value),
-        [1, 2, 3],
-        "Program output is correct"
-    );
+    expect(L.stack.slice(L.top - 3, L.top).map(e => e.value))
+        .toEqual([1, 2, 3]);
 });
 
 
-test('LE, JMP', function (t) {
+test('LE, JMP', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local a, b = 1, 1
 
         return a >= b
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.strictEqual(
-        lua.lua_toboolean(L, -1),
-        true,
-        "Program output is correct"
-    );
+    expect(lua.lua_toboolean(L, -1)).toBe(true);
 });
 
 
-test('LT', function (t) {
+test('LT', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local a, b = 1, 1
 
         return a > b
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.strictEqual(
-        lua.lua_toboolean(L, -1),
-        false,
-        "Program output is correct"
-    );
+    expect(lua.lua_toboolean(L, -1)).toBe(false);
 });
 
 
-test('EQ', function (t) {
+test('EQ', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local a, b = 1, 1
 
         return a == b
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.strictEqual(
-        lua.lua_toboolean(L, -1),
-        true,
-        "Program output is correct"
-    );
+    expect(lua.lua_toboolean(L, -1)).toBe(true);
 });
 
 
-test('TESTSET (and)', function (t) {
+test('TESTSET (and)', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local a = true
         local b = "hello"
 
         return a and b
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.strictEqual(
-        lua.lua_tojsstring(L, -1),
-        "hello",
-        "Program output is correct"
-    );
+    expect(lua.lua_tojsstring(L, -1)).toBe("hello");
 });
 
 
-test('TESTSET (or)', function (t) {
+test('TESTSET (or)', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local a = false
         local b = "hello"
 
         return a or b
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.strictEqual(
-        lua.lua_tojsstring(L, -1),
-        "hello",
-        "Program output is correct"
-    );
+    expect(lua.lua_tojsstring(L, -1)).toBe("hello");
 });
 
 
-test('TEST (false)', function (t) {
+test('TEST (false)', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local a = false
         local b = "hello"
@@ -582,41 +389,27 @@ test('TEST (false)', function (t) {
         end
 
         return "goodbye"
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.strictEqual(
-        lua.lua_tojsstring(L, -1),
-        "goodbye",
-        "Program output is correct"
-    );
+    expect(lua.lua_tojsstring(L, -1)).toBe("goodbye");
 });
 
 
-test('FORPREP, FORLOOP (int)', function (t) {
+test('FORPREP, FORLOOP (int)', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local total = 0
 
@@ -625,41 +418,27 @@ test('FORPREP, FORLOOP (int)', function (t) {
         end
 
         return total
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.strictEqual(
-        lua.lua_tointeger(L, -1),
-        55,
-        "Program output is correct"
-    );
+    expect(lua.lua_tointeger(L, -1)).toBe(55);
 });
 
 
-test('FORPREP, FORLOOP (float)', function (t) {
+test('FORPREP, FORLOOP (float)', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local total = 0
 
@@ -668,41 +447,27 @@ test('FORPREP, FORLOOP (float)', function (t) {
         end
 
         return total
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.strictEqual(
-        lua.lua_tonumber(L, -1),
-        60.5,
-        "Program output is correct"
-    );
+    expect(lua.lua_tonumber(L, -1)).toBe(60.5);
 });
 
 
-test('SETTABLE, GETTABLE', function (t) {
+test('SETTABLE, GETTABLE', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local t = {}
 
@@ -710,47 +475,30 @@ test('SETTABLE, GETTABLE', function (t) {
         t["two"] = "world"
 
         return t
-    `, L;
-
-    t.plan(4);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.strictEqual(
-        lua.lua_topointer(L, -1).strong.get(1).value.jsstring(),
-        "hello",
-        "Program output is correct"
-    );
-
-    t.strictEqual(
-        lua.lua_topointer(L, -1).strong.get(lstring.luaS_hash(to_luastring("two"))).value.jsstring(),
-        "world",
-        "Program output is correct"
-    );
+    expect(lua.lua_topointer(L, -1).strong.get(1).value.jsstring())
+        .toBe("hello");
+    expect(lua.lua_topointer(L, -1).strong.get(lstring.luaS_hash(to_luastring("two"))).value.jsstring())
+        .toBe("world");
 });
 
 
-test('SETUPVAL, GETUPVAL', function (t) {
+test('SETUPVAL, GETUPVAL', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local up = "hello"
 
@@ -761,41 +509,27 @@ test('SETUPVAL, GETUPVAL', function (t) {
         end
 
         return f()
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.strictEqual(
-        lua.lua_tojsstring(L, -1),
-        "world",
-        "Program output is correct"
-    );
+    expect(lua.lua_tojsstring(L, -1)).toBe("world");
 });
 
 
-test('SETTABUP, GETTABUP', function (t) {
+test('SETTABUP, GETTABUP', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         t = {}
 
@@ -803,47 +537,30 @@ test('SETTABUP, GETTABUP', function (t) {
         t["two"] = "world"
 
         return t
-    `, L;
-
-    t.plan(4);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.strictEqual(
-        lua.lua_topointer(L, -1).strong.get(1).value.jsstring(),
-        "hello",
-        "Program output is correct"
-    );
-
-    t.strictEqual(
-        lua.lua_topointer(L, -1).strong.get(lstring.luaS_hash(to_luastring("two"))).value.jsstring(),
-        "world",
-        "Program output is correct"
-    );
+    expect(lua.lua_topointer(L, -1).strong.get(1).value.jsstring())
+        .toBe("hello");
+    expect(lua.lua_topointer(L, -1).strong.get(lstring.luaS_hash(to_luastring("two"))).value.jsstring())
+        .toBe("world");
 });
 
 
-test('SELF', function (t) {
+test('SELF', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local t = {}
 
@@ -853,80 +570,53 @@ test('SELF', function (t) {
         end
 
         return t:get()
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.strictEqual(
-        lua.lua_tojsstring(L, -1),
-        "hello",
-        "Program output is correct"
-    );
+    expect(lua.lua_tojsstring(L, -1)).toBe("hello");
 });
 
 
-test('SETLIST', function (t) {
+test('SETLIST', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local t = {1, 2, 3, 4, 5, 6, 7, 8, 9}
 
         return t
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.deepEqual(
-        [...lua.lua_topointer(L, -1).strong.entries()].map(e => e[1].value.value).sort(),
-        [1, 2, 3, 4, 5, 6, 7, 8, 9],
-        "Program output is correct"
-    );
+    expect([...lua.lua_topointer(L, -1).strong.entries()].map(e => e[1].value.value).sort())
+        .toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
 });
 
 
-test('Variable SETLIST', function (t) {
+test('Variable SETLIST', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local a = function ()
             return 6, 7, 8, 9
@@ -935,79 +625,53 @@ test('Variable SETLIST', function (t) {
         local t = {1, 2, 3, 4, 5, a()}
 
         return t
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.deepEqual(
-        [...lua.lua_topointer(L, -1).strong.entries()].map(e => e[1].value.value).sort(),
-        [1, 2, 3, 4, 5, 6, 7, 8, 9],
-        "Program output is correct"
-    );
+    expect([...lua.lua_topointer(L, -1).strong.entries()].map(e => e[1].value.value).sort())
+        .toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
 });
 
-test('Long SETLIST', function (t) {
+test('Long SETLIST', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local t = {1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5}
 
         return t
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.deepEqual(
-        [...lua.lua_topointer(L, -1).strong.entries()].map(e => e[1].value.value).reverse(),
-        [1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5],
-        "Program output is correct"
-    );
+    expect([...lua.lua_topointer(L, -1).strong.entries()].map(e => e[1].value.value).reverse())
+        .toEqual([1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5]);
 });
 
 
-test('TFORCALL, TFORLOOP', function (t) {
+test('TFORCALL, TFORLOOP', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local iterator = function (t, i)
             i = i + 1
@@ -1028,125 +692,70 @@ test('TFORCALL, TFORLOOP', function (t) {
         end
 
         return r
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.strictEqual(
-        lua.lua_tonumber(L, -1),
-        6,
-        "Program output is correct"
-    );
+    expect(lua.lua_tonumber(L, -1)).toBe(6);
 });
 
 
-test('LEN', function (t) {
+test('LEN', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local t = {[10000] = "foo"}
         local t2 = {1, 2, 3}
         local s = "hello"
 
         return #t, #t2, #s
-    `, L;
-
-    t.plan(5);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.strictEqual(
-        lua.lua_tonumber(L, -1),
-        5,
-        "Program output is correct"
-    );
-
-    t.strictEqual(
-        lua.lua_tonumber(L, -2),
-        3,
-        "Program output is correct"
-    );
-
-    t.strictEqual(
-        lua.lua_tonumber(L, -3),
-        0,
-        "Program output is correct"
-    );
+    expect(lua.lua_tonumber(L, -1)).toBe(5);
+    expect(lua.lua_tonumber(L, -2)).toBe(3);
+    expect(lua.lua_tonumber(L, -3)).toBe(0);
 });
 
 
-test('CONCAT', function (t) {
+test('CONCAT', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         return "hello " .. 2 .. " you"
-    `, L;
-
-    t.plan(3);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
+    `;
+    {
         lualib.luaL_openlibs(L);
-
         let reader = function(L, data) {
             let code = luaCode ? luaCode.trim() : null;
             luaCode = null;
             return code ? to_luastring(code) : null;
         };
-
         lua.lua_load(L, reader, luaCode, to_luastring("test"), to_luastring("text"));
 
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
         lua.lua_call(L, 0, -1);
+    }
 
-    }, "Lua program ran without error");
-
-    t.strictEqual(
-        lua.lua_tojsstring(L, -1),
-        "hello 2 you",
-        "Program output is correct"
-    );
+    expect(lua.lua_tojsstring(L, -1)).toBe("hello 2 you");
 });

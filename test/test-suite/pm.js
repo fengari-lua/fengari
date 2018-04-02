@@ -210,7 +210,7 @@ test("[test-suite] pm: classes", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadfile(L, to_luastring("tests/test-suite/pm-classes.lua"));
+        lauxlib.luaL_loadfile(L, to_luastring("test/test-suite/pm-classes.lua"));
 
     }, "Lua program loaded without error");
 
@@ -234,7 +234,7 @@ test("[test-suite] pm: gsub", function (t) {
 
         lualib.luaL_openlibs(L);
 
-        lauxlib.luaL_loadfile(L, to_luastring("tests/test-suite/pm-gsub.lua"));
+        lauxlib.luaL_loadfile(L, to_luastring("test/test-suite/pm-gsub.lua"));
 
     }, "Lua program loaded without error");
 
