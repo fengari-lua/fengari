@@ -110,7 +110,7 @@ test('luaL_loadbuffer', function (t) {
 // TODO: test stdin
 test('loadfile', function (t) {
     let luaCode = `
-        local f = loadfile("tests/loadfile-test.lua")
+        local f = assert(loadfile("tests/loadfile-test.lua"))
         return f()
     `, L;
 
@@ -142,7 +142,7 @@ test('loadfile', function (t) {
 
 test('loadfile (binary)', function (t) {
     let luaCode = `
-        local f = loadfile("tests/loadfile-test.bc")
+        local f = assert(loadfile("tests/loadfile-test.bc"))
         return f()
     `, L;
 
