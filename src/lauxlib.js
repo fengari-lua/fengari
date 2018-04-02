@@ -910,7 +910,7 @@ if (typeof process === "undefined") {
     };
 
     getc = function(lf) {
-        let b = new Buffer(1);
+        let b = Buffer.alloc(1);
         let bytes;
         try {
             bytes = fs.readSync(lf.f, b, 0, 1, lf.pos);
