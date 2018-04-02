@@ -810,17 +810,17 @@ const skipcomment = function(lf) {
 
 let luaL_loadfilex;
 
-class LoadF {
-    constructor() {
-        this.n = NaN;  /* number of pre-read characters */
-        this.f = null;  /* file being read */
-        this.buff = new Uint8Array(1024);  /* area for reading file */
-        this.pos = 0;  /* current position in file */
-        this.err = void 0;
-    }
-}
-
 if (typeof process === "undefined") {
+    class LoadF {
+        constructor() {
+            this.n = NaN;  /* number of pre-read characters */
+            this.f = null;  /* file being read */
+            this.buff = new Uint8Array(1024);  /* area for reading file */
+            this.pos = 0;  /* current position in file */
+            this.err = void 0;
+        }
+    }
+
     const getF = function(L, ud) {
         let lf = ud;
 
@@ -888,6 +888,16 @@ if (typeof process === "undefined") {
     };
 } else {
     const fs = require('fs');
+
+    class LoadF {
+        constructor() {
+            this.n = NaN;  /* number of pre-read characters */
+            this.f = null;  /* file being read */
+            this.buff = Buffer.alloc(1024);  /* area for reading file */
+            this.pos = 0;  /* current position in file */
+            this.err = void 0;
+        }
+    }
 
     const getF = function(L, ud) {
         let lf = ud;
