@@ -43,12 +43,12 @@ if (typeof process === "undefined") {
     const LUA_LDIR = "./lua/" + LUA_VDIR + "/";
     module.exports.LUA_LDIR = LUA_LDIR;
 
-    const LUA_JSDIR = "./lua/" + LUA_VDIR + "/";
+    const LUA_JSDIR = LUA_LDIR;
     module.exports.LUA_JSDIR = LUA_JSDIR;
 
     const LUA_PATH_DEFAULT = to_luastring(
         LUA_LDIR + "?.lua;" + LUA_LDIR + "?/init.lua;" +
-        LUA_JSDIR + "?.lua;" + LUA_JSDIR + "?/init.lua;" +
+        /* LUA_JSDIR excluded as it is equal to LUA_LDIR */
         "./?.lua;./?/init.lua"
     );
     module.exports.LUA_PATH_DEFAULT = LUA_PATH_DEFAULT;
@@ -100,15 +100,14 @@ if (typeof process === "undefined") {
     const LUA_LDIR2 = LUA_ROOT2 + "share/lua/" + LUA_VDIR + "/";
     module.exports.LUA_LDIR = LUA_LDIR;
 
-    const LUA_JSDIR = LUA_ROOT + "share/lua/" + LUA_VDIR + "/";
+    const LUA_JSDIR = LUA_LDIR;
     module.exports.LUA_JSDIR = LUA_JSDIR;
-    const LUA_JSDIR2 = LUA_ROOT2 + "share/lua/" + LUA_VDIR + "/";
+    const LUA_JSDIR2 = LUA_LDIR2;
 
     const LUA_PATH_DEFAULT = to_luastring(
         LUA_LDIR + "?.lua;" + LUA_LDIR + "?/init.lua;" +
         LUA_LDIR2 + "?.lua;" + LUA_LDIR2 + "?/init.lua;" +
-        LUA_JSDIR + "?.lua;" + LUA_JSDIR + "?/init.lua;" +
-        LUA_JSDIR2 + "?.lua;" + LUA_JSDIR2 + "?/init.lua;" +
+        /* LUA_JSDIR(2) excluded as it is equal to LUA_LDIR(2) */
         "./?.lua;./?/init.lua"
     );
     module.exports.LUA_PATH_DEFAULT = LUA_PATH_DEFAULT;
