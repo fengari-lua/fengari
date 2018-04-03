@@ -850,8 +850,9 @@ if (typeof process === "undefined") {
             let path = to_uristring(filename);
             let xhr = new XMLHttpRequest();
             xhr.open("GET", path, false);
-            /* XXX: Synchronous xhr in main thread always returns a js string
-                Additionally, some browsers make console noise if you even attempt to set responseType
+            /*
+            Synchronous xhr in main thread always returns a js string.
+            Some browsers make console noise if you even attempt to set responseType
             */
             if (typeof window === "undefined") {
                 xhr.responseType = "arraybuffer";
@@ -871,7 +872,7 @@ if (typeof process === "undefined") {
         let com = skipcomment(lf);
         /* check for signature first, as we don't want to add line number corrections in binary case */
         if (com.c === LUA_SIGNATURE[0] && filename) {  /* binary file? */
-            /* no need to re-open in node.js */
+            /* no need to re-open */
         } else if (com.skipped) { /* read initial portion */
             lf.buff[lf.n++] = 10 /* '\n'.charCodeAt(0) */;  /* add line to correct line numbers */
         }
@@ -949,7 +950,7 @@ if (typeof process === "undefined") {
         let com = skipcomment(lf);
         /* check for signature first, as we don't want to add line number corrections in binary case */
         if (com.c === LUA_SIGNATURE[0] && filename) {  /* binary file? */
-            /* no need to re-open in node.js */
+            /* no need to re-open */
         } else if (com.skipped) { /* read initial portion */
             lf.buff[lf.n++] = 10 /* '\n'.charCodeAt(0) */;  /* add line to correct line numbers */
         }
