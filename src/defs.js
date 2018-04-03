@@ -56,6 +56,7 @@ const luastring_eq = function(a, b) {
     return true;
 };
 
+const unicode_error_message = "cannot convert invalid utf8 to javascript string";
 const to_jsstring = function(value, from, to, replacement_char) {
     if (!is_luastring(value)) throw new TypeError("to_jsstring expects a Uint8Array");
 
@@ -72,18 +73,18 @@ const to_jsstring = function(value, from, to, replacement_char) {
             /* single byte sequence */
             str += String.fromCharCode(u0);
         } else if (u0 < 0xC2 || u0 > 0xF4) {
-            if (!replacement_char) throw RangeError("cannot convert invalid utf8 to javascript string");
+            if (!replacement_char) throw RangeError(unicode_error_message);
             str += "�";
         } else if (u0 <= 0xDF) {
             /* two byte sequence */
             if (i >= to) {
-                if (!replacement_char) throw RangeError("cannot convert invalid utf8 to javascript string");
+                if (!replacement_char) throw RangeError(unicode_error_message);
                 str += "�";
                 continue;
             }
             let u1 = value[i++];
             if ((u1&0xC0) !== 0x80) {
-                if (!replacement_char) throw RangeError("cannot convert invalid utf8 to javascript string");
+                if (!replacement_char) throw RangeError(unicode_error_message);
                 str += "�";
                 continue;
             }
@@ -91,19 +92,19 @@ const to_jsstring = function(value, from, to, replacement_char) {
         } else if (u0 <= 0xEF) {
             /* three byte sequence */
             if (i+1 >= to) {
-                if (!replacement_char) throw RangeError("cannot convert invalid utf8 to javascript string");
+                if (!replacement_char) throw RangeError(unicode_error_message);
                 str += "�";
                 continue;
             }
             let u1 = value[i++];
             if ((u1&0xC0) !== 0x80) {
-                if (!replacement_char) throw RangeError("cannot convert invalid utf8 to javascript string");
+                if (!replacement_char) throw RangeError(unicode_error_message);
                 str += "�";
                 continue;
             }
             let u2 = value[i++];
             if ((u2&0xC0) !== 0x80) {
-                if (!replacement_char) throw RangeError("cannot convert invalid utf8 to javascript string");
+                if (!replacement_char) throw RangeError(unicode_error_message);
                 str += "�";
                 continue;
             }
@@ -119,25 +120,25 @@ const to_jsstring = function(value, from, to, replacement_char) {
         } else {
             /* four byte sequence */
             if (i+2 >= to) {
-                if (!replacement_char) throw RangeError("cannot convert invalid utf8 to javascript string");
+                if (!replacement_char) throw RangeError(unicode_error_message);
                 str += "�";
                 continue;
             }
             let u1 = value[i++];
             if ((u1&0xC0) !== 0x80) {
-                if (!replacement_char) throw RangeError("cannot convert invalid utf8 to javascript string");
+                if (!replacement_char) throw RangeError(unicode_error_message);
                 str += "�";
                 continue;
             }
             let u2 = value[i++];
             if ((u2&0xC0) !== 0x80) {
-                if (!replacement_char) throw RangeError("cannot convert invalid utf8 to javascript string");
+                if (!replacement_char) throw RangeError(unicode_error_message);
                 str += "�";
                 continue;
             }
             let u3 = value[i++];
             if ((u3&0xC0) !== 0x80) {
-                if (!replacement_char) throw RangeError("cannot convert invalid utf8 to javascript string");
+                if (!replacement_char) throw RangeError(unicode_error_message);
                 str += "�";
                 continue;
             }
