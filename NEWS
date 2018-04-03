@@ -1,7 +1,8 @@
-UNRELEASED
+0.1.1 - 2018-04-03
 
   - Fix node 6 compatibility
   - Removed duplicate LUA_PATH entries
+
 
 0.1.0 - 2018-03-31
 
