@@ -130,6 +130,11 @@ const io_output = function(L) {
     return g_iofile(L, IO_OUTPUT, "w");
 };
 
+/* node <= 6 doesn't support passing a Uint8Array to fs.writeSync */
+const prepare_string_for_write = process.versions.node > 6 ?
+    (s) => s : // identity function
+    (s) => Buffer.from(s.buffer, s.byteOffset, s.byteLength);
+
 const g_write = function(L, f, arg) {
     let nargs = lua_gettop(L) - arg;
     let status = true;
@@ -137,7 +142,7 @@ const g_write = function(L, f, arg) {
     for (; nargs--; arg++) {
         let s = luaL_checklstring(L, arg);
         try {
-            status = status && (fs.writeSync(f.fd, Uint8Array.from(s)) === s.length);
+            status = status && (fs.writeSync(f.fd, prepare_string_for_write(s)) === s.length);
         } catch (e) {
             status = false;
             err = e;
