@@ -251,13 +251,17 @@ if (typeof process === "undefined") {
     syslib.remove = function(L) {
         let filename = luaL_checkstring(L, 1);
         try {
-            if (fs.lstatSync(filename).isDirectory()) {
-                fs.rmdirSync(filename);
-            } else {
-                fs.unlinkSync(filename);
-            }
+            fs.unlinkSync(filename);
         } catch (e) {
-            return luaL_fileresult(L, false, filename, e);
+            if (e.code === 'EISDIR') {
+                try {
+                    fs.rmdirSync(filename);
+                } catch (e) {
+                    return luaL_fileresult(L, false, filename, e);
+                }
+            } else {
+                return luaL_fileresult(L, false, filename, e);
+            }
         }
         return luaL_fileresult(L, true);
     };
