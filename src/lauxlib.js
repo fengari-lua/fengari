@@ -290,11 +290,19 @@ const luaL_fileresult = function(L, stat, fname, e) {
         return 1;
     } else {
         lua_pushnil(L);
+        let message, errno;
+        if (e) {
+            message = e.message;
+            errno = -e.errno;
+        } else {
+            message = "Success"; /* what strerror(0) returns */
+            errno = 0;
+        }
         if (fname)
-            lua_pushfstring(L, to_luastring("%s: %s"), fname, to_luastring(e.message));
+            lua_pushfstring(L, to_luastring("%s: %s"), fname, to_luastring(message));
         else
-            lua_pushstring(L, to_luastring(e.message));
-        lua_pushinteger(L, -e.errno);
+            lua_pushstring(L, to_luastring(message));
+        lua_pushinteger(L, errno);
         return 3;
     }
 };
