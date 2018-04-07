@@ -142,7 +142,7 @@ const g_write = function(L, f, arg) {
     for (; nargs--; arg++) {
         let s = luaL_checklstring(L, arg);
         try {
-            status = status && (fs.writeSync(f.fd, prepare_string_for_write(s)) === s.length);
+            status = status && (fs.writeSync(f.fd, prepare_string_for_write(s), 0, s.length) === s.length);
         } catch (e) {
             status = false;
             err = e;
