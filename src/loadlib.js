@@ -85,7 +85,7 @@ const global_env = (function() {
         return self;
     } else {
         /* unknown global env */
-        return eval('this'); /* use non-strict mode to get global env */
+        return (0, eval)('this'); /* use non-strict mode to get global env */
     }
 })();
 
