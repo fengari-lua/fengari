@@ -1,13 +1,11 @@
 "use strict";
 
-const test     = require('tape');
-
-const lua     = require('../../src/lua.js');
+const lua = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
-const lualib  = require('../../src/lualib.js');
+const lualib = require('../../src/lualib.js');
 const {to_luastring} = require("../../src/fengaricore.js");
 
-const ltests  = require('./ltests.js');
+const ltests = require('./ltests.js');
 
 const prefix = `
     mt = {
@@ -57,64 +55,43 @@ const prefix = `
     end
 `;
 
-test("[test-suite] coroutine: is main thread", function (t) {
+test("[test-suite] coroutine: is main thread", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local main, ismain = coroutine.running()
         assert(type(main) == "thread" and ismain)
         assert(not coroutine.resume(main))
         assert(not coroutine.isyieldable())
         assert(not pcall(coroutine.yield))
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: trivial errors", function (t) {
+test("[test-suite] coroutine: trivial errors", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         assert(not pcall(coroutine.resume, 0))
         assert(not pcall(coroutine.status, 0))
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: tests for multiple yield/resume arguments", function (t) {
+test("[test-suite] coroutine: tests for multiple yield/resume arguments", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local function eqtab (t1, t2)
           assert(#t1 == #t2)
@@ -158,30 +135,18 @@ test("[test-suite] coroutine: tests for multiple yield/resume arguments", functi
         assert(coroutine.status(f) == "dead")
         s, a = coroutine.resume(f, "xuxu")
         assert(not s and string.find(a, "dead") and coroutine.status(f) == "dead")
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: yields in tail calls", function (t) {
+test("[test-suite] coroutine: yields in tail calls", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local function foo (i) return coroutine.yield(i) end
         f = coroutine.wrap(function ()
@@ -192,30 +157,18 @@ test("[test-suite] coroutine: yields in tail calls", function (t) {
         end)
         for i=1,10 do _G.x = i; assert(f(i) == i) end
         _G.x = 'xuxu'; assert(f('xuxu') == 'a')
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: recursive", function (t) {
+test("[test-suite] coroutine: recursive", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         function pf (n, i)
           coroutine.yield(n)
@@ -228,30 +181,18 @@ test("[test-suite] coroutine: recursive", function (t) {
           assert(f(1, 1) == s)
           s = s*i
         end
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: sieve", function (t) {
+test("[test-suite] coroutine: sieve", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         function gen (n)
           return coroutine.wrap(function ()
@@ -281,30 +222,18 @@ test("[test-suite] coroutine: sieve", function (t) {
 
         assert(#a == 25 and a[#a] == 97)
         x, a = nil
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: yielding across JS boundaries", function (t) {
+test("[test-suite] coroutine: yielding across JS boundaries", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local f = function (s, i) return coroutine.yield(i) end
 
@@ -333,30 +262,18 @@ test("[test-suite] coroutine: yielding across JS boundaries", function (t) {
         assert(co() == 10)
         r, msg = co(100)
         assert(not r and msg == 240)
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: unyieldable JS call", function (t) {
+test("[test-suite] coroutine: unyieldable JS call", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         do
           local function f (c)
@@ -371,30 +288,18 @@ test("[test-suite] coroutine: unyieldable JS call", function (t) {
                      end)
           assert(co() == "aa")
         end
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: errors in coroutines", function (t) {
+test("[test-suite] coroutine: errors in coroutines", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         function foo ()
           assert(debug.getinfo(1).currentline == debug.getinfo(foo).linedefined + 1)
@@ -416,30 +321,18 @@ test("[test-suite] coroutine: errors in coroutines", function (t) {
         assert(not a and b == foo and coroutine.status(x) == "dead")
         a,b = coroutine.resume(x)
         assert(not a and string.find(b, "dead") and coroutine.status(x) == "dead")
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: co-routines x for loop", function (t) {
+test("[test-suite] coroutine: co-routines x for loop", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         function all (a, n, k)
           if k == 0 then coroutine.yield(a)
@@ -456,30 +349,18 @@ test("[test-suite] coroutine: co-routines x for loop", function (t) {
           a = a+1
         end
         assert(a == 5^4)
-   `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+   `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: old bug: attempt to resume itself", function (t) {
+test("[test-suite] coroutine: old bug: attempt to resume itself", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         function co_func (current_co)
           assert(coroutine.running() == current_co)
@@ -499,30 +380,18 @@ test("[test-suite] coroutine: old bug: attempt to resume itself", function (t) {
         assert(a == true and b == 10)
         assert(coroutine.resume(co, co) == false)
         assert(coroutine.resume(co, co) == false)
-   `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+   `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: old bug: other old bug when attempting to resume itself", function (t) {
+test("[test-suite] coroutine: old bug: other old bug when attempting to resume itself", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         do
           local A = coroutine.running()
@@ -534,30 +403,18 @@ test("[test-suite] coroutine: old bug: other old bug when attempting to resume i
           st, res = A()
           assert(not st and string.find(res, "non%-suspended"))
         end
-   `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+   `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: attempt to resume 'normal' coroutine", function (t) {
+test("[test-suite] coroutine: attempt to resume 'normal' coroutine", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local co1, co2
         co1 = coroutine.create(function () return co2() end)
@@ -570,58 +427,34 @@ test("[test-suite] coroutine: attempt to resume 'normal' coroutine", function (t
         a,b = coroutine.resume(co1)
         assert(a and b == 3)
         assert(coroutine.status(co1) == 'dead')
-   `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+   `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: infinite recursion of coroutines", function (t) {
+test("[test-suite] coroutine: infinite recursion of coroutines", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         a = function(a) coroutine.wrap(a)(a) end
         assert(not pcall(a, a))
         a = nil
-   `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+   `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: access to locals of erroneous coroutines", function (t) {
+test("[test-suite] coroutine: access to locals of erroneous coroutines", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local x = coroutine.create (function ()
                     local a = 10
@@ -634,29 +467,17 @@ test("[test-suite] coroutine: access to locals of erroneous coroutines", functio
         assert(not coroutine.resume(x, 1, 1, 1, 1, 1, 1, 1))
         assert(_G.f() == 11)
         assert(_G.f() == 12)
-   `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+   `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
-test("[test-suite] coroutine: leaving a pending coroutine open", function (t) {
+test("[test-suite] coroutine: leaving a pending coroutine open", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         _X = coroutine.wrap(function ()
               local a = 10
@@ -665,30 +486,18 @@ test("[test-suite] coroutine: leaving a pending coroutine open", function (t) {
             end)
 
         _X()
-   `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+   `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: stack overflow", function (t) {
+test("[test-suite] coroutine: stack overflow", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         -- bug (stack overflow)
         local j = 2^9
@@ -705,30 +514,18 @@ test("[test-suite] coroutine: stack overflow", function (t) {
           assert(not r)
         end
         co = nil
-   `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+   `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: testing yields inside metamethods", function (t) {
+test("[test-suite] coroutine: testing yields inside metamethods", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local a = new(10)
         local b = new(12)
@@ -765,30 +562,18 @@ test("[test-suite] coroutine: testing yields inside metamethods", function (t) {
             a.BB = print
             return a.BB
         end, {"nidx", "idx"}) == print)
-   `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+   `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: tests for comparsion operators", function (t) {
+test("[test-suite] coroutine: tests for comparsion operators", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         do
           local mt1 = {
@@ -829,30 +614,18 @@ test("[test-suite] coroutine: tests for comparsion operators", function (t) {
           run(test)
 
         end
-   `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+   `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: getuptable & setuptable", function (t) {
+test("[test-suite] coroutine: getuptable & setuptable", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         do local _ENV = _ENV
           f = function () AAA = BBB + 1; return AAA end
@@ -861,30 +634,18 @@ test("[test-suite] coroutine: getuptable & setuptable", function (t) {
         debug.setupvalue(f, 1, g)
         assert(run(f, {"idx", "nidx", "idx"}) == 11)
         assert(g.k.AAA == 11)
-   `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+   `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: testing yields inside 'for' iterators", function (t) {
+test("[test-suite] coroutine: testing yields inside 'for' iterators", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local f = function (s, i)
               if i%2 == 0 then coroutine.yield(nil, "for") end
@@ -896,26 +657,11 @@ test("[test-suite] coroutine: testing yields inside 'for' iterators", function (
                      for i in f, 4, 0 do s = s + i end
                      return s
                    end, {"for", "for", "for"}) == 10)
-   `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+   `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
@@ -930,7 +676,10 @@ const jsprefix = `
     end
 `;
 
-test("[test-suite] coroutine: testing yields inside hooks", function (t) {
+test("[test-suite] coroutine: testing yields inside hooks", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local A, B = 0, 0
 
@@ -950,31 +699,19 @@ test("[test-suite] coroutine: testing yields inside hooks", function (t) {
         end
 
         assert(B // A == 7)    -- fact(7) // fact(6)
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        ltests.luaopen_tests(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(jsprefix + luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    ltests.luaopen_tests(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(jsprefix + luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: testing yields inside line hook", function (t) {
+test("[test-suite] coroutine: testing yields inside line hook", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local line = debug.getinfo(1, "l").currentline + 2    -- get line number
         local function foo ()
@@ -993,31 +730,19 @@ test("[test-suite] coroutine: testing yields inside line hook", function (t) {
         _G.X = nil; co(); assert(_G.X == line + 2 and _G.XX == nil)
         _G.X = nil; co(); assert(_G.X == line + 3 and _G.XX == 20)
         assert(co() == 10)
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        ltests.luaopen_tests(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(jsprefix + luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    ltests.luaopen_tests(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(jsprefix + luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: testing yields in count hook", function (t) {
+test("[test-suite] coroutine: testing yields in count hook", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local line = debug.getinfo(1, "l").currentline + 2    -- get line number
         local function foo ()
@@ -1034,31 +759,19 @@ test("[test-suite] coroutine: testing yields in count hook", function (t) {
         local c = 0
         repeat c = c + 1; local a = co() until a == 10
         assert(_G.XX == 20 and c >= 5)
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        ltests.luaopen_tests(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(jsprefix + luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    ltests.luaopen_tests(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(jsprefix + luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: testing yields inside line hook", function (t) {
+test("[test-suite] coroutine: testing yields inside line hook", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local line = debug.getinfo(1, "l").currentline + 2    -- get line number
         local function foo ()
@@ -1084,31 +797,19 @@ test("[test-suite] coroutine: testing yields inside line hook", function (t) {
         repeat c = c + 1; local a = co() until a == 10
         assert(_G.XX == 20 and c >= 5)
         _G.X = nil; _G.XX = nil
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        ltests.luaopen_tests(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(jsprefix + luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    ltests.luaopen_tests(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(jsprefix + luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: testing debug library on a coroutine suspended inside a hook", function (t) {
+test("[test-suite] coroutine: testing debug library on a coroutine suspended inside a hook", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         do
           -- testing debug library on a coroutine suspended inside a hook
@@ -1136,31 +837,19 @@ test("[test-suite] coroutine: testing debug library on a coroutine suspended ins
           assert(v[1] == true and v[2] == 2 and v[3] == 20 and v[4] == nil)
           assert(not coroutine.resume(c))
         end
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        ltests.luaopen_tests(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    ltests.luaopen_tests(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: testing debug library on last function in a suspended coroutine", function (t) {
+test("[test-suite] coroutine: testing debug library on last function in a suspended coroutine", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         do
           -- testing debug library on last function in a suspended coroutine
@@ -1172,31 +861,19 @@ test("[test-suite] coroutine: testing debug library on last function in a suspen
           a, b = debug.getlocal(c, 0, 2)
           assert(b == 10)
         end
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        ltests.luaopen_tests(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    ltests.luaopen_tests(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: reusing a thread", function (t) {
+test("[test-suite] coroutine: reusing a thread", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         assert(T.testC([[
           newthread           # create thread
@@ -1218,31 +895,19 @@ test("[test-suite] coroutine: reusing a thread", function (t) {
         ]], function (...) return ... end) == 'b b b')
 
         assert(X == 'a a a' and Y == 'OK')
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        ltests.luaopen_tests(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    ltests.luaopen_tests(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: resuming running coroutine", function (t) {
+test("[test-suite] coroutine: resuming running coroutine", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         C = coroutine.create(function ()
               return T.testC([[
@@ -1267,30 +932,18 @@ test("[test-suite] coroutine: resuming running coroutine", function (t) {
           return 4]])
         assert(a == coroutine.running() and string.find(b, "non%-suspended") and
                c == "ERRRUN" and d == 4)
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        ltests.luaopen_tests(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    ltests.luaopen_tests(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
-test("[test-suite] coroutine: using a main thread as a coroutine", function (t) {
+test("[test-suite] coroutine: using a main thread as a coroutine", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local state = T.newstate()
         T.loadlib(state)
@@ -1322,31 +975,19 @@ test("[test-suite] coroutine: using a main thread as a coroutine", function (t) 
         assert(T.doremote(state, "return B") == 'BB')
 
         T.closestate(state)
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        ltests.luaopen_tests(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    ltests.luaopen_tests(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: tests for coroutine API", function (t) {
+test("[test-suite] coroutine: tests for coroutine API", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local function apico (...)
           local x = {...}
@@ -1386,31 +1027,19 @@ test("[test-suite] coroutine: tests for coroutine API", function (t) {
                a[7] == "YIELD" and a[8] == 3 and
                a[9] == "YIELD" and a[10] == 4)
         assert(not pcall(co))   -- coroutine is dead now
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        ltests.luaopen_tests(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    ltests.luaopen_tests(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: tests for coroutine API", function (t) {
+test("[test-suite] coroutine: tests for coroutine API", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         f = T.makeCfunc("pushnum 3; pushnum 5; yield 1;")
         co = coroutine.wrap(function ()
@@ -1419,31 +1048,19 @@ test("[test-suite] coroutine: tests for coroutine API", function (t) {
         assert(co(23,16) == 5)
         assert(co(23,16) == 5)
         assert(co(23,16) == 10)
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        ltests.luaopen_tests(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    ltests.luaopen_tests(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: testing coroutines with C bodies", function (t) {
+test("[test-suite] coroutine: testing coroutines with C bodies", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local function eqtab (t1, t2)
           assert(#t1 == #t2)
@@ -1476,31 +1093,19 @@ test("[test-suite] coroutine: testing coroutines with C bodies", function (t) {
                                return 4; ]], f)
 
         assert(a == 'YIELD' and b == 'a' and c == 102 and d == 'OK')
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        ltests.luaopen_tests(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    ltests.luaopen_tests(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: testing chain of suspendable C calls", function (t) {
+test("[test-suite] coroutine: testing chain of suspendable C calls", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local count = 3   -- number of levels
 
@@ -1531,31 +1136,19 @@ test("[test-suite] coroutine: testing chain of suspendable C calls", function (t
         a = {co()}
         -- three '34's (one from each pending C call)
         assert(#a == 3 and a[1] == a[2] and a[2] == a[3] and a[3] == 34)
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        ltests.luaopen_tests(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    ltests.luaopen_tests(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: testing yields with continuations", function (t) {
+test("[test-suite] coroutine: testing yields with continuations", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         co = coroutine.wrap(function (...) return
                T.testC([[ # initial function
@@ -1608,31 +1201,19 @@ test("[test-suite] coroutine: testing yields with continuations", function (t) {
         assert(x == "YIELD" and y == 4)
 
         assert(not pcall(co))   -- coroutine should be dead
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        ltests.luaopen_tests(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    ltests.luaopen_tests(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] coroutine: bug in nCcalls", function (t) {
+test("[test-suite] coroutine: bug in nCcalls", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local co = coroutine.wrap(function ()
           local a = {pcall(pcall,pcall,pcall,pcall,pcall,pcall,pcall,error,"hi")}
@@ -1641,25 +1222,10 @@ test("[test-suite] coroutine: bug in nCcalls", function (t) {
 
         local a = {co()}
         assert(a[10] == "hi")
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        ltests.luaopen_tests(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    ltests.luaopen_tests(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });

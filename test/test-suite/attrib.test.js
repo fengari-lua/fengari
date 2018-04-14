@@ -1,13 +1,14 @@
 "use strict";
 
-const test     = require('tape');
-
-const lua     = require('../../src/lua.js');
+const lua = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
-const lualib  = require('../../src/lualib.js');
+const lualib = require('../../src/lualib.js');
 const {to_luastring} = require("../../src/fengaricore.js");
 
-test("[test-suite] attrib: testing require", function (t) {
+test("[test-suite] attrib: testing require", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         assert(require"string" == string)
         assert(require"math" == math)
@@ -52,34 +53,25 @@ test("[test-suite] attrib: testing require", function (t) {
           assert(not s and string.find(err, "package.path"))
           package.path = oldpath
         end
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
+
 
 // TODO: when io.write etc.
-test("[test-suite] attrib: system specific tests for 'require'", { skip: true }, function (t) {
+test.skip("[test-suite] attrib: system specific tests for 'require'", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
 });
 
 
-test("[test-suite] attrib: testing assignments, logical operators, and constructors", function (t) {
+test("[test-suite] attrib: testing assignments, logical operators, and constructors", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local res, res2 = 27
 
@@ -168,30 +160,18 @@ test("[test-suite] attrib: testing assignments, logical operators, and construct
         assert(a[1]==10 and a[-3]==a.a and a[f]==print and a.x=='a' and not a.y)
         a[1], f(a)[2], b, c = {['alo']=assert}, 10, a[1], a[f], 6, 10, 23, f(a), 2
         a[1].alo(a[2]==10 and b==10 and c==print)
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] attrib: test of large float/integer indices ", function (t) {
+test("[test-suite] attrib: test of large float/integer indices ", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         a = {}
         a[true] = 20
@@ -244,30 +224,18 @@ test("[test-suite] attrib: test of large float/integer indices ", function (t) {
 
         assert(a[maxintF] == 20 and a[maxintF - 1.0] == 11 and
                a[-maxintF] == 22 and a[-maxintF + 1.0] == 13)
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] attrib: test conflicts in multiple assignment", function (t) {
+test("[test-suite] attrib: test conflicts in multiple assignment", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         do
           local a,i,j,b
@@ -276,30 +244,18 @@ test("[test-suite] attrib: test conflicts in multiple assignment", function (t) 
           assert(i == 2 and b[1] == 1 and a == 1 and j == b and b[2] == 2 and
                  b[3] == 1)
         end
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] attrib: repeat test with upvalues", function (t) {
+test("[test-suite] attrib: repeat test with upvalues", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         do
           local a,i,j,b
@@ -314,30 +270,18 @@ test("[test-suite] attrib: repeat test with upvalues", function (t) {
           (function (a) t[a], a = 10, 20  end)(1);
           assert(t[1] == 10)
         end
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] attrib: bug in 5.2 beta", function (t) {
+test("[test-suite] attrib: bug in 5.2 beta", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         local function foo ()
           local a
@@ -350,24 +294,9 @@ test("[test-suite] attrib: bug in 5.2 beta", function (t) {
 
         local a, b = foo()()
         assert(a == 3 and b == 14)
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });

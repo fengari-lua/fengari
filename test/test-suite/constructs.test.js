@@ -1,10 +1,8 @@
 "use strict";
 
-const test     = require('tape');
-
-const lua     = require('../../src/lua.js');
+const lua = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
-const lualib  = require('../../src/lualib.js');
+const lualib = require('../../src/lualib.js');
 const {to_luastring} = require("../../src/fengaricore.js");
 
 const checkload = `
@@ -13,61 +11,40 @@ const checkload = `
     end
 `;
 
-test('[test-suite] constructs: testing semicolons', function (t) {
+test('[test-suite] constructs: testing semicolons', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         do ;;; end
         ; do ; a = 3; assert(a == 3) end;
         ;
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(checkload + luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(checkload + luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test('[test-suite] constructs: invalid operations should not raise errors when not executed', function (t) {
+test('[test-suite] constructs: invalid operations should not raise errors when not executed', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         if false then a = 3 // 0; a = 0 % 0 end
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(checkload + luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(checkload + luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test('[test-suite] constructs: testing priorities', function (t) {
+test('[test-suite] constructs: testing priorities', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         assert(2^3^2 == 2^(3^2));
         assert(2^3*4 == (2^3)*4);
@@ -109,30 +86,18 @@ test('[test-suite] constructs: testing priorities', function (t) {
         assert((x>y) and x or y == 2);
 
         assert(1234567890 == tonumber('1234567890') and 1234567890+1 == 1234567891)
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(checkload + luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(checkload + luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test('[test-suite] constructs: silly loops', function (t) {
+test('[test-suite] constructs: silly loops', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         repeat until 1; repeat until true;
         while false do end; while nil do end;
@@ -295,29 +260,17 @@ test('[test-suite] constructs: silly loops', function (t) {
 
         a,b = F(1)~=nil; assert(a == true and b == nil);
         a,b = F(nil)==nil; assert(a == true and b == nil)
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(checkload + luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(checkload + luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
-test.skip('[test-suite] constructs: huge loops, upvalue', function (t) {
+test.skip('[test-suite] constructs: huge loops, upvalue', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         -- sometimes will be 0, sometimes will not...
         _ENV.GLOB1 = math.floor(os.time()) % 2
@@ -382,30 +335,18 @@ test.skip('[test-suite] constructs: huge loops, upvalue', function (t) {
             if i % 60000 == 0 then print('+') end
           end
         end
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(checkload + luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(checkload + luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] constructs: testing some syntax errors (chosen through 'gcov')", function (t) {
+test("[test-suite] constructs: testing some syntax errors (chosen through 'gcov')", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = `
         _soft = true
 
@@ -418,24 +359,9 @@ test("[test-suite] constructs: testing some syntax errors (chosen through 'gcov'
           s = "while true do " .. s .. "end"
           checkload(s, "too long")
         end
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-
-        L = lauxlib.luaL_newstate();
-
-        lualib.luaL_openlibs(L);
-
-        lauxlib.luaL_loadstring(L, to_luastring(checkload + luaCode));
-
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-
-        lua.lua_call(L, 0, -1);
-
-    }, "Lua program ran without error");
-
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(checkload + luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });

@@ -1,10 +1,8 @@
 "use strict";
 
-const test     = require('tape');
-
-const lua     = require('../../src/lua.js');
+const lua = require('../../src/lua.js');
 const lauxlib = require('../../src/lauxlib.js');
-const lualib  = require('../../src/lualib.js');
+const lualib = require('../../src/lualib.js');
 const {to_luastring} = require("../../src/fengaricore.js");
 
 const prefix = `
@@ -96,28 +94,25 @@ const prefix = `
     end
 `;
 
-test("[test-suite] utf8: offset", function (t) {
+test("[test-suite] utf8: offset", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = prefix + `
         assert(utf8.offset("alo", 5) == nil)
         assert(utf8.offset("alo", -4) == nil)
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-        L = lauxlib.luaL_newstate();
-        lualib.luaL_openlibs(L);
-        if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
-            throw new SyntaxError(lua.lua_tojsstring(L, -1));
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-        lua.lua_call(L, 0, -1);
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] utf8: error indication in utf8.len", function (t) {
+test("[test-suite] utf8: error indication in utf8.len", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = prefix + `
         do
           local function check (s, p)
@@ -129,24 +124,18 @@ test("[test-suite] utf8: error indication in utf8.len", function (t) {
           check("\\xF4\\x9F\\xBF", 1)
           check("\\xF4\\x9F\\xBF\\xBF", 1)
         end
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-        L = lauxlib.luaL_newstate();
-        lualib.luaL_openlibs(L);
-        if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
-            throw new SyntaxError(lua.lua_tojsstring(L, -1));
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-        lua.lua_call(L, 0, -1);
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] utf8: error in initial position for offset", function (t) {
+test("[test-suite] utf8: error in initial position for offset", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = prefix + `
         checkerror("position out of range", utf8.offset, "abc", 1, 5)
         checkerror("position out of range", utf8.offset, "abc", 1, -4)
@@ -155,24 +144,18 @@ test("[test-suite] utf8: error in initial position for offset", function (t) {
         checkerror("continuation byte", utf8.offset, "𦧺", 1, 2)
         checkerror("continuation byte", utf8.offset, "𦧺", 1, 2)
         checkerror("continuation byte", utf8.offset, "\\x80", 1)
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-        L = lauxlib.luaL_newstate();
-        lualib.luaL_openlibs(L);
-        if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
-            throw new SyntaxError(lua.lua_tojsstring(L, -1));
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-        lua.lua_call(L, 0, -1);
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] utf8: codepoints", function (t) {
+test("[test-suite] utf8: codepoints", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = prefix + `
         local s = "hello World"
         local t = {string.byte(s, 1, -1)}
@@ -199,110 +182,80 @@ test("[test-suite] utf8: codepoints", function (t) {
         assert(utf8.codepoint(utf8.char(0x10FFFF)) == 0x10FFFF)
 
         checkerror("value out of range", utf8.char, 0x10FFFF + 1)
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-        L = lauxlib.luaL_newstate();
-        lualib.luaL_openlibs(L);
-        if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
-            throw new SyntaxError(lua.lua_tojsstring(L, -1));
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-        lua.lua_call(L, 0, -1);
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] utf8: UTF-8 representation for 0x11ffff (value out of valid range)", function (t) {
+test("[test-suite] utf8: UTF-8 representation for 0x11ffff (value out of valid range)", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = prefix + `
         invalid("\\xF4\\x9F\\xBF\\xBF")
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-        L = lauxlib.luaL_newstate();
-        lualib.luaL_openlibs(L);
-        if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
-            throw new SyntaxError(lua.lua_tojsstring(L, -1));
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-        lua.lua_call(L, 0, -1);
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] utf8: overlong sequences", function (t) {
+test("[test-suite] utf8: overlong sequences", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = prefix + `
         invalid("\\xC0\\x80")          -- zero
         invalid("\\xC1\\xBF")          -- 0x7F (should be coded in 1 byte)
         invalid("\\xE0\\x9F\\xBF")      -- 0x7FF (should be coded in 2 bytes)
         invalid("\\xF0\\x8F\\xBF\\xBF")  -- 0xFFFF (should be coded in 3 bytes)
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-        L = lauxlib.luaL_newstate();
-        lualib.luaL_openlibs(L);
-        if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
-            throw new SyntaxError(lua.lua_tojsstring(L, -1));
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-        lua.lua_call(L, 0, -1);
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] utf8: invalid bytes", function (t) {
+test("[test-suite] utf8: invalid bytes", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = prefix + `
         invalid("\\x80")  -- continuation byte
         invalid("\\xBF")  -- continuation byte
         invalid("\\xFE")  -- invalid byte
         invalid("\\xFF")  -- invalid byte
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-        L = lauxlib.luaL_newstate();
-        lualib.luaL_openlibs(L);
-        if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
-            throw new SyntaxError(lua.lua_tojsstring(L, -1));
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-        lua.lua_call(L, 0, -1);
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] utf8: empty strings", function (t) {
+test("[test-suite] utf8: empty strings", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = prefix + `
         check("", {})
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-        L = lauxlib.luaL_newstate();
-        lualib.luaL_openlibs(L);
-        if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
-            throw new SyntaxError(lua.lua_tojsstring(L, -1));
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-        lua.lua_call(L, 0, -1);
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });
 
 
-test("[test-suite] utf8: minimum and maximum values for each sequence size", function (t) {
+test("[test-suite] utf8: minimum and maximum values for each sequence size", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
     let luaCode = prefix + `
         s = "\\0 \\x7F\\z
              \\xC2\\x80 \\xDF\\xBF\\z
@@ -332,18 +285,9 @@ test("[test-suite] utf8: minimum and maximum values for each sequence size", fun
             assert(utf8.offset(x, 0, p + j - 1) == p)
           end
         end
-    `, L;
-
-    t.plan(2);
-
-    t.doesNotThrow(function () {
-        L = lauxlib.luaL_newstate();
-        lualib.luaL_openlibs(L);
-        if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
-            throw new SyntaxError(lua.lua_tojsstring(L, -1));
-    }, "Lua program loaded without error");
-
-    t.doesNotThrow(function () {
-        lua.lua_call(L, 0, -1);
-    }, "Lua program ran without error");
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
 });

@@ -10,7 +10,7 @@
   "scripts": {
     "lint": "eslint src/ test/",
     "prepublishOnly": "git diff-index --quiet --cached HEAD -- && npm run lint && npm run test",
-    "test": "jest && (tape test/test-suite/*.js | faucet)"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -31,9 +31,7 @@
   "homepage": "https://github.com/fengari-lua/fengari#readme",
   "devDependencies": {
     "eslint": "^4.19.1",
-    "faucet": "^0.0.1",
-    "jest": "^22.4.3",
-    "tape": "^4.9.0"
+    "jest": "^22.4.3"
   },
   "dependencies": {
     "readline-sync": "^1.4.9",
