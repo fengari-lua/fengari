@@ -22,7 +22,7 @@ const prefix = `
       table.sort(a, func)
       x = (os.clock() - x) * 1000
       pre = pre or ""
-      print(string.format("%ssorting %d %s elements in %.2f msec.", pre, n, msg, x))
+      -- print(string.format("%ssorting %d %s elements in %.2f msec.", pre, n, msg, x))
       check(a, func)
     end
 
@@ -397,8 +397,8 @@ test("[test-suite] sort: Invert-sorting", () => {
         x = os.clock(); i=0
         table.sort(a, function(x,y) i=i+1; return y<x end)
         x = (os.clock() - x) * 1000
-        print(string.format("Invert-sorting other %d elements in %.2f msec., with %i comparisons",
-              limit, x, i))
+        -- print(string.format("Invert-sorting other %d elements in %.2f msec., with %i comparisons",
+        --       limit, x, i))
         check(a, function(x,y) return y<x end)
 
         table.sort{}  -- empty array

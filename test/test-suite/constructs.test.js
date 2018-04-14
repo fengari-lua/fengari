@@ -332,7 +332,7 @@ test.skip('[test-suite] constructs: huge loops, upvalue', () => {
             IX = false
             assert(p() == v[2] and IX == not not v[2])
             i = i + 1
-            if i % 60000 == 0 then print('+') end
+            -- if i % 60000 == 0 then print('+') end
           end
         end
     `;

@@ -38,14 +38,14 @@ test("[test-suite] tpack: maximum size for integers", () => {
         assert(1 <= sizeshort and sizeshort <= sizeint and sizeint <= sizelong and
                sizefloat <= sizedouble)
 
-        print("platform:")
-        print(string.format(
-          "\\tshort %d, int %d, long %d, size_t %d, float %d, double %d,\\n\\z
-           \\tlua Integer %d, lua Number %d",
-           sizeshort, sizeint, sizelong, sizesize_t, sizefloat, sizedouble,
-           sizeLI, sizenumber))
-        print("\\t" .. (little and "little" or "big") .. " endian")
-        print("\\talignment: " .. align)
+        -- print("platform:")
+        -- print(string.format(
+        --   "\\tshort %d, int %d, long %d, size_t %d, float %d, double %d,\\n\\z
+        --    \\tlua Integer %d, lua Number %d",
+        --    sizeshort, sizeint, sizelong, sizesize_t, sizefloat, sizedouble,
+        --    sizeLI, sizenumber))
+        -- print("\\t" .. (little and "little" or "big") .. " endian")
+        -- print("\\talignment: " .. align)
     `;
     lualib.luaL_openlibs(L);
     if (lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode)) === lua.LUA_ERRSYNTAX)

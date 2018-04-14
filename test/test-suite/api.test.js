@@ -686,7 +686,7 @@ test("[test-suite] api: test errors in non protected threads", () => {
 
         if not _soft then
           checkerrnopro("pushnum 3; call 0 0", "attempt to call")
-          print"testing stack overflow in unprotected thread"
+          -- print"testing stack overflow in unprotected thread"
           function f () f() end
           checkerrnopro("getglobal 'f'; call 0 0;", "stack overflow")
         end

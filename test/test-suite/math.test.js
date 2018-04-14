@@ -80,8 +80,8 @@ test("[test-suite] math: number of bits in the mantissa of a floating-point numb
           local x = 2.0^floatbits
           assert(x > x - 1.0 and x == x + 1.0)
 
-          print(string.format("%d-bit integers, %d-bit (mantissa) floats",
-                               intbits, floatbits))
+          -- print(string.format("%d-bit integers, %d-bit (mantissa) floats",
+          --                      intbits, floatbits))
         end
 
         assert(math.type(0) == "integer" and math.type(0.0) == "float"
@@ -304,66 +304,69 @@ test("[test-suite] math: order between floats and integers", () => {
           assert(minint <= -2^(intbits - 1))
           assert(-2^(intbits - 1) <= minint)
         end
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
+});
 
-        if floatbits < intbits then
-          print("testing order (floats cannot represent all integers)")
-          local fmax = 2^floatbits
-          local ifmax = fmax | 0
-          assert(fmax < ifmax + 1)
-          assert(fmax - 1 < ifmax)
-          assert(-(fmax - 1) > -ifmax)
-          assert(not (fmax <= ifmax - 1))
-          assert(-fmax > -(ifmax + 1))
-          assert(not (-fmax >= -(ifmax - 1)))
 
-          assert(fmax/2 - 0.5 < ifmax//2)
-          assert(-(fmax/2 - 0.5) > -ifmax//2)
+test("[test-suite] math: testing order (floats can represent all integers)", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
 
-          assert(maxint < 2^intbits)
-          assert(minint > -2^intbits)
-          assert(maxint <= 2^intbits)
-          assert(minint >= -2^intbits)
-        else
-          print("testing order (floats can represent all integers)")
-          assert(maxint < maxint + 1.0)
-          assert(maxint < maxint + 0.5)
-          assert(maxint - 1.0 < maxint)
-          assert(maxint - 0.5 < maxint)
-          assert(not (maxint + 0.0 < maxint))
-          assert(maxint + 0.0 <= maxint)
-          assert(not (maxint < maxint + 0.0))
-          assert(maxint + 0.0 <= maxint)
-          assert(maxint <= maxint + 0.0)
-          assert(not (maxint + 1.0 <= maxint))
-          assert(not (maxint + 0.5 <= maxint))
-          assert(not (maxint <= maxint - 1.0))
-          assert(not (maxint <= maxint - 0.5))
+    let luaCode = `
+        assert(floatbits >= intbits)
 
-          assert(minint < minint + 1.0)
-          assert(minint < minint + 0.5)
-          assert(minint <= minint + 0.5)
-          assert(minint - 1.0 < minint)
-          assert(minint - 1.0 <= minint)
-          assert(not (minint + 0.0 < minint))
-          assert(not (minint + 0.5 < minint))
-          assert(not (minint < minint + 0.0))
-          assert(minint + 0.0 <= minint)
-          assert(minint <= minint + 0.0)
-          assert(not (minint + 1.0 <= minint))
-          assert(not (minint + 0.5 <= minint))
-          assert(not (minint <= minint - 1.0))
-        end
+        assert(maxint < maxint + 1.0)
+        assert(maxint < maxint + 0.5)
+        assert(maxint - 1.0 < maxint)
+        assert(maxint - 0.5 < maxint)
+        assert(not (maxint + 0.0 < maxint))
+        assert(maxint + 0.0 <= maxint)
+        assert(not (maxint < maxint + 0.0))
+        assert(maxint + 0.0 <= maxint)
+        assert(maxint <= maxint + 0.0)
+        assert(not (maxint + 1.0 <= maxint))
+        assert(not (maxint + 0.5 <= maxint))
+        assert(not (maxint <= maxint - 1.0))
+        assert(not (maxint <= maxint - 0.5))
 
-        do
-          local NaN = 0/0
-          assert(not (NaN < 0))
-          assert(not (NaN > minint))
-          assert(not (NaN <= -9))
-          assert(not (NaN <= maxint))
-          assert(not (NaN < maxint))
-          assert(not (minint <= NaN))
-          assert(not (minint < NaN))
-        end
+        assert(minint < minint + 1.0)
+        assert(minint < minint + 0.5)
+        assert(minint <= minint + 0.5)
+        assert(minint - 1.0 < minint)
+        assert(minint - 1.0 <= minint)
+        assert(not (minint + 0.0 < minint))
+        assert(not (minint + 0.5 < minint))
+        assert(not (minint < minint + 0.0))
+        assert(minint + 0.0 <= minint)
+        assert(minint <= minint + 0.0)
+        assert(not (minint + 1.0 <= minint))
+        assert(not (minint + 0.5 <= minint))
+        assert(not (minint <= minint - 1.0))
+    `;
+    lualib.luaL_openlibs(L);
+    if (lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode)) === lua.LUA_ERRSYNTAX)
+        throw new SyntaxError(lua.lua_tojsstring(L, -1));
+    lua.lua_call(L, 0, 0);
+});
+
+
+test("[test-suite] math: NaN order", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
+    let luaCode = `
+        local NaN = 0/0
+        assert(not (NaN < 0))
+        assert(not (NaN > minint))
+        assert(not (NaN <= -9))
+        assert(not (NaN <= maxint))
+        assert(not (NaN < maxint))
+        assert(not (minint <= NaN))
+        assert(not (minint < NaN))
     `;
     lualib.luaL_openlibs(L);
     if (lauxlib.luaL_loadstring(L, to_luastring(prefix + luaCode)) === lua.LUA_ERRSYNTAX)
@@ -988,7 +991,6 @@ test("[test-suite] math: testing -0 and NaN", () => {
 
     let luaCode = `
         do
-          print("testing -0 and NaN")
           local mz, z = -0.0, 0.0
           assert(mz == z)
           assert(1/mz < 0 and 0 < 1/z)

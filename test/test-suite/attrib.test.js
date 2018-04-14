@@ -23,7 +23,7 @@ test("[test-suite] attrib: testing require", () => {
         assert(type(package.preload) == "table")
 
         assert(type(package.config) == "string")
-        print("package config: "..string.gsub(package.config, "\\n", "|"))
+        -- print("package config: "..string.gsub(package.config, "\\n", "|"))
 
         do
           -- create a path with 'max' templates,

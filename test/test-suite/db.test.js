@@ -598,8 +598,7 @@ test("[test-suite] db: tests for tail calls", () => {
             local tail = debug.getinfo(2)
             assert(tail.func == g1 and tail.istailcall == true)
             assert(debug.getinfo(3, "S").what == "main")
-            print"+"
-            end
+          end
         end
 
         function g(x) return f(x) end

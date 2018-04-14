@@ -433,7 +433,7 @@ test("[test-suite] strings: 'format %a %A'", () => {
           end
 
           if not pcall(string.format, "%.3a", 0) then
-            (Message or print)("\\n >>> modifiers for format '%a' not available <<<\\n")
+            -- (Message or print)("\\n >>> modifiers for format '%a' not available <<<\\n")
           else
             assert(string.find(string.format("%+.2A", 12), "^%+0X%x%.%x0P%+?%d$"))
             assert(string.find(string.format("%.4A", -12), "^%-0X%x%.%x000P%+?%d$"))

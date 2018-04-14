@@ -28,7 +28,6 @@ test('setmetatable, getmetatable', () => {
     let luaCode = `
         local mt = {
             __index = function ()
-                print("hello")
                 return "hello"
             end
         }
