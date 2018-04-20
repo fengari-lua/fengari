@@ -18,7 +18,7 @@ before_install:
 
 script:
     - yarn lint
-    - FENGARICONF='{"LUAI_MAXSTACK":100000}' travis_wait yarn test
+    - FENGARICONF='{"LUAI_MAXSTACK":100000}' yarn test --maxWorkers=$(nproc)
 
 notifications:
     email: false

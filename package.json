@@ -5,12 +5,12 @@
   "main": "src/fengari.js",
   "directories": {
     "lib": "src",
-    "test": "tests"
+    "test": "test"
   },
   "scripts": {
-    "lint": "eslint src/ tests/",
+    "lint": "eslint src/ test/",
     "prepublishOnly": "git diff-index --quiet --cached HEAD -- && npm run lint && npm run test",
-    "test": "tape tests/*.js tests/test-suite/*.js | faucet"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -31,8 +31,7 @@
   "homepage": "https://github.com/fengari-lua/fengari#readme",
   "devDependencies": {
     "eslint": "^4.19.1",
-    "faucet": "^0.0.1",
-    "tape": "^4.9.0"
+    "jest": "^22.4.3"
   },
   "dependencies": {
     "readline-sync": "^1.4.9",
@@ -78,6 +77,16 @@
         "error",
         "always"
       ]
-    }
+    },
+    "overrides": [
+      {
+        "files": [
+          "test/**/*.test.js"
+        ],
+        "env": {
+          "jest": true
+        }
+      }
+    ]
   }
 }
