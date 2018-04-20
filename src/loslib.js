@@ -169,16 +169,20 @@ const os_date = function(L) {
 };
 
 const os_time = function(L) {
-    let t = new Date();
-    if (!lua_isnoneornil(L, 1))  /* called with arg */{
-        luaL_checktype(L, 1, LUA_TTABLE);  /* make sure table is at the top */
-        lua_settop(L, 1);
-        t.setSeconds(getfield(L, "sec", 0, 0));
-        t.setMinutes(getfield(L, "min", 0, 0));
-        t.setHours(getfield(L, "hour", 12, 0));
-        t.setDate(getfield(L, "day", -1, 0));
-        t.setMonth(getfield(L, "month", -1, 1));
-        t.setFullYear(getfield(L, "year", -1, 0));
+    let t;
+    if (lua_isnoneornil(L, 1))  /* called without args? */
+        t = new Date();  /* get current time */
+    else {
+        luaL_checktype(L, 1, LUA_TTABLE);
+        lua_settop(L, 1);  /* make sure table is at the top */
+        t = new Date(
+            getfield(L, "year", -1, 0),
+            getfield(L, "month", -1, 1),
+            getfield(L, "day", -1, 0),
+            getfield(L, "hour", 12, 0),
+            getfield(L, "min", 0, 0),
+            getfield(L, "sec", 0, 0)
+        )
         setallfields(L, t);
     }
 

@@ -84,6 +84,27 @@ test('os.date', () => {
 });
 
 
+test('os.date normalisation', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
+    let luaCode = `
+        return os.date('%Y-%m-%d', os.time({
+            day = 0,
+            month = 0,
+            year = 2014
+        }))
+    `;
+    {
+        lualib.luaL_openlibs(L);
+        expect(lauxlib.luaL_loadstring(L, to_luastring(luaCode))).toBe(lua.LUA_OK);
+        lua.lua_call(L, 0, -1);
+    }
+
+    expect(lua.lua_tojsstring(L, -1)).toBe("2013-11-30");
+});
+
+
 test('os.getenv', () => {
     let L = lauxlib.luaL_newstate();
     if (!L) throw Error("failed to create lua state");
