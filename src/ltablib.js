@@ -211,7 +211,7 @@ const unpack = function(L) {
     if (i > e) return 0;  /* empty range */
     let n = e - i;  /* number of elements minus 1 (avoid overflows) */
     if (n >= Number.MAX_SAFE_INTEGER || !lua_checkstack(L, ++n))
-        return luaL_error(L, to_luastring("too many results to unpack", true));
+        return luaL_error(L, to_luastring("too many results to unpack"));
     for (; i < e; i++)  /* push arg[i..e - 1] (to avoid overflows) */
         lua_geti(L, 1, i);
     lua_geti(L, 1, e);  /* push last element */

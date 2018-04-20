@@ -141,7 +141,7 @@ const os_date = function(L) {
     }
 
     if (stm === null)  /* invalid date? */
-        luaL_error(L, to_luastring("time result cannot be represented in this installation", true));
+        luaL_error(L, to_luastring("time result cannot be represented in this installation"));
     if (s[i] === "*".charCodeAt(0) && s[i+1] === "t".charCodeAt(0)) {
         lua_createtable(L, 0, 9);  /* 9 = number of fields */
         setallfields(L, stm, utc);

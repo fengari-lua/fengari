@@ -411,14 +411,14 @@ const RESERVEDSLOT = 5;
 ** reserved slot inside the stack.
 */
 const generic_reader = function(L, ud) {
-    luaL_checkstack(L, 2, to_luastring("too many nested functions", true));
+    luaL_checkstack(L, 2, "too many nested functions");
     lua_pushvalue(L, 1);  /* get function */
     lua_call(L, 0, 1);  /* call it */
     if (lua_isnil(L, -1)) {
         lua_pop(L, 1);  /* pop result */
         return null;
     } else if (!lua_isstring(L, -1))
-        luaL_error(L, to_luastring("reader function must return a string", true));
+        luaL_error(L, to_luastring("reader function must return a string"));
     lua_replace(L, RESERVEDSLOT);  /* save string in reserved slot */
     return lua_tostring(L, RESERVEDSLOT);
 };

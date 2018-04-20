@@ -219,7 +219,7 @@ const iter_aux = function(L) {
     else {
         let dec = utf8_decode(s, n);
         if (dec === null || iscont(s[dec.pos]))
-            return luaL_error(L, to_luastring("invalid UTF-8 code", true));
+            return luaL_error(L, to_luastring("invalid UTF-8 code"));
         lua_pushinteger(L, n + 1);
         lua_pushinteger(L, dec.code);
         return 2;

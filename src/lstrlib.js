@@ -292,7 +292,7 @@ const addliteral = function(L, b, arg) {
             break;
         }
         default: {
-            luaL_argerror(L, arg, to_luastring("value has no literal form", true));
+            luaL_argerror(L, arg, to_luastring("value has no literal form"));
         }
     }
 };
@@ -301,7 +301,7 @@ const scanformat = function(L, strfrmt, i, form) {
     let p = i;
     while (strfrmt[p] !== 0 && luastring_indexOf(FLAGS, strfrmt[p]) >= 0) p++;  /* skip flags */
     if (p - i >= FLAGS.length)
-        luaL_error(L, to_luastring("invalid format (repeated flags)", true));
+        luaL_error(L, to_luastring("invalid format (repeated flags)"));
     if (isdigit(strfrmt[p])) p++;  /* skip width */
     if (isdigit(strfrmt[p])) p++;  /* (2 digits at most) */
     if (strfrmt[p] === 46 /* '.'.charCodeAt(0) */) {
@@ -310,7 +310,7 @@ const scanformat = function(L, strfrmt, i, form) {
         if (isdigit(strfrmt[p])) p++;  /* (2 digits at most) */
     }
     if (isdigit(strfrmt[p]))
-        luaL_error(L, to_luastring("invalid format (width or precision too long)", true));
+        luaL_error(L, to_luastring("invalid format (width or precision too long)"));
     form[0] = 37 /* "%".charCodeAt(0) */;
     for (let j = 0; j < p - i + 1; j++)
         form[j+1] = strfrmt[i+j];
@@ -345,7 +345,7 @@ const str_format = function(L) {
         } else { /* format item */
             let form = [];  /* to store the format ('%...') */
             if (++arg > top)
-                luaL_argerror(L, arg, to_luastring("no value", true));
+                luaL_argerror(L, arg, to_luastring("no value"));
             i = scanformat(L, strfrmt, i, form);
             switch (String.fromCharCode(strfrmt[i++])) {
                 case 'c': {
@@ -535,13 +535,13 @@ const getdetails = function(h, totalsize, fmt) {
     let align = r.size;  /* usually, alignment follows size */
     if (r.opt === Kpaddalign) {  /* 'X' gets alignment from following option */
         if (fmt.off >= fmt.s.length || fmt.s[fmt.off] === 0)
-            luaL_argerror(h.L, 1, to_luastring("invalid next option for option 'X'", true));
+            luaL_argerror(h.L, 1, to_luastring("invalid next option for option 'X'"));
         else {
             let o = getoption(h, fmt);
             align = o.size;
             o = o.opt;
             if (o === Kchar || align === 0)
-                luaL_argerror(h.L, 1, to_luastring("invalid next option for option 'X'", true));
+                luaL_argerror(h.L, 1, to_luastring("invalid next option for option 'X'"));
         }
     }
     if (align <= 1 || r.opt === Kchar)  /* need no alignment? */
@@ -550,7 +550,7 @@ const getdetails = function(h, totalsize, fmt) {
         if (align > h.maxalign)  /* enforce maximum alignment */
             align = h.maxalign;
         if ((align & (align -1)) !== 0)  /* is 'align' not a power of 2? */
-            luaL_argerror(h.L, 1, to_luastring("format asks for alignment not power of 2", true));
+            luaL_argerror(h.L, 1, to_luastring("format asks for alignment not power of 2"));
         r.ntoalign = (align - (totalsize & (align - 1))) & (align - 1);
     }
     return r;
@@ -831,10 +831,10 @@ const str_unpack = function(L) {
         let size = details.size;
         let ntoalign = details.ntoalign;
         if (/*ntoalign + size > ~pos ||*/ pos + ntoalign + size > ld)
-            luaL_argerror(L, 2, to_luastring("data string too short", true));
+            luaL_argerror(L, 2, to_luastring("data string too short"));
         pos += ntoalign;  /* skip alignment */
         /* stack space for item + next position */
-        luaL_checkstack(L, 2, to_luastring("too many results", true));
+        luaL_checkstack(L, 2, "too many results");
         n++;
         switch (opt) {
             case Kint:
@@ -1039,7 +1039,7 @@ const min_expand = function(ms, s, p, ep) {
 
 const start_capture = function(ms, s, p, what) {
     let level = ms.level;
-    if (level >= LUA_MAXCAPTURES) luaL_error(ms.L, to_luastring("too many captures", true));
+    if (level >= LUA_MAXCAPTURES) luaL_error(ms.L, to_luastring("too many captures"));
     ms.capture[level] = ms.capture[level] ? ms.capture[level] : {};
     ms.capture[level].init = s;
     ms.capture[level].len = what;
@@ -1091,7 +1091,7 @@ const match = function(ms, s, p) {
     let gotoinit = true;
 
     if (ms.matchdepth-- === 0)
-        luaL_error(ms.L, to_luastring("pattern too complex", true));
+        luaL_error(ms.L, to_luastring("pattern too complex"));
 
     while (gotoinit || gotodefault) {
         gotoinit = false;
@@ -1203,7 +1203,7 @@ const push_onecapture = function(ms, i, s, e) {
             luaL_error(ms.L, to_luastring("invalid capture index %%%d"), i + 1);
     } else {
         let l = ms.capture[i].len;
-        if (l === CAP_UNFINISHED) luaL_error(ms.L, to_luastring("unfinished capture", true));
+        if (l === CAP_UNFINISHED) luaL_error(ms.L, to_luastring("unfinished capture"));
         if (l === CAP_POSITION)
             lua_pushinteger(ms.L, ms.capture[i].init - ms.src_init + 1);
         else
@@ -1213,7 +1213,7 @@ const push_onecapture = function(ms, i, s, e) {
 
 const push_captures = function(ms, s, e) {
     let nlevels = ms.level === 0 && ms.src.subarray(s) ? 1 : ms.level;
-    luaL_checkstack(ms.L, nlevels, to_luastring("too many catpures", true));
+    luaL_checkstack(ms.L, nlevels, "too many captures");
     for (let i = 0; i < nlevels; i++)
         push_onecapture(ms, i, s, e);
     return nlevels;  /* number of strings pushed */
