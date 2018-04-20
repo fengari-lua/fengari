@@ -75,6 +75,7 @@ const {
 } = require('./lauxlib.js');
 const lualib = require('./lualib.js');
 const {
+    luastring_eq,
     luastring_indexOf,
     to_jsstring,
     to_luastring
@@ -1061,21 +1062,7 @@ const end_capture = function(ms, s, p) {
 
 /* Compare the elements of arrays 'a' and 'b' to see if they contain the same elements */
 const array_cmp = function(a, ai, b, bi, len) {
-    if (len === 0)
-        return true;
-    let aj = ai+len;
-    loop: for (;;) {
-        ai = luastring_indexOf(a, b[bi], ai);
-        if (ai === -1 || ai >= aj)
-            return false;
-        for (let j = 1; j < len; j++) {
-            if (a[ai+j] !== b[bi+j]) {
-                ai++;
-                continue loop;
-            }
-        }
-        return true;
-    }
+    return luastring_eq(a.subarray(ai, ai+len), b.subarray(bi, bi+len));
 };
 
 const match_capture = function(ms, s, l) {
@@ -1249,17 +1236,11 @@ const find_subarray = function(arr, subarr, from_index) {
     if (sl === 0)
         return i;
 
-    loop: for (;;) {
-        i = arr.indexOf(subarr[0], i);
-        if (i === -1) break;
-        for (let j = 1; j < sl; j++) {
-            if (arr[i+j] !== subarr[j]) {
-                i++;
-                continue loop;
-            }
-        }
-        return i;
+    for (; (i = arr.indexOf(subarr[0], i)) !== -1; i++) {
+        if (luastring_eq(arr.subarray(i, i+sl), subarr))
+            return i;
     }
+
     return -1;
 };
 

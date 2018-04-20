@@ -42,6 +42,7 @@ const {
     luaL_pushresult
 } = require('./lauxlib.js');
 const {
+    luastring_eq,
     luastring_indexOf,
     to_jsstring,
     to_luastring
@@ -101,14 +102,6 @@ const getfield = function(L, key, d, delta) {
     return res;
 };
 
-const array_cmp = function(a, ai, b, bi, len) {
-    for (let i=0; i<len; i++) {
-        if (a[ai+i] !== b[bi+i])
-            return false;
-    }
-    return true;
-};
-
 const checkoption = function(L, conv, i, buff) {
     let option = LUA_STRFTIMEOPTIONS;
     let o = 0;
@@ -116,7 +109,7 @@ const checkoption = function(L, conv, i, buff) {
     for (; o < option.length && oplen <= (conv.length - i); o += oplen) {
         if (option[o] === '|'.charCodeAt(0))  /* next block? */
             oplen++;  /* will check options with next length (+1) */
-        else if (array_cmp(conv, i, option, o, oplen)) {  /* match? */
+        else if (luastring_eq(conv.subarray(i, i+oplen), option.subarray(o, o+oplen))) {  /* match? */
             buff.set(conv.subarray(i, i+oplen)); /* copy valid option to buffer */
             return i + oplen;  /* return next item */
         }
