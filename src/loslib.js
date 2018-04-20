@@ -199,7 +199,7 @@ const l_checktime = function(L, arg) {
 const os_difftime = function(L) {
     let t1 = l_checktime(L, 1);
     let t2 = l_checktime(L, 2);
-    lua_pushnumber(L, new Date(t1) - new Date(t2));
+    lua_pushnumber(L, t1 - t2);
     return 1;
 };
 
