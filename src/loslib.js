@@ -175,7 +175,7 @@ const os_time = function(L) {
             getfield(L, "hour", 12, 0),
             getfield(L, "min", 0, 0),
             getfield(L, "sec", 0, 0)
-        )
+        );
         setallfields(L, t);
     }
 
