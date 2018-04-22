@@ -1,6 +1,7 @@
 UNRELEASED
 
   - More node 6 compatibility fixes
+  - Use own strftime code (drops strftime npm package dependency)
 
 
 0.1.1 - 2018-04-03
