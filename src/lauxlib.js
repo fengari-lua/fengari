@@ -482,6 +482,7 @@ const luaL_prepbuffer = function(B) {
 
 const luaL_addlstring = function(B, s, l) {
     if (l > 0) {
+        s = from_userstring(s);
         let b = luaL_prepbuffsize(B, l);
         b.set(s.subarray(0, l));
         luaL_addsize(B, l);
@@ -489,6 +490,7 @@ const luaL_addlstring = function(B, s, l) {
 };
 
 const luaL_addstring = function(B, s) {
+    s = from_userstring(s);
     luaL_addlstring(B, s, s.length);
 };
 

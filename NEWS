@@ -2,6 +2,7 @@ UNRELEASED
 
   - More node 6 compatibility fixes
   - Use own strftime code (drops strftime npm package dependency)
+  - Fix passing JavaScript strings to luaL_add(l)string
 
 
 0.1.1 - 2018-04-03
