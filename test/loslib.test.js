@@ -120,6 +120,7 @@ test('os.time normalisation of table', () => {
         assert(t.month == 2, "unmodified month")
         assert(t.year == 2018, "unmodified year")
         assert(t.wday == 3, "correct wday")
+        assert(t.yday == 51, "correct yday")
     `;
     lualib.luaL_openlibs(L);
     expect(lauxlib.luaL_loadstring(L, to_luastring(luaCode))).toBe(lua.LUA_OK);
