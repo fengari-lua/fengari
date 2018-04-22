@@ -73,7 +73,7 @@ const setallfields = function(L, time, utc) {
     setfield(L, "min",   !utc ? time.getMinutes()  : time.getUTCMinutes());
     setfield(L, "hour",  !utc ? time.getHours()    : time.getUTCHours());
     setfield(L, "day",   !utc ? time.getDate()     : time.getUTCDate());
-    setfield(L, "month", !utc ? time.getMonth()    : time.getUTCMonth());
+    setfield(L, "month", (!utc ? time.getMonth()   : time.getUTCMonth()) + 1);
     setfield(L, "year",  !utc ? time.getFullYear() : time.getUTCFullYear());
     setfield(L, "wday",  !utc ? time.getDay()      : time.getUTCDay());
     let now = new Date();

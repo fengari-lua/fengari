@@ -105,6 +105,27 @@ test('os.date normalisation', () => {
 });
 
 
+test('os.time normalisation of table', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
+    let luaCode = `
+        local t = {
+            day = 20,
+            month = 2,
+            year = 2018
+        }
+        os.time(t)
+        assert(t.day == 20, "unmodified day")
+        assert(t.month == 2, "unmodified month")
+        assert(t.year == 2018, "unmodified year")
+    `;
+    lualib.luaL_openlibs(L);
+    expect(lauxlib.luaL_loadstring(L, to_luastring(luaCode))).toBe(lua.LUA_OK);
+    lua.lua_call(L, 0, 0);
+});
+
+
 test('os.getenv', () => {
     let L = lauxlib.luaL_newstate();
     if (!L) throw Error("failed to create lua state");
