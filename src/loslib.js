@@ -144,9 +144,8 @@ const os_date = function(L) {
                 i++;  /* skip '%' */
                 i = checkoption(L, s, i, cc.subarray(1));  /* copy specifier to 'cc' */
                 let len = luastring_indexOf(cc, 0);
-                if (len !== -1)
-                    cc = cc.subarray(0, len);
-                let buff = strftime(to_jsstring(cc), stm);
+                if (len === -1) len = void 0;
+                let buff = strftime(to_jsstring(cc, 0, len), stm);
                 luaL_addstring(b, to_luastring(buff));
             }
         }
