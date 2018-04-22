@@ -35,7 +35,6 @@ const {
     luaL_execresult,
     luaL_fileresult,
     luaL_newlib,
-    luaL_opt,
     luaL_optinteger,
     luaL_optlstring,
     luaL_optstring,
@@ -123,8 +122,7 @@ const checkoption = function(L, conv, i, buff) {
 
 const os_date = function(L) {
     let s = luaL_optlstring(L, 1, "%c");
-    let t = luaL_opt(L, l_checktime, 2, new Date().getTime() / 1000) * 1000;
-    let stm = new Date(t);
+    let stm = lua_isnoneornil(L, 2) ? new Date() : new Date(l_checktime(L, 2) * 1000);
     let utc = false;
     let i = 0;
     if (s[i] === '!'.charCodeAt(0)) {  /* UTC? */
