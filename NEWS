@@ -1,6 +1,9 @@
-UNRELEASED
+0.1.2 - 2018-04-22
 
   - More node 6 compatibility fixes
+  - Use indirect eval to get reference to global environment
+  - Move test suite to jest
+  - Fixes for os.time and os.date normalisation
   - Use own strftime code (drops strftime npm package dependency)
   - Fix passing JavaScript strings to luaL_add(l)string
 
