@@ -75,7 +75,7 @@ const setallfields = function(L, time, utc) {
     setfield(L, "day",   utc ? time.getUTCDate()     : time.getDate());
     setfield(L, "month", (utc ? time.getUTCMonth()   : time.getMonth()) + 1);
     setfield(L, "year",  utc ? time.getUTCFullYear() : time.getFullYear());
-    setfield(L, "wday",  utc ? time.getUTCDay()      : time.getDay());
+    setfield(L, "wday",  (utc ? time.getUTCDay()     : time.getDay()) + 1);
     let now = new Date();
     setfield(L, "yday", Math.floor((now - (new Date(now.getFullYear(), 0, 0))) / (1000 * 60 * 60 * 24)));
     // setboolfield(L, "isdst", time.get);
