@@ -69,13 +69,13 @@ const setfield = function(L, key, value) {
 };
 
 const setallfields = function(L, time, utc) {
-    setfield(L, "sec",   !utc ? time.getSeconds()  : time.getUTCSeconds());
-    setfield(L, "min",   !utc ? time.getMinutes()  : time.getUTCMinutes());
-    setfield(L, "hour",  !utc ? time.getHours()    : time.getUTCHours());
-    setfield(L, "day",   !utc ? time.getDate()     : time.getUTCDate());
-    setfield(L, "month", (!utc ? time.getMonth()   : time.getUTCMonth()) + 1);
-    setfield(L, "year",  !utc ? time.getFullYear() : time.getUTCFullYear());
-    setfield(L, "wday",  !utc ? time.getDay()      : time.getUTCDay());
+    setfield(L, "sec",   utc ? time.getUTCSeconds()  : time.getSeconds());
+    setfield(L, "min",   utc ? time.getUTCMinutes()  : time.getMinutes());
+    setfield(L, "hour",  utc ? time.getUTCHours()    : time.getHours());
+    setfield(L, "day",   utc ? time.getUTCDate()     : time.getDate());
+    setfield(L, "month", (utc ? time.getUTCMonth()   : time.getMonth()) + 1);
+    setfield(L, "year",  utc ? time.getUTCFullYear() : time.getFullYear());
+    setfield(L, "wday",  utc ? time.getUTCDay()      : time.getDay());
     let now = new Date();
     setfield(L, "yday", Math.floor((now - (new Date(now.getFullYear(), 0, 0))) / (1000 * 60 * 60 * 24)));
     // setboolfield(L, "isdst", time.get);
