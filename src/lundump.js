@@ -79,38 +79,38 @@ class BytecodeParser {
         return u8;
     }
 
-    readByte() {
+    LoadByte() {
         if (luaZ_read(this.Z, this.u8, 0, 1) !== 0)
             this.error("truncated");
         return this.u8[0];
     }
 
-    readInteger() {
-        if (luaZ_read(this.Z, this.u8, 0, this.integerSize) !== 0)
-            this.error("truncated");
-        return this.dv.getInt32(0, true);
-    }
-
-    readSize_t() {
-        return this.readInteger();
-    }
-
-    readInt() {
+    LoadInt() {
         if (luaZ_read(this.Z, this.u8, 0, this.intSize) !== 0)
             this.error("truncated");
         return this.dv.getInt32(0, true);
     }
 
-    readNumber() {
+    LoadNumber() {
         if (luaZ_read(this.Z, this.u8, 0, this.numberSize) !== 0)
             this.error("truncated");
         return this.dv.getFloat64(0, true);
     }
 
-    readString() {
-        let size = this.readByte();
+    LoadInteger() {
+        if (luaZ_read(this.Z, this.u8, 0, this.integerSize) !== 0)
+            this.error("truncated");
+        return this.dv.getInt32(0, true);
+    }
+
+    LoadSize_t() {
+        return this.LoadInteger();
+    }
+
+    LoadString() {
+        let size = this.LoadByte();
         if (size === 0xFF)
-            size = this.readSize_t();
+            size = this.LoadSize_t();
         if (size === 0)
             return null;
         return luaS_bless(this.L, this.read(size-1));
@@ -121,23 +121,14 @@ class BytecodeParser {
         return ((~((~0)<<(n)))<<(p));
     }
 
-    /* creates a mask with 'n' 0 bits at position 'p' */
-    static MASK0(n, p) {
-        return (~BytecodeParser.MASK1(n,p));
-    }
-
-    readInstruction() {
-        if (luaZ_read(this.Z, this.u8, 0, this.instructionSize) !== 0)
-            this.error("truncated");
-        return this.dv.getUint32(0, true);
-    }
-
-    readCode(f) {
-        let n = this.readInt();
+    LoadCode(f) {
+        let n = this.LoadInt();
         let p = BytecodeParser;
 
         for (let i = 0; i < n; i++) {
-            let ins = this.readInstruction();
+	        if (luaZ_read(this.Z, this.u8, 0, this.instructionSize) !== 0)
+	            this.error("truncated");
+            let ins = this.dv.getUint32(0, true);
             f.code[i] = {
                 code:   ins,
                 opcode: (ins >> POS_OP) & p.MASK1(SIZE_OP, 0),
@@ -151,40 +142,28 @@ class BytecodeParser {
         }
     }
 
-    readUpvalues(f) {
-        let n = this.readInt();
+    LoadConstants(f) {
+        let n = this.LoadInt();
 
         for (let i = 0; i < n; i++) {
-            f.upvalues[i] = {
-                name:    null,
-                instack: this.readByte(),
-                idx:     this.readByte()
-            };
-        }
-    }
-
-    readConstants(f) {
-        let n = this.readInt();
-
-        for (let i = 0; i < n; i++) {
-            let t = this.readByte();
+            let t = this.LoadByte();
 
             switch (t) {
                 case LUA_TNIL:
                     f.k.push(new lobject.TValue(LUA_TNIL, null));
                     break;
                 case LUA_TBOOLEAN:
-                    f.k.push(new lobject.TValue(LUA_TBOOLEAN, this.readByte() !== 0));
+                    f.k.push(new lobject.TValue(LUA_TBOOLEAN, this.LoadByte() !== 0));
                     break;
                 case LUA_TNUMFLT:
-                    f.k.push(new lobject.TValue(LUA_TNUMFLT, this.readNumber()));
+                    f.k.push(new lobject.TValue(LUA_TNUMFLT, this.LoadNumber()));
                     break;
                 case LUA_TNUMINT:
-                    f.k.push(new lobject.TValue(LUA_TNUMINT, this.readInteger()));
+                    f.k.push(new lobject.TValue(LUA_TNUMINT, this.LoadInteger()));
                     break;
                 case LUA_TSHRSTR:
                 case LUA_TLNGSTR:
-                    f.k.push(new lobject.TValue(LUA_TLNGSTR, this.readString()));
+                    f.k.push(new lobject.TValue(LUA_TLNGSTR, this.LoadString()));
                     break;
                 default:
                     this.error(`unrecognized constant '${t}'`);
@@ -192,49 +171,61 @@ class BytecodeParser {
         }
     }
 
-    readProtos(f) {
-        let n = this.readInt();
+    LoadProtos(f) {
+        let n = this.LoadInt();
 
         for (let i = 0; i < n; i++) {
             f.p[i] = new lfunc.Proto(this.L);
-            this.readFunction(f.p[i], f.source);
+            this.LoadFunction(f.p[i], f.source);
         }
     }
 
-    readDebug(f) {
-        let n = this.readInt();
-        for (let i = 0; i < n; i++)
-            f.lineinfo[i] = this.readInt();
+    LoadUpvalues(f) {
+        let n = this.LoadInt();
 
-        n = this.readInt();
+        for (let i = 0; i < n; i++) {
+            f.upvalues[i] = {
+                name:    null,
+                instack: this.LoadByte(),
+                idx:     this.LoadByte()
+            };
+        }
+    }
+
+    LoadDebug(f) {
+        let n = this.LoadInt();
+        for (let i = 0; i < n; i++)
+            f.lineinfo[i] = this.LoadInt();
+
+        n = this.LoadInt();
         for (let i = 0; i < n; i++) {
             f.locvars[i] = {
-                varname: this.readString(),
-                startpc: this.readInt(),
-                endpc:   this.readInt()
+                varname: this.LoadString(),
+                startpc: this.LoadInt(),
+                endpc:   this.LoadInt()
             };
         }
 
-        n = this.readInt();
+        n = this.LoadInt();
         for (let i = 0; i < n; i++) {
-            f.upvalues[i].name = this.readString();
+            f.upvalues[i].name = this.LoadString();
         }
     }
 
-    readFunction(f, psource) {
-        f.source = this.readString();
+    LoadFunction(f, psource) {
+        f.source = this.LoadString();
         if (f.source === null)  /* no source in dump? */
             f.source = psource;  /* reuse parent's source */
-        f.linedefined = this.readInt();
-        f.lastlinedefined = this.readInt();
-        f.numparams = this.readByte();
-        f.is_vararg = this.readByte() !== 0;
-        f.maxstacksize = this.readByte();
-        this.readCode(f);
-        this.readConstants(f);
-        this.readUpvalues(f);
-        this.readProtos(f);
-        this.readDebug(f);
+        f.linedefined = this.LoadInt();
+        f.lastlinedefined = this.LoadInt();
+        f.numparams = this.LoadByte();
+        f.is_vararg = this.LoadByte() !== 0;
+        f.maxstacksize = this.LoadByte();
+        this.LoadCode(f);
+        this.LoadConstants(f);
+        this.LoadUpvalues(f);
+        this.LoadProtos(f);
+        this.LoadDebug(f);
     }
 
     checkliteral(s, msg) {
@@ -246,19 +237,19 @@ class BytecodeParser {
     checkHeader() {
         this.checkliteral(LUA_SIGNATURE.subarray(1), "not a"); /* 1st char already checked */
 
-        if (this.readByte() !== 0x53)
+        if (this.LoadByte() !== 0x53)
             this.error("version mismatch in");
 
-        if (this.readByte() !== 0)
+        if (this.LoadByte() !== 0)
             this.error("format mismatch in");
 
         this.checkliteral(LUAC_DATA, "corrupted");
 
-        this.intSize         = this.readByte();
-        this.size_tSize      = this.readByte();
-        this.instructionSize = this.readByte();
-        this.integerSize     = this.readByte();
-        this.numberSize      = this.readByte();
+        this.intSize         = this.LoadByte();
+        this.size_tSize      = this.LoadByte();
+        this.instructionSize = this.LoadByte();
+        this.integerSize     = this.LoadByte();
+        this.numberSize      = this.LoadByte();
 
         this.checksize(this.intSize, 4, "int");
         this.checksize(this.size_tSize, 4, "size_t");
@@ -266,10 +257,10 @@ class BytecodeParser {
         this.checksize(this.integerSize, 4, "integer");
         this.checksize(this.numberSize, 8, "number");
 
-        if (this.readInteger() !== 0x5678)
+        if (this.LoadInteger() !== 0x5678)
             this.error("endianness mismatch in");
 
-        if (this.readNumber() !== 370.5)
+        if (this.LoadNumber() !== 370.5)
             this.error("float format mismatch in");
 
     }
@@ -288,11 +279,11 @@ class BytecodeParser {
 const luaU_undump = function(L, Z, name) {
     let S = new BytecodeParser(L, Z, name);
     S.checkHeader();
-    let cl = lfunc.luaF_newLclosure(L, S.readByte());
+    let cl = lfunc.luaF_newLclosure(L, S.LoadByte());
     ldo.luaD_inctop(L);
     L.stack[L.top-1].setclLvalue(cl);
     cl.p = new lfunc.Proto(L);
-    S.readFunction(cl.p, null);
+    S.LoadFunction(cl.p, null);
     lua_assert(cl.nupvalues === cl.p.upvalues.length);
     /* luai_verifycode */
     return cl;
