@@ -108,16 +108,12 @@ class BytecodeParser {
     }
 
     readString() {
-        let size = Math.max(this.readByte() - 1, 0);
-
-        if (size + 1 === 0xFF)
-            size = this.readSize_t() - 1;
-
-        if (size === 0) {
+        let size = this.readByte();
+        if (size === 0xFF)
+            size = this.readSize_t();
+        if (size === 0)
             return null;
-        }
-
-        return luaS_bless(this.L, this.read(size));
+        return luaS_bless(this.L, this.read(size-1));
     }
 
     /* creates a mask with 'n' 1 bits at position 'p' */
