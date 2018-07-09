@@ -126,8 +126,8 @@ class BytecodeParser {
         let p = BytecodeParser;
 
         for (let i = 0; i < n; i++) {
-	        if (luaZ_read(this.Z, this.u8, 0, this.instructionSize) !== 0)
-	            this.error("truncated");
+            if (luaZ_read(this.Z, this.u8, 0, this.instructionSize) !== 0)
+                this.error("truncated");
             let ins = this.dv.getUint32(0, true);
             f.code[i] = {
                 code:   ins,
