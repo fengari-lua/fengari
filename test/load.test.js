@@ -49,8 +49,8 @@ test('undump empty string', () => {
 
     let luaCode = `
         assert(load(string.dump(function()
-			local str = ""
-			return #str -- something that inspects the string
+            local str = ""
+            return #str -- something that inspects the string
         end)))()
     `;
     {
