@@ -219,7 +219,7 @@ const unpack = function(L) {
 };
 
 const l_randomizePivot = function() {
-    return Math.floor(Math.random()*1<<32);
+    return Math.floor(Math.random()*0x100000000);
 };
 
 const RANLIMIT = 100;
