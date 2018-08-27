@@ -1094,7 +1094,7 @@ const lua_upvalueid = function(L, fidx, n) {
         }
         case LUA_TCCL: {  /* C closure */
             let f = fi.value;
-            api_check(L, n|0 === n && 1 <= n && n <= f.nupvalues, "invalid upvalue index");
+            api_check(L, (n|0) === n && n > 0 && n <= f.nupvalues, "invalid upvalue index");
             return f.upvalue[n - 1];
         }
         default: {
