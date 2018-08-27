@@ -640,8 +640,7 @@ const open_func = function(ls, fs, bl) {
     fs.nactvar = 0;
     fs.firstlocal = ls.dyd.actvar.n;
     fs.bl = null;
-    let f = new Proto(ls.L);
-    f = fs.f;
+    let f = fs.f;
     f.source = ls.source;
     f.maxstacksize = 2;  /* registers 0/1 are always valid */
     enterblock(fs, bl, false);
