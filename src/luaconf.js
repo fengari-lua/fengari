@@ -165,7 +165,11 @@ const LUA_INTEGER_FMT = `%${LUA_INTEGER_FRMLEN}d`;
 const LUA_NUMBER_FMT  = "%.14g";
 
 const lua_getlocaledecpoint = function() {
-    return (1.1).toLocaleString().charCodeAt(1);
+    /* we hard-code the decimal point to '.' as a user cannot change the
+       locale in most JS environments, and in that you can, a multi-byte
+       locale is common.
+    */
+    return 46 /* '.'.charCodeAt(0) */;
 };
 
 const luai_apicheck = function(l, e) {

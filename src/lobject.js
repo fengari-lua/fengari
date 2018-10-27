@@ -57,7 +57,6 @@ const ltable  = require('./ltable.js');
 const {
     LUA_COMPAT_FLOATSTRING,
     ldexp,
-    lua_getlocaledecpoint,
     lua_integer2str,
     lua_number2str
 } = require('./luaconf.js');
@@ -428,7 +427,6 @@ const MAXSIGDIG = 30;
 */
 const lua_strx2number = function(s) {
     let i = 0;
-    let dot = lua_getlocaledecpoint();
     let r = 0.0;  /* result (accumulator) */
     let sigdig = 0;  /* number of significant digits */
     let nosigdig = 0;  /* number of non-significant digits */
@@ -441,7 +439,7 @@ const lua_strx2number = function(s) {
     if (!(s[i] === 48 /* ('0').charCodeAt(0) */ && (s[i+1] === 120 /* ('x').charCodeAt(0) */ || s[i+1] === 88 /* ('X').charCodeAt(0) */)))  /* check '0x' */
         return null;  /* invalid format (no '0x') */
     for (i += 2; ; i++) {  /* skip '0x' and read numeral */
-        if (s[i] === dot) {
+        if (s[i] === 46 /* ('.').charCodeAt(0) i.e. dot/lua_getlocaledecpoint(); */) {
             if (hasdot) break;  /* second dot? stop loop */
             else hasdot = true;
         } else if (lisxdigit(s[i])) {
@@ -592,7 +590,7 @@ const luaO_tostring = function(L, obj) {
     else {
         let str = lua_number2str(obj.value);
         if (!LUA_COMPAT_FLOATSTRING && /^[-0123456789]+$/.test(str)) {  /* looks like an int? */
-            str += String.fromCharCode(lua_getlocaledecpoint()) + '0'; /* adds '.0' to result */
+            str += '.0'; /* adds '.0' to result: lua_getlocaledecpoint removed as optimisation */
         }
         buff = to_luastring(str);
     }
