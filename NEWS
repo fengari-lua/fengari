@@ -1,3 +1,10 @@
+UNRELEASED
+
+  - Fix loading bytecode with empty string constant
+  - Fix missing luaopen_base export
+  - Use only C locale for string->number conversions
+
+
 0.1.2 - 2018-04-22
 
   - More node 6 compatibility fixes
