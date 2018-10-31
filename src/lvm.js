@@ -1113,12 +1113,9 @@ const settable = function(L, t, key, val) {
         let tm;
         if (t.ttistable()) {
             let h = t.value; /* save 't' table */
-            let slot = ltable.luaH_set(L, h, key);
+            let slot = ltable.luaH_get(L, h, key);
             if (!slot.ttisnil() || (tm = ltm.fasttm(L, h.metatable, ltm.TMS.TM_NEWINDEX)) === null) {
-                if (val.ttisnil())
-                    ltable.luaH_delete(L, h, key);
-                else
-                    slot.setfrom(val);
+                ltable.luaH_setfrom(L, h, key, val);
                 ltable.invalidateTMcache(h);
                 return;
             }

@@ -1,7 +1,7 @@
 "use strict";
 
 const {
-    constant_types: { LUA_TLNGSTR },
+    constant_types: { LUA_TBOOLEAN, LUA_TLNGSTR },
     thread_status: { LUA_ERRSYNTAX },
     to_luastring
 } = require('./defs.js');
@@ -205,16 +205,16 @@ const save_and_next = function(ls) {
 ** it will not be collected until the end of the compilation
 ** (by that time it should be anchored somewhere)
 */
+const TVtrue = new lobject.TValue(LUA_TBOOLEAN, true);
 const luaX_newstring = function(ls, str) {
     let L = ls.L;
     let ts = luaS_new(L, str);
-    let o = ltable.luaH_set(L, ls.h, new lobject.TValue(LUA_TLNGSTR, ts));
-    if (o.ttisnil()) { /* not in use yet? */
-        o.setbvalue(true);
+    /* HACK: Workaround lack of ltable 'keyfromval' */
+    let tpair = ls.h.strong.get(luaS_hashlongstr(ts));
+    if (!tpair) { /* not in use yet? */
+        let key = new lobject.TValue(LUA_TLNGSTR, ts);
+        ltable.luaH_setfrom(L, ls.h, key, TVtrue);
     } else { /* string already present */
-        /* HACK: Workaround lack of ltable 'keyfromval' */
-        let tpair = ls.h.strong.get(luaS_hashlongstr(ts));
-        lua_assert(tpair.value == o); /* fengari addition */
         ts = tpair.key.tsvalue(); /* re-use value previously stored */
     }
     return ts;

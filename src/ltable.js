@@ -185,23 +185,6 @@ const luaH_get = function(L, t, key) {
     return getgeneric(t, table_hash(L, key));
 };
 
-const setgeneric = function(t, hash, key) {
-    let v = t.strong.get(hash);
-    if (v)
-        return v.value;
-
-    let kv = key.value;
-    if ((key.ttisfloat() && (kv|0) === kv)) { /* does index fit in an integer? */
-        /* insert it as an integer */
-        key = new lobject.TValue(LUA_TNUMINT, kv);
-    } else {
-        key = new lobject.TValue(key.type, kv);
-    }
-    let tv = new lobject.TValue(LUA_TNIL, null);
-    add(t, hash, key, tv);
-    return tv;
-};
-
 const luaH_setint = function(t, key, value) {
     lua_assert(typeof key == "number" && (key|0) === key && value instanceof lobject.TValue);
     let hash = key; /* table_hash known result */
@@ -209,9 +192,9 @@ const luaH_setint = function(t, key, value) {
         mark_dead(t, hash);
         return;
     }
-    let v = t.strong.get(hash);
-    if (v) {
-        let tv = v.value;
+    let e = t.strong.get(hash);
+    if (e) {
+        let tv = e.value;
         tv.setfrom(value);
     } else {
         let k = new lobject.TValue(LUA_TNUMINT, key);
@@ -220,16 +203,29 @@ const luaH_setint = function(t, key, value) {
     }
 };
 
-const luaH_set = function(L, t, key) {
+const luaH_setfrom = function(L, t, key, value) {
     lua_assert(key instanceof lobject.TValue);
     let hash = table_hash(L, key);
-    return setgeneric(t, hash, key);
-};
+    if (value.ttisnil()) { /* delete */
+        mark_dead(t, hash);
+        return;
+    }
 
-const luaH_delete = function(L, t, key) {
-    lua_assert(key instanceof lobject.TValue);
-    let hash = table_hash(L, key);
-    return mark_dead(t, hash);
+    let e = t.strong.get(hash);
+    if (e) {
+        e.value.setfrom(value);
+    } else {
+        let k;
+        let kv = key.value;
+        if ((key.ttisfloat() && (kv|0) === kv)) { /* does index fit in an integer? */
+            /* insert it as an integer */
+            k = new lobject.TValue(LUA_TNUMINT, kv);
+        } else {
+            k = new lobject.TValue(key.type, kv);
+        }
+        let v = new lobject.TValue(value.type, value.value);
+        add(t, hash, k, v);
+    }
 };
 
 /*
@@ -285,12 +281,11 @@ const luaH_next = function(L, table, keyI) {
 };
 
 module.exports.invalidateTMcache = invalidateTMcache;
-module.exports.luaH_delete  = luaH_delete;
 module.exports.luaH_get     = luaH_get;
 module.exports.luaH_getint  = luaH_getint;
 module.exports.luaH_getn    = luaH_getn;
 module.exports.luaH_getstr  = luaH_getstr;
-module.exports.luaH_set     = luaH_set;
+module.exports.luaH_setfrom = luaH_setfrom;
 module.exports.luaH_setint  = luaH_setint;
 module.exports.luaH_new     = luaH_new;
 module.exports.luaH_next    = luaH_next;

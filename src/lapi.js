@@ -452,12 +452,7 @@ const lua_rawset = function(L, idx) {
     api_check(L, o.ttistable(), "table expected");
     let k = L.stack[L.top - 2];
     let v = L.stack[L.top - 1];
-    if (v.ttisnil()) {
-        ltable.luaH_delete(L, o.value, k);
-    } else {
-        let slot = ltable.luaH_set(L, o.value, k);
-        slot.setfrom(v);
-    }
+    ltable.luaH_setfrom(L, o.value, k, v);
     ltable.invalidateTMcache(o.value);
     delete L.stack[--L.top];
     delete L.stack[--L.top];
@@ -478,12 +473,7 @@ const lua_rawsetp = function(L, idx, p) {
     api_check(L, o.ttistable(), "table expected");
     let k = new TValue(LUA_TLIGHTUSERDATA, p);
     let v = L.stack[L.top - 1];
-    if (v.ttisnil()) {
-        ltable.luaH_delete(L, o.value, k);
-    } else {
-        let slot = ltable.luaH_set(L, o.value, k);
-        slot.setfrom(v);
-    }
+    ltable.luaH_setfrom(L, o.value, k, v);
     delete L.stack[--L.top];
 };
 
