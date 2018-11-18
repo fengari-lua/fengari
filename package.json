@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/fengari-lua/fengari#readme",
   "devDependencies": {
-    "eslint": "^5.8.0",
+    "eslint": "^5.9.0",
     "jest": "^23.6.0"
   },
   "dependencies": {
