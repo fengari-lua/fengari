@@ -83,7 +83,7 @@ In the browser `require` and `package.loadlib` try to find a file by making sync
 - `package.jspath` instead of `package.cpath`
 - `LUA_JSPATH_DEFAULT` instead of `LUA_CPATH_DEFAULT` (and contains .js extensions rather than .so or .dll extensions)
 - `lua_tointegerx` and `lua_tonumberx` do not have out-parameters indicating conversion success. Instead, ``false`` is returned when conversion fails.
-- `luaL_execresult` takes an extra argument: an error object. The error object should have a fields `status`, `signal` and `errno`.
+- `luaL_execresult` takes an extra argument: an error object. The error object should have fields `status`, `signal` and `errno`.
 - `luaL_fileresult` takes an extra argument: an error object. The error object should have a field `errno`.
 
 
@@ -132,7 +132,7 @@ This example would be an inefficient way to write `lua_pushvalue(L, 1)`:
 ```js
 var p = lua_toproxy(L, 1);
 p(L);
-````
+```
 
 
 ### `fengari` library
