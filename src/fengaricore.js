@@ -15,7 +15,7 @@ const FENGARI_VERSION_RELEASE = "4";
 const FENGARI_VERSION         = "Fengari " + FENGARI_VERSION_MAJOR + "." + FENGARI_VERSION_MINOR;
 const FENGARI_RELEASE         = FENGARI_VERSION + "." + FENGARI_VERSION_RELEASE;
 const FENGARI_AUTHORS         = "B. Giannangeli, Daurnimator";
-const FENGARI_COPYRIGHT       = FENGARI_RELEASE + "  Copyright (C) 2017-2018 " + FENGARI_AUTHORS + "\nBased on: " + defs.LUA_COPYRIGHT;
+const FENGARI_COPYRIGHT       = FENGARI_RELEASE + "  Copyright (C) 2017-2019 " + FENGARI_AUTHORS + "\nBased on: " + defs.LUA_COPYRIGHT;
 
 module.exports.FENGARI_AUTHORS         = FENGARI_AUTHORS;
 module.exports.FENGARI_COPYRIGHT       = FENGARI_COPYRIGHT;
