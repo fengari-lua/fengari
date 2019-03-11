@@ -242,9 +242,9 @@ const addquoted = function(b, s, len) {
             luaL_addchar(b, 92 /* '\\'.charCodeAt(0) */);
             luaL_addchar(b, s[i]);
         } else if (iscntrl(s[i])) {
-            let buff = ''+s[i];
+            let buff = "" + s[i]; /* stringify */
             if (isdigit(s[i+1]))
-                buff = '0'.repeat(3-buff.length) + buff; /* pad to 3 '0's */
+                buff = ("000" + buff).slice(-3); /* pad to 3 digits with leading '0's */
             luaL_addstring(b, to_luastring("\\" + buff));
         } else
             luaL_addchar(b, s[i]);
