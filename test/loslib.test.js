@@ -128,6 +128,23 @@ test('os.time normalisation of table', () => {
 });
 
 
+test('os.setlocale', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
+    let luaCode = `
+        assert("C" == os.setlocale())
+        assert("C" == os.setlocale(""))
+        assert("C" == os.setlocale("C"))
+        assert("C" == os.setlocale("POSIX"))
+        assert(nil == os.setlocale("any_other_locale"))
+    `;
+    lualib.luaL_openlibs(L);
+    expect(lauxlib.luaL_loadstring(L, to_luastring(luaCode))).toBe(lua.LUA_OK);
+    lua.lua_call(L, 0, 0);
+});
+
+
 test('os.getenv', () => {
     let L = lauxlib.luaL_newstate();
     if (!L) throw Error("failed to create lua state");

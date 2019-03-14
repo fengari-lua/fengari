@@ -29,6 +29,7 @@ const {
     luaL_argerror,
     luaL_buffinit,
     luaL_checkinteger,
+    luaL_checkoption,
     luaL_checkstring,
     luaL_checktype,
     luaL_error,
@@ -451,9 +452,28 @@ const os_difftime = function(L) {
     return 1;
 };
 
+const catnames = ["all", "collate", "ctype", "monetary", "numeric", "time"].map((lc) => to_luastring(lc));
+const C = to_luastring("C");
+const POSIX = to_luastring("POSIX");
+const os_setlocale = function(L) {
+    const l = luaL_optstring(L, 1, null);
+    luaL_checkoption(L, 2, "all", catnames);
+    /* It is not possible to set the JS-VM wide locale, so we say that we only
+       know the C locale. The "POSIX" locale is defined in
+       IEEE Std 1003.1-2017 Section 7.2 as equivalent to "C" */
+    lua_pushstring(L, (
+        l === null /* passing nil returns the current locale; which is "C" */
+        || l.length == 0 /* empty string resets to the default locale; which is "C" */
+        || luastring_eq(l, C) /* user passed "C" */
+        || luastring_eq(l, POSIX) /* user passed "POSIX", equivalent to "C" */
+    ) ? C : null);
+    return 1;
+};
+
 const syslib = {
     "date": os_date,
     "difftime": os_difftime,
+    "setlocale": os_setlocale,
     "time": os_time
 };
 
