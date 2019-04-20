@@ -220,6 +220,8 @@ const luaB_collectgarbage = function(L) {
     let o = optsnum[luaL_checkoption(L, 1, "collect", opts)];
     let ex = luaL_optinteger(L, 2, 0);
     let res = lua_gc(L, o, ex);
+    if (res == -1)
+        return luaL_error(L, to_luastring("unavailable in current environment"));
     switch (o) {
         case LUA_GCCOUNT: {
             let b = lua_gc(L, LUA_GCCOUNTB, 0);
