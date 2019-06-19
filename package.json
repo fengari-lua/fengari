@@ -3,6 +3,7 @@
   "version": "0.1.4",
   "description": "A Lua VM written in JS ES6 targeting the browser",
   "main": "src/fengari.js",
+  "types": "typings/fengari.d.ts",
   "directories": {
     "lib": "src",
     "test": "test"
