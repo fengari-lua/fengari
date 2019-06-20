@@ -1,5 +1,5 @@
 /*
- * Typescruipt type declarations for Fengari
+ * Typescript type declarations for Fengari
  */
 
 // tslint:disable:class-name
@@ -37,11 +37,11 @@ export const LUA_OPBNOT: number;
 export const LUA_TNONE: number;
 export const LUA_TNIL: number;
 export const LUA_TBOOLEAN: number;
-export const LUA_TLIGHTUSERDATA : number;
-export const LUA_TNUMBER : number;
+export const LUA_TLIGHTUSERDATA: number;
+export const LUA_TNUMBER: number;
 export const LUA_TSTRING: number;
 export const LUA_TTABLE: number;
-export const LUA_TFUNCTION : number;
+export const LUA_TFUNCTION: number;
 export const LUA_TUSERDATA: number;
 export const LUA_TTHREAD: number;
 
@@ -49,7 +49,6 @@ export namespace lua {
   interface lua_State {
   }
 
-  //export type lua_Type = LUA_TNONE | LUA_TNIL | LUA_TBOOLEAN | LUA_TLIGHTUSERDATA | LUA_TNUMBER | LUA_TSTRING | LUA_TTABLE | LUA_TFUNCTION | LUA_TUSERDATA | LUA_TTHREAD;
   export type lua_Type = number;
   export type lua_ArithOp = number;
 
