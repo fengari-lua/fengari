@@ -893,3 +893,18 @@ test("[test-suite] errors: local variables limit", () => {
         throw new SyntaxError(lua.lua_tojsstring(L, -1));
     lua.lua_call(L, 0, 0);
 });
+
+test("[test-suite] errors: api_check messages", () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
+    try {
+        // Intentionally generate a stack underflow.
+        lua.lua_pop(L, 255);
+        // We should never get here.
+        throw new Error("api_check(stack underflow) didn't fire");
+    } catch (e) {
+        if (e.message !== "invalid new top")
+            throw new Error("api_check threw the wrong message: " + e.message);
+    }
+});

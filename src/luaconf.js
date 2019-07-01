@@ -173,7 +173,7 @@ const lua_getlocaledecpoint = function() {
 };
 
 const luai_apicheck = function(l, e) {
-    if (!e) throw Error(e);
+    if (e) throw Error(e);
 };
 
 /*
