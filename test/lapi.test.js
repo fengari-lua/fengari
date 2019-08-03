@@ -380,3 +380,47 @@ describe('lua_atnativeerror', () => {
         expect(lua.lua_tojsstring(L, -1)).toBe("runtime error!");
     });
 });
+
+
+describe('lua_len', () => {
+    test('table with two potential boundaries', () => {
+        let L = lauxlib.luaL_newstate();
+        if (!L) throw Error("failed to create lua state");
+
+        {
+            lua.lua_createtable(L);
+            for (let i=3; i<=8; i++) {
+                lua.lua_pushinteger(L, i);
+                lua.lua_seti(L, -2, i);
+            }
+            lua.lua_len(L, -1);
+        }
+
+        // could be 0 or 8
+        let len = lua.lua_tointeger(L, -1);
+        expect(len == 0 || len == 8).toBe(true);
+    });
+
+    test('pathological case', () => {
+        let L = lauxlib.luaL_newstate();
+        if (!L) throw Error("failed to create lua state");
+
+        {
+            lua.lua_createtable(L);
+            let i = 1;
+            for (let j=1; j<=1023; j++) {
+                lua.lua_pushnumber(L, i);
+                lua.lua_pushnumber(L, i);
+                lua.lua_settable(L, -3);
+                i *= 2;
+            }
+            lua.lua_len(L, -1);
+        }
+
+        /* is allowed to be a power of 2 larger than 2
+           however if the result ever changes from 2 then the pathological
+           code path has probably moved */
+        let len = lua.lua_tointeger(L, -1);
+        expect(len).toBe(2);
+    });
+});

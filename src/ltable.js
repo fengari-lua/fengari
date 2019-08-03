@@ -18,6 +18,9 @@ const {
     },
     to_luastring
 } = require('./defs.js');
+const {
+    LUA_MAXINTEGER
+} = require('./luaconf.js');
 const { lua_assert } = require('./llimits.js');
 const ldebug  = require('./ldebug.js');
 const lobject = require('./lobject.js');
@@ -234,7 +237,18 @@ const luaH_setfrom = function(L, t, key, value) {
 */
 const luaH_getn = function(t) {
     let i = 0;
-    let j = t.strong.size + 1; /* use known size of Map to bound search */
+    let j = t.strong.size + 1; /* use known size of Map to kick start search */
+    /* find 'i' and 'j' such that i is present and j is not */
+    while (!(luaH_getint(t, j).ttisnil())) {
+        i = j;
+        if (j > LUA_MAXINTEGER / 2) {  /* overflow? */
+            /* table was built with bad purposes: resort to linear search */
+            i = 1;
+            while (!luaH_getint(t, i).ttisnil()) i++;
+            return i - 1;
+        }
+        j *= 2;
+    }
     /* now do a binary search between them */
     while (j - i > 1) {
         let m = Math.floor((i+j)/2);
