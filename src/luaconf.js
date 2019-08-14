@@ -172,10 +172,6 @@ const lua_getlocaledecpoint = function() {
     return 46 /* '.'.charCodeAt(0) */;
 };
 
-const luai_apicheck = function(l, e) {
-    if (!e) throw Error(e);
-};
-
 /*
 @@ LUAL_BUFFERSIZE is the buffer size used by the lauxlib buffer system.
 */
@@ -220,4 +216,3 @@ module.exports.lua_getlocaledecpoint  = lua_getlocaledecpoint;
 module.exports.lua_integer2str        = lua_integer2str;
 module.exports.lua_number2str         = lua_number2str;
 module.exports.lua_numbertointeger    = lua_numbertointeger;
-module.exports.luai_apicheck          = luai_apicheck;
