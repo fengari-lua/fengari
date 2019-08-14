@@ -2,6 +2,7 @@ UNRELEASED
 
   - Add os.setlocale that only understands the C locale
   - Fix incorrect length for certain tables
+  - Remove luai_apicheck
   - Note: this will be the last release to support Node 6 and Node 11
 
 

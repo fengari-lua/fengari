@@ -1,16 +1,12 @@
 "use strict";
 
-const { luai_apicheck } = require("./luaconf.js");
-
 const lua_assert = function(c) {
     if (!c) throw Error("assertion failed");
 };
 module.exports.lua_assert = lua_assert;
 
-module.exports.luai_apicheck = luai_apicheck || function(l, e) { return lua_assert(e); };
-
 const api_check = function(l, e, msg) {
-    return luai_apicheck(l, e && msg);
+    if (!e) throw Error(msg);
 };
 module.exports.api_check = api_check;
 
