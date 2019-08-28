@@ -1,5 +1,6 @@
 UNRELEASED
 
+  - Fix Fengari loading Node-specific code when bundled for the web with Webpack
   - Add os.setlocale that only understands the C locale
   - Fix incorrect length for certain tables
   - Remove luai_apicheck

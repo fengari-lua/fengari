@@ -75,10 +75,13 @@ const {
     to_jsstring,
     to_luastring
 } = require("./fengaricore.js");
+const {
+    isBrowser
+} = require("./isnode.js");
 
 let lua_writestring;
 let lua_writeline;
-if (typeof process === "undefined") {
+if (isBrowser) {
     if (typeof TextDecoder === "function") { /* Older browsers don't have TextDecoder */
         let buff = "";
         let decoder = new TextDecoder("utf-8");

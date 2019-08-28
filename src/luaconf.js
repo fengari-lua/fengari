@@ -7,6 +7,9 @@ const {
     LUA_VERSION_MINOR,
     to_luastring
 } = require('./defs.js');
+const {
+    isBrowser
+} = require("./isnode.js");
 
 /*
 ** LUA_PATH_SEP is the character that separates templates in a path.
@@ -36,7 +39,7 @@ module.exports.LUA_EXEC_DIR = LUA_EXEC_DIR;
 const LUA_VDIR = LUA_VERSION_MAJOR + "." + LUA_VERSION_MINOR;
 module.exports.LUA_VDIR = LUA_VDIR;
 
-if (typeof process === "undefined") {
+if (isBrowser) {
     const LUA_DIRSEP = "/";
     module.exports.LUA_DIRSEP = LUA_DIRSEP;
 

@@ -3,6 +3,7 @@
 const { lua_pop } = require('./lua.js');
 const { luaL_requiref } = require('./lauxlib.js');
 const { to_luastring } = require("./fengaricore.js");
+const { isNode } = require("./isnode.js");
 
 const loadedlibs = {};
 
@@ -36,7 +37,7 @@ loadedlibs[lualib.LUA_STRLIBNAME] = luaopen_string;
 loadedlibs[lualib.LUA_MATHLIBNAME] = luaopen_math;
 loadedlibs[lualib.LUA_UTF8LIBNAME] = luaopen_utf8;
 loadedlibs[lualib.LUA_DBLIBNAME] = luaopen_debug;
-if (typeof process !== "undefined")
+if (isNode)
     loadedlibs[lualib.LUA_IOLIBNAME] = require('./liolib.js').luaopen_io;
 
 /* Extension: fengari library */

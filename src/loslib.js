@@ -46,6 +46,9 @@ const {
     to_jsstring,
     to_luastring
 } = require("./fengaricore.js");
+const {
+    isBrowser
+} = require("./isnode.js");
 
 /* options for ANSI C 89 (only 1-char options) */
 // const L_STRFTIMEC89 = to_luastring("aAbBcdHIjmMpSUwWxXyYZ%");
@@ -477,7 +480,7 @@ const syslib = {
     "time": os_time
 };
 
-if (typeof process === "undefined") {
+if (isBrowser) {
     syslib.clock = function(L) {
         lua_pushnumber(L, performance.now()/1000);
         return 1;

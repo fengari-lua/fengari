@@ -4,6 +4,9 @@ const {
     LUA_VERSION_MAJOR,
     LUA_VERSION_MINOR
 } = require("./lua.js");
+const {
+    isNode
+} = require("./isnode.js");
 
 const LUA_VERSUFFIX = "_" + LUA_VERSION_MAJOR + "_" + LUA_VERSION_MINOR;
 module.exports.LUA_VERSUFFIX = LUA_VERSUFFIX;
@@ -20,7 +23,7 @@ const LUA_TABLIBNAME = "table";
 module.exports.LUA_TABLIBNAME = LUA_TABLIBNAME;
 module.exports.luaopen_table = require("./ltablib.js").luaopen_table;
 
-if (typeof process !== "undefined") {
+if (isNode) {
     const LUA_IOLIBNAME = "io";
     module.exports.LUA_IOLIBNAME = LUA_IOLIBNAME;
     module.exports.luaopen_io = require("./liolib.js").luaopen_io;

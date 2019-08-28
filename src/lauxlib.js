@@ -84,6 +84,9 @@ const {
     to_luastring,
     to_uristring
 } = require("./fengaricore.js");
+const {
+    isBrowser
+} = require("./isnode.js");
 
 /* extra error code for 'luaL_loadfilex' */
 const LUA_ERRFILE = LUA_ERRERR+1;
@@ -820,7 +823,7 @@ const skipcomment = function(lf) {
 
 let luaL_loadfilex;
 
-if (typeof process === "undefined") {
+if (isBrowser) {
     class LoadF {
         constructor() {
             this.n = NaN;  /* number of pre-read characters */
@@ -989,7 +992,7 @@ const luaL_dofile = function(L, filename) {
 const lua_writestringerror = function() {
     for (let i=0; i<arguments.length; i++) {
         let a = arguments[i];
-        if (typeof process === "undefined") {
+        if (isBrowser) {
             /* split along new lines for separate console.error invocations */
             do {
                 /* regexp uses [\d\D] to work around matching new lines

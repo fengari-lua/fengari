@@ -78,6 +78,9 @@ const {
     luastring_indexOf,
     to_luastring
 } = require("./fengaricore.js");
+const {
+    isNode
+} = require("./isnode.js");
 
 /*
 ** If L1 != L, L1 can be in any state, and therefore there are no
@@ -469,7 +472,7 @@ const dblib = {
 };
 
 let getinput;
-if (typeof process !== "undefined") { // Only with Node
+if (isNode) { // Only with Node
     const readlineSync = require('readline-sync');
     readlineSync.setDefaultOptions({
         prompt: 'lua_debug> '

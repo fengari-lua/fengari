@@ -71,9 +71,13 @@ const {
     to_uristring
 } = require("./fengaricore.js");
 const fengari  = require('./fengari.js');
+const {
+    isBrowser,
+    isNode
+} = require("./isnode.js");
 
 const global_env = (function() {
-    if (typeof process !== "undefined") {
+    if (isNode) {
         /* node */
         return global;
     } else if (typeof window !== "undefined") {
@@ -120,7 +124,7 @@ const AUXMARK = to_luastring("\x01");
 ** error string in the stack.
 */
 let lsys_load;
-if (typeof process === "undefined") {
+if (isBrowser) {
     lsys_load = function(L, path, seeglb) {
         path = to_uristring(path);
         let xhr = new XMLHttpRequest();
@@ -195,7 +199,7 @@ const noenv = function(L) {
 };
 
 let readable;
-if (typeof process !== "undefined") { // Only with Node
+if (isNode) { // Only with Node
     const fs = require('fs');
 
     readable = function(filename) {
@@ -270,7 +274,7 @@ const ll_loadlib = function(L) {
 };
 
 const env = (function() {
-    if (typeof process !== "undefined") {
+    if (isNode) {
         /* node */
         return process.env;
     } else {
