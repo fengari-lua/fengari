@@ -51,6 +51,7 @@ const luaZ_fill = function(z) {
     let buff = z.reader(z.L, z.data);
     if (buff === null)
         return EOZ;
+    // convert to lua_string
     buff = from_userstring(buff);
     lua_assert(buff instanceof Uint8Array, "Should only load binary of array of bytes");
     let size = buff.length;
