@@ -1,5 +1,6 @@
 "use strict";
 
+const { from_userstring } = require("./defs.js");
 const { lua_assert } = require("./llimits.js");
 
 class MBuffer {
@@ -50,6 +51,7 @@ const luaZ_fill = function(z) {
     let buff = z.reader(z.L, z.data);
     if (buff === null)
         return EOZ;
+    buff = from_userstring(buff);
     lua_assert(buff instanceof Uint8Array, "Should only load binary of array of bytes");
     let size = buff.length;
     if (size === 0)
