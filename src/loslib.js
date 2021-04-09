@@ -560,6 +560,7 @@ if (typeof process === "undefined") {
     syslib.execute = function(L) {
         let cmd = luaL_optstring(L, 1, null);
         if (cmd !== null) {
+            cmd = to_jsstring(cmd);
             try {
                 child_process.execSync(
                     cmd,
