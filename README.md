@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/fengari-lua/fengari.svg?branch=master)](https://travis-ci.org/fengari-lua/fengari)
 [![npm](https://img.shields.io/npm/v/fengari.svg)](https://npmjs.com/package/fengari)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![#fengari on Freenode](https://img.shields.io/Freenode/%23fengari.png)](https://webchat.freenode.net/?channels=fengari)
+[![#fengari on libera.chat](https://img.shields.io/badge/chat-%23fengari-brightgreen)](https://web.libera.chat/?channels=#fengari)
 [![Code Quality: Javascript](https://img.shields.io/lgtm/grade/javascript/g/fengari-lua/fengari.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/fengari-lua/fengari/context:javascript)
 [![Total Alerts](https://img.shields.io/lgtm/alerts/g/fengari-lua/fengari.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/fengari-lua/fengari/alerts)
 
