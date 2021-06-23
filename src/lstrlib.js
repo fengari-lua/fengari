@@ -1199,7 +1199,7 @@ const push_onecapture = function(ms, i, s, e) {
 };
 
 const push_captures = function(ms, s, e) {
-    let nlevels = ms.level === 0 && ms.src.subarray(s) ? 1 : ms.level;
+    let nlevels = (ms.level === 0 && s != null) ? 1 : ms.level;
     luaL_checkstack(ms.L, nlevels, "too many captures");
     for (let i = 0; i < nlevels; i++)
         push_onecapture(ms, i, s, e);

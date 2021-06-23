@@ -274,6 +274,25 @@ test('string.find without pattern', () => {
 });
 
 
+test('string.find with special pattern (issue #185)', () => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
+    let luaCode = `
+        return string.find("-", "-")
+    `;
+    {
+        lualib.luaL_openlibs(L);
+        expect(lauxlib.luaL_loadstring(L, to_luastring(luaCode))).toBe(lua.LUA_OK);
+        lua.lua_call(L, 0, -1);
+    }
+
+    expect(lua.lua_gettop(L)).toBe(2);
+    expect(lua.lua_tointeger(L, -2)).toBe(1);
+    expect(lua.lua_tointeger(L, -1)).toBe(1);
+});
+
+
 test('string.match', () => {
     let L = lauxlib.luaL_newstate();
     if (!L) throw Error("failed to create lua state");
