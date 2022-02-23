@@ -12,7 +12,7 @@
 
 # Fengari
 
-🐺 φεγγάρι - The Lua VM written in JS ES6 for Node and the browser
+🌙 φεγγάρι - The Lua VM written in JS ES6 for Node and the browser
 
 This repository contains the core fengari code (which is a port of the Lua C library) which includes parser, virtual machine and base libraries.
 However it is rare to use this repository directly.
