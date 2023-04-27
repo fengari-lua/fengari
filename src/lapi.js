@@ -356,7 +356,7 @@ const lua_pushinteger = function(L, n) {
  * @param {lua_State} L
  * @param {string|Uint8Array} s
  * @param {number} len
- * @returns {any}
+ * @returns {Uint8Array}
  */
 const lua_pushlstring = function(L, s, len) {
     fengari_argcheckinteger(len);
@@ -371,7 +371,7 @@ const lua_pushlstring = function(L, s, len) {
     }
     lobject.pushsvalue2s(L, ts);
     api_check(L, L.top <= L.ci.top, "stack overflow");
-    return ts.value;
+    return ts.realstring;
 };
 
 /**
@@ -418,9 +418,10 @@ const lua_pushfstring = function (L, fmt, ...argp) {
 /**
  * @param {lua_State} L
  * @param {string?} [s]
- * @returns {any}
+ * @returns {Uint8Array?}
  */
 const lua_pushliteral = function (L, s) {
+    let arr = null;
     if (s === undefined || s === null) {
         L.stack[L.top] = new TValue(LUA_TNIL, null);
         L.top++;
@@ -428,11 +429,11 @@ const lua_pushliteral = function (L, s) {
         fengari_argcheck(typeof s === "string");
         let ts = luaS_newliteral(L, s);
         lobject.pushsvalue2s(L, ts);
-        s = ts.getstr(); /* internal copy */
+        arr = ts.getstr(); /* internal copy */
     }
     api_check(L, L.top <= L.ci.top, "stack overflow");
 
-    return s;
+    return arr;
 };
 
 /**

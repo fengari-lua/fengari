@@ -131,7 +131,7 @@ const str_char = function(L) {
     let p = luaL_buffinitsize(L, b, n);
     for (let i = 1; i <= n; i++) {
         let c = luaL_checkinteger(L, i);
-        luaL_argcheck(L, c >= 0 && c <= 255, "value out of range"); // Strings are 8-bit clean
+        luaL_argcheck(L, c >= 0 && c <= 255, i, "value out of range"); // Strings are 8-bit clean
         p[i-1] = c;
     }
     luaL_pushresultsize(b, n);
@@ -540,8 +540,7 @@ const getdetails = function(h, totalsize, fmt) {
         else {
             let o = getoption(h, fmt);
             align = o.size;
-            o = o.opt;
-            if (o === Kchar || align === 0)
+            if (o.opt === Kchar || align === 0)
                 luaL_argerror(h.L, 1, to_luastring("invalid next option for option 'X'"));
         }
     }
@@ -809,7 +808,7 @@ const unpacknum = function(L, b, islittle, size) {
 
     let dv = new DataView(new ArrayBuffer(size));
     for (let i = 0; i < size; i++)
-        dv.setUint8(i, b[i], islittle);
+        dv.setUint8(i, b[i]);
 
     if (size == 4) return dv.getFloat32(0, islittle);
     else return dv.getFloat64(0, islittle);
@@ -1390,8 +1389,10 @@ const add_value = function(ms, b, s, e, tr) {
 };
 
 const str_gsub = function(L) {
+    /** @type {any|Uint8Array} */
     let src = luaL_checkstring(L, 1);  /* subject */
     let srcl = src.length;
+    /** @type {number|Uint8Array} */
     let p = luaL_checkstring(L, 2);  /* pattern */
     let lp = p.length;
     let lastmatch = null;  /* end of last match */

@@ -106,9 +106,9 @@ class Table {
         this.id = L.l_G.id_counter++;
         this.strong = new Map();
         this.dead_strong = new Map();
-        this.dead_weak = void 0; /* initialised when needed */
-        this.f = void 0; /* first entry */
-        this.l = void 0; /* last entry */
+        this.dead_weak = null; /* initialised when needed */
+        this.f = null; /* first entry */
+        this.l = null; /* last entry */
         this.metatable = null;
         this.flags = ~0;
     }

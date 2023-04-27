@@ -288,6 +288,7 @@ const from_userstring = function(str) {
             throw new TypeError("expects an array of bytes or javascript string");
         }
     }
+    // @ts-ignore
     return str;
 };
 

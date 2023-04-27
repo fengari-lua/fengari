@@ -85,7 +85,8 @@ const setallfields = function(L, time, utc) {
     setfield(L, "month", (utc ? time.getUTCMonth()   : time.getMonth()) + 1);
     setfield(L, "year",  utc ? time.getUTCFullYear() : time.getFullYear());
     setfield(L, "wday",  (utc ? time.getUTCDay()     : time.getDay()) + 1);
-    setfield(L, "yday", Math.floor((time - (new Date(time.getFullYear(), 0, 0 /* shortcut to correct day by one */))) / 86400000));
+    setfield(L, "yday", Math.floor(
+        (time.valueOf() - (new Date(time.getFullYear(), 0, 0 /* shortcut to correct day by one */)).valueOf()) / 86400000));
     // setboolfield(L, "isdst", time.get);
 };
 
@@ -142,7 +143,7 @@ const week_number = function(date, start_of_week) {
         else
             weekday--;
     }
-    let yday = (date - new Date(date.getFullYear(), 0, 1)) / 86400000;
+    let yday = (date.valueOf() - new Date(date.getFullYear(), 0, 1).valueOf()) / 86400000;
     return Math.floor((yday + 7 - weekday) / 7);
 };
 
@@ -283,7 +284,7 @@ const strftime = function(L, b, s, date) {
 
                 // '000'
                 case 106 /* j */: {
-                    let yday = Math.floor((date - new Date(date.getFullYear(), 0, 1)) / 86400000);
+                    let yday = Math.floor((date.valueOf() - new Date(date.getFullYear(), 0, 1).valueOf()) / 86400000);
                     if (yday < 100) {
                         if (yday < 10)
                             luaL_addchar(b, 48 /* 0 */);
@@ -425,17 +426,17 @@ const os_time = function(L) {
         luaL_checktype(L, 1, LUA_TTABLE);
         lua_settop(L, 1);  /* make sure table is at the top */
         t = new Date(
-            getfield(L, "year", -1, 0),
-            getfield(L, "month", -1, 1),
-            getfield(L, "day", -1, 0),
-            getfield(L, "hour", 12, 0),
-            getfield(L, "min", 0, 0),
-            getfield(L, "sec", 0, 0)
+            Number(getfield(L, "year", -1, 0)),
+            Number(getfield(L, "month", -1, 1)),
+            Number(getfield(L, "day", -1, 0)),
+            Number(getfield(L, "hour", 12, 0)),
+            Number(getfield(L, "min", 0, 0)),
+            Number(getfield(L, "sec", 0, 0))
         );
         setallfields(L, t);
     }
 
-    lua_pushinteger(L, Math.floor(t / 1000));
+    lua_pushinteger(L, Math.floor(t.valueOf() / 1000));
     return 1;
 };
 
@@ -501,6 +502,7 @@ if (typeof process === "undefined") {
     };
 
     syslib.getenv = function(L) {
+        /** @type {string|Uint8Array} */
         let key = luaL_checkstring(L, 1);
         key = to_jsstring(key); /* https://github.com/nodejs/node/issues/16961 */
         if (Object.prototype.hasOwnProperty.call(process.env, key)) {
@@ -521,7 +523,7 @@ if (typeof process === "undefined") {
     };
 
     syslib.remove = function(L) {
-        let filename = luaL_checkstring(L, 1);
+        let filename = to_jsstring(luaL_checkstring(L, 1));
         try {
             fs.unlinkSync(filename);
         } catch (e) {
@@ -539,8 +541,8 @@ if (typeof process === "undefined") {
     };
 
     syslib.rename = function(L) {
-        let fromname = luaL_checkstring(L, 1);
-        let toname = luaL_checkstring(L, 2);
+        let fromname = to_jsstring(luaL_checkstring(L, 1));
+        let toname = to_jsstring(luaL_checkstring(L, 2));
         try {
             fs.renameSync(fromname, toname);
         } catch (e) {
@@ -558,6 +560,7 @@ if (typeof process === "undefined") {
     };
 
     syslib.execute = function(L) {
+        /** @type {string|Uint8Array} */
         let cmd = luaL_optstring(L, 1, null);
         if (cmd !== null) {
             cmd = to_jsstring(cmd);

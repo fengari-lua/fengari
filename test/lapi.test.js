@@ -57,7 +57,8 @@ test('lua_pushliteral', () => {
     if (!L) throw Error("failed to create lua state");
 
     {
-        lua.lua_pushliteral(L, "hello");
+        expect(lua.lua_pushliteral(L, "hello"))
+            .toBeInstanceOf(Uint8Array);
     }
 
     expect(lauxlib.luaL_typename(L, -1))
