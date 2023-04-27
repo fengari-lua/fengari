@@ -538,6 +538,7 @@ const l_str2int = function(s) {
     let i = 0;
     let a = 0;
     let empty = true;
+    /** @type {boolean|any} */
     let neg;
 
     while (lisspace(s[i])) i++;  /* skip initial spaces */
@@ -552,7 +553,7 @@ const l_str2int = function(s) {
     } else {  /* decimal */
         for (; i < s.length && lisdigit(s[i]); i++) {
             let d = s[i] - 48 /* ('0').charCodeAt(0) */;
-            if (a >= MAXBY10 && (a > MAXBY10 || d > MAXLASTD + (neg ? 1 : 0)))  /* overflow? */
+            if (a >= MAXBY10 && (a > MAXBY10 || d > MAXLASTD + neg))  /* overflow? */
                 return null;  /* do not accept it (as integer) */
             a = (a * 10 + d)|0;
             empty = false;

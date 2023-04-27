@@ -6,6 +6,8 @@
     "emitDeclarationOnly": true,
     "outDir": "dist",
     "declarationMap": true,
-    "checkJs": true
+    "checkJs": true,
+    "lib": ["DOM", "WebWorker", "ES2015"],
+    "skipLibCheck": true
   }
 }

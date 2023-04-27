@@ -79,7 +79,6 @@ const global_env = (function() {
     } else if (typeof window !== "undefined") {
         /* browser window */
         return window;
-        // @ts-ignore
     } else if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
         /* web worker */
         return self;

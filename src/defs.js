@@ -5,7 +5,7 @@
  */
 
 /**
- * Converts a JavaScript string into a Uint8Array (used a Lua string).
+ * Converts a char array into a Uint8Array.
  *
  * @type {function(ArrayLike<number>):Uint8Array}
  */
@@ -34,7 +34,7 @@ if (typeof (new Uint8Array().indexOf) === "function") {
     };
 } else {
     /* Browsers that don't support Uint8Array.indexOf seem to allow using Array.indexOf on Uint8Array objects e.g. IE11 */
-    let array_indexOf = [0].indexOf;
+    let array_indexOf = Array.prototype.indexOf;
     if (array_indexOf.call(new Uint8Array(1), 0) !== 0) throw Error("missing .indexOf");
     luastring_indexOf = function(s, v, i) {
         return array_indexOf.call(s, v, i);
@@ -231,8 +231,7 @@ const to_luastring = function(str, cache) {
     }
 
     let len = str.length;
-    /** @type {Array<number> | Uint8Array} */
-    let outU8Array = Array(len); /* array is at *least* going to be length of string */
+    const outU8Array = Array(len); /* array is at *least* going to be length of string */
     let outIdx = 0;
     for (let i = 0; i < len; ++i) {
         let u = str.charCodeAt(i);
@@ -264,11 +263,11 @@ const to_luastring = function(str, cache) {
             }
         }
     }
-    outU8Array = luastring_from(outU8Array);
+    const converted = luastring_from(outU8Array);
 
-    if (cache) to_luastring_cache[str] = outU8Array;
+    if (cache) to_luastring_cache[str] = converted;
 
-    return outU8Array;
+    return converted;
 };
 
 /**
@@ -281,14 +280,13 @@ const to_luastring = function(str, cache) {
  * @returns {Uint8Array}
  */
 const from_userstring = function(str) {
-    if (!is_luastring(str)) {
+    if (!(str instanceof Uint8Array)) {
         if (typeof str === "string") {
             str = to_luastring(str);
         } else {
             throw new TypeError("expects an array of bytes or javascript string");
         }
     }
-    // @ts-ignore
     return str;
 };
 
@@ -336,37 +334,49 @@ const thread_status = {
     LUA_ERRERR:    6
 };
 
+const LUA_TNONE          = -1;
+const LUA_TNIL           = 0;
+const LUA_TBOOLEAN       = 1;
+const LUA_TLIGHTUSERDATA = 2;
+const LUA_TNUMBER        = 3;
+const LUA_TSTRING        = 4;
+const LUA_TTABLE         = 5;
+const LUA_TFUNCTION      = 6;
+const LUA_TUSERDATA      = 7;
+const LUA_TTHREAD        = 8;
+const LUA_NUMTAGS        = 9;
+
+const LUA_TSHRSTR = LUA_TSTRING | (0 << 4);  /* short strings */
+const LUA_TLNGSTR = LUA_TSTRING | (1 << 4);  /* long strings */
+
+const LUA_TNUMFLT = LUA_TNUMBER | (0 << 4);  /* float numbers */
+const LUA_TNUMINT = LUA_TNUMBER | (1 << 4);  /* integer numbers */
+
+const LUA_TLCL = LUA_TFUNCTION | (0 << 4);  /* Lua closure */
+const LUA_TLCF = LUA_TFUNCTION | (1 << 4);  /* light C function */
+const LUA_TCCL = LUA_TFUNCTION | (2 << 4);  /* C closure */
+
 const constant_types = {
-    LUA_TNONE:          -1,
-    LUA_TNIL:           0,
-    LUA_TBOOLEAN:       1,
-    LUA_TLIGHTUSERDATA: 2,
-    LUA_TNUMBER:        3,
-    LUA_TSTRING:        4,
-    LUA_TTABLE:         5,
-    LUA_TFUNCTION:      6,
-    LUA_TUSERDATA:      7,
-    LUA_TTHREAD:        8,
-    LUA_NUMTAGS:        9,
+    LUA_TNONE:          LUA_TNONE,
+    LUA_TNIL:           LUA_TNIL,
+    LUA_TBOOLEAN:       LUA_TBOOLEAN,
+    LUA_TLIGHTUSERDATA: LUA_TLIGHTUSERDATA,
+    LUA_TNUMBER:        LUA_TNUMBER,
+    LUA_TSTRING:        LUA_TSTRING,
+    LUA_TTABLE:         LUA_TTABLE,
+    LUA_TFUNCTION:      LUA_TFUNCTION,
+    LUA_TUSERDATA:      LUA_TUSERDATA,
+    LUA_TTHREAD:        LUA_TTHREAD,
+    LUA_NUMTAGS:        LUA_NUMTAGS,
 
-    LUA_TSHRSTR:        0,
-    LUA_TLNGSTR:        0,
-    LUA_TNUMFLT:        0,
-    LUA_TNUMINT:        0,
-    LUA_TLCL:           0,
-    LUA_TLCF:           0,
-    LUA_TCCL:           0,
+    LUA_TSHRSTR:        LUA_TSHRSTR,
+    LUA_TLNGSTR:        LUA_TLNGSTR,
+    LUA_TNUMFLT:        LUA_TNUMFLT,
+    LUA_TNUMINT:        LUA_TNUMINT,
+    LUA_TLCL:           LUA_TLCL,
+    LUA_TLCF:           LUA_TLCF,
+    LUA_TCCL:           LUA_TCCL,
 };
-
-constant_types.LUA_TSHRSTR = constant_types.LUA_TSTRING | (0 << 4);  /* short strings */
-constant_types.LUA_TLNGSTR = constant_types.LUA_TSTRING | (1 << 4);  /* long strings */
-
-constant_types.LUA_TNUMFLT = constant_types.LUA_TNUMBER | (0 << 4);  /* float numbers */
-constant_types.LUA_TNUMINT = constant_types.LUA_TNUMBER | (1 << 4);  /* integer numbers */
-
-constant_types.LUA_TLCL = constant_types.LUA_TFUNCTION | (0 << 4);  /* Lua closure */
-constant_types.LUA_TLCF = constant_types.LUA_TFUNCTION | (1 << 4);  /* light C function */
-constant_types.LUA_TCCL = constant_types.LUA_TFUNCTION | (2 << 4);  /* C closure */
 
 /*
 ** Comparison and arithmetic functions

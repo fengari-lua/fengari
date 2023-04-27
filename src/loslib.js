@@ -92,6 +92,13 @@ const setallfields = function(L, time, utc) {
 
 const L_MAXDATEFIELD = (Number.MAX_SAFE_INTEGER / 2);
 
+/**
+ * @param {import('./lstate').lua_State} L
+ * @param {string} key
+ * @param {number} d
+ * @param {number} delta
+ * @returns
+ */
 const getfield = function(L, key, d, delta) {
     let t = lua_getfield(L, -1, to_luastring(key, true));  /* get field and its type */
     let res = lua_tointegerx(L, -1);
@@ -426,12 +433,12 @@ const os_time = function(L) {
         luaL_checktype(L, 1, LUA_TTABLE);
         lua_settop(L, 1);  /* make sure table is at the top */
         t = new Date(
-            Number(getfield(L, "year", -1, 0)),
-            Number(getfield(L, "month", -1, 1)),
-            Number(getfield(L, "day", -1, 0)),
-            Number(getfield(L, "hour", 12, 0)),
-            Number(getfield(L, "min", 0, 0)),
-            Number(getfield(L, "sec", 0, 0))
+            getfield(L, "year", -1, 0),
+            getfield(L, "month", -1, 1),
+            getfield(L, "day", -1, 0),
+            getfield(L, "hour", 12, 0),
+            getfield(L, "min", 0, 0),
+            getfield(L, "sec", 0, 0)
         );
         setallfields(L, t);
     }
@@ -523,13 +530,13 @@ if (typeof process === "undefined") {
     };
 
     syslib.remove = function(L) {
-        let filename = to_jsstring(luaL_checkstring(L, 1));
+        let filename = luaL_checkstring(L, 1);
         try {
-            fs.unlinkSync(filename);
+            fs.unlinkSync(Buffer.from(filename));
         } catch (e) {
             if (e.code === 'EISDIR') {
                 try {
-                    fs.rmdirSync(filename);
+                    fs.rmdirSync(Buffer.from(filename));
                 } catch (e) {
                     return luaL_fileresult(L, false, filename, e);
                 }
@@ -541,10 +548,10 @@ if (typeof process === "undefined") {
     };
 
     syslib.rename = function(L) {
-        let fromname = to_jsstring(luaL_checkstring(L, 1));
-        let toname = to_jsstring(luaL_checkstring(L, 2));
+        let fromname = luaL_checkstring(L, 1);
+        let toname = luaL_checkstring(L, 2);
         try {
-            fs.renameSync(fromname, toname);
+            fs.renameSync(Buffer.from(fromname), Buffer.from(toname));
         } catch (e) {
             return luaL_fileresult(L, false, false, e);
         }

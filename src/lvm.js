@@ -595,7 +595,6 @@ const luaV_execute = function(L) {
                 let init = L.stack[ra];
                 let plimit = L.stack[ra + 1];
                 let pstep = L.stack[ra + 2];
-                /** @type {any} */
                 let forlim;
 
                 if (init.ttisinteger() && pstep.ttisinteger() && (forlim = forlimit(plimit, pstep.value))) {
@@ -800,7 +799,7 @@ const forlimit = function(obj, step) {
     if (ilimit === false) {
         let n = tonumber(obj);
         if (n === false)
-            return false;
+            return null;
 
         if (0 < n) {
             ilimit = LUA_MAXINTEGER;

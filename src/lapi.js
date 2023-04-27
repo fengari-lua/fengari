@@ -406,7 +406,7 @@ const lua_pushvfstring = function (L, fmt, argp) {
 /**
  * @param {lua_State} L
  * @param {string|Uint8Array} fmt
- * @param {any} argp
+ * @param {any[]} argp
  * @returns {any}
  */
 const lua_pushfstring = function (L, fmt, ...argp) {
