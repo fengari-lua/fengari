@@ -8,8 +8,16 @@ const {
 } = require('./defs.js');
 const { lua_assert } = require("./llimits.js");
 
+/**
+ * @typedef {import('./lstate').lua_State} lua_State
+ */
+
 class TString {
 
+    /**
+     * @param {lua_State} L
+     * @param {Uint8Array} str
+     */
     constructor(L, str) {
         this.hash = null;
         this.realstring = str;
@@ -57,11 +65,21 @@ const luaS_bless = function(L, str) {
 };
 
 /* makes a copy */
+/**
+ * @param {lua_State} L
+ * @param {Uint8Array} str
+ * @returns {TString}
+ */
 const luaS_new = function(L, str) {
     return luaS_bless(L, luastring_from(str));
 };
 
 /* takes a js string */
+/**
+ * @param {lua_State} L
+ * @param {string} str
+ * @returns {TString}
+ */
 const luaS_newliteral = function(L, str) {
     return luaS_bless(L, to_luastring(str));
 };

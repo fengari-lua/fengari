@@ -277,7 +277,7 @@ const to_luastring = function(str, cache) {
  * Otherwise, it tries to convert it.
  *
  * @param {string|Uint8Array} str
- * @returns
+ * @returns {Uint8Array}
  */
 const from_userstring = function(str) {
     if (!is_luastring(str)) {
