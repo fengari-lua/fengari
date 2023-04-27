@@ -7,7 +7,7 @@
 /**
  * Converts a JavaScript string into a Uint8Array (used a Lua string).
  *
- * @type {function(string):Uint8Array}
+ * @type {function(ArrayLike<number>):Uint8Array}
  */
 let luastring_from;
 if (typeof Uint8Array.from === "function") {
@@ -25,7 +25,7 @@ if (typeof Uint8Array.from === "function") {
 /**
  * Returns the index of the first occurrence of the character in the Lua string.
  *
- * @type {function(Uint8Array, number, number?):number}
+ * @type {function(Uint8Array|any[], number, number=):number}
  */
 let luastring_indexOf;
 if (typeof (new Uint8Array().indexOf) === "function") {
@@ -34,7 +34,7 @@ if (typeof (new Uint8Array().indexOf) === "function") {
     };
 } else {
     /* Browsers that don't support Uint8Array.indexOf seem to allow using Array.indexOf on Uint8Array objects e.g. IE11 */
-    let array_indexOf = [].indexOf;
+    let array_indexOf = [0].indexOf;
     if (array_indexOf.call(new Uint8Array(1), 0) !== 0) throw Error("missing .indexOf");
     luastring_indexOf = function(s, v, i) {
         return array_indexOf.call(s, v, i);
@@ -88,9 +88,9 @@ const unicode_error_message = "cannot convert invalid utf8 to javascript string"
  * Converts a Lua string (in UTF-8) to a normal JavaScript string.
  *
  * @param {Uint8Array} value the Lua string
- * @param {number?} from the staring index
- * @param {number?} to the ending index
- * @param {boolean?} replacement_char whether to replace invalid utf8 chars
+ * @param {number} [from] the staring index
+ * @param {number} [to] the ending index
+ * @param {boolean} [replacement_char] whether to replace invalid utf8 chars
  * @returns {string}
  */
 const to_jsstring = function(value, from, to, replacement_char) {
@@ -219,7 +219,7 @@ const to_luastring_cache = {};
 
 /**
  * @param {string} str
- * @param {object?} cache
+ * @param {boolean} [cache]
  * @returns {Uint8Array}
  */
 const to_luastring = function(str, cache) {
@@ -231,6 +231,7 @@ const to_luastring = function(str, cache) {
     }
 
     let len = str.length;
+    /** @type {Array<number> | Uint8Array} */
     let outU8Array = Array(len); /* array is at *least* going to be length of string */
     let outIdx = 0;
     for (let i = 0; i < len; ++i) {

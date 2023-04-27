@@ -78,7 +78,7 @@ const isvalid = function(o) {
 };
 
 /**
- * @param {lua_State} L
+ * @param {lua_State?} L
  * @returns {number}
  */
 const lua_version = function(L) {
@@ -417,7 +417,7 @@ const lua_pushfstring = function (L, fmt, ...argp) {
 /* Similar to lua_pushstring, but takes a JS string */
 /**
  * @param {lua_State} L
- * @param {string} s
+ * @param {string?} [s]
  * @returns {any}
  */
 const lua_pushliteral = function (L, s) {
@@ -474,7 +474,7 @@ const lua_pushjsfunction = lua_pushcfunction;
 
 /**
  * @param {lua_State} L
- * @param {number} b
+ * @param {any} b
  */
 const lua_pushboolean = function(L, b) {
     L.stack[L.top] = new TValue(LUA_TBOOLEAN, !!b);
@@ -704,8 +704,8 @@ const lua_rawget = function(L, idx) {
 // narray and nrec are mostly useless for this implementation
 /**
  * @param {lua_State} L
- * @param {number} narray
- * @param {number} nrec
+ * @param {number} [narray]
+ * @param {number} [nrec]
  */
 const lua_createtable = function(L, narray, nrec) {
     let t = new lobject.TValue(LUA_TTABLE, ltable.luaH_new(L));
@@ -719,7 +719,7 @@ const luaS_newudata = function(L, size) {
 
 /**
  * @param {lua_State} L
- * @param {number} size
+ * @param {number} [size]
  * @returns {any}
  */
 const lua_newuserdata = function(L, size) {
@@ -812,7 +812,7 @@ const lua_register = function(L, n, f) {
 /**
  * @param {lua_State} L
  * @param {number} objindex
- * @returns {number}
+ * @returns {boolean}
  */
 const lua_getmetatable = function(L, objindex) {
     let obj = index2addr(L, objindex);
@@ -903,7 +903,7 @@ const lua_getglobal = function(L, name) {
 /**
  * @param {lua_State} L
  * @param {number} idx
- * @returns {number}
+ * @returns {boolean}
  */
 const lua_toboolean = function(L, idx) {
     let o = index2addr(L, idx);
@@ -913,7 +913,7 @@ const lua_toboolean = function(L, idx) {
 /**
  * @param {lua_State} L
  * @param {number} idx
- * @returns {Uint8Array}
+ * @returns {Uint8Array?}
  */
 const lua_tolstring = function(L, idx) {
     let o = index2addr(L, idx);
@@ -932,7 +932,7 @@ const lua_tostring =  lua_tolstring;
 /**
  * @param {lua_State} L
  * @param {number} idx
- * @returns {string}
+ * @returns {string?}
  */
 const lua_tojsstring = function(L, idx) {
     let o = index2addr(L, idx);
@@ -1000,7 +1000,7 @@ const lua_tointeger = function(L, idx) {
 /**
  * @param {lua_State} L
  * @param {number} idx
- * @returns {number}
+ * @returns {number|false}
  */
 const lua_tointegerx = function(L, idx) {
     return lvm.tointeger(index2addr(L, idx));
@@ -1019,7 +1019,7 @@ const lua_tonumber = function(L, idx) {
 /**
  * @param {lua_State} L
  * @param {number} idx
- * @returns {number}
+ * @returns {number|false}
  */
 const lua_tonumberx = function(L, idx) {
     return lvm.tonumber(index2addr(L, idx));
@@ -1181,7 +1181,7 @@ const lua_iscfunction = function(L, idx) {
 /**
  * @param {lua_State} L
  * @param {number} n
- * @returns {number}
+ * @returns {boolean}
  */
 const lua_isnil = function(L, n) {
     return lua_type(L, n) === LUA_TNIL;
@@ -1190,7 +1190,7 @@ const lua_isnil = function(L, n) {
 /**
  * @param {lua_State} L
  * @param {number} n
- * @returns {number}
+ * @returns {boolean}
  */
 const lua_isboolean = function(L, n) {
     return lua_type(L, n) === LUA_TBOOLEAN;
@@ -1199,7 +1199,7 @@ const lua_isboolean = function(L, n) {
 /**
  * @param {lua_State} L
  * @param {number} n
- * @returns {number}
+ * @returns {boolean}
  */
 const lua_isnone = function(L, n) {
     return lua_type(L, n) === LUA_TNONE;
@@ -1208,7 +1208,7 @@ const lua_isnone = function(L, n) {
 /**
  * @param {lua_State} L
  * @param {number} n
- * @returns {number}
+ * @returns {boolean}
  */
 const lua_isnoneornil = function(L, n) {
     return lua_type(L, n) <= 0;
@@ -1217,7 +1217,7 @@ const lua_isnoneornil = function(L, n) {
 /**
  * @param {lua_State} L
  * @param {number} idx
- * @returns {number}
+ * @returns {boolean}
  */
 const lua_istable = function(L, idx) {
     return index2addr(L, idx).ttistable();
@@ -1235,7 +1235,7 @@ const lua_isinteger = function(L, idx) {
 /**
  * @param {lua_State} L
  * @param {number} idx
- * @returns {number}
+ * @returns {boolean}
  */
 const lua_isnumber = function(L, idx) {
     return lvm.tonumber(index2addr(L, idx)) !== false;
@@ -1264,7 +1264,7 @@ const lua_isuserdata = function(L, idx) {
 /**
  * @param {lua_State} L
  * @param {number} idx
- * @returns {number}
+ * @returns {boolean}
  */
 const lua_isthread = function(L, idx) {
     return lua_type(L, idx) === LUA_TTHREAD;
@@ -1273,7 +1273,7 @@ const lua_isthread = function(L, idx) {
 /**
  * @param {lua_State} L
  * @param {number} idx
- * @returns {number}
+ * @returns {boolean}
  */
 const lua_isfunction = function(L, idx) {
     return lua_type(L, idx) === LUA_TFUNCTION;
@@ -1282,7 +1282,7 @@ const lua_isfunction = function(L, idx) {
 /**
  * @param {lua_State} L
  * @param {number} idx
- * @returns {number}
+ * @returns {boolean}
  */
 const lua_islightuserdata = function(L, idx) {
     return lua_type(L, idx) === LUA_TLIGHTUSERDATA;
@@ -1458,7 +1458,7 @@ const lua_pcall = function(L, n, r, f) {
 
 /**
  * @param {lua_State} L
- * @returns {number}
+ * @returns {never}
  */
 const lua_error = function(L) {
     api_checknelems(L, 1);

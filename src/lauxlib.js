@@ -244,8 +244,8 @@ const panic = function(L) {
 /**
  * @param {lua_State} L
  * @param {number} arg
- * @param {Uint8Array} extramsg
- * @returns {number}
+ * @param {any} extramsg
+ * @returns {never}
  */
 const luaL_argerror = function(L, arg, extramsg) {
     let ar = new lua_Debug();
@@ -267,6 +267,9 @@ const luaL_argerror = function(L, arg, extramsg) {
     return luaL_error(L, to_luastring("bad argument #%d to '%s' (%s)"), arg, ar.name, extramsg);
 };
 
+/**
+ * @returns {never}
+ */
 const typeerror = function(L, arg, tname) {
     let typearg;
     if (luaL_getmetafield(L, arg, __name) === LUA_TSTRING)
@@ -306,8 +309,9 @@ const luaL_error = function(L, fmt, ...argp) {
 /* Unlike normal lua, we pass in an error object */
 /**
  * @param {lua_State} L
- * @param {number} stat
- * @param {Uint8Array} fname
+ * @param {any} [stat]
+ * @param {string|Uint8Array|false} [fname]
+ * @param {any} [e]
  * @returns {number}
  */
 const luaL_fileresult = function(L, stat, fname, e) {
@@ -336,7 +340,7 @@ const luaL_fileresult = function(L, stat, fname, e) {
 /* Unlike normal lua, we pass in an error object */
 /**
  * @param {lua_State} L
- * @param {number} e
+ * @param {any} e
  * @returns {number}
  */
 const luaL_execresult = function(L, e) {
@@ -426,12 +430,14 @@ const luaL_checkoption = function(L, arg, def, lst) {
     return luaL_argerror(L, arg, lua_pushfstring(L, to_luastring("invalid option '%s'"), name));
 };
 
+/**
+ * @returns {never}
+ */
 const tag_error = function(L, arg, tag) {
     typeerror(L, arg, lua_typename(L, tag));
 };
 
 /**
- * @param {number}
  * @returns {lua_State}
  */
 const luaL_newstate = function() {
@@ -452,9 +458,9 @@ const luaL_typename = function(L, i) {
 
 /**
  * @param {lua_State} L
- * @param {number} cond
+ * @param {any} cond
  * @param {number} arg
- * @param {Uint8Array} extramsg
+ * @param {any} extramsg
  */
 const luaL_argcheck = function(L, cond, arg, extramsg) {
     if (!cond) luaL_argerror(L, arg, extramsg);
@@ -495,7 +501,7 @@ const luaL_checkstring = luaL_checklstring;
 /**
  * @param {lua_State} L
  * @param {number} arg
- * @param {Uint8Array} def
+ * @param {string|Uint8Array} [def]
  * @returns {Uint8Array}
  */
 const luaL_optlstring = function(L, arg, def) {
@@ -543,7 +549,7 @@ const luaL_optnumber = function(L, arg, def) {
 const luaL_checkinteger = function(L, arg) {
     let d = lua_tointegerx(L, arg);
     if (d === false)
-        interror(L, arg);
+        return interror(L, arg);
     return d;
 };
 
@@ -699,7 +705,7 @@ const luaL_getmetafield = function(L, obj, event) {
  * @param {lua_State} L
  * @param {number} obj
  * @param {Uint8Array} event
- * @returns {number}
+ * @returns {boolean}
  */
 const luaL_callmeta = function(L, obj, event) {
     obj = lua_absindex(L, obj);
@@ -721,7 +727,7 @@ const luaL_len = function(L, idx) {
     lua_len(L, idx);
     let l = lua_tointegerx(L, -1);
     if (l === false)
-        luaL_error(L, to_luastring("object length is not an integer", true));
+        return luaL_error(L, to_luastring("object length is not an integer", true));
     lua_pop(L, 1);  /* remove object */
     return l;
 };
@@ -837,7 +843,7 @@ const luaL_gsub = function(L, s, p, r) {
  * @param {lua_State} L
  * @param {number} idx
  * @param {Uint8Array} fname
- * @returns {number}
+ * @returns {boolean}
  */
 const luaL_getsubtable = function(L, idx, fname) {
     if (lua_getfield(L, idx, fname) === LUA_TTABLE)
@@ -878,7 +884,7 @@ const luaL_setfuncs = function(L, l, nup) {
 /**
  * @param {lua_State} L
  * @param {number} space
- * @param {Uint8Array} msg
+ * @param {any} msg
  */
 const luaL_checkstack = function(L, space, msg) {
     if (!lua_checkstack(L, space)) {
