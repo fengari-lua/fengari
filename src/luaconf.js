@@ -126,6 +126,7 @@ if (typeof process === "undefined") {
 ** This macro is not on by default even in compatibility mode,
 ** because this is not really an incompatibility.
 */
+/** @type {boolean} */
 const LUA_COMPAT_FLOATSTRING = conf.LUA_COMPAT_FLOATSTRING || false;
 
 const LUA_MAXINTEGER = 2147483647;
@@ -137,6 +138,7 @@ const LUA_MININTEGER = -2147483648;
 ** its only purpose is to stop Lua from consuming unlimited stack
 ** space (and to reserve some numbers for pseudo-indices).
 */
+/** @type {number} */
 const LUAI_MAXSTACK = conf.LUAI_MAXSTACK || 1000000;
 
 /*
@@ -144,16 +146,29 @@ const LUAI_MAXSTACK = conf.LUAI_MAXSTACK || 1000000;
 @@ of a function in debug information.
 ** CHANGE it if you want a different size.
 */
+/** @type {number} */
 const LUA_IDSIZE = conf.LUA_IDSIZE || (60-1); /* fengari uses 1 less than lua as we don't embed the null byte */
 
+/**
+ * @param {number} n
+ * @returns {string}
+ */
 const lua_integer2str = function(n) {
     return String(n); /* should match behaviour of LUA_INTEGER_FMT */
 };
 
+/**
+ * @param {number} n
+ * @returns {string}
+ */
 const lua_number2str = function(n) {
     return String(Number(n.toPrecision(14))); /* should match behaviour of LUA_NUMBER_FMT */
 };
 
+/**
+ * @param {number} n
+ * @returns {number|false}
+ */
 const lua_numbertointeger = function(n) {
     return n >= LUA_MININTEGER && n < -LUA_MININTEGER ? n : false;
 };
@@ -175,9 +190,15 @@ const lua_getlocaledecpoint = function() {
 /*
 @@ LUAL_BUFFERSIZE is the buffer size used by the lauxlib buffer system.
 */
+/** @type {number} */
 const LUAL_BUFFERSIZE = conf.LUAL_BUFFERSIZE || 8192;
 
-// See: http://croquetweak.blogspot.fr/2014/08/deconstructing-floats-frexp-and-ldexp.html
+/**
+ * See: http://croquetweak.blogspot.fr/2014/08/deconstructing-floats-frexp-and-ldexp.html
+ *
+ * @param {number} value
+ * @returns {[number, number]}
+ */
 const frexp = function(value) {
     if (value === 0) return [value, 0];
     var data = new DataView(new ArrayBuffer(8));
@@ -192,6 +213,13 @@ const frexp = function(value) {
     return [mantissa, exponent];
 };
 
+/**
+ * See: http://croquetweak.blogspot.fr/2014/08/deconstructing-floats-frexp-and-ldexp.html
+ *
+ * @param {number} mantissa
+ * @param {number} exponent
+ * @returns {number}
+ */
 const ldexp = function(mantissa, exponent) {
     var steps = Math.min(3, Math.ceil(Math.abs(exponent) / 1023));
     var result = mantissa;
