@@ -2,6 +2,10 @@
 
 const { sprintf } = require('sprintf-js');
 
+/**
+ * @typedef {import('./defs').LuaString} LuaString
+ */
+
 const {
     LUA_INTEGER_FMT,
     LUA_INTEGER_FRMLEN,
@@ -1389,10 +1393,10 @@ const add_value = function(ms, b, s, e, tr) {
 };
 
 const str_gsub = function(L) {
-    /** @type {any|Uint8Array} */
+    /** @type {any|LuaString} */
     let src = luaL_checkstring(L, 1);  /* subject */
     let srcl = src.length;
-    /** @type {number|Uint8Array} */
+    /** @type {number|LuaString} */
     let p = luaL_checkstring(L, 2);  /* pattern */
     let lp = p.length;
     let lastmatch = null;  /* end of last match */

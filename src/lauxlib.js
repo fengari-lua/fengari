@@ -2,6 +2,7 @@
 
 /**
  * @typedef {import('./lstate').lua_State} lua_State
+ * @typedef {import('./defs').LuaString} LuaString
  */
 
 const {
@@ -205,7 +206,7 @@ const lastlevel = function(L) {
 /**
  * @param {lua_State} L
  * @param {lua_State} L1
- * @param {Uint8Array} msg
+ * @param {LuaString} msg
  * @param {number} level
  */
 const luaL_traceback = function(L, L1, msg, level) {
@@ -310,7 +311,7 @@ const luaL_error = function(L, fmt, ...argp) {
 /**
  * @param {lua_State} L
  * @param {any} [stat]
- * @param {string|Uint8Array|false} [fname]
+ * @param {string|LuaString|false} [fname]
  * @param {any} [e]
  * @returns {number}
  */
@@ -368,7 +369,7 @@ const luaL_execresult = function(L, e) {
 
 /**
  * @param {lua_State} L
- * @param {Uint8Array} n
+ * @param {LuaString} n
  * @returns {number}
  */
 const luaL_getmetatable = function(L, n) {
@@ -377,7 +378,7 @@ const luaL_getmetatable = function(L, n) {
 
 /**
  * @param {lua_State} L
- * @param {Uint8Array} tname
+ * @param {LuaString} tname
  * @returns {number}
  */
 const luaL_newmetatable = function(L, tname) {
@@ -395,7 +396,7 @@ const luaL_newmetatable = function(L, tname) {
 
 /**
  * @param {lua_State} L
- * @param {Uint8Array} tname
+ * @param {LuaString} tname
  */
 const luaL_setmetatable = function(L, tname) {
     luaL_getmetatable(L, tname);
@@ -450,7 +451,7 @@ const luaL_newstate = function() {
 /**
  * @param {lua_State} L
  * @param {number} i
- * @returns {Uint8Array}
+ * @returns {LuaString}
  */
 const luaL_typename = function(L, i) {
     return lua_typename(L, lua_type(L, i));
@@ -488,7 +489,7 @@ const luaL_checktype = function(L, arg, t) {
 /**
  * @param {lua_State} L
  * @param {number} arg
- * @returns {Uint8Array}
+ * @returns {LuaString}
  */
 const luaL_checklstring = function(L, arg) {
     let s = lua_tolstring(L, arg);
@@ -501,8 +502,8 @@ const luaL_checkstring = luaL_checklstring;
 /**
  * @param {lua_State} L
  * @param {number} arg
- * @param {string|Uint8Array} [def]
- * @returns {Uint8Array}
+ * @param {string|LuaString} [def]
+ * @returns {LuaString}
  */
 const luaL_optlstring = function(L, arg, def) {
     if (lua_type(L, arg) <= 0) {
@@ -642,10 +643,10 @@ const getS = function(L, ud) {
 
 /**
  * @param {lua_State} L
- * @param {Uint8Array} buff
+ * @param {LuaString} buff
  * @param {number} size
- * @param {Uint8Array} name
- * @param {Uint8Array} mode
+ * @param {LuaString} name
+ * @param {LuaString} mode
  * @returns {number}
  */
 const luaL_loadbufferx = function(L, buff, size, name, mode) {
@@ -654,9 +655,9 @@ const luaL_loadbufferx = function(L, buff, size, name, mode) {
 
 /**
  * @param {lua_State} L
- * @param {Uint8Array} s
+ * @param {LuaString} s
  * @param {number} sz
- * @param {Uint8Array} n
+ * @param {LuaString} n
  * @returns {number}
  */
 const luaL_loadbuffer = function(L, s, sz, n) {
@@ -665,7 +666,7 @@ const luaL_loadbuffer = function(L, s, sz, n) {
 
 /**
  * @param {lua_State} L
- * @param {Uint8Array} s
+ * @param {LuaString} s
  * @returns {number}
  */
 const luaL_loadstring = function(L, s) {
@@ -674,7 +675,7 @@ const luaL_loadstring = function(L, s) {
 
 /**
  * @param {lua_State} L
- * @param {Uint8Array} s
+ * @param {LuaString} s
  * @returns {number}
  */
 const luaL_dostring = function(L, s) {
@@ -684,7 +685,7 @@ const luaL_dostring = function(L, s) {
 /**
  * @param {lua_State} L
  * @param {number} obj
- * @param {Uint8Array} event
+ * @param {LuaString} event
  * @returns {number}
  */
 const luaL_getmetafield = function(L, obj, event) {
@@ -704,7 +705,7 @@ const luaL_getmetafield = function(L, obj, event) {
 /**
  * @param {lua_State} L
  * @param {number} obj
- * @param {Uint8Array} event
+ * @param {LuaString} event
  * @returns {boolean}
  */
 const luaL_callmeta = function(L, obj, event) {
@@ -737,7 +738,7 @@ const p_f = to_luastring("%f");
 /**
  * @param {lua_State} L
  * @param {number} idx
- * @returns {Uint8Array}
+ * @returns {LuaString}
  */
 const luaL_tolstring = function(L, idx) {
     if (luaL_callmeta(L, idx, __tostring)) {
@@ -816,10 +817,10 @@ const find_subarray = function(arr, subarr, from_index) {
 
 /**
  * @param {lua_State} L
- * @param {Uint8Array} s
- * @param {Uint8Array} p
- * @param {Uint8Array} r
- * @returns {Uint8Array}
+ * @param {LuaString} s
+ * @param {LuaString} p
+ * @param {LuaString} r
+ * @returns {LuaString}
  */
 const luaL_gsub = function(L, s, p, r) {
     let wild;
@@ -842,7 +843,7 @@ const luaL_gsub = function(L, s, p, r) {
 /**
  * @param {lua_State} L
  * @param {number} idx
- * @param {Uint8Array} fname
+ * @param {LuaString} fname
  * @returns {boolean}
  */
 const luaL_getsubtable = function(L, idx, fname) {
@@ -1163,7 +1164,7 @@ if (typeof process === "undefined") {
 
 /**
  * @param {lua_State} L
- * @param {Uint8Array} filename
+ * @param {LuaString} filename
  * @returns {number}
  */
 const luaL_loadfile = function(L, filename) {
@@ -1172,7 +1173,7 @@ const luaL_loadfile = function(L, filename) {
 
 /**
  * @param {lua_State} L
- * @param {Uint8Array} filename
+ * @param {LuaString} filename
  * @returns {number}
  */
 const luaL_dofile = function(L, filename) {

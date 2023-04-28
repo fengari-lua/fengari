@@ -5,9 +5,13 @@
  */
 
 /**
- * Converts a char array into a Uint8Array.
+ * @typedef {Uint8Array} LuaString
+ */
+
+/**
+ * Converts a char array into a Lua string.
  *
- * @type {function(ArrayLike<number>):Uint8Array}
+ * @type {function(ArrayLike<number>):LuaString}
  */
 let luastring_from;
 if (typeof Uint8Array.from === "function") {
@@ -25,7 +29,7 @@ if (typeof Uint8Array.from === "function") {
 /**
  * Returns the index of the first occurrence of the character in the Lua string.
  *
- * @type {function(Uint8Array|any[], number, number=):number}
+ * @type {function(LuaString|number[], number, number=):number}
  */
 let luastring_indexOf;
 if (typeof (new Uint8Array().indexOf) === "function") {
@@ -44,7 +48,7 @@ if (typeof (new Uint8Array().indexOf) === "function") {
 /**
  * Constructs a Lua string from characters.
  *
- * @type {function(...number):Uint8Array}
+ * @type {function(...number):LuaString}
  */
 let luastring_of;
 if (typeof Uint8Array.of === "function") {
@@ -67,8 +71,8 @@ const is_luastring = function(s) {
 /**
  * Tests two Lua strings for equality.
  *
- * @param {Uint8Array} a str 1
- * @param {Uint8Array} b str 2
+ * @param {LuaString} a str 1
+ * @param {LuaString} b str 2
  * @returns {boolean}
  */
 const luastring_eq = function(a, b) {
@@ -87,7 +91,7 @@ const unicode_error_message = "cannot convert invalid utf8 to javascript string"
 /**
  * Converts a Lua string (in UTF-8) to a normal JavaScript string.
  *
- * @param {Uint8Array} value the Lua string
+ * @param {LuaString} value the Lua string
  * @param {number} [from] the staring index
  * @param {number} [to] the ending index
  * @param {boolean} [replacement_char] whether to replace invalid utf8 chars
@@ -198,7 +202,7 @@ const uri_allowed = (";,/?:@&=+$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUV
 /**
  * Utility function to convert a Lua string to a JavaScript string with URI escaping.
  *
- * @param {Uint8Array} a the string
+ * @param {LuaString} a the string
  * @returns {string}
  */
 const to_uristring = function(a) {
@@ -220,7 +224,7 @@ const to_luastring_cache = {};
 /**
  * @param {string} str
  * @param {boolean} [cache]
- * @returns {Uint8Array}
+ * @returns {LuaString}
  */
 const to_luastring = function(str, cache) {
     if (typeof str !== "string") throw new TypeError("to_luastring expects a javascript string");
@@ -276,8 +280,8 @@ const to_luastring = function(str, cache) {
  * If `str` is already a Lua string, it returns it as is.
  * Otherwise, it tries to convert it.
  *
- * @param {string|Uint8Array} str
- * @returns {Uint8Array}
+ * @param {string|LuaString} str
+ * @returns {LuaString}
  */
 const from_userstring = function(str) {
     if (!(str instanceof Uint8Array)) {

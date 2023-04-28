@@ -10,6 +10,7 @@ const { lua_assert } = require("./llimits.js");
 
 /**
  * @typedef {import('./lstate').lua_State} lua_State
+ * @typedef {import('./defs').LuaString} LuaString
  */
 
 class TString {
@@ -67,7 +68,7 @@ const luaS_bless = function(L, str) {
 /* makes a copy */
 /**
  * @param {lua_State} L
- * @param {Uint8Array} str
+ * @param {LuaString} str
  * @returns {TString}
  */
 const luaS_new = function(L, str) {

@@ -70,7 +70,6 @@ const {
     to_luastring,
     to_uristring
 } = require("./fengaricore.js");
-const fengari  = require('./fengari.js');
 
 const global_env = (function() {
     if (typeof process !== "undefined") {
@@ -143,7 +142,7 @@ if (typeof process === "undefined") {
             lua_pushstring(L, to_luastring(`${e.name}: ${e.message}`));
             return null;
         }
-        let res = func(fengari);
+        let res = func(require('./fengari.js'));
         if (typeof res === "function" || (typeof res === "object" && res !== null)) {
             return res;
         } else if (res === void 0) { /* assume library added symbols to global environment */

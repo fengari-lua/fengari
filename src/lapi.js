@@ -2,6 +2,7 @@
 
 /**
  * @typedef {import('./lstate').lua_State} lua_State
+ * @typedef {import('./defs').LuaString} LuaString
  */
 
 const {
@@ -354,9 +355,9 @@ const lua_pushinteger = function(L, n) {
 
 /**
  * @param {lua_State} L
- * @param {string|Uint8Array} s
+ * @param {string|LuaString} s
  * @param {number} len
- * @returns {Uint8Array}
+ * @returns {LuaString}
  */
 const lua_pushlstring = function(L, s, len) {
     fengari_argcheckinteger(len);
@@ -376,7 +377,7 @@ const lua_pushlstring = function(L, s, len) {
 
 /**
  * @param {lua_State} L
- * @param {string|Uint8Array} s
+ * @param {string|LuaString} s
  * @returns {any}
  */
 const lua_pushstring = function (L, s) {
@@ -394,7 +395,7 @@ const lua_pushstring = function (L, s) {
 
 /**
  * @param {lua_State} L
- * @param {string|Uint8Array} fmt
+ * @param {string|LuaString} fmt
  * @param {any[]} argp
  * @returns {any}
  */
@@ -405,7 +406,7 @@ const lua_pushvfstring = function (L, fmt, argp) {
 
 /**
  * @param {lua_State} L
- * @param {string|Uint8Array} fmt
+ * @param {string|LuaString} fmt
  * @param {any[]} argp
  * @returns {any}
  */
@@ -418,7 +419,7 @@ const lua_pushfstring = function (L, fmt, ...argp) {
 /**
  * @param {lua_State} L
  * @param {string?} [s]
- * @returns {Uint8Array?}
+ * @returns {LuaString?}
  */
 const lua_pushliteral = function (L, s) {
     let arr = null;
@@ -528,7 +529,7 @@ const auxsetstr = function(L, t, k) {
 
 /**
  * @param {lua_State} L
- * @param {Uint8Array} name
+ * @param {string|LuaString} name
  */
 const lua_setglobal = function(L, name) {
     auxsetstr(L, ltable.luaH_getint(L.l_G.l_registry.value, LUA_RIDX_GLOBALS), name);
@@ -580,7 +581,7 @@ const lua_settable = function(L, idx) {
 /**
  * @param {lua_State} L
  * @param {number} idx
- * @param {Uint8Array} k
+ * @param {LuaString} k
  */
 const lua_setfield = function(L, idx, k) {
     auxsetstr(L, index2addr(L, idx), k);
@@ -802,7 +803,7 @@ const lua_newtable = function(L) {
 
 /**
  * @param {lua_State} L
- * @param {Uint8Array} n
+ * @param {LuaString} n
  * @param {function} f
  */
 const lua_register = function(L, n, f) {
@@ -866,7 +867,7 @@ const lua_gettable = function(L, idx) {
 /**
  * @param {lua_State} L
  * @param {number} idx
- * @param {Uint8Array} k
+ * @param {string|LuaString} k
  * @returns {number}
  */
 const lua_getfield = function(L, idx, k) {
@@ -890,7 +891,7 @@ const lua_geti = function(L, idx, n) {
 
 /**
  * @param {lua_State} L
- * @param {Uint8Array} name
+ * @param {LuaString} name
  * @returns {number}
  */
 const lua_getglobal = function(L, name) {
@@ -914,7 +915,7 @@ const lua_toboolean = function(L, idx) {
 /**
  * @param {lua_State} L
  * @param {number} idx
- * @returns {Uint8Array?}
+ * @returns {LuaString?}
  */
 const lua_tolstring = function(L, idx) {
     let o = index2addr(L, idx);
@@ -1132,7 +1133,7 @@ const lua_compare = function(L, index1, index2, op) {
 
 /**
  * @param {lua_State} L
- * @param {Uint8Array} s
+ * @param {LuaString} s
  * @returns {number}
  */
 const lua_stringtonumber = function(L, s) {
@@ -1162,7 +1163,7 @@ const lua_type = function(L, idx) {
 /**
  * @param {lua_State} L
  * @param {number} t
- * @returns {Uint8Array}
+ * @returns {LuaString}
  */
 const lua_typename = function(L, t) {
     api_check(L, LUA_TNONE <= t && t < LUA_NUMTAGS, "invalid tag");

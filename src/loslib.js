@@ -1,5 +1,9 @@
 "use strict";
 
+/**
+ * @typedef {import('./defs').LuaString} LuaString
+ */
+
 const {
     LUA_TNIL,
     LUA_TTABLE,
@@ -509,7 +513,7 @@ if (typeof process === "undefined") {
     };
 
     syslib.getenv = function(L) {
-        /** @type {string|Uint8Array} */
+        /** @type {string|LuaString} */
         let key = luaL_checkstring(L, 1);
         key = to_jsstring(key); /* https://github.com/nodejs/node/issues/16961 */
         if (Object.prototype.hasOwnProperty.call(process.env, key)) {
@@ -567,7 +571,7 @@ if (typeof process === "undefined") {
     };
 
     syslib.execute = function(L) {
-        /** @type {string|Uint8Array} */
+        /** @type {string|LuaString} */
         let cmd = luaL_optstring(L, 1, null);
         if (cmd !== null) {
             cmd = to_jsstring(cmd);
