@@ -194,6 +194,7 @@ test('debug.traceback (with a global)', () => {
     let L = lauxlib.luaL_newstate();
     if (!L) throw Error("failed to create lua state");
 
+    /** @type {string|Uint8Array} */
     let luaCode = `
         local trace
 
@@ -238,6 +239,7 @@ test('debug.traceback (with a upvalue)', () => {
     let L = lauxlib.luaL_newstate();
     if (!L) throw Error("failed to create lua state");
 
+    /** @type {string|Uint8Array} */
     let luaCode = `
         local trace
         local rec
@@ -282,6 +284,7 @@ test('debug.getinfo', () => {
     let L = lauxlib.luaL_newstate();
     if (!L) throw Error("failed to create lua state");
 
+    /** @type {string|Uint8Array} */
     let luaCode = `
         local alocal = function(p1, p2) end
         global = function() return alocal end

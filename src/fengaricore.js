@@ -17,20 +17,22 @@ const FENGARI_RELEASE         = FENGARI_VERSION + "." + FENGARI_VERSION_RELEASE;
 const FENGARI_AUTHORS         = "B. Giannangeli, Daurnimator";
 const FENGARI_COPYRIGHT       = FENGARI_RELEASE + "  Copyright (C) 2017-2019 " + FENGARI_AUTHORS + "\nBased on: " + defs.LUA_COPYRIGHT;
 
-module.exports.FENGARI_AUTHORS         = FENGARI_AUTHORS;
-module.exports.FENGARI_COPYRIGHT       = FENGARI_COPYRIGHT;
-module.exports.FENGARI_RELEASE         = FENGARI_RELEASE;
-module.exports.FENGARI_VERSION         = FENGARI_VERSION;
-module.exports.FENGARI_VERSION_MAJOR   = FENGARI_VERSION_MAJOR;
-module.exports.FENGARI_VERSION_MINOR   = FENGARI_VERSION_MINOR;
-module.exports.FENGARI_VERSION_NUM     = FENGARI_VERSION_NUM;
-module.exports.FENGARI_VERSION_RELEASE = FENGARI_VERSION_RELEASE;
-module.exports.is_luastring            = defs.is_luastring;
-module.exports.luastring_eq            = defs.luastring_eq;
-module.exports.luastring_from          = defs.luastring_from;
-module.exports.luastring_indexOf       = defs.luastring_indexOf;
-module.exports.luastring_of            = defs.luastring_of;
-module.exports.to_jsstring             = defs.to_jsstring;
-module.exports.to_luastring            = defs.to_luastring;
-module.exports.to_uristring            = defs.to_uristring;
-module.exports.from_userstring         = defs.from_userstring;
+module.exports = {
+    FENGARI_AUTHORS:          FENGARI_AUTHORS,
+    FENGARI_COPYRIGHT:        FENGARI_COPYRIGHT,
+    FENGARI_RELEASE:          FENGARI_RELEASE,
+    FENGARI_VERSION:          FENGARI_VERSION,
+    FENGARI_VERSION_MAJOR:    FENGARI_VERSION_MAJOR,
+    FENGARI_VERSION_MINOR:    FENGARI_VERSION_MINOR,
+    FENGARI_VERSION_NUM:      FENGARI_VERSION_NUM,
+    FENGARI_VERSION_RELEASE:  FENGARI_VERSION_RELEASE,
+    is_luastring:             defs.is_luastring,
+    luastring_eq:             defs.luastring_eq,
+    luastring_from:           defs.luastring_from,
+    luastring_indexOf:        defs.luastring_indexOf,
+    luastring_of:             defs.luastring_of,
+    to_jsstring:              defs.to_jsstring,
+    to_luastring:             defs.to_luastring,
+    to_uristring:             defs.to_uristring,
+    from_userstring:          defs.from_userstring
+};

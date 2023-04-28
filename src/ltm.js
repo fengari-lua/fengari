@@ -71,30 +71,30 @@ const TMS = {
 };
 
 const luaT_init = function(L) {
-    L.l_G.tmname[TMS.TM_INDEX]    = new luaS_new(L, to_luastring("__index", true));
-    L.l_G.tmname[TMS.TM_NEWINDEX] = new luaS_new(L, to_luastring("__newindex", true));
-    L.l_G.tmname[TMS.TM_GC]       = new luaS_new(L, to_luastring("__gc", true));
-    L.l_G.tmname[TMS.TM_MODE]     = new luaS_new(L, to_luastring("__mode", true));
-    L.l_G.tmname[TMS.TM_LEN]      = new luaS_new(L, to_luastring("__len", true));
-    L.l_G.tmname[TMS.TM_EQ]       = new luaS_new(L, to_luastring("__eq", true));
-    L.l_G.tmname[TMS.TM_ADD]      = new luaS_new(L, to_luastring("__add", true));
-    L.l_G.tmname[TMS.TM_SUB]      = new luaS_new(L, to_luastring("__sub", true));
-    L.l_G.tmname[TMS.TM_MUL]      = new luaS_new(L, to_luastring("__mul", true));
-    L.l_G.tmname[TMS.TM_MOD]      = new luaS_new(L, to_luastring("__mod", true));
-    L.l_G.tmname[TMS.TM_POW]      = new luaS_new(L, to_luastring("__pow", true));
-    L.l_G.tmname[TMS.TM_DIV]      = new luaS_new(L, to_luastring("__div", true));
-    L.l_G.tmname[TMS.TM_IDIV]     = new luaS_new(L, to_luastring("__idiv", true));
-    L.l_G.tmname[TMS.TM_BAND]     = new luaS_new(L, to_luastring("__band", true));
-    L.l_G.tmname[TMS.TM_BOR]      = new luaS_new(L, to_luastring("__bor", true));
-    L.l_G.tmname[TMS.TM_BXOR]     = new luaS_new(L, to_luastring("__bxor", true));
-    L.l_G.tmname[TMS.TM_SHL]      = new luaS_new(L, to_luastring("__shl", true));
-    L.l_G.tmname[TMS.TM_SHR]      = new luaS_new(L, to_luastring("__shr", true));
-    L.l_G.tmname[TMS.TM_UNM]      = new luaS_new(L, to_luastring("__unm", true));
-    L.l_G.tmname[TMS.TM_BNOT]     = new luaS_new(L, to_luastring("__bnot", true));
-    L.l_G.tmname[TMS.TM_LT]       = new luaS_new(L, to_luastring("__lt", true));
-    L.l_G.tmname[TMS.TM_LE]       = new luaS_new(L, to_luastring("__le", true));
-    L.l_G.tmname[TMS.TM_CONCAT]   = new luaS_new(L, to_luastring("__concat", true));
-    L.l_G.tmname[TMS.TM_CALL]     = new luaS_new(L, to_luastring("__call", true));
+    L.l_G.tmname[TMS.TM_INDEX]    = luaS_new(L, to_luastring("__index", true));
+    L.l_G.tmname[TMS.TM_NEWINDEX] = luaS_new(L, to_luastring("__newindex", true));
+    L.l_G.tmname[TMS.TM_GC]       = luaS_new(L, to_luastring("__gc", true));
+    L.l_G.tmname[TMS.TM_MODE]     = luaS_new(L, to_luastring("__mode", true));
+    L.l_G.tmname[TMS.TM_LEN]      = luaS_new(L, to_luastring("__len", true));
+    L.l_G.tmname[TMS.TM_EQ]       = luaS_new(L, to_luastring("__eq", true));
+    L.l_G.tmname[TMS.TM_ADD]      = luaS_new(L, to_luastring("__add", true));
+    L.l_G.tmname[TMS.TM_SUB]      = luaS_new(L, to_luastring("__sub", true));
+    L.l_G.tmname[TMS.TM_MUL]      = luaS_new(L, to_luastring("__mul", true));
+    L.l_G.tmname[TMS.TM_MOD]      = luaS_new(L, to_luastring("__mod", true));
+    L.l_G.tmname[TMS.TM_POW]      = luaS_new(L, to_luastring("__pow", true));
+    L.l_G.tmname[TMS.TM_DIV]      = luaS_new(L, to_luastring("__div", true));
+    L.l_G.tmname[TMS.TM_IDIV]     = luaS_new(L, to_luastring("__idiv", true));
+    L.l_G.tmname[TMS.TM_BAND]     = luaS_new(L, to_luastring("__band", true));
+    L.l_G.tmname[TMS.TM_BOR]      = luaS_new(L, to_luastring("__bor", true));
+    L.l_G.tmname[TMS.TM_BXOR]     = luaS_new(L, to_luastring("__bxor", true));
+    L.l_G.tmname[TMS.TM_SHL]      = luaS_new(L, to_luastring("__shl", true));
+    L.l_G.tmname[TMS.TM_SHR]      = luaS_new(L, to_luastring("__shr", true));
+    L.l_G.tmname[TMS.TM_UNM]      = luaS_new(L, to_luastring("__unm", true));
+    L.l_G.tmname[TMS.TM_BNOT]     = luaS_new(L, to_luastring("__bnot", true));
+    L.l_G.tmname[TMS.TM_LT]       = luaS_new(L, to_luastring("__lt", true));
+    L.l_G.tmname[TMS.TM_LE]       = luaS_new(L, to_luastring("__le", true));
+    L.l_G.tmname[TMS.TM_CONCAT]   = luaS_new(L, to_luastring("__concat", true));
+    L.l_G.tmname[TMS.TM_CALL]     = luaS_new(L, to_luastring("__call", true));
 };
 
 /*

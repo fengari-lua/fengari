@@ -1,0 +1,13 @@
+{
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "allowJs": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outFile": "dist/fengari.js",
+    "declarationMap": true,
+    "checkJs": true,
+    "lib": ["DOM", "WebWorker", "ES2015"],
+    "skipLibCheck": true
+  }
+}

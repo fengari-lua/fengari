@@ -24,7 +24,7 @@ const LUAC_FORMAT  = 0;   /* this is the official format */
 class DumpState {
     constructor() {
         this.L = null;
-        this.write = null;
+        this.writer = null;
         this.data = null;
         this.strip = NaN;
         this.status = NaN;

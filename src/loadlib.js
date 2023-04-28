@@ -70,7 +70,6 @@ const {
     to_luastring,
     to_uristring
 } = require("./fengaricore.js");
-const fengari  = require('./fengari.js');
 
 const global_env = (function() {
     if (typeof process !== "undefined") {
@@ -143,7 +142,7 @@ if (typeof process === "undefined") {
             lua_pushstring(L, to_luastring(`${e.name}: ${e.message}`));
             return null;
         }
-        let res = func(fengari);
+        let res = func(require('./fengari.js'));
         if (typeof res === "function" || (typeof res === "object" && res !== null)) {
             return res;
         } else if (res === void 0) { /* assume library added symbols to global environment */
@@ -437,7 +436,7 @@ const searcher_Croot = function(L) {
         if (stat != ERRFUNC)
             return checkload(L, 0, filename);  /* real error */
         else {  /* open function not found */
-            lua_pushstring(L, to_luastring("\n\tno module '%s' in file '%s'"), name, filename);
+            lua_pushfstring(L, to_luastring("\n\tno module '%s' in file '%s'"), name, filename);
             return 1;
         }
     }

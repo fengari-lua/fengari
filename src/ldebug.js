@@ -608,6 +608,9 @@ const luaG_runerror = function(L, fmt, ...argp) {
     luaG_errormsg(L);
 };
 
+/**
+ * @returns {never}
+ */
 const luaG_errormsg = function(L) {
     if (L.errfunc !== 0) {  /* is there an error handling function? */
         let errfunc = L.errfunc;

@@ -4,6 +4,15 @@
  * Fengari specific string conversion functions
  */
 
+/**
+ * @typedef {Uint8Array} LuaString
+ */
+
+/**
+ * Converts a char array into a Lua string.
+ *
+ * @type {function(ArrayLike<number>):LuaString}
+ */
 let luastring_from;
 if (typeof Uint8Array.from === "function") {
     luastring_from = Uint8Array.from.bind(Uint8Array);
@@ -17,6 +26,11 @@ if (typeof Uint8Array.from === "function") {
     };
 }
 
+/**
+ * Returns the index of the first occurrence of the character in the Lua string.
+ *
+ * @type {function(LuaString|number[], number, number=):number}
+ */
 let luastring_indexOf;
 if (typeof (new Uint8Array().indexOf) === "function") {
     luastring_indexOf = function(s, v, i) {
@@ -24,13 +38,18 @@ if (typeof (new Uint8Array().indexOf) === "function") {
     };
 } else {
     /* Browsers that don't support Uint8Array.indexOf seem to allow using Array.indexOf on Uint8Array objects e.g. IE11 */
-    let array_indexOf = [].indexOf;
+    let array_indexOf = Array.prototype.indexOf;
     if (array_indexOf.call(new Uint8Array(1), 0) !== 0) throw Error("missing .indexOf");
     luastring_indexOf = function(s, v, i) {
         return array_indexOf.call(s, v, i);
     };
 }
 
+/**
+ * Constructs a Lua string from characters.
+ *
+ * @type {function(...number):LuaString}
+ */
 let luastring_of;
 if (typeof Uint8Array.of === "function") {
     luastring_of = Uint8Array.of.bind(Uint8Array);
@@ -40,11 +59,22 @@ if (typeof Uint8Array.of === "function") {
     };
 }
 
+/**
+ * Returns `true` if the object can be used as a Lua string.
+ *
+ * @param {any} s the object
+ */
 const is_luastring = function(s) {
     return s instanceof Uint8Array;
 };
 
-/* test two lua strings for equality */
+/**
+ * Tests two Lua strings for equality.
+ *
+ * @param {LuaString} a str 1
+ * @param {LuaString} b str 2
+ * @returns {boolean}
+ */
 const luastring_eq = function(a, b) {
     if (a !== b) {
         let len = a.length;
@@ -57,6 +87,16 @@ const luastring_eq = function(a, b) {
 };
 
 const unicode_error_message = "cannot convert invalid utf8 to javascript string";
+
+/**
+ * Converts a Lua string (in UTF-8) to a normal JavaScript string.
+ *
+ * @param {LuaString} value the Lua string
+ * @param {number} [from] the staring index
+ * @param {number} [to] the ending index
+ * @param {boolean} [replacement_char] whether to replace invalid utf8 chars
+ * @returns {string}
+ */
 const to_jsstring = function(value, from, to, replacement_char) {
     if (!is_luastring(value)) throw new TypeError("to_jsstring expects a Uint8Array");
 
@@ -159,7 +199,12 @@ const uri_allowed = (";,/?:@&=+$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUV
     return uri_allowed;
 }, {});
 
-/* utility function to convert a lua string to a js string with uri escaping */
+/**
+ * Utility function to convert a Lua string to a JavaScript string with URI escaping.
+ *
+ * @param {LuaString} a the string
+ * @returns {string}
+ */
 const to_uristring = function(a) {
     if (!is_luastring(a)) throw new TypeError("to_uristring expects a Uint8Array");
     let s = "";
@@ -176,6 +221,11 @@ const to_uristring = function(a) {
 
 const to_luastring_cache = {};
 
+/**
+ * @param {string} str
+ * @param {boolean} [cache]
+ * @returns {LuaString}
+ */
 const to_luastring = function(str, cache) {
     if (typeof str !== "string") throw new TypeError("to_luastring expects a javascript string");
 
@@ -185,7 +235,7 @@ const to_luastring = function(str, cache) {
     }
 
     let len = str.length;
-    let outU8Array = Array(len); /* array is at *least* going to be length of string */
+    const outU8Array = Array(len); /* array is at *least* going to be length of string */
     let outIdx = 0;
     for (let i = 0; i < len; ++i) {
         let u = str.charCodeAt(i);
@@ -217,15 +267,24 @@ const to_luastring = function(str, cache) {
             }
         }
     }
-    outU8Array = luastring_from(outU8Array);
+    const converted = luastring_from(outU8Array);
 
-    if (cache) to_luastring_cache[str] = outU8Array;
+    if (cache) to_luastring_cache[str] = converted;
 
-    return outU8Array;
+    return converted;
 };
 
+/**
+ * Returns a Lua string.
+ *
+ * If `str` is already a Lua string, it returns it as is.
+ * Otherwise, it tries to convert it.
+ *
+ * @param {string|LuaString} str
+ * @returns {LuaString}
+ */
 const from_userstring = function(str) {
-    if (!is_luastring(str)) {
+    if (!(str instanceof Uint8Array)) {
         if (typeof str === "string") {
             str = to_luastring(str);
         } else {
@@ -269,7 +328,6 @@ module.exports.LUA_RELEASE         = LUA_RELEASE;
 module.exports.LUA_COPYRIGHT       = LUA_COPYRIGHT;
 module.exports.LUA_AUTHORS         = LUA_AUTHORS;
 
-
 const thread_status = {
     LUA_OK:        0,
     LUA_YIELD:     1,
@@ -280,29 +338,49 @@ const thread_status = {
     LUA_ERRERR:    6
 };
 
+const LUA_TNONE          = -1;
+const LUA_TNIL           = 0;
+const LUA_TBOOLEAN       = 1;
+const LUA_TLIGHTUSERDATA = 2;
+const LUA_TNUMBER        = 3;
+const LUA_TSTRING        = 4;
+const LUA_TTABLE         = 5;
+const LUA_TFUNCTION      = 6;
+const LUA_TUSERDATA      = 7;
+const LUA_TTHREAD        = 8;
+const LUA_NUMTAGS        = 9;
+
+const LUA_TSHRSTR = LUA_TSTRING | (0 << 4);  /* short strings */
+const LUA_TLNGSTR = LUA_TSTRING | (1 << 4);  /* long strings */
+
+const LUA_TNUMFLT = LUA_TNUMBER | (0 << 4);  /* float numbers */
+const LUA_TNUMINT = LUA_TNUMBER | (1 << 4);  /* integer numbers */
+
+const LUA_TLCL = LUA_TFUNCTION | (0 << 4);  /* Lua closure */
+const LUA_TLCF = LUA_TFUNCTION | (1 << 4);  /* light C function */
+const LUA_TCCL = LUA_TFUNCTION | (2 << 4);  /* C closure */
+
 const constant_types = {
-    LUA_TNONE:          -1,
-    LUA_TNIL:           0,
-    LUA_TBOOLEAN:       1,
-    LUA_TLIGHTUSERDATA: 2,
-    LUA_TNUMBER:        3,
-    LUA_TSTRING:        4,
-    LUA_TTABLE:         5,
-    LUA_TFUNCTION:      6,
-    LUA_TUSERDATA:      7,
-    LUA_TTHREAD:        8,
-    LUA_NUMTAGS:        9
+    LUA_TNONE:          LUA_TNONE,
+    LUA_TNIL:           LUA_TNIL,
+    LUA_TBOOLEAN:       LUA_TBOOLEAN,
+    LUA_TLIGHTUSERDATA: LUA_TLIGHTUSERDATA,
+    LUA_TNUMBER:        LUA_TNUMBER,
+    LUA_TSTRING:        LUA_TSTRING,
+    LUA_TTABLE:         LUA_TTABLE,
+    LUA_TFUNCTION:      LUA_TFUNCTION,
+    LUA_TUSERDATA:      LUA_TUSERDATA,
+    LUA_TTHREAD:        LUA_TTHREAD,
+    LUA_NUMTAGS:        LUA_NUMTAGS,
+
+    LUA_TSHRSTR:        LUA_TSHRSTR,
+    LUA_TLNGSTR:        LUA_TLNGSTR,
+    LUA_TNUMFLT:        LUA_TNUMFLT,
+    LUA_TNUMINT:        LUA_TNUMINT,
+    LUA_TLCL:           LUA_TLCL,
+    LUA_TLCF:           LUA_TLCF,
+    LUA_TCCL:           LUA_TCCL,
 };
-
-constant_types.LUA_TSHRSTR = constant_types.LUA_TSTRING | (0 << 4);  /* short strings */
-constant_types.LUA_TLNGSTR = constant_types.LUA_TSTRING | (1 << 4);  /* long strings */
-
-constant_types.LUA_TNUMFLT = constant_types.LUA_TNUMBER | (0 << 4);  /* float numbers */
-constant_types.LUA_TNUMINT = constant_types.LUA_TNUMBER | (1 << 4);  /* integer numbers */
-
-constant_types.LUA_TLCL = constant_types.LUA_TFUNCTION | (0 << 4);  /* Lua closure */
-constant_types.LUA_TLCF = constant_types.LUA_TFUNCTION | (1 << 4);  /* light C function */
-constant_types.LUA_TCCL = constant_types.LUA_TFUNCTION | (2 << 4);  /* C closure */
 
 /*
 ** Comparison and arithmetic functions
@@ -332,6 +410,12 @@ const LUA_MINSTACK = 20;
 const { LUAI_MAXSTACK } = require('./luaconf.js');
 const LUA_REGISTRYINDEX = -LUAI_MAXSTACK - 1000;
 
+/**
+ * Returns a pseudo-index for the i-th upvalue.
+ *
+ * @param {number} i
+ * @returns {number}
+ */
 const lua_upvalueindex = function(i) {
     return LUA_REGISTRYINDEX - i;
 };

@@ -799,7 +799,7 @@ const forlimit = function(obj, step) {
     if (ilimit === false) {
         let n = tonumber(obj);
         if (n === false)
-            return false;
+            return null;
 
         if (0 < n) {
             ilimit = LUA_MAXINTEGER;

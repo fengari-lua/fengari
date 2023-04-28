@@ -1,5 +1,10 @@
 "use strict";
 
+/**
+ * @typedef {import('./lstate').lua_State} lua_State
+ * @typedef {import('./defs').LuaString} LuaString
+ */
+
 const {
     LUA_MULTRET,
     LUA_OPBNOT,
@@ -73,17 +78,31 @@ const isvalid = function(o) {
     return o !== lobject.luaO_nilobject;
 };
 
+/**
+ * @param {lua_State?} L
+ * @returns {number}
+ */
 const lua_version = function(L) {
     if (L === null) return LUA_VERSION_NUM;
     else return L.l_G.version;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {function?} panicf
+ * @returns {function?}
+ */
 const lua_atpanic = function(L, panicf) {
     let old = L.l_G.panic;
     L.l_G.panic = panicf;
     return old;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {function?} errorf
+ * @returns {function?}
+ */
 const lua_atnativeerror = function(L, errorf) {
     let old = L.l_G.atnativeerror;
     L.l_G.atnativeerror = errorf;
@@ -130,6 +149,11 @@ const index2addr_ = function(L, idx) {
     }
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} n
+ * @returns {boolean}
+ */
 const lua_checkstack = function(L, n) {
     let res;
     let ci = L.ci;
@@ -152,6 +176,11 @@ const lua_checkstack = function(L, n) {
     return res;
 };
 
+/**
+ * @param {lua_State} from
+ * @param {lua_State} to
+ * @param {number} n
+ */
 const lua_xmove = function(from, to, n) {
     if (from === to) return;
     api_checknelems(from, n);
@@ -173,21 +202,38 @@ const lua_xmove = function(from, to, n) {
 /*
 ** convert an acceptable stack index into an absolute index
 */
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {number}
+ */
 const lua_absindex = function(L, idx) {
     return (idx > 0 || idx <= LUA_REGISTRYINDEX)
         ? idx
         : (L.top - L.ci.funcOff) + idx;
 };
 
+/**
+ * @param {lua_State} L
+ * @returns {number}
+ */
 const lua_gettop = function(L) {
     return L.top - (L.ci.funcOff + 1);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ */
 const lua_pushvalue = function(L, idx) {
     lobject.pushobj2s(L, index2addr(L, idx));
     api_check(L, L.top <= L.ci.top, "stack overflow");
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ */
 const lua_settop = function(L, idx) {
     let func = L.ci.funcOff;
     let newtop;
@@ -201,6 +247,10 @@ const lua_settop = function(L, idx) {
     ldo.adjust_top(L, newtop);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} n
+ */
 const lua_pop = function(L, n) {
     lua_settop(L, -n - 1);
 };
@@ -218,6 +268,11 @@ const reverse = function(L, from, to) {
 ** Let x = AB, where A is a prefix of length 'n'. Then,
 ** rotate x n === BA. But BA === (A^r . B^r)^r.
 */
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @param {number} n
+ */
 const lua_rotate = function(L, idx, n) {
     let t = L.top - 1;
     let pIdx = index2addr_(L, idx);
@@ -230,20 +285,37 @@ const lua_rotate = function(L, idx, n) {
     reverse(L, pIdx, L.top - 1);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} fromidx
+ * @param {number} toidx
+ */
 const lua_copy = function(L, fromidx, toidx) {
     let from = index2addr(L, fromidx);
     index2addr(L, toidx).setfrom(from);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ */
 const lua_remove = function(L, idx) {
     lua_rotate(L, idx, -1);
     lua_pop(L, 1);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ */
 const lua_insert = function(L, idx) {
     lua_rotate(L, idx, 1);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ */
 const lua_replace = function(L, idx) {
     lua_copy(L, -1, idx);
     lua_pop(L, 1);
@@ -253,23 +325,40 @@ const lua_replace = function(L, idx) {
 ** push functions (JS -> stack)
 */
 
+/**
+ * @param {lua_State} L
+ */
 const lua_pushnil = function(L) {
     L.stack[L.top] = new TValue(LUA_TNIL, null);
     api_incr_top(L);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} n
+ */
 const lua_pushnumber = function(L, n) {
     fengari_argcheck(typeof n === "number");
     L.stack[L.top] = new TValue(LUA_TNUMFLT, n);
     api_incr_top(L);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} n
+ */
 const lua_pushinteger = function(L, n) {
     fengari_argcheckinteger(n);
     L.stack[L.top] = new TValue(LUA_TNUMINT, n);
     api_incr_top(L);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {string|LuaString} s
+ * @param {number} len
+ * @returns {LuaString}
+ */
 const lua_pushlstring = function(L, s, len) {
     fengari_argcheckinteger(len);
     let ts;
@@ -283,9 +372,14 @@ const lua_pushlstring = function(L, s, len) {
     }
     lobject.pushsvalue2s(L, ts);
     api_check(L, L.top <= L.ci.top, "stack overflow");
-    return ts.value;
+    return ts.realstring;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {string|LuaString} s
+ * @returns {any}
+ */
 const lua_pushstring = function (L, s) {
     if (s === undefined || s === null) {
         L.stack[L.top] = new TValue(LUA_TNIL, null);
@@ -299,18 +393,36 @@ const lua_pushstring = function (L, s) {
     return s;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {string|LuaString} fmt
+ * @param {any[]} argp
+ * @returns {any}
+ */
 const lua_pushvfstring = function (L, fmt, argp) {
     fmt = from_userstring(fmt);
     return lobject.luaO_pushvfstring(L, fmt, argp);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {string|LuaString} fmt
+ * @param {any[]} argp
+ * @returns {any}
+ */
 const lua_pushfstring = function (L, fmt, ...argp) {
     fmt = from_userstring(fmt);
     return lobject.luaO_pushvfstring(L, fmt, argp);
 };
 
 /* Similar to lua_pushstring, but takes a JS string */
+/**
+ * @param {lua_State} L
+ * @param {string?} [s]
+ * @returns {LuaString?}
+ */
 const lua_pushliteral = function (L, s) {
+    let arr = null;
     if (s === undefined || s === null) {
         L.stack[L.top] = new TValue(LUA_TNIL, null);
         L.top++;
@@ -318,13 +430,18 @@ const lua_pushliteral = function (L, s) {
         fengari_argcheck(typeof s === "string");
         let ts = luaS_newliteral(L, s);
         lobject.pushsvalue2s(L, ts);
-        s = ts.getstr(); /* internal copy */
+        arr = ts.getstr(); /* internal copy */
     }
     api_check(L, L.top <= L.ci.top, "stack overflow");
 
-    return s;
+    return arr;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {function} fn
+ * @param {number} n
+ */
 const lua_pushcclosure = function(L, fn, n) {
     fengari_argcheck(typeof fn === "function");
     fengari_argcheckinteger(n);
@@ -347,28 +464,47 @@ const lua_pushcclosure = function(L, fn, n) {
 
 const lua_pushjsclosure = lua_pushcclosure;
 
+/**
+ * @param {lua_State} L
+ * @param {function} fn
+ */
 const lua_pushcfunction = function(L, fn) {
     lua_pushcclosure(L, fn, 0);
 };
 
 const lua_pushjsfunction = lua_pushcfunction;
 
+/**
+ * @param {lua_State} L
+ * @param {any} b
+ */
 const lua_pushboolean = function(L, b) {
     L.stack[L.top] = new TValue(LUA_TBOOLEAN, !!b);
     api_incr_top(L);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {any} p
+ */
 const lua_pushlightuserdata = function(L, p) {
     L.stack[L.top] = new TValue(LUA_TLIGHTUSERDATA, p);
     api_incr_top(L);
 };
 
+/**
+ * @param {lua_State} L
+ * @returns {boolean}
+ */
 const lua_pushthread = function(L) {
     L.stack[L.top] = new TValue(LUA_TTHREAD, L);
     api_incr_top(L);
     return L.l_G.mainthread === L;
 };
 
+/**
+ * @param {lua_State} L
+ */
 const lua_pushglobaltable = function(L) {
     lua_rawgeti(L, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
 };
@@ -391,10 +527,18 @@ const auxsetstr = function(L, t, k) {
     delete L.stack[--L.top];
 };
 
+/**
+ * @param {lua_State} L
+ * @param {string|LuaString} name
+ */
 const lua_setglobal = function(L, name) {
     auxsetstr(L, ltable.luaH_getint(L.l_G.l_registry.value, LUA_RIDX_GLOBALS), name);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} objindex
+ */
 const lua_setmetatable = function(L, objindex) {
     api_checknelems(L, 1);
     let mt;
@@ -422,6 +566,10 @@ const lua_setmetatable = function(L, objindex) {
     return true;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ */
 const lua_settable = function(L, idx) {
     api_checknelems(L, 2);
     let t = index2addr(L, idx);
@@ -430,10 +578,20 @@ const lua_settable = function(L, idx) {
     delete L.stack[--L.top];
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @param {LuaString} k
+ */
 const lua_setfield = function(L, idx, k) {
     auxsetstr(L, index2addr(L, idx), k);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @param {number} n
+ */
 const lua_seti = function(L, idx, n) {
     fengari_argcheckinteger(n);
     api_checknelems(L, 1);
@@ -446,6 +604,10 @@ const lua_seti = function(L, idx, n) {
     delete L.stack[--L.top];
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ */
 const lua_rawset = function(L, idx) {
     api_checknelems(L, 2);
     let o = index2addr(L, idx);
@@ -458,6 +620,11 @@ const lua_rawset = function(L, idx) {
     delete L.stack[--L.top];
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @param {number} n
+ */
 const lua_rawseti = function(L, idx, n) {
     fengari_argcheckinteger(n);
     api_checknelems(L, 1);
@@ -467,6 +634,11 @@ const lua_rawseti = function(L, idx, n) {
     delete L.stack[--L.top];
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @param {any} p
+ */
 const lua_rawsetp = function(L, idx, p) {
     api_checknelems(L, 1);
     let o = index2addr(L, idx);
@@ -489,6 +661,12 @@ const auxgetstr = function(L, t, k) {
     return L.stack[L.top - 1].ttnov();
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @param {number} n
+ * @returns {number}
+ */
 const lua_rawgeti = function(L, idx, n) {
     let t = index2addr(L, idx);
     fengari_argcheckinteger(n);
@@ -498,6 +676,12 @@ const lua_rawgeti = function(L, idx, n) {
     return L.stack[L.top - 1].ttnov();
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @param {any} p
+ * @returns {number}
+ */
 const lua_rawgetp = function(L, idx, p) {
     let t = index2addr(L, idx);
     api_check(L, t.ttistable(), "table expected");
@@ -507,6 +691,11 @@ const lua_rawgetp = function(L, idx, p) {
     return L.stack[L.top - 1].ttnov();
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {number}
+ */
 const lua_rawget = function(L, idx) {
     let t = index2addr(L, idx);
     api_check(L, t.ttistable(t), "table expected");
@@ -515,6 +704,11 @@ const lua_rawget = function(L, idx) {
 };
 
 // narray and nrec are mostly useless for this implementation
+/**
+ * @param {lua_State} L
+ * @param {number} [narray]
+ * @param {number} [nrec]
+ */
 const lua_createtable = function(L, narray, nrec) {
     let t = new lobject.TValue(LUA_TTABLE, ltable.luaH_new(L));
     L.stack[L.top] = t;
@@ -525,6 +719,11 @@ const luaS_newudata = function(L, size) {
     return new lobject.Udata(L, size);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} [size]
+ * @returns {any}
+ */
 const lua_newuserdata = function(L, size) {
     let u = luaS_newudata(L, size);
     L.stack[L.top] = new lobject.TValue(LUA_TUSERDATA, u);
@@ -557,6 +756,12 @@ const aux_upvalue = function(L, fi, n) {
     }
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} funcindex
+ * @param {number} n
+ * @returns {any}
+ */
 const lua_getupvalue = function(L, funcindex, n) {
     let up = aux_upvalue(L, index2addr(L, funcindex), n);
     if (up) {
@@ -569,6 +774,12 @@ const lua_getupvalue = function(L, funcindex, n) {
     return null;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} funcindex
+ * @param {number} n
+ * @returns {any}
+ */
 const lua_setupvalue = function(L, funcindex, n) {
     let fi = index2addr(L, funcindex);
     api_checknelems(L, 1);
@@ -583,15 +794,28 @@ const lua_setupvalue = function(L, funcindex, n) {
     return null;
 };
 
+/**
+ * @param {lua_State} L
+ */
 const lua_newtable = function(L) {
     lua_createtable(L, 0, 0);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {LuaString} n
+ * @param {function} f
+ */
 const lua_register = function(L, n, f) {
     lua_pushcfunction(L, f);
     lua_setglobal(L, n);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} objindex
+ * @returns {boolean}
+ */
 const lua_getmetatable = function(L, objindex) {
     let obj = index2addr(L, objindex);
     let mt;
@@ -615,6 +839,11 @@ const lua_getmetatable = function(L, objindex) {
     return res;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {number}
+ */
 const lua_getuservalue = function(L, idx) {
     let o = index2addr(L, idx);
     api_check(L, o.ttisfulluserdata(), "full userdata expected");
@@ -624,16 +853,33 @@ const lua_getuservalue = function(L, idx) {
     return L.stack[L.top - 1].ttnov();
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {number}
+ */
 const lua_gettable = function(L, idx) {
     let t = index2addr(L, idx);
     lvm.luaV_gettable(L, t, L.stack[L.top - 1], L.top - 1);
     return L.stack[L.top - 1].ttnov();
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @param {string|LuaString} k
+ * @returns {number}
+ */
 const lua_getfield = function(L, idx, k) {
     return auxgetstr(L, index2addr(L, idx), k);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @param {number} n
+ * @returns {number}
+ */
 const lua_geti = function(L, idx, n) {
     let t = index2addr(L, idx);
     fengari_argcheckinteger(n);
@@ -643,6 +889,11 @@ const lua_geti = function(L, idx, n) {
     return L.stack[L.top - 1].ttnov();
 };
 
+/**
+ * @param {lua_State} L
+ * @param {LuaString} name
+ * @returns {number}
+ */
 const lua_getglobal = function(L, name) {
     return auxgetstr(L, ltable.luaH_getint(L.l_G.l_registry.value, LUA_RIDX_GLOBALS), name);
 };
@@ -651,11 +902,21 @@ const lua_getglobal = function(L, name) {
 ** access functions (stack -> JS)
 */
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {boolean}
+ */
 const lua_toboolean = function(L, idx) {
     let o = index2addr(L, idx);
     return !o.l_isfalse();
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {LuaString?}
+ */
 const lua_tolstring = function(L, idx) {
     let o = index2addr(L, idx);
 
@@ -670,6 +931,11 @@ const lua_tolstring = function(L, idx) {
 
 const lua_tostring =  lua_tolstring;
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {string?}
+ */
 const lua_tojsstring = function(L, idx) {
     let o = index2addr(L, idx);
 
@@ -682,11 +948,21 @@ const lua_tojsstring = function(L, idx) {
     return o.jsstring();
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {DataView}
+ */
 const lua_todataview = function(L, idx) {
     let u8 = lua_tolstring(L, idx);
     return new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {number}
+ */
 const lua_rawlen = function(L, idx) {
     let o = index2addr(L, idx);
     switch (o.ttype()) {
@@ -702,30 +978,60 @@ const lua_rawlen = function(L, idx) {
     }
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {function?}
+ */
 const lua_tocfunction = function(L, idx) {
     let o = index2addr(L, idx);
     if (o.ttislcf() || o.ttisCclosure()) return o.value;
     else return null;  /* not a C function */
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {number}
+ */
 const lua_tointeger = function(L, idx) {
     let n = lua_tointegerx(L, idx);
     return n === false ? 0 : n;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {number|false}
+ */
 const lua_tointegerx = function(L, idx) {
     return lvm.tointeger(index2addr(L, idx));
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {number}
+ */
 const lua_tonumber = function(L, idx) {
     let n = lua_tonumberx(L, idx);
     return n === false ? 0 : n;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {number|false}
+ */
 const lua_tonumberx = function(L, idx) {
     return lvm.tonumber(index2addr(L, idx));
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {any}
+ */
 const lua_touserdata = function(L, idx) {
     let o = index2addr(L, idx);
     switch (o.ttnov()) {
@@ -737,11 +1043,21 @@ const lua_touserdata = function(L, idx) {
     }
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {lua_State}
+ */
 const lua_tothread = function(L, idx) {
     let o = index2addr(L, idx);
     return o.ttisthread() ? o.value : null;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {any}
+ */
 const lua_topointer = function(L, idx) {
     let o = index2addr(L, idx);
     switch (o.ttype()) {
@@ -790,6 +1106,13 @@ const lua_toproxy = function(L, idx) {
 };
 
 
+/**
+ * @param {lua_State} L
+ * @param {number} index1
+ * @param {number} index2
+ * @param {number} op
+ * @returns {number}
+ */
 const lua_compare = function(L, index1, index2, op) {
     let o1 = index2addr(L, index1);
     let o2 = index2addr(L, index2);
@@ -808,6 +1131,11 @@ const lua_compare = function(L, index1, index2, op) {
     return i;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {LuaString} s
+ * @returns {number}
+ */
 const lua_stringtonumber = function(L, s) {
     let tv = new TValue();
     let sz = lobject.luaO_str2num(s, tv);
@@ -822,77 +1150,162 @@ const f_call = function(L, ud) {
     ldo.luaD_callnoyield(L, ud.funcOff, ud.nresults);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {number}
+ */
 const lua_type = function(L, idx) {
     let o = index2addr(L, idx);
     return isvalid(o) ?  o.ttnov() : LUA_TNONE;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} t
+ * @returns {LuaString}
+ */
 const lua_typename = function(L, t) {
     api_check(L, LUA_TNONE <= t && t < LUA_NUMTAGS, "invalid tag");
     return ltm.ttypename(t);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {number}
+ */
 const lua_iscfunction = function(L, idx) {
     let o = index2addr(L, idx);
     return o.ttislcf(o) || o.ttisCclosure();
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} n
+ * @returns {boolean}
+ */
 const lua_isnil = function(L, n) {
     return lua_type(L, n) === LUA_TNIL;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} n
+ * @returns {boolean}
+ */
 const lua_isboolean = function(L, n) {
     return lua_type(L, n) === LUA_TBOOLEAN;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} n
+ * @returns {boolean}
+ */
 const lua_isnone = function(L, n) {
     return lua_type(L, n) === LUA_TNONE;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} n
+ * @returns {boolean}
+ */
 const lua_isnoneornil = function(L, n) {
     return lua_type(L, n) <= 0;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {boolean}
+ */
 const lua_istable = function(L, idx) {
     return index2addr(L, idx).ttistable();
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {number}
+ */
 const lua_isinteger = function(L, idx) {
     return index2addr(L, idx).ttisinteger();
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {boolean}
+ */
 const lua_isnumber = function(L, idx) {
     return lvm.tonumber(index2addr(L, idx)) !== false;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {number}
+ */
 const lua_isstring = function(L, idx) {
     let o = index2addr(L, idx);
     return o.ttisstring() || lvm.cvt2str(o);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {number}
+ */
 const lua_isuserdata = function(L, idx) {
     let o = index2addr(L, idx);
     return o.ttisfulluserdata(o) || o.ttislightuserdata();
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {boolean}
+ */
 const lua_isthread = function(L, idx) {
     return lua_type(L, idx) === LUA_TTHREAD;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {boolean}
+ */
 const lua_isfunction = function(L, idx) {
     return lua_type(L, idx) === LUA_TFUNCTION;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {boolean}
+ */
 const lua_islightuserdata = function(L, idx) {
     return lua_type(L, idx) === LUA_TLIGHTUSERDATA;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} index1
+ * @param {number} index2
+ * @returns {number}
+ */
 const lua_rawequal = function(L, index1, index2) {
     let o1 = index2addr(L, index1);
     let o2 = index2addr(L, index2);
     return isvalid(o1) && isvalid(o2) ? lvm.luaV_equalobj(null, o1, o2) : 0;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} op
+ */
 const lua_arith = function(L, op) {
     if (op !== LUA_OPUNM && op !== LUA_OPBNOT)
         api_checknelems(L, 2);  /* all other operations expect two operands */
@@ -937,10 +1350,18 @@ const lua_dump = function(L, writer, data, strip) {
     return 1;
 };
 
+/**
+ * @param {lua_State} L
+ * @returns {number}
+ */
 const lua_status = function(L) {
     return L.status;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ */
 const lua_setuservalue = function(L, idx) {
     api_checknelems(L, 1);
     let o = index2addr(L, idx);
@@ -972,6 +1393,11 @@ const lua_callk = function(L, nargs, nresults, ctx, k) {
         L.ci.top = L.top;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} n
+ * @param {number} r
+ */
 const lua_call = function(L, n, r) {
     lua_callk(L, n, r, 0, null);
 };
@@ -1017,6 +1443,13 @@ const lua_pcallk = function(L, nargs, nresults, errfunc, ctx, k) {
     return status;
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} n
+ * @param {number} r
+ * @param {any} f
+ * @returns {number}
+ */
 const lua_pcall = function(L, n, r, f) {
     return lua_pcallk(L, n, r, f, 0, null);
 };
@@ -1025,11 +1458,20 @@ const lua_pcall = function(L, n, r, f) {
 ** miscellaneous functions
 */
 
+/**
+ * @param {lua_State} L
+ * @returns {never}
+ */
 const lua_error = function(L) {
     api_checknelems(L, 1);
     ldebug.luaG_errormsg(L);
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ * @returns {number}
+ */
 const lua_next = function(L, idx) {
     let t = index2addr(L, idx);
     api_check(L, t.ttistable(), "table expected");
@@ -1045,6 +1487,10 @@ const lua_next = function(L, idx) {
     }
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} n
+ */
 const lua_concat = function(L, n) {
     api_checknelems(L, n);
     if (n >= 2)
@@ -1055,6 +1501,10 @@ const lua_concat = function(L, n) {
     }
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} idx
+ */
 const lua_len = function(L, idx) {
     let t = index2addr(L, idx);
     let tv = new TValue();
@@ -1094,6 +1544,13 @@ const lua_upvalueid = function(L, fidx, n) {
     }
 };
 
+/**
+ * @param {lua_State} L
+ * @param {number} fidx1
+ * @param {number} n1
+ * @param {number} fidx2
+ * @param {number} n2
+ */
 const lua_upvaluejoin = function(L, fidx1, n1, fidx2, n2) {
     let ref1 = getupvalref(L, fidx1, n1);
     let ref2 = getupvalref(L, fidx2, n2);

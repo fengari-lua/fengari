@@ -538,6 +538,7 @@ const l_str2int = function(s) {
     let i = 0;
     let a = 0;
     let empty = true;
+    /** @type {boolean|any} */
     let neg;
 
     while (lisspace(s[i])) i++;  /* skip initial spaces */
