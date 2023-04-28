@@ -10,7 +10,7 @@ Copyright © 1994–2017 Lua.org, PUC-Rio.
 
 const core = require("./fengaricore.js");
 
-const exported = {
+module.exports = {
     FENGARI_AUTHORS:          core.FENGARI_AUTHORS,
     FENGARI_COPYRIGHT:        core.FENGARI_COPYRIGHT,
     FENGARI_RELEASE:          core.FENGARI_RELEASE,
@@ -32,5 +32,3 @@ const exported = {
     lauxlib:                  require('./lauxlib.js'),
     lualib:                   require('./lualib.js'),
 };
-
-module.exports = exported;

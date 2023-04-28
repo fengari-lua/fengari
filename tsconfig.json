@@ -4,7 +4,7 @@
     "allowJs": true,
     "declaration": true,
     "emitDeclarationOnly": true,
-    "outDir": "dist",
+    "outFile": "dist/fengari.js",
     "declarationMap": true,
     "checkJs": true,
     "lib": ["DOM", "WebWorker", "ES2015"],

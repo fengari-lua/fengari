@@ -6,7 +6,7 @@ const ldebug = require("./ldebug.js");
 const ldo    = require("./ldo.js");
 const lstate = require("./lstate.js");
 
-const exported = {
+module.exports = {
     LUA_AUTHORS:              defs.LUA_AUTHORS,
     LUA_COPYRIGHT:            defs.LUA_COPYRIGHT,
     LUA_ERRERR:               defs.thread_status.LUA_ERRERR,
@@ -191,5 +191,3 @@ const exported = {
     lua_yieldk:               ldo.lua_yieldk,
     lua_tocfunction:          lapi.lua_tocfunction,
 };
-
-module.exports = exported;

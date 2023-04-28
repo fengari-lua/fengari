@@ -73,6 +73,5 @@ module.exports.LUA_FENGARILIBNAME = LUA_FENGARILIBNAME;
 /** @type {(L: lua_State) => number} */
 module.exports.luaopen_fengari = require("./fengarilib.js").luaopen_fengari;
 
-const linit = require('./linit.js');
 /** @type {(L: lua_State) => void} */
-module.exports.luaL_openlibs = linit.luaL_openlibs;
+module.exports.luaL_openlibs = require('./linit.js').luaL_openlibs;
