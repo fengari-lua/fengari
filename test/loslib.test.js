@@ -160,3 +160,31 @@ test('os.getenv', () => {
 
     expect(lua.lua_isstring(L, -1)).toBe(true);
 });
+
+describe('filesystem tests', () => {
+    (process ? it : it.skip)('os.rename, os.remove', () => {
+        expect(typeof lualib.luaopen_io).toBe("function");
+        let L = lauxlib.luaL_newstate();
+        if (!L) throw Error("failed to create lua state");
+
+        {
+            const fs = require("fs");
+            const tmp = require("tmp");
+            const file = tmp.fileSync();
+            lua.lua_pushstring(L, file.name);
+            lua.lua_setglobal(L, "filename");
+            lualib.luaL_openlibs(L);
+
+            expect(lauxlib.luaL_loadstring(L, to_luastring(`assert(os.rename(filename, filename .. '.renamed'))`)))
+                .toBe(lua.LUA_OK);
+            lua.lua_call(L, 0, -1);
+            expect(fs.existsSync(file.name)).toBe(false);
+            expect(fs.existsSync(`${file.name}.renamed`)).toBe(true);
+
+            expect(lauxlib.luaL_loadstring(L, to_luastring(`assert(os.remove(filename .. '.renamed'))`)))
+                .toBe(lua.LUA_OK);
+            lua.lua_call(L, 0, -1);
+            expect(fs.existsSync(`${file.name}.renamed`)).toBe(false);
+        }
+    });
+});
