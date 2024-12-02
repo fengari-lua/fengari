@@ -437,7 +437,7 @@ const searcher_Croot = function(L) {
         if (stat != ERRFUNC)
             return checkload(L, 0, filename);  /* real error */
         else {  /* open function not found */
-            lua_pushstring(L, to_luastring("\n\tno module '%s' in file '%s'"), name, filename);
+            lua_pushfstring(L, to_luastring("\n\tno module '%s' in file '%s'"), name, filename);
             return 1;
         }
     }
