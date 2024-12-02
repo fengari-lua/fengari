@@ -809,7 +809,7 @@ const unpacknum = function(L, b, islittle, size) {
 
     let dv = new DataView(new ArrayBuffer(size));
     for (let i = 0; i < size; i++)
-        dv.setUint8(i, b[i], islittle);
+        dv.setUint8(i, b[i]);
 
     if (size == 4) return dv.getFloat32(0, islittle);
     else return dv.getFloat64(0, islittle);
