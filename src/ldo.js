@@ -368,6 +368,9 @@ const luaD_call = function(L, off, nResults) {
     L.nCcalls--;
 };
 
+/**
+ * @returns {never}
+ */
 const luaD_throw = function(L, errcode) {
     if (L.errorJmp) {  /* thread has an error handler? */
         L.errorJmp.status = errcode;  /* set status */

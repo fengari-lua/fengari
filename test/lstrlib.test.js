@@ -159,9 +159,7 @@ test('string.format', () => {
         lua.lua_call(L, 0, -1);
     }
 
-    expect(lua.lua_tojsstring(L, -1)).toBe('"a string with \\"quotes\\" and \\\n new line"',
-        "Correct element(s) on the stack"
-    );
+    expect(lua.lua_tojsstring(L, -1)).toBe('"a string with \\"quotes\\" and \\\n new line"');
 });
 
 

@@ -171,6 +171,7 @@ const runJS = function(L, L1, pc) {
                 break;
             }
             case "func2num": {
+                /** @type {any} */
                 let func = lua.lua_tocfunction(L1, getindex(L, L1, pc));
                 if (func === null) func = 0;
                 else if (func.id) func = func.id;
@@ -187,7 +188,7 @@ const runJS = function(L, L1, pc) {
                 break;
             }
             case "getmetatable": {
-                if (lua.lua_getmetatable(L1, getindex(L, L1, pc)) === 0)
+                if (lua.lua_getmetatable(L1, getindex(L, L1, pc)) === false)
                     lua.lua_pushnil(L1);
                 break;
             }
@@ -307,7 +308,7 @@ const runJS = function(L, L1, pc) {
             case "print": {
                 let n = getnum(L, L1, pc);
                 if (n !== 0) {
-                    console.log(`${lauxlib.luaL_tojsstring(L1, n, null)}\n`);
+                    console.log(`${lua.lua_tojsstring(L1, n)}\n`);
                     lua.lua_pop(L1, 1);
                 }
                 else printstack(L1);
@@ -607,11 +608,10 @@ const closestate = function(L) {
 
 const doremote = function(L) {
     let L1 = getstate(L);
-    let lcode;
-    let code = lauxlib.luaL_checklstring(L, 2, lcode);
+    let code = lauxlib.luaL_checklstring(L, 2);
     let status;
     lua.lua_settop(L1, 0);
-    status = lauxlib.luaL_loadbuffer(L1, code, lcode, code);
+    status = lauxlib.luaL_loadbuffer(L1, code, code.length, code);
     if (status === lua.LUA_OK)
         status = lua.lua_pcall(L1, 0, lua.LUA_MULTRET, 0);
     if (status !== lua.LUA_OK) {

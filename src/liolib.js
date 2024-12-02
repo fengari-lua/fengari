@@ -131,7 +131,7 @@ const io_output = function(L) {
 };
 
 /* node <= 6 doesn't support passing a Uint8Array to fs.writeSync */
-const prepare_string_for_write = process.versions.node > 6 ?
+const prepare_string_for_write = parseInt(process.versions.node.split('.')[0]) > 6 ?
     (s) => s : // identity function
     (s) => Buffer.from(s.buffer, s.byteOffset, s.byteLength);
 

@@ -1,5 +1,9 @@
 "use strict";
 
+/**
+ * @typedef {import('./defs').LuaString} LuaString
+ */
+
 const {
     LUA_TNIL,
     LUA_TTABLE,
@@ -85,12 +89,20 @@ const setallfields = function(L, time, utc) {
     setfield(L, "month", (utc ? time.getUTCMonth()   : time.getMonth()) + 1);
     setfield(L, "year",  utc ? time.getUTCFullYear() : time.getFullYear());
     setfield(L, "wday",  (utc ? time.getUTCDay()     : time.getDay()) + 1);
-    setfield(L, "yday", Math.floor((time - (new Date(time.getFullYear(), 0, 0 /* shortcut to correct day by one */))) / 86400000));
+    setfield(L, "yday", Math.floor(
+        (time.valueOf() - (new Date(time.getFullYear(), 0, 0 /* shortcut to correct day by one */)).valueOf()) / 86400000));
     // setboolfield(L, "isdst", time.get);
 };
 
 const L_MAXDATEFIELD = (Number.MAX_SAFE_INTEGER / 2);
 
+/**
+ * @param {import('./lstate').lua_State} L
+ * @param {string} key
+ * @param {number} d
+ * @param {number} delta
+ * @returns
+ */
 const getfield = function(L, key, d, delta) {
     let t = lua_getfield(L, -1, to_luastring(key, true));  /* get field and its type */
     let res = lua_tointegerx(L, -1);
@@ -142,7 +154,7 @@ const week_number = function(date, start_of_week) {
         else
             weekday--;
     }
-    let yday = (date - new Date(date.getFullYear(), 0, 1)) / 86400000;
+    let yday = (date.valueOf() - new Date(date.getFullYear(), 0, 1).valueOf()) / 86400000;
     return Math.floor((yday + 7 - weekday) / 7);
 };
 
@@ -283,7 +295,7 @@ const strftime = function(L, b, s, date) {
 
                 // '000'
                 case 106 /* j */: {
-                    let yday = Math.floor((date - new Date(date.getFullYear(), 0, 1)) / 86400000);
+                    let yday = Math.floor((date.valueOf() - new Date(date.getFullYear(), 0, 1).valueOf()) / 86400000);
                     if (yday < 100) {
                         if (yday < 10)
                             luaL_addchar(b, 48 /* 0 */);
@@ -435,7 +447,7 @@ const os_time = function(L) {
         setallfields(L, t);
     }
 
-    lua_pushinteger(L, Math.floor(t / 1000));
+    lua_pushinteger(L, Math.floor(t.valueOf() / 1000));
     return 1;
 };
 
@@ -501,6 +513,7 @@ if (typeof process === "undefined") {
     };
 
     syslib.getenv = function(L) {
+        /** @type {string|LuaString} */
         let key = luaL_checkstring(L, 1);
         key = to_jsstring(key); /* https://github.com/nodejs/node/issues/16961 */
         if (Object.prototype.hasOwnProperty.call(process.env, key)) {
@@ -523,11 +536,11 @@ if (typeof process === "undefined") {
     syslib.remove = function(L) {
         let filename = luaL_checkstring(L, 1);
         try {
-            fs.unlinkSync(filename);
+            fs.unlinkSync(Buffer.from(filename));
         } catch (e) {
             if (e.code === 'EISDIR') {
                 try {
-                    fs.rmdirSync(filename);
+                    fs.rmdirSync(Buffer.from(filename));
                 } catch (e) {
                     return luaL_fileresult(L, false, filename, e);
                 }
@@ -542,7 +555,7 @@ if (typeof process === "undefined") {
         let fromname = luaL_checkstring(L, 1);
         let toname = luaL_checkstring(L, 2);
         try {
-            fs.renameSync(fromname, toname);
+            fs.renameSync(Buffer.from(fromname), Buffer.from(toname));
         } catch (e) {
             return luaL_fileresult(L, false, false, e);
         }
@@ -558,6 +571,7 @@ if (typeof process === "undefined") {
     };
 
     syslib.execute = function(L) {
+        /** @type {string|LuaString} */
         let cmd = luaL_optstring(L, 1, null);
         if (cmd !== null) {
             cmd = to_jsstring(cmd);
