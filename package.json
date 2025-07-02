@@ -30,13 +30,13 @@
   },
   "homepage": "https://github.com/fengari-lua/fengari#readme",
   "devDependencies": {
-    "eslint": "^5.15.1",
-    "jest": "^24.5.0"
+    "eslint": "^9.30.0",
+    "jest": "^30.0.3"
   },
   "dependencies": {
-    "readline-sync": "^1.4.9",
-    "sprintf-js": "^1.1.2",
-    "tmp": "^0.0.33"
+    "readline-sync": "^1.4.10",
+    "sprintf-js": "^1.1.3",
+    "tmp": "^0.2.3"
   },
   "sideEffects": false,
   "eslintConfig": {
