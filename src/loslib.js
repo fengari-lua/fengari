@@ -484,8 +484,9 @@ if (typeof process === "undefined") {
     };
 } else {
     /* Only with Node */
+    const os = require('os');
     const fs = require('fs');
-    const tmp = require('tmp');
+    const path = require('path');
     const child_process = require('child_process');
 
     syslib.exit = function(L) {
@@ -517,7 +518,7 @@ if (typeof process === "undefined") {
     };
 
     const lua_tmpname = function() {
-        return tmp.tmpNameSync();
+        return path.join(os.tmpdir(), 'tmp-' + Math.random().toString(36).slice(2));
     };
 
     syslib.remove = function(L) {

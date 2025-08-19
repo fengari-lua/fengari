@@ -35,8 +35,7 @@
   },
   "dependencies": {
     "readline-sync": "^1.4.9",
-    "sprintf-js": "^1.1.2",
-    "tmp": "^0.0.33"
+    "sprintf-js": "^1.1.2"
   },
   "sideEffects": false,
   "eslintConfig": {
