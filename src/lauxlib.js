@@ -968,7 +968,7 @@ if (typeof process === "undefined") {
             lf.buff[lf.n++] = com.c; /* 'c' is the first character of the stream */
         let status = lua_load(L, getF, lf, lua_tostring(L, -1), mode);
         let readstatus = lf.err;
-        if (filename) try { fs.closeSync(lf.f); } catch(e) {}  /* close file (even in case of errors) */
+        if (filename) try { fs.closeSync(lf.f); } catch (e) {}  /* close file (even in case of errors) */
         if (readstatus) {
             lua_settop(L, fnameindex);  /* ignore results from 'lua_load' */
             return errfile(L, "read", fnameindex, readstatus);

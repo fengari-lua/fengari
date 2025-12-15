@@ -59,36 +59,36 @@ describe('to_jsstring', () => {
 describe('to_jsstring fails on invalid unicode', () => {
     test("non-utf8 char", () => {
         expect(() => defs.to_jsstring(defs.luastring_of(165)))
-            .toThrowError(RangeError);
+            .toThrow(RangeError);
     });
 
     test("invalid continuation byte", () => {
         expect(() => defs.to_jsstring(defs.luastring_of(208, 60)))
-            .toThrowError(RangeError);
+            .toThrow(RangeError);
     });
 
     test("invalid continuation byte", () => {
         expect(() => defs.to_jsstring(defs.luastring_of(225, 60, 145)))
-            .toThrowError(RangeError);
+            .toThrow(RangeError);
     });
 
     test("invalid continuation byte", () => {
         expect(() => defs.to_jsstring(defs.luastring_of(225, 145, 60)))
-            .toThrowError(RangeError);
+            .toThrow(RangeError);
     });
 
     test("invalid continuation byte", () => {
         expect(() => defs.to_jsstring(defs.luastring_of(242, 60, 145, 145)))
-            .toThrowError(RangeError);
+            .toThrow(RangeError);
     });
 
     test("invalid continuation byte", () => {
         expect(() => defs.to_jsstring(defs.luastring_of(242, 145, 60, 145)))
-            .toThrowError(RangeError);
+            .toThrow(RangeError);
     });
 
     test("invalid continuation byte", () => {
         expect(() => defs.to_jsstring(defs.luastring_of(242, 145, 145, 60)))
-            .toThrowError(RangeError);
+            .toThrow(RangeError);
     });
 });

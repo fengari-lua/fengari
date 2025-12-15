@@ -97,7 +97,7 @@ if (typeof process === "undefined") {
             try {
                 /* If the string is valid utf8, then we can use to_jsstring */
                 s = to_jsstring(s);
-            } catch(e) {
+            } catch (e) {
                 /* otherwise push copy of raw array */
                 let copy = new Uint8Array(s.length);
                 copy.set(s);

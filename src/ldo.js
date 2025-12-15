@@ -424,7 +424,7 @@ const luaD_rawrunprotected = function(L, f, ud) {
                     }
 
                     lj.status = LUA_ERRRUN;
-                } catch(e2) {
+                } catch (e2) {
                     if (lj.status === LUA_OK) {
                         /* also failed */
                         lj.status = -1;
