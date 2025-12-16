@@ -97,7 +97,7 @@ if (typeof process === "undefined") {
             try {
                 /* If the string is valid utf8, then we can use to_jsstring */
                 s = to_jsstring(s);
-            } catch {
+            } catch (e) {
                 /* otherwise push copy of raw array */
                 let copy = new Uint8Array(s.length);
                 copy.set(s);
@@ -269,7 +269,7 @@ const luaB_ipairs = function(L) {
 const b_str2int = function(s, base) {
     try {
         s = to_jsstring(s);
-    } catch {
+    } catch (e) {
         return null;
     }
     let r = /^[\t\v\f \n\r]*([+-]?)0*([0-9A-Za-z]+)[\t\v\f \n\r]*$/.exec(s);

@@ -478,7 +478,7 @@ const lua_strx2number = function(s) {
 const lua_str2number = function(s) {
     try {
         s = to_jsstring(s);
-    } catch {
+    } catch (e) {
         return null;
     }
     /* use a regex to validate number and also to get length

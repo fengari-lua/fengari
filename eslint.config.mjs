@@ -2,7 +2,8 @@ import globals from "globals";
 import { defineConfig } from "eslint/config";
 
 export default defineConfig([
-    { files: ["**/*.{js,mjs,cjs}"], languageOptions: { globals: { ...globals.browser, ...globals.node, ...globals.worker, ...globals.jest } } },
+    { files: ["**/*.{js,mjs,cjs}"], languageOptions: { globals: { ...globals.browser, ...globals.node, ...globals.worker } } },
+    { files: ["test/**/*.{js,mjs,cjs}"], languageOptions: { globals: globals.jest } },
     {
         "rules": {
             "indent": [
@@ -26,7 +27,8 @@ export default defineConfig([
             "no-unused-vars": [
                 2,
                 {
-                    "args": "none"
+                    "args": "none",
+                    "caughtErrors": "none"
                 }
             ],
             "semi": [

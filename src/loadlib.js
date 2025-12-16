@@ -202,7 +202,7 @@ if (typeof process !== "undefined") { // Only with Node
         try {
             let fd = fs.openSync(filename, 'r');
             fs.closeSync(fd);
-        } catch {
+        } catch (e) {
             return false;
         }
         return true;

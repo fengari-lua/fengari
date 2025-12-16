@@ -691,7 +691,7 @@ const checkpanic = function(L) {
     try {    /* set jump buffer */
         runJS(L, L1, { script: code, offset: 0 });    /* run code unprotected */
         lua.lua_pushliteral(L, "no errors");
-    } catch {    /* error handling */
+    } catch (e) {    /* error handling */
         /* move error message to original state */
         lua.lua_pushstring(L, lua.lua_tostring(L1, -1));
     }
