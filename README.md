@@ -2,8 +2,6 @@
 [![npm](https://img.shields.io/npm/v/fengari.svg)](https://npmjs.com/package/fengari)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![#fengari on libera.chat](https://img.shields.io/badge/chat-%23fengari-brightgreen)](https://web.libera.chat/?channels=#fengari)
-[![Code Quality: Javascript](https://img.shields.io/lgtm/grade/javascript/g/fengari-lua/fengari.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/fengari-lua/fengari/context:javascript)
-[![Total Alerts](https://img.shields.io/lgtm/alerts/g/fengari-lua/fengari.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/fengari-lua/fengari/alerts)
 
 <p align="center">
     <img src="https://github.com/fengari-lua/fengari/raw/master/logo.png" alt="Fengari" width="304" height="304">
