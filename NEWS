@@ -1,4 +1,4 @@
-UNRELEASED
+0.1.5 - 2025-12-26
 
   - Add os.setlocale that only understands the C locale
   - Fix incorrect length for certain tables

@@ -1,6 +1,6 @@
 {
   "name": "fengari",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A Lua VM written in JS ES6 targeting the browser",
   "main": "src/fengari.js",
   "directories": {
