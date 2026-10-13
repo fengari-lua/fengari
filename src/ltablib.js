@@ -41,7 +41,6 @@ const {
     luaL_error,
     luaL_len,
     luaL_newlib,
-    luaL_opt,
     luaL_optinteger,
     luaL_optlstring,
     luaL_pushresult,
@@ -207,7 +206,7 @@ const pack = function(L) {
 
 const unpack = function(L) {
     let i = luaL_optinteger(L, 2, 1);
-    let e = luaL_opt(L, luaL_checkinteger, 3, luaL_len(L, 1));
+    let e = lua_isnoneornil(L, 3) ? luaL_len(L, 1) : luaL_checkinteger(L, 3);
     if (i > e) return 0;  /* empty range */
     let n = e - i;  /* number of elements minus 1 (avoid overflows) */
     if (n >= Number.MAX_SAFE_INTEGER || !lua_checkstack(L, ++n))

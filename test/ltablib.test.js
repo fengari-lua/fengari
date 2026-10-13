@@ -181,3 +181,36 @@ test('table.sort with cmp function', () => {
     expect(inttable2array(lua.lua_topointer(L, -1)))
         .toEqual([5, 4, 3, 2, 1]);
 });
+
+
+test.each([
+    ["explicit end", "table.unpack(t, 1, 1)", 0, 1],
+    ["explicit empty range", "table.unpack(t, 2, 1)", 0, 0],
+    ["omitted end", "table.unpack(t, 1)", 1, 1],
+    ["nil end", "table.unpack(t, 1, nil)", 1, 1]
+])('table.unpack length default: %s', (name, expression, expectedCalls, expectedResults) => {
+    let L = lauxlib.luaL_newstate();
+    if (!L) throw Error("failed to create lua state");
+
+    let luaCode = `
+        local calls = 0
+        local t = setmetatable({42}, {
+            __len = function()
+                calls = calls + 1
+                return 1
+            end
+        })
+        local result = table.pack(${expression})
+        return calls, result.n, result[1]
+    `;
+    lualib.luaL_openlibs(L);
+    expect(lauxlib.luaL_loadstring(L, to_luastring(luaCode))).toBe(lua.LUA_OK);
+    lua.lua_call(L, 0, -1);
+
+    expect(lua.lua_tointeger(L, -3)).toBe(expectedCalls);
+    expect(lua.lua_tointeger(L, -2)).toBe(expectedResults);
+    if (expectedResults === 0)
+        expect(lua.lua_isnil(L, -1)).toBe(true);
+    else
+        expect(lua.lua_tointeger(L, -1)).toBe(42);
+});
